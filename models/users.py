@@ -8,8 +8,8 @@ from models.base_model import BaseModel, Base
 class User(BaseModel, Base):
     __tablename__ = 'user'
     name = Column(String(100), nullable=False)
-    email = Column(String(100), nullable=False, unique=True)
-    password = Column(String(100), nullable=False)
+    email = Column(String(120), nullable=False, unique=True)
+    password = Column(String(120), nullable=False)
 
     # Define relationships
     # grades = relationship("Grade", backref="user", cascade="all, delete-orphan")

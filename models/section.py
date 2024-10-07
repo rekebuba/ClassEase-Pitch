@@ -7,10 +7,9 @@ from models.engine.db_storage import BaseModel, Base
 
 class Section(BaseModel, Base):
     __tablename__ = 'sections'
-    grade_id = Column(String(60), ForeignKey('grades.id'))
-    name = Column(String(1)) # e.g., A, B, C, D, E, F, G
-    # teacher = Column(String(100), nullable=False)
-    # teacher_id = Column(Integer, ForeignKey('teachers.id'))
+    section = Column(String(1)) # e.g., A, B, C, D, E, F, G
+    grade_id = Column(String(120), ForeignKey('grades.id'), nullable=False)
+    teacher_id = Column(String(120), ForeignKey('teacher.id', ondelete='SET NULL'), nullable=True, default=None)
 
     # Define relationships
     students = relationship("Student", backref="section", cascade="all, delete-orphan")

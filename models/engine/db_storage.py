@@ -3,11 +3,14 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 from models.base_model import Base, BaseModel
-from models.grades import Grade
+from models.grade import Grade
 from models.student import Student
 from models.section import Section
 from models.users import User
-# from models.grades import Grade
+from models.subject import Subject
+from models.teacher import Teacher
+from models.assessment import Assessment
+from models.mark_list import MarkList
 import os
 
 
@@ -60,5 +63,4 @@ class DBStorage:
 
     def get(self, cls, id):
         user = self.__session.query(cls).filter(cls.id == id).one_or_none()
-        print(user.to_dict())
         return user.to_dict()

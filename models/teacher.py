@@ -1,14 +1,19 @@
-# #!/usr/bin/python3
+#!/usr/bin/python3
 
-# from sqlalchemy import Column, Integer, String, ForeignKey
-# from models.engine.db_storage import BaseModel, Base
+from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy.orm import relationship
+from models.engine.db_storage import BaseModel, Base
 
-# class Teacher(BaseModel, Base):
-#     __tablename__ = 'teachers'
-#     name = Column(String(50), nullable=False)
-#     subject_id = Column(Integer, ForeignKey('subjects.id'))
-#     grade = Column(Integer, nullable=False)
+class Teacher(BaseModel, Base):
+    __tablename__ = 'teacher'
+    name = Column(String(50), nullable=False)
+    email = Column(String(120), nullable=False)
+    password = Column(String(120), nullable=False)
 
-#     def __init__(self, *args, **kwargs):
-#         """initializes score"""
-#         super().__init__(*args, **kwargs)
+    subject = relationship("Subject", backref="teacher", cascade="save-update", passive_deletes=True)
+    section = relationship("Section", backref="teacher", cascade="save-update", passive_deletes=True)
+    mark_list = relationship("MarkList", backref="teacher", cascade="save-update", passive_deletes=True)
+
+    def __init__(self, *args, **kwargs):
+        """initializes score"""
+        super().__init__(*args, **kwargs)
