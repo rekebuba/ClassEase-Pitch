@@ -207,15 +207,17 @@ def create_mark_list():
     
 
     for student in students:
-        section = storage._DBStorage__session.query(Section).filter_by(
-            grade_id=grade_id).order_by(func.rand()).first()
-        if not section:
-            abort(404, description="Section not found")
-        storage._DBStorage__session.execute(
-            update(Student)
-            .where(Student.id == student.id)
-            .values(section_id=section.id)
-        )
+        if not student.section_id:
+            section = storage._DBStorage__session.query(Section).filter_by(
+                grade_id=grade_id).order_by(func.rand()).first()
+            if not section:
+                abort(404, description="Section not found")
+            storage._DBStorage__session.execute(
+                update(Student)
+                .where(Student.id == student.id)
+                .values(section_id=section.id)
+            )
+
     storage.save()
 
     """
@@ -234,10 +236,11 @@ def create_mark_list():
                         "grade_id": grade_id,
                         "teacher_id": subject.teacher_id,
                         "section_id": student.section_id,
-                        "subject_id": subject.id
+                        "subject_id": subject.id,
+                        "semester": data['semester']
                     }
                     mark_lists.append(MarkList(**values, **assessment_type))
-                    assessments.append(Assessment(student_id=student.id, subject_id=subject.id))
+                assessments.append(Assessment(student_id=student.id, subject_id=subject.id, semester=data['semester']))
         storage._DBStorage__session.bulk_save_objects(mark_lists)
         storage._DBStorage__session.bulk_save_objects(assessments)
 
@@ -262,7 +265,7 @@ def show_mark_list():
     if not subject:
         abort(404, description="Subject not found")
 
-    students = storage._DBStorage__session.query(MarkList).filter_by(grade_id=grade.id, section_id=section.id, subject_id=subject.id).all()
+    students = storage._DBStorage__session.query(MarkList).filter_by(grade_id=grade.id, section_id=section.id, subject_id=subject.id, semester=data['semester']).all()
     if not students:
         abort(404, description="Student not found")
 

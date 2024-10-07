@@ -17,8 +17,10 @@ class Student(BaseModel, Base):
     grade_id = Column(String(120), ForeignKey('grades.id'), nullable=False)
     section_id = Column(String(120), ForeignKey('sections.id'))
 
-
-    total_average = Column(Float, default=0)
+    semester_1_average = Column(Float)
+    semester_2_average = Column(Float)
+    semester_1_rank = Column(Float)
+    semester_2_rank = Column(Float)
 
     __table_args__ = (
         CheckConstraint(

@@ -9,6 +9,7 @@ class Assessment(BaseModel, Base):
     student_id = Column(String(120), ForeignKey('students.id'), nullable=False)
     subject_id = Column(String(120), ForeignKey('subjects.id'), nullable=False)
     average = Column(Float, default=0)  # The actual score of the student in this assessment
+    semester = Column(Integer, nullable=False)
 
     def __init__(self, *args, **kwargs):
         """initializes score"""

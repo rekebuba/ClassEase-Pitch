@@ -72,7 +72,7 @@ def get_students():
     if not section:
             abort(404, description="Section not found")
 
-    students = storage._DBStorage__session.query(MarkList).filter_by(grade_id=grade.id, section_id=section.id, teacher_id=teacher_id).all()
+    students = storage._DBStorage__session.query(MarkList).filter_by(grade_id=grade.id, section_id=section.id, teacher_id=teacher_id, semester=data['semester']).all()
     if not students:
         abort(404, description="Student not found")
 
