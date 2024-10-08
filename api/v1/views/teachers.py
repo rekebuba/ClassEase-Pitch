@@ -1,6 +1,6 @@
 from flask import request, jsonify, abort
 from models import storage
-from models.users import User
+# from models.users import User
 from models.grade import Grade
 from models.student import Student
 from models.section import Section
@@ -8,33 +8,15 @@ from models.teacher import Teacher
 from models.subject import Subject
 from models.assessment import Assessment
 from models.mark_list import MarkList
-from api.v1.views import app_views, teach
 from functools import wraps
 from urllib.parse import urlparse, parse_qs
 import jwt
 import os
+from flask import Blueprint
+from api.v1.views.utils import create_teacher_token, teacher_required
 
-# Decorator for teacher JWT verification
-def teacher_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        token = None
-        if 'Authorization' in request.headers:
-            token = request.headers['Authorization'].split()[1]  # Bearer token
+teach = Blueprint('teach', __name__, url_prefix='/api/v1/teacher')
 
-        if not token:
-            return jsonify({'message': 'Token is missing!'}), 401
-
-        try:
-            data = jwt.decode(token, os.getenv("TEACHER_JWT_SECRET"), algorithms=["HS256"])
-        except jwt.ExpiredSignatureError:
-            return jsonify({'message': 'Teacher token has expired'}), 401
-        except jwt.InvalidTokenError:
-            return jsonify({'message': 'Invalid Teacher token'}), 401
-
-        return f(*args, **kwargs)
-
-    return decorated_function
 
 @teach.route('/registration', methods=['POST'])
 def register_new_teacher():
@@ -49,10 +31,21 @@ def register_new_teacher():
 
     return  jsonify({"message": "Teacher registered successfully!"}), 201
 
+@teach.route('/login', methods=['POST'])
+def teacher_login():
+    data = request.get_json()
+
+    user = storage.get_first(Teacher, email=data['email'])
+    if user and user.check_password(data['password']):
+        access_token = create_teacher_token(user.id)
+        return jsonify(access_token=access_token), 200
+
+    return jsonify({"error": "Invalid credentials"}), 401
+
 
 @teach.route('/students/mark_list', methods=['GET'])
 @teacher_required
-def get_students():
+def get_students(teacher_data):
     url = request.url
     parsed_url = urlparse(url)
     data = parse_qs(parsed_url.query)
@@ -60,19 +53,16 @@ def get_students():
     if not data:
         abort(400, description="Bad Request!")
 
-    token = request.headers['Authorization'].split(" ")[1]  # Bearer <token>
-    payload = jwt.decode(token, os.getenv("TEACHER_JWT_SECRET"), algorithms=["HS256"])
-    teacher_id = payload['teacher_id']
 
-    grade = storage._DBStorage__session.query(Grade).filter_by(grade=data['grade']).first()
+    grade = storage.get_first(Grade, grade=data['grade'])
     if not grade:
         abort(404, description="Grade not found")
 
-    section = storage._DBStorage__session.query(Section).filter_by(teacher_id=teacher_id, grade_id=grade.id, section=data['section']).first()
+    section = storage.get_first(Section, teacher_id=teacher_data.id, grade_id=grade.id, section=data['section'])
     if not section:
             abort(404, description="Section not found")
 
-    students = storage._DBStorage__session.query(MarkList).filter_by(grade_id=grade.id, section_id=section.id, teacher_id=teacher_id, semester=data['semester']).all()
+    students = storage.get_all(MarkList, grade_id=grade.id, section_id=section.id, teacher_id=teacher_data.id, semester=data['semester'])
     if not students:
         abort(404, description="Student not found")
 
@@ -84,17 +74,13 @@ def get_students():
 
 @teach.route('/students/mark_list', methods=['PUT'])
 @teacher_required
-def add_student_assessment():
+def add_student_assessment(teacher_data):
     data = request.get_json()
     if not data:
         abort(400, description="Not a JSON")
 
-    # token = request.headers['Authorization'].split(" ")[1]  # Bearer <token>
-    # data = jwt.decode(token, os.getenv("TEACHER_JWT_SECRET"), algorithms=["HS256"])
-    # teacher_id = data['teacher_id']
-
     for student in data:
-        mark_list = storage._DBStorage__session.query(MarkList).filter_by(id=student['id']).first()
+        mark_list = storage.get_first(MarkList, id=student['id'])
         if not mark_list:
             abort(404, description="Student not found")
         mark_list.score = student['score']
@@ -104,8 +90,5 @@ def add_student_assessment():
 
 @teach.route('/dashboard', methods=['GET'])
 @teacher_required
-def teacher_dashboard():
-    token = request.headers['Authorization'].split(" ")[1]  # Bearer <token>
-    data = jwt.decode(token, os.getenv("TEACHER_JWT_SECRET"), algorithms=["HS256"])
-    user_data = storage.get(Teacher, data['teacher_id'])
-    return jsonify(user_data), 200
+def teacher_dashboard(teacher_data):
+    return jsonify(teacher_data.to_dict()), 200

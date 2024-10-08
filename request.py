@@ -72,7 +72,7 @@ if __name__ == "__main__":
     show_admin_mark_list = "http://0.0.0.0:5000/api/v1/admin/students/mark_list?grade=12&section=B&subject=english&semester=2"
 
 
-    show_teacher_mark_list = "http://0.0.0.0:5000/api/v1/teacher/students/mark_list?grade=12&section=A&semester=1"
+    show_teacher_mark_list = "http://0.0.0.0:5000/api/v1/teacher/students/mark_list?grade=12&section=A&semester=2"
 
     admin_data = {
         "name": "abdullahi Ibrahim",
@@ -153,11 +153,11 @@ if __name__ == "__main__":
 
     # Call the functions to send requests
 
-    # print("\nRegistration...")
-    # send_post_request(admin_register, admin_data)
-    # send_post_request(teacher_register, teacher_data)
-    # for student in student_data:
-    #     send_post_request(student_register, student)
+    print("\nRegistration...")
+    send_post_request(admin_register, admin_data)
+    send_post_request(teacher_register, teacher_data)
+    for student in student_data:
+        send_post_request(student_register, student)
 
     print("\nData")
     admin_token = send_post_request(admin_login, admin_data).json()[
@@ -167,30 +167,30 @@ if __name__ == "__main__":
     # student = {"id": "0d88c1f5-862d-4dbb-a3a8-bdf5371c0cc2", "password": "0d88c1f5-862d-4dbb-a3a8-bdf5371c0cc2"}
     # student_token = send_post_request(student_login, student).json()['access_token']
 
-    # print("Sending GET request...")
-    # send_get_request(admin_home, token=admin_token)
-    # send_get_request(teacher_home, token=teacher_token)
-    # send_get_request(student_home)
+    print("Sending GET request...")
+    send_get_request(admin_home, token=admin_token)
+    send_get_request(teacher_home, token=teacher_token)
+    send_get_request(student_home)
 
-    # print("\nSending PUT request...")
-    # send_put_request(student_course, add_subject, token=admin_token)
+    print("\nSending PUT request...")
+    send_put_request(student_course, add_subject, token=admin_token)
 
-    # for mark_list in mark_list_data:
-    #     send_put_request(create_mark_list, mark_list, token=admin_token)
+    for mark_list in mark_list_data:
+        send_put_request(create_mark_list, mark_list, token=admin_token)
 
-    # teachers_data = send_get_request(all_teachers, token=admin_token).json()
-    # teacher_id = get_random_id(teachers_data)
+    teachers_data = send_get_request(all_teachers, token=admin_token).json()
+    teacher_id = get_random_id(teachers_data)
 
-    # teacher_course = f"http://0.0.0.0:5000/api/v1/admin/teacher/{teacher_id}/detail/course"
-    # for teacher in assign_teacher:
-    #     send_put_request(teacher_course, teacher, token=admin_token)
+    teacher_course = f"http://0.0.0.0:5000/api/v1/admin/teacher/{teacher_id}/detail/course"
+    for teacher in assign_teacher:
+        send_put_request(teacher_course, teacher, token=admin_token)
 
-    # send_get_request(show_admin_mark_list, token=admin_token)
+    send_get_request(show_admin_mark_list, token=admin_token)
     get_teacher_mark_list = send_get_request(show_teacher_mark_list, token=teacher_token).json()
-    # for student in get_teacher_mark_list:
-    #     student['score'] = random.randint(0, 70)
+    for student in get_teacher_mark_list:
+        student['score'] = random.randint(0, 70)
 
-    # send_put_request(show_teacher_mark_list, get_teacher_mark_list, token=teacher_token)
+    send_put_request(show_teacher_mark_list, get_teacher_mark_list, token=teacher_token)
 
 
     # print("\nSending PUT request...")

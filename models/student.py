@@ -58,6 +58,6 @@ class Student(BaseModel, Base):
     def id_exists(self, id):
         """Function to check if the student ID already exists"""
         from models import storage
-        if storage._DBStorage__session.query(Student).filter_by(id=id).first():
+        if storage.get_first(Student, id=id):
             return True
         return False
