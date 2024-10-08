@@ -6,7 +6,8 @@ from sqlalchemy import Column, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 import uuid
 import bcrypt
-from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import declared_attr
 
 Base = declarative_base()
 
@@ -68,7 +69,8 @@ class BaseModel:
         return cls.__name__.lower()
 
     def hash_password(self, password):
-        self.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        self.password = bcrypt.hashpw(password.encode(
+            'utf-8'), bcrypt.gensalt()).decode('utf-8')
 
     def check_password(self, password):
         return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))

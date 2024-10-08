@@ -2,7 +2,6 @@
 from models.engine.db_storage import DBStorage
 
 storage = DBStorage()
-# storage.reload()
 
 def init_app(app):
     """ Initialize the storage with the Flask app """

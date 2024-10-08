@@ -1,10 +1,11 @@
 from flask import Flask
 from models import storage
-from models import init_app
+
 
 def create_app(config_name):
+    """ Create a Flask application """
     app = Flask(__name__)
-    
+
     # Load configuration
     if config_name == 'testing':
         app.config.from_object('config.TestingConfig')

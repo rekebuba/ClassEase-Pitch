@@ -24,3 +24,9 @@ class DevelopmentConfig(Config):
 
 class ProductionConfig(Config):
     DEBUG = False
+
+class TestingConfig(Config):
+    """Testing configuration."""
+    TESTING = True
+    DEBUG = True
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///test.db'  # Using SQLite for testing

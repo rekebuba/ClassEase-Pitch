@@ -6,7 +6,7 @@ from models.base_model import BaseModel, Base
 
 
 class Admin(BaseModel, Base):
-    __tablename__ = 'user'
+    __tablename__ = 'admin'
     name = Column(String(100), nullable=False)
     email = Column(String(120), nullable=False, unique=True)
     password = Column(String(120), nullable=False)

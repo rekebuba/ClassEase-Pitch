@@ -1,12 +1,8 @@
-from flask import request, jsonify, abort
+from flask import request, jsonify
 from models import storage
-# from models.users import User
 from models.grade import Grade
 from models.student import Student
 from models.section import Section
-from functools import wraps
-import jwt
-import os
 from flask import Blueprint
 from api.v1.views.utils import create_student_token, student_required
 
@@ -19,7 +15,7 @@ def register_new_student():
     data = request.get_json()
 
     if not data:
-        abort(400, description="Not a JSON")
+        return jsonify({"error": "Not a JSON"}), 404
 
     grade = storage.get_first(Grade, grade=data['grade'])
     if not grade:
@@ -30,7 +26,7 @@ def register_new_student():
     students.hash_password(students.id)
     storage.add(students)
 
-    return  jsonify({"message": "Student registered successfully!"}), 201
+    return jsonify({"message": "Student registered successfully!"}), 201
 
 
 @stud.route('/login', methods=['POST'])
@@ -43,6 +39,7 @@ def student_login():
         return jsonify(access_token=access_token), 200
 
     return jsonify({"error": "Invalid credentials"}), 401
+
 
 @stud.route('/dashboard', methods=['GET'])
 @student_required

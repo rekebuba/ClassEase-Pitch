@@ -6,7 +6,6 @@ from flask import request, jsonify
 from models import storage
 from models.student import Student
 from models.teacher import Teacher
-# from models.users import User
 from models.admin import Admin
 
 
@@ -20,6 +19,7 @@ def create_admin_token(admin_id):
     token = jwt.encode(payload, current_app.config["ADMIN_SECRET_KEY"], algorithm="HS256")
     return token
 
+
 # Function to generate JWT for teachers
 def create_teacher_token(teacher_id):
     payload = {
@@ -30,6 +30,7 @@ def create_teacher_token(teacher_id):
     token = jwt.encode(payload, current_app.config["TEACHER_SECRET_KEY"], algorithm="HS256")
     return token
 
+
 # Function to generate JWT for students
 def create_student_token(student_id):
     payload = {
@@ -39,6 +40,7 @@ def create_student_token(student_id):
     }
     token = jwt.encode(payload, current_app.config["STUDENT_SECRET_KEY"], algorithm="HS256")
     return token
+
 
 # Decorator for Admin JWT verification
 def admin_required(f):
@@ -90,6 +92,7 @@ def teacher_required(f):
         return f(teacher_data, *args, **kwargs)
 
     return decorated_function
+
 
 # Decorator for student JWT verification
 def student_required(f):
