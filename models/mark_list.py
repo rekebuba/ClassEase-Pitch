@@ -7,12 +7,13 @@ from models.engine.db_storage import BaseModel, Base
 
 class MarkList(BaseModel, Base):
     __tablename__ = 'mark_lists'
-    student_id = Column(String(120), ForeignKey('students.id'), nullable=False)
+    student_id = Column(String(120), ForeignKey('student.id'), nullable=False)
     grade_id = Column(String(120), ForeignKey('grades.id'), nullable=False)
     section_id = Column(String(120), ForeignKey('sections.id'))
     subject_id = Column(String(120), ForeignKey('subjects.id'), nullable=False)
     teacher_id = Column(String(120), ForeignKey('teacher.id', ondelete="SET NULL"), nullable=True, default=None)
     semester = Column(Integer, nullable=False)
+    school_year = Column(String(10), nullable=False)
     type = Column(String(50), nullable=False)  # e.g., 'Test', 'Quiz', 'Assignment', 'Midterm', 'Final'
     percentage = Column(Float, nullable=False)  # percentage of this assessment towards the final score
     score = Column(Float)  # The actual score of the student in this assessment

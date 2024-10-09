@@ -6,6 +6,7 @@ from models.engine.db_storage import BaseModel, Base
 
 class Teacher(BaseModel, Base):
     __tablename__ = 'teacher'
+    id = Column(String(120), primary_key=True, unique=True)
     name = Column(String(50), nullable=False)
     email = Column(String(120), nullable=False)
     password = Column(String(120), nullable=False)
@@ -17,3 +18,4 @@ class Teacher(BaseModel, Base):
     def __init__(self, *args, **kwargs):
         """initializes score"""
         super().__init__(*args, **kwargs)
+        self.id = super().generate_id('Teacher')

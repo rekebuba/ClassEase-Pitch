@@ -30,3 +30,8 @@ class TestingConfig(Config):
     TESTING = True
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = 'sqlite:///test.db'  # Using SQLite for testing
+
+    # Overriding the JWT secret keys for testing
+    ADMIN_SECRET_KEY = os.getenv("TEST_ADMIN_JWT_SECRET")
+    TEACHER_SECRET_KEY = os.getenv("TEST_TEACHER_JWT_SECRET")
+    STUDENT_SECRET_KEY = os.getenv("TEST_STUDENT_JWT_SECRET")

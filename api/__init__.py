@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from models import storage
 
 
@@ -16,6 +17,9 @@ def create_app(config_name):
 
     # Initialize database
     storage.init_app(app)
+
+    # Enable CORS
+    CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 
     # Import and register blueprints
     from api.v1.views.admin import auth

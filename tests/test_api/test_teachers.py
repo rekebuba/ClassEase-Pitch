@@ -2,6 +2,7 @@ import unittest
 from models import storage
 from api import create_app
 import json
+from models.teacher import Teacher
 from tests.test_api.helper_functions import register_teacher, get_teacher_access_token, create_mark_list, admin_course_assign_to_teacher
 
 class TestTeachers(unittest.TestCase):
@@ -21,7 +22,7 @@ class TestTeachers(unittest.TestCase):
         # Test that the teacher register endpoint works
         response = self.client.post('/api/v1/teacher/registration',
                                     data=json.dumps(
-                                        {"name": "Abdullahi", "email": "newteacher@example.com", "password": "testpassword"}),
+                                        {"name": "Abdullahi", "email": "newteacher@example.com"}),
                                     content_type='application/json')
         self.assertEqual(response.status_code, 201)
         json_data = response.get_json()
@@ -34,7 +35,7 @@ class TestTeachers(unittest.TestCase):
         # Test that a valid login returns a token
         response = self.client.post('/api/v1/teacher/login',
                                     data=json.dumps(
-                                        {"email": email, "password": "testpassword"}),
+                                        {"email": email, "password": storage.get_random(Teacher).id}),
                                     content_type='application/json')
 
         self.assertEqual(response.status_code, 200)
@@ -94,7 +95,10 @@ class TestTeachers(unittest.TestCase):
         # Test that a valid login returns a token
         teacher_token = admin_course_assign_to_teacher(self.client)
 
-        response = self.client.get('/api/v1/teacher/students/mark_list?grade=12&section=A&semester=1',
+        if not teacher_token:
+            self.fail("Admin course assignment failed. Test failed")
+
+        response = self.client.get('/api/v1/teacher/students/mark_list?grade=12&section=A&semester=1&school_year=2023/24',
                                       headers={
                                         'Authorization': f'Bearer {teacher_token}'},
                                       content_type='application/json')

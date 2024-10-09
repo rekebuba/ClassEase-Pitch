@@ -13,6 +13,7 @@ from models.subject import Subject
 from models.teacher import Teacher
 from models.assessment import Assessment
 from models.mark_list import MarkList
+from models.average_result import AVRGResult
 
 
 class DBStorage:

@@ -3,6 +3,7 @@ from models import storage
 from api import create_app
 import json
 import random
+from models.admin import Admin
 from tests.test_api.helper_functions import register_admin, get_admin_access_token, create_mark_list, get_teacher_access_token, register_teacher, register_student, mark_list_data
 
 
@@ -15,7 +16,6 @@ class TestAdmin(unittest.TestCase):
         self.client = self.app.test_client()
         self.app.app_context().push()
 
-
     def tearDown(self):
         # Clean up and drop the tables after each test
         storage.get_session().remove()
@@ -26,7 +26,7 @@ class TestAdmin(unittest.TestCase):
         # self.drop_table()
         response = self.client.post('/api/v1/admin/registration',
                                     data=json.dumps(
-                                        {"name": "Abdullahi", "email": "newadmin@example.com", "password": "testpassword"}),
+                                        {"name": "Abdullahi", "email": "newadmin@example.com"}),
                                     content_type='application/json')
         self.assertEqual(response.status_code, 201)
         json_data = response.get_json()
@@ -39,7 +39,7 @@ class TestAdmin(unittest.TestCase):
         # Test that a valid login returns a token
         response = self.client.post('/api/v1/admin/login',
                                     data=json.dumps(
-                                        {"name": "Abdullahi", "email": email, "password": "testpassword"}),
+                                        {"name": "Abdullahi", "email": email, "password": storage.get_random(Admin).id}),
                                     content_type='application/json')
 
         self.assertEqual(response.status_code, 200)
@@ -141,10 +141,9 @@ class TestAdmin(unittest.TestCase):
         token = create_mark_list(self.client)
 
         if not token:
-            self.fail(
-                "Token not generated. Test failed. Check the login endpoint.")
+            self.fail("Mark list creation failed. Test failed")
 
-        response = self.client.get('/api/v1/admin/students/mark_list?grade=12&section=B&subject=english&semester=1',
+        response = self.client.get('/api/v1/admin/students/mark_list?grade=12&section=B&subject=english&semester=1&school_year=2023/24',
                                    headers={
                                        'Authorization': f'Bearer {token}'},
                                    content_type='application/json')
@@ -188,6 +187,9 @@ class TestAdmin(unittest.TestCase):
         """Test that an admin can access teacher course data."""
         # Test that a valid login returns a token
         token = create_mark_list(self.client)
+        if not token:
+            self.fail("Mark list creation failed. Test failed")
+
         get_teacher_access_token(self.client)
 
         if not token:
@@ -207,12 +209,13 @@ class TestAdmin(unittest.TestCase):
         random_entry = random.choice(teachers_data)
         teacher_id = random_entry.get('id')
 
-        response = self.client.put(f'/api/v1/admin/teacher/{teacher_id}/detail/course',
+        response = self.client.put(f'/api/v1/admin/teacher/detail/course?teacher_id={teacher_id}',
                                    data=json.dumps(
                                        {
                                            "grade": 12,
                                            "section": ["A", "B"],
-                                           "subject": "math"
+                                           "subject": "math",
+                                           "school_year": "2023/24"
                                        }
                                    ),
                                    headers={
@@ -225,6 +228,10 @@ class TestAdmin(unittest.TestCase):
         """Test that an admin can access teacher course data."""
         # Test that a valid login returns a token
         token = create_mark_list(self.client)
+
+        if not token:
+            self.fail("Mark list creation failed. Test failed")
+
         get_teacher_access_token(self.client)
 
         if not token:
@@ -244,12 +251,13 @@ class TestAdmin(unittest.TestCase):
         random_entry = random.choice(teachers_data)
         teacher_id = random_entry.get('id')
 
-        response = self.client.put(f'/api/v1/admin/teacher/{teacher_id}/detail/course',
+        response = self.client.put(f'/api/v1/admin/teacher/detail/course?teacher_id={teacher_id}',
                                    data=json.dumps(
                                        {
                                            "grade": 12,
                                            "section": ["A", "B"],
-                                           "subject": "math"
+                                           "subject": "math",
+                                           "school_year": "2023/24"
                                        }
                                    ),
                                    headers={

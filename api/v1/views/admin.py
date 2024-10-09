@@ -11,6 +11,7 @@ from models.student import Student
 from models.section import Section
 from models.mark_list import MarkList
 from models.assessment import Assessment
+from models.average_result import AVRGResult
 from sqlalchemy import update, select, and_
 from urllib.parse import urlparse, parse_qs
 from api.v1.views.utils import create_admin_token, admin_required
@@ -27,7 +28,7 @@ def register_new_admin():
         return jsonify({"error": "Not a JSON"}), 404
 
     user = Admin(name=data['name'], email=data['email'])
-    user.hash_password(data['password'])
+    user.hash_password(user.id)
 
     storage.add(user)
     return jsonify({"message": "Admin registered successfully!"}), 201
@@ -77,11 +78,15 @@ def decode(subject: str, grade):
 #     return jsonify({"message": "Course updated successfully!"}), 201
 
 
-@auth.route('/teacher/<id>/detail/course', methods=['PUT'])
+@auth.route('/teacher/detail/course', methods=['PUT'])
 @admin_required
-def assign_course(admin_data, id):
+def assign_course(admin_data):
     # Get the teacher by ID
-    teacher = storage.get_first(Teacher, id=id)
+    url = request.url
+    parsed_url = urlparse(url)
+    teacher_id = parse_qs(parsed_url.query)['teacher_id'][0]
+
+    teacher = storage.get_first(Teacher, id=teacher_id)
     if not teacher:
         return jsonify({"error": "Teacher not found"}), 404
 
@@ -97,24 +102,32 @@ def assign_course(admin_data, id):
         return jsonify({"error": "No grade found for the teacher"}), 404
 
     # Update the Subject table
-    storage.get_session().execute(
+    subject_update_result = storage.get_session().execute(
         update(Subject)
         .where(and_(
             Subject.grade_id == grade_id,
-            Subject.name == data['subject']
+            Subject.name == data['subject'],
+            Subject.school_year == data['school_year']
         ))
         .values(teacher_id=teacher.id)
     )
 
+    if subject_update_result.rowcount == 0:
+        return jsonify({"error": "Subject not found"}), 404
+
     # Update the Section table
-    storage.get_session().execute(
+    section_update_result = storage.get_session().execute(
         update(Section)
         .where(and_(
             Section.grade_id == grade_id,
+            Section.school_year == data['school_year'],
             Section.section.in_(data['section'])
         ))
         .values(teacher_id=teacher.id)
     )
+
+    if section_update_result.rowcount == 0:
+        return jsonify({"error": "Section not found"}), 404
 
     # Commit the updates to the database
     storage.save()
@@ -141,7 +154,8 @@ def assign_course(admin_data, id):
         .where(and_(
             MarkList.grade_id == grade_id,
             MarkList.section_id.in_(section_result),
-            MarkList.subject_id.in_(subject_result)
+            MarkList.subject_id.in_(subject_result),
+            MarkList.school_year == data['school_year']
         ))
         .values(teacher_id=teacher.id)
     )
@@ -178,8 +192,9 @@ def create_mark_list(admin_data):
 
     # Update the Section table
     for sections in data['sections']:
-        if not storage.get_first(Section, grade_id=grade_id, section=sections):
-            section = Section(grade_id=grade_id, section=sections)
+        if not storage.get_first(Section, grade_id=grade_id, section=sections, school_year=data['school_year']):
+            section = Section(grade_id=grade_id, section=sections,
+                              school_year=data['school_year'])
             storage.add(section)
 
     students = (
@@ -209,7 +224,7 @@ def create_mark_list(admin_data):
         subject = storage.get_first(
             Subject, code=code, grade_id=grade_id, name=course)
         if not subject:
-            subject = Subject(name=course, code=code, grade_id=grade_id)
+            subject = Subject(name=course, code=code, grade_id=grade_id, school_year=data['school_year'])
             storage.add(subject)
 
     """
@@ -219,6 +234,7 @@ def create_mark_list(admin_data):
     with storage.get_session().begin():
         mark_lists = []  # A list to hold mark_list objects
         assessments = []  # A list to hold assessment objects
+        average_result = []
         for student in students:
             subjects = storage.get_all(Subject, grade_id=grade_id)
             if not subjects:
@@ -232,13 +248,17 @@ def create_mark_list(admin_data):
                         "teacher_id": subject.teacher_id,
                         "section_id": student.section_id,
                         "subject_id": subject.id,
-                        "semester": data['semester']
+                        "semester": data['semester'],
+                        "school_year": data['school_year'],
                     }
                     mark_lists.append(MarkList(**values, **assessment_type))
                 assessments.append(Assessment(
-                    student_id=student.id, subject_id=subject.id, semester=data['semester']))
+                    student_id=student.id, subject_id=subject.id, semester=data['semester'], school_year=data['school_year']))
+            average_result.append(AVRGResult(
+                student_id=student.id, semester=data['semester'], school_year=data['school_year']))
         storage.get_session().bulk_save_objects(mark_lists)
         storage.get_session().bulk_save_objects(assessments)
+        storage.get_session().bulk_save_objects(average_result)
 
     return jsonify({"message": "Mark list created successfully!"}), 201
 
@@ -255,7 +275,7 @@ def show_mark_list(admin_data):
         return jsonify({"error": "Grade not found"}), 404
 
     section = storage.get_first(
-        Section, grade_id=grade.id, section=data['section'][0])
+        Section, grade_id=grade.id, section=data['section'][0], school_year=data['school_year'][0])
     if not section:
         return jsonify({"error": "Section not found"}), 404
 
@@ -265,7 +285,8 @@ def show_mark_list(admin_data):
         return jsonify({"error": "Subject not found"}), 404
 
     students = storage.get_all(MarkList, grade_id=grade.id, section_id=section.id,
-                               subject_id=subject.id, semester=data['semester'][0])
+                               subject_id=subject.id, semester=data['semester'][0],
+                               school_year=data['school_year'][0])
     if not students:
         return jsonify({"error": "Student not found"}), 404
 

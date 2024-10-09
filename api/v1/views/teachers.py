@@ -22,7 +22,7 @@ def register_new_teacher():
         return jsonify({"error": "Not a JSON"}), 404
 
     teacher = Teacher(name=data['name'], email=data['email'])
-    teacher.hash_password(data['password'])
+    teacher.hash_password(teacher.id)
     storage.add(teacher)
 
     return jsonify({"message": "Teacher registered successfully!"}), 201
@@ -55,12 +55,14 @@ def get_students(teacher_data):
         return jsonify({"error": "Grade not found"}), 404
 
     section = storage.get_first(
-        Section, teacher_id=teacher_data.id, grade_id=grade.id, section=data['section'][0])
+        Section, teacher_id=teacher_data.id, grade_id=grade.id, section=data['section'][0],
+        school_year=data['school_year'][0])
     if not section:
         return jsonify({"error": "Section not found"}), 404
 
     students = storage.get_all(MarkList, grade_id=grade.id, section_id=section.id,
-                               teacher_id=teacher_data.id, semester=data['semester'][0])
+                               teacher_id=teacher_data.id, semester=data['semester'][0],
+                               school_year=data['school_year'][0])
     if not students:
         return jsonify({"error": "Student not found"}), 404
 
