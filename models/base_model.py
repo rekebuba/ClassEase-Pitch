@@ -6,10 +6,8 @@ from sqlalchemy import Column, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import declared_attr
-from ethiopian_date import EthiopianDateConverter
 import uuid
 import bcrypt
-import random
 
 Base = declarative_base()
 
@@ -76,42 +74,3 @@ class BaseModel:
 
     def check_password(self, password):
         return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))
-
-    def generate_id(self, role):
-        """Function to generate a custom student ID based on the grade"""
-        id = ''
-        section = ''
-
-        if role == 'Student':
-            section = 'MAS'
-        elif role == 'Teacher':
-            section = 'MAT'
-        elif role == 'Admin':
-            section = 'MAA'
-
-        from models.student import Student
-        from models.admin import Admin
-        from models.teacher import Teacher
-
-        role_class_map = {
-            'Teacher': Teacher,
-            'Student': Student,
-            'Admin': Admin
-        }
-
-        unique = True
-        while unique:
-            num = random.randint(1000, 9999)
-            starting_year = EthiopianDateConverter.date_to_ethiopian(
-                datetime.now()).year % 100
-            id = f'{section}/{num}/{starting_year}'
-            if not self.id_exists(id, role_class_map[role]):
-                unique = False
-        return id
-
-    def id_exists(self, id, role):
-        """Function to check if the ID already exists"""
-        from models import storage
-        if storage.get_first(role, id=id):
-            return True
-        return False

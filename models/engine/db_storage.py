@@ -6,6 +6,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from flask_sqlalchemy import SQLAlchemy
 from models.base_model import Base, BaseModel
 from models.grade import Grade, seed_grades
+from models.users import User
 from models.student import Student
 from models.section import Section
 from models.admin import Admin
@@ -68,6 +69,10 @@ class DBStorage:
         """Drop all tables."""
         with self.__engine.engine.begin() as conn:
             Base.metadata.drop_all(bind=conn)
+
+    def rollback(self):
+        """Rollback all changes."""
+        self.get_session().rollback()
 
     def get_first(self, cls, **data):
         return self.get_session().query(cls).filter_by(**data).first()

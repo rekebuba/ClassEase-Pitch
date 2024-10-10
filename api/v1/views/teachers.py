@@ -1,5 +1,6 @@
 from flask import request, jsonify
 from models import storage
+from models.users import User
 from models.grade import Grade
 from models.student import Student
 from models.section import Section
@@ -21,23 +22,28 @@ def register_new_teacher():
     if not data:
         return jsonify({"error": "Not a JSON"}), 404
 
-    teacher = Teacher(name=data['name'], email=data['email'])
-    teacher.hash_password(teacher.id)
-    storage.add(teacher)
+    # Check if required fields are present
+    if 'name' not in data or 'email' not in data:
+        return jsonify({"error": "Missing name or email"}), 400
+
+    new_teacher = User(role='Teacher')
+    new_teacher.hash_password(new_teacher.id)
+
+
+    try:
+        # Save User first
+        storage.add(new_teacher)
+
+        # Create the Teacher object, using the same id
+        teacher = Teacher(id=new_teacher.id, name=data['name'], email=data['email'])
+
+        # Save the Teacher object
+        storage.add(teacher)
+    except Exception as e:
+        storage.rollback()
+        return jsonify({"error": str(e)}), 500
 
     return jsonify({"message": "Teacher registered successfully!"}), 201
-
-
-@teach.route('/login', methods=['POST'])
-def teacher_login():
-    data = request.get_json()
-
-    user = storage.get_first(Teacher, email=data['email'])
-    if user and user.check_password(data['password']):
-        access_token = create_teacher_token(user.id)
-        return jsonify(access_token=access_token), 200
-
-    return jsonify({"error": "Invalid credentials"}), 401
 
 
 @teach.route('/students/mark_list', methods=['GET'])

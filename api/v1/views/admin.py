@@ -3,6 +3,7 @@
 from flask import request, jsonify
 from models import storage
 from flask import Blueprint
+from models.users import User
 from models.admin import Admin
 from models.subject import Subject
 from models.teacher import Teacher
@@ -27,23 +28,28 @@ def register_new_admin():
     if not data:
         return jsonify({"error": "Not a JSON"}), 404
 
-    user = Admin(name=data['name'], email=data['email'])
-    user.hash_password(user.id)
+    # Check if required fields are present
+    if 'name' not in data or 'email' not in data:
+        return jsonify({"error": "Missing name or email"}), 400
 
-    storage.add(user)
+    new_admin = User(role='Admin')
+    new_admin.hash_password(new_admin.id)
+
+    try:
+        # Save User first
+        storage.add(new_admin)
+
+        # Create the Admin object, using the same id
+        admin = Admin(id=new_admin.id, name=data['name'], email=data['email'])
+
+        # Save Admin
+        storage.add(admin)
+    except Exception as e:
+        storage.rollback()
+        print(e)
+        return jsonify({"error": str(e)}), 500
+
     return jsonify({"message": "Admin registered successfully!"}), 201
-
-
-@auth.route('/login', methods=['POST'])
-def admin_login():
-    data = request.get_json()
-
-    user = storage.get_first(Admin, email=data['email'])
-    if user and user.check_password(data['password']):
-        access_token = create_admin_token(user.id)
-        return jsonify(access_token=access_token), 200
-
-    return jsonify({"error": "Invalid credentials"}), 401
 
 
 @auth.route('/dashboard', methods=['GET'])

@@ -26,9 +26,9 @@ mark_list_data = {
     "semester": 1,
     "school_year": "2023/24"
 }
-
+# <a href="/student/registration">Student registration</a>
 student_data = {
-    "first_name": "Abubeker",
+    "name": "Abubeker",
     "father_name": "Abdullahi",
     "g_father_name": "Ibrahim",
     "father_phone": "+2519999999",
@@ -52,11 +52,11 @@ def register_admin(client):
 
 def get_admin_access_token(client):
     """Get the access token for the admin."""
-    email = register_admin(client)
+    register_admin(client)
 
-    response = client.post('/api/v1/admin/login',
+    response = client.post('/api/v1/login',
                                 data=json.dumps(
-                                    {"name": "Abdullahi", "email": email, "password": storage.get_random(Admin).id}),
+                                    {"id": storage.get_random(Admin).id, "password": storage.get_random(Admin).id}),
                                 content_type='application/json')
 
     json_data = response.get_json()
@@ -104,9 +104,9 @@ def register_teacher(client):
 def get_teacher_access_token(client):
     """Get the access token for the teacher."""
     email = register_teacher(client)
-    response = client.post('/api/v1/teacher/login',
+    response = client.post('/api/v1/login',
                                 data=json.dumps(
-                                    {"name": "Abdullahi", "email": email, "password": storage.get_random(Teacher).id}),
+                                    {"id": storage.get_random(Teacher).id, "password": storage.get_random(Teacher).id}),
                                 content_type='application/json')
 
     json_data = response.get_json()
@@ -123,6 +123,17 @@ def register_student(client):
 
     return response
 
+def get_student_access_token(client):
+    """Get the access token for the student."""
+    register_student(client)
+
+    response = client.post('/api/v1/login',
+                                data=json.dumps(
+                                    {"id": storage.get_random(Student).id, "password": storage.get_random(Student).id}),
+                                content_type='application/json')
+
+    json_data = response.get_json()
+    return json_data['access_token']
 
 def admin_course_assign_to_teacher(client):
     """Test that an admin can access teacher course data."""

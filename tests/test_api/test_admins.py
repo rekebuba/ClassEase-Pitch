@@ -4,6 +4,7 @@ from api import create_app
 import json
 import random
 from models.admin import Admin
+from models.users import User
 from tests.test_api.helper_functions import register_admin, get_admin_access_token, create_mark_list, get_teacher_access_token, register_teacher, register_student, mark_list_data
 
 
@@ -34,12 +35,12 @@ class TestAdmin(unittest.TestCase):
 
     def test_admin_login_success(self):
         """Test that the admin login endpoint works."""
-        email = register_admin(self.client)
+        register_admin(self.client)
 
         # Test that a valid login returns a token
-        response = self.client.post('/api/v1/admin/login',
+        response = self.client.post('/api/v1/login',
                                     data=json.dumps(
-                                        {"name": "Abdullahi", "email": email, "password": storage.get_random(Admin).id}),
+                                        {"name": "Abdullahi", "id": storage.get_random(Admin).id, "password": storage.get_random(Admin).id}),
                                     content_type='application/json')
 
         self.assertEqual(response.status_code, 200)
@@ -47,20 +48,20 @@ class TestAdmin(unittest.TestCase):
         self.access_token = json_data['access_token']
         self.assertIn('access_token', json_data)
 
-    def test_admin_login_wrong_email(self):
+    def test_admin_login_wrong_id(self):
         # Test that an invalid email returns an error
-        response = self.client.post('/api/v1/admin/login',
+        response = self.client.post('/api/v1/login',
                                     data=json.dumps(
-                                        {"name": "Abdullahi", "email": "dose't exist", "password": "testpassword"}),
+                                        {"name": "Abdullahi", "id": "dose't exist", "password": "testpassword"}),
                                     content_type='application/json')
         self.assertEqual(response.status_code, 401)
 
     def test_admin_login_wrong_password(self):
         # Test that an invalid password returns an error
-        email = register_admin(self.client)
-        response = self.client.post('/api/v1/admin/login',
+        register_admin(self.client)
+        response = self.client.post('/api/v1/login',
                                     data=json.dumps(
-                                        {"name": "Abdullahi", "email": email, "password": "wrongpassword"}),
+                                        {"name": "Abdullahi", "id": storage.get_random(Admin).id, "password": "wrongpassword"}),
                                     content_type='application/json')
         self.assertEqual(response.status_code, 401)
 

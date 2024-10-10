@@ -30,12 +30,12 @@ class TestTeachers(unittest.TestCase):
 
     def test_teacher_login_success(self):
         """Test that the teacher login endpoint works."""
-        email = register_teacher(self.client)
+        register_teacher(self.client)
 
         # Test that a valid login returns a token
-        response = self.client.post('/api/v1/teacher/login',
+        response = self.client.post('/api/v1/login',
                                     data=json.dumps(
-                                        {"email": email, "password": storage.get_random(Teacher).id}),
+                                        {"id": storage.get_random(Teacher).id, "password": storage.get_random(Teacher).id}),
                                     content_type='application/json')
 
         self.assertEqual(response.status_code, 200)
@@ -43,20 +43,20 @@ class TestTeachers(unittest.TestCase):
         self.access_token = json_data['access_token']
         self.assertIn('access_token', json_data)
 
-    def test_teacher_login_wrong_email(self):
-        # Test that an invalid email returns an error
-        response = self.client.post('/api/v1/teacher/login',
+    def test_teacher_login_wrong_id(self):
+        # Test that an invalid id returns an error
+        response = self.client.post('/api/v1/login',
                                     data=json.dumps(
-                                        {"name": "Abdullahi", "email": "dose't exist", "password": "testpassword"}),
+                                        {"name": "Abdullahi", "id": "dose't exist", "password": "testpassword"}),
                                     content_type='application/json')
         self.assertEqual(response.status_code, 401)
 
     def test_teacher_login_wrong_password(self):
         # Test that an invalid password returns an error
         email = register_teacher(self.client)
-        response = self.client.post('/api/v1/teacher/login',
+        response = self.client.post('/api/v1/login',
                                     data=json.dumps(
-                                        {"name": "Abdullahi", "email": email, "password": "wrongpassword"}),
+                                        {"name": "Abdullahi", "id": storage.get_random(Teacher).id, "password": "wrongpassword"}),
                                     content_type='application/json')
         self.assertEqual(response.status_code, 401)
 

@@ -5,12 +5,11 @@ from models.engine.db_storage import BaseModel, Base
 
 class Student(BaseModel, Base):
     __tablename__ = 'student'
-    id = Column(String(120), primary_key=True, unique=True)
-    first_name = Column(String(50), nullable=False)
+    id = Column(String(120), ForeignKey('users.id'), primary_key=True, unique=True)
+    name = Column(String(50), nullable=False)
     father_name = Column(String(50), nullable=False)
     g_father_name = Column(String(50))
     age = Column(Integer, nullable=False)
-    password = Column(String(120))
     father_phone = Column(String(15))
     mother_phone = Column(String(15))
 
@@ -25,7 +24,7 @@ class Student(BaseModel, Base):
             'father_phone IS NOT NULL OR mother_phone IS NOT NULL'),
     )
 
+
     def __init__(self, *args, **kwargs):
         """initializes score"""
         super().__init__(*args, **kwargs)
-        self.id = super().generate_id('Student')
