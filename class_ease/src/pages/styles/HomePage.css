@@ -1,0 +1,199 @@
+/* Header */
+body,
+html {
+    margin: 0;
+    /* Resets default body margin */
+    padding: 0;
+    /* Resets default body padding */
+}
+
+
+.header {
+    position: relative;
+    /* Keeps the header fixed at the top */
+    top: 0;
+    /* Aligns it to the top */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #003366;
+    color: white;
+    padding: 15px;
+    z-index: 1000;
+    /* Ensures it stays above other content */
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+}
+
+.nav-links li {
+    margin: 0 15px;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+}
+
+.login-btn a {
+    color: white;
+    text-decoration: none;
+    background-color: #ff9900;
+    padding: 10px 15px;
+    border-radius: 5px;
+}
+
+.login-btn a:hover {
+    background-color: #cc7a00;
+}
+
+/* Hero Section */
+.hero {
+    /* background: url('../images/school.png'); */
+    height: 80vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: black;
+}
+
+.hero-content h1 {
+    font-size: 48px;
+    margin-bottom: 20px;
+}
+
+.hero-content p {
+    font-size: 20px;
+    margin-bottom: 30px;
+}
+
+.cta-btn {
+    background-color: #ff9900;
+    padding: 15px 30px;
+    color: white;
+    font-size: 18px;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.cta-btn:hover {
+    background-color: #cc7a00;
+}
+
+/* About, Academics, and Testimonials Section */
+.about,
+.academics,
+.events,
+.testimonials {
+    padding: 50px;
+    background-color: #f9f9f9;
+    text-align: center;
+}
+
+h2 {
+    margin-bottom: 30px;
+    font-size: 32px;
+}
+
+.program-list,
+.event-list,
+.testimonial-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+}
+
+.program-item,
+.event-item,
+.testimonial-item {
+    position: relative;
+    width: 30%;
+    margin: 20px;
+    transition: transform 0.3s ease;
+    background-color: white;
+    cursor: pointer;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.event-item:hover,
+.testimonial-item:hover,
+.program-item:hover {
+    transform: scale(1.1);
+}
+
+.program-item h3,
+.event-item h3 {
+    margin: 15px 0 10px;
+    margin-bottom: 15px;
+    font-size: 24px;
+}
+
+.testimonial-item p {
+    font-style: italic;
+    margin-bottom: 10px;
+    color: #666;
+}
+
+/* Footer */
+.footer {
+    background-color: #003366;
+    color: white;
+    padding: 40px;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-around;
+}
+
+.footer-about,
+.footer-links,
+.footer-subscribe {
+    width: 30%;
+}
+
+.subscribe {
+    background-color: #2E5487; /* Button color */
+    color: white;              /* Text color */
+    border: none;              /* Remove default border */
+    border-radius: 5px;       /* Rounded corners */
+    padding: 10px 20px;       /* Top/bottom and left/right padding */
+    font-size: 16px;          /* Font size */
+    cursor: pointer;           /* Change cursor to pointer on hover */
+    transition: background-color 0.3s, transform 0.2s; /* Smooth transitions */
+}
+
+.subscribe:hover {
+    background-color: #005599; /* Darker color on hover */
+    transform: scale(1.05);    /* Slightly enlarge on hover */
+}
+
+.subscribe:focus {
+    outline: none;             /* Remove default focus outline */
+    box-shadow: 0 0 3px #005599; /* Add a subtle glow effect */
+}
+
+.footer-links ul {
+    list-style: none;
+}
+
+.footer-links a {
+    color: white;
+    text-decoration: none;
+}
+
+.footer-bottom {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 14px;
+}

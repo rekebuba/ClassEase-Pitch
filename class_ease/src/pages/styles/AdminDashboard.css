@@ -1,0 +1,118 @@
+/* CSS (AdminDashboard.css) */
+.admin-dashboard-container {
+    display: flex;
+    height: 100vh;
+}
+
+body {
+    margin: 0;
+    /* Remove default body margin */
+    overflow: hidden;
+    /* Prevent body scroll */
+}
+
+.admin-sidebar {
+    width: 250px;
+    background-color: #2a3f54;
+    color: white;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100vh;
+    /* Full height of the viewport */
+}
+
+.admin-profile-section {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.admin-menu ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.admin-menu ul li {
+    margin: 20px 0;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+}
+
+.admin-menu ul li svg {
+    margin-right: 10px;
+}
+
+.content {
+    margin-left: 0px;
+    /* Margin to account for the sidebar width */
+    padding: 20px;
+    /* Padding for content */
+    overflow-y: auto;
+    /* Enable vertical scrolling */
+    height: 100vh;
+    flex: 1;
+}
+
+.admin-content {
+    flex: 1;
+    padding: 30px;
+    background-color: #f5f5f5;
+}
+
+.admin-header h2 {
+    margin-bottom: 20px;
+}
+
+.admin-stats {
+    display: flex;
+    gap: 20px;
+}
+
+.admin-stat-card {
+    background-color: white;
+    padding: 20px;
+    flex: 1;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.data-management {
+    margin-top: 30px;
+}
+
+.data-section {
+    margin-bottom: 30px;
+}
+
+.data-section h3 {
+    margin-bottom: 15px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.data-table th,
+.data-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.view-btn {
+    background-color: #2a3f54;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.view-btn:hover {
+    background-color: #1d2e40;
+}
