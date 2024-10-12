@@ -5,14 +5,14 @@ html {
     /* Resets default body margin */
     padding: 0;
     /* Resets default body padding */
+    overflow-y: scroll;
 }
 
-
+.dashboard-header,
 .header {
-    position: relative;
-    /* Keeps the header fixed at the top */
+    position: fixed;
     top: 0;
-    /* Aligns it to the top */
+    left: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -20,9 +20,10 @@ html {
     color: white;
     padding: 15px;
     z-index: 1000;
-    /* Ensures it stays above other content */
+    width: 98%;
 }
 
+.dashboard-logo,
 .logo {
     font-size: 24px;
     font-weight: bold;

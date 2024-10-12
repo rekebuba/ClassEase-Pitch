@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { login } from "../services/api";
+import api from "../services/api";
 import { useNavigate } from "react-router-dom";
 import "./styles/Login.css";
 
@@ -15,8 +15,9 @@ function Login() {
     e.preventDefault();
 
     try {
-      const data = await login(credentials);
-      navigate(`/${data.role}/dashboard`); // Redirect to dashboard
+      const response = await api.post('/login', credentials);
+      localStorage.setItem("Authorization", response.data.access_token);
+      navigate(`/${response.data.role}/dashboard`); // Redirect to dashboard
     } catch (error) {
       setWarning("id or password is not correct");
     }

@@ -1,7 +1,7 @@
 import React from 'react';
 // import React, { useState } from "react";
 import './styles/HomePage.css';
-import './StudentRegistrationForm';
+import './StudRegistrationForm';
 
 
 

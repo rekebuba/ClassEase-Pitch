@@ -1,46 +1,51 @@
 import React, { useState, useEffect } from "react";
-import {
-  FaUserGraduate,
-  FaClipboardList,
-  FaBookOpen,
-  FaCog,
-  FaSignOutAlt
-} from "react-icons/fa";
+import TeacherPanel from "../components/TeachPanel";
 import "./styles/TeacherDashboard.css";
+import "./styles/Dashboard.css";
 
 const TeacherDashboard = () => {
+  const [activePage, setActivePage] = useState("Home");
+
   return (
-    <div className="teacher-dashboard-container">
-      <aside className="teacher-sidebar">
-        <div className="teacher-profile-section">
-          <h3>Teacher Panel</h3>
-          <p>Mr. Anderson</p>
-          <p>Mathematics Teacher</p>
-        </div>
-        <nav className="teacher-menu">
-          <ul>
-            <li>
-              <FaUserGraduate /> My Students
-            </li>
-            <li>
-              <FaClipboardList /> Manage Scores
-            </li>
-            <li>
-              <FaBookOpen /> Assignments
-            </li>
-            <li>
-              <FaCog /> Settings
-            </li>
-            <li>
-              <FaSignOutAlt /> Logout
-            </li>
-          </ul>
-        </nav>
-      </aside>
-      <div className="content">
-        <main className="teacher-content">
-          <header className="teacher-header">
-            <h2>Welcome Mr. Anderson</h2>
+    <div className="dashboard-container">
+      <TeacherPanel />
+      {/* <div className="content"> */}
+        <main className="content">
+          <header className="dashboard-header">
+            {/* <h2>Welcome Back, John!</h2> */}
+            <div className="dashboard-logo">ClassEase School</div>
+            <div className="dashboard-nav">
+              <div
+                className={`nav-item ${activePage === "Home" ? "active" : ""}`}
+                onClick={() => setActivePage("Home")}
+              >
+                Home
+              </div>
+              <div
+                className={`nav-item ${activePage === "User Control" ? "active" : ""}`}
+                onClick={() => setActivePage("User Control")}
+              >
+                User Control
+              </div>
+              <div
+                className={`nav-item ${activePage === "Event Management" ? "active" : ""}`}
+                onClick={() => setActivePage("Event Management")}
+              >
+                Event Management
+              </div>
+              <div
+                className={`nav-item ${activePage === "Reports" ? "active" : ""}`}
+                onClick={() => setActivePage("Reports")}
+              >
+                Reports
+              </div>
+              <div
+                className={`nav-item ${activePage === "Contact" ? "active" : ""}`}
+                onClick={() => setActivePage("Contact")}
+              >
+                Contact
+              </div>
+            </div>
           </header>
           <section className="teacher-stats">
             <div className="teacher-stat-card">
@@ -129,7 +134,7 @@ const TeacherDashboard = () => {
             </div>
           </section>
         </main>
-      </div>
+      {/* </div> */}
     </div>
   );
 };

@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import './styles/StudentRegistrationForm.css';
+import './styles/StudRegistrationForm.css';
 
 
 const StudentRegistrationForm = () => {
   const [formData, setFormData] = useState({
     name: "",
     FatherName: "",
+    GrandFatherName: "",
     grade: "",
     dob: "",
     FatherPhone: ""
@@ -22,10 +23,10 @@ const StudentRegistrationForm = () => {
   };
 
   return (
-    <div className="form-container">
+    <div className="registration-form-container">
       <h2>Student Registration Form</h2>
       <form onSubmit={handleSubmit} className="student-form">
-        <div className="form-group">
+        <div className="registration-form-group">
           <label htmlFor="firstName">Name:</label>
           <input
             type="text"
@@ -37,7 +38,7 @@ const StudentRegistrationForm = () => {
           />
         </div>
 
-        <div className="form-group">
+        <div className="registration-form-group">
           <label htmlFor="lastName">Father Name:</label>
           <input
             type="text"
@@ -49,19 +50,19 @@ const StudentRegistrationForm = () => {
           />
         </div>
 
-        <div className="form-group">
-          <label htmlFor="lastName">Father Name:</label>
+        <div className="registration-form-group">
+          <label htmlFor="lastName">Grand Father Name:</label>
           <input
             type="text"
-            id="lastName"
-            name="lastName"
-            value={formData.lastName}
+            id="grandFatherName"
+            name="grandFatherName"
+            value={formData.grandFatherName}
             onChange={handleInputChange}
             required
           />
         </div>
 
-        <div className="form-group">
+        <div className="registration-form-group">
           <label htmlFor="grade">Grade:</label>
           <select
             id="grade"
@@ -78,26 +79,7 @@ const StudentRegistrationForm = () => {
             )}
           </select>
         </div>
-
-        <div className="form-group">
-          <label htmlFor="section">Section:</label>
-          <select
-            id="section"
-            name="section"
-            value={formData.section}
-            onChange={handleInputChange}
-            required
-          >
-            <option value="">Select Section</option>
-            {["A", "B", "C", "D", "E", "F", "G"].map(section =>
-              <option key={section} value={section}>
-                {section}
-              </option>
-            )}
-          </select>
-        </div>
-
-        <div className="form-group">
+        <div className="registration-form-group">
           <label htmlFor="dob">Date of Birth:</label>
           <input
             type="date"
@@ -108,20 +90,7 @@ const StudentRegistrationForm = () => {
             required
           />
         </div>
-
-        <div className="form-group">
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-
-        <div className="form-group">
+        <div className="registration-form-group">
           <label htmlFor="phone">Phone Number:</label>
           <input
             type="tel"

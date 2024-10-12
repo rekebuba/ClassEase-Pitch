@@ -1,4 +1,4 @@
-.form-container {
+.registration-form-container {
     max-width: 500px;
     margin: 50px auto;
     padding: 20px;
@@ -8,7 +8,7 @@
     font-family: Arial, sans-serif;
 }
 
-h2 {
+.registration-form-container h2 {
     text-align: center;
     margin-bottom: 20px;
     font-size: 24px;
@@ -20,19 +20,19 @@ h2 {
     flex-direction: column;
 }
 
-.form-group {
+.registration-form-group {
     margin-bottom: 15px;
 }
 
-label {
+.registration-form-group label {
     font-weight: bold;
     margin-bottom: 5px;
     display: block;
     color: #555;
 }
 
-input,
-select {
+.registration-form-group input,
+.registration-form-group select {
     width: 100%;
     padding: 10px;
     font-size: 16px;
@@ -41,7 +41,7 @@ select {
     box-sizing: border-box;
 }
 
-input[type="date"] {
+.registration-form-group input[type="date"] {
     padding-right: 10px;
 }
 
@@ -71,8 +71,8 @@ input:focus {
         padding: 15px;
     }
 
-    input,
-    select {
+    .registration-form-group input,
+    .registration-form-group select {
         font-size: 14px;
         padding: 8px;
     }
@@ -81,3 +81,4 @@ input:focus {
         font-size: 16px;
     }
 }
+

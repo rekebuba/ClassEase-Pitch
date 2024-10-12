@@ -1,18 +1,21 @@
 import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-
-
-
-
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import NotFound from './pages/NotFound';
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./ProtectedRoute";
 import TeacherDashboard from "./pages/TeachDashbord";
-import StudentDashboard from "./pages/StdDashbord";
-import StudentRegistrationForm from "./pages/StudentRegistrationForm";
-
+import StudentDashboard from "./pages/StudDashbord";
+import StudentRegistrationForm from "./pages/StudRegistrationForm";
+import AdminManageStudents from "./pages/AdminManageStud";
+import AdminManageTeach from "./pages/AdminManageTeach";
+import TeacherManageStudents from "./pages/TeacherManageStud";
+import AdminCreateMarkList from "./pages/AdminMarkList";
+import AdminEventManagement from "./pages/AdminEventManagement"
+import AdminStudPerformance from "./pages/AdminStudPerformance";
+import UserAccessControl from "./pages/AdminUsersAccessControl";
+import AdminEnrollStud from "./pages/AdminEnrollStud";
 
 const router = createBrowserRouter([
   {
@@ -26,7 +29,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/admin/dashboard",
-    element: <ProtectedRoute element={<AdminDashboard />} />,
+    element: <AdminDashboard />
   },
   {
     path: "/teacher/dashboard",
@@ -39,6 +42,38 @@ const router = createBrowserRouter([
   {
     path: "/student/registration",
     element: <ProtectedRoute element={<StudentRegistrationForm />} />,
+  },
+  {
+    path: "admin/student/registration",
+    element: <AdminEnrollStud />
+  },
+  {
+    path: "/admin/manage/students",
+    element: <AdminManageStudents />
+  },
+  {
+    path: "/admin/manage/teachers",
+    element: <AdminManageTeach />
+  },
+  {
+    path: "/teacher/students",
+    element: <TeacherManageStudents />
+  },
+  {
+    path: "/admin/assessment/marklist",
+    element: <AdminCreateMarkList />
+  },
+  {
+    path: "/admin/events/newevent",
+    element: <AdminEventManagement />
+  },
+  {
+    path: "/admin/students/performance",
+    element: <AdminStudPerformance />
+  },
+  {
+    path: "/admin/users/accesscontrol",
+    element: <UserAccessControl />
   }
 ]);
 
