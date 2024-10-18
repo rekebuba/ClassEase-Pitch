@@ -15,7 +15,8 @@ import AdminCreateMarkList from "./pages/AdminMarkList";
 import AdminEventManagement from "./pages/AdminEventManagement"
 import AdminStudPerformance from "./pages/AdminStudPerformance";
 import UserAccessControl from "./pages/AdminUsersAccessControl";
-import AdminEnrollStud from "./pages/AdminEnrollStud";
+import AdminEnrollUser from "./pages/AdminEnrollUser";
+import AssignTeacher from "./pages/AdminAssignTeacher";
 
 const router = createBrowserRouter([
   {
@@ -45,7 +46,11 @@ const router = createBrowserRouter([
   },
   {
     path: "admin/student/registration",
-    element: <AdminEnrollStud />
+    element: <AdminEnrollUser role="student" />
+  },
+  {
+    path: "admin/teacher/registration",
+    element: <AdminEnrollUser role="teacher" />
   },
   {
     path: "/admin/manage/students",
@@ -54,6 +59,10 @@ const router = createBrowserRouter([
   {
     path: "/admin/manage/teachers",
     element: <AdminManageTeach />
+  },
+  {
+    path: "/admin/assign/teachers",
+    element: <AssignTeacher />
   },
   {
     path: "/teacher/students",

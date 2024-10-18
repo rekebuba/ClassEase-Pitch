@@ -5,17 +5,34 @@ import AdminPanel from "../components/AdminPanel";
 import AdminHeader from "../components/AdminHeader";
 import AdminTeachProfile from "./AdminTeachProfile";
 import AdminTeachList from "./AdminTeachList";
+import AssignTeacher from "./AdminAssignTeacher";
 
 const AdminManageStudents = () => {
 
-    const [isOpen, setIsOpen] = useState(false);
+    const [isDetailOpen, setIsDetailOpen] = useState(false);
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [teacherSummary, setTeacherSummary] = useState({});
 
-    const toggleDropdown = () => {
-        setIsOpen(!isOpen);
+
+    const toggleDropdown = (role) => {
+        if (role === 'detail') {
+            setIsDetailOpen(!isDetailOpen);
+        }
+        if (role === 'edit') {
+            setIsEditOpen(!isEditOpen);
+        }
     };
 
-    const toggleProfile = () => {
-        setIsOpen(false);
+    const toggleDetailProfile = () => {
+        setIsDetailOpen(false);
+    }
+
+    const toggleEditProfile = () => {
+        setIsEditOpen(false);
+    }
+
+    const summary = (data) => {
+        setTeacherSummary(data);
     }
 
     return (
@@ -23,8 +40,9 @@ const AdminManageStudents = () => {
             <AdminPanel />
             <main className="content">
                 <AdminHeader />
-                <AdminTeachList toggleDropdown={toggleDropdown} />
-                <AdminTeachProfile isOpen={isOpen} toggleProfile={toggleProfile} />
+                <AdminTeachList toggleDropdown={toggleDropdown} teacherSummary={summary} />
+                <AdminTeachProfile isDetailOpen={isDetailOpen} toggleDetailProfile={toggleDetailProfile} teacherData={teacherSummary} />
+                <AssignTeacher isEditOpen={isEditOpen} toggleEditProfile={toggleEditProfile} teacherData={teacherSummary} />
             </main>
         </div>
     );

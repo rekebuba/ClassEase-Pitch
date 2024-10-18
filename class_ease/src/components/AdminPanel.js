@@ -2,7 +2,6 @@ import { FaSignOutAlt, FaUserCircle } from "react-icons/fa";
 
 
 const AdminPanel = () => {
-    
     return (
         <aside className="sidebar">
             <div className="profile-section">

@@ -1,4 +1,4 @@
-/* CSS (AdminDashboard.css) */
+/* CSS (AdminDashboard) */
 .admin-dashboard-container {
     display: flex;
     height: 100vh;
@@ -69,7 +69,7 @@ html {
     background-color: #1d2e40;
 }
 
-/* CSS (AdminManageStudents.css) */
+/* CSS (AdminManageStudents) */
 .admin-manage-container {
     position: relative;
     display: flex;
@@ -190,6 +190,13 @@ html {
     padding: 15px;
     text-align: left;
     border-bottom: 1px solid #ddd;
+    max-width: 100px;
+}
+
+.action-container {
+    display: flex;
+    gap: 20px;
+    width: 100%;
 }
 
 .delete-btn,
@@ -201,24 +208,34 @@ html {
     padding: 8px 12px;
     border-radius: 5px;
     cursor: pointer;
+    gap: 20px;
 }
 
 .delete-btn {
     background-color: #d9534f;
-    margin-left: 10px;
 }
 
-.detail-btn:hover,
-.edit-btn:hover {
+.edit-btn {
+    background-color: #62C566;
+}
+
+.detail-btn:hover {
     background-color: #1d2e40;
     transform: scale(1.03);
 }
 
-.delete-btn:hover {
-    background-color: #c9302c;
+.edit-btn:hover {
+    background-color: #4CAF50;
+    transform: scale(1.03);
+
 }
 
-/* CSS (AdminDashboardGraph.css) */
+.delete-btn:hover {
+    background-color: #c9302c;
+    transform: scale(1.03);
+}
+
+/* CSS (AdminDashboardGraph) */
 
 h2 {
     text-align: center;
@@ -251,7 +268,7 @@ h2 {
 }
 
 
-/* CSS (UserAccessControl.css) */
+/* CSS (UserAccessControl) */
 .access-control-h2 {
     text-align: center;
     /* margin-bottom: 30px; */
@@ -317,7 +334,7 @@ h2 {
     border-radius: 5px;
 }
 
-/* CSS (EventManagement.css) */
+/* CSS (EventManagement) */
 .event-management {
     padding: 20px;
     background-color: #f4f6f9;
@@ -394,7 +411,7 @@ h2 {
     color: green;
 }
 
-/* CSS (ExamAssessmentReports.css) */
+/* CSS (ExamAssessmentReports) */
 .exam-assessment-reports {
     padding: 20px;
     background-color: #f4f6f9;
@@ -439,7 +456,7 @@ h3 {
     margin-bottom: 10px;
 }
 
-/* CSS (AdminCreateMarkList.css) */
+/* CSS (AdminCreateMarkList) */
 .admin-create-marklist-container {
     background-color: #f5f5f5;
     padding: 30px;
@@ -505,25 +522,41 @@ h2 {
     margin-right: 10px;
 }
 
-.assignment-container {
+.add-checkbox input {
+    width: 45%;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.add-checkbox button {
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.assessment-container {
     padding: 20px;
     margin-top: -25px;
 }
 
-.assignment-container h3 {
+.assessment-container h3 {
     font-weight: bold;
     text-align: left;
 }
 
-.assignment-row {
+.assessment-row {
     display: flex;
     justify-content: space-between;
     margin-bottom: 10px;
     flex-wrap: wrap;
 }
 
-.assignment-input,
-.assignment-select {
+.assessment-input,
+.assessment-select {
     width: 48%;
     padding: 8px;
     font-size: 16px;
@@ -531,30 +564,25 @@ h2 {
     border-radius: 5px;
 }
 
-.add-assignment-btn {
-    background-color: #007bff;
-    color: white;
+.add-assessment-btn {
+    border: 1px solid #ccc;
     padding: 10px 20px;
     font-size: 16px;
-    border: none;
     border-radius: 5px;
     display: flex;
     align-items: center;
     cursor: pointer;
 }
 
-.add-assignment-btn svg {
+.add-assessment-btn svg {
     margin-right: 8px;
 }
 
-.add-assignment-btn:hover {
-    background-color: #0056b3;
-}
 
 @media (max-width: 768px) {
 
-    .assignment-input,
-    .assignment-select {
+    .assessment-input,
+    .assessment-select {
         width: 100%;
         margin-bottom: 10px;
     }
@@ -575,7 +603,7 @@ h2 {
 }
 
 
-/* CSS (EventManagement.css) */
+/* CSS (EventManagement) */
 .new-event-management {
     padding: 20px;
     background-color: #f4f6f9;
@@ -642,9 +670,13 @@ h2 {
     border-radius: 5px;
 }
 
-/* CSS (StudentProfile.css) */
+/* CSS (StudentProfile) */
 .manage-student-container {
     position: relative;
+}
+
+.stud-list {
+    margin-top: 10px;
 }
 
 .profile-header-container h2 {
@@ -744,7 +776,7 @@ h2 {
     background-color: #f4f6f9;
 }
 
-/* CSS (TeacherProfile.css) */
+/* CSS (TeacherProfile) */
 .profile-header {
     display: flex;
     align-items: center;
@@ -781,7 +813,7 @@ h2 {
     margin-bottom: 10px;
 }
 
-/* DataExportImport.css */
+/* DataExportImport */
 
 
 .data-export-import {
@@ -838,4 +870,143 @@ h2 {
     margin-bottom: 5px;
     border: 1px solid #dee2e6;
     border-radius: 4px;
+}
+
+/* pagination */
+.pagination-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+    font-family: Arial, sans-serif;
+}
+
+.pagination-btn {
+    background-color: #007bff;
+    /* Blue button */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+    margin: 0 10px;
+}
+
+.pagination-btn:hover {
+    background-color: #0056b3;
+    /* Darker blue on hover */
+}
+
+.pagination-btn:disabled {
+    background-color: #c0c0c0;
+    /* Grey when disabled */
+    cursor: not-allowed;
+}
+
+.pagination-info {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+
+.pagination-input {
+    width: 50px;
+    padding: 5px;
+    margin: 0 5px;
+    text-align: center;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border-color 0.3s ease;
+}
+
+.pagination-input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* CSS (TeacherRegistrationForm) */
+.teacher-registration-form {
+    width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.teacher-registration-form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.teacher-registration-form-group {
+    margin-bottom: 15px;
+}
+
+.teacher-registration-form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.teacher-registration-form-group input,
+.teacher-registration-form-group select {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.teacher-registration-submit-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.teacher-registration-submit-btn:hover {
+    background-color: #45a049;
+}
+
+
+/* CSS (AssignTeacher) */
+.teacher-form-group {
+    margin-bottom: 15px;
+}
+
+.teacher-form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.teacher-form-group select {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.teacher-assign-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.teacher-assign-btn:hover {
+    background-color: #45a049;
 }

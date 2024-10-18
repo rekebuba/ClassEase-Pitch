@@ -31,7 +31,7 @@ import {
     FaRegCalendarAlt
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import React, { useState } from "react";
+import React from "react";
 
 const AdminHeader = () => {
     const navigate = useNavigate();
@@ -56,7 +56,7 @@ const AdminHeader = () => {
         navigate("/admin/students/performance")
     }
 
-    const goToDashbard = e => {
+    const goToDashboard = e => {
         navigate("/admin/dashboard")
     }
 
@@ -68,6 +68,14 @@ const AdminHeader = () => {
         navigate("/admin/student/registration")
     }
 
+    const enrollTeacher = e => {
+        navigate("/admin/teacher/registration")
+    }
+
+    const assignTeacher = e => {
+        navigate("/admin/assign/teachers");
+    }
+
     const dataExportImport = e => {
         navigate("/admin/settings/importexport")
     }
@@ -76,7 +84,7 @@ const AdminHeader = () => {
             <div className="dashboard-logo">ClassEase School</div>
             <div className="dashboard-nav">
                 <div className="nav-item">
-                    <span className="nav-link" onClick={goToDashbard}>
+                    <span className="nav-link" onClick={goToDashboard}>
                         <FaHome /> Home
                     </span>
                 </div>
@@ -87,7 +95,8 @@ const AdminHeader = () => {
                     <div className="dropdown-content">
                         <div className="dropdown-item" onClick={manageStudents}><FaUserGraduate /> Manage Students</div>
                         <div className="dropdown-item" onClick={manageTeachers}><FaChalkboardTeacher /> Manage Teachers</div>
-                        <div className="dropdown-item"><FaUserTie /> Manage Staff</div>
+                        <div className="dropdown-item" onClick={enrollStudent}><FaUserPlus /> Enroll Students</div>
+                        <div className="dropdown-item" onClick={enrollTeacher}><FaUserPlus /> Register Teacher</div>
                         <div className="dropdown-item" onClick={userAccessControl}><FaUserShield /> Roles & Permissions</div>
                     </div>
                 </div>
@@ -98,8 +107,7 @@ const AdminHeader = () => {
                     <div className="dropdown-content">
                         <div className="dropdown-item"><FaBuilding /> Class Management</div>
                         <div className="dropdown-item"><FaBook /> Subject Management</div>
-                        <div className="dropdown-item"><FaChalkboard /> Assign Teachers</div>
-                        <div className="dropdown-item" onClick={enrollStudent}><FaUserPlus /> Enroll Students</div>
+                        <div className="dropdown-item" onClick={assignTeacher}><FaChalkboard /> Assign Teachers</div>
                         <div className="dropdown-item"><FaCalendarAlt /> Timetable Setup</div>
                     </div>
                 </div>

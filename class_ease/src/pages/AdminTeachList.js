@@ -1,73 +1,98 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaSearch } from 'react-icons/fa';
-import DataExport from './DataExport'
+import Pagination from "./library/pagination";
+import Alert from "./Alert";
+import api from "../services/api";
 
-const AdminTeachList = ({ toggleDropdown }) => {
-    const [selectedGrade, setSelectedGrade] = useState("All Grades");
-    const [selectedSection, setSelectedSection] = useState("All Sections");
-    const [selectedYear, setSelectedYear] = useState("2024");
+const AdminTeachList = ({ toggleDropdown, teacherSummary }) => {
+    const [alert, setAlert] = useState({ type: "", message: "", show: false });
+    const [allTeacher, setAllStudents] = useState({ teachers: [], meta: {} });        // Store all teachers
+    const [filteredTeachers, setFilteredTeachers] = useState({ teachers: [], meta: {} });  // Store the filtered search results
     const [searchTerm, setSearchTerm] = useState("");
+    const [currentPage, setCurrentPage] = useState(1);
+    const limit = 10;
 
-    const handleSearch = () => {
-        // Add search logic here
+    const handleSearch = async (page) => {
+        page = page || currentPage; // If page is not provided, use the current page
+        try {
+            const response = await api.get('/admin/teachers', {
+                params: {
+                    page: page,
+                    limit: limit,
+                    search: searchTerm
+                }
+            });
+
+            console.log(response.data);
+            const data = {
+                teachers: response.data['teachers'],
+                meta: response.data['meta']
+            };
+
+            if (searchTerm) {
+                setFilteredTeachers(data); // Update with search results
+            } else {
+                setAllStudents(data);      // Store all teachers
+                setFilteredTeachers(data); // Initially, filtered is the same as all
+            }
+            setCurrentPage(page);
+        } catch (error) {
+            if (error.response && error.response.data && error.response.data['error']) {
+                showAlert("warning", error.response.data['error']);
+            } else {
+                showAlert("warning", "An unexpected error occurred.");
+            }
+            // Reset the state
+            setCurrentPage(1);
+            setFilteredTeachers({ teachers: [], meta: {} });
+        }
     };
 
-    const handleGradeChange = e => setSelectedGrade(e.target.value);
-    const handleSectionChange = e => setSelectedSection(e.target.value);
-    const handleYearChange = e => setSelectedYear(e.target.value);
-    const handleSearchChange = e => setSearchTerm(e.target.value);
+    useEffect(() => {
+        handleSearch();  // Fetch the list of Teachers when the component loads
+    }, []);
+
+
+    const handleNextPage = () => {
+        if (currentPage < filteredTeachers.meta.total_pages) {
+            const newPage = currentPage + 1;  // Increment the page
+            handleSearch(newPage);
+        }
+    };
+
+    const handlePreviousPage = () => {
+        if (currentPage > 1) {
+            const newPage = currentPage - 1;  // Decrement the page
+            handleSearch(newPage);
+        }
+    };
+
+    const showAlert = (type, message) => {
+        setAlert({ type, message, show: true });
+    };
+
+    const closeAlert = () => {
+        setAlert({ ...alert, show: false });
+    };
+
+    const handleSearchChange = (e) => {
+        const value = e.target.value;
+        setSearchTerm(value);           // Update the search term state
+        if (value === "") {
+            setFilteredTeachers(allTeacher);  // If search is cleared, revert to all teachers
+        }
+    };
+
 
     return (
         <div className="manage-student-container">
             <div className="admin-header">
                 <h2>Manage Teachers</h2>
             </div>
-            <section className="admin-filters">
-                <div className="filter-group">
-                    <label htmlFor="grade">Grade:</label>
-                    <select
-                        id="grade"
-                        value={selectedGrade}
-                        onChange={handleGradeChange}
-                    >
-                        {Array.from({ length: 12 }, (_, i) => i + 1).map(grade =>
-                            <option key={grade} value={grade}>
-                                Grade {grade}
-                            </option>
-                        )}
-                    </select>
-                </div>
-                <div className="filter-group">
-                    <label htmlFor="section">Section:</label>
-                    <select
-                        id="section"
-                        value={selectedSection}
-                        onChange={handleSectionChange}
-                    >
-                        <option>All Sections</option>
-                        <option>A</option>
-                        <option>B</option>
-                        <option>C</option>
-                    </select>
-                </div>
-                <div className="filter-group">
-                    <label htmlFor="year">Year:</label>
-                    <select id="year" value={selectedYear} onChange={handleYearChange}>
-                        <option>2023</option>
-                        <option>2024</option>
-                        <option>2025</option>
-                    </select>
-                </div>
-                <button className="filter-group-search" onClick={handleSearch}>
-                    Search
-                </button>
-            </section>
-
             <section className="student-list">
                 <div className="list-head">
                     <h3>Teachers List</h3>
-                    <DataExport />
                     <div className="search-bar">
                         <input
                             type="text"
@@ -87,31 +112,49 @@ const AdminTeachList = ({ toggleDropdown }) => {
                             <tr>
                                 <th>ID</th>
                                 <th>Name</th>
-                                <th>Subject</th>
+                                <th>Last Name</th>
+                                <th>Class Assigned</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        {filteredTeachers.teachers.map(teacher => <tbody>
+                            {/* Dynamic Data Rows */}
                             <tr>
-                                <td>9876</td>
-                                <td>Mr. Anderson</td>
-                                <td>Mathematics</td>
+                                <td>{teacher.id}</td>
+                                <td>Mr. {teacher.first_name}</td>
+                                <td>{teacher.last_name}</td>
+                                <td>{teacher.record.length > 0 ? teacher.record.length : 'N/A'}</td>
                                 <td>
-                                    <button className="detail-btn" onClick={toggleDropdown}>Detail</button>
+                                    <div className="action-container">
+                                        <button className="detail-btn" onClick={() => {
+                                            toggleDropdown('detail');
+                                            teacherSummary(teacher); // Pass the data for the clicked Teacher
+                                        }}>Detail</button>
+                                        <button className="edit-btn" onClick={() => {
+                                            toggleDropdown('edit');
+                                            teacherSummary(teacher); // Pass the data for the clicked Teacher
+                                        }}>Edit</button>
+                                        <button className="delete-btn">Delete</button>
+                                    </div>
                                 </td>
                             </tr>
-                            <tr>
-                                <td>5432</td>
-                                <td>Ms. Thompson</td>
-                                <td>English</td>
-                                <td>
-                                    <button className="detail-btn" onClick={toggleDropdown}>Detail</button>
-                                </td>
-                            </tr>
-                        </tbody>
+                        </tbody>)}
                     </table>
                 </div>
             </section>
+            {filteredTeachers.meta.total_pages > 1 &&
+                <Pagination
+                    handlePreviousPage={handlePreviousPage}
+                    currentPage={currentPage}
+                    handleNextPage={handleNextPage}
+                    meta={filteredTeachers.meta}
+                />}
+            <Alert
+                type={alert.type}
+                message={alert.message}
+                show={alert.show}
+                onClose={closeAlert}
+            />
         </div>
     );
 };

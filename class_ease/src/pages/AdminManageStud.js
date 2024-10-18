@@ -10,6 +10,7 @@ import AdminStudentsList from "./AdminStudList";
 const AdminManageStudents = () => {
 
   const [isOpen, setIsOpen] = useState(false);
+  const [studentSummary, setStudentSummary] = useState({});
 
   const toggleDropdown = () => {
       setIsOpen(!isOpen);
@@ -19,13 +20,17 @@ const AdminManageStudents = () => {
     setIsOpen(false);
   }
 
+  const summary = (data) => {
+    setStudentSummary(data);
+  }
+
   return (
     <div className="admin-manage-container">
       <AdminPanel />
       <main className="content">
         <AdminHeader />
-        <AdminStudentsList toggleDropdown={toggleDropdown} />
-        <AdminStudProfileView isOpen={isOpen} toggleProfile={toggleProfile} />
+        <AdminStudentsList toggleDropdown={toggleDropdown} studentSummary={summary} />
+        <AdminStudProfileView isOpen={isOpen} toggleProfile={toggleProfile} studentData={studentSummary} />
       </main>
     </div>
   );

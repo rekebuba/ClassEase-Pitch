@@ -2,14 +2,28 @@ import React, { useState } from 'react';
 import Papa from 'papaparse'; // For CSV parsing
 import jsFileDownload from 'js-file-download'; // For CSV download
 import './styles/AdminDashboard.css';
+import api from "../services/api";
 
-const DataExport = () => {
-    // Example dummy data
-    const studentData = [
-        { id: 1, name: 'John Doe', grade: 'A', age: 16 },
-        { id: 2, name: 'Jane Smith', grade: 'B', age: 15 },
-        { id: 3, name: 'Samuel Johnson', grade: 'C', age: 17 }
-    ];
+
+const DataExport = ({ selectedGrade, selectedYear, showAlert }) => {
+    const [studentData, setStudentData] = useState([]);
+
+    const handleSubmit = async () => {
+        console.log(selectedGrade);
+        console.log(selectedYear);
+        try {
+            const response = await api.get(`/admin/manage/students?grade=${selectedGrade}&school_year=${selectedYear}`);
+            setStudentData(response.data);
+        } catch (error) {
+            if (error.response && error.response.data && error.response.data['error']) {
+                showAlert("warning", error.response.data['error']);
+            } else {
+                showAlert("warning", "An unexpected error occurred.");
+            }
+            return;
+        }
+        exportCSV();
+    };
 
     // Convert JSON to CSV and trigger download
     const exportCSV = () => {
@@ -21,7 +35,7 @@ const DataExport = () => {
         <div className="data-export-import">
             {/* Export Section */}
             <div className="export-section">
-                <button onClick={exportCSV} className="btn btn-primary">
+                <button onClick={handleSubmit} className="btn btn-primary">
                     Export CSV
                 </button>
             </div>

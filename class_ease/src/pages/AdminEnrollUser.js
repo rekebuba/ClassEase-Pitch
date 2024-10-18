@@ -2,8 +2,9 @@ import React from 'react';
 import AdminPanel from '../components/AdminPanel';
 import AdminHeader from '../components/AdminHeader';
 import StudentRegistrationForm from './StudRegistrationForm';
+import TeacherRegistrationForm from './TeacherRegistrationForm';
 
-const AdminEnrollStud = () => {
+const AdminEnrollStud = ({ role }) => {
 
     return (
         <div className="admin-dashboard-container">
@@ -11,7 +12,8 @@ const AdminEnrollStud = () => {
             <div className="content">
                 <main className="dashboard-content">
                     <AdminHeader />
-                    <StudentRegistrationForm />
+                    {role === 'teacher' ? <TeacherRegistrationForm /> : <StudentRegistrationForm />
+                    }
                 </main>
             </div>
         </div>
