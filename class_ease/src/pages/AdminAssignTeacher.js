@@ -39,7 +39,7 @@ const AssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
             const response = await Api.put('/admin/assign-teacher', {
                 teacher_id: teacherData.id,
                 grade: classGrade,
-                section: 'A',
+                section: selectedSection,
                 subjects_taught: subjects,
                 mark_list_year: selectedYear,
             });
@@ -60,6 +60,8 @@ const AssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
             setSelectedSection(selectedSection.filter((section) => section !== value))
         }
     }
+
+    console.log("selected section: ", selectedSection);
 
     return (
         <div className={`teacher-profile-view ${isEditOpen ? "open" : "close"}`}>

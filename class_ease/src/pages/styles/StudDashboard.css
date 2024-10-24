@@ -1,39 +1,73 @@
 /* CSS (StudentDashboard.css) */
-.dashboard-container {
+/* .dashboard-container {
     display: flex;
     height: 100vh;
-}
+} */
 
-
-
-
-.stats {
+.popup-header-container.score {
     display: flex;
-    gap: 20px;
+    justify-content: flex-end;
+
 }
 
-.stat-card {
-    background-color: white;
+.close-popup {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.close-popup button {
+    cursor: pointer;
+    color: #333;
+    font-size: 24px;
+    border: none;
+    background-color: transparent;
+}
+
+.close-popup button:hover {
+    transform: scale(1.1);
+}
+
+.student-list {
     padding: 20px;
-    flex: 1;
+    background-color: #f9f9f9;
     border-radius: 8px;
-    text-align: center;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
 }
 
-.course-list {
-    margin-top: 30px;
+.list-head {
+    margin-bottom: 20px;
 }
 
-.course-list ul {
-    list-style-type: none;
-    padding: 0;
+.list-head h3 {
+    color: #333;
+    font-size: 24px;
 }
 
-.course-list li {
-    background-color: white;
-    padding: 15px;
-    margin-bottom: 10px;
-    border-radius: 8px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.data-table thead th {
+    border-bottom: 2px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+.data-table tbody td {
+    padding: 10px;
+}
+
+.summary-row {
+    background-color: #e9ecef;
+}
+
+.summary-row td {
+    padding: 10px;
+    font-weight: bold;
+}
+
+
+.total-score {
+    display: flex;
+    justify-content: flex-end;
 }

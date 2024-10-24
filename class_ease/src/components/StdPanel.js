@@ -1,8 +1,5 @@
 import {
-  FaBook,
-  FaCalendarAlt,
   FaUserCircle,
-  FaCog,
   FaSignOutAlt
 } from "react-icons/fa";
 
@@ -16,15 +13,6 @@ const StudentPanel = () => {
       </div>
       <nav className="menu">
         <ul>
-          <li>
-            <FaBook /> My Courses
-          </li>
-          <li>
-            <FaCalendarAlt /> Schedule
-          </li>
-          <li>
-            <FaCog /> Settings
-          </li>
           <li>
             <FaSignOutAlt /> Logout
           </li>
