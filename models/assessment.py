@@ -7,10 +7,12 @@ from models.engine.db_storage import BaseModel, Base
 class Assessment(BaseModel, Base):
     __tablename__ = 'assessments'
     student_id = Column(String(120), ForeignKey('student.id'), nullable=False)
+    grade_id = Column(String(120), ForeignKey('grades.id'), nullable=False)
     subject_id = Column(String(120), ForeignKey('subjects.id'), nullable=False)
-    average = Column(Float, default=0)  # The actual score of the student in this assessment
+    total = Column(Float, default=0)  # The sum score of the student for each assessment
+    rank = Column(Integer)
     semester = Column(Integer, nullable=False)
-    school_year = Column(String(10), nullable=False)
+    year = Column(String(10), nullable=False)
 
     def __init__(self, *args, **kwargs):
         """initializes score"""

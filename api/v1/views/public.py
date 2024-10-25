@@ -7,7 +7,7 @@ app_views = Blueprint('app_views', __name__, url_prefix='/api/v1')
 
 
 @app_views.route('/login', methods=['POST'])
-def student_login():
+def login():
     data = request.get_json()
 
     if not data:

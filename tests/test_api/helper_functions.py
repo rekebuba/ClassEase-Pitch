@@ -24,15 +24,14 @@ mark_list_data = {
         {"type": "quiz", "percentage": 10}
     ],
     "semester": 1,
-    "school_year": "2023/24"
+    "year": "2023/24"
 }
 # <a href="/student/registration">Student registration</a>
 student_data = {
     "name": "Abubeker",
     "father_name": "Abdullahi",
-    "g_father_name": "Ibrahim",
+    "grand_father_name": "Ibrahim",
     "father_phone": "+2519999999",
-    "age": 18,
     "grade": 12,
     "start_year": "2023/24"
 }
@@ -161,7 +160,7 @@ def admin_course_assign_to_teacher(client):
                                         "grade": 12,
                                         "section": ["A", "B"],
                                         "subject": "math",
-                                        "school_year": "2023/24"
+                                        "year": "2023/24"
                                     }
                                 ),
                                 headers={

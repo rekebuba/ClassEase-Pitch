@@ -9,8 +9,7 @@ class Subject(BaseModel, Base):
     name = Column(String(50), nullable=False)
     code = Column(String(10), nullable=False)
     grade_id = Column(String(120), ForeignKey('grades.id'), nullable=False)
-    teacher_id = Column(String(120), ForeignKey('teacher.id', ondelete="SET NULL"), nullable=True, default=None)
-    school_year = Column(String(10), nullable=False)
+    year = Column(String(10), nullable=False)
 
     def __init__(self, *args, **kwargs):
         """initializes score"""

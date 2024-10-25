@@ -8,7 +8,7 @@ class AVRGResult(BaseModel, Base):
     student_id = Column(String(120), ForeignKey('student.id'), nullable=False)
     average = Column(Float, default=0)  # The actual score of the student in this assessment
     semester = Column(Integer, nullable=False)
-    school_year = Column(String(10), nullable=False)
+    year = Column(String(10), nullable=False)
     rank = Column(Integer)
 
     def __init__(self, *args, **kwargs):

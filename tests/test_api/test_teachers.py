@@ -98,7 +98,7 @@ class TestTeachers(unittest.TestCase):
         if not teacher_token:
             self.fail("Admin course assignment failed. Test failed")
 
-        response = self.client.get('/api/v1/teacher/students/mark_list?grade=12&section=A&semester=1&school_year=2023/24',
+        response = self.client.get('/api/v1/teacher/students/mark_list?grade=12&section=A&semester=1&year=2023/24',
                                       headers={
                                         'Authorization': f'Bearer {teacher_token}'},
                                       content_type='application/json')

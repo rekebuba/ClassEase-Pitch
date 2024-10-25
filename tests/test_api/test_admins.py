@@ -144,7 +144,7 @@ class TestAdmin(unittest.TestCase):
         if not token:
             self.fail("Mark list creation failed. Test failed")
 
-        response = self.client.get('/api/v1/admin/students/mark_list?grade=12&section=B&subject=english&semester=1&school_year=2023/24',
+        response = self.client.get('/api/v1/admin/students/mark_list?grade=12&section=B&subject=english&semester=1&year=2023/24',
                                    headers={
                                        'Authorization': f'Bearer {token}'},
                                    content_type='application/json')
@@ -216,7 +216,7 @@ class TestAdmin(unittest.TestCase):
                                            "grade": 12,
                                            "section": ["A", "B"],
                                            "subject": "math",
-                                           "school_year": "2023/24"
+                                           "year": "2023/24"
                                        }
                                    ),
                                    headers={
@@ -258,7 +258,7 @@ class TestAdmin(unittest.TestCase):
                                            "grade": 12,
                                            "section": ["A", "B"],
                                            "subject": "math",
-                                           "school_year": "2023/24"
+                                           "year": "2023/24"
                                        }
                                    ),
                                    headers={
