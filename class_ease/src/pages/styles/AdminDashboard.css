@@ -1,0 +1,1012 @@
+/* CSS (AdminDashboard) */
+.admin-dashboard-container {
+    display: flex;
+    height: 100vh;
+}
+
+body,
+html {
+    margin: 0;
+    /* Remove default body margin */
+    overflow: hidden;
+    /* Prevent body scroll */
+}
+
+.profile-fatimes,
+.admin-header h2 {
+    margin-bottom: 20px;
+}
+
+.admin-stats {
+    display: flex;
+    gap: 20px;
+}
+
+.admin-stat-card {
+    background-color: white;
+    padding: 20px;
+    flex: 1;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.data-management {
+    margin-top: 30px;
+}
+
+.data-section {
+    margin-bottom: 30px;
+}
+
+.data-section h3 {
+    margin-bottom: 15px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.data-table th,
+.data-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.view-btn {
+    background-color: #2a3f54;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.view-btn:hover {
+    background-color: #1d2e40;
+}
+
+/* CSS (AdminManageStudents) */
+.admin-manage-container {
+    position: relative;
+    display: flex;
+    height: 100vh;
+}
+
+.admin-menu ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.admin-menu ul li {
+    margin: 20px 0;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+}
+
+.admin-menu ul li svg {
+    margin-right: 10px;
+}
+
+.admin-content {
+    flex: 1;
+    padding: 30px;
+    background-color: #f5f5f5;
+}
+
+.admin-header h2 {
+    margin-bottom: 20px;
+}
+
+.admin-filters {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.filter-group select {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    width: 150px;
+}
+
+.search-bar {
+    position: absolute;
+    margin-top: 25px;
+    right: 0;
+}
+
+.search-bar input {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    width: 200px;
+    margin-right: 10px;
+}
+
+.filter-group-search {
+    background-color: #2a3f54;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    height: 40px;
+    margin-top: 17px;
+    width: 100px;
+    margin-right: 70px;
+}
+
+.search-bar button {
+    background-color: #2a3f54;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.filter-group-search:hover,
+.search-bar button:hover {
+    background-color: #1d2e40;
+    transform: scale(1.03)
+}
+
+.student-list {
+    margin-top: 80px;
+}
+
+
+.list-head {
+    display: flex;
+}
+
+.list-head h3 {
+    margin-top: 30px;
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.data-table th,
+.data-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    max-width: 100px;
+}
+
+.action-container {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+.delete-btn,
+.detail-btn,
+.edit-btn {
+    background-color: #2a3f54;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    gap: 20px;
+}
+
+.delete-btn {
+    background-color: #d9534f;
+}
+
+.edit-btn {
+    background-color: #62C566;
+}
+
+.detail-btn:hover {
+    background-color: #1d2e40;
+    transform: scale(1.03);
+}
+
+.edit-btn:hover {
+    background-color: #4CAF50;
+    transform: scale(1.03);
+
+}
+
+.delete-btn:hover {
+    background-color: #c9302c;
+    transform: scale(1.03);
+}
+
+/* CSS (AdminDashboardGraph) */
+
+h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 28px;
+    color: #333;
+}
+
+.charts-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.chart-card {
+    background-color: white;
+    padding: 20px;
+    margin: 10px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 42%;
+}
+
+.chart-card h3 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 20px;
+    color: #333;
+}
+
+
+/* CSS (UserAccessControl) */
+.access-control-h2 {
+    text-align: center;
+    /* margin-bottom: 30px; */
+}
+
+.add-user,
+.user-list,
+.activity-log {
+    margin-bottom: 30px;
+}
+
+.add-user input,
+.add-user select {
+    padding: 10px;
+    margin-right: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.add-user button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.add-user button:disabled {
+    background-color: #ccc;
+}
+
+.user-list table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.user-list th,
+.user-list td {
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+.delete-btn {
+    padding: 5px 10px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.activity-log ul {
+    list-style: none;
+    padding: 0;
+}
+
+.activity-log li {
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+/* CSS (EventManagement) */
+.event-management {
+    padding: 20px;
+    background-color: #f4f6f9;
+    border-radius: 10px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.calendar-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.selected-date {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.event-form {
+    margin-bottom: 30px;
+}
+
+.event-form input,
+.event-form textarea,
+.event-form select {
+    display: block;
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.event-form button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.event-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.event-list li {
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+.reminder-section {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.reminder-section label {
+    display: block;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.reminder-section p {
+    color: green;
+}
+
+/* CSS (ExamAssessmentReports) */
+.exam-assessment-reports {
+    padding: 20px;
+    background-color: #f4f6f9;
+    border-radius: 10px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+/* h2,
+h3 {
+    text-align: center;
+    margin-bottom: 20px;
+} */
+
+.report-controls {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.report-controls select {
+    margin-right: 10px;
+    padding: 5px;
+}
+
+.report-controls button {
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.chart-container {
+    margin-bottom: 40px;
+    display: flex;
+}
+
+.chart-container h4 {
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+/* CSS (AdminCreateMarkList) */
+.admin-create-marklist-container {
+    background-color: #f5f5f5;
+    padding: 30px;
+    max-width: 800px;
+    margin: 0 auto;
+    border-radius: 8px;
+    box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+    font-size: 16px;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.marklist-form {
+    display: flex;
+    flex-direction: column;
+}
+
+.grade-section {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px;
+}
+
+
+.subjects {
+    padding: 20px;
+}
+
+.form-group label {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.form-group label input,
+.form-group select {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+.subject-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.subject-container input {
+    margin-right: 10px;
+}
+
+.checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.checkbox-group label {
+    margin-right: 10px;
+}
+
+.add-checkbox input {
+    width: 45%;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.add-checkbox button {
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.assessment-container {
+    padding: 20px;
+    margin-top: -25px;
+}
+
+.assessment-container h3 {
+    font-weight: bold;
+    text-align: left;
+}
+
+.assessment-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.assessment-input,
+.assessment-select {
+    width: 48%;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.add-assessment-btn {
+    border: 1px solid #ccc;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.add-assessment-btn svg {
+    margin-right: 8px;
+}
+
+
+@media (max-width: 768px) {
+
+    .assessment-input,
+    .assessment-select {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
+
+.submit-btn {
+    background-color: #2a3f54;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.submit-btn:hover {
+    background-color: #1d2e40;
+}
+
+
+/* CSS (EventManagement) */
+.new-event-management {
+    padding: 20px;
+    background-color: #f4f6f9;
+    border-radius: 10px;
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+
+
+.content h2 {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.calendar-section {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.selected-date {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.new-event-form {
+    margin-bottom: 30px;
+}
+
+.new-event-form input,
+.new-event-form textarea,
+.new-event-form select {
+    display: block;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.new-event-form textarea {
+    width: 100%;
+}
+
+.new-event-form button {
+    padding: 10px 20px;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.new-event-list ul {
+    list-style: none;
+    padding: 0;
+}
+
+.new-event-list li {
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    margin-bottom: 10px;
+    border-radius: 5px;
+}
+
+/* CSS (StudentProfile) */
+.manage-student-container {
+    position: relative;
+}
+
+.stud-list {
+    margin-top: 10px;
+}
+
+.profile-header-container h2 {
+    margin-left: 35%;
+}
+
+.profile-header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+
+.profile-fatimes {
+    background-color: #2a3f54;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.profile-fatimes:hover {
+    background-color: #1d2e40;
+    transform: scale(1.03);
+}
+
+.teacher-profile-view,
+.student-profile-view {
+    display: none;
+    position: absolute;
+    top: 0;
+    width: 800px;
+    height: 500px;
+    margin: 0 auto;
+    margin-left: 100px;
+    margin-top: 100px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow-y: scroll;
+    z-index: 1000;
+}
+
+.teacher-profile-view.open,
+.student-profile-view.open {
+    display: block;
+}
+
+.teacher-profile-view.close,
+.student-profile-view.close {
+    display: none;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.student-picture img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 20px;
+}
+
+.student-info h2 {
+    margin: 0;
+}
+
+.profile-content {
+    margin-top: 20px;
+}
+
+.profile-content h3,
+.profile-content h4 {
+    margin-bottom: 10px;
+}
+
+.subject-scores-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.subject-scores-table th,
+.subject-scores-table td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+.subject-scores-table th {
+    background-color: #f4f6f9;
+}
+
+/* CSS (TeacherProfile) */
+.profile-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.teacher-picture img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 20px;
+}
+
+.teacher-info h2 {
+    margin: 0;
+}
+
+.profile-content {
+    margin-top: 20px;
+}
+
+.profile-content h3 {
+    margin-bottom: 10px;
+    text-align: left;
+}
+
+.profile-content ul {
+    list-style-type: disc;
+    margin-left: 20px;
+}
+
+.profile-content p {
+    margin-bottom: 10px;
+}
+
+/* DataExportImport */
+
+
+.data-export-import {
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
+
+.btn-secondary {
+    background-color: #6c757d;
+    color: #fff;
+    border: none;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+}
+
+.file-input {
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.error-text {
+    color: #ff0000;
+    font-size: 14px;
+}
+
+.uploaded-data ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.uploaded-data ul li {
+    background: #f8f9fa;
+    padding: 10px;
+    margin-bottom: 5px;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+}
+
+/* pagination */
+.pagination-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px 0;
+    font-family: Arial, sans-serif;
+}
+
+.pagination-btn {
+    background-color: #007bff;
+    /* Blue button */
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+    margin: 0 10px;
+}
+
+.pagination-btn:hover {
+    background-color: #0056b3;
+    /* Darker blue on hover */
+}
+
+.pagination-btn:disabled {
+    background-color: #c0c0c0;
+    /* Grey when disabled */
+    cursor: not-allowed;
+}
+
+.pagination-info {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+}
+
+.pagination-input {
+    width: 50px;
+    padding: 5px;
+    margin: 0 5px;
+    text-align: center;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border-color 0.3s ease;
+}
+
+.pagination-input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* CSS (TeacherRegistrationForm) */
+.teacher-registration-form {
+    width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.teacher-registration-form h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.teacher-registration-form-group {
+    margin-bottom: 15px;
+}
+
+.teacher-registration-form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.teacher-registration-form-group input,
+.teacher-registration-form-group select {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.teacher-registration-submit-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.teacher-registration-submit-btn:hover {
+    background-color: #45a049;
+}
+
+
+/* CSS (AssignTeacher) */
+.teacher-form-group {
+    margin-bottom: 15px;
+}
+
+.teacher-form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.teacher-form-group select {
+    width: 100%;
+    padding: 8px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.teacher-assign-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.teacher-assign-btn:hover {
+    background-color: #45a049;
+}
