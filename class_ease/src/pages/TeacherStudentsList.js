@@ -81,7 +81,7 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary }) => {
             const response = await api.get('/teacher/students/mark_list', {
                 params: {
                     grade: selectedGrade,
-                    school_year: selectedYear,
+                    year: selectedYear,
                     sections: selectedSection.join(','), // Convert array to comma-separated string
                     semester: selectedSemester,
                     page: page,

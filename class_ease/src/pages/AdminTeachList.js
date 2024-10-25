@@ -114,6 +114,7 @@ const AdminTeachList = ({ toggleDropdown, teacherSummary }) => {
                                 <th>Name</th>
                                 <th>Last Name</th>
                                 <th>Class Assigned</th>
+                                <th>Subject</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -124,6 +125,7 @@ const AdminTeachList = ({ toggleDropdown, teacherSummary }) => {
                                 <td>Mr. {teacher.first_name}</td>
                                 <td>{teacher.last_name}</td>
                                 <td>{teacher.record.length > 0 ? teacher.record.length : 'N/A'}</td>
+                                <td>{teacher.subjects}</td>
                                 <td>
                                     <div className="action-container">
                                         <button className="detail-btn" onClick={() => {

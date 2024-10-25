@@ -12,7 +12,7 @@ const DataExport = ({ selectedGrade, selectedYear, showAlert }) => {
         console.log(selectedGrade);
         console.log(selectedYear);
         try {
-            const response = await api.get(`/admin/manage/students?grade=${selectedGrade}&school_year=${selectedYear}`);
+            const response = await api.get(`/admin/manage/students?grade=${selectedGrade}&year=${selectedYear}`);
             setStudentData(response.data);
         } catch (error) {
             if (error.response && error.response.data && error.response.data['error']) {

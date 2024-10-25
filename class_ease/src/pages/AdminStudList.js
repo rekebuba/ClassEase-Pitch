@@ -76,7 +76,7 @@ const AdminStudentsList = ({ toggleDropdown, studentSummary }) => {
             const response = await api.get('/admin/manage/students', {
                 params: {
                     grade: selectedGrade,
-                    school_year: selectedYear,
+                    year: selectedYear,
                     page: page,
                     limit: limit,
                     search: searchTerm

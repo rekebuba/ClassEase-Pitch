@@ -145,7 +145,7 @@ const AdminCreateMarkList = () => {
             "subjects": selectedSubjects,
             "assessment_type": assessmentTypes,
             "semester": selectedSemester,
-            "school_year": schoolYear
+            "year": schoolYear
         }
         console.log(mark_list_data)
         try {

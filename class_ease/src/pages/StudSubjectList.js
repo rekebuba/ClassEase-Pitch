@@ -23,6 +23,7 @@ function SubjectList({ student, allSubjects, toggleDropdown, studentSummary }) {
                         <th>No.</th>
                         <th>Subject</th>
                         <th>Average</th>
+                        <th>Rank</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -32,6 +33,7 @@ function SubjectList({ student, allSubjects, toggleDropdown, studentSummary }) {
                             <td>{index + 1}</td>
                             <td>{subject.subject}</td>
                             <td>{subject.average}</td>
+                            <td>{subject.rank || 'N/A'}</td>
                             <td>
                                 <button
                                     className="detail-btn"
@@ -46,9 +48,9 @@ function SubjectList({ student, allSubjects, toggleDropdown, studentSummary }) {
                         </tr>
                     ))}
                     <tr className="summary-row">
-                        <td colSpan="2">Total Average</td>
+                        <td colSpan="3">Total Average</td>
                         <td>{student.average_score}</td>
-                        <td>Rank: {student.average_score}</td>
+                        <td>Rank: {student.rank}</td>
                     </tr>
                 </tbody>
             </table>
