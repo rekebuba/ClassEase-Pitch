@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { FaSearch } from 'react-icons/fa';
-import api from "../services/api";
-import Alert from "./Alert"
+import api from "../../services/api";
+import Alert from '../../services/Alert';
+
 
 
 function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStudents, toggleDropdown, studentSummary }) {

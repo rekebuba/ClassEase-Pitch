@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import './styles/updateProfile.css';
-import TeacherHeader from '../components/TeachHeader';
-import TeacherPanel from '../components/TeachPanel';
-import api from '../services/api';
-import Alert from './Alert';
+import '../../styles/updateProfile.css';
+import TeacherHeader from '../../components/TeachHeader';
+import TeacherPanel from '../../components/TeachPanel';
+import api from '../../services/api';
+import Alert from '../../services/Alert';
 
 const TeacherUpdateProfile = () => {
     const [formData, setFormData] = useState({});

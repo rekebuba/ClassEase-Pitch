@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import './styles/StudRegistrationForm.css';
-import Api from '../services/api';
-import Alert from "./Alert";
-import convertKeysToSnakeCase from './library/lodash';
+import '../../styles/StudRegistrationForm.css';
+import Api from '../../services/api';
+import Alert from "../../services/Alert";
+import convertKeysToSnakeCase from '../library/lodash';
 
 const StudentRegistrationForm = () => {
   const [alert, setAlert] = useState({ type: "", message: "", show: false });

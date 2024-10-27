@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import ExamAssessmentReports from "./AdminExamAssessmentReports";
-import api from '../services/api';
-import { SubjectList } from './StudSubjectList'
+import api from '../../services/api';
+import { SubjectList } from '../student/StudSubjectList';
 
 const StudentProfile = ({ isProfileOpen, toggleAssessment, closeProfile, studentProfileSummary, assessmentSummary }) => {
     const [allSubjects, setAllSubjects] = useState([]);

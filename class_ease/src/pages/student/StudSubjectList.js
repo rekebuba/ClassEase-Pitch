@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import './styles/StudDashboard.css';
-import './styles/Table.css'
-import './styles/Dashboard.css';
-import Alert from "./Alert";
-import api from "../services/api";
+import '../../styles/StudDashboard.css';
+import '../../styles/Table.css'
+import '../../styles/Dashboard.css';
+import Alert from "../../services/Alert";
+import api from "../../services/api";
 
 export function SubjectList({ student, allSubjects, toggleAssessment, assessmentSummary }) {
     return (

@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import "./styles/AdminManageStudents.css";
-import AdminPanel from "../components/AdminPanel";
-import AdminHeader from "../components/AdminHeader";
+import "../../styles/AdminManageStudents.css";
+import AdminPanel from "../../components/AdminPanel";
+import AdminHeader from "../../components/AdminHeader";
 import StudentProfile from "./AdminStudProfile";
 import AdminStudentsList from "./AdminStudList";
-import PopupScore from "./StudPopupScore";
+import PopupScore from "../student/StudPopupScore";
 
 
 

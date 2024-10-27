@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect } from "react";
 import { FaSearch } from 'react-icons/fa';
-import Pagination from "./library/pagination";
-import Alert from "./Alert";
-import api from "../services/api";
+import Pagination from "../library/pagination";
+import Alert from "../../services/Alert";
+import api from "../../services/api";
 
 const AdminTeachList = ({ toggleDropdown, teacherSummary }) => {
     const [alert, setAlert] = useState({ type: "", message: "", show: false });

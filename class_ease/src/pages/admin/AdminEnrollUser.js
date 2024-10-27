@@ -1,8 +1,8 @@
 import React from 'react';
-import AdminPanel from '../components/AdminPanel';
-import AdminHeader from '../components/AdminHeader';
-import StudentRegistrationForm from './StudRegistrationForm';
-import TeacherRegistrationForm from './TeacherRegistrationForm';
+import AdminPanel from '../../components/AdminPanel';
+import AdminHeader from '../../components/AdminHeader';
+import StudentRegistrationForm from '../student/StudentRegistrationForm';
+import TeacherRegistrationForm from '../teacher/TeacherRegistrationForm';
 
 const AdminEnrollStud = ({ role }) => {
 

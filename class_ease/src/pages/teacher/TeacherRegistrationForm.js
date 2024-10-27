@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import Api from '../services/api';
-import Alert from './Alert';
-import convertKeysToSnakeCase from './library/lodash';
+import Api from '../../services/api';
+import Alert from '../../services/Alert';
+import convertKeysToSnakeCase from '../library/lodash';
 
 const TeacherRegistrationForm = () => {
     const [alert, setAlert] = useState({ type: "", message: "", show: false });

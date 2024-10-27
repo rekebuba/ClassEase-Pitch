@@ -1,7 +1,6 @@
 import React from 'react';
-// import React, { useState } from "react";
-import './styles/HomePage.css';
-import './StudRegistrationForm';
+import '../styles/HomePage.css';
+import '../pages/student/StudentRegistrationForm';
 
 
 

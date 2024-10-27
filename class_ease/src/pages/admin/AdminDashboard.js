@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-import "./styles/Dashboard.css";
-import "./styles/AdminDashboard.css";
-import './styles/Table.css';
-import api from "../services/api";
+import "../../styles/Dashboard.css";
+import "../../styles/AdminDashboard.css";
+import '../../styles/Table.css';
+import api from "../../services/api";
 import { useNavigate } from "react-router-dom";
-import AdminPanel from "../components/AdminPanel";
-import AdminHeader from "../components/AdminHeader";
+import AdminPanel from "../../components/AdminPanel";
+import AdminHeader from "../../components/AdminHeader";
 import AdminStudPerformance from "./AdminStudPerformance";
 
 const AdminDashboard = () => {

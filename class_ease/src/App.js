@@ -1,31 +1,26 @@
 import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Logout from "./pages/Logout";
-import NotFound from './pages/NotFound';
-import AdminDashboard from "./pages/AdminDashboard";
-import ProtectedRoute from "./ProtectedRoute";
-import TeacherDashboard from "./pages/TeachDashbord";
-import StudentDashboard from "./pages/StudDashbord";
-import StudentRegistrationForm from "./pages/StudRegistrationForm";
-import AdminManageStudents from "./pages/AdminManageStud";
-import AdminManageTeach from "./pages/AdminManageTeach";
-import TeacherManageStudents from "./pages/TeacherManageStud";
-import AdminCreateMarkList from "./pages/AdminMarkList";
-import AdminEventManagement from "./pages/AdminEventManagement"
-import AdminStudPerformance from "./pages/AdminStudPerformance";
-import UserAccessControl from "./pages/AdminUsersAccessControl";
-import AdminEnrollUser from "./pages/AdminEnrollUser";
-import AssignTeacher from "./pages/AdminAssignTeacher";
-import TeacherUpdateProfile from "./pages/TeacherUpdateProfile";
-import AdminUpdateProfile from "./pages/AdminUpdateProfile";
-import StudentUpdateProfile from "./pages/StudUpdateProfile";
-
-const handleUpdate = (updatedData) => {
-  console.log("Updated user data:", updatedData);
-  // Here, you would typically send updatedData to the backend
-};
+import Home from "./components/Home";
+import Login from "./services/Login";
+import Logout from "./services/Logout";
+import NotFound from './services/NotFound';
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import ProtectedRoute from "./services/ProtectedRoute";
+import TeacherDashboard from "./pages/teacher/TeacherDashboard";
+import StudentDashboard from "./pages/student/StudentDashboard";
+import StudentRegistrationForm from "./pages/student/StudentRegistrationForm";
+import AdminManageStudents from "./pages/admin/AdminManageStudents";
+import AdminManageTeach from "./pages/admin/AdminManageTeach";
+import TeacherManageStudents from "./pages/teacher/TeacherManageStudents";
+import AdminCreateMarkList from "./pages/admin/AdminCreateMarkList";
+import AdminEventManagement from "./pages/admin/AdminEventManagement";
+import AdminStudPerformance from "./pages/admin/AdminStudPerformance";
+import AdminUserAccessControl from "./pages/admin/AdminUserAccessControl";
+import AdminEnrollUser from "./pages/admin/AdminEnrollUser";
+import AdminAssignTeacher from "./pages/admin/AdminAssignTeacher";
+import TeacherUpdateProfile from "./pages/teacher/TeacherUpdateProfile";
+import AdminUpdateProfile from "./pages/admin/AdminUpdateProfile";
+import StudentUpdateProfile from "./pages/student/StudentUpdateProfile";
 
 const router = createBrowserRouter([
   {
@@ -87,7 +82,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/admin/assign/teachers",
-    element: <AssignTeacher />
+    element: <AdminAssignTeacher />
   },
   {
     path: "/teacher/students",
@@ -107,7 +102,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/admin/users/accesscontrol",
-    element: <UserAccessControl />
+    element: <AdminUserAccessControl />
   }
 ]);
 

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import './styles/updateProfile.css';
-import StudentPanel from '../components/StdPanel';
-import api from '../services/api';
-import Alert from './Alert';
+import '../../styles/updateProfile.css';
+import StudentPanel from '../../components/StdPanel';
+import api from '../../services/api';
+import Alert from '../../services/Alert';
 
 const StudentUpdateProfile = () => {
     const [formData, setFormData] = useState({});

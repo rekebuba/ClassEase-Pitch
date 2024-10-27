@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import TeacherPanel from "../components/TeachPanel";
-import "./styles/TeacherDashboard.css";
-import "./styles/Dashboard.css";
+import TeacherPanel from "../../components/TeachPanel";
+import "../../styles/TeacherDashboard.css";
+import "../../styles/Dashboard.css";
 import TeacherMarkList from './TeacherMarkList';
-import TeacherHeader from "../components/TeachHeader";
+import TeacherHeader from "../../components/TeachHeader";
 
 const TeacherDashboard = () => {
   const [activePage, setActivePage] = useState("Home");

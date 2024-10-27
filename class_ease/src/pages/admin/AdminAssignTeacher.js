@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
-import Api from '../services/api';
-import Alert from './Alert';
+import Api from '../../services/api';
+import Alert from '../../services/Alert';
 
 
-const AssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
+const AdminAssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
     const [teachers, setTeachers] = useState({ name: '', subjects: [] });
     const [classGrade, setClassGrade] = useState('');
     const [selectedSection, setSelectedSection] = useState([]);
@@ -167,4 +167,4 @@ const AssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
     );
 };
 
-export default AssignTeacher;
+export default AdminAssignTeacher;

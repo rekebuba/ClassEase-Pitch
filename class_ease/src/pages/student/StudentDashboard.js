@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import StudentPanel from "../components/StdPanel";
-import './styles/StudDashboard.css';
-import './styles/Dashboard.css';
+import StudentPanel from "../../components/StdPanel";
+import '../../styles/StudDashboard.css';
+import '../../styles/Dashboard.css';
 import StudentSubjectList from "./StudSubjectList";
 import PopupScore from "./StudPopupScore";
 

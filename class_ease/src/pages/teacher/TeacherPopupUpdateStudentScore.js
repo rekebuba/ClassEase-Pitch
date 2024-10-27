@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { FaTimes } from 'react-icons/fa';
-import api from '../services/api';
-import Alert from './Alert';
+import api from '../../services/api';
+import Alert from '../../services/Alert';
 
-const PopupTable = ({ isOpen, toggleAssessment, studentData }) => {
+const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [updateAssessmentData, setUpdateAssessmentData] = useState([]);
     const [alert, setAlert] = useState({ type: "", message: "", show: false });
@@ -118,4 +118,4 @@ const PopupTable = ({ isOpen, toggleAssessment, studentData }) => {
     );
 };
 
-export default PopupTable;
+export default TeacherPopupUpdateStudentScore;

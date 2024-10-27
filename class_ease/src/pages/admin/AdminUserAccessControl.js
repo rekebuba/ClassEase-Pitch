@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import AdminPanel from '../components/AdminPanel';
-import AdminHeader from '../components/AdminHeader';
+import AdminPanel from '../../components/AdminPanel';
+import AdminHeader from '../../components/AdminHeader';
 
 
 // Mock Data for Users and Roles
@@ -12,7 +12,7 @@ const initialUsers = [
 
 const roles = ['Admin', 'Teacher', 'Staff'];
 
-const UserAccessControl = () => {
+const AdminUserAccessControl = () => {
     const [users, setUsers] = useState(initialUsers);
     const [newUser, setNewUser] = useState({ name: '', role: '' });
     const [activityLog, setActivityLog] = useState([]);
@@ -132,4 +132,4 @@ const UserAccessControl = () => {
     );
 };
 
-export default UserAccessControl;
+export default AdminUserAccessControl;

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import "./styles/AdminManageStudents.css";
-import AdminPanel from "../components/AdminPanel";
+import "../../styles/AdminManageStudents.css";
+import AdminPanel from "../../components/AdminPanel";
 // import { useNavigate } from "react-router-dom";
-import AdminHeader from "../components/AdminHeader";
+import AdminHeader from "../../components/AdminHeader";
 import AdminTeachProfile from "./AdminTeachProfile";
 import AdminTeachList from "./AdminTeachList";
 import AssignTeacher from "./AdminAssignTeacher";

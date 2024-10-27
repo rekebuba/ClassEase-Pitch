@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { FaSearch } from 'react-icons/fa';
-import api from "../services/api";
-import Alert from "./Alert"
-import Pagination from "./library/pagination";
-import './styles/Table.css'
+import api from "../../services/api";
+import Alert from "../../services/Alert"
+import Pagination from "../library/pagination";
+import '../../styles/Table.css'
 
 
 function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStudents, toggleProfile, profileSummary }) {

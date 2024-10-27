@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import AdminPanel from "../components/AdminPanel";
-import AdminHeader from "../components/AdminHeader";
-import './styles/AdminDashboard.css'
-import './styles/Table.css';
+import AdminPanel from "../../components/AdminPanel";
+import AdminHeader from "../../components/AdminHeader";
+import '../../styles/AdminDashboard.css'
+import '../../styles/Table.css';
 import { FaPlus } from 'react-icons/fa';
-import api from "../services/api";
-import Alert from './Alert';
+import api from "../../services/api";
+import Alert from '../../services/Alert';
 
 const AdminCreateMarkList = () => {
     const subjectsList = [

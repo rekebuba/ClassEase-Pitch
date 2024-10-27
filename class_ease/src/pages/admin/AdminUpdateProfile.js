@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import './styles/updateProfile.css';
-import AdminHeader from '../components/AdminHeader';
-import AdminPanel from '../components/AdminPanel';
-import api from '../services/api';
-import Alert from './Alert';
+import '../../styles/updateProfile.css';
+import AdminHeader from '../../components/AdminHeader';
+import AdminPanel from '../../components/AdminPanel';
+import api from '../../services/api';
+import Alert from '../../services/Alert';
 
 const AdminUpdateProfile = () => {
     const [formData, setFormData] = useState({});
