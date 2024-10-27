@@ -1,6 +1,14 @@
 import axios from "axios";
 
-// services/apiService.js
+/**
+ * Creates an instance of axios with a predefined base URL.
+ * 
+ * The base URL is set to "http://localhost:5000/api/v1", which is the root endpoint
+ * for the API. This instance can be used to make HTTP requests to the API endpoints
+ * under this base URL.
+ * 
+ * @constant {AxiosInstance} api - An axios instance configured with the base URL.
+ */
 const api = axios.create({
   baseURL: "http://localhost:5000/api/v1"
 });
@@ -37,4 +45,3 @@ api.interceptors.response.use(
 );
 
 export default api;
-

@@ -3,8 +3,6 @@ import { FaSearch } from 'react-icons/fa';
 import api from "../../services/api";
 import Alert from '../../services/Alert';
 
-
-
 function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStudents, toggleDropdown, studentSummary }) {
     const totalSum = (assessment) => {
         return assessment.reduce((sum, item) => sum + item.score, 0);
@@ -71,6 +69,22 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
 }
 
 
+/**
+ * TeacherStudentsList component for managing and displaying a list of students.
+ * 
+ * @component
+ * @param {Object} props - The component props.
+ * @param {Function} props.toggleDropdown - Function to toggle dropdown visibility.
+ * @param {Object} props.studentSummary - Summary information about students.
+ * 
+ * @returns {JSX.Element} The rendered component.
+ * 
+ * @example
+ * <TeacherStudentsList toggleDropdown={toggleDropdown} studentSummary={studentSummary} />
+ * 
+ * @description
+ * This component allows teachers to manage and filter a list of students based on various criteria such as grade, section, semester, and year. It also provides search functionality and pagination for navigating through the list of students.
+ */
 const TeacherStudentsList = ({ toggleDropdown, studentSummary }) => {
     const [selectedGrade, setSelectedGrade] = useState(1);
     const [selectedSemester, setSelectedSemester] = useState(1);
@@ -85,7 +99,12 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary }) => {
     const [gradeAssigned, setGradeAssigned] = useState([]);
     const limit = 10;
 
-
+    /**
+     * @function handleSearch
+     * @description Fetches and filters the list of students based on the selected criteria and search term.
+     * @param {number} [page] - The page number to fetch. If not provided, the current page is used.
+     * @returns {void}
+     */
     const handleSearch = async (page) => {
         if (selectedSection.length === 0) {
             showAlert("warning", "Select Section");
@@ -105,7 +124,6 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary }) => {
                 }
             });
 
-            console.log(response.data)
             const data = {
                 students: response.data['students'],
                 header: response.data['header']
@@ -144,15 +162,40 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary }) => {
         }
     };
 
+    /**
+     * @function showAlert
+     * @description Displays an alert message.
+     * @param {string} type - The type of alert (e.g., "warning").
+     * @param {string} message - The alert message.
+     * @returns {void}
+     */
     const showAlert = (type, message) => {
         setAlert({ type, message, show: true });
     };
 
+    /**
+     * @function closeAlert
+     * @description Closes the alert message.
+     * @returns {void}
+     */
     const closeAlert = () => {
         setAlert({ ...alert, show: false });
     };
 
+    /**
+     * @function handleGradeChange
+     * @description Handles changes to the selected grade.
+     * @param {Event} e - The change event.
+     * @returns {void}
+     */
     const handleGradeChange = e => setSelectedGrade(parseFloat(e.target.value));
+
+    /**
+     * @function handleSectionChange
+     * @description Handles changes to the selected sections.
+     * @param {Event} e - The change event.
+     * @returns {void}
+     */
     const handleSectionChange = e => {
         const { value, checked } = e.target;
         if (checked) {
@@ -161,12 +204,31 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary }) => {
             setSelectedSection(selectedSection.filter((section) => section !== value))
         }
     }
+
+    /**
+     * @function handleSemesterChange
+     * @description Handles changes to the selected semester.
+     * @param {Event} e - The change event.
+     * @returns {void}
+     */
     const handleSemesterChange = (e) => {
         setSelectedSemester(parseFloat(e.target.value));
     }
 
+    /**
+     * @function handleYearChange
+     * @description Handles changes to the selected year.
+     * @param {Event} e - The change event.
+     * @returns {void}
+     */
     const handleYearChange = e => setSelectedYear(e.target.value);
 
+    /**
+     * @function handleSearchChange
+     * @description Handles changes to the search term.
+     * @param {Event} e - The change event.
+     * @returns {void}
+     */
     const handleSearchChange = (e) => {
         const value = e.target.value;
         setSearchTerm(value);           // Update the search term state
@@ -175,6 +237,11 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary }) => {
         }
     };
 
+    /**
+     * @function fetchAssignedGrade
+     * @description Fetches the grades assigned to the teacher.
+     * @returns {void}
+     */
     const fetchAssignedGrade = async () => {
         try {
             const response = await api.get('/teacher/students/assigned_grade');
@@ -188,6 +255,11 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary }) => {
         }
     }
 
+    /**
+     * @hook useEffect
+     * @description Fetches the assigned grades whenever the selected grade changes.
+     * @returns {void}
+     */
     useEffect(() => {
         fetchAssignedGrade();
     }, [selectedGrade]);

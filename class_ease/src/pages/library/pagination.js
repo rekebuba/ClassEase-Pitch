@@ -1,5 +1,17 @@
 import React from 'react';
 
+/**
+ * Pagination component for navigating through pages.
+ *
+ * @param {Object} props - The properties object.
+ * @param {function} props.handlePreviousPage - Function to handle the action when the previous page button is clicked.
+ * @param {number} props.currentPage - The current page number.
+ * @param {function} props.handleNextPage - Function to handle the action when the next page button is clicked.
+ * @param {Object} props.meta - Metadata object containing pagination details.
+ * @param {number} props.meta.total_pages - The total number of pages.
+ *
+ * @returns {JSX.Element} The Pagination component.
+ */
 function Pagination({ handlePreviousPage, currentPage, handleNextPage, meta }) {
     return (<div className="pagination-container">
         <button className="pagination-btn" onClick={handlePreviousPage} disabled={currentPage === 1}>

@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
-// import ExamAssessmentReports from "./AdminExamAssessmentReports";
 
+/**
+ * @function assignTeacherData
+ * @description Assigns the teacher data to the teacher object.
+ * @param {Object} data - The teacher data object.
+ * @returns {Object} The teacher object with the assigned data.
+ */
 const assignTeacherData = (data) => {
     if (!data || Object.keys(data).length === 0) return {};
     return {
@@ -17,6 +22,16 @@ const assignTeacherData = (data) => {
     };
 };
 
+/**
+ * TeachProfile component displays detailed information about a teacher.
+ *
+ * @param {Object} props - The properties object.
+ * @param {boolean} props.isDetailOpen - Indicates if the detail profile is open.
+ * @param {Function} props.toggleDetailProfile - Function to toggle the detail profile visibility.
+ * @param {Object} props.teacherData - The data of the teacher to be displayed.
+ *
+ * @returns {JSX.Element} The rendered TeachProfile component.
+ */
 const TeachProfile = ({ isDetailOpen, toggleDetailProfile, teacherData }) => {
     const [teacher, setTeacher] = useState({
         name: '',
@@ -30,6 +45,9 @@ const TeachProfile = ({ isDetailOpen, toggleDetailProfile, teacherData }) => {
         qualifications: [],
     });
 
+    /**
+     * Updates the teacher data when the teacherData prop changes.
+     */
     useEffect(() => {
         if (teacherData) {
             const transformedData = assignTeacherData(teacherData);

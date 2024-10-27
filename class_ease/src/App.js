@@ -22,6 +22,9 @@ import TeacherUpdateProfile from "./pages/teacher/TeacherUpdateProfile";
 import AdminUpdateProfile from "./pages/admin/AdminUpdateProfile";
 import StudentUpdateProfile from "./pages/student/StudentUpdateProfile";
 
+/**
+ * Defines the routes for the application using `createBrowserRouter`.
+ */
 const router = createBrowserRouter([
   {
     path: "/",
@@ -106,7 +109,15 @@ const router = createBrowserRouter([
   }
 ]);
 
-
+/**
+ * The main application component that sets up the router provider.
+ * 
+ * This component is responsible for rendering the RouterProvider with the specified router configuration.
+ * It serves as the entry point for the application's routing mechanism.
+ * 
+ * @component
+ * @returns {JSX.Element} The RouterProvider component with the configured router.
+ */
 function App() {
   return (
     <RouterProvider router={router} />

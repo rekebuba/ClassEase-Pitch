@@ -59,6 +59,30 @@ export function SubjectList({ student, allSubjects, toggleAssessment, assessment
     );
 }
 
+/**
+ * Component for displaying the list of subjects for a student.
+ *
+ * @component
+ * @param {Object} props - The component props.
+ * @param {Function} props.toggleAssessment - Function to toggle the assessment view.
+ * @param {Object} props.assessmentSummary - Summary of the student's assessments.
+ * @returns {JSX.Element} The rendered component.
+ *
+ * @example
+ * <StudentSubjectList
+ *   toggleAssessment={toggleAssessmentFunction}
+ *   assessmentSummary={assessmentSummaryObject}
+ * />
+ *
+ * @typedef {Object} Alert
+ * @property {string} type - The type of alert (e.g., "warning", "success").
+ * @property {string} message - The alert message.
+ * @property {boolean} show - Whether the alert is visible.
+ *
+ * @typedef {Object} Student
+ * @property {string} name - The name of the student.
+ * @property {number} id - The ID of the student.
+ */
 const StudentSubjectList = ({ toggleAssessment, assessmentSummary }) => {
     const [selectedGrade, setSelectedGrade] = useState(1);
     const [selectedSemester, setSelectedSemester] = useState(1);
@@ -67,6 +91,15 @@ const StudentSubjectList = ({ toggleAssessment, assessmentSummary }) => {
     const [allSubjects, setAllSubjects] = useState([]);
     const [student, setStudent] = useState({});
 
+    /**
+     * @function handleSearch
+     * @description Handles the search for student scores based on the selected grade and semester.
+     * @async
+     * @returns {Promise<void>} A promise that resolves when the search is complete.
+     * @throws {Error} An error if the search fails.
+     * @throws {string} An error message if the search fails.
+     * @throws {Object[]} An array of subjects if the search is successful.
+     */
     const handleSearch = async () => {
         try {
             const response = await api.get('/student/score', {
@@ -86,22 +119,54 @@ const StudentSubjectList = ({ toggleAssessment, assessmentSummary }) => {
         }
     };
 
+    /**
+     * @function showAlert
+     * @description Sets the alert message and type.
+     * @param {string} type - The type of alert (e.g., "warning", "success").
+     * @param {string} message - The alert message.
+     * @returns {void}
+     */
     const showAlert = (type, message) => {
         setAlert({ type, message, show: true });
     };
 
+    /**
+     * @function closeAlert
+     * @description Closes the alert.
+     * @returns {void}
+     */
     const closeAlert = () => {
         setAlert({ ...alert, show: false });
     };
 
+    /**
+     * @function handleSemesterChange
+     * @description Handles the change in semester selection.
+     * @param {Event} e - The semester change event.
+     * @returns {void}
+     */
     const handleSemesterChange = (e) => {
         setSelectedSemester(parseFloat(e.target.value));
     };
 
+    /**
+     * @function handleGradeChange
+     * @description Handles the change in grade selection.
+     * @returns {void}
+     */
     const handleGradeChange = (e) => {
         setSelectedGrade(parseFloat(e.target.value));
     };
 
+    /**
+     * @function fetchAssignedGrade
+     * @description Fetches the assigned grade for the student.
+     * @async
+     * @returns {Promise<void>} A promise that resolves when the grade is fetched.
+     * @throws {Error} An error if the grade fetch fails.
+     * @throws {string} An error message if the grade fetch fails.
+     * @throws {number[]} An array of assigned grades if the fetch is successful.
+     */
     const fetchAssignedGrade = async () => {
         try {
             const response = await api.get('/student/assigned_grade');
@@ -112,6 +177,10 @@ const StudentSubjectList = ({ toggleAssessment, assessmentSummary }) => {
         }
     };
 
+    /**
+     * @hook useEffect
+     * @description Fetches the assigned grade when the component mounts.
+     */
     useEffect(() => {
         fetchAssignedGrade();
     }, [selectedGrade]);

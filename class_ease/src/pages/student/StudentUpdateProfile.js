@@ -4,13 +4,43 @@ import StudentPanel from '../../components/StdPanel';
 import api from '../../services/api';
 import Alert from '../../services/Alert';
 
+/**
+ * Component for updating student profile.
+ *
+ * @component
+ * @example
+ * return (
+ *   <StudentUpdateProfile />
+ * )
+ *
+ * @returns {JSX.Element} The rendered component.
+ *
+ * @description
+ * This component allows students to update their profile information. It includes fields for profile picture, name, date of birth, father's phone, mother's phone, and password. The component fetches the current student data on mount and displays it. Users can toggle between view and edit modes. In edit mode, users can update their information and save changes.
+ *
+ * @function
+ * @name StudentUpdateProfile
+ *
+ * @property {Object} formData - The state object holding form data.
+ * @property {string} previewImage - The state string holding the URL of the preview image.
+ * @property {boolean} editMode - The state boolean indicating if the form is in edit mode.
+ * @property {Object} alert - The state object holding alert information.
+ * @property {string} alert.type - The type of alert (e.g., "success", "warning").
+ * @property {string} alert.message - The alert message.
+ * @property {boolean} alert.show - Boolean indicating if the alert is visible.
+ */
 const StudentUpdateProfile = () => {
     const [formData, setFormData] = useState({});
     const [previewImage, setPreviewImage] = useState('');
     const [editMode, setEditMode] = useState(false);
     const [alert, setAlert] = useState({ type: "", message: "", show: false });
 
-
+    /**
+     * @function handleChange
+     * @description Handles changes to form inputs and updates the state.
+     * @param {Event} e - The event object.
+     * @returns {void}
+     */
     const handleChange = (e) => {
         const { name, value, files } = e.target;
         if (name === 'profilePicture' && files.length) {
@@ -22,11 +52,17 @@ const StudentUpdateProfile = () => {
         }
     };
 
+    /**
+     * @function loadStudentData
+     * @description Fetches student data from the API and updates the state.
+     * @returns {void}
+     * @async
+     * @throws {error} Any error while fetching data.
+     */
     const loadStudentData = async () => {
         try {
             const response = await api.get(`/student/dashboard`);
             const data = response.data;
-            console.log(data);
             setFormData(data);
             if (data.profilePicture) {
                 setPreviewImage(data.profilePicture);
@@ -38,6 +74,15 @@ const StudentUpdateProfile = () => {
         }
     };
 
+    /**
+     * @function saveStudentData
+     * @description Sends updated student data to the API to save changes.
+     * @returns {void}
+     * @async
+     * @throws {error} Any error while saving data.
+     * @throws {error} An error if the form submission fails.
+     * @throws {error} An unexpected error occurred.
+     */
     const saveStudentData = async () => {
         try {
             const response = await api.put(`/student/update-profile`, formData);
@@ -53,19 +98,41 @@ const StudentUpdateProfile = () => {
         }
     };
 
+    /**
+     * @function handleSave
+     * @description Handles the save button click, toggles edit mode off, and saves student data.
+     * @returns {void}
+     */
     const handleSave = () => {
         setEditMode(false);
         saveStudentData();
     };
 
+    /**
+     * @function showAlert
+     * @description Displays an alert with the specified type and message.
+     * @param {string} type - The type of alert.
+     * @param {string} message - The alert message.
+     * @returns {void}
+     */
     const showAlert = (type, message) => {
         setAlert({ type, message, show: true });
     };
 
+    /**
+     * @function closeAlert
+     * @description Closes the alert.
+     * @returns {void}
+     */
     const closeAlert = () => {
         setAlert({ ...alert, show: false });
     };
 
+    /**
+     * @hook useEffect
+     * @description Loads student data on component mount.
+     * @returns {void}
+     */
     useEffect(() => {
         loadStudentData();
     }, []);

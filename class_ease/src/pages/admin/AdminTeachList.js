@@ -1,10 +1,26 @@
-
 import React, { useState, useEffect } from "react";
 import { FaSearch } from 'react-icons/fa';
 import Pagination from "../library/pagination";
 import Alert from "../../services/Alert";
 import api from "../../services/api";
 
+/**
+ * AdminTeachList Component
+ * 
+ * @component
+ * @param {Object} props - The component props.
+ * @param {Function} props.toggleDropdown - Function to toggle the dropdown menu.
+ * @param {Function} props.teacherSummary - Function to display the teacher summary.
+ * 
+ * @description
+ * This component renders a list of teachers with search and pagination functionality.
+ * It allows the admin to manage teachers by viewing details or editing their information.
+ * 
+ * @returns {JSX.Element} The rendered component.
+ * 
+ * @example
+ * <AdminTeachList toggleDropdown={toggleDropdown} teacherSummary={teacherSummary} />
+ */
 const AdminTeachList = ({ toggleDropdown, teacherSummary }) => {
     const [alert, setAlert] = useState({ type: "", message: "", show: false });
     const [allTeacher, setAllStudents] = useState({ teachers: [], meta: {} });        // Store all teachers
@@ -13,6 +29,14 @@ const AdminTeachList = ({ toggleDropdown, teacherSummary }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const limit = 10;
 
+    /**
+     * @function handleSearch
+     * @param {number} page - The page number for pagination.
+     * @description Fetches and filters the list of teachers based on the search term and page number.
+     * @async
+     * @returns {Promise<void>} The response data.
+     * @throws {error} The error that was caught.
+     */
     const handleSearch = async (page) => {
         page = page || currentPage; // If page is not provided, use the current page
         try {
@@ -53,6 +77,11 @@ const AdminTeachList = ({ toggleDropdown, teacherSummary }) => {
     }, []);
 
 
+    /**
+     * @function handleNextPage
+     * @description Handles pagination to the next page.
+     * @returns {void}
+     */
     const handleNextPage = () => {
         if (currentPage < filteredTeachers.meta.total_pages) {
             const newPage = currentPage + 1;  // Increment the page
@@ -60,6 +89,11 @@ const AdminTeachList = ({ toggleDropdown, teacherSummary }) => {
         }
     };
 
+    /**
+     * @function handlePreviousPage
+     * @description Handles pagination to the previous page.
+     * @returns {void}
+     */
     const handlePreviousPage = () => {
         if (currentPage > 1) {
             const newPage = currentPage - 1;  // Decrement the page
@@ -67,14 +101,32 @@ const AdminTeachList = ({ toggleDropdown, teacherSummary }) => {
         }
     };
 
+    /**
+     * @function showAlert
+     * @param {string} type - The type of alert (e.g., "warning").
+     * @param {string} message - The alert message.
+     * @description Displays an alert message.
+     * @returns {void}
+     */
     const showAlert = (type, message) => {
         setAlert({ type, message, show: true });
     };
 
+    /**
+     * @function closeAlert
+     * @description Closes the alert message.
+     * @returns {void}
+     */
     const closeAlert = () => {
         setAlert({ ...alert, show: false });
     };
 
+    /**
+     * @function handleSearchChange
+     * @param {Object} e - The event object.
+     * @description Updates the search term state and filters the teachers list.
+     * @returns {void}
+     */
     const handleSearchChange = (e) => {
         const value = e.target.value;
         setSearchTerm(value);           // Update the search term state
@@ -82,7 +134,6 @@ const AdminTeachList = ({ toggleDropdown, teacherSummary }) => {
             setFilteredTeachers(allTeacher);  // If search is cleared, revert to all teachers
         }
     };
-
 
     return (
         <div className="manage-student-container">

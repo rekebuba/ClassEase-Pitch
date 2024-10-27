@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import Calendar from 'react-calendar';
 import AdminPanel from '../../components/AdminPanel';
 import AdminHeader from '../../components/AdminHeader';
 
+/**
+ * 
+ * @returns {JSX.Element} The rendered component.
+ */
 const EventManagement = () => {
     const [newEvent, setNewEvent] = useState({ title: '', description: '', date: '' });
     const [events, setEvents] = useState([]);

@@ -4,6 +4,27 @@ import Api from '../../services/api';
 import Alert from '../../services/Alert';
 
 
+/**
+ * AdminAssignTeacher component allows an admin to assign a teacher to classes.
+ *
+ * @component
+ * @param {Object} props - The properties object.
+ * @param {boolean} props.isEditOpen - Indicates if the edit profile popup is open.
+ * @param {Function} props.toggleEditProfile - Function to toggle the edit profile popup.
+ * @param {Object} props.teacherData - Data of the teacher to be assigned.
+ * @param {string} props.teacherData.name - Name of the teacher.
+ * @param {Array<string>} props.teacherData.subjects - List of subjects the teacher can teach.
+ * @param {string} props.teacherData.id - ID of the teacher.
+ *
+ * @returns {JSX.Element} The AdminAssignTeacher component.
+ *
+ * @example
+ * <AdminAssignTeacher
+ *   isEditOpen={true}
+ *   toggleEditProfile={toggleEditProfileFunction}
+ *   teacherData={{ name: 'John Doe', subjects: ['Math', 'Science'], id: '123' }}
+ * />
+ */
 const AdminAssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
     const [teachers, setTeachers] = useState({ name: '', subjects: [] });
     const [classGrade, setClassGrade] = useState('');
@@ -14,6 +35,10 @@ const AdminAssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
     const [alert, setAlert] = useState({ type: "", message: "", show: false });
 
 
+    /**
+     * @function useEffect
+     * @description React hook to fetch teacher data.
+     */
     useEffect(() => {
         if (!teacherData || Object.keys(teacherData).length === 0) return;
         const data = {
@@ -24,14 +49,29 @@ const AdminAssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
         setTeachers(data);
     }, [teacherData]);
 
+    /**
+     * @function showAlert
+     * @description Displays an alert message.
+     * @param {string} type - The type of alert (e.g., "warning", "success").
+     * @param {string} message - The alert message.
+      */
     const showAlert = (type, message) => {
         setAlert({ type, message, show: true });
     };
 
+    /**
+     * @function closeAlert
+     * @description Closes the alert message.
+      */
     const closeAlert = () => {
         setAlert({ ...alert, show: false });
     };
 
+    /**
+     * @function handleAssign
+     * @description Handles the form submission to assign a teacher to classes.
+     * @param {Event} e - The form submission event.
+     */
     const handleAssign = async (e) => {
         e.preventDefault();
 
@@ -51,6 +91,11 @@ const AdminAssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
     };
     const handleYearChange = e => setSelectedYear(e.target.value);
 
+    /**
+    * @function handleSectionChange
+    * @description Handles the change event for the section selection.
+    * @param {Event} e - The change event.
+     */
     const handleSectionChange = (e) => {
         const { value, checked } = e.target;
         if (checked) {

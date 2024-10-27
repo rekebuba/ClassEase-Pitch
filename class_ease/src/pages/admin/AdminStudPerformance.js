@@ -14,6 +14,30 @@ ChartJS.register(
     Legend
 );
 
+/**
+ * AdminStudPerformance Component
+ * 
+ * This component displays the student enrollment by grade and average performance by subject
+ * using line and bar charts respectively. It takes in two props: `enrollmentByGrade` and 
+ * `performanceBySubject`, which are arrays of objects containing the necessary data for the charts.
+ * 
+ * Props:
+ * @param {Object[]} enrollmentByGrade - Array of objects representing student enrollment by grade.
+ * @param {number} enrollmentByGrade[].grade - The grade level.
+ * @param {number} enrollmentByGrade[].student_count - The number of students enrolled in the grade.
+ * 
+ * @param {Object[]} performanceBySubject - Array of objects representing performance by subject.
+ * @param {string} performanceBySubject[].subject - The name of the subject.
+ * @param {number} performanceBySubject[].average_percentage - The average performance percentage in the subject.
+ * 
+ * @returns {JSX.Element} The rendered component displaying the charts.
+ * 
+ * Example usage:
+ * <AdminStudPerformance 
+ *    enrollmentByGrade={[{ grade: 1, student_count: 30 }, { grade: 2, student_count: 25 }]} 
+ *    performanceBySubject={[{ subject: 'Math', average_percentage: 75 }, { subject: 'Science', average_percentage: 80 }]} 
+ * />
+ */
 const AdminStudPerformance = ({ enrollmentByGrade, performanceBySubject }) => {
     // Data for charts
     const [studentEnrollmentData, setStudentEnrollmentData] = useState({
@@ -47,6 +71,9 @@ const AdminStudPerformance = ({ enrollmentByGrade, performanceBySubject }) => {
         ],
     });
 
+    /**
+     * @description Updates the data for the student enrollment and subject performance charts
+    */
     useEffect(() => {
         if (enrollmentByGrade) {
             const grades = enrollmentByGrade.map(item => `Grade ${item.grade}`);
@@ -76,9 +103,7 @@ const AdminStudPerformance = ({ enrollmentByGrade, performanceBySubject }) => {
             ],
             });
         }
-        }, [enrollmentByGrade, performanceBySubject]);
-
-
+        }, [enrollmentByGrade, performanceBySubject, studentEnrollmentData.datasets, subjectPerformanceData.datasets]);
 
     return (
         <>

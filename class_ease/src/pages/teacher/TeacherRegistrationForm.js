@@ -3,6 +3,56 @@ import Api from '../../services/api';
 import Alert from '../../services/Alert';
 import convertKeysToSnakeCase from '../library/lodash';
 
+/**
+ * TeacherRegistrationForm Component
+ * 
+ * This component renders a form for registering a new teacher. It includes fields for 
+ * first name, last name, age, gender, email, phone number, address, subjects taught, 
+ * qualifications, and years of experience. The form data is managed using React's 
+ * useState hook, and form submission is handled asynchronously with error handling.
+ * 
+ * @component
+ * @example
+ * return (
+ *   <TeacherRegistrationForm />
+ * )
+ * 
+ * @returns {JSX.Element} The rendered component.
+ * 
+ * @function
+ * @name TeacherRegistrationForm
+ * 
+ * @description
+ * - `showAlert(type, message)`: Displays an alert with the specified type and message.
+ * - `closeAlert()`: Closes the currently displayed alert.
+ * - `handleChange(e)`: Updates the form data state when an input field value changes.
+ * - `handleSubmit(e)`: Handles form submission, converts form data to snake_case, 
+ *   sends a POST request to the server, and displays success or error alerts based 
+ *   on the response.
+ * 
+ * @state {Object} alert - The state object for managing alert visibility and content.
+ * @state {string} alert.type - The type of the alert (e.g., "success", "warning").
+ * @state {string} alert.message - The message to be displayed in the alert.
+ * @state {boolean} alert.show - A flag indicating whether the alert is visible.
+ * 
+ * @state {Object} formData - The state object for managing form input values.
+ * @state {string} formData.firstName - The first name of the teacher.
+ * @state {string} formData.lastName - The last name of the teacher.
+ * @state {string} formData.age - The age of the teacher.
+ * @state {string} formData.gender - The gender of the teacher.
+ * @state {string} formData.email - The email address of the teacher.
+ * @state {string} formData.phone - The phone number of the teacher.
+ * @state {string} formData.address - The address of the teacher.
+ * @state {string} formData.experience - The years of experience of the teacher.
+ * @state {string} formData.qualification - The qualifications of the teacher.
+ * @state {string} formData.subjectTaught - The subjects taught by the teacher.
+ * 
+ * @dependencies
+ * - `useState`: React hook for managing state.
+ * - `Api`: Custom API utility for making HTTP requests.
+ * - `convertKeysToSnakeCase`: Utility function for converting object keys to snake_case.
+ * - `Alert`: Custom Alert component for displaying messages.
+ */
 const TeacherRegistrationForm = () => {
     const [alert, setAlert] = useState({ type: "", message: "", show: false });
     const [formData, setFormData] = useState({
@@ -18,19 +68,49 @@ const TeacherRegistrationForm = () => {
         subjectTaught: '',
     });
 
-
+    /**
+     * @function showAlert
+     * @description Sets the alert message.
+     * @param {string} type - Type of the alert.
+     * @param {string} message - Message to display in the alert.
+     * @returns {void}
+     */
     const showAlert = (type, message) => {
         setAlert({ type, message, show: true });
     };
 
+    /**
+     * @function closeAlert
+     * @description Closes the alert message.
+     * @returns {void}
+     */
     const closeAlert = () => {
         setAlert({ ...alert, show: false });
     };
 
+    /**
+     * @function handleChange
+     * @description Updates the form data state when an input field value changes.
+     * @param {Object} e - The event object.
+     * @returns {void}
+     */
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    /**
+     * @function handleSubmit
+     * @description Handles form submission, converts form data to snake_case,
+     * sends a POST request to the server, and displays success or error alerts based
+     * on the response.
+     * @param {Object} e - The event object.
+     * @returns {void}
+     * @async
+     * @throws {error} An error occurred while processing the request.
+     * @throws {error.response.data.error} An error message returned by the server.
+     * @throws {error.response.data} An unexpected error occurred.
+     * @returns {void}
+     */
     const handleSubmit = async (e) => {
         e.preventDefault();
         const data = convertKeysToSnakeCase(formData);

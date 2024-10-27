@@ -5,13 +5,44 @@ import TeacherPanel from '../../components/TeachPanel';
 import api from '../../services/api';
 import Alert from '../../services/Alert';
 
+/**
+ * TeacherUpdateProfile component allows teachers to update their profile information.
+ * It includes functionalities for loading existing teacher data, handling form changes,
+ * previewing profile pictures, and saving updated data.
+ *
+ * @component
+ * @example
+ * return (
+ *   <TeacherUpdateProfile />
+ * )
+ *
+ * @returns {JSX.Element} The rendered component.
+ *
+ * @function
+ * @name TeacherUpdateProfile
+ *
+ * @description
+ * This component manages the state for form data, preview image, edit mode, and alert messages.
+ * It provides functions to handle form changes, load teacher data from the server, save updated
+ * data to the server, and display alert messages.
+ *
+ * @property {Object} formData - The state object holding the form data.
+ * @property {string} previewImage - The state string holding the URL of the preview image.
+ * @property {boolean} editMode - The state boolean indicating whether the form is in edit mode.
+ * @property {Object} alert - The state object holding alert message details.
+ */
 const TeacherUpdateProfile = () => {
     const [formData, setFormData] = useState({});
     const [previewImage, setPreviewImage] = useState('');
     const [editMode, setEditMode] = useState(false);
     const [alert, setAlert] = useState({ type: "", message: "", show: false });
 
-
+    /**
+     * @function handleChange
+     * @description Handles changes in the form inputs and updates the formData state.
+     * @param {Object} e - The event object.
+     * @returns {void}
+     */
     const handleChange = (e) => {
         const { name, value, files } = e.target;
         if (name === 'profilePicture' && files.length) {
@@ -23,6 +54,14 @@ const TeacherUpdateProfile = () => {
         }
     };
 
+    /**
+     * @function loadTeacherData
+     * @description Loads the teacher's data from the server and updates the formData and previewImage states.
+     * @returns {void}
+     * @async
+     * @throws {error} Any error while fetching the data.
+     * @throws {error.response.data.message} The error message received from the server.
+     */
     const loadTeacherData = async () => {
         try {
             const response = await api.get(`/teacher/dashboard`);
@@ -39,6 +78,16 @@ const TeacherUpdateProfile = () => {
         }
     };
 
+    /**
+     * @function saveTeacherData
+     * @description Sends the updated formData to the server to save the changes.
+     * @returns {void}
+     * @async
+     * @throws {error} Any error while saving the data.
+     * @throws {error.response.data.error} The error message received from the server.
+     * @throws {error.response.data.message} The success message received from the server.
+     * @throws {error.response.data} The unexpected error message received from the server.
+     */
     const saveTeacherData = async () => {
         try {
             const response = await api.put(`/teacher/update-profile`, formData);
@@ -54,19 +103,41 @@ const TeacherUpdateProfile = () => {
         }
     };
 
+    /**
+     * @function handleSave
+     * @description Disables edit mode and calls saveTeacherData to save the changes.
+     * @returns {void}
+     */
     const handleSave = () => {
         setEditMode(false);
         saveTeacherData();
     };
 
+    /**
+     * @function showAlert
+     * @description Displays an alert message with the specified type and message.
+     * @param {string} type - The type of the alert message.
+     * @param {string} message - The message to display in the alert.
+     * @returns {void}
+     */
     const showAlert = (type, message) => {
         setAlert({ type, message, show: true });
     };
 
+    /**
+     * @function closeAlert
+     * @description Closes the alert message.
+     * @returns {void}
+     */
     const closeAlert = () => {
         setAlert({ ...alert, show: false });
     };
 
+    /**
+     * @hook useEffect
+     * @description Loads the teacher's data when the component mounts.
+     * @returns {void}
+     */
     useEffect(() => {
         loadTeacherData();
     }, []);

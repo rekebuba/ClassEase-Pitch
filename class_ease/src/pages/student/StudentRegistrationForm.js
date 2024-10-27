@@ -4,6 +4,28 @@ import Api from '../../services/api';
 import Alert from "../../services/Alert";
 import convertKeysToSnakeCase from '../library/lodash';
 
+/**
+ * StudentRegistrationForm component handles the registration form for students.
+ * It manages form state, handles form submission, and displays alerts based on the response.
+ *
+ * @component
+ * @example
+ * return (
+ *   <StudentRegistrationForm />
+ * )
+ *
+ * @returns {JSX.Element} The rendered component.
+ *
+ * @typedef {Object} FormData
+ * @property {string} name - The student's name.
+ * @property {string} fatherName - The student's father's name.
+ * @property {string} grandFatherName - The student's grandfather's name.
+ * @property {string} grade - The student's grade.
+ * @property {string} dateOfBirth - The student's date of birth.
+ * @property {string} fatherPhone - The student's father's phone number.
+ * @property {string} motherPhone - The student's mother's phone number.
+ * @property {string} startYear - The year the student is registering for.
+ */
 const StudentRegistrationForm = () => {
   const [alert, setAlert] = useState({ type: "", message: "", show: false });
   const [currentYear] = useState(new Date().getFullYear());
@@ -18,6 +40,14 @@ const StudentRegistrationForm = () => {
     startYear: ""
   });
 
+  /**
+   * @function handleSubmit
+   * @description Handles form submission, sends data to the server, and displays alerts based on the response.
+   * @param {Event} e - The form submission event.
+   * @async
+   * @returns {Promise<void>} A promise that resolves when the form submission is complete.
+   * @throws {Error} An error if the form submission fails.
+   */
   const handleSubmit = async (e) => {
     e.preventDefault();
     const snakeCaseFormData = convertKeysToSnakeCase(formData);
@@ -44,15 +74,33 @@ const StudentRegistrationForm = () => {
     }
   };
 
+  /**
+   * @function handleInputChange
+   * @description Handles input changes and updates the form state.
+   * @param {Event} e - The input change
+   * @returns {void}
+   */
   const handleInputChange = e => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
   };
 
+  /**
+   * @function showAlert
+   * @description Displays an alert with the specified type and message.
+   * @param {string} type - The type of alert (e.g., "success", "warning").
+   * @param {string} message - The alert message.
+   * @returns {void}
+   */
   const showAlert = (type, message) => {
     setAlert({ type, message, show: true });
   };
 
+  /**
+   * @function closeAlert
+   * @description Closes the currently displayed alert.
+   * @returns {void}
+   */
   const closeAlert = () => {
     setAlert({ ...alert, show: false });
   };

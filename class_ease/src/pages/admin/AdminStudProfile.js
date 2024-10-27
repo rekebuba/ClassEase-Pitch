@@ -4,31 +4,37 @@ import ExamAssessmentReports from "./AdminExamAssessmentReports";
 import api from '../../services/api';
 import { SubjectList } from '../student/StudSubjectList';
 
+/**
+ * StudentProfile component displays a detailed profile of a student including their personal information and performance overview.
+ *
+ * @component
+ * @param {Object} props - The properties object.
+ * @param {boolean} props.isProfileOpen - A flag indicating whether the profile popup is open or closed.
+ * @param {function} props.toggleAssessment - A function to toggle the assessment view.
+ * @param {function} props.closeProfile - A function to close the profile popup.
+ * @param {Object} props.studentProfileSummary - An object containing the summary of the student's profile.
+ * @param {string} props.studentProfileSummary.student_id - The ID of the student.
+ * @param {string} props.studentProfileSummary.grade - The grade of the student.
+ * @param {string} props.studentProfileSummary.pictureUrl - The URL of the student's picture.
+ * @param {string} props.studentProfileSummary.name - The name of the student.
+ * @param {string} props.studentProfileSummary.father_name - The father's name of the student.
+ * @param {string} props.studentProfileSummary.grand_father_name - The grandfather's name of the student.
+ * @param {string} props.studentProfileSummary.date_of_birth - The date of birth of the student in 'YYYY-MM-DD' format.
+ * @param {string} props.studentProfileSummary.section - The section of the student.
+ * @param {Object} props.assessmentSummary - An object containing the summary of the student's assessment.
+ *
+ * @returns {JSX.Element} The rendered StudentProfile component.
+ */
 const StudentProfile = ({ isProfileOpen, toggleAssessment, closeProfile, studentProfileSummary, assessmentSummary }) => {
     const [allSubjects, setAllSubjects] = useState([]);
     const [student, setStudent] = useState({});
 
-
-    const lodeStudentSubjectList = async () => {
-        try {
-            if (studentProfileSummary !== undefined && Object.keys(studentProfileSummary).length > 0) {
-                const response = await api.get(`/student/score`, {
-                    params: {
-                        student_id: studentProfileSummary.student_id,
-                        grade: studentProfileSummary.grade,
-                        semester: 1
-                    }
-                });
-                setAllSubjects(response.data['student_assessment']);
-                // setStudent(response.data['student']);
-            }
-        } catch (error) {
-            if (error.response && error.response.data && error.response.data['error']) {
-                console.error(error.response.data['error']);
-            }
-        }
-    };
-
+    /**
+     * @function calculateAge
+     * @param {string} birthday - The date of birth of the student in 'YYYY-MM-DD' format.
+     * @returns {number} The age of the student.
+     * @description Calculates the age of the student based on their date of birth.
+     */
     function calculateAge(birthday) {
         // birthday should be in the format 'YYYY-MM-DD'
         const birthDate = new Date(birthday);
@@ -39,6 +45,32 @@ const StudentProfile = ({ isProfileOpen, toggleAssessment, closeProfile, student
     }
 
     useEffect(() => {
+        /**
+         * @function lodeStudentSubjectList
+         * @description Loads the list of subjects for the student.
+         * @async
+         * @returns {Promise<void>} The response data.
+         * @throws {error} The error that was caught
+         */
+        const lodeStudentSubjectList = async () => {
+            try {
+                if (studentProfileSummary !== undefined && Object.keys(studentProfileSummary).length > 0) {
+                    const response = await api.get(`/student/score`, {
+                        params: {
+                            student_id: studentProfileSummary.student_id,
+                            grade: studentProfileSummary.grade,
+                            semester: 1
+                        }
+                    });
+                    setAllSubjects(response.data['student_assessment']);
+                    // setStudent(response.data['student']);
+                }
+            } catch (error) {
+                if (error.response && error.response.data && error.response.data['error']) {
+                    console.error(error.response.data['error']);
+                }
+            }
+        };
         lodeStudentSubjectList();
         setStudent(studentProfileSummary);
     }, [isProfileOpen, studentProfileSummary]);

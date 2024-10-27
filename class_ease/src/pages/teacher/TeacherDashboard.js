@@ -1,13 +1,17 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import TeacherPanel from "../../components/TeachPanel";
 import "../../styles/TeacherDashboard.css";
 import "../../styles/Dashboard.css";
-import TeacherMarkList from './TeacherMarkList';
 import TeacherHeader from "../../components/TeachHeader";
 
+/**
+ * TeacherDashboard component
+ * @component
+ * @return {component} TeacherDashboard
+ * @example
+ * return <TeacherDashboard />
+ */
 const TeacherDashboard = () => {
-  const [activePage, setActivePage] = useState("Home");
-
   return (
     <div className="admin-manage-container">
       <TeacherPanel />
@@ -70,7 +74,6 @@ const TeacherDashboard = () => {
           </table>
         </section>
       </main>
-      {/* </div> */}
     </div>
   );
 };

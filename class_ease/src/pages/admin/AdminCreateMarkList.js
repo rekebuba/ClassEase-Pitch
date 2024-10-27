@@ -7,6 +7,40 @@ import { FaPlus } from 'react-icons/fa';
 import api from "../../services/api";
 import Alert from '../../services/Alert';
 
+/**
+ * AdminCreateMarkList component for creating a mark list for students.
+ * 
+ * @component
+ * @returns {JSX.Element} The rendered component.
+ * 
+ * @example
+ * return (
+ *   <AdminCreateMarkList />
+ * )
+ * 
+ * @description
+ * This component allows an admin to create a mark list for students by selecting grade, semester, school year, sections, subjects, and assessment types. 
+ * It includes functionalities to add new subjects, validate assessment percentages, and submit the mark list data to the server.
+ * 
+ * @function
+ * @name AdminCreateMarkList
+ * 
+ * @property {Array<string>} subjectsList - List of predefined subjects.
+ * @property {Array<number>} percentages - List of predefined percentages for assessments.
+ * @property {Array<string>} subjects - State for managing the list of subjects.
+ * @property {number} selectedGrade - State for managing the selected grade.
+ * @property {Array<string>} selectedSection - State for managing the selected sections.
+ * @property {Array<string>} selectedSubjects - State for managing the selected subjects.
+ * @property {string} newCheckboxLabel - State for managing the label of a new subject checkbox.
+ * @property {boolean} AddNewCheckbox - State for toggling the addition of a new subject checkbox.
+ * @property {Array<Object>} assessmentTypes - State for managing the list of assessment types and their percentages.
+ * @property {number} selectedSemester - State for managing the selected semester.
+ * @property {string} schoolYear - State for managing the selected school year.
+ * @property {boolean} selectAll - State for toggling the selection of all subjects.
+ * @property {number} totalAssessment - State for managing the total percentage of assessments.
+ * @property {number} currentYear - State for managing the current year.
+ * @property {Object} alert - State for managing alert messages.
+ */
 const AdminCreateMarkList = () => {
     const subjectsList = [
         'Math',
@@ -34,14 +68,30 @@ const AdminCreateMarkList = () => {
     const [currentYear] = useState(new Date().getFullYear());
     const [alert, setAlert] = useState({ type: "", message: "", show: false });
 
+    /**
+     * @function handleGradeChange
+     * @description Handles the change event for the grade selection.
+     * @param {Event} e - The change event.
+     */
     const handleGradeChange = (e) => {
         setSelectedGrade(parseFloat(e.target.value));
     }
 
+    /**
+     * @function handleSemesterChange
+     * @description Handles the change event for the semester selection.
+     * @param {Event} e - The change event.
+     * @param {*} e 
+     */
     const handleSemesterChange = (e) => {
         setSelectedSemester(parseFloat(e.target.value));
     }
 
+    /**
+    * @function handleSectionChange
+    * @description Handles the change event for the section selection.
+    * @param {Event} e - The change event.
+     */
     const handleSectionChange = (e) => {
         const { value, checked } = e.target;
         if (checked) {
@@ -50,6 +100,12 @@ const AdminCreateMarkList = () => {
             setSelectedSection(selectedSection.filter((section) => section !== value))
         }
     }
+
+    /**
+     * @function handleSubjectChange
+     * @description Handles the change event for the subject selection.
+     * @param {Event} e - The change event. 
+     */
     const handleSubjectChange = (e) => {
         const { value, checked } = e.target;
         if (checked) {
@@ -59,7 +115,11 @@ const AdminCreateMarkList = () => {
         }
     };
 
-    // Handle adding a new checkbox
+    /** 
+     * @function addCheckbox
+     * @description Handles the addition of a new subject checkbox.
+     * @param {Event} e - The click event.
+     */
     const addCheckbox = (e) => {
         e.preventDefault();
         var modifiedLabel = newCheckboxLabel.trim()
@@ -69,14 +129,22 @@ const AdminCreateMarkList = () => {
             setNewCheckboxLabel('');
         }
     };
-
-    const handleTotalAssessment = (e) => {
+    /** 
+     * @function handleTotalAssessment
+     * @description Calculates and sets the total percentage of assessments.
+     */
+    const handleTotalAssessment = () => {
         const totalPercentage = assessmentTypes.reduce((acc, { percentage }) => {
             return acc + (percentage ? parseFloat(percentage) : 0); // ensure it's a number
         }, 0);
         setTotalAssessment(totalPercentage);
     }
 
+    /** 
+     * @function handleValidAssessment
+     * @description Validates if the total percentage of assessments is less than 100%.
+     * @returns {boolean} True if valid, otherwise false.
+     */
     const handleValidAssessment = () => {
         // Calculate sum using reduce
         const totalPercentage = assessmentTypes.reduce((acc, { percentage }) => {
@@ -89,6 +157,10 @@ const AdminCreateMarkList = () => {
         }
     }
 
+    /** 
+     * @function handleSelectAll
+     * @description Toggles the selection of all subjects.
+     */
     const handleSelectAll = () => {
         if (selectAll) {
             setSelectedSubjects([]);
@@ -98,6 +170,11 @@ const AdminCreateMarkList = () => {
         setSelectAll(!selectAll);
     };
 
+    /**
+     * @function addAssessmentType
+     * @description Handles the addition of a new assessment type.
+     * @param {Event} e - The click event.
+     */
     const addAssessmentType = (e) => {
         e.preventDefault();
         // checks if at least one element in the array satisfies the condition
@@ -108,10 +185,20 @@ const AdminCreateMarkList = () => {
         }
     };
 
+    /**
+     * @function handleYearChange
+     * @description Handles the change event for the school year selection.
+     * @param {Event} e - The change event.
+     */
     const handleYearChange = (e) => {
         setSchoolYear(e.target.value);
     }
 
+    /**
+     * @function checkValidData
+     * @description Validates the form data before submission.
+     * @param {Event} e - The submit event.
+     */
     const checkValidData = (e) => {
         e.preventDefault()
         if (selectedSection.length === 0) {
@@ -130,16 +217,31 @@ const AdminCreateMarkList = () => {
         handleSubmit();
     }
 
+    /**
+     * @function showAlert
+     * @description Displays an alert message.
+     * @param {string} type - The type of alert (e.g., "warning", "success").
+     * @param {string} message - The alert message.
+      */
     const showAlert = (type, message) => {
         setAlert({ type, message, show: true });
     };
 
+    /**
+     * @function closeAlert
+     * @description Closes the alert message.
+      */
     const closeAlert = () => {
         setAlert({ ...alert, show: false });
     };
 
+    /**
+     * @function handleSubmit
+     * @description Submits the mark list data to the server.
+     * @async
+     * @returns {Promise<void>}
+     */
     const handleSubmit = async () => {
-        // Logic for submitting the mark list creation
         const mark_list_data = {
             "grade": selectedGrade,
             "sections": selectedSection,
@@ -154,7 +256,6 @@ const AdminCreateMarkList = () => {
             // If successful, show a success alert
             showAlert("success", "Mark list created successfully!");
         } catch (error) {
-            // setAlert({ type: "success", message: "success", show: true });
             if (error.response && error.response.data && error.response.data['error']) {
                 showAlert("warning", error.response.data['error']);
             } else {

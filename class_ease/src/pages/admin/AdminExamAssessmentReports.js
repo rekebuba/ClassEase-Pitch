@@ -1,9 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Bar, Line, Pie } from 'react-chartjs-2';
+import { Bar, Line } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, LineElement, PointElement, ArcElement } from 'chart.js';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, LineElement, PointElement, ArcElement);
 
+/**
+ * ExamAssessmentReports component renders the exam assessment reports for students.
+ * It displays two charts: one for subject scores comparison and another for progress tracking over time.
+ *
+ * @example
+ * const subjectSummary = [
+ *   { subject: 'Math', subject_average: 85, semester: 'Fall 2021' },
+ *   { subject: 'Science', subject_average: 90, semester: 'Fall 2021' },
+ * ];
+ * <ExamAssessmentReports subjectSummary={subjectSummary} />
+ */
 const ExamAssessmentReports = ({ subjectSummary }) => {
     const [studentPerformance, setStudentPerformance] = useState({
         subjects: [],
@@ -42,6 +53,14 @@ const ExamAssessmentReports = ({ subjectSummary }) => {
         ],
     };
 
+    /**
+     * Updates the student performance state when the subject summary changes.
+     * @param {Array} subjectSummary - An array of subject summary objects.
+     * @param {string} subjectSummary[].subject - The name of the subject.
+     * @param {number} subjectSummary[].subject_average - The average score for the subject.
+     * @param {string} subjectSummary[].semester - The semester for the subject.
+     * @returns {void}
+     */
     useEffect(() => {
         if (subjectSummary !== undefined && Object.keys(subjectSummary).length > 0) {
             const subjects = subjectSummary.map((subject) => subject.subject);
