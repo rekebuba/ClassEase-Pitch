@@ -9,8 +9,6 @@ const DataExport = ({ selectedGrade, selectedYear, showAlert }) => {
     const [studentData, setStudentData] = useState([]);
 
     const handleSubmit = async () => {
-        console.log(selectedGrade);
-        console.log(selectedYear);
         try {
             const response = await api.get(`/admin/manage/students?grade=${selectedGrade}&year=${selectedYear}`);
             setStudentData(response.data);

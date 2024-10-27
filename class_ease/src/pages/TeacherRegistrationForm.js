@@ -35,9 +35,8 @@ const TeacherRegistrationForm = () => {
         e.preventDefault();
         const data = convertKeysToSnakeCase(formData);
         try {
-            const response = await Api.post('/admin/teachers/registration', data);
+            await Api.post('/admin/teachers/registration', data);
             showAlert("success", "Teacher registered successfully!");
-            console.log(response.data);
         } catch (error) {
             if (error.response && error.response.data && error.response.data['error']) {
                 showAlert("warning", error.response.data['error']);

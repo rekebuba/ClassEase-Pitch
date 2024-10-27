@@ -2,6 +2,7 @@ import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
+import Logout from "./pages/Logout";
 import NotFound from './pages/NotFound';
 import AdminDashboard from "./pages/AdminDashboard";
 import ProtectedRoute from "./ProtectedRoute";
@@ -17,6 +18,14 @@ import AdminStudPerformance from "./pages/AdminStudPerformance";
 import UserAccessControl from "./pages/AdminUsersAccessControl";
 import AdminEnrollUser from "./pages/AdminEnrollUser";
 import AssignTeacher from "./pages/AdminAssignTeacher";
+import TeacherUpdateProfile from "./pages/TeacherUpdateProfile";
+import AdminUpdateProfile from "./pages/AdminUpdateProfile";
+import StudentUpdateProfile from "./pages/StudUpdateProfile";
+
+const handleUpdate = (updatedData) => {
+  console.log("Updated user data:", updatedData);
+  // Here, you would typically send updatedData to the backend
+};
 
 const router = createBrowserRouter([
   {
@@ -27,6 +36,10 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
+  },
+  {
+    path: "/logout",
+    element: <Logout />,
   },
   {
     path: "/admin/dashboard",
@@ -51,6 +64,18 @@ const router = createBrowserRouter([
   {
     path: "admin/teacher/registration",
     element: <AdminEnrollUser role="teacher" />
+  },
+  {
+    path: "/teacher/update/profile",
+    element: <ProtectedRoute element={<TeacherUpdateProfile />} />,
+  },
+  {
+    path: "/admin/update/profile",
+    element: <ProtectedRoute element={<AdminUpdateProfile />} />,
+  },
+  {
+    path: "/student/update/profile",
+    element: <ProtectedRoute element={<StudentUpdateProfile />} />
   },
   {
     path: "/admin/manage/students",

@@ -20,6 +20,10 @@ const TeacherHeader = () => {
         navigate("/teacher/dashboard")
     }
 
+    const updateProfile = e => {
+        navigate("/teacher/update/profile")
+    }
+
     return (
         <header className="dashboard-header">
             <div className="dashboard-logo">ClassEase School</div>
@@ -42,7 +46,7 @@ const TeacherHeader = () => {
                         <FaCog /> Settings
                     </span>
                     <div className="dropdown-content">
-                        <div className="dropdown-item"><FaCogs /> Update Profile</div>
+                        <div className="dropdown-item" onClick={updateProfile}><FaCogs /> Update Profile</div>
                     </div>
                 </div>
             </div>

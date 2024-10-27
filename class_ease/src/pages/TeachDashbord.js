@@ -9,10 +9,10 @@ const TeacherDashboard = () => {
   const [activePage, setActivePage] = useState("Home");
 
   return (
-    <div className="dashboard-container">
+    <div className="admin-manage-container">
       <TeacherPanel />
-      <TeacherHeader />
       <main className="content">
+        <TeacherHeader />
         <section className="teacher-stats">
           <div className="teacher-stat-card">
             <h3>Total Students</h3>

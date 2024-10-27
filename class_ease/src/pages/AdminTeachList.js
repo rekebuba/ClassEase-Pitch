@@ -24,7 +24,6 @@ const AdminTeachList = ({ toggleDropdown, teacherSummary }) => {
                 }
             });
 
-            console.log(response.data);
             const data = {
                 teachers: response.data['teachers'],
                 meta: response.data['meta']
@@ -50,7 +49,7 @@ const AdminTeachList = ({ toggleDropdown, teacherSummary }) => {
     };
 
     useEffect(() => {
-        handleSearch();  // Fetch the list of Teachers when the component loads
+        handleSearch(1);  // Fetch the list of Teachers when the component loads
     }, []);
 
 
@@ -90,37 +89,37 @@ const AdminTeachList = ({ toggleDropdown, teacherSummary }) => {
             <div className="admin-header">
                 <h2>Manage Teachers</h2>
             </div>
-            <section className="student-list">
-                <div className="list-head">
+            <section className="table-section">
+                <div className="table-head">
                     <h3>Teachers List</h3>
-                    <div className="search-bar">
+                    <div className="table-search-bar">
                         <input
                             type="text"
                             placeholder="Search by Teacher ID"
                             value={searchTerm}
                             onChange={handleSearchChange}
                         />
-                        <button onClick={handleSearch}>
+                        <button onClick={() => { handleSearch() }}>
                             <FaSearch />
                         </button>
                     </div>
                 </div>
 
-                <div className="data-section">
-                    <table className="data-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Name</th>
-                                <th>Last Name</th>
-                                <th>Class Assigned</th>
-                                <th>Subject</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        {filteredTeachers.teachers.map(teacher => <tbody>
-                            {/* Dynamic Data Rows */}
-                            <tr>
+                <table className="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Last Name</th>
+                            <th>Class Assigned</th>
+                            <th>Subject</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {filteredTeachers.teachers.map((teacher, index) => (
+                            // Dynamic Data Rows
+                            <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#fff' : '#f1f1f1' }}>
                                 <td>{teacher.id}</td>
                                 <td>Mr. {teacher.first_name}</td>
                                 <td>{teacher.last_name}</td>
@@ -136,28 +135,30 @@ const AdminTeachList = ({ toggleDropdown, teacherSummary }) => {
                                             toggleDropdown('edit');
                                             teacherSummary(teacher); // Pass the data for the clicked Teacher
                                         }}>Edit</button>
-                                        <button className="delete-btn">Delete</button>
+                                        {/* <button className="delete-btn">Delete</button> */}
                                     </div>
                                 </td>
                             </tr>
-                        </tbody>)}
-                    </table>
-                </div>
-            </section>
-            {filteredTeachers.meta.total_pages > 1 &&
+                        ))}
+                    </tbody>
+                </table>
+            </section >
+            {
+                filteredTeachers.meta.total_pages > 1 &&
                 <Pagination
                     handlePreviousPage={handlePreviousPage}
                     currentPage={currentPage}
                     handleNextPage={handleNextPage}
                     meta={filteredTeachers.meta}
-                />}
-            <Alert
+                />
+            }
+            < Alert
                 type={alert.type}
                 message={alert.message}
                 show={alert.show}
                 onClose={closeAlert}
             />
-        </div>
+        </div >
     );
 };
 

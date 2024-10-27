@@ -1,0 +1,95 @@
+.user-profile {
+    margin: 0 auto;
+    padding: 20px;
+    background: #f7f9fc;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-profile h2 {
+    text-align: center;
+    color: #333;
+}
+
+.profile-picture {
+    display: flex;
+    align-self: flex-start;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.profile-picture img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: #ccc;
+}
+
+.profile-picture input {
+    cursor: pointer;
+    width: 170px;
+}
+
+.profile-details {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 30px;
+}
+
+.profile-form-group {
+    width: 50%;
+    height: 70px;
+    margin-bottom: 15px;
+}
+
+.profile-data {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    width: 100%;
+}
+
+.profile-details label {
+    font-weight: bold;
+    margin: 5px;
+}
+
+.profile-details input[type='text'],
+.profile-details input[type='email'],
+.profile-details input[type='tel'],
+.profile-details input[type='password'] {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+.edit-button {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.save-button {
+    padding: 10px 20px;
+    margin: 0 10px;
+    border-radius: 5px;
+    background-color: #28a745;
+    color: #fff;
+}
+
+.cancel-button {
+    background-color: #dc3545;
+    color: #fff;
+    margin-left: 10px;
+}

@@ -36,14 +36,13 @@ const AssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
         e.preventDefault();
 
         try {
-            const response = await Api.put('/admin/assign-teacher', {
+            await Api.put('/admin/assign-teacher', {
                 teacher_id: teacherData.id,
                 grade: classGrade,
                 section: selectedSection,
                 subjects_taught: subjects,
                 mark_list_year: selectedYear,
             });
-            console.log(response.data);
             showAlert("success", "Teacher assigned successfully");
         } catch (error) {
             const errorMessage = error.response?.data?.error ?? "An unexpected error occurred.";
@@ -61,109 +60,110 @@ const AssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
         }
     }
 
-    console.log("selected section: ", selectedSection);
-
     return (
-        <div className={`teacher-profile-view ${isEditOpen ? "open" : "close"}`}>
-            <div className="profile-header-container">
-                <h2>Assign Teacher to Classes</h2>
-                <button className="profile-fatimes" onClick={toggleEditProfile}><FaTimes size={24} /></button>
-            </div>
-            <form onSubmit={handleAssign}>
-                <div className="teacher-form-group">
-                    <label htmlFor="teacher">Teacher</label>
-                    <select
-                        id="teacher"
-                        name="teacher"
-                        value={teachers.name}
-                        onChange={(e) => setTeachers({ ...teachers, name: e.target.value })}
-                        required
-                    >
-                        <option
-                            key="default"
-                            value={teachers.name}>
-                            {teachers.name}
-                        </option>
-                    </select>
+        <div className={`popup-overlay ${isEditOpen ? "open" : "close"}`}>
+            <div className='popup-overlay-container'>
+                <div className="close-popup">
+                    <h2 style={{ margin: 0 }}>Assign Teacher to Classes</h2>
+                    <button onClick={toggleEditProfile}><FaTimes size={24} /></button>
                 </div>
-                <div className="teacher-form-group">
-                    <label htmlFor="classGrade">Select Class Grade</label>
-                    <select
-                        id="classGrade"
-                        name="classGrade"
-                        value={classGrade}
-                        onChange={(e) => setClassGrade(e.target.value)}
-                        required
-                    >
-                        <option value="">Select Grade</option>
-                        {Array.from({ length: 12 }, (_, i) => i + 1).map(grade => (
-                            <option key={grade} value={grade}>
-                                Grade {grade}
+                <form onSubmit={handleAssign}>
+                    <div className="teacher-form-group">
+                        <label htmlFor="teacher">Teacher</label>
+                        <select
+                            id="teacher"
+                            name="teacher"
+                            value={teachers.name}
+                            onChange={(e) => setTeachers({ ...teachers, name: e.target.value })}
+                            required
+                        >
+                            <option
+                                key="default"
+                                value={teachers.name}>
+                                {teachers.name}
                             </option>
-                        ))}
-                    </select>
-                </div>
-                <div className="form-group subjects">
-                    <label htmlFor="section">Section:</label>
-                    <div className="checkbox-group">
-                        {['A', 'B', 'C'].map((section) => (
-                            <div className="subject-container" key={section}>
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        value={section}
-                                        checked={selectedSection.includes(section)}
-                                        onChange={handleSectionChange}
-                                    />
-                                    {section}
-                                </label>
-                            </div>
-                        ))}
+                        </select>
                     </div>
-                </div>
-                <div className="teacher-form-group">
-                    <label htmlFor="year">Year:</label>
-                    <select id="year" value={selectedYear} onChange={handleYearChange}>
-                        {/* Dynamic Year Options */}
-                        {Array.from({ length: 3 }, (_, i) => currentYear - i).map(year => (
-                            <option key={year} value={year}>
-                                {year}/{(year + 1) % 100}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <div className="teacher-form-group">
-                    <label htmlFor="subjects">Select Subjects</label>
-                    <select
-                        id="subjects"
-                        name="subjects"
-                        value={subjects}
-                        onChange={(e) => setSubjects(Array.from(e.target.selectedOptions, option => option.value))}
-                        required
-                        multiple
-                    >
-                        {(teachers.subjects && teachers.subjects.length > 0) ? (
-                            teachers.subjects.map((subject, index) => (
-                                <option key={index} value={subject}>
-                                    {subject}
+                    <div className="teacher-form-group">
+                        <label htmlFor="classGrade">Select Class Grade</label>
+                        <select
+                            id="classGrade"
+                            name="classGrade"
+                            value={classGrade}
+                            onChange={(e) => setClassGrade(e.target.value)}
+                            required
+                        >
+                            <option value="">Select Grade</option>
+                            {Array.from({ length: 12 }, (_, i) => i + 1).map(grade => (
+                                <option key={grade} value={grade}>
+                                    Grade {grade}
                                 </option>
-                            ))
-                        ) : (
-                            <option disabled>No subjects available</option>
-                        )}
-                    </select>
-                </div>
-                <button type="submit" className="teacher-assign-btn">
-                    Assign Teacher
-                </button>
-            </form>
-            <Alert
-                type={alert.type}
-                message={alert.message}
-                show={alert.show}
-                onClose={closeAlert}
-            />
+                            ))}
+                        </select>
+                    </div>
+                    <div className="form-group subjects">
+                        <label htmlFor="section">Section:</label>
+                        <div className="checkbox-group">
+                            {['A', 'B', 'C'].map((section) => (
+                                <div className="subject-container" key={section}>
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            value={section}
+                                            checked={selectedSection.includes(section)}
+                                            onChange={handleSectionChange}
+                                        />
+                                        {section}
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="teacher-form-group">
+                        <label htmlFor="year">Year:</label>
+                        <select id="year" value={selectedYear} onChange={handleYearChange}>
+                            {/* Dynamic Year Options */}
+                            {Array.from({ length: 3 }, (_, i) => currentYear - i).map(year => (
+                                <option key={year} value={year}>
+                                    {year}/{(year + 1) % 100}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="teacher-form-group">
+                        <label htmlFor="subjects">Select Subjects</label>
+                        <select
+                            id="subjects"
+                            name="subjects"
+                            value={subjects}
+                            onChange={(e) => setSubjects(Array.from(e.target.selectedOptions, option => option.value))}
+                            required
+                            multiple
+                        >
+                            {(teachers.subjects && teachers.subjects.length > 0) ? (
+                                teachers.subjects.map((subject, index) => (
+                                    <option key={index} value={subject}>
+                                        {subject}
+                                    </option>
+                                ))
+                            ) : (
+                                <option disabled>No subjects available</option>
+                            )}
+                        </select>
+                    </div>
+                    <button type="submit" className="teacher-assign-btn">
+                        Assign Teacher
+                    </button>
+                </form>
+                <Alert
+                    type={alert.type}
+                    message={alert.message}
+                    show={alert.show}
+                    onClose={closeAlert}
+                />
+            </div>
         </div>
+
     );
 };
 

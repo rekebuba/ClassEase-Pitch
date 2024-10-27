@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import AdminPanel from "../components/AdminPanel";
 import AdminHeader from "../components/AdminHeader";
 import './styles/AdminDashboard.css'
+import './styles/Table.css';
 import { FaPlus } from 'react-icons/fa';
 import api from "../services/api";
 import Alert from './Alert';
@@ -147,10 +148,8 @@ const AdminCreateMarkList = () => {
             "semester": selectedSemester,
             "year": schoolYear
         }
-        console.log(mark_list_data)
         try {
-            const response = await api.put('admin/students/mark_list', mark_list_data)
-            console.log(response.data)
+            await api.put('admin/students/mark_list', mark_list_data)
 
             // If successful, show a success alert
             showAlert("success", "Mark list created successfully!");

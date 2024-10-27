@@ -3,87 +3,67 @@ import api from "../services/api";
 import { useNavigate } from "react-router-dom";
 import "./styles/Login.css";
 
-function Login() {
-  const [credentials, setCredentials] = useState({
-    id: "",
-    password: ""
-  });
+const Login = () => {
+  const [credentials, setCredentials] = useState({ id: "", password: "" });
   const [warning, setWarning] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      const response = await api.post('/login', credentials);
-      localStorage.setItem("Authorization", response.data.access_token);
-      navigate(`/${response.data.role}/dashboard`); // Redirect to dashboard
+      const response = await api.get('/login', { params: credentials });
+      if (response.status === 200) {
+        localStorage.setItem("Authorization", response.data.access_token);
+        navigate(`/${response.data.role}/dashboard`);
+      }
     } catch (error) {
-      setWarning("id or password is not correct");
+      setWarning("ID or password is incorrect");
     }
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setCredentials((prevCredentials) => ({
+      ...prevCredentials,
+      [name]: value,
+    }));
+  };
+
   return (
-    // <div className="container">
-      <div className="login-section">
-        <div className="login-box">
-          <h2>Login to your account</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="input-group">
-              <i className="fa fa-user" />
-              <input
-                type="text"
-                placeholder="id"
-                value={credentials.id}
-                onChange={e =>
-                  setCredentials({ ...credentials, id: e.target.value })}
-              />
-            </div>
-            <div className="input-group">
-              <i className="fa fa-lock" />
-              <input
-                type="password"
-                placeholder="Password"
-                value={credentials.password}
-                onChange={e =>
-                  setCredentials({ ...credentials, password: e.target.value })}
-              />
-            </div>
-            <button type="submit" className="login-button">
-              Login
-            </button>
-            <p className="warning">
-              {warning}
-            </p>
-            <p className="forgot-password">Forgot Password?</p>
-          </form>
-        </div>
+    <div className="login-section">
+      <div className="login-box">
+        <h2>Login to your account</h2>
+        <form onSubmit={handleSubmit}>
+          <div className="input-group">
+            <i className="fa fa-user" />
+            <input
+              type="text"
+              name="id"
+              placeholder="ID"
+              value={credentials.id}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="input-group">
+            <i className="fa fa-lock" />
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={credentials.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          {warning && <p className="warning">{warning}</p>}
+          <button type="submit" className="login-button">
+            Login
+          </button>
+        </form>
       </div>
-    // </div>
-    // <div>
-    //   <h2>Login</h2>
-    //   <form onSubmit={handleSubmit}>
-    //     <input
-    //       type="text"
-    //       placeholder="id"
-    //       value={credentials.id}
-    //       onChange={e =>
-    //         setCredentials({ ...credentials, id: e.target.value })}
-    //     />
-    //     <input
-    //       type="password"
-    //       placeholder="Password"
-    //       value={credentials.password}
-    //       onChange={e =>
-    //         setCredentials({ ...credentials, password: e.target.value })}
-    //     />
-    //     <button type="submit">Login</button>
-    //     <p className="warning">
-    //       {warning}
-    //     </p>
-    //   </form>
-    // </div>
+    </div>
   );
-}
+};
 
 export default Login;

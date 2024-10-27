@@ -41,7 +41,6 @@ const TeacherMarkList = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log('Updated Scores:', scores);
         setIsSubmitted(true);
     };
 

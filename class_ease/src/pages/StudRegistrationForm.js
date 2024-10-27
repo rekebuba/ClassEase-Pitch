@@ -22,7 +22,6 @@ const StudentRegistrationForm = () => {
     e.preventDefault();
     const snakeCaseFormData = convertKeysToSnakeCase(formData);
     try {
-      console.log("Form Submitted:", snakeCaseFormData);
       const response = await Api.post('/student/registration', snakeCaseFormData);
       showAlert("success", response.data['message']);
       // clear the form inputs (keeps user on same page)
@@ -39,7 +38,6 @@ const StudentRegistrationForm = () => {
     } catch (error) {
       if (error.response && error.response.data && error.response.data['error']) {
         showAlert("warning", error.response.data['error']);
-        console.log("Error:", error);
       } else {
         showAlert("warning", "An unexpected error occurred.");
       }
@@ -52,16 +50,12 @@ const StudentRegistrationForm = () => {
   };
 
   const showAlert = (type, message) => {
-    console.log("this is an Alert:", type, message);
     setAlert({ type, message, show: true });
   };
 
   const closeAlert = () => {
     setAlert({ ...alert, show: false });
   };
-
-
-  console.log(alert)
 
   return (
     <div className="registration-form-container">

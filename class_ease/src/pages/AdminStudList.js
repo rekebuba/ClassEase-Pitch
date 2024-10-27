@@ -3,25 +3,32 @@ import { FaSearch } from 'react-icons/fa';
 import api from "../services/api";
 import Alert from "./Alert"
 import Pagination from "./library/pagination";
+import './styles/Table.css'
 
 
-function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStudents, toggleDropdown, studentSummary }) {
+function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStudents, toggleProfile, profileSummary }) {
     return (
-        <section className="student-list">
-            <div className="list-head">
-                <h3>Student List:</h3>
-                <div className="search-bar">
-                    <input
-                        type="text"
-                        placeholder="Search Student"
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                    />
-                    <button onClick={() => handleSearch()}>
-                        <FaSearch />
-                    </button>
+        <section className="table-section">
+            {(filteredStudents.students.length > 0) && (
+                <div className="table-head">
+                    <h3>Student List</h3>
+                    <h3>
+                        <span>{`Academic Year: ${filteredStudents.header.year}`}</span>
+                        <span style={{ marginLeft: '20px' }}>{`Grade: ${filteredStudents.header.grade}`}</span>
+                    </h3>
+                    <div className="table-search-bar">
+                        <input
+                            type="text"
+                            placeholder="Search Student"
+                            value={searchTerm}
+                            onChange={handleSearchChange}
+                        />
+                        <button onClick={() => handleSearch()}>
+                            <FaSearch />
+                        </button>
+                    </div>
                 </div>
-            </div>
+            )}
 
             <table className="data-table">
                 <thead>
@@ -29,41 +36,41 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
                         <th>ID</th>
                         <th>Name</th>
                         <th>Father Name</th>
-                        <th>Grade</th>
+                        <th>G.Father Name</th>
                         <th>Section</th>
-                        <th>Year</th>
                         <th>Action</th>
                     </tr>
                 </thead>
-                {filteredStudents.students.map(student => <tbody>
-                    {/* Dynamic Data Rows */}
-                    <tr>
-                        <td>{student.student_id}</td>
-                        <td>{student.name}</td>
-                        <td>{student.father_name}</td>
-                        <td>{student.grade}</td>
-                        <td>{student.section ? student.section : 'N/A'}</td>
-                        <td>{student.year}</td>
-                        <td>
-                            <button className="detail-btn" onClick={() => {
-                                toggleDropdown();
-                                studentSummary(student); // Pass the data for the clicked student
-                            }}>Detail</button>
-                        </td>
-                    </tr>
-                </tbody>)}
+                <tbody>
+                    {filteredStudents.students.map((student, index) => (
+                        // Dynamic Data Rows
+                        <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#fff' : '#f1f1f1' }}>
+                            <td>{student.student_id}</td>
+                            <td>{student.name}</td>
+                            <td>{student.father_name}</td>
+                            <td>{student.grand_father_name}</td>
+                            <td>{student.section ? student.section : 'N/A'}</td>
+                            <td>
+                                <button className="detail-btn" onClick={() => {
+                                    toggleProfile();
+                                    profileSummary(student); // Pass the data for the clicked student
+                                }}>Detail</button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
             </table>
         </section>
     );
 }
 
 
-const AdminStudentsList = ({ toggleDropdown, studentSummary }) => {
+const AdminStudentsList = ({ toggleProfile, profileSummary }) => {
     const [selectedGrade, setSelectedGrade] = useState(1);
     const [selectedYear, setSelectedYear] = useState("2024/25");
     const [alert, setAlert] = useState({ type: "", message: "", show: false });
     const [allStudents, setAllStudents] = useState({ students: [], meta: {} });        // Store all students
-    const [filteredStudents, setFilteredStudents] = useState({ students: [], meta: {} });  // Store the filtered search results
+    const [filteredStudents, setFilteredStudents] = useState({ students: [], meta: {}, header: {} });  // Store the filtered search results
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [currentYear] = useState(new Date().getFullYear());
@@ -85,10 +92,10 @@ const AdminStudentsList = ({ toggleDropdown, studentSummary }) => {
 
             const data = {
                 students: response.data['students'],
-                meta: response.data['meta']
+                meta: response.data['meta'],
+                header: response.data['header']
             };
 
-            console.log(searchTerm)
             if (searchTerm) {
                 setFilteredStudents(data); // Update with search results
             } else {
@@ -104,7 +111,7 @@ const AdminStudentsList = ({ toggleDropdown, studentSummary }) => {
             }
             // Reset the state
             setCurrentPage(1);
-            setFilteredStudents({ students: [], meta: {} });
+            setFilteredStudents({ students: [], meta: {}, header: {} });
         }
     };
 
@@ -131,14 +138,6 @@ const AdminStudentsList = ({ toggleDropdown, studentSummary }) => {
     };
 
     const handleGradeChange = e => setSelectedGrade(parseFloat(e.target.value));
-    // const handleSectionChange = e => {
-    //     const { value, checked } = e.target;
-    //     if (checked) {
-    //         setSelectedSection([...selectedSection, value]);
-    //     } else {
-    //         setSelectedSection(selectedSection.filter((section) => section !== value))
-    //     }
-    // }
     const handleYearChange = e => setSelectedYear(e.target.value);
 
     const handleSearchChange = (e) => {
@@ -169,24 +168,6 @@ const AdminStudentsList = ({ toggleDropdown, studentSummary }) => {
                         )}
                     </select>
                 </div>
-                {/* <div className="filter-group">
-                    <label htmlFor="section">Section:</label>
-                    <div className="checkbox-group stud-list">
-                        {['A', 'B', 'C'].map((section) => (
-                            <div className="subject-container" key={section}>
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        value={section}
-                                        checked={selectedSection.includes(section)}
-                                        onChange={handleSectionChange}
-                                    />
-                                    {section}
-                                </label>
-                            </div>
-                        ))}
-                    </div>
-                </div> */}
                 <div className="filter-group">
                     <label htmlFor="year">Year:</label>
                     <select id="year" value={selectedYear} onChange={handleYearChange}>
@@ -218,8 +199,8 @@ const AdminStudentsList = ({ toggleDropdown, studentSummary }) => {
                 handleSearchChange={handleSearchChange}
                 handleSearch={handleSearch}
                 filteredStudents={filteredStudents}
-                toggleDropdown={toggleDropdown}
-                studentSummary={studentSummary}
+                toggleProfile={toggleProfile}
+                profileSummary={profileSummary}
             />
             {
                 (filteredStudents.meta.total_pages > 1 && filteredStudents.students.length >= limit) &&

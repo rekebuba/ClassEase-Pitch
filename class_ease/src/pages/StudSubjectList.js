@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import './styles/StudDashboard.css';
+import './styles/Table.css'
 import './styles/Dashboard.css';
 import Alert from "./Alert";
 import api from "../services/api";
 
-function SubjectList({ student, allSubjects, toggleDropdown, studentSummary }) {
+export function SubjectList({ student, allSubjects, toggleAssessment, assessmentSummary }) {
     return (
-        <section className="student-list">
+        <section className="table-section">
             <div className="list-head">
                 {student.year && (
                     <h3>
@@ -32,14 +33,14 @@ function SubjectList({ student, allSubjects, toggleDropdown, studentSummary }) {
                         <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#fff' : '#f1f1f1' }}>
                             <td>{index + 1}</td>
                             <td>{subject.subject}</td>
-                            <td>{subject.average}</td>
+                            <td>{subject.subject_average}</td>
                             <td>{subject.rank || 'N/A'}</td>
                             <td>
                                 <button
                                     className="detail-btn"
                                     onClick={() => {
-                                        studentSummary(subject);
-                                        toggleDropdown();
+                                        assessmentSummary(subject);
+                                        toggleAssessment();
                                     }}
                                 >
                                     Detail
@@ -49,7 +50,7 @@ function SubjectList({ student, allSubjects, toggleDropdown, studentSummary }) {
                     ))}
                     <tr className="summary-row">
                         <td colSpan="3">Total Average</td>
-                        <td>{student.average_score}</td>
+                        <td>{student.semester_average}</td>
                         <td>Rank: {student.rank}</td>
                     </tr>
                 </tbody>
@@ -58,7 +59,7 @@ function SubjectList({ student, allSubjects, toggleDropdown, studentSummary }) {
     );
 }
 
-const StudentSubjectList = ({ toggleDropdown, studentSummary }) => {
+const StudentSubjectList = ({ toggleAssessment, assessmentSummary }) => {
     const [selectedGrade, setSelectedGrade] = useState(1);
     const [selectedSemester, setSelectedSemester] = useState(1);
     const [alert, setAlert] = useState({ type: "", message: "", show: false });
@@ -79,6 +80,8 @@ const StudentSubjectList = ({ toggleDropdown, studentSummary }) => {
             setStudent(response.data['student']);
         } catch (error) {
             const errorMessage = error.response?.data?.error || "An unexpected error occurred.";
+            setAllSubjects([]);
+            setStudent({});
             showAlert("warning", errorMessage);
         }
     };
@@ -160,8 +163,8 @@ const StudentSubjectList = ({ toggleDropdown, studentSummary }) => {
             <SubjectList
                 allSubjects={allSubjects}
                 student={student}
-                toggleDropdown={toggleDropdown}
-                studentSummary={studentSummary}
+                toggleAssessment={toggleAssessment}
+                assessmentSummary={assessmentSummary}
             />
         </div>
     );

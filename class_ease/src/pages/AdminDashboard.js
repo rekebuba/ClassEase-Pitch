@@ -1,32 +1,29 @@
 import React, { useState, useEffect } from "react";
 import "./styles/Dashboard.css";
 import "./styles/AdminDashboard.css";
+import './styles/Table.css';
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
 import AdminPanel from "../components/AdminPanel";
-import ExamAssessmentReports from "./AdminExamAssessmentReports";
 import AdminHeader from "../components/AdminHeader";
-import AdminStudProfile from "./AdminStudProfile";
+import AdminStudPerformance from "./AdminStudPerformance";
 
 const AdminDashboard = () => {
-  const [adminData, setAdminData] = useState({});
+  const [overview, setOverview] = useState({});
   const navigate = useNavigate();
 
-  useEffect(
-    () => {
-      const retrieveData = async () => {
-        try {
-          const data = await api.get("/admin/dashboard");
-          setAdminData(data.data);
-        } catch (error) {
-          console.error("Error fetching data:", error);
-        }
-      };
+  useEffect(() => {
+    const retrieveData = async () => {
+      try {
+        const data = await api.get("/admin/overview");
+        setOverview(data.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
 
-      retrieveData();
-    },
-    [navigate]
-  );
+    retrieveData();
+  }, [navigate]);
 
   return (
     <div className="admin-dashboard-container">
@@ -34,24 +31,20 @@ const AdminDashboard = () => {
       <div className="content">
         <main className="dashboard-content">
           <AdminHeader />
-          {/* <header className="admin-header">
-            <h2>Welcome Admin</h2>
-          </header> */}
           <section className="admin-stats">
             <div className="admin-stat-card">
               <h3>Total Students</h3>
-              <p>350</p>
+              <p>{overview.total_students}</p>
             </div>
             <div className="admin-stat-card">
               <h3>Total Teachers</h3>
-              <p>45</p>
-            </div>
-            <div className="admin-stat-card">
-              <h3>Active Classes</h3>
-              <p>20</p>
+              <p>{overview.total_teachers}</p>
             </div>
           </section>
-          <AdminStudProfile />
+          <AdminStudPerformance
+            enrollmentByGrade={overview.enrollment_by_grade}
+            performanceBySubject={overview.performance_by_subject}
+          />
         </main>
       </div>
     </div>

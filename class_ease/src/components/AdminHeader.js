@@ -6,7 +6,6 @@ import {
     FaCogs,
     FaChartBar,
     FaUsers,
-    FaUserTie,
     FaUserShield,
     FaBookOpen,
     FaBuilding,
@@ -52,10 +51,6 @@ const AdminHeader = () => {
         navigate("/admin/events/newevent")
     }
 
-    const studentPerformance = e => {
-        navigate("/admin/students/performance")
-    }
-
     const goToDashboard = e => {
         navigate("/admin/dashboard")
     }
@@ -76,9 +71,10 @@ const AdminHeader = () => {
         navigate("/admin/assign/teachers");
     }
 
-    const dataExportImport = e => {
-        navigate("/admin/settings/importexport")
+    const updateProfile = e => {
+        navigate("/admin/update/profile")
     }
+
     return (
         <header className="dashboard-header">
             <div className="dashboard-logo">ClassEase School</div>
@@ -137,7 +133,7 @@ const AdminHeader = () => {
                         <FaChartBar /> Report
                     </span>
                     <div className="dropdown-content">
-                        <div className="dropdown-item" onClick={studentPerformance}><FaChartPie /> Student Performance Report</div>
+                        <div className="dropdown-item"><FaChartPie /> Student Performance Report</div>
                         <div className="dropdown-item"><FaFileInvoice /> Attendance Reports</div>
                         <div className="dropdown-item"><FaFileContract /> Exam Reports</div>
                     </div>
@@ -147,10 +143,7 @@ const AdminHeader = () => {
                         <FaCog /> Settings
                     </span>
                     <div className="dropdown-content">
-                        <div className="dropdown-item"><FaCogs /> System Settings</div>
-                        <div className="dropdown-item"><FaUserTag /> User Roles</div>
-                        <div className="dropdown-item"><FaKey /> Access Control</div>
-                        <div className="dropdown-item"><FaDatabase /> Backup & Restore</div>
+                        <div className="dropdown-item" onClick={updateProfile}><FaCogs /> Update Profile</div>
                     </div>
                 </div>
             </div>

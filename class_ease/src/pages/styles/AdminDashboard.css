@@ -43,32 +43,6 @@ html {
     margin-bottom: 15px;
 }
 
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-}
-
-.data-table th,
-.data-table td {
-    padding: 15px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-}
-
-.view-btn {
-    background-color: #2a3f54;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.view-btn:hover {
-    background-color: #1d2e40;
-}
-
 /* CSS (AdminManageStudents) */
 .admin-manage-container {
     position: relative;
@@ -166,33 +140,6 @@ html {
     transform: scale(1.03)
 }
 
-.student-list {
-    margin-top: 80px;
-}
-
-
-.list-head {
-    display: flex;
-}
-
-.list-head h3 {
-    margin-top: 30px;
-}
-
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-}
-
-.data-table th,
-.data-table td {
-    padding: 15px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-    max-width: 100px;
-}
-
 .action-container {
     display: flex;
     gap: 20px;
@@ -248,6 +195,7 @@ h2 {
     display: flex;
     flex-wrap: wrap;
     justify-content: space-between;
+    width: 100%;
 }
 
 .chart-card {
@@ -258,6 +206,7 @@ h2 {
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 42%;
+    height: 50%;
 }
 
 .chart-card h3 {
@@ -668,112 +617,6 @@ h2 {
     border: 1px solid #ddd;
     margin-bottom: 10px;
     border-radius: 5px;
-}
-
-/* CSS (StudentProfile) */
-.manage-student-container {
-    position: relative;
-}
-
-.stud-list {
-    margin-top: 10px;
-}
-
-.profile-header-container h2 {
-    margin-left: 35%;
-}
-
-.profile-header-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-
-.profile-fatimes {
-    background-color: #2a3f54;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.profile-fatimes:hover {
-    background-color: #1d2e40;
-    transform: scale(1.03);
-}
-
-.teacher-profile-view,
-.student-profile-view {
-    display: none;
-    position: absolute;
-    top: 0;
-    width: 800px;
-    height: 500px;
-    margin: 0 auto;
-    margin-left: 100px;
-    margin-top: 100px;
-    padding: 20px;
-    background-color: #fff;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    overflow-y: scroll;
-    z-index: 1000;
-}
-
-.teacher-profile-view.open,
-.student-profile-view.open {
-    display: block;
-}
-
-.teacher-profile-view.close,
-.student-profile-view.close {
-    display: none;
-}
-
-.profile-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 30px;
-}
-
-.student-picture img {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    object-fit: cover;
-    margin-right: 20px;
-}
-
-.student-info h2 {
-    margin: 0;
-}
-
-.profile-content {
-    margin-top: 20px;
-}
-
-.profile-content h3,
-.profile-content h4 {
-    margin-bottom: 10px;
-}
-
-.subject-scores-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 10px;
-}
-
-.subject-scores-table th,
-.subject-scores-table td {
-    padding: 10px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-}
-
-.subject-scores-table th {
-    background-color: #f4f6f9;
 }
 
 /* CSS (TeacherProfile) */

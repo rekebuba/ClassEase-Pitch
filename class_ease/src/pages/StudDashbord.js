@@ -6,15 +6,15 @@ import StudentSubjectList from "./StudSubjectList";
 import PopupScore from "./StudPopupScore";
 
 const StudentDashboard = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isAssesOpen, setIsAssesOpen] = useState(false);
   const [studentSummary, setStudentSummary] = useState({});
 
-  const toggleDropdown = () => {
-    setIsOpen(!isOpen);
+  const toggleAssessment = () => {
+    setIsAssesOpen(!isAssesOpen);
   };
 
-  const toggleAssessment = () => {
-    setIsOpen(false);
+  const closeAssessment = () => {
+    setIsAssesOpen(false);
   }
 
   const summary = (data) => {
@@ -28,8 +28,15 @@ const StudentDashboard = () => {
         <header className="dashboard-header">
           <div className="dashboard-logo">ClassEase School</div>
         </header>
-        <StudentSubjectList toggleDropdown={toggleDropdown} studentSummary={summary} />
-        <PopupScore isOpen={isOpen} toggleAssessment={toggleAssessment} studentData={studentSummary} />
+        <StudentSubjectList
+          toggleAssessment={toggleAssessment}
+          assessmentSummary={summary}
+        />
+        <PopupScore
+          isAssesOpen={isAssesOpen}
+          closeAssessment={closeAssessment}
+          assessmentSummary={studentSummary}
+        />
       </main>
     </div>
   );

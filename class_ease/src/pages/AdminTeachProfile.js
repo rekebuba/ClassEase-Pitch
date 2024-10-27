@@ -36,52 +36,52 @@ const TeachProfile = ({ isDetailOpen, toggleDetailProfile, teacherData }) => {
             setTeacher(transformedData);
         }
     }, [teacherData]);
-    console.log(teacher)
-    console.log(teacherData.record)
 
     return (
-        <div className={`teacher-profile-view ${isDetailOpen ? "open" : "close"}`}>
-            <div className="profile-header-container">
-                <h2>Teacher Data</h2>
-                <button className="profile-fatimes" onClick={toggleDetailProfile}><FaTimes size={24} /></button>
-            </div>
-            <div className="profile-header">
-                <div className="teacher-picture">
-                    <img src={teacher.pictureUrl} alt="Teacher" />
+        <div className={`popup-overlay ${isDetailOpen ? "open" : "close"}`}>
+            <div className='popup-overlay-container'>
+                <div className="close-popup">
+                    <h2 style={{ margin: 0 }}>Teacher Data</h2>
+                    <button onClick={toggleDetailProfile}><FaTimes size={24} /></button>
                 </div>
-                <div className="teacher-info">
-                    <h2>{teacher.name}</h2>
-                    <p>Age: {teacher.age}</p>
-                    <p>Experience: {teacher.experience}</p>
-                    <p>Email: {teacher.email}</p>
-                    <p>Phone: {teacher.phone}</p>
+                <div className="popup-profile-header">
+                    <div className="popup-profile-picture">
+                        <img src={teacher.pictureUrl} alt="Teacher" />
+                    </div>
+                    <div className="popup-profile-info">
+                        <h2>{teacher.name}</h2>
+                        <p>Age: {teacher.age}</p>
+                        <p>Experience: {teacher.experience}</p>
+                        <p>Email: {teacher.email}</p>
+                        <p>Phone: {teacher.phone}</p>
+                    </div>
                 </div>
-            </div>
 
-            <div className="profile-content">
-                <h3>Subjects Taught</h3>
-                <ul>
-                    {teacher.subjects && teacher.subjects.map((subject, index) => (
-                        <li key={index}>{subject}</li>
-                    ))}
-                </ul>
+                <div className="popup-profile-content">
+                    <h3>Subjects Taught</h3>
+                    <ul>
+                        {teacher.subjects && teacher.subjects.map((subject, index) => (
+                            <li key={index}>{subject}</li>
+                        ))}
+                    </ul>
 
-                <h3>Classes Handled</h3>
-                <ul>
-                    {teacher.classes && teacher.classes.length > 0 ? (
-                        teacher.classes.map((cls, index) => (
-                            <li key={index}>Grade: {cls.grade}, Section: {cls.section}, Subject: {cls.subject}</li>
-                        ))
-                    ) : (
-                        <li key='N/A'>N/A</li>
-                    )}
-                </ul>
-                <h3>Qualifications</h3>
-                <ul>
-                    {teacher.qualifications && teacher.qualifications.map((qualification, index) => (
-                        <li key={index}>{qualification}</li>
-                    ))}
-                </ul>
+                    <h3>Classes Handled</h3>
+                    <ul>
+                        {teacher.classes && teacher.classes.length > 0 ? (
+                            teacher.classes.map((cls, index) => (
+                                <li key={index}>Grade: {cls.grade}, Section: {cls.section}, Subject: {cls.subject}</li>
+                            ))
+                        ) : (
+                            <li key='N/A'>N/A</li>
+                        )}
+                    </ul>
+                    <h3>Qualifications</h3>
+                    <ul>
+                        {teacher.qualifications && teacher.qualifications.map((qualification, index) => (
+                            <li key={index}>{qualification}</li>
+                        ))}
+                    </ul>
+                </div>
             </div>
         </div>
     );

@@ -2,26 +2,36 @@ import React, { useState, useEffect } from "react";
 import { FaSearch } from 'react-icons/fa';
 import api from "../services/api";
 import Alert from "./Alert"
-import Pagination from "./library/pagination";
 
 
 function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStudents, toggleDropdown, studentSummary }) {
+    const totalSum = (assessment) => {
+        return assessment.reduce((sum, item) => sum + item.score, 0);
+    };
+
     return (
-        <section className="student-list">
-            <div className="list-head">
-                <h3>Student List:</h3>
-                <div className="search-bar">
-                    <input
-                        type="text"
-                        placeholder="Search Student"
-                        value={searchTerm}
-                        onChange={handleSearchChange}
-                    />
-                    <button onClick={() => handleSearch()}>
-                        <FaSearch />
-                    </button>
+        <section className="table-section">
+            {(filteredStudents.students.length > 0) && (
+                <div className="table-head">
+                    <h3>Student List</h3>
+                    <h3>
+                        <span>{`Academic Year: ${filteredStudents.header.year}`}</span>
+                        <span style={{ marginLeft: '20px' }}>{`Grade: ${filteredStudents.header.grade}`}</span>
+                        <span style={{ marginLeft: '20px' }}>{`Subject: ${filteredStudents.header.subject}`}</span>
+                    </h3>
+                    <div className="table-search-bar">
+                        <input
+                            type="text"
+                            placeholder="Search Student"
+                            value={searchTerm}
+                            onChange={handleSearchChange}
+                        />
+                        <button onClick={() => handleSearch()}>
+                            <FaSearch />
+                        </button>
+                    </div>
                 </div>
-            </div>
+            )}
 
             <table className="data-table">
                 <thead>
@@ -29,33 +39,33 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
                         <th>ID</th>
                         <th>Name</th>
                         <th>Father Name</th>
-                        <th>Grade</th>
+                        <th>G.Father Name</th>
                         <th>Section</th>
-                        <th>Subject</th>
-                        <th>Year</th>
+                        <th>Total Score</th>
                         <th>Action</th>
                     </tr>
                 </thead>
-                {filteredStudents.map(student => <tbody>
-                    {/* Dynamic Data Rows */}
-                    <tr>
-                        <td>{student.student_id}</td>
-                        <td>{student.name}</td>
-                        <td>{student.father_name}</td>
-                        <td>{student.grade}</td>
-                        <td>{student.section ? student.section : 'N/A'}</td>
-                        <td>{student.subject}</td>
-                        <td>{student.year}</td>
-                        <td>
-                            <button className="detail-btn" onClick={() => {
-                                toggleDropdown();
-                                studentSummary(student); // Pass the data for the clicked student
-                            }}>Detail</button>
-                        </td>
-                    </tr>
-                </tbody>)}
+                <tbody>
+                    {filteredStudents.students.map((student, index) => (
+                        // Dynamic Data Rows
+                        <tr key={index}>
+                            <td>{student.student_id}</td>
+                            <td>{student.name}</td>
+                            <td>{student.father_name}</td>
+                            <td>{student.grand_father_name}</td>
+                            <td>{student.section ? student.section : 'N/A'}</td>
+                            <td>{totalSum(student.assessment)}</td>
+                            <td>
+                                <button className="detail-btn" onClick={() => {
+                                    toggleDropdown();
+                                    studentSummary(student); // Pass the data for the clicked student
+                                }}>Detail</button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
             </table>
-        </section>
+        </section >
     );
 }
 
@@ -65,8 +75,8 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary }) => {
     const [selectedSemester, setSelectedSemester] = useState(1);
     const [selectedYear, setSelectedYear] = useState("2024/25");
     const [alert, setAlert] = useState({ type: "", message: "", show: false });
-    const [allStudents, setAllStudents] = useState([]);        // Store all students
-    const [filteredStudents, setFilteredStudents] = useState([]);  // Store the filtered search results
+    const [allStudents, setAllStudents] = useState({ students: [], header: {} });        // Store all students
+    const [filteredStudents, setFilteredStudents] = useState({ students: [], header: {} });  // Store the filtered search results
     const [selectedSection, setSelectedSection] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
@@ -76,6 +86,10 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary }) => {
 
 
     const handleSearch = async (page) => {
+        if (selectedSection.length === 0) {
+            showAlert("warning", "Select Section");
+            return;
+        }
         page = page || currentPage; // If page is not provided, use the current page
         try {
             const response = await api.get('/teacher/students/mark_list', {
@@ -90,12 +104,17 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary }) => {
                 }
             });
 
-            console.log(response.data['students'])
+            console.log(response.data)
+            const data = {
+                students: response.data['students'],
+                header: response.data['header']
+            };
+
             if (searchTerm) {
-                setFilteredStudents(response.data['students']); // Update with search results
+                setFilteredStudents(data); // Update with search results
             } else {
-                setAllStudents(response.data['students']);      // Store all students
-                setFilteredStudents(response.data['students']); // Initially, filtered is the same as all
+                setAllStudents(data);      // Store all students
+                setFilteredStudents(data); // Initially, filtered is the same as all
             }
             setCurrentPage(page);
         } catch (error) {
@@ -158,7 +177,6 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary }) => {
     const fetchAssignedGrade = async () => {
         try {
             const response = await api.get('/teacher/students/assigned_grade');
-            console.log(response.data)
             setGradeAssigned(response.data['grade']);
         } catch (error) {
             if (error.response && error.response.data && error.response.data['error']) {

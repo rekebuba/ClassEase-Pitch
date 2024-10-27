@@ -1,22 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bar, Line, Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, LineElement, PointElement, ArcElement } from 'chart.js';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend, LineElement, PointElement, ArcElement);
 
-const ExamAssessmentReports = () => {
+const ExamAssessmentReports = ({ subjectSummary }) => {
     const [studentPerformance, setStudentPerformance] = useState({
-        subjects: ['Math', 'English', 'Science', 'History', 'Geography'],
-        scores: [85, 90, 78, 88, 92],
-        timePeriod: ['Semester 1', 'Semester 2', 'Semester 3'],
+        subjects: [],
+        scores: [],
+        timePeriod: [],
         progress: [
-            { semester: 'Semester 1', score: 70 },
-            { semester: 'Semester 2', score: 80 },
-            { semester: 'Semester 3', score: 90 },
+            { semester: '', score: null },
+            { semester: '', score: null },
+            { semester: '', score: null },
         ],
     });
-
-    const [selectedStudent, setSelectedStudent] = useState('Student A');
 
     const barData = {
         labels: studentPerformance.subjects,
@@ -44,10 +42,22 @@ const ExamAssessmentReports = () => {
         ],
     };
 
+    useEffect(() => {
+        if (subjectSummary !== undefined && Object.keys(subjectSummary).length > 0) {
+            const subjects = subjectSummary.map((subject) => subject.subject);
+            const scores = subjectSummary.map((subject) => subject.subject_average);
+            const timePeriod = subjectSummary.map((subject) => subject.semester);
+            const progress = subjectSummary.map((subject) => ({ semester: subject.semester, score: subject.subject_average }));
+
+            setStudentPerformance({ ...studentPerformance, subjects, scores, progress, timePeriod });
+        }
+    }, [subjectSummary]);
+
+
+
     return (
         <div className="exam-assessment-reports">
             <div className="admin-dashboard-graph">
-                <h3>This Student Performance Overview</h3>
                 <div className="chart-container">
                     <div className="chart-card">
                         <h4>Subject Scores Comparison</h4>
