@@ -4,8 +4,7 @@ from api import create_app
 import json
 import random
 from models.admin import Admin
-from models.users import User
-from tests.test_api.helper_functions import register_admin, get_admin_access_token, create_mark_list, get_teacher_access_token, register_teacher, register_student, mark_list_data
+from tests.test_api.helper_functions import *
 
 
 class TestAdmin(unittest.TestCase):
@@ -24,11 +23,7 @@ class TestAdmin(unittest.TestCase):
 
     def test_admin_register_success(self):
         # Test that the admin register endpoint works
-        # self.drop_table()
-        response = self.client.post('/api/v1/admin/registration',
-                                    data=json.dumps(
-                                        {"name": "Abdullahi", "email": "newadmin@example.com"}),
-                                    content_type='application/json')
+        response = register_admin(self.client)
         self.assertEqual(response.status_code, 201)
         json_data = response.get_json()
         self.assertIn('Admin registered successfully!', json_data['message'])
@@ -36,12 +31,11 @@ class TestAdmin(unittest.TestCase):
     def test_admin_login_success(self):
         """Test that the admin login endpoint works."""
         register_admin(self.client)
+        id = storage.get_random(Admin).id
 
         # Test that a valid login returns a token
-        response = self.client.post('/api/v1/login',
-                                    data=json.dumps(
-                                        {"name": "Abdullahi", "id": storage.get_random(Admin).id, "password": storage.get_random(Admin).id}),
-                                    content_type='application/json')
+        response = self.client.get(
+            f'/api/v1/login?id={id}&password={id}', content_type='application/json')
 
         self.assertEqual(response.status_code, 200)
         json_data = response.get_json()
@@ -50,19 +44,19 @@ class TestAdmin(unittest.TestCase):
 
     def test_admin_login_wrong_id(self):
         # Test that an invalid email returns an error
-        response = self.client.post('/api/v1/login',
-                                    data=json.dumps(
-                                        {"name": "Abdullahi", "id": "dose't exist", "password": "testpassword"}),
-                                    content_type='application/json')
+        id = 'fake'
+
+        # Test that a valid login returns a token
+        response = self.client.get(
+            f'/api/v1/login?id={id}&password={id}', content_type='application/json')
         self.assertEqual(response.status_code, 401)
 
     def test_admin_login_wrong_password(self):
         # Test that an invalid password returns an error
         register_admin(self.client)
-        response = self.client.post('/api/v1/login',
-                                    data=json.dumps(
-                                        {"name": "Abdullahi", "id": storage.get_random(Admin).id, "password": "wrongpassword"}),
-                                    content_type='application/json')
+        id = storage.get_random(Admin).id
+        response = self.client.get(
+            f'/api/v1/login?id={id}&password=wrong', content_type='application/json')
         self.assertEqual(response.status_code, 401)
 
     def test_admin_dashboard_success(self):
@@ -109,8 +103,9 @@ class TestAdmin(unittest.TestCase):
             self.fail(
                 "Student can not be registered. Test failed. Check the student registration endpoint")
 
+        mark_list = generate_mark_list_data(1)
         response = self.client.put('/api/v1/admin/students/mark_list',
-                                   data=json.dumps(mark_list_data),
+                                   data=json.dumps(mark_list),
                                    headers={
                                        'Authorization': f'Bearer {token}'},
                                    content_type='application/json')
@@ -129,7 +124,7 @@ class TestAdmin(unittest.TestCase):
                 "Token not generated. Test failed. Check the login endpoint.")
 
         response = self.client.put('/api/v1/admin/students/mark_list',
-                                   data=json.dumps(mark_list_data),
+                                   data=json.dumps(generate_mark_list_data(1)),
                                    headers={
                                        'Authorization': f'Bearer {token}invalid'},
                                    content_type='application/json')
@@ -144,7 +139,7 @@ class TestAdmin(unittest.TestCase):
         if not token:
             self.fail("Mark list creation failed. Test failed")
 
-        response = self.client.get('/api/v1/admin/students/mark_list?grade=12&section=B&subject=english&semester=1&year=2023/24',
+        response = self.client.get('/api/v1/admin/manage/students?grade=1&year=2024/25',
                                    headers={
                                        'Authorization': f'Bearer {token}'},
                                    content_type='application/json')
@@ -191,9 +186,9 @@ class TestAdmin(unittest.TestCase):
         if not token:
             self.fail("Mark list creation failed. Test failed")
 
-        get_teacher_access_token(self.client)
+        teacher_token = get_teacher_access_token(self.client)
 
-        if not token:
+        if not teacher_token:
             self.fail(
                 "Token not generated. Test failed. Check the login endpoint.")
 
@@ -207,16 +202,17 @@ class TestAdmin(unittest.TestCase):
 
         teachers_data = response.json
 
-        random_entry = random.choice(teachers_data)
+        random_entry = random.choice(teachers_data['teachers'])
         teacher_id = random_entry.get('id')
 
-        response = self.client.put(f'/api/v1/admin/teacher/detail/course?teacher_id={teacher_id}',
+        response = self.client.put(f'/api/v1/admin/assign-teacher',
                                    data=json.dumps(
                                        {
-                                           "grade": 12,
+                                           "teacher_id": teacher_id,
+                                           "grade": 1,
                                            "section": ["A", "B"],
-                                           "subject": "math",
-                                           "year": "2023/24"
+                                           "subjects_taught": teachers_data['teachers'][0]['subjects'],
+                                           "mark_list_year": "2024/25"
                                        }
                                    ),
                                    headers={
@@ -224,18 +220,19 @@ class TestAdmin(unittest.TestCase):
                                    content_type='application/json')
 
         self.assertEqual(response.status_code, 201)
+        json_data = response.get_json()
+        self.assertIn('Teacher assigned successfully!', json_data['message'])
 
     def test_admin_course_assign_to_teacher_failure(self):
         """Test that an admin can access teacher course data."""
         # Test that a valid login returns a token
         token = create_mark_list(self.client)
-
         if not token:
             self.fail("Mark list creation failed. Test failed")
 
-        get_teacher_access_token(self.client)
+        teacher_token = get_teacher_access_token(self.client)
 
-        if not token:
+        if not teacher_token:
             self.fail(
                 "Token not generated. Test failed. Check the login endpoint.")
 
@@ -249,20 +246,22 @@ class TestAdmin(unittest.TestCase):
 
         teachers_data = response.json
 
-        random_entry = random.choice(teachers_data)
+        random_entry = random.choice(teachers_data['teachers'])
         teacher_id = random_entry.get('id')
 
-        response = self.client.put(f'/api/v1/admin/teacher/detail/course?teacher_id={teacher_id}',
+        response = self.client.put(f'/api/v1/admin/assign-teacher',
                                    data=json.dumps(
                                        {
-                                           "grade": 12,
+                                           "teacher_id": teacher_id,
+                                           "grade": 1,
                                            "section": ["A", "B"],
-                                           "subject": "math",
-                                           "year": "2023/24"
+                                           "subjects_taught": ["dose not exist"],
+                                           "mark_list_year": "2024/25"
                                        }
                                    ),
                                    headers={
-                                       'Authorization': f'Bearer {token}invalid'},
+                                       'Authorization': f'Bearer {token}'},
                                    content_type='application/json')
-
-        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.status_code, 404)
+        json_data = response.get_json()
+        self.assertIn('Subject not found', json_data['error'])
