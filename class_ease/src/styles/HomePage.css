@@ -5,7 +5,7 @@ html {
     /* Resets default body margin */
     padding: 0;
     /* Resets default body padding */
-    overflow-y: scroll;
+    /* overflow-y: scroll; */
 }
 
 .dashboard-header,
@@ -44,16 +44,22 @@ html {
     font-size: 18px;
 }
 
+.hero-content div,
+.login-btn {
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.hero-content div:hover,
+.login-btn:hover {
+    transform: scale(1.03);
+}
+
 .login-btn a {
     color: white;
     text-decoration: none;
     background-color: #ff9900;
     padding: 10px 15px;
     border-radius: 5px;
-}
-
-.login-btn a:hover {
-    background-color: #cc7a00;
 }
 
 /* Hero Section */
@@ -84,10 +90,7 @@ html {
     font-size: 18px;
     border-radius: 5px;
     text-decoration: none;
-}
-
-.cta-btn:hover {
-    background-color: #cc7a00;
+    transition: background-color 0.3s, transform 0.2s;
 }
 
 /* About, Academics, and Testimonials Section */
@@ -163,25 +166,42 @@ h2 {
     width: 30%;
 }
 
+.footer-subscribe input {
+    padding: 5px 10px;
+}
+
 .subscribe {
-    background-color: #2E5487; /* Button color */
-    color: white;              /* Text color */
-    border: none;              /* Remove default border */
-    border-radius: 5px;       /* Rounded corners */
-    padding: 10px 20px;       /* Top/bottom and left/right padding */
-    font-size: 16px;          /* Font size */
-    cursor: pointer;           /* Change cursor to pointer on hover */
-    transition: background-color 0.3s, transform 0.2s; /* Smooth transitions */
+    background-color: #2E5487;
+    /* Button color */
+    color: white;
+    /* Text color */
+    border: none;
+    /* Remove default border */
+    border-radius: 5px;
+    /* Rounded corners */
+    padding: 5px 10px;
+    /* Top/bottom and left/right padding */
+    margin-left: 10px;
+    font-size: 16px;
+    /* Font size */
+    cursor: pointer;
+    /* Change cursor to pointer on hover */
+    transition: background-color 0.3s, transform 0.2s;
+    /* Smooth transitions */
 }
 
 .subscribe:hover {
-    background-color: #005599; /* Darker color on hover */
-    transform: scale(1.05);    /* Slightly enlarge on hover */
+    background-color: #005599;
+    /* Darker color on hover */
+    transform: scale(1.05);
+    /* Slightly enlarge on hover */
 }
 
 .subscribe:focus {
-    outline: none;             /* Remove default focus outline */
-    box-shadow: 0 0 3px #005599; /* Add a subtle glow effect */
+    outline: none;
+    /* Remove default focus outline */
+    box-shadow: 0 0 3px #005599;
+    /* Add a subtle glow effect */
 }
 
 .footer-links ul {

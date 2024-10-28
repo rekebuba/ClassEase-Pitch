@@ -1,35 +1,40 @@
 import React from 'react';
+import HomeHeader from './HomeHeader';
 import '../styles/HomePage.css';
 import '../pages/student/StudentRegistrationForm';
 
 
-
+/**
+ * Home component renders the main landing page of the ClassEase School website.
+ * It includes several sections such as Hero, About Us, Academic Programs, 
+ * Latest News & Events, Testimonials, and Footer.
+ *
+ * Sections:
+ * - Hero: Welcomes visitors and provides a call-to-action button for student registration.
+ * - About Us: Provides information about the school's mission and environment.
+ * - Academic Programs: Details the different educational programs offered by the school.
+ * - Latest News & Events: Displays recent news and upcoming events.
+ * - Testimonials: Shares feedback from students and parents.
+ * - Footer: Contains contact information, quick links, and a newsletter subscription form.
+ *
+ * @component
+ * @example
+ * return (
+ *   <Home />
+ * )
+ */
 const Home = () => {
   return (
     <>
-      {/* Header */}
-      <header className="header">
-        <div className="logo">ClassEase School</div>
-        <nav>
-          <ul className="nav-links">
-            <li><a href="#home">Home</a></li>
-            <li><a href="#about">About Us</a></li>
-            <li><a href="#admissions">Admissions</a></li>
-            <li><a href="#academics">Academics</a></li>
-            <li><a href="#contact">Contact</a></li>
-          </ul>
-        </nav>
-        <div className="login-btn">
-          <a href="/login">Login</a>
-        </div>
-      </header>
-
+      <HomeHeader />
       {/* Hero Section */}
       <section id="home" className="hero">
         <div className="hero-content">
           <h1>Welcome to ClassEase School</h1>
           <p>Empowering students with the knowledge and skills to excel in the modern world.</p>
-          <a href="/student/registration" className="cta-btn">Apply Now</a>
+          <div>
+            <a href="/student/registration" className="cta-btn">Apply Now</a>
+          </div>
         </div>
       </section>
 

@@ -8,7 +8,7 @@ body,
 html {
     margin: 0;
     /* Remove default body margin */
-    overflow: hidden;
+    /* overflow: hidden; */
     /* Prevent body scroll */
 }
 
@@ -137,7 +137,7 @@ html {
 .filter-group-search:hover,
 .search-bar button:hover {
     background-color: #1d2e40;
-    transform: scale(1.03)
+    transform: scale(1.03);
 }
 
 .action-container {

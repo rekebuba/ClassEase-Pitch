@@ -20,7 +20,13 @@ function Pagination({ handlePreviousPage, currentPage, handleNextPage, meta }) {
 
         <div className="pagination-info">
             <span> Page </span>
-            <input type="text" className="pagination-input" defaultValue={currentPage} min={1} max={meta.total_pages} />
+            <input
+                type="text"
+                className="pagination-input"
+                value={currentPage}
+                min={1}
+                max={meta.total_pages}
+            />
             <span> of {meta.total_pages} </span>
         </div>
 

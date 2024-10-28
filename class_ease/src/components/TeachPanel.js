@@ -4,11 +4,49 @@ import { FaSignOutAlt, FaUserCircle } from "react-icons/fa";
 import api from '../services/api';
 
 
+/**
+ * TeacherPanel component renders the sidebar for the teacher's dashboard.
+ * It fetches teacher data from the API and displays the teacher's profile information.
+ * 
+ * @component
+ * 
+ * @example
+ * return (
+ *   <TeacherPanel />
+ * )
+ * 
+ * @returns {JSX.Element} The rendered sidebar component for the teacher's dashboard.
+ * 
+ * @function
+ * @name TeacherPanel
+ * 
+ * @description
+ * This component uses the `useNavigate` hook from `react-router-dom` for navigation and 
+ * the `useState` and `useEffect` hooks from `react` to manage state and side effects.
+ * It fetches teacher data from the `/teacher/dashboard` endpoint and displays the teacher's 
+ * profile information including their name, class, and subject taught. It also provides a 
+ * logout option that navigates to the logout page.
+ */
 const TeacherPanel = () => {
     const navigate = useNavigate();
     const [teacherData, setTeacherData] = useState({});
 
+    /**
+     * @hook useEffect
+     * @description Fetches teacher data from the API when the component mounts.
+     */
     useEffect(() => {
+        /**
+         * @async
+         * @function fetchAdmin
+         * @description Fetches teacher data from the API and updates the state.
+         * @throws Will log an error message to the console if the API request fails.
+         * @returns {undefined} Returns early if there is an error.
+         * @param {Object} error - The error response from the API.
+         * @param {Object} error.response - The response object from the API.
+         * @param {Object} error.response.data - The data object from the API response.
+         * @param {string} error.response.data['error'] - The error message from the API response.
+         */
         const fetchAdmin = async () => {
             try {
                 const response = await api.get('/teacher/dashboard');
@@ -23,6 +61,10 @@ const TeacherPanel = () => {
         fetchAdmin();
     }, []);
 
+    /**
+     * @function handleLogout
+     * @description Navigates to the logout page.
+     */
     const handleLogout = () => {
         navigate('/logout');
     }

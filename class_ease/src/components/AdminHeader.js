@@ -21,9 +21,6 @@ import {
     FaChartPie,
     FaFileInvoice,
     FaFileContract,
-    FaUserTag,
-    FaKey,
-    FaDatabase,
     FaCalendarCheck,
     FaPlusCircle,
     FaEdit,
@@ -32,10 +29,42 @@ import {
 import { useNavigate } from "react-router-dom";
 import React from "react";
 
+/**
+ * AdminHeader component renders the header section of the admin dashboard.
+ * It includes navigation links for various administrative tasks such as 
+ * managing students and teachers, creating events, and accessing reports.
+ * 
+ * @component
+ * @example
+ * return (
+ *   <AdminHeader />
+ * )
+ * 
+ * @returns {JSX.Element} The rendered header component for the admin dashboard.
+ * 
+ * @function
+ * @name AdminHeader
+ * 
+ * @description
+ * The AdminHeader component provides a set of navigation links organized into 
+ * dropdown menus. Each link triggers a navigation action to a different part 
+ * of the admin interface. The component uses the `useNavigate` hook from 
+ * `react-router-dom` to handle navigation.
+ * 
+ * @property {function} manageStudents - Navigates to the student management page.
+ * @property {function} manageTeachers - Navigates to the teacher management page.
+ * @property {function} assessMarkList - Navigates to the mark list assessment page.
+ * @property {function} createEvent - Navigates to the new event creation page.
+ * @property {function} goToDashboard - Navigates to the admin dashboard.
+ * @property {function} userAccessControl - Navigates to the user access control page.
+ * @property {function} enrollStudent - Navigates to the student enrollment page.
+ * @property {function} enrollTeacher - Navigates to the teacher registration page.
+ * @property {function} updateProfile - Navigates to the profile update page.
+ */
 const AdminHeader = () => {
     const navigate = useNavigate();
 
-    const manageStudents = e => {
+    const manageStudents = () => {
         navigate("/admin/manage/students");
     }
 
@@ -65,10 +94,6 @@ const AdminHeader = () => {
 
     const enrollTeacher = e => {
         navigate("/admin/teacher/registration")
-    }
-
-    const assignTeacher = e => {
-        navigate("/admin/assign/teachers");
     }
 
     const updateProfile = e => {
@@ -103,7 +128,7 @@ const AdminHeader = () => {
                     <div className="dropdown-content">
                         <div className="dropdown-item"><FaBuilding /> Class Management</div>
                         <div className="dropdown-item"><FaBook /> Subject Management</div>
-                        <div className="dropdown-item" onClick={assignTeacher}><FaChalkboard /> Assign Teachers</div>
+                        <div className="dropdown-item"><FaChalkboard /> Assign Teachers</div>
                         <div className="dropdown-item"><FaCalendarAlt /> Timetable Setup</div>
                     </div>
                 </div>

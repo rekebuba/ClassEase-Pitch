@@ -27,7 +27,7 @@ const AdminEnrollStud = ({ role }) => {
             <div className="content">
                 <main className="dashboard-content">
                     <AdminHeader />
-                    {role === 'teacher' ? <TeacherRegistrationForm /> : <StudentRegistrationForm />
+                    {role === 'teacher' ? <TeacherRegistrationForm /> : <StudentRegistrationForm role='admin' />
                     }
                 </main>
             </div>

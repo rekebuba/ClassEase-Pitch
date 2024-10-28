@@ -9,17 +9,49 @@ import {
 import { useNavigate } from "react-router-dom";
 import React from "react";
 
+/**
+ * TeacherHeader component renders the header section for the teacher's dashboard.
+ * It includes navigation links to the dashboard, student management, and profile update pages.
+ *
+ * @component
+ * @example
+ * return (
+ *   <TeacherHeader />
+ * )
+ *
+ * @returns {JSX.Element} The rendered header component.
+ *
+ * @function
+ * @name TeacherHeader
+ *
+ * @description
+ * The TeacherHeader component provides navigation options for teachers to manage students,
+ * access the dashboard, and update their profile. It uses the `useNavigate` hook from
+ * `react-router-dom` to handle navigation.
+ */
 const TeacherHeader = () => {
     const navigate = useNavigate();
 
+    /**
+     * @function manageStudents
+     * @description Navigates to the student management page.
+     */
     const manageStudents = e => {
         navigate("/teacher/students");
     };
 
+    /**
+     * @function goToDashboard
+     * @description Navigates to the teacher's dashboard.
+     */
     const goToDashboard = e => {
         navigate("/teacher/dashboard")
     }
 
+    /**
+     * @function updateProfile
+     * @description Navigates to the profile update page.
+     */
     const updateProfile = e => {
         navigate("/teacher/update/profile")
     }

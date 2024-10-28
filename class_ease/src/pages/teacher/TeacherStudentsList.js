@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { FaSearch } from 'react-icons/fa';
+import Pagination from '../library/pagination';
 import api from "../../services/api";
 import Alert from '../../services/Alert';
 
-function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStudents, toggleDropdown, studentSummary }) {
+function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStudents, currentStudents, toggleDropdown, studentSummary }) {
     const totalSum = (assessment) => {
         return assessment.reduce((sum, item) => sum + item.score, 0);
     };
@@ -45,7 +46,7 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
                     </tr>
                 </thead>
                 <tbody>
-                    {filteredStudents.students.map((student, index) => (
+                    {currentStudents.students.map((student, index) => (
                         // Dynamic Data Rows
                         <tr key={index}>
                             <td>{student.student_id}</td>
@@ -97,6 +98,8 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary }) => {
     const [currentPage, setCurrentPage] = useState(1);
     const [currentYear] = useState(new Date().getFullYear());
     const [gradeAssigned, setGradeAssigned] = useState([]);
+    const [currentStudents, setCurrentStudents] = useState({ students: [], header: {} });
+    const [totalPages, setTotalPages] = useState(0);
     const limit = 10;
 
     /**
@@ -149,19 +152,17 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary }) => {
     };
 
     const handleNextPage = () => {
-        if (currentPage < filteredStudents.meta.total_pages) {
-            const newPage = currentPage + 1;  // Increment the page
-            handleSearch(newPage);
+        if (currentPage < totalPages) {
+            setCurrentPage((prevPage) => prevPage + 1);
         }
     };
 
+    // Handle Previous Page
     const handlePreviousPage = () => {
         if (currentPage > 1) {
-            const newPage = currentPage - 1;  // Decrement the page
-            handleSearch(newPage);
+            setCurrentPage((prevPage) => prevPage - 1);
         }
     };
-
     /**
      * @function showAlert
      * @description Displays an alert message.
@@ -262,7 +263,20 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary }) => {
      */
     useEffect(() => {
         fetchAssignedGrade();
-    }, [selectedGrade]);
+
+        // Calculate the start and end indices for the students on the current page
+        const indexOfLastStudent = currentPage * limit;
+        const indexOfFirstStudent = indexOfLastStudent - limit;
+        setCurrentStudents({
+            students: filteredStudents.students.slice(indexOfFirstStudent, indexOfLastStudent),
+            header: filteredStudents.header
+        });
+
+        // Calculate total pages
+        setTotalPages(Math.ceil(filteredStudents.students.length / limit));
+    }, [selectedGrade, currentPage, filteredStudents]);
+
+
 
     return (
         <div className="dashboard-container">
@@ -344,18 +358,21 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary }) => {
                 handleSearchChange={handleSearchChange}
                 handleSearch={handleSearch}
                 filteredStudents={filteredStudents}
+                currentStudents={currentStudents}
                 toggleDropdown={toggleDropdown}
                 studentSummary={studentSummary}
             />
-            {/* {
-                (filteredStudents.meta.total_pages > 1 && filteredStudents.students.length >= limit) &&
+            {
+                (totalPages > 1 && filteredStudents.students.length >= limit) &&
                 <Pagination
                     handlePreviousPage={handlePreviousPage}
                     currentPage={currentPage}
                     handleNextPage={handleNextPage}
-                    meta={filteredStudents.meta}
+                    meta={{
+                        total_pages: totalPages
+                    }}
                 />
-            } */}
+            }
         </div>
     );
 };
