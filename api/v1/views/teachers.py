@@ -22,6 +22,50 @@ from math import ceil
 teach = Blueprint('teach', __name__, url_prefix='/api/v1/teacher')
 
 
+@teach.route('/dashboard', methods=['GET'])
+@teacher_required
+def teacher_dashboard(teacher_data):
+    if not teacher_data:
+        return jsonify({"error": "Teacher not found"}), 404
+    return jsonify(teacher_data.to_dict()), 200
+
+
+@teach.route('/update-profile', methods=['PUT'])
+@teacher_required
+def update_teacher_profile(teacher_data):
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Not a JSON"}), 400
+
+    required_data = {
+        'first_name',
+        'email',
+        'phone',
+    }
+
+    for field in required_data:
+        if field not in data:
+            return jsonify({"error": f"Missing {field}"}), 400
+
+    teacher_data.first_name = data['first_name']
+    teacher_data.email = data['email']
+    teacher_data.phone = data['phone']
+
+    if 'new_password' in data:
+        if 'current_password' not in data:
+            return jsonify({"error": "Missing old password"}), 400
+        user = storage.get_first(User, id=teacher_data.id)
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+        if not user.check_password(data['current_password']):
+            return jsonify({"error": "Incorrect password"}), 400
+
+        user.hash_password(data['new_password'])
+    storage.save()
+
+    return jsonify({"message": "Profile Updated Successfully"}), 200
+
+
 @teach.route('/students/mark_list', methods=['GET'])
 @teacher_required
 def get_students(teacher_data):
@@ -73,13 +117,12 @@ def get_students(teacher_data):
                                 for student in students_query])
 
     updated_student_list = {}
-    for data in student_list:
-        student_id = data['student_id']
+    for student_data in student_list:
+        student_id = student_data['student_id']
         if student_id not in updated_student_list:
             student = storage.get_first(Student, id=student_id)
-            section = storage.get_first(Section, id=data['section_id'])
-            grade = storage.get_first(Grade, id=data['grade_id'])
-            subject = storage.get_first(Subject, id=data['subject_id'])
+            section = storage.get_first(Section, id=student_data['section_id'])
+            subject = storage.get_first(Subject, id=student_data['subject_id'])
             updated_student_list[student_id] = {
                 "student_id": student_id,
                 "name": student.name,
@@ -91,20 +134,25 @@ def get_students(teacher_data):
                 "grade_id": grade.id,
                 "subject": subject.name,
                 "subject_id": subject.id,
-                "semester": data['semester'],
-                "year": data['year'],
+                "semester": student_data['semester'],
+                "year": student_data['year'],
                 "assessment": []
             }
         updated_student_list[student_id]['assessment'].append({
-            "assessment_type": data['type'],
-            "score": data['score'],
-            "percentage": data['percentage']
+            "assessment_type": student_data['type'],
+            "score": student_data['score'],
+            "percentage": student_data['percentage']
         })
 
     student_list = list(updated_student_list.values())
 
     return jsonify({
         "students": student_list,
+        "header": {
+            "grade": data['grade'][0],
+            "year": data['year'][0],
+            "subject": student_list[0]['subject'],
+        }
     }
     ), 200
 
@@ -116,7 +164,8 @@ def get_teacher_assigned_grade(teacher_data):
         TeachersRecord.teacher_id == teacher_data.id
     )
 
-    if not assigned_grade:
+    print(assigned_grade.all())
+    if not assigned_grade.all():
         return jsonify({"error": f"No grades were assigned"}), 404
 
     joined = assigned_grade.join(Grade, Grade.id == TeachersRecord.grade_id)
@@ -155,11 +204,13 @@ def add_student_assessment(teacher_data):
         if not teacher_record:
             return jsonify({"error": "Teacher record not found"}), 404
 
+        print(student_data['student_id'])
         for assessment in assessments:
             update_score = storage.get_session().execute(
                 update(MarkList)
                 .where(and_(
                     MarkList.teachers_record_id == teacher_record.id,
+                    MarkList.student_id == student_data['student_id'],
                     MarkList.semester == student_data['semester'],
                     MarkList.year == student_data['year'],
                     MarkList.type == assessment['assessment_type']
@@ -333,9 +384,3 @@ def year_ranks(student_data):
             avrg.rank = rank
 
     storage.save()
-
-
-@teach.route('/dashboard', methods=['GET'])
-@teacher_required
-def teacher_dashboard(teacher_data):
-    return jsonify(teacher_data.to_dict()), 200

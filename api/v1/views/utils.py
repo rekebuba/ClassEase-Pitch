@@ -136,6 +136,46 @@ def student_required(f):
 
     return decorated_function
 
+# Unified decorator for Student and Admin JWT verification
+def student_or_admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = None
+        if 'Authorization' in request.headers:
+            token = request.headers['Authorization'].split()[1]  # Bearer token
+
+        if not token:
+            return jsonify({'message': 'Token is missing!'}), 401
+
+        try:
+            # First, try decoding as a student token
+            payload = jwt.decode(
+                token, current_app.config["STUDENT_SECRET_KEY"], algorithms=["HS256"])
+            student_data = storage.get_first(
+                StudentYearlyRecord, student_id=payload['id'])
+            if student_data:
+                return f(student_data, None, *args, **kwargs)
+        except jwt.ExpiredSignatureError:
+            return jsonify({'message': 'Token has expired'}), 401
+        except jwt.InvalidTokenError:
+            pass  # Invalid for student, let's check for admin
+
+        try:
+            # Then, try decoding as an admin token
+            payload = jwt.decode(
+                token, current_app.config["ADMIN_SECRET_KEY"], algorithms=["HS256"])
+            admin_data = storage.get_first(Admin, id=payload['id'])
+            if admin_data:
+                return f(None, admin_data, *args, **kwargs)
+        except jwt.ExpiredSignatureError:
+            return jsonify({'message': 'Token has expired'}), 401
+        except jwt.InvalidTokenError:
+            return jsonify({'message': 'Invalid token'}), 401
+
+        return jsonify({'message': 'Unauthorized access'}), 401
+
+    return decorated_function
+
 
 def update_overall_averages():
     averages = storage.get_session().query(

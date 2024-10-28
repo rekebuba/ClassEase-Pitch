@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 from flask import request, jsonify
+from sqlalchemy import func
 from models import storage
 from flask import Blueprint
 from models.users import User
@@ -22,6 +23,83 @@ from math import ceil
 
 
 auth = Blueprint('auth', __name__, url_prefix='/api/v1/admin')
+
+
+@auth.route('/dashboard', methods=['GET'])
+@admin_required
+def admin_dashboard(admin_data):
+    if not admin_data:
+        return jsonify({"error": "Admin not found"}), 404
+    return jsonify(admin_data.to_dict()), 200
+
+
+@auth.route('/update-profile', methods=['PUT'])
+@admin_required
+def update_admin_profile(admin_data):
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Not a JSON"}), 400
+
+    required_data = {
+        'name',
+        'email',
+        # 'phone',
+    }
+
+    for field in required_data:
+        if field not in data:
+            return jsonify({"error": f"Missing {field}"}), 400
+
+    admin_data.name = data['name']
+    admin_data.email = data['email']
+    # admin_data.phone = data['phone']
+
+    if 'new_password' in data:
+        if 'current_password' not in data:
+            return jsonify({"error": "Missing old password"}), 400
+        user = storage.get_first(User, id=admin_data.id)
+        if not user:
+            return jsonify({"error": "User not found"}), 404
+        if not user.check_password(data['current_password']):
+            return jsonify({"error": "Incorrect password"}), 400
+
+        user.hash_password(data['new_password'])
+    storage.save()
+
+    return jsonify({"message": "Profile Updated Successfully"}), 200
+
+
+@auth.route('/overview', methods=['GET'])
+@admin_required
+def school_overview(admin_data):
+    total_teachers = storage.get_all(Teacher)
+    total_students = storage.get_all(Student)
+    enrollment_by_grade = storage.get_session().query(
+        Grade.grade,
+        func.count(StudentYearlyRecord.student_id)
+    ).join(Grade, StudentYearlyRecord.grade_id == Grade.id).group_by(
+        StudentYearlyRecord.grade_id,
+    ).all()
+
+    performance_by_subject = storage.get_session().query(
+        Subject.name,
+        func.avg(MarkList.percentage)
+    ).join(Subject, MarkList.subject_id == Subject.id).group_by(
+        MarkList.subject_id,
+    ).all()
+
+    return jsonify({
+        "total_teachers": len(total_teachers),
+        "total_students": len(total_students),
+        "enrollment_by_grade": [
+            {"grade": grade, "student_count": student_count}
+            for grade, student_count in enrollment_by_grade
+        ],
+        "performance_by_subject": [
+            {"subject": subject, "average_percentage": average_percentage}
+            for subject, average_percentage in performance_by_subject
+        ]
+    }), 200
 
 
 @auth.route('/registration', methods=['POST'])
@@ -110,36 +188,9 @@ def register_new_teacher():
     return jsonify({"message": "Teacher registered successfully!"}), 201
 
 
-@auth.route('/dashboard', methods=['GET'])
-@admin_required
-def admin_dashboard(admin_data):
-    return jsonify(admin_data.to_dict()), 200
-
-
 def decode(subject: str, grade):
     code = subject[:3].upper() + str(grade)
     return code
-
-
-# @auth.route('/student/courses', methods=['PUT'])
-# @admin_required
-# def update_course(admin_data):
-#     data = request.get_json()
-#     if not data:
-#         return jsonify({"error": "Not a JSON"}), 404
-
-#     grade = storage.get_first(Grade, grade=data['grade'])
-#     if not grade:
-#         return jsonify({"error": "No grade found for the student"}), 404
-
-#     for course in data['subjects']:
-#         code = decode(course, data['grade'])
-#         subject = storage.get_first(Subject, code=code, grade_id=grade.id, name=course)
-#         if not subject:
-#             subject = Subject(name=course, code=code, grade_id=grade.id)
-#             storage.add(subject)
-
-#     return jsonify({"message": "Course updated successfully!"}), 201
 
 
 @auth.route('/assign-teacher', methods=['PUT'])
@@ -208,7 +259,6 @@ def assign_class(admin_data):
                     storage.add(teacher_record)
 
                 # Update the MarkList table
-                print(teacher_record.id)
                 update_result = storage.get_session().execute(
                     update(MarkList)
                     .where(and_(
@@ -224,7 +274,6 @@ def assign_class(admin_data):
                 storage.save()
     except Exception as e:
         storage.rollback()
-        print(str(e))
         return jsonify({"error": str(e)}), 500
 
     return jsonify({"message": "Teacher assigned successfully!"}), 201
@@ -489,8 +538,10 @@ def admin_student_data(admin_data):
         joined = query.join(Student, Student.id ==
                             StudentYearlyRecord.student_id)
         query = joined.filter(
+            StudentYearlyRecord.student_id.ilike(search_pattern) |
             Student.name.ilike(search_pattern) |
-            StudentYearlyRecord.student_id.ilike(search_pattern)
+            Student.father_name.ilike(search_pattern) |
+            Student.grand_father_name.ilike(search_pattern)
         )
 
     # Use the paginate_query function to handle pagination
@@ -538,12 +589,17 @@ def admin_student_data(admin_data):
                 year=data['year'][0]
             ):
                 if semester.semester not in semesters:
-                    semesters[semester.semester] = []
+                    assessment = storage.get_first(
+                        Assessment, student_id=student_data.id, subject_id=subject.id, semester=semester.semester)
+                    semesters[semester.semester] = [
+                        {"subject_total": {"total": assessment.total, "rank": assessment.rank}}]
+
                 semesters[semester.semester].append({
                     "type": semester.type,
                     "score": semester.score,
                     "percentage": semester.percentage
                 })
+
             semester_result = {
                 "subject": subject.name,
                 "semesters": semesters
@@ -557,18 +613,19 @@ def admin_student_data(admin_data):
             "father_name": student_data.father_name,
             "grand_father_name": student_data.grand_father_name,
             "grade": data['grade'][0],
+            "year": data['year'][0],
+            "date_of_birth": student_data.date_of_birth,
             "section": section,
             "performance": performance,
-            "year": student.year
         }
 
         student_list.append(student_summary)
 
     return jsonify({
         "students": student_list,
-        "meta": paginated_result['meta']
-    }
-    ), 200
+        "meta": paginated_result['meta'],
+        "header": {"grade": data['grade'][0], "year": data['year'][0]}
+    }), 200
 
 
 @auth.route('/teachers', methods=['GET'])
@@ -578,15 +635,25 @@ def all_teachers(admin_data):
     parsed_url = urlparse(url)
     data = parse_qs(parsed_url.query)
 
+    # Pagination and filtering params
+    page = int(data['page'][0]) if 'page' in data else 1
+    limit = int(data['limit'][0]) if 'limit' in data else 10
+    search_term = data['search'][0] if 'search' in data else None
+
     teachers = storage.get_session().query(Teacher)
 
     if not teachers:
         return jsonify({"error": "No teachers found"}), 404
 
-    # Pagination and filtering params
-    page = int(data['page'][0]) if 'page' in data else 1
-    limit = int(data['limit'][0]) if 'limit' in data else 10
-    search_term = data['search'][0] if 'search' in data else None
+    if search_term:
+        search_pattern = f"%{search_term}%"
+        teachers = teachers.filter(
+            Teacher.id.ilike(search_pattern) |
+            Teacher.first_name.ilike(search_pattern) |
+            Teacher.last_name.ilike(search_pattern) |
+            Teacher.email.ilike(search_pattern) |
+            Teacher.phone.ilike(search_pattern)
+        )
 
     # Use the paginate_query function to handle pagination
     paginated_result = paginate_query(teachers, page, limit)

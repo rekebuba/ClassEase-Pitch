@@ -9,8 +9,8 @@ class StudentYearlyRecord(BaseModel, Base):
     year = Column(String(10), nullable=False)
     grade_id = Column(String(120), ForeignKey('grades.id'), nullable=False)
     section_id = Column(String(120), ForeignKey('sections.id'), nullable=True)
-    final_score = Column(Float, nullable=True)  # year-end score
-    rank = Column(Integer, nullable=True)
+    final_score = Column(Float, nullable=True, default=None)  # year-end score
+    rank = Column(Integer, nullable=True, default=None)
 
 
     # Relationship to Student
