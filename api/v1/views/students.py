@@ -276,7 +276,6 @@ def get_student_score(student_data, admin_data):
         if field not in data:
             return jsonify({"error": f"Missing {field}"}), 400
 
-    print(data['grade'][0])
     grade = storage.get_first(Grade, grade=data['grade'][0])
     if not grade:
         return jsonify({"error": "Grade not found"}), 404

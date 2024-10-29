@@ -84,10 +84,10 @@ export function SubjectList({ student, allSubjects, toggleAssessment, assessment
  * @property {number} id - The ID of the student.
  */
 const StudentSubjectList = ({ toggleAssessment, assessmentSummary }) => {
-    const [selectedGrade, setSelectedGrade] = useState(1);
     const [selectedSemester, setSelectedSemester] = useState(1);
     const [alert, setAlert] = useState({ type: "", message: "", show: false });
     const [gradeAssigned, setGradeAssigned] = useState([]);
+    const [selectedGrade, setSelectedGrade] = useState(gradeAssigned.length > 0 ? gradeAssigned[0] : null);
     const [allSubjects, setAllSubjects] = useState([]);
     const [student, setStudent] = useState({});
 
@@ -171,6 +171,7 @@ const StudentSubjectList = ({ toggleAssessment, assessmentSummary }) => {
         try {
             const response = await api.get('/student/assigned_grade');
             setGradeAssigned(response.data['grade']);
+            setSelectedGrade(response.data['grade'][0]);
         } catch (error) {
             const errorMessage = error.response?.data?.error || "An unexpected error occurred.";
             showAlert("warning", errorMessage);
@@ -183,7 +184,7 @@ const StudentSubjectList = ({ toggleAssessment, assessmentSummary }) => {
      */
     useEffect(() => {
         fetchAssignedGrade();
-    }, [selectedGrade]);
+    }, []);
 
     return (
         <div className="dashboard-container">
