@@ -26,6 +26,7 @@ import {
     FaEdit,
     FaRegCalendarAlt
 } from "react-icons/fa";
+import classEaseHeader from '../images/ClassEase-header.png';
 import { useNavigate } from "react-router-dom";
 import React from "react";
 
@@ -63,6 +64,10 @@ import React from "react";
  */
 const AdminHeader = () => {
     const navigate = useNavigate();
+
+    const goToHome = () => {
+        navigate("/");
+    }
 
     const manageStudents = () => {
         navigate("/admin/manage/students");
@@ -102,10 +107,12 @@ const AdminHeader = () => {
 
     return (
         <header className="dashboard-header">
-            <div className="dashboard-logo">ClassEase School</div>
+            <div className="header-logo" onClick={goToHome}>
+                <img src={classEaseHeader} alt="ClassEase School" />
+            </div>
             <div className="dashboard-nav">
-                <div className="nav-item">
-                    <span className="nav-link" onClick={goToDashboard}>
+                <div className="nav-item" onClick={goToDashboard}>
+                    <span className="nav-link">
                         <FaHome /> Home
                     </span>
                 </div>

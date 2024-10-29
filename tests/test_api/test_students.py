@@ -65,7 +65,7 @@ class TestStudents(unittest.TestCase):
         It performs the following steps:
         1. Registers a new student.
         2. Retrieves a random student's ID from the storage.
-        3. Sends a GET request to the login endpoint with the student's ID and password.
+        3. Sends a POST request to the login endpoint with the student's ID and password.
         4. Verifies that the response status code is 200 (OK).
         5. Extracts the access token from the response JSON data.
         6. Asserts that the access token is present in the response.
@@ -77,7 +77,8 @@ class TestStudents(unittest.TestCase):
         register_student(self.client)
         id = storage.get_random(Student).id
         # Test that a valid login returns a token
-        response = self.client.get(f'/api/v1/login?id={id}&password={id}', content_type='application/json')
+        response = self.client.post(
+            f'/api/v1/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
 
         self.assertEqual(response.status_code, 200)
         json_data = response.get_json()
@@ -103,7 +104,9 @@ class TestStudents(unittest.TestCase):
         id = 'fake'
 
         # Test that a valid login returns a token
-        response = self.client.get(f'/api/v1/login?id={id}&password={id}', content_type='application/json')
+        response = self.client.post(
+            f'/api/v1/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
+
         self.assertEqual(response.status_code, 401)
 
     def test_student_login_wrong_password(self):
@@ -125,7 +128,9 @@ class TestStudents(unittest.TestCase):
         register_student(self.client)
         id = storage.get_random(Student).id
 
-        response = self.client.get(f'/api/v1/login?id={id}&password=wrong', content_type='application/json')
+        response = self.client.post(
+            f'/api/v1/login', data=json.dumps({"id": id, "password": 'wrong'}), content_type='application/json')
+
         self.assertEqual(response.status_code, 401)
 
     def test_student_dashboard_success(self):

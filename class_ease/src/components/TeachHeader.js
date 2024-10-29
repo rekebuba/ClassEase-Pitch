@@ -5,7 +5,7 @@ import {
     FaFileAlt,
     FaUserGraduate,
 } from "react-icons/fa";
-
+import classEaseHeader from '../images/ClassEase-header.png';
 import { useNavigate } from "react-router-dom";
 import React from "react";
 
@@ -33,6 +33,15 @@ const TeacherHeader = () => {
     const navigate = useNavigate();
 
     /**
+     * Navigates to the home page.
+     *
+     * @param {Event} e - The event object.
+     */
+    const goToHome = e => {
+        navigate("/");
+    }
+
+    /**
      * @function manageStudents
      * @description Navigates to the student management page.
      */
@@ -58,7 +67,9 @@ const TeacherHeader = () => {
 
     return (
         <header className="dashboard-header">
-            <div className="dashboard-logo">ClassEase School</div>
+            <div className="header-logo" onClick={goToHome}>
+                <img src={classEaseHeader} alt="ClassEase School" />
+            </div>
             <div className="dashboard-nav">
                 <div className="nav-item">
                     <span className="nav-link" onClick={goToDashboard}>

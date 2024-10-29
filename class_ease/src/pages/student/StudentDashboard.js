@@ -4,6 +4,9 @@ import '../../styles/StudDashboard.css';
 import '../../styles/Dashboard.css';
 import StudentSubjectList from "./StudSubjectList";
 import PopupScore from "./StudPopupScore";
+import { useNavigate } from "react-router-dom";
+import classEaseHeader from '../../images/ClassEase-header.png';
+
 
 /**
  * StudentDashboard component renders the main dashboard for students.
@@ -28,6 +31,15 @@ import PopupScore from "./StudPopupScore";
 const StudentDashboard = () => {
   const [isAssesOpen, setIsAssesOpen] = useState(false);
   const [studentSummary, setStudentSummary] = useState({});
+  const navigate = useNavigate();
+
+
+  /**
+   * Navigates the user to the home page.
+   */
+  const goToHome = () => {
+    navigate("/");
+  }
 
   /**
    * @function toggleAssessment
@@ -62,7 +74,9 @@ const StudentDashboard = () => {
       <StudentPanel />
       <main className="content">
         <header className="dashboard-header">
-          <div className="dashboard-logo">ClassEase School</div>
+          <div className="header-logo" onClick={goToHome}>
+            <img src={classEaseHeader} alt="ClassEase School" />
+          </div>
         </header>
         <StudentSubjectList
           toggleAssessment={toggleAssessment}

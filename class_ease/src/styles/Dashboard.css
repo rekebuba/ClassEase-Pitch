@@ -43,7 +43,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    margin-top: 55px;
+    margin-top: 90px;
 }
 
 .profile-section {
@@ -85,7 +85,7 @@
     padding: 30px;
     background-color: #f5f5f5;
     overflow-y: auto;
-    margin-top: 65px;
+    margin-top: 93px;
 }
 
 .dashboard-header h2 {

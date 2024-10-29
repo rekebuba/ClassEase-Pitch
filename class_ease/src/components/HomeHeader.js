@@ -1,4 +1,5 @@
 import React from 'react';
+import classEaseHeader from '../images/ClassEase-header.png';
 
 /**
  * HomeHeader component renders the header section of the homepage.
@@ -16,12 +17,13 @@ import React from 'react';
  */
 function HomeHeader() {
     return (<header className="header">
-        <div className="logo">ClassEase School</div>
+        <div className="header-logo">
+            <img src={classEaseHeader} alt="ClassEase School" />
+        </div>
         <nav>
             <ul className="nav-links">
                 <li><a href="#home">Home</a></li>
                 <li><a href="#about">About Us</a></li>
-                <li><a href="#admissions">Admissions</a></li>
                 <li><a href="#academics">Academics</a></li>
                 <li><a href="#contact">Contact</a></li>
             </ul>

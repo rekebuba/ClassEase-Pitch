@@ -5,12 +5,11 @@ from flask import Blueprint, request, jsonify
 from api.v1.views.utils import create_student_token, create_teacher_token, create_admin_token
 from models import storage
 from models.users import User
-from urllib.parse import urlparse, parse_qs
 
 app_views = Blueprint('app_views', __name__, url_prefix='/api/v1')
 
 
-@app_views.route('/login', methods=['GET'])
+@app_views.route('/login', methods=['POST'])
 def login():
     """
     Handle user login by validating credentials and generating an access token.
@@ -30,9 +29,9 @@ def login():
         400: Missing 'id' or 'password' in the request.
         401: Invalid credentials or invalid user role.
     """
-    url = request.url
-    parsed_url = urlparse(url)
-    data = parse_qs(parsed_url.query)
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Not a JSON"}), 400
 
     required_fields = {'id', 'password'}
     for field in required_fields:
@@ -43,8 +42,8 @@ def login():
         return jsonify({"error": "Missing id or password"}), 400
 
     print(data)
-    user = storage.get_first(User, id=data['id'][0])
-    if user and user.check_password(data['password'][0]):
+    user = storage.get_first(User, id=data['id'])
+    if user and user.check_password(data['password']):
         if user.role == 'Student':
             access_token = create_student_token(user.id)
         elif user.role == 'Teacher':

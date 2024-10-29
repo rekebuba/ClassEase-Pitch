@@ -2,7 +2,7 @@ import React from 'react';
 import HomeHeader from './HomeHeader';
 import '../styles/HomePage.css';
 import '../pages/student/StudentRegistrationForm';
-
+import classEaseImage from '../images/ClassEase-no-slogan.png';
 
 /**
  * Home component renders the main landing page of the ClassEase School website.
@@ -28,13 +28,12 @@ const Home = () => {
     <>
       <HomeHeader />
       {/* Hero Section */}
-      <section id="home" className="hero">
-        <div className="hero-content">
+      <section id="home" class="hero">
+        <img src={classEaseImage} alt="ClassEase Logo" class="hero-image" />
+        <div class="hero-content">
           <h1>Welcome to ClassEase School</h1>
           <p>Empowering students with the knowledge and skills to excel in the modern world.</p>
-          <div>
-            <a href="/student/registration" className="cta-btn">Apply Now</a>
-          </div>
+          <a href="/student/registration" class="cta-btn">Apply Now</a>
         </div>
       </section>
 
@@ -44,6 +43,7 @@ const Home = () => {
         <p>
           ClassEase School has been dedicated to providing a rich and rigorous academic program. Our focus is to shape the minds of tomorrow by providing a nurturing, inclusive, and forward-thinking environment.
         </p>
+        <img src="../images/about-us.jpg" alt="About ClassEase School" className="about-image" />
       </section>
 
       {/* Academic Programs Section */}
@@ -53,14 +53,17 @@ const Home = () => {
           <div className="program-item">
             <h3>Primary School</h3>
             <p>We provide a strong foundation for students from Grade 1 to 6, encouraging curiosity and a love for learning.</p>
+            <img src="../images/primary-school.jpg" alt="Primary School" className="program-image" />
           </div>
           <div className="program-item">
             <h3>Middle School</h3>
             <p>Building essential skills for students from Grade 7 to 9 with a focus on collaboration and critical thinking.</p>
+            <img src="../images/middle-school.jpg" alt="Middle School" className="program-image" />
           </div>
           <div className="program-item">
             <h3>High School</h3>
             <p>Challenging students from Grade 10 to 12 to prepare them for higher education and future careers.</p>
+            <img src="../images/high-school.jpg" alt="High School" className="program-image" />
           </div>
         </div>
       </section>
@@ -72,10 +75,12 @@ const Home = () => {
           <div className="event-item">
             <h3>Annual Sports Day</h3>
             <p>Join us for an exciting day of competitions and events on the school campus.</p>
+            <img src="../images/sports-day.jpg" alt="Annual Sports Day" className="event-image" />
           </div>
           <div className="event-item">
             <h3>Parent-Teacher Meeting</h3>
             <p>Meet with our teachers to discuss the progress of students and their achievements.</p>
+            <img src="../images/parent-teacher-meeting.jpg" alt="Parent-Teacher Meeting" className="event-image" />
           </div>
         </div>
       </section>
@@ -96,7 +101,7 @@ const Home = () => {
       </section>
 
       {/* Footer */}
-      <footer className="footer">
+      <footer id="contact" className="footer">
         <div className="footer-content">
           <div className="footer-about">
             <h3>ClassEase School</h3>
@@ -108,7 +113,6 @@ const Home = () => {
             <h3>Quick Links</h3>
             <ul>
               <li><a href="#about">About Us</a></li>
-              <li><a href="#admissions">Admissions</a></li>
               <li><a href="#academics">Academics</a></li>
               <li><a href="#contact">Contact</a></li>
             </ul>

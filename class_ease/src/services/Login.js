@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import api from "./api";
 import { useNavigate } from "react-router-dom";
 import "../styles/Login.css";
+import axios from 'axios';
 
 /**
  * Login component handles user authentication.
@@ -22,16 +22,15 @@ import "../styles/Login.css";
  * @function
  * @name Login
  * 
- * @property {Object} credentials - The user's login credentials.
- * @property {string} credentials.id - The user's ID.
- * @property {string} credentials.password - The user's password.
- * @property {Function} setCredentials - Function to update the user's credentials.
+ * @property {string} id - The user's ID.
+ * @property {string} password - The user's password.
  * @property {string} warning - Warning message displayed on authentication failure.
  * @property {Function} setWarning - Function to update the warning message.
  * @property {Function} navigate - Function to navigate to different routes.
  */
 const Login = () => {
-  const [credentials, setCredentials] = useState({ id: "", password: "" });
+  const [id, setId] = useState('');
+  const [password, setPassword] = useState('');
   const [warning, setWarning] = useState("");
   const navigate = useNavigate();
 
@@ -43,8 +42,10 @@ const Login = () => {
    */
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setWarning(""); // Reset warning on new submission attempt
+
     try {
-      const response = await api.get('/login', { params: credentials });
+      const response = await axios.post('http://localhost:5000/api/v1/login', { id, password });
       if (response.status === 200) {
         localStorage.setItem("Authorization", response.data.access_token);
         navigate(`/${response.data.role}/dashboard`);
@@ -54,45 +55,31 @@ const Login = () => {
     }
   };
 
-  /**
-   * @function handleChange
-   * @description Handles changes to the input fields and updates the credentials state.
-   * @param {Event} e - The input change event.
-   * @returns {void}
-   */
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setCredentials((prevCredentials) => ({
-      ...prevCredentials,
-      [name]: value,
-    }));
-  };
-
   return (
     <div className="login-section">
       <div className="login-box">
         <h2>Login to your account</h2>
         <form onSubmit={handleSubmit}>
-          <div className="input-group">
-            <i className="fa fa-user" />
+          <div className="input-group" style={{ marginBottom: '20px', position: 'relative' }}>
+            <i className="fa fa-user" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
             <input
               type="text"
               name="id"
               placeholder="ID"
-              value={credentials.id}
-              onChange={handleChange}
+              value={id}
+              onChange={(e) => setId(e.target.value)}
               required
             />
           </div>
-          <div className="input-group">
-            <i className="fa fa-lock" />
+          <div className="input-group" style={{ marginBottom: '20px', position: 'relative' }}>
+            <i className="fa fa-lock" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
             <input
               type="password"
               name="password"
               placeholder="Password"
-              value={credentials.password}
-              onChange={handleChange}
-              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            required
             />
           </div>
           {warning && <p className="warning">{warning}</p>}

@@ -1,4 +1,8 @@
 /* Header */
+* {
+    font-family: 'Arial', sans-serif;
+}
+
 body,
 html {
     margin: 0;
@@ -23,8 +27,16 @@ html {
     width: 98%;
 }
 
-.dashboard-logo,
-.logo {
+.header-logo img {
+    max-width: 200px;
+    height: auto;
+    box-shadow: -10px 0 30px rgba(0.3, 0, 0, 0);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.dashboard-logo {
     font-size: 24px;
     font-weight: bold;
 }
@@ -64,33 +76,78 @@ html {
 
 /* Hero Section */
 .hero {
-    /* background: url('../images/school.png'); */
-    height: 80vh;
     display: flex;
-    justify-content: center;
     align-items: center;
-    text-align: center;
-    color: black;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f9f9f9;
+    padding: 0 20px;
+}
+
+.hero-image {
+    max-width: 600px;
+    height: auto;
+    margin-right: 50px;
+    box-shadow: -10px 0 30px rgba(0.3, 0, 0, 0);
+    background: transparent;
+    /* Ensure no background color */
+    border: none;
+}
+
+.hero-content {
+    text-align: left;
+    max-width: 500px;
 }
 
 .hero-content h1 {
-    font-size: 48px;
+    font-size: 3em;
+    font-weight: 700;
+    color: #333;
     margin-bottom: 20px;
 }
 
 .hero-content p {
-    font-size: 20px;
+    font-size: 1.2em;
+    color: #555;
+    line-height: 1.5;
     margin-bottom: 30px;
 }
 
 .cta-btn {
-    background-color: #ff9900;
+    display: inline-block;
+    background-color: #f7921e;
+    color: #fff;
     padding: 15px 30px;
-    color: white;
-    font-size: 18px;
-    border-radius: 5px;
+    font-size: 1em;
+    font-weight: bold;
     text-decoration: none;
-    transition: background-color 0.3s, transform 0.2s;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.cta-btn:hover {
+    background-color: #e57300;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .hero {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .hero-image {
+        margin-right: 0;
+        margin-bottom: 20px;
+    }
+
+    .hero-content h1 {
+        font-size: 2.5em;
+    }
+
+    .cta-btn {
+        padding: 12px 25px;
+    }
 }
 
 /* About, Academics, and Testimonials Section */
@@ -148,11 +205,31 @@ h2 {
     color: #666;
 }
 
-/* Footer */
 .footer {
-    background-color: #003366;
+    background-image: url('../images/ClassEase-footer.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     color: white;
     padding: 40px;
+    position: relative;
+}
+
+/* Optional: Overlay to improve text readability */
+.footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 51, 102, 0.5);
+    z-index: 1;
+}
+
+.footer * {
+    position: relative;
+    z-index: 2;
 }
 
 .footer-content {
@@ -172,40 +249,36 @@ h2 {
 
 .subscribe {
     background-color: #2E5487;
-    /* Button color */
     color: white;
-    /* Text color */
     border: none;
-    /* Remove default border */
     border-radius: 5px;
-    /* Rounded corners */
     padding: 5px 10px;
-    /* Top/bottom and left/right padding */
     margin-left: 10px;
     font-size: 16px;
-    /* Font size */
     cursor: pointer;
-    /* Change cursor to pointer on hover */
     transition: background-color 0.3s, transform 0.2s;
-    /* Smooth transitions */
 }
 
 .subscribe:hover {
     background-color: #005599;
-    /* Darker color on hover */
     transform: scale(1.05);
-    /* Slightly enlarge on hover */
 }
 
 .subscribe:focus {
     outline: none;
-    /* Remove default focus outline */
     box-shadow: 0 0 3px #005599;
-    /* Add a subtle glow effect */
 }
 
 .footer-links ul {
     list-style: none;
+}
+
+.footer-links ul li {
+    cursor: pointer;
+}
+
+.footer-links ul li:hover {
+    transform: scale(1.01);
 }
 
 .footer-links a {
