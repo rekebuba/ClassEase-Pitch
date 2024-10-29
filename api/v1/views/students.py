@@ -173,13 +173,21 @@ def register_new_student():
         return jsonify({"error": "Grade not found"}), 404
 
     # Check if a student with the same name, father's name, and date of birth already exists
-    date_obj = datetime.strptime(data['date_of_birth'], "%Y-%m-%dT%H:%M:%S.%f")
+    # date_obj = datetime.strptime(data['date_of_birth'], "%Y-%m-%dT%H:%M:%S.%f")
+    # Convert date_of_birth to datetime if it's not already a datetime object
+    if isinstance(data['date_of_birth'], str):
+        try:
+            data['date_of_birth'] = datetime.strptime(
+                data['date_of_birth'], "%Y-%m-%dT%H:%M:%S.%f")
+        except ValueError:
+            data['date_of_birth'] = datetime.strptime(
+                data['date_of_birth'], "%Y-%m-%d")
     existing_student = storage.get_first(
         Student,
         name=data['name'],
         father_name=data['father_name'],
         grand_father_name=data['grand_father_name'],
-        date_of_birth=date_obj
+        date_of_birth=data['date_of_birth']
     )
 
     if existing_student:
@@ -191,9 +199,6 @@ def register_new_student():
     try:
         # Save User first
         # Convert date_of_birth to datetime if it's not already a datetime object
-        if isinstance(data['date_of_birth'], str):
-            data['date_of_birth'] = datetime.strptime(data['date_of_birth'], "%Y-%m-%dT%H:%M:%S.%f")
-
         storage.add(new_student)
 
         # Create the Student object, using the same id

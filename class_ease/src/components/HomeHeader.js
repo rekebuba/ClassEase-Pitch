@@ -1,5 +1,6 @@
 import React from 'react';
 import classEaseHeader from '../images/ClassEase-header.png';
+import { useNavigate } from 'react-router-dom';
 
 /**
  * HomeHeader component renders the header section of the homepage.
@@ -16,8 +17,14 @@ import classEaseHeader from '../images/ClassEase-header.png';
  * )
  */
 function HomeHeader() {
+    const navigate = useNavigate();
+
+    const goToHome = () => {
+        navigate("/");
+    }
+
     return (<header className="header">
-        <div className="header-logo">
+        <div className="header-logo" onClick={goToHome}>
             <img src={classEaseHeader} alt="ClassEase School" />
         </div>
         <nav>
