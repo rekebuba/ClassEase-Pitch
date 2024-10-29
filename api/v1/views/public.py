@@ -41,7 +41,6 @@ def login():
     if 'id' not in data or 'password' not in data:
         return jsonify({"error": "Missing id or password"}), 400
 
-    print(data)
     user = storage.get_first(User, id=data['id'])
     if user and user.check_password(data['password']):
         if user.role == 'Student':

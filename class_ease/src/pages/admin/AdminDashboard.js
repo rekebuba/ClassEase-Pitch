@@ -47,7 +47,6 @@ import AdminStudPerformance from "./AdminStudPerformance";
  */
 const AdminDashboard = () => {
   const [overview, setOverview] = useState({});
-  const navigate = useNavigate();
 
   /**
    * @function retrieveData
@@ -68,7 +67,7 @@ const AdminDashboard = () => {
    */
   useEffect(() => {
     retrieveData();
-  }, [navigate]);
+  }, []);
 
   return (
     <div className="admin-dashboard-container">

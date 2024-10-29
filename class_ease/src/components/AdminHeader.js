@@ -123,20 +123,20 @@ const AdminHeader = () => {
                     <div className="dropdown-content">
                         <div className="dropdown-item" onClick={manageStudents}><FaUserGraduate /> Manage Students</div>
                         <div className="dropdown-item" onClick={manageTeachers}><FaChalkboardTeacher /> Manage Teachers</div>
-                        <div className="dropdown-item" onClick={enrollStudent}><FaUserPlus /> Enroll Students</div>
-                        <div className="dropdown-item" onClick={enrollTeacher}><FaUserPlus /> Register Teacher</div>
                         <div className="dropdown-item" onClick={userAccessControl}><FaUserShield /> Roles & Permissions</div>
                     </div>
                 </div>
                 <div className="nav-item dropdown">
                     <span className="nav-link">
-                        <FaBookOpen /> Classes & Subjects
+                        <FaBookOpen /> Registration
                     </span>
                     <div className="dropdown-content">
-                        <div className="dropdown-item"><FaBuilding /> Class Management</div>
+                        <div className="dropdown-item" onClick={enrollStudent}><FaUserPlus /> Enroll Students</div>
+                        <div className="dropdown-item" onClick={enrollTeacher}><FaUserPlus /> Register Teacher</div>
+                        {/* <div className="dropdown-item"><FaBuilding /> Class Management</div>
                         <div className="dropdown-item"><FaBook /> Subject Management</div>
                         <div className="dropdown-item"><FaChalkboard /> Assign Teachers</div>
-                        <div className="dropdown-item"><FaCalendarAlt /> Timetable Setup</div>
+                        <div className="dropdown-item"><FaCalendarAlt /> Timetable Setup</div> */}
                     </div>
                 </div>
                 <div className="nav-item dropdown">
@@ -145,8 +145,8 @@ const AdminHeader = () => {
                     </span>
                     <div className="dropdown-content">
                         <div className="dropdown-item" onClick={assessMarkList}><FaBookReader /> Create Mark List</div>
-                        <div className="dropdown-item"><FaFileSignature /> Manage Tests & Quizzes</div>
-                        <div className="dropdown-item"><FaPenAlt /> Manage Midterm Exams</div>
+                        {/* <div className="dropdown-item"><FaFileSignature /> Manage Tests & Quizzes</div>
+                        <div className="dropdown-item"><FaPenAlt /> Manage Midterm Exams</div> */}
                         <div className="dropdown-item"><FaGraduationCap /> Manage Final Exams</div>
                     </div>
                 </div>

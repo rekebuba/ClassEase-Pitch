@@ -27,7 +27,7 @@ class Assessment(BaseModel, Base):
     student_id = Column(String(120), ForeignKey('student.id'), nullable=False)
     grade_id = Column(String(120), ForeignKey('grades.id'), nullable=False)
     subject_id = Column(String(120), ForeignKey('subjects.id'), nullable=False)
-    total = Column(Float, default=None)  # The sum score of the student for each assessment
+    total = Column(Float, default=None)  # The subject sum score of the student for each assessment
     rank = Column(Integer, default=None)
     semester = Column(Integer, nullable=False)
     year = Column(String(10), nullable=False)

@@ -23,7 +23,7 @@ class AVRGResult(BaseModel, Base):
     """
     __tablename__ = 'average_result'
     student_id = Column(String(120), ForeignKey('student.id'), nullable=False)
-    average = Column(Float, default=None)  # The actual score of the student in this assessment
+    average = Column(Float, default=None)  # The actual average score of the student in this for all subject
     semester = Column(Integer, nullable=False)
     year = Column(String(10), nullable=False)
     rank = Column(Integer, default=None)

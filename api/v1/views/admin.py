@@ -144,9 +144,9 @@ def school_overview(admin_data):
 
     performance_by_subject = storage.get_session().query(
         Subject.name,
-        func.avg(MarkList.percentage)
+        func.avg(MarkList.score)
     ).join(Subject, MarkList.subject_id == Subject.id).group_by(
-        MarkList.subject_id,
+        Subject.name
     ).all()
 
     return jsonify({

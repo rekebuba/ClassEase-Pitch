@@ -53,6 +53,8 @@ const AdminStudPerformance = ({ enrollmentByGrade, performanceBySubject }) => {
         ],
     });
 
+    console.log('enrollmentBySubject', performanceBySubject);
+
     const [ subjectPerformanceData, setSubjectPerformanceData] = useState({
         labels: [],
         datasets: [
@@ -103,7 +105,7 @@ const AdminStudPerformance = ({ enrollmentByGrade, performanceBySubject }) => {
             ],
             });
         }
-        }, [enrollmentByGrade, performanceBySubject, studentEnrollmentData.datasets, subjectPerformanceData.datasets]);
+        }, [enrollmentByGrade, performanceBySubject]);
 
     return (
         <>

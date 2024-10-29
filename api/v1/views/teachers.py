@@ -227,7 +227,6 @@ def get_teacher_assigned_grade(teacher_data):
         TeachersRecord.teacher_id == teacher_data.id
     )
 
-    print(assigned_grade.all())
     if not assigned_grade.all():
         return jsonify({"error": f"No grades were assigned"}), 404
 
@@ -291,7 +290,6 @@ def add_student_assessment(teacher_data):
         if not teacher_record:
             return jsonify({"error": "Teacher record not found"}), 404
 
-        print(student_data['student_id'])
         for assessment in assessments:
             update_score = storage.get_session().execute(
                 update(MarkList)
@@ -314,6 +312,7 @@ def add_student_assessment(teacher_data):
         subject_sum(student_data)
         semester_average(student_data)
         yearly_average(student_data)
+        
 
     except Exception as e:
         print((e))
@@ -451,7 +450,7 @@ def yearly_average(student_data):
         return
 
     # Calculate the yearly average
-    yearly_avg = sum([res.average for res in result]) / 2
+    yearly_avg = sum([res.average for res in result if res.average]) / 2
 
     overall = storage.get_session().query(StudentYearlyRecord).filter_by(
         student_id=student_data['student_id'],
