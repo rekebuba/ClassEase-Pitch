@@ -4,6 +4,22 @@ from models import storage
 
 
 def create_app(config_name):
+    """
+    Create a Flask application.
+
+    Args:
+        config_name (str): The configuration name. It can be 'testing', 'development', or any other value for production.
+
+    Returns:
+        Flask: The Flask application instance.
+
+    The function performs the following tasks:
+    - Initializes the Flask application.
+    - Loads the appropriate configuration based on the provided config_name.
+    - Initializes the database with the application context.
+    - Enables Cross-Origin Resource Sharing (CORS) for the specified routes.
+    - Imports and registers the necessary blueprints for different parts of the application.
+    """
     """ Create a Flask application """
     app = Flask(__name__)
 

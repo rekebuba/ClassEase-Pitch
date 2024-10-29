@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+"""Admin views module for the API"""
 
 from flask import request, jsonify
 from sqlalchemy import func
@@ -18,7 +19,7 @@ from models.stud_yearly_record import StudentYearlyRecord
 from models.teacher_record import TeachersRecord
 from sqlalchemy import update, select, and_
 from urllib.parse import urlparse, parse_qs
-from api.v1.views.utils import create_admin_token, admin_required
+from api.v1.views.utils import admin_required
 from math import ceil
 
 
@@ -28,6 +29,20 @@ auth = Blueprint('auth', __name__, url_prefix='/api/v1/admin')
 @auth.route('/dashboard', methods=['GET'])
 @admin_required
 def admin_dashboard(admin_data):
+    """
+    Handle the admin dashboard view.
+
+    Args:
+        admin_data (object): The admin data object. It should have a method `to_dict()` 
+                             that converts the object to a dictionary.
+
+    Returns:
+        tuple: A tuple containing a JSON response and an HTTP status code.
+               - If `admin_data` is None, returns a JSON response with an error message 
+                 and a 404 status code.
+               - If `admin_data` is valid, returns a JSON response with the admin data 
+                 dictionary and a 200 status code.
+    """
     if not admin_data:
         return jsonify({"error": "Admin not found"}), 404
     return jsonify(admin_data.to_dict()), 200
@@ -36,6 +51,33 @@ def admin_dashboard(admin_data):
 @auth.route('/update-profile', methods=['PUT'])
 @admin_required
 def update_admin_profile(admin_data):
+    """
+    Update the profile of an admin user.
+
+    Args:
+        admin_data (object): The admin user object whose profile is to be updated.
+
+    Returns:
+        Response: A JSON response indicating the result of the update operation.
+
+    The function expects a JSON payload in the request with the following fields:
+        - name (str): The new name of the admin.
+        - email (str): The new email of the admin.
+        - current_password (str, optional): The current password of the admin, required if updating the password.
+        - new_password (str, optional): The new password for the admin.
+
+    The function performs the following checks:
+        - Ensures the request payload is a valid JSON.
+        - Ensures the required fields ('name' and 'email') are present in the payload.
+        - If updating the password, ensures both 'current_password' and 'new_password' are provided.
+        - Verifies the current password before updating to the new password.
+
+    Returns:
+        - 400: If the request payload is not a valid JSON or if required fields are missing.
+        - 404: If the admin user is not found.
+        - 400: If the current password is incorrect.
+        - 200: If the profile is updated successfully.
+    """
     data = request.get_json()
     if not data:
         return jsonify({"error": "Not a JSON"}), 400
@@ -72,6 +114,25 @@ def update_admin_profile(admin_data):
 @auth.route('/overview', methods=['GET'])
 @admin_required
 def school_overview(admin_data):
+    """
+    Provides an overview of the school including total number of teachers, total number of students,
+    enrollment statistics by grade, and performance statistics by subject.
+
+    Args:
+        admin_data (dict): Data related to the admin requesting the overview.
+
+    Returns:
+        Response: A JSON response containing the following keys:
+            - total_teachers (int): The total number of teachers.
+            - total_students (int): The total number of students.
+            - enrollment_by_grade (list): A list of dictionaries, each containing:
+                - grade (str): The grade level.
+                - student_count (int): The number of students enrolled in that grade.
+            - performance_by_subject (list): A list of dictionaries, each containing:
+                - subject (str): The name of the subject.
+                - average_percentage (float): The average percentage score for that subject.
+        HTTP Status Code: 200
+    """
     total_teachers = storage.get_all(Teacher)
     total_students = storage.get_all(Student)
     enrollment_by_grade = storage.get_session().query(
@@ -104,6 +165,22 @@ def school_overview(admin_data):
 
 @auth.route('/registration', methods=['POST'])
 def register_new_admin():
+    """
+    Registers a new admin user.
+
+    This function handles the registration of a new admin user by extracting 
+    data from a JSON request, validating the required fields, creating a new 
+    User object with the role 'Admin', and saving it to the storage. It then 
+    creates an Admin object with the same ID and saves it to the storage.
+
+    Returns:
+        Response: A JSON response indicating the success or failure of the 
+        registration process.
+        - 201: Admin registered successfully.
+        - 400: Missing name or email in the request data.
+        - 404: Request data is not a valid JSON.
+        - 500: Internal server error during the registration process.
+    """
     data = request.get_json()
 
     if not data:
@@ -136,6 +213,21 @@ def register_new_admin():
 @auth.route('/teachers/registration', methods=['POST'])
 # @admin_required
 def register_new_teacher():
+    """
+    Registers a new teacher in the system.
+
+    This function retrieves JSON data from the request, validates the required fields,
+    checks for the existence of a teacher with the same email, first name, and last name,
+    and then creates a new User and Teacher record in the storage.
+
+    Returns:
+        Response: A JSON response indicating the success or failure of the registration process.
+                  - 201: Teacher registered successfully.
+                  - 400: Missing required fields.
+                  - 404: Not a JSON.
+                  - 409: Teacher already exists.
+                  - 500: Internal server error.
+    """
     data = request.get_json()
 
     if not data:
@@ -196,6 +288,31 @@ def decode(subject: str, grade):
 @auth.route('/assign-teacher', methods=['PUT'])
 @admin_required
 def assign_class(admin_data):
+    """
+    Assigns a teacher to a class based on the provided data.
+
+    Args:
+        admin_data (dict): Data containing information about the teacher and class assignment.
+
+    Returns:
+        Response: JSON response indicating success or failure of the operation.
+
+    The function performs the following steps:
+    1. Parses the JSON request data.
+    2. Validates the presence of required fields.
+    3. Retrieves the teacher by ID.
+    4. Retrieves the grade ID from the Grade table.
+    5. Retrieves the subject IDs based on the subjects taught.
+    6. Retrieves the section IDs based on the grade and section.
+    7. Checks if the teacher is already assigned to the subject and section.
+    8. Updates the teacher record if not already assigned.
+    9. Updates the MarkList table with the teacher's record ID.
+    10. Commits the changes to the database.
+
+    Returns:
+        JSON response with a success message and status code 201 if the operation is successful.
+        JSON response with an error message and appropriate status code if any validation or database operation fails.
+    """
     data = request.get_json()
     if not data:
         return jsonify({"error": "Not a JSON"}), 400
@@ -282,6 +399,30 @@ def assign_class(admin_data):
 @auth.route('/students/mark_list', methods=['PUT'])
 @admin_required
 def create_mark_list(admin_data):
+    """
+    Create a mark list for students based on the provided admin data.
+
+    Args:
+        admin_data (dict): The data provided by the admin to create the mark list.
+
+    Returns:
+        Response: A JSON response indicating the success or failure of the operation.
+
+    The function performs the following steps:
+    1. Parses the JSON request data.
+    2. Validates the presence and types of required fields.
+    3. Retrieves the grade ID from the Grade table.
+    4. Updates the Section table with the provided sections.
+    5. Checks if a mark list already exists for the given grade, section, semester, and year.
+    6. Retrieves students for the given grade and year.
+    7. Assigns sections to students who do not have one.
+    8. Updates the Subject table with the provided subjects.
+    9. Creates mark list, assessment, and average result objects for each student.
+    10. Saves the created objects to the database.
+
+    Returns:
+        Response: A JSON response indicating the success or failure of the operation.
+    """
     data = request.get_json()
     if not data:
         return jsonify({"error": "Not a JSON"}), 404
@@ -422,6 +563,28 @@ def create_mark_list(admin_data):
 @auth.route('/students/mark_list', methods=['GET'])
 @admin_required
 def show_mark_list(admin_data):
+    """
+    Retrieve and display a list of marks for students based on the provided query parameters.
+
+    Args:
+        admin_data (dict): Data related to the admin making the request.
+
+    Returns:
+        Response: A JSON response containing the list of student marks or an error message with the appropriate HTTP status code.
+
+    Query Parameters:
+        grade (str): The grade level.
+        sections (str): The section within the grade.
+        subject (str): The subject for which marks are being requested.
+        assessment_type (str): The type of assessment.
+        semester (str): The semester for which marks are being requested.
+        year (str): The academic year.
+
+    Responses:
+        200: A JSON list of student marks.
+        400: A JSON error message indicating a missing required field.
+        404: A JSON error message indicating that the grade, section, subject, or students were not found.
+    """
     url = request.url
     parsed_url = urlparse(url)
     data = parse_qs(parsed_url.query)
@@ -504,6 +667,30 @@ def paginate_query(query, page, limit):
 @auth.route('/manage/students', methods=['GET'])
 @admin_required
 def admin_student_data(admin_data):
+    """
+    Retrieve and filter student data based on the provided admin data.
+
+    Args:
+        admin_data (dict): The data provided by the admin to filter student records.
+
+    Returns:
+        Response: A JSON response containing the filtered student data, or an error message if any required data is missing or not found.
+
+    The function performs the following steps:
+    1. Parses the request URL to extract query parameters.
+    2. Checks for the presence of required fields ('grade' and 'year') in the query parameters.
+    3. Retrieves the grade information from the storage.
+    4. Handles pagination and filtering parameters ('page', 'limit', 'search').
+    5. Queries the student records based on the grade and year.
+    6. Applies search filters if a search term is provided.
+    7. Paginates the query results.
+    8. Constructs a list of student summaries, including performance data for each student.
+    9. Returns the student data along with pagination metadata and header information.
+
+    Error Handling:
+    - Returns a 400 error if any required field is missing.
+    - Returns a 404 error if the grade is not found, no students are found, or no mark list is available for the specified grade and year.
+    """
     url = request.url
     parsed_url = urlparse(url)
     data = parse_qs(parsed_url.query)
@@ -631,6 +818,56 @@ def admin_student_data(admin_data):
 @auth.route('/teachers', methods=['GET'])
 @admin_required
 def all_teachers(admin_data):
+    """
+    Retrieve and return a list of teachers with pagination and optional search functionality.
+
+    Args:
+        admin_data (dict): Data related to the admin making the request.
+
+    Returns:
+        Response: A JSON response containing a list of teachers and pagination metadata.
+                  If no teachers are found, returns a 404 error with an appropriate message.
+
+    Query Parameters:
+        page (int, optional): The page number for pagination. Defaults to 1.
+        limit (int, optional): The number of items per page for pagination. Defaults to 10.
+        search (str, optional): A search term to filter teachers by id, first name, last name, email, or phone.
+
+    Response JSON Structure:
+        {
+            "teachers": [
+                {
+                    "id": int,
+                    "name": str,
+                    "first_name": str,
+                    "last_name": str,
+                    "email": str,
+                    "phone": str,
+                    "age": int,
+                    "experience": int,
+                    "no_of_mark_list": int,
+                    "record": [
+                        {
+                            "grade": str,
+                            "section": str,
+                            "subject": str
+                        },
+                        ...
+                    ],
+                    "subjects": [str],
+                    "qualifications": [str]
+                },
+                ...
+            ],
+            "meta": {
+                "page": int,
+                "limit": int,
+                "total_items": int,
+                "total_pages": int
+
+    Raises:
+        404: If no teachers are found or if no teachers match the search criteria.
+    """
     url = request.url
     parsed_url = urlparse(url)
     data = parse_qs(parsed_url.query)

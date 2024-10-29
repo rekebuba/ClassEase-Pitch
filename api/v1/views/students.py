@@ -1,5 +1,7 @@
+#!/usr/bin/python3
+"""Student views module for the API"""
+
 from flask import Blueprint, request, jsonify
-from sqlalchemy import func
 from models import storage
 from models.users import User
 from models.grade import Grade
@@ -20,6 +22,15 @@ stud = Blueprint('stud', __name__, url_prefix='/api/v1/student')
 @stud.route('/dashboard', methods=['GET'])
 @student_required
 def student_dashboard(student_data):
+    """
+    Generates the student dashboard data.
+
+    Args:
+        student_data (object): An object containing student identifiers such as student_id, grade_id, and section_id.
+
+    Returns:
+        Response: A JSON response containing the student's information, including grade and section, or an error message if the student is not found.
+    """
     if not student_data:
         return jsonify({"error": "Student not found"}), 404
 
@@ -41,6 +52,35 @@ def student_dashboard(student_data):
 @stud.route('/update-profile', methods=['PUT'])
 @student_required
 def update_student_profile(student_data):
+    """
+    Update the profile of a student with the provided data.
+
+    Args:
+        student_data (object): The student object whose profile is to be updated.
+
+    Returns:
+        Response: A JSON response indicating the result of the update operation.
+
+    The function expects a JSON payload in the request with the following fields:
+        - date_of_birth (str): The student's date of birth.
+        - father_phone (str): The student's father's phone number.
+        - mother_phone (str): The student's mother's phone number.
+        - new_password (str, optional): The new password for the student's account.
+        - current_password (str, optional): The current password for the student's account (required if new_password is provided).
+
+    The function performs the following checks:
+        - Ensures the request payload is a valid JSON.
+        - Ensures all required fields (date_of_birth, father_phone, mother_phone) are present in the payload.
+        - If a new password is provided, ensures the current password is also provided and is correct.
+
+    The function updates the student's profile and saves the changes to the storage.
+
+    Returns:
+        - 400: If the request payload is not a valid JSON or if any required field is missing.
+        - 404: If the user associated with the student ID is not found.
+        - 400: If the current password is incorrect.
+        - 200: If the profile is updated successfully.
+    """
     data = request.get_json()
     if not data:
         return jsonify({"error": "Not a JSON"}), 400
@@ -77,6 +117,36 @@ def update_student_profile(student_data):
 
 @stud.route('/registration', methods=['POST'])
 def register_new_student():
+    """
+    Registers a new student in the system.
+
+    This function handles the registration of a new student by validating the input data,
+    checking for the existence of required fields, ensuring the uniqueness of the student,
+    and saving the student and associated records to the database.
+
+    Returns:
+        Response: A JSON response indicating the result of the registration process.
+
+    Possible Responses:
+        - 404: If the input data is not a valid JSON.
+        - 400: If any required field is missing or if no phone number is provided.
+        - 404: If the specified grade is not found.
+        - 409: If a student with the same name, father's name, and date of birth already exists.
+        - 500: If there is an error during the database operations.
+        - 201: If the student is registered successfully.
+
+    Required Fields in JSON Data:
+        - name (str): The name of the student.
+        - father_name (str): The name of the student's father.
+        - grand_father_name (str): The name of the student's grandfather.
+        - grade (str): The grade of the student.
+        - date_of_birth (str): The date of birth of the student in ISO format.
+        - start_year (int): The year the student starts.
+
+    Optional Fields in JSON Data:
+        - father_phone (str): The phone number of the student's father.
+        - mother_phone (str): The phone number of the student's mother.
+    """
     data = request.get_json()
 
     if not data:
@@ -145,6 +215,16 @@ def register_new_student():
 @stud.route('/assigned_grade', methods=['GET'])
 @student_required
 def get_student_grade(student_data):
+    """
+    Retrieve the grade(s) associated with a student.
+
+    Args:
+        student_data (object): An object containing student information, 
+                               specifically the grade_id attribute.
+
+    Returns:
+        Response: A JSON response containing a list of grade names and an HTTP status code 200.
+    """
     grades = storage.get_all(Grade, id=student_data.grade_id)
     grade_names = [grade.grade for grade in grades]
 
@@ -154,6 +234,20 @@ def get_student_grade(student_data):
 @stud.route('/score', methods=['GET'])
 @student_or_admin_required
 def get_student_score(student_data, admin_data):
+    """
+    Retrieve and return the score details of a student for a specific grade and semester.
+
+    Args:
+        student_data (StudentYearlyRecord): The yearly record of the student. If not provided, it will be fetched using the student_id from the request query parameters.
+        admin_data (dict): Additional data related to the admin making the request (currently unused).
+
+    Returns:
+        Response: A JSON response containing the student's score details, including assessments and summary information, or an error message with an appropriate HTTP status code.
+
+    Raises:
+        400 Bad Request: If required query parameters are missing or invalid.
+        404 Not Found: If the grade or average score data is not found.
+    """
     url = request.url
     parsed_url = urlparse(url)
     data = parse_qs(parsed_url.query)

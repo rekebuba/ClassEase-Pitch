@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+""" Module for BaseModel class """
 
 from datetime import datetime
 import models
@@ -9,10 +10,30 @@ from sqlalchemy.orm import declared_attr
 import uuid
 import bcrypt
 
-Base = declarative_base()
+Base = declarative_base() # Base class for all models
 
 
 class BaseModel:
+    """
+    BaseModel class
+
+    Defines a base model for other classes to inherit from, providing common attributes and methods.
+
+    Attributes:
+        id (str): Primary key, a unique identifier for each instance.
+        created_at (datetime): Timestamp when the instance was created.
+        updated_at (datetime): Timestamp when the instance was last updated.
+
+    Methods:
+        __init__(*args, **kwargs): Initializes the instance with given attributes.
+        __str__(): Returns a string representation of the instance.
+        save(): Updates the updated_at attribute and saves the instance to storage.
+        to_dict(): Returns a dictionary representation of the instance.
+        delete(): Deletes the instance from storage.
+        __tablename__(cls): Returns the table name for the class.
+        hash_password(password): Hashes the given password and stores it.
+        check_password(password): Checks if the given password matches the stored hashed password.
+    """
     """Defines all common attributes/methods for other classes"""
 
     id = Column(String(120), primary_key=True)
@@ -39,17 +60,42 @@ class BaseModel:
             self.updated_at = self.created_at
 
     def __str__(self):
-        """Returns a string representation of the instance"""
+        """
+        Returns a string representation of the instance.
+
+        The string representation includes the class name, the instance ID, 
+        and the dictionary of the instance's attributes.
+
+        Returns:
+            str: A string in the format "[ClassName] (id) {attributes}".
+        """
         return "[{}] ({}) {}".format(self.__class__.__name__, self.id, self.__dict__)
 
     def save(self):
-        """Updates the public instance attribute updated_at with the current datetime"""
+        """
+        Saves the current instance to the storage.
+
+        This method updates the `updated_at` attribute with the current UTC datetime,
+        adds the instance to the storage, and then saves the storage.
+
+        Returns:
+            None
+        """
         self.updated_at = datetime.utcnow()
         models.storage.new(self)
         models.storage.save()
 
     def to_dict(self):
-        """Returns a dictionary containing all keys/values of __dict__ of the instance"""
+        """
+        Converts the instance to a dictionary representation.
+
+        This method creates a copy of the instance's `__dict__` attribute,
+        removes any SQLAlchemy instance state and password fields if present,
+        and adds the class name, creation time, and update time in ISO format.
+
+        Returns:
+            dict: A dictionary containing the instance's data.
+        """
         new_dict = self.__dict__.copy()
         if "_sa_instance_state" in new_dict:
             del new_dict["_sa_instance_state"]
@@ -61,16 +107,48 @@ class BaseModel:
         return new_dict
 
     def delete(self):
+        """
+        Delete the current instance from the storage.
+
+        Raises:
+            StorageError: If there is an issue with the storage system during deletion.
+        """
         """delete the current instance from the storage"""
         models.storage.delete(self)
 
     @declared_attr
     def __tablename__(cls):
+        """
+        Returns the table name for the SQLAlchemy model.
+
+        The table name is derived from the class name, converted to lowercase.
+
+        Returns:
+            str: The table name in lowercase.
+        """
         return cls.__name__.lower()
 
     def hash_password(self, password):
+        """
+        Hashes a given password using bcrypt and stores the hashed password.
+
+        Args:
+            password (str): The plaintext password to be hashed.
+
+        Returns:
+            None
+        """
         self.password = bcrypt.hashpw(password.encode(
             'utf-8'), bcrypt.gensalt()).decode('utf-8')
 
     def check_password(self, password):
+        """
+        Check if the provided password matches the stored hashed password.
+
+        Args:
+            password (str): The plaintext password to check.
+
+        Returns:
+            bool: True if the password matches the stored hashed password, False otherwise.
+        """
         return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))

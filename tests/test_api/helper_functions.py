@@ -1,15 +1,33 @@
+#!/usr/bin/python3
+""" Module for helper functions for testing the API """
+
 import json
-import uuid
 import random
 from faker import Faker
 from models import storage
 from models.admin import Admin
 from models.teacher import Teacher
 from models.student import Student
-from datetime import datetime
 
 
 def generate_students(num=1):
+    """
+    Generate a list of dictionaries representing student data.
+
+    Args:
+        num (int): The number of student records to generate. Default is 1.
+
+    Returns:
+        list: A list of dictionaries, each containing the following keys:
+            - 'name' (str): The first name of the student.
+            - 'father_name' (str): The last name of the student's father.
+            - 'grand_father_name' (str): The last name of the student's grandfather.
+            - 'grade' (int): The grade level of the student, default is 1.
+            - 'date_of_birth' (str): The date of birth of the student in ISO 8601 format.
+            - 'father_phone' (str): The phone number of the student's father.
+            - 'mother_phone' (str): The phone number of the student's mother.
+            - 'start_year' (str): The start year of the student's academic session, default is "2024/25".
+    """
     f = Faker()
 
     rows = [{
@@ -27,6 +45,25 @@ def generate_students(num=1):
 
 
 def generate_teachers(num=1):
+    """
+    Generate a list of dictionaries, each representing a teacher with randomly generated attributes.
+
+    Args:
+        num (int): The number of teacher dictionaries to generate. Default is 1.
+
+    Returns:
+        list: A list of dictionaries, each containing the following keys:
+            - first_name (str): The first name of the teacher.
+            - last_name (str): The last name of the teacher.
+            - age (int): The age of the teacher, randomly chosen between 20 and 60.
+            - gender (str): The gender of the teacher, randomly chosen between "male" and "female".
+            - email (str): The email address of the teacher.
+            - phone (str): The phone number of the teacher.
+            - address (str): The address of the teacher.
+            - experience (int): The years of experience of the teacher, randomly chosen between 0 and 5.
+            - qualification (str): The qualification of the teacher, randomly chosen as "Certified Teacher".
+            - subject_taught (str): The subject taught by the teacher, randomly chosen from a predefined list of subjects.
+    """
     f = Faker()
     rows = [{
         'first_name': f.first_name(),
@@ -45,6 +82,15 @@ def generate_teachers(num=1):
 
 
 def generate_admin(num=1):
+    """
+    Generate a list of dictionaries containing fake admin user data.
+
+    Args:
+        num (int): The number of admin user dictionaries to generate. Default is 1.
+
+    Returns:
+        list: A list of dictionaries, each containing 'name' and 'email' keys with fake data.
+    """
     f = Faker()
     rows = [{
         'name': f.first_name(),
@@ -54,8 +100,19 @@ def generate_admin(num=1):
     return rows
 
 
-def generate_mark_list_data(num=1):
-    f = Faker()
+def generate_mark_list_data():
+    """
+    Generates a dictionary containing mock data for a mark list.
+
+    Returns:
+        dict: A dictionary containing the following keys:
+            - "grade" (int): The grade level.
+            - "sections" (list of str): List of section names.
+            - "subjects" (list of str): List of subject names.
+            - "assessment_type" (list of dict): List of assessment types with their respective percentages.
+            - "semester" (int): The semester number (1 or 2).
+            - "year" (str): The academic year in "YYYY/YY" format.
+    """
     return {
         "grade": 1,
         "sections": ["A", "B"],
@@ -73,6 +130,23 @@ def generate_mark_list_data(num=1):
 
 
 def register_admin(client):
+    """
+    Register an admin for testing.
+
+    This function generates a list of admin users and attempts to register 
+    each one by sending a POST request to the '/api/v1/admin/registration' 
+    endpoint. If the registration is successful, the response status code 
+    should be 201. If any registration fails, an exception is raised and 
+    the response is returned.
+
+    Args:
+        client: The test client used to send HTTP requests.
+
+    Returns:
+        response: The response object from the failed registration attempt, 
+                  if an exception is raised. Otherwise, returns the response 
+                  object from the last successful registration attempt.
+    """
     """Register an admin for testing."""
 
     # Register an admin before login
@@ -90,6 +164,22 @@ def register_admin(client):
 
 
 def register_teacher(client):
+    """
+    Register a teacher for testing.
+
+    This function generates a single teacher using the `generate_teachers` function
+    and attempts to register the teacher via a POST request to the '/api/v1/admin/teachers/registration' endpoint.
+    If the registration is not successful (i.e., the response status code is not 201), an exception is raised.
+
+    Args:
+        client: The test client used to make the POST request.
+
+    Returns:
+        response: The response object from the POST request.
+
+    Raises:
+        Exception: If the registration is not successful.
+    """
     """Register an teacher for testing."""
 
     teachers = generate_teachers(1)

@@ -1,10 +1,12 @@
+#!/usr/bin/python3
+"""Utility functions for the API"""
+
 import jwt
 from datetime import datetime, timedelta
 from flask import current_app  # Import current_app to access app context
 from functools import wraps
 from flask import request, jsonify
 from models import storage
-from models.student import Student
 from models.stud_yearly_record import StudentYearlyRecord
 from models.teacher import Teacher
 from models.admin import Admin
@@ -17,6 +19,17 @@ from apscheduler.schedulers.background import BackgroundScheduler
 
 # Function to generate JWT for Admins
 def create_admin_token(admin_id):
+    """
+    Generate a JWT token for an admin user.
+
+    Args:
+        admin_id (int): The unique identifier of the admin user.
+
+    Returns:
+        str: A JWT token encoded with the admin's ID, expiration time, and role.
+
+    The token expires in 30 minutes from the time of creation.
+    """
     payload = {
         'id': admin_id,
         # Admin token expires in 30 minutes
@@ -30,6 +43,20 @@ def create_admin_token(admin_id):
 
 # Function to generate JWT for teachers
 def create_teacher_token(teacher_id):
+    """
+    Generate a JWT token for a teacher.
+
+    Args:
+        teacher_id (int): The unique identifier of the teacher.
+
+    Returns:
+        str: A JWT token encoded with the teacher's information and expiration time.
+
+    The token payload includes:
+        - 'id': The teacher's unique identifier.
+        - 'exp': The expiration time of the token, set to 15 minutes from the current time.
+        - 'role': The role of the user, set to 'teacher'.
+    """
     payload = {
         'id': teacher_id,
         # teacher token expires in 15 minutes
@@ -43,6 +70,15 @@ def create_teacher_token(teacher_id):
 
 # Function to generate JWT for students
 def create_student_token(student_id):
+    """
+    Generate a JWT token for a student.
+
+    Args:
+        student_id (int): The unique identifier of the student.
+
+    Returns:
+        str: A JWT token encoded with the student's information and expiration time.
+    """
     payload = {
         'id': student_id,
         # teacher token expires in 15 minutes
@@ -56,6 +92,24 @@ def create_student_token(student_id):
 
 # Decorator for Admin JWT verification
 def admin_required(f):
+    """
+    Decorator to ensure that the request is made by an authenticated admin user.
+
+    This decorator checks for the presence of a valid JWT token in the 'Authorization' header of the request.
+    The token is expected to be in the format 'Bearer <token>'. The token is then decoded using the secret key
+    specified in the application's configuration. If the token is valid and corresponds to an existing admin user,
+    the decorated function is called with the admin data passed as the first argument.
+
+    Args:
+        f (function): The function to be decorated.
+
+    Returns:
+        function: The decorated function which includes the admin data if the token is valid.
+
+    Raises:
+        401 Unauthorized: If the token is missing, expired, or invalid.
+        404 Not Found: If the token is valid but the admin user does not exist.
+    """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         token = None
@@ -83,6 +137,22 @@ def admin_required(f):
 
 # Decorator for teacher JWT verification
 def teacher_required(f):
+    """
+    Decorator to ensure that the request is made by an authenticated teacher.
+
+    This decorator checks for the presence of a JWT token in the 'Authorization' header of the request.
+    The token is expected to be in the format 'Bearer <token>'. The token is then decoded using the 
+    secret key specified in the application's configuration. If the token is valid and corresponds 
+    to an existing teacher, the decorated function is called with the teacher's data passed as the 
+    first argument. If the token is missing, expired, invalid, or the teacher is not found, an 
+    appropriate JSON response with an error message and status code is returned.
+
+    Args:
+        f (function): The function to be decorated.
+
+    Returns:
+        function: The decorated function with teacher authentication enforced.
+    """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         token = None
@@ -110,6 +180,20 @@ def teacher_required(f):
 
 # Decorator for student JWT verification
 def student_required(f):
+    """
+    Decorator to ensure that the request is made by an authenticated student.
+
+    This decorator checks for the presence of a JWT token in the 'Authorization' header of the request.
+    It decodes the token using the student secret key and retrieves the student data from the storage.
+    If the token is missing, expired, invalid, or if the student is not found, it returns an appropriate
+    JSON response with a corresponding HTTP status code.
+
+    Args:
+        f (function): The function to be decorated.
+
+    Returns:
+        function: The decorated function which includes the student data as the first argument.
+    """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         token = None
@@ -138,6 +222,24 @@ def student_required(f):
 
 # Unified decorator for Student and Admin JWT verification
 def student_or_admin_required(f):
+    """
+    Decorator to ensure that the request is made by either a student or an admin.
+
+    This decorator checks the 'Authorization' header for a Bearer token and attempts to decode it
+    using either the student or admin secret keys. If the token is valid and corresponds to a student,
+    the decorated function is called with the student data and None for admin data. If the token is valid
+    and corresponds to an admin, the decorated function is called with None for student data and the admin data.
+    If the token is missing, expired, or invalid, an appropriate JSON response with a 401 status code is returned.
+
+    Args:
+        f (function): The function to be decorated.
+
+    Returns:
+        function: The decorated function with student or admin data passed as arguments.
+
+    Raises:
+        401 Unauthorized: If the token is missing, expired, or invalid.
+    """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         token = None
@@ -175,32 +277,3 @@ def student_or_admin_required(f):
         return jsonify({'message': 'Unauthorized access'}), 401
 
     return decorated_function
-
-
-def update_overall_averages():
-    averages = storage.get_session().query(
-        MarkList.subject_id,
-        func.sum(MarkList.score).label('total_score')
-    ).group_by(MarkList.subject_id).all()
-
-    for avg in averages:
-        overall = storage.get_session().query(AVRGResult).filter_by(
-            student_id=avg.student_id
-        ).first()
-
-        if not overall:
-            # overall = AVRGResult(
-            #     student_id=avg.student_id,
-            #     average_score=avg.average_score
-            # )
-            # storage.add(overall)
-            return
-        else:
-            overall.average = avg.average_score
-
-    storage.save()
-
-# # Initialize the scheduler
-# scheduler = BackgroundScheduler()
-# scheduler.add_job(update_overall_averages, 'interval', hours=1)
-# scheduler.start()

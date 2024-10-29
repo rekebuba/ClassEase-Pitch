@@ -1,3 +1,6 @@
+#!/usr/bin/python3
+"""Teacher views module for the API"""
+
 from flask import request, jsonify
 from sqlalchemy import func
 from models import storage
@@ -5,7 +8,6 @@ from models.users import User
 from models.grade import Grade
 from models.student import Student
 from models.section import Section
-from models.teacher import Teacher
 from models.subject import Subject
 from models.assessment import Assessment
 from models.mark_list import MarkList
@@ -13,10 +15,9 @@ from models.average_result import AVRGResult
 from models.teacher_record import TeachersRecord
 from models.stud_yearly_record import StudentYearlyRecord
 from urllib.parse import urlparse, parse_qs
-from sqlalchemy import update, select, and_
+from sqlalchemy import update, and_
 from flask import Blueprint
-from api.v1.views.utils import create_teacher_token, teacher_required
-from math import ceil
+from api.v1.views.utils import teacher_required
 
 
 teach = Blueprint('teach', __name__, url_prefix='/api/v1/teacher')
@@ -25,6 +26,16 @@ teach = Blueprint('teach', __name__, url_prefix='/api/v1/teacher')
 @teach.route('/dashboard', methods=['GET'])
 @teacher_required
 def teacher_dashboard(teacher_data):
+    """
+    Handle the teacher dashboard view.
+
+    Args:
+        teacher_data (object): The teacher data object. Should have a `to_dict` method.
+
+    Returns:
+        Response: A JSON response containing the teacher data if found, 
+                  otherwise an error message with a 404 status code.
+    """
     if not teacher_data:
         return jsonify({"error": "Teacher not found"}), 404
     return jsonify(teacher_data.to_dict()), 200
@@ -33,6 +44,22 @@ def teacher_dashboard(teacher_data):
 @teach.route('/update-profile', methods=['PUT'])
 @teacher_required
 def update_teacher_profile(teacher_data):
+    """
+    Update the profile of a teacher.
+
+    This function updates the profile information of a teacher based on the provided JSON data.
+    It requires the fields 'first_name', 'email', and 'phone' to be present in the request data.
+    Optionally, it can also update the teacher's password if 'new_password' and 'current_password' are provided.
+
+    Args:
+        teacher_data (object): The teacher object whose profile is to be updated.
+
+    Returns:
+        Response: A JSON response indicating the result of the update operation.
+            - 200: Profile updated successfully.
+            - 400: If the request data is not JSON, or if required fields are missing, or if the current password is incorrect.
+            - 404: If the user is not found.
+    """
     data = request.get_json()
     if not data:
         return jsonify({"error": "Not a JSON"}), 400
@@ -69,6 +96,30 @@ def update_teacher_profile(teacher_data):
 @teach.route('/students/mark_list', methods=['GET'])
 @teacher_required
 def get_students(teacher_data):
+    """
+    Retrieves a list of students based on the provided teacher data and query parameters.
+
+    Args:
+        teacher_data (object): The teacher data object containing the teacher's information.
+
+    Returns:
+        Response: A JSON response containing the list of students and relevant header information, 
+                  or an error message with the appropriate HTTP status code.
+
+    Query Parameters:
+        grade (str): The grade to filter students by.
+        sections (str): Comma-separated list of sections to filter students by.
+        semester (str): The semester to filter students by.
+        year (str): The year to filter students by.
+
+    Response JSON Structure
+
+    Error Responses:
+        400: {"error": "Bad Request"} - If required query parameters are missing.
+        400: {"error": "Missing <field>"} - If a specific required field is missing.
+        404: {"error": "Grade not found"} - If the specified grade does not exist.
+        404: {"error": "Section not found"} - If the specified section does not exist.
+    """
     url = request.url
     parsed_url = urlparse(url)
     data = parse_qs(parsed_url.query)
@@ -160,6 +211,18 @@ def get_students(teacher_data):
 @teach.route('/students/assigned_grade', methods=['GET'])
 @teacher_required
 def get_teacher_assigned_grade(teacher_data):
+    """
+    Retrieve the grades assigned to a specific teacher.
+
+    Args:
+        teacher_data (object): An object containing the teacher's data, 
+                               specifically the teacher's ID.
+
+    Returns:
+        Response: A JSON response containing the list of grades assigned to the teacher 
+                  if found, or an error message if no grades were assigned.
+        int: HTTP status code 200 if grades are found, 404 if no grades are assigned.
+    """
     assigned_grade = storage.get_session().query(TeachersRecord).filter(
         TeachersRecord.teacher_id == teacher_data.id
     )
@@ -178,6 +241,30 @@ def get_teacher_assigned_grade(teacher_data):
 @teach.route('/students/mark_list', methods=['PUT'])
 @teacher_required
 def add_student_assessment(teacher_data):
+    """
+    Adds or updates student assessment scores for a given teacher.
+
+    Args:
+        teacher_data (object): The teacher data object containing the teacher's information.
+
+    Returns:
+        Response: A JSON response indicating the success or failure of the operation.
+
+    Raises:
+        Exception: If an unexpected error occurs during the update process.
+
+    The function performs the following steps:
+    1. Retrieves JSON data from the request.
+    2. Validates the presence of required fields in the JSON data.
+    3. Fetches the teacher's record based on the provided teacher data and student data.
+    4. Updates the student's assessment scores in the database.
+    5. Commits the updates to the database.
+    6. Calculates and updates the student's subject sum, semester average, and yearly average.
+    7. Handles any exceptions that occur during the process and returns an appropriate error response.
+
+    Returns:
+        Response: A JSON response indicating the success or failure of the operation.
+    """
     data = request.get_json()
     if not data:
         return jsonify({"error": "Not a JSON"}), 404
@@ -236,6 +323,23 @@ def add_student_assessment(teacher_data):
 
 
 def subject_sum(student_data):
+    """
+    Calculate the total score for a specific subject and student, and update or create an Assessment record.
+
+    This function queries the MarkList table to sum the scores for a given student, subject, semester, and year.
+    It then updates or creates an Assessment record with the total score. Finally, it calls the subject_ranks
+    function to update the subject ranks.
+
+    Args:
+        student_data (dict): A dictionary containing the following keys:
+            - student_id (int): The ID of the student.
+            - subject_id (int): The ID of the subject.
+            - semester (int): The semester number.
+            - year (int): The academic year.
+
+    Returns:
+        None
+    """
     total = storage.get_session().query(
         MarkList.subject_id,
         MarkList.student_id,
@@ -273,6 +377,23 @@ def subject_sum(student_data):
 
 
 def semester_average(student_data):
+    """
+    Calculate the average score for a student in a specific semester and year,
+    update or create an AVRGResult entry with the calculated average, and 
+    subsequently update the semester ranks.
+
+    Args:
+        student_data (dict): A dictionary containing the student's ID, semester, 
+                             and year. Example:
+                             {
+                                 'student_id': <student_id>,
+                                 'semester': <semester>,
+                                 'year': <year>
+                             }
+
+    Returns:
+        None
+    """
     average = storage.get_session().query(
         Assessment.student_id,
         Assessment.year,
@@ -306,6 +427,20 @@ def semester_average(student_data):
 
 
 def yearly_average(student_data):
+    """
+    Calculate and update the yearly average score for a student.
+
+    This function retrieves the average results for a student for a given year,
+    calculates the yearly average, and updates or creates a record in the 
+    StudentYearlyRecord table with the calculated average. It also triggers 
+    the year_ranks function to update the student's ranking.
+
+    Args:
+        student_data (dict): A dictionary containing 'student_id' and 'year' keys.
+
+    Returns:
+        None
+    """
 
     result = storage.get_session().query(AVRGResult).filter_by(
         student_id=student_data['student_id'],
@@ -338,6 +473,19 @@ def yearly_average(student_data):
 
 
 def subject_ranks(student_data):
+    """
+    Calculate and assign ranks to students based on their total scores in a specific subject, semester, and year.
+
+    Args:
+        student_data (dict): A dictionary containing the following keys:
+            - 'subject_id' (int): The ID of the subject.
+            - 'semester' (str): The semester for which the ranks are to be calculated.
+            - 'year' (int): The year for which the ranks are to be calculated.
+
+    The function queries the database to get distinct subject IDs matching the provided subject_id, semester, and year.
+    For each subject, it retrieves all assessments, orders them by total score in descending order, and assigns ranks
+    based on their position in the sorted list. The ranks are then saved back to the database.
+    """
     for subject_id in storage.get_session().query(Assessment.subject_id).filter(
         Assessment.subject_id == student_data['subject_id'],
         Assessment.semester == student_data['semester'],
@@ -357,6 +505,19 @@ def subject_ranks(student_data):
 
 
 def semester_ranks(student_data):
+    """
+    Calculate and assign ranks to students based on their average results for a given semester and year.
+
+    Args:
+        student_data (dict): A dictionary containing 'semester' and 'year' keys to filter the results.
+
+    Returns:
+        None: This function updates the ranks in the database and does not return any value.
+
+    Example:
+        student_data = {'semester': 'Fall', 'year': 2023}
+        semester_ranks(student_data)
+    """
     for semester in storage.get_session().query(AVRGResult.semester).filter(
         AVRGResult.semester == student_data['semester'],
         AVRGResult.year == student_data['year']
@@ -373,6 +534,21 @@ def semester_ranks(student_data):
 
 
 def year_ranks(student_data):
+    """
+    Calculate and assign ranks to students based on their final scores for a given year.
+
+    Args:
+        student_data (dict): A dictionary containing student information, specifically the year to filter by.
+
+    Returns:
+        None: This function updates the ranks in the database and does not return any value.
+
+    The function performs the following steps:
+    1. Queries the database to get distinct years matching the provided year in student_data.
+    2. For each year, retrieves student records ordered by their final scores in descending order.
+    3. Assigns ranks to students based on their final scores.
+    4. Saves the updated ranks back to the database.
+    """
     for year in storage.get_session().query(StudentYearlyRecord.year).filter(
         StudentYearlyRecord.year == student_data['year'],
     ).distinct():
