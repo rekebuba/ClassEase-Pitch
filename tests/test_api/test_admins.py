@@ -74,7 +74,7 @@ class TestAdmin(unittest.TestCase):
         This test performs the following steps:
         1. Registers an admin user.
         2. Retrieves a random admin's ID from the storage.
-        3. Sends a GET request to the login endpoint with the admin's ID and password.
+        3. Sends a POST request to the login endpoint with the admin's ID and password.
         4. Asserts that the response status code is 200 (OK).
         5. Extracts the access token from the response JSON data.
         6. Asserts that the access token is present in the response JSON data.
@@ -86,8 +86,8 @@ class TestAdmin(unittest.TestCase):
         id = storage.get_random(Admin).id
 
         # Test that a valid login returns a token
-        response = self.client.get(
-            f'/api/v1/login?id={id}&password={id}', content_type='application/json')
+        response = self.client.post(
+            f'/api/v1/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
 
         self.assertEqual(response.status_code, 200)
         json_data = response.get_json()
@@ -103,7 +103,7 @@ class TestAdmin(unittest.TestCase):
 
         Steps:
         1. Set an invalid id and password.
-        2. Send a GET request to the login endpoint with the invalid credentials.
+        2. Send a POST request to the login endpoint with the invalid credentials.
         3. Assert that the response status code is 401.
 
         Expected Result:
@@ -112,8 +112,8 @@ class TestAdmin(unittest.TestCase):
         id = 'fake'
 
         # Test that a valid login returns a token
-        response = self.client.get(
-            f'/api/v1/login?id={id}&password={id}', content_type='application/json')
+        response = self.client.post(
+            f'/api/v1/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
         self.assertEqual(response.status_code, 401)
 
     def test_admin_login_wrong_password(self):
@@ -136,8 +136,9 @@ class TestAdmin(unittest.TestCase):
         """
         register_admin(self.client)
         id = storage.get_random(Admin).id
-        response = self.client.get(
-            f'/api/v1/login?id={id}&password=wrong', content_type='application/json')
+        response = self.client.post(
+            f'/api/v1/login', data=json.dumps({"id": id, "password": 'wrong'}), content_type='application/json')
+
         self.assertEqual(response.status_code, 401)
 
     def test_admin_dashboard_success(self):
@@ -225,7 +226,7 @@ class TestAdmin(unittest.TestCase):
             self.fail(
                 "Student can not be registered. Test failed. Check the student registration endpoint")
 
-        mark_list = generate_mark_list_data(1)
+        mark_list = generate_mark_list_data()
         response = self.client.put('/api/v1/admin/students/mark_list',
                                    data=json.dumps(mark_list),
                                    headers={
@@ -258,7 +259,7 @@ class TestAdmin(unittest.TestCase):
                 "Token not generated. Test failed. Check the login endpoint.")
 
         response = self.client.put('/api/v1/admin/students/mark_list',
-                                   data=json.dumps(generate_mark_list_data(1)),
+                                   data=json.dumps(generate_mark_list_data()),
                                    headers={
                                        'Authorization': f'Bearer {token}invalid'},
                                    content_type='application/json')

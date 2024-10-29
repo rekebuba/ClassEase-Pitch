@@ -85,8 +85,8 @@ class TestTeachers(unittest.TestCase):
         register_teacher(self.client)
         id = storage.get_random(Teacher).id
 
-        response = self.client.get(f'/api/v1/login?id={id}&password={id}',
-                                    content_type='application/json')
+        response = self.client.post(
+            f'/api/v1/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
 
         self.assertEqual(response.status_code, 200)
         json_data = response.get_json()
@@ -112,7 +112,9 @@ class TestTeachers(unittest.TestCase):
         id = 'fake'
 
         # Test that a valid login returns a token
-        response = self.client.get(f'/api/v1/login?id={id}&password={id}', content_type='application/json')
+        response = self.client.post(
+            f'/api/v1/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
+
         self.assertEqual(response.status_code, 401)
 
     def test_admin_login_wrong_password(self):
@@ -133,7 +135,9 @@ class TestTeachers(unittest.TestCase):
         """
         register_teacher(self.client)
         id = storage.get_random(Teacher).id
-        response = self.client.get(f'/api/v1/login?id={id}&password=wrong', content_type='application/json')
+        response = self.client.post(
+            f'/api/v1/login', data=json.dumps({"id": id, "password": "wrong"}), content_type='application/json')
+
         self.assertEqual(response.status_code, 401)
 
     def test_teacher_dashboard_success(self):

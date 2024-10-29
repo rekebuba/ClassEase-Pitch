@@ -219,8 +219,7 @@ def get_admin_access_token(client):
     id = storage.get_random(Admin).id
 
     # Test that a valid login returns a token
-    response = client.get(
-        f'/api/v1/login?id={id}&password={id}', content_type='application/json')
+    response = client.post('/api/v1/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
 
     json_data = response.get_json()
     return json_data['access_token']
@@ -232,8 +231,7 @@ def get_teacher_access_token(client):
     id = storage.get_random(Teacher).id
 
     # Test that a valid login returns a token
-    response = client.get(
-        f'/api/v1/login?id={id}&password={id}', content_type='application/json')
+    response = client.post('/api/v1/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
 
     json_data = response.get_json()
     return json_data['access_token']
@@ -245,8 +243,7 @@ def get_student_access_token(client):
     id = storage.get_random(Student).id
 
     # Test that a valid login returns a token
-    response = client.get(
-        f'/api/v1/login?id={id}&password={id}', content_type='application/json')
+    response = client.post('/api/v1/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
 
     json_data = response.get_json()
     return json_data['access_token']
@@ -266,7 +263,7 @@ def create_mark_list(client):
                 raise Exception
 
         response = client.put('/api/v1/admin/students/mark_list',
-                              data=json.dumps(generate_mark_list_data(1)),
+                              data=json.dumps(generate_mark_list_data()),
                               headers={
                                   'Authorization': f'Bearer {token}'},
                               content_type='application/json')
