@@ -168,9 +168,9 @@ class_ease
 └── updateProfile.css
 
 tests
-├── **init**.py
+├── __init__.py
 ├── test_api
-│ ├── **init**.py
+│ ├──__init__.py
 │ ├── helper_functions.py
 │ ├── test_admins.py
 │ ├── test_students.py
