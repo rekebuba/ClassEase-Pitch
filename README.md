@@ -15,6 +15,7 @@ ClassEase is a comprehensive school management system designed to streamline the
 - [Installation](#installation)
 - [Usage](#usage)
 - [API Endpoints](#api-endpoints)
+- [Running Tests](#Running-Tests)
 - [Contributing](#contributing)
 - [Future Improvements](#future-improvements)
 - [Lessons Learned](#lessons-learned)
@@ -202,7 +203,15 @@ tests
    cd ClassEase
    ```
 
-2. **Backend Setup:**
+2. **MySQL Setup:**
+
+   Set up MySQL by running the setup_mysql_dev.sql:
+
+   ```bash
+   mysql -u root -p < setup_mysql_dev.sql # enter password when prompted
+   ```
+
+3. **Backend Setup:**
 
    Set up a virtual environment and install dependencies:
 
@@ -214,7 +223,7 @@ tests
 
    Configure the MySQL database in the `db_storage.py` file.
 
-3. **Frontend Setup:**
+4. **Frontend Setup:**
 
    Navigate to the frontend directory, install dependencies, and start the development server:
 
@@ -224,7 +233,7 @@ tests
    npm start
    ```
 
-4. **Run the Backend:**
+5. **Run the Backend:**
 
    Start the backend server:
 
@@ -262,6 +271,45 @@ Here is an overview of some core API endpoints:
 | /api/v1/admin/manage/students    | POST   | Retrieve and filter student data based on the provided admin data. |
 
 For a complete list of API endpoints and detailed usage, please refer to the API documentation in the project repository.
+
+## Running Tests
+
+### Prerequisites
+
+Ensure you have the necessary dependencies installed and the environment set up as described in the [Installation](#installation) section.
+
+### Running Backend Tests
+
+To run the backend tests, navigate to the project root directory and use the following command:
+
+```bash
+python3 -m unittest discover -s tests/test_api
+```
+
+This command will discover and run all the tests in the `tests/test_api` directory.
+
+### Running Specific Tests
+
+If you want to run a specific test file, you can specify the path to the test file. For example, to run the `test_students.py` file:
+
+```bash
+python3 -m unittest tests/test_api/test_students.py
+```
+
+### Viewing Test Coverage
+
+To view the test coverage for the backend, you can use the `coverage` package. First, install it if you haven't already:
+
+```bash
+pip install coverage
+```
+
+Then, run the tests with coverage:
+
+```bash
+coverage run -m unittest discover -s tests/test_api
+coverage report -m
+```
 
 ## Contributing
 
