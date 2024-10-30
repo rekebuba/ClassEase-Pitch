@@ -1,4 +1,7 @@
-ClassEase
+<p align="center">
+  <img src="class_ease/src/images/ClassEase-header.png" alt="ClassEase Logo" width="300" height="100">
+</p>
+
 # ClassEase
 
 ClassEase is a comprehensive school management system designed to streamline the process of managing students, teachers, and academic data. This system facilitates student record handling, grade tracking, and role-based access, making it easier for schools to maintain organized and secure data while providing a user-friendly interface for teachers, administrators, and students.
@@ -50,27 +53,27 @@ ClassEase aims to address the challenges faced by schools in managing student in
 
 ```markdown
 api
-├── __init__.py
+├── **init**.py
 └── v1
-    ├── __init__.py
-    ├── app.py
-    └── views
-        ├── __init__.py
-        ├── admin.py
-        ├── public.py
-        ├── students.py
-        ├── teachers.py
-        └── utils.py
+├── **init**.py
+├── app.py
+└── views
+├── **init**.py
+├── admin.py
+├── public.py
+├── students.py
+├── teachers.py
+└── utils.py
 
 models
-├── __init__.py
+├── **init**.py
 ├── admin.py
 ├── assessment.py
 ├── average_result.py
 ├── base_model.py
 ├── engine
-│   ├── __init__.py
-│   └── db_storage.py
+│ ├── **init**.py
+│ └── db_storage.py
 ├── grade.py
 ├── mark_list.py
 ├── section.py
@@ -86,95 +89,95 @@ class_ease
 ├── package-lock.json
 ├── package.json
 ├── public
-│   ├── ClassEase-favicon.ico
-│   ├── index.html
-│   ├── logo192.png
-│   ├── logo512.png
-│   ├── manifest.json
-│   └── robots.txt
+│ ├── ClassEase-favicon.ico
+│ ├── index.html
+│ ├── logo192.png
+│ ├── logo512.png
+│ ├── manifest.json
+│ └── robots.txt
 └── src
-    ├── App.js
-    ├── App.test.js
-    ├── components
-    │   ├── AdminHeader.js
-    │   ├── AdminPanel.js
-    │   ├── Home.js
-    │   ├── HomeHeader.js
-    │   ├── StdPanel.js
-    │   ├── TeachHeader.js
-    │   └── TeachPanel.js
-    ├── images
-    │   ├── ClassEase-footer.png
-    │   ├── ClassEase-full-Logo.png
-    │   ├── ClassEase-header.png
-    │   └── ClassEase-no-slogan.png
-    ├── index.js
-    ├── pages
-    │   ├── admin
-    │   │   ├── AdminAssignTeacher.js
-    │   │   ├── AdminCreateMarkList.js
-    │   │   ├── AdminDashboard.js
-    │   │   ├── AdminEnrollUser.js
-    │   │   ├── AdminEventManagement.js
-    │   │   ├── AdminExamAssessmentReports.js
-    │   │   ├── AdminManageStudents.js
-    │   │   ├── AdminManageTeach.js
-    │   │   ├── AdminStudList.js
-    │   │   ├── AdminStudPerformance.js
-    │   │   ├── AdminStudProfile.js
-    │   │   ├── AdminTeachList.js
-    │   │   ├── AdminTeachProfile.js
-    │   │   ├── AdminUpdateProfile.js
-    │   │   └── AdminUserAccessControl.js
-    │   ├── library
-    │   │   ├── lodash.js
-    │   │   └── pagination.js
-    │   ├── student
-    │   │   ├── StudPopupScore.js
-    │   │   ├── StudSubjectList.js
-    │   │   ├── StudentDashboard.js
-    │   │   ├── StudentRegistrationForm.js
-    │   │   └── StudentUpdateProfile.js
-    │   └── teacher
-    │       ├── TeacherDashboard.js
-    │       ├── TeacherManageStudents.js
-    │       ├── TeacherPopupUpdateStudentScore.js
-    │       ├── TeacherRegistrationForm.js
-    │       ├── TeacherStudentsList.js
-    │       └── TeacherUpdateProfile.js
-    ├── services
-    │   ├── Alert.js
-    │   ├── Login.js
-    │   ├── Logout.js
-    │   ├── NotFound.js
-    │   ├── ProtectedRoute.js
-    │   └── api.js
-    ├── setupTests.js
-    └── styles
-        ├── AdminDashboard.css
-        ├── AdminManageStudents.css
-        ├── Alert.css
-        ├── Dashboard.css
-        ├── HomePage.css
-        ├── Login.css
-        ├── StudDashboard.css
-        ├── StudRegistrationForm.css
-        ├── Table.css
-        ├── TeacherDashboard.css
-        ├── notfound.css
-        └── updateProfile.css
+├── App.js
+├── App.test.js
+├── components
+│ ├── AdminHeader.js
+│ ├── AdminPanel.js
+│ ├── Home.js
+│ ├── HomeHeader.js
+│ ├── StdPanel.js
+│ ├── TeachHeader.js
+│ └── TeachPanel.js
+├── images
+│ ├── ClassEase-footer.png
+│ ├── ClassEase-full-Logo.png
+│ ├── ClassEase-header.png
+│ └── ClassEase-no-slogan.png
+├── index.js
+├── pages
+│ ├── admin
+│ │ ├── AdminAssignTeacher.js
+│ │ ├── AdminCreateMarkList.js
+│ │ ├── AdminDashboard.js
+│ │ ├── AdminEnrollUser.js
+│ │ ├── AdminEventManagement.js
+│ │ ├── AdminExamAssessmentReports.js
+│ │ ├── AdminManageStudents.js
+│ │ ├── AdminManageTeach.js
+│ │ ├── AdminStudList.js
+│ │ ├── AdminStudPerformance.js
+│ │ ├── AdminStudProfile.js
+│ │ ├── AdminTeachList.js
+│ │ ├── AdminTeachProfile.js
+│ │ ├── AdminUpdateProfile.js
+│ │ └── AdminUserAccessControl.js
+│ ├── library
+│ │ ├── lodash.js
+│ │ └── pagination.js
+│ ├── student
+│ │ ├── StudPopupScore.js
+│ │ ├── StudSubjectList.js
+│ │ ├── StudentDashboard.js
+│ │ ├── StudentRegistrationForm.js
+│ │ └── StudentUpdateProfile.js
+│ └── teacher
+│ ├── TeacherDashboard.js
+│ ├── TeacherManageStudents.js
+│ ├── TeacherPopupUpdateStudentScore.js
+│ ├── TeacherRegistrationForm.js
+│ ├── TeacherStudentsList.js
+│ └── TeacherUpdateProfile.js
+├── services
+│ ├── Alert.js
+│ ├── Login.js
+│ ├── Logout.js
+│ ├── NotFound.js
+│ ├── ProtectedRoute.js
+│ └── api.js
+├── setupTests.js
+└── styles
+├── AdminDashboard.css
+├── AdminManageStudents.css
+├── Alert.css
+├── Dashboard.css
+├── HomePage.css
+├── Login.css
+├── StudDashboard.css
+├── StudRegistrationForm.css
+├── Table.css
+├── TeacherDashboard.css
+├── notfound.css
+└── updateProfile.css
 
 tests
-├── __init__.py
+├── **init**.py
 ├── test_api
-│   ├── __init__.py
-│   ├── helper_functions.py
-│   ├── test_admins.py
-│   ├── test_students.py
-│   └── test_teachers.py
+│ ├── **init**.py
+│ ├── helper_functions.py
+│ ├── test_admins.py
+│ ├── test_students.py
+│ └── test_teachers.py
 └── test_models
-    ├── test_admin_models.py
-    └── test_teacher_models.py
+├── test_admin_models.py
+└── test_teacher_models.py
 ```
 
 - **api/v1**: Contains the main API views and route handling for the backend.
@@ -194,40 +197,40 @@ tests
 
 1. **Clone the Repository:**
 
-    ```bash
-    git clone https://github.com/your-username/ClassEase.git
-    cd ClassEase
-    ```
+   ```bash
+   git clone https://github.com/your-username/ClassEase.git
+   cd ClassEase
+   ```
 
 2. **Backend Setup:**
 
-    Set up a virtual environment and install dependencies:
+   Set up a virtual environment and install dependencies:
 
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate
-    pip install -r requirements.txt
-    ```
+   ```bash
+   python3 -m venv venv
+   source venv/bin/activate
+   pip install -r requirements.txt
+   ```
 
-    Configure the MySQL database in the `db_storage.py` file.
+   Configure the MySQL database in the `db_storage.py` file.
 
 3. **Frontend Setup:**
 
-    Navigate to the frontend directory, install dependencies, and start the development server:
+   Navigate to the frontend directory, install dependencies, and start the development server:
 
-    ```bash
-    cd class_ease
-    npm install
-    npm start
-    ```
+   ```bash
+   cd class_ease
+   npm install
+   npm start
+   ```
 
 4. **Run the Backend:**
 
-    Start the backend server:
+   Start the backend server:
 
-    ```bash
-    python3 -m api.v1.app
-    ```
+   ```bash
+   python3 -m api.v1.app
+   ```
 
 ## Usage
 
@@ -249,14 +252,14 @@ Add or modify student details, update grades, and manage academic records with r
 
 Here is an overview of some core API endpoints:
 
-| Endpoint                    | Method | Description                          |
-|-----------------------------|--------|--------------------------------------|
-| /api/v1/login          | POST   | Logs a user into the system          |
-| /api/v1/student/registration            | POST    | Registers a new Student         |
-| /api/v1/students            | POST   | Adds a new student to the system     |
-| /api/v1/admin/students/mark_list | PUT    | Create a mark list for students based on the provided admin data |
-| /api/v1/admin/teachers            | GET    | Lists all teachers                   |
-| /api/v1/admin/manage/students    | POST   | Retrieve and filter student data based on the provided admin data.       |
+| Endpoint                         | Method | Description                                                        |
+| -------------------------------- | ------ | ------------------------------------------------------------------ |
+| /api/v1/login                    | POST   | Logs a user into the system                                        |
+| /api/v1/student/registration     | POST   | Registers a new Student                                            |
+| /api/v1/students                 | POST   | Adds a new student to the system                                   |
+| /api/v1/admin/students/mark_list | PUT    | Create a mark list for students based on the provided admin data   |
+| /api/v1/admin/teachers           | GET    | Lists all teachers                                                 |
+| /api/v1/admin/manage/students    | POST   | Retrieve and filter student data based on the provided admin data. |
 
 For a complete list of API endpoints and detailed usage, please refer to the API documentation in the project repository.
 
@@ -267,9 +270,9 @@ We welcome contributions to make ClassEase better! If you'd like to contribute, 
 1. Fork the repository.
 2. Create a new branch for your feature or bugfix:
 
-    ```bash
-    git checkout -b feature-name
-    ```
+   ```bash
+   git checkout -b feature-name
+   ```
 
 3. Make your changes and commit them.
 4. Push the branch to your forked repository and open a pull request.
