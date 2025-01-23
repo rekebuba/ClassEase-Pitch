@@ -5,12 +5,12 @@ from datetime import datetime
 import models
 from sqlalchemy import Column, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import declarative_base
-from sqlalchemy.orm import declared_attr
+from sqlalchemy.orm import declarative_base, declared_attr, DeclarativeMeta
 import uuid
 import bcrypt
+from typing import Type
 
-Base = declarative_base() # Base class for all models
+Base: Type = declarative_base() # Base class for all models
 
 
 class BaseModel:

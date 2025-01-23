@@ -28,17 +28,18 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   response => response,
   error => {
-    if (error.response && error.response.status === 401) {
+    if (error.response && (error.response.status === 401 || error.response.status === 404)) {
       const reason = error.response.data.reason;
 
       if (reason === "SESSION_EXPIRED") {
-        alert("Your session has expired. Please log in again.");
+        window.location.href = "/login"; // Redirect to login page
         localStorage.removeItem("Authorization"); // Clear the token
+        alert("Your session has expired. Please log in again.");
       } else if (reason === "UNAUTHORIZED") {
+        window.location.href = "/login"; // Redirect to login page
         alert("You are not authorized to access this resource.");
       }
 
-      window.location.href = "/login"; // Redirect to login page
     }
     return Promise.reject(error);
   }

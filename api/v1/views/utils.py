@@ -33,7 +33,7 @@ def create_admin_token(admin_id):
     payload = {
         'id': admin_id,
         # Admin token expires in 30 minutes
-        'exp': datetime.utcnow() + timedelta(minutes=30),
+        'exp': datetime.utcnow() + timedelta(minutes=720),
         'role': 'admin'
     }
     token = jwt.encode(
@@ -60,7 +60,7 @@ def create_teacher_token(teacher_id):
     payload = {
         'id': teacher_id,
         # teacher token expires in 15 minutes
-        'exp': datetime.utcnow() + timedelta(minutes=15),
+        'exp': datetime.utcnow() + timedelta(minutes=720),
         'role': 'teacher'
     }
     token = jwt.encode(
@@ -82,7 +82,7 @@ def create_student_token(student_id):
     payload = {
         'id': student_id,
         # teacher token expires in 15 minutes
-        'exp': datetime.utcnow() + timedelta(minutes=15),
+        'exp': datetime.utcnow() + timedelta(minutes=720),
         'role': 'student'
     }
     token = jwt.encode(

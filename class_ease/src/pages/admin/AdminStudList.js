@@ -235,7 +235,7 @@ const AdminStudentsList = ({ toggleProfile, profileSummary }) => {
      * This function updates the selected grade state based on the value selected
      */
     const handleGradeChange = e => setSelectedGrade(parseFloat(e.target.value));
-    
+
     /**
      * @function handleYearChange - Updates the selected year state.
      * @param {Object} e - The event object representing the year selection.
@@ -244,7 +244,10 @@ const AdminStudentsList = ({ toggleProfile, profileSummary }) => {
      * This function updates the selected year state based on the value selected
      * and triggers the handleSearch function to fetch students based on the new year.
      */
-    const handleYearChange = e => setSelectedYear(e.target.value);
+    const handleYearChange = e => {
+        console.log(e.target.value);
+        setSelectedYear(e.target.value)
+    };
 
     /**
      * @function handleSearchChange - Updates the search term state and filters students accordingly.
@@ -287,7 +290,7 @@ const AdminStudentsList = ({ toggleProfile, profileSummary }) => {
                     <select id="year" value={selectedYear} onChange={handleYearChange}>
                         {/* Dynamic Year Options */}
                         {Array.from({ length: 3 }, (_, i) => currentYear - i).map(year => (
-                            <option key={year} value={year}>
+                            <option key={year} value={`${year}/${(year + 1) % 100}`}>
                                 {year}/{(year + 1) % 100}
                             </option>
                         ))}
