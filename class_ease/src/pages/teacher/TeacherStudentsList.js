@@ -11,7 +11,7 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
 
     return (
         <section className="table-section">
-            {(filteredStudents.students.length > 0) && (
+            {(filteredStudents && filteredStudents.students && filteredStudents.students.length > 0) && (
                 <div className="table-head">
                     <h3>Student List</h3>
                     <h3>
@@ -46,7 +46,8 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
                     </tr>
                 </thead>
                 <tbody>
-                    {currentStudents.students.map((student, index) => (
+                    {(currentStudents && currentStudents.students) &&
+                    currentStudents.students.map((student, index) => (
                         // Dynamic Data Rows
                         <tr key={index}>
                             <td>{student.student_id}</td>
@@ -148,6 +149,7 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary }) => {
             // Reset the state
             setCurrentPage(1);
             setFilteredStudents([]);
+            setCurrentStudents([]);
         }
     };
 
@@ -265,15 +267,18 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary }) => {
         fetchAssignedGrade();
 
         // Calculate the start and end indices for the students on the current page
-        const indexOfLastStudent = currentPage * limit;
-        const indexOfFirstStudent = indexOfLastStudent - limit;
-        setCurrentStudents({
-            students: filteredStudents.students.slice(indexOfFirstStudent, indexOfLastStudent),
-            header: filteredStudents.header
-        });
+        
+        if (filteredStudents && filteredStudents.students) {
+            const indexOfLastStudent = currentPage * limit;
+            const indexOfFirstStudent = indexOfLastStudent - limit;
+            setCurrentStudents({
+                students: filteredStudents.students.slice(indexOfFirstStudent, indexOfLastStudent),
+                header: filteredStudents.header
+            });
+            // Calculate total pages
+            setTotalPages(Math.ceil(filteredStudents.students.length / limit));
+        }
 
-        // Calculate total pages
-        setTotalPages(Math.ceil(filteredStudents.students.length / limit));
     }, [selectedGrade, currentPage, filteredStudents]);
 
 
@@ -332,7 +337,7 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary }) => {
                     <select id="year" value={selectedYear} onChange={handleYearChange}>
                         {/* Dynamic Year Options */}
                         {Array.from({ length: 3 }, (_, i) => currentYear - i).map(year => (
-                            <option key={year} value={year}>
+                            <option key={year} value={`${year}/${(year + 1) % 100}`}>
                                 {year}/{(year + 1) % 100}
                             </option>
                         ))}
@@ -363,7 +368,7 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary }) => {
                 studentSummary={studentSummary}
             />
             {
-                (totalPages > 1 && filteredStudents.students.length >= limit) &&
+                (totalPages > 1 && filteredStudents && filteredStudents.students && filteredStudents.students.length >= limit) &&
                 <Pagination
                     handlePreviousPage={handlePreviousPage}
                     currentPage={currentPage}

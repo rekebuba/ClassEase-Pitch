@@ -95,7 +95,7 @@ def update_teacher_profile(teacher_data):
 
 @teach.route('/students/mark_list', methods=['GET'])
 @teacher_required
-def get_students(teacher_data):
+def get_list_of_students(teacher_data):
     """
     Retrieves a list of students based on the provided teacher data and query parameters.
 
@@ -154,7 +154,7 @@ def get_students(teacher_data):
         TeachersRecord.section_id.in_(section_ids),
     ).all()
     if not teacher_record:
-        return jsonify({"error": "Section not found"}), 404
+        return jsonify({"error": "you can not access this mark list!"}), 404
 
     student_list = []
     for record in teacher_record:
@@ -166,6 +166,9 @@ def get_students(teacher_data):
         if students_query:
             student_list.extend([student.to_dict()
                                 for student in students_query])
+
+    if not student_list:
+        return jsonify({"error": "No students found"}), 404
 
     updated_student_list = {}
     for student_data in student_list:
@@ -208,6 +211,56 @@ def get_students(teacher_data):
     ), 200
 
 
+@teach.route('/student/assessment', methods=['GET'])
+@teacher_required
+def get_student_mark_list(teacher_data):
+    url = request.url
+    parsed_url = urlparse(url)
+    data = parse_qs(parsed_url.query)
+
+    required_data = {
+        'student_id',
+        'grade_id',
+        'section_id',
+        'semester',
+        'year'
+    }
+
+    for field in required_data:
+        if field not in data:
+            return jsonify({"error": f"Missing {field}"}), 400
+
+    student_id = data['student_id'][0]
+    semester = data['semester'][0]
+    year = data['year'][0]
+    grade_id = data['grade_id'][0]
+    section_id = data['section_id'][0]
+
+    teacher_record = storage.get_first(TeachersRecord,
+                                       teacher_id=teacher_data.id,
+                                       grade_id=grade_id,
+                                       section_id=section_id
+                                       )
+    if not teacher_record:
+        return jsonify({"error": "you can not access this mark list!"}), 404
+
+    mark_list = storage.get_all(MarkList,
+                                teachers_record_id=teacher_record.id,
+                                student_id=student_id,
+                                semester=semester,
+                                year=year
+                                )
+    assessment = []
+    for mark in mark_list:
+        mark = mark.to_dict()
+        assessment.append({
+            "assessment_type": mark['type'],
+            "score": mark['score'],
+            "percentage": mark['percentage']
+        })
+    return jsonify({"assessment": assessment}), 200
+
+
 @teach.route('/students/assigned_grade', methods=['GET'])
 @teacher_required
 def get_teacher_assigned_grade(teacher_data):
@@ -223,23 +276,25 @@ def get_teacher_assigned_grade(teacher_data):
                   if found, or an error message if no grades were assigned.
         int: HTTP status code 200 if grades are found, 404 if no grades are assigned.
     """
-    assigned_grade = storage.get_session().query(TeachersRecord).filter(
-        TeachersRecord.teacher_id == teacher_data.id
+    assigned_grade = (
+        storage.get_session()
+        .query(Grade)
+        .join(TeachersRecord, TeachersRecord.grade_id == Grade.id)
+        .filter(TeachersRecord.teacher_id == teacher_data.id)
+        .distinct(Grade.id)
     )
 
     if not assigned_grade.all():
         return jsonify({"error": f"No grades were assigned"}), 404
 
-    joined = assigned_grade.join(Grade, Grade.id == TeachersRecord.grade_id)
-    grade_names = [
-        grade.grade for grade in joined.with_entities(Grade.grade).all()]
+    grade_names = [grade.grade for grade in assigned_grade]
 
     return jsonify({"grade": grade_names}), 200
 
 
 @teach.route('/students/mark_list', methods=['PUT'])
 @teacher_required
-def add_student_assessment(teacher_data):
+def update_student_assessment(teacher_data):
     """
     Adds or updates student assessment scores for a given teacher.
 
@@ -312,7 +367,6 @@ def add_student_assessment(teacher_data):
         subject_sum(student_data)
         semester_average(student_data)
         yearly_average(student_data)
-        
 
     except Exception as e:
         print((e))

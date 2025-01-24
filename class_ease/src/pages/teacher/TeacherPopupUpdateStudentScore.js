@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import api from '../../services/api';
 import Alert from '../../services/Alert';
@@ -34,8 +34,35 @@ import Alert from '../../services/Alert';
  */
 const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData }) => {
     const [isEditing, setIsEditing] = useState(false);
-    const [updateAssessmentData, setUpdateAssessmentData] = useState([]);
     const [alert, setAlert] = useState({ type: "", message: "", show: false });
+    const [updateAssessmentData, setUpdateAssessmentData] = useState([]);
+    const [individualAssessment, setIndividualAssessment] = useState([]);
+
+    const fetchIndividualAssessment = async () => {
+        try {
+            const res = await api.get('/teacher/student/assessment', {
+                params: {
+                    ...studentData,
+                    assessment: '',
+                }
+            } );
+            if (res.status === 200) {
+                setIndividualAssessment(res.data.assessment);
+            }
+        } catch (error) {
+            if (error.response && error.response.data && error.response.data['error']) {
+                showAlert("warning", error.response.data['error']);
+            }
+        }
+    };
+    
+
+    useEffect(() => {
+        if (studentData === undefined) {
+            return;
+        }
+        fetchIndividualAssessment();
+    }, [studentData]);
 
     /**
      * @function handleScoreChange
@@ -45,7 +72,7 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData 
      * @returns {void}
      */
     const handleScoreChange = (index, value) => {
-        const updatedAssessments = [...studentData.assessment];
+        const updatedAssessments = [...updateAssessmentData];
         updatedAssessments[index].score = value;
         setUpdateAssessmentData(updatedAssessments);
     };
@@ -77,6 +104,10 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData 
      */
     const handleEdit = () => {
         setIsEditing(true);
+        const updatedAssessments = individualAssessment.map((assessment) => ({
+            ...assessment,
+        }));
+        setUpdateAssessmentData(updatedAssessments);
     };
 
     /**
@@ -84,12 +115,12 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData 
      * @description Saves the updated assessment data.
      * @returns {void}
      */
-    const handleSave = () => {
+    const handleSave = async () => {
         setIsEditing(false);
         try {
-            const res = api.put('/teacher/students/mark_list', { student_data: studentData, assessments: updateAssessmentData });
+            const res = await api.put('/teacher/students/mark_list', { student_data: studentData, assessments: updateAssessmentData });
             if (res.status === 201) {
-                showAlert("success", res.status['message']);
+                showAlert("success", res.data['message']);
             }
 
         } catch (error) {
@@ -98,6 +129,7 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData 
             }
             console.error(error);
         }
+        fetchIndividualAssessment();
     };
 
     /**
@@ -110,9 +142,9 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData 
      * @returns {string} The total score of the student.
      * @returns {number} 0 if no score is available.
      */
-    const calculateTotal = (studentData) => {
-        if (studentData.assessment === undefined || studentData.assessment.length === 0) return 'N/A';
-        const totalScore = studentData.assessment.reduce((acc, assessment) => acc + (assessment.score || 0), 0);
+    const calculateTotal = (assessment) => {
+        if (assessment === undefined || assessment.length === 0) return 'N/A';
+        const totalScore = assessment.reduce((acc, assessment) => acc + (assessment.score || 0), 0);
         return totalScore;
     };
 
@@ -124,6 +156,7 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData 
                         <h3>{studentData.name} {studentData.father_name} Score</h3>
                         <button onClick={() => {
                             setIsEditing(false);
+                            setUpdateAssessmentData([]);
                             toggleAssessment();
                         }}
                         ><FaTimes size={15} /></button>
@@ -136,8 +169,8 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData 
                             </tr>
                         </thead>
                         <tbody>
-                            {(studentData.assessment && studentData.assessment.length > 0) &&
-                                studentData.assessment.map((assessment, index) => (
+                            {(individualAssessment && individualAssessment.length > 0) &&
+                                individualAssessment.map((assessment, index) => (
                                     <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#fff' : '#f1f1f1' }}>
                                         <td style={{ textAlign: "center" }}>{assessment.assessment_type} ({assessment.percentage}%)</td>
                                         <td>
@@ -146,7 +179,7 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData 
                                                     type="number"
                                                     min={0}
                                                     max={assessment.percentage}
-                                                    value={assessment.score || 0}
+                                                    value={updateAssessmentData[index].score || 0}
                                                     onChange={(e) => {
                                                         let value = parseFloat(e.target.value);
                                                         if (value > assessment.percentage) value = assessment.percentage;
@@ -162,7 +195,7 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData 
                         </tbody>
                     </table>
                     <div className='total-score'>
-                        <h3><strong>Total Score: {calculateTotal(studentData)} / 100</strong></h3>
+                        <h3><strong>Total Score: {calculateTotal(individualAssessment)} / 100</strong></h3>
                     </div>
                     <div className='popup-table-btn'>
                         <button className="popup-table-edit-btn" onClick={handleEdit}>
