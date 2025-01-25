@@ -56,7 +56,7 @@ const AdminManageStudents = () => {
      */
     const toggleDetailProfile = () => {
         setIsDetailOpen(false);
-    }
+    };
 
     /**
      * @method
@@ -65,7 +65,7 @@ const AdminManageStudents = () => {
      */
     const toggleEditProfile = () => {
         setIsEditOpen(false);
-    }
+    };
 
     /**
      * @method
@@ -82,7 +82,7 @@ const AdminManageStudents = () => {
      */
     const summary = (data) => {
         setTeacherSummary(data);
-    }
+    };
 
     return (
         <div className="admin-manage-container">

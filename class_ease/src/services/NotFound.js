@@ -1,5 +1,5 @@
 import React from 'react';
-import '../styles/notfound.css'
+import '../styles/notfound.css';
 
 
 /**
@@ -18,16 +18,16 @@ import '../styles/notfound.css'
  */
 const NotFound = () => {
     return (
-        <div class="container-404">
-            <div class="copy-container center-xy">
+        <div className="container-404">
+            <div className="copy-container center-xy">
                 <p>
                     😥404, page not found.
                 </p>
-                <span class="handle"></span>
+                <span className="handle"></span>
 
             </div>
         </div>
-    )
+    );
 };
 
 export default NotFound;

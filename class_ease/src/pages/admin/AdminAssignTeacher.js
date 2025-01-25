@@ -101,9 +101,9 @@ const AdminAssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
         if (checked) {
             setSelectedSection([...selectedSection, value]);
         } else {
-            setSelectedSection(selectedSection.filter((section) => section !== value))
+            setSelectedSection(selectedSection.filter((section) => section !== value));
         }
-    }
+    };
 
     return (
         <div className={`popup-overlay ${isEditOpen ? "open" : "close"}`}>

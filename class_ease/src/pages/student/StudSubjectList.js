@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import '../../styles/StudDashboard.css';
-import '../../styles/Table.css'
+import '../../styles/Table.css';
 import '../../styles/Dashboard.css';
 import Alert from "../../services/Alert";
 import api from "../../services/api";

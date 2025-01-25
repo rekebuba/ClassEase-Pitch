@@ -50,7 +50,7 @@ const AdminPanel = () => {
                 if (error.response && error.response.data && error.response.data['error']) {
                     console.error(error.response.data['error']);
                 }
-                return
+                return;
             }
         };
         fetchAdmin();
@@ -62,7 +62,7 @@ const AdminPanel = () => {
      */
     const handleLogout = () => {
         navigate('/logout');
-    }
+    };
 
     return (
         <aside className="sidebar">

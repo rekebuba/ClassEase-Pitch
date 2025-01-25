@@ -39,7 +39,7 @@ const TeacherHeader = () => {
      */
     const goToHome = e => {
         navigate("/");
-    }
+    };
 
     /**
      * @function manageStudents
@@ -54,16 +54,16 @@ const TeacherHeader = () => {
      * @description Navigates to the teacher's dashboard.
      */
     const goToDashboard = e => {
-        navigate("/teacher/dashboard")
-    }
+        navigate("/teacher/dashboard");
+    };
 
     /**
      * @function updateProfile
      * @description Navigates to the profile update page.
      */
     const updateProfile = e => {
-        navigate("/teacher/update/profile")
-    }
+        navigate("/teacher/update/profile");
+    };
 
     return (
         <header className="dashboard-header">
@@ -94,7 +94,7 @@ const TeacherHeader = () => {
                 </div>
             </div>
         </header>
-    )
-}
+    );
+};
 
 export default TeacherHeader;

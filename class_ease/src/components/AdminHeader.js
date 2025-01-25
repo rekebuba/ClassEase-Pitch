@@ -67,43 +67,43 @@ const AdminHeader = () => {
 
     const goToHome = () => {
         navigate("/");
-    }
+    };
 
     const manageStudents = () => {
         navigate("/admin/manage/students");
-    }
+    };
 
     const manageTeachers = e => {
         navigate("/admin/manage/teachers");
-    }
+    };
 
     const assessMarkList = e => {
         navigate("/admin/assessment/marklist");
-    }
+    };
 
     const createEvent = e => {
-        navigate("/admin/events/newevent")
-    }
+        navigate("/admin/events/newevent");
+    };
 
     const goToDashboard = e => {
-        navigate("/admin/dashboard")
-    }
+        navigate("/admin/dashboard");
+    };
 
     const userAccessControl = e => {
-        navigate("/admin/users/accesscontrol")
-    }
+        navigate("/admin/users/accesscontrol");
+    };
 
     const enrollStudent = e => {
-        navigate("/admin/student/registration")
-    }
+        navigate("/admin/student/registration");
+    };
 
     const enrollTeacher = e => {
-        navigate("/admin/teacher/registration")
-    }
+        navigate("/admin/teacher/registration");
+    };
 
     const updateProfile = e => {
-        navigate("/admin/update/profile")
-    }
+        navigate("/admin/update/profile");
+    };
 
     return (
         <header className="dashboard-header">
@@ -180,7 +180,7 @@ const AdminHeader = () => {
                 </div>
             </div>
         </header>
-    )
-}
+    );
+};
 
 export default AdminHeader;

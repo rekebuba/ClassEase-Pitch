@@ -150,7 +150,7 @@ const AdminTeachList = ({ toggleDropdown, teacherSummary }) => {
                             value={searchTerm}
                             onChange={handleSearchChange}
                         />
-                        <button onClick={() => { handleSearch() }}>
+                        <button onClick={() => { handleSearch(); }}>
                             <FaSearch />
                         </button>
                     </div>

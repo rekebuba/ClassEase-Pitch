@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { FaSearch } from 'react-icons/fa';
 import api from "../../services/api";
-import Alert from "../../services/Alert"
+import Alert from "../../services/Alert";
 import Pagination from "../library/pagination";
-import '../../styles/Table.css'
+import '../../styles/Table.css';
 
 /**
  * @function StudentList - Displays a list of students with search functionality.
@@ -246,7 +246,7 @@ const AdminStudentsList = ({ toggleProfile, profileSummary }) => {
      */
     const handleYearChange = e => {
         console.log(e.target.value);
-        setSelectedYear(e.target.value)
+        setSelectedYear(e.target.value);
     };
 
     /**

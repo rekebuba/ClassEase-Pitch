@@ -55,7 +55,7 @@ const TeacherPanel = () => {
                 if (error.response && error.response.data && error.response.data['error']) {
                     console.error(error.response.data['error']);
                 }
-                return
+                return;
             }
         };
         fetchAdmin();
@@ -67,7 +67,7 @@ const TeacherPanel = () => {
      */
     const handleLogout = () => {
         navigate('/logout');
-    }
+    };
 
     return (
         <aside className="sidebar">

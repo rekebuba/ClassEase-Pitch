@@ -21,7 +21,7 @@ function HomeHeader() {
 
     const goToHome = () => {
         navigate("/");
-    }
+    };
 
     return (<header className="header">
         <div className="header-logo" onClick={goToHome}>

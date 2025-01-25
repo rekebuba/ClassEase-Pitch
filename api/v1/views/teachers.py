@@ -177,6 +177,12 @@ def get_list_of_students(teacher_data):
             student = storage.get_first(Student, id=student_id)
             section = storage.get_first(Section, id=student_data['section_id'])
             subject = storage.get_first(Subject, id=student_data['subject_id'])
+            total_score = storage.get_first(Assessment,
+                                            student_id=student_id,
+                                            subject_id=student_data['subject_id'],
+                                            semester=student_data['semester'],
+                                            year=student_data['year']
+                                            )
             updated_student_list[student_id] = {
                 "student_id": student_id,
                 "name": student.name,
@@ -210,7 +216,6 @@ def get_list_of_students(teacher_data):
     }
     ), 200
 
-
 @teach.route('/student/assessment', methods=['GET'])
 @teacher_required
 def get_student_mark_list(teacher_data):
@@ -221,6 +226,7 @@ def get_student_mark_list(teacher_data):
     required_data = {
         'student_id',
         'grade_id',
+        'subject_id',
         'section_id',
         'semester',
         'year'
@@ -231,10 +237,11 @@ def get_student_mark_list(teacher_data):
             return jsonify({"error": f"Missing {field}"}), 400
 
     student_id = data['student_id'][0]
+    grade_id = data['grade_id'][0]
+    subject_id = data['subject_id'][0]
+    section_id = data['section_id'][0]
     semester = data['semester'][0]
     year = data['year'][0]
-    grade_id = data['grade_id'][0]
-    section_id = data['section_id'][0]
 
     teacher_record = storage.get_first(TeachersRecord,
                                        teacher_id=teacher_data.id,
@@ -250,6 +257,12 @@ def get_student_mark_list(teacher_data):
                                 semester=semester,
                                 year=year
                                 )
+    total_score = storage.get_first(Assessment,
+                                        student_id=student_id,
+                                        subject_id=subject_id,
+                                        semester=semester,
+                                        year=year
+                                        )
     assessment = []
     for mark in mark_list:
         mark = mark.to_dict()
@@ -258,7 +271,7 @@ def get_student_mark_list(teacher_data):
             "score": mark['score'],
             "percentage": mark['percentage']
         })
-    return jsonify({"assessment": assessment}), 200
+    return jsonify({"assessment": assessment, "total_score": total_score.total, "rank": total_score.rank}), 200
 
 
 @teach.route('/students/assigned_grade', methods=['GET'])
@@ -369,7 +382,6 @@ def update_student_assessment(teacher_data):
         yearly_average(student_data)
 
     except Exception as e:
-        print((e))
         return jsonify({"error": f"Unexpected error occurred Failed to update score"}), 500
 
     return jsonify({"message": "Student Mark Updated Successfully!"}), 201

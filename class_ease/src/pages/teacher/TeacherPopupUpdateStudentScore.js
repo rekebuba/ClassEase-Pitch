@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import api from '../../services/api';
 import Alert from '../../services/Alert';
@@ -32,37 +32,43 @@ import Alert from '../../services/Alert';
  *
  * @returns {JSX.Element} The TeacherPopupUpdateStudentScore component.
  */
-const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData }) => {
+const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData, onSave }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [alert, setAlert] = useState({ type: "", message: "", show: false });
     const [updateAssessmentData, setUpdateAssessmentData] = useState([]);
-    const [individualAssessment, setIndividualAssessment] = useState([]);
+    const [individualAssessment, setIndividualAssessment] = useState({});
 
-    const fetchIndividualAssessment = async () => {
+    const fetchIndividualAssessment = useCallback(async () => {
         try {
             const res = await api.get('/teacher/student/assessment', {
                 params: {
-                    ...studentData,
+                    student_id: studentData.student_id,
+                    grade_id: studentData.grade_id,
+                    subject_id: studentData.subject_id,
+                    section_id: studentData.section_id,
+                    semester: studentData.semester,
+                    year: studentData.year,
                     assessment: '',
-                }
-            } );
+                },
+            });
             if (res.status === 200) {
-                setIndividualAssessment(res.data.assessment);
+                const updatedData = { ...studentData, ...res.data };
+                setIndividualAssessment(updatedData);
+                return updatedData; // Return updated data
             }
         } catch (error) {
-            if (error.response && error.response.data && error.response.data['error']) {
-                showAlert("warning", error.response.data['error']);
+            if (error.response?.data?.error) {
+                showAlert("warning", error.response.data.error);
             }
         }
-    };
-    
+    }, [studentData]);
 
     useEffect(() => {
         if (studentData === undefined) {
             return;
         }
         fetchIndividualAssessment();
-    }, [studentData]);
+    }, [studentData, fetchIndividualAssessment]);
 
     /**
      * @function handleScoreChange
@@ -104,7 +110,7 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData 
      */
     const handleEdit = () => {
         setIsEditing(true);
-        const updatedAssessments = individualAssessment.map((assessment) => ({
+        const updatedAssessments = individualAssessment.assessment.map((assessment) => ({
             ...assessment,
         }));
         setUpdateAssessmentData(updatedAssessments);
@@ -129,23 +135,9 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData 
             }
             console.error(error);
         }
-        fetchIndividualAssessment();
-    };
-
-    /**
-     * @function calculateTotal
-     * @description Calculates the total score of the student.
-     * @param {Object} studentData - Data of the student including assessments.
-     * @param {Array} studentData.assessment - Array of assessment objects.
-     * @returns {string} The total score of the student.
-     * @returns {string} 'N/A' if no assessments are available.
-     * @returns {string} The total score of the student.
-     * @returns {number} 0 if no score is available.
-     */
-    const calculateTotal = (assessment) => {
-        if (assessment === undefined || assessment.length === 0) return 'N/A';
-        const totalScore = assessment.reduce((acc, assessment) => acc + (assessment.score || 0), 0);
-        return totalScore;
+        // Fetch updated data and pass it to onSave
+        const updatedData = await fetchIndividualAssessment();
+        onSave(updatedData); // Use the returned data directly
     };
 
     return (
@@ -169,8 +161,8 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData 
                             </tr>
                         </thead>
                         <tbody>
-                            {(individualAssessment && individualAssessment.length > 0) &&
-                                individualAssessment.map((assessment, index) => (
+                            {(individualAssessment.assessment && individualAssessment.assessment.length > 0) &&
+                                individualAssessment.assessment.map((assessment, index) => (
                                     <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#fff' : '#f1f1f1' }}>
                                         <td style={{ textAlign: "center" }}>{assessment.assessment_type} ({assessment.percentage}%)</td>
                                         <td>
@@ -187,7 +179,7 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData 
                                                     }}
                                                 />
                                             ) : (
-                                                assessment.score !== null ? assessment.score : ''
+                                                assessment.score !== null ? assessment.score : 'N/A'
                                             )}
                                         </td>
                                     </tr>
@@ -195,7 +187,7 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData 
                         </tbody>
                     </table>
                     <div className='total-score'>
-                        <h3><strong>Total Score: {calculateTotal(individualAssessment)} / 100</strong></h3>
+                        <h3><strong>Total Score: {individualAssessment.score ? individualAssessment.score : 'N/A'} / 100</strong></h3>
                     </div>
                     <div className='popup-table-btn'>
                         <button className="popup-table-edit-btn" onClick={handleEdit}>

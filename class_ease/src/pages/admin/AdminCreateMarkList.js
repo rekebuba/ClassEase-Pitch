@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import AdminPanel from "../../components/AdminPanel";
 import AdminHeader from "../../components/AdminHeader";
-import '../../styles/AdminDashboard.css'
+import '../../styles/AdminDashboard.css';
 import '../../styles/Table.css';
 import { FaPlus } from 'react-icons/fa';
 import api from "../../services/api";
@@ -75,7 +75,7 @@ const AdminCreateMarkList = () => {
      */
     const handleGradeChange = (e) => {
         setSelectedGrade(parseFloat(e.target.value));
-    }
+    };
 
     /**
      * @function handleSemesterChange
@@ -85,7 +85,7 @@ const AdminCreateMarkList = () => {
      */
     const handleSemesterChange = (e) => {
         setSelectedSemester(parseFloat(e.target.value));
-    }
+    };
 
     /**
     * @function handleSectionChange
@@ -97,9 +97,9 @@ const AdminCreateMarkList = () => {
         if (checked) {
             setSelectedSection([...selectedSection, value]);
         } else {
-            setSelectedSection(selectedSection.filter((section) => section !== value))
+            setSelectedSection(selectedSection.filter((section) => section !== value));
         }
-    }
+    };
 
     /**
      * @function handleSubjectChange
@@ -122,7 +122,7 @@ const AdminCreateMarkList = () => {
      */
     const addCheckbox = (e) => {
         e.preventDefault();
-        var modifiedLabel = newCheckboxLabel.trim()
+        var modifiedLabel = newCheckboxLabel.trim();
         modifiedLabel = modifiedLabel.charAt(0).toUpperCase() + modifiedLabel.slice(1);
         if (modifiedLabel !== '' && !subjects.includes(modifiedLabel)) {
             setSubjects([...subjects, modifiedLabel]);
@@ -138,7 +138,7 @@ const AdminCreateMarkList = () => {
             return acc + (percentage ? parseFloat(percentage) : 0); // ensure it's a number
         }, 0);
         setTotalAssessment(totalPercentage);
-    }
+    };
 
     /** 
      * @function handleValidAssessment
@@ -155,7 +155,7 @@ const AdminCreateMarkList = () => {
         } else {
             return true;
         }
-    }
+    };
 
     /** 
      * @function handleSelectAll
@@ -192,7 +192,7 @@ const AdminCreateMarkList = () => {
      */
     const handleYearChange = (e) => {
         setSchoolYear(e.target.value);
-    }
+    };
 
     /**
      * @function checkValidData
@@ -200,7 +200,7 @@ const AdminCreateMarkList = () => {
      * @param {Event} e - The submit event.
      */
     const checkValidData = (e) => {
-        e.preventDefault()
+        e.preventDefault();
         if (selectedSection.length === 0) {
             showAlert("warning", "Please select at least one section.");
             return;
@@ -215,7 +215,7 @@ const AdminCreateMarkList = () => {
             return;
         }
         handleSubmit();
-    }
+    };
 
     /**
      * @function showAlert
@@ -249,9 +249,9 @@ const AdminCreateMarkList = () => {
             "assessment_type": assessmentTypes,
             "semester": selectedSemester,
             "year": schoolYear
-        }
+        };
         try {
-            await api.put('admin/students/mark_list', mark_list_data)
+            await api.put('admin/students/mark_list', mark_list_data);
 
             // If successful, show a success alert
             showAlert("success", "Mark list created successfully!");
@@ -405,7 +405,7 @@ const AdminCreateMarkList = () => {
                                             const newAssessments = [...assessmentTypes];
                                             newAssessments[index].percentage = parseFloat(e.target.value);
                                             setAssessmentTypes(newAssessments);
-                                            handleTotalAssessment(e)
+                                            handleTotalAssessment(e);
                                         }}
                                     >
                                         <option value="">Percentage</option>

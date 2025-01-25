@@ -55,7 +55,7 @@ const AdminManageStudents = () => {
    */
   const closeProfile = () => {
     setIsProfileOpen(false);
-  }
+  };
 
   /**
    * @function toggleAssessment - Toggles the visibility of the student assessment popup.
@@ -63,7 +63,7 @@ const AdminManageStudents = () => {
    */
   const toggleAssessment = () => {
     setIsAssesOpen(!isAssesOpen);
-  }
+  };
 
   /**
    * @function closeAssessment - Closes the student assessment popup.
@@ -71,7 +71,7 @@ const AdminManageStudents = () => {
    */
   const closeAssessment = () => {
     setIsAssesOpen(false);
-  }
+  };
 
   /**
    * @function profileSummary - Sets the student profile summary state.
@@ -80,7 +80,7 @@ const AdminManageStudents = () => {
    */
   const profileSummary = (data) => {
     setStudentProfileSummary(data);
-  }
+  };
 
   /**
    * @function assessmentSummary - Sets the student assessment summary state.
@@ -89,7 +89,7 @@ const AdminManageStudents = () => {
    */
   const assessmentSummary = (data) => {
     setStudentAssessmentSummary(data);
-  }
+  };
 
   return (
     <div className="admin-manage-container">

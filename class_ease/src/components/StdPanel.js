@@ -54,7 +54,7 @@ const StudentPanel = () => {
         if (error.response && error.response.data && error.response.data['error']) {
           console.error(error.response.data['error']);
         }
-        return
+        return;
       }
     };
     fetchAdmin();
@@ -66,15 +66,15 @@ const StudentPanel = () => {
    */
   const handleLogout = () => {
     navigate('/logout');
-  }
+  };
 
   /**
    * @function updateProfile
    * @description Navigates to the update profile route.
    */
   const updateProfile = e => {
-    navigate("/student/update/profile")
-  }
+    navigate("/student/update/profile");
+  };
 
   return (
     <aside className="sidebar">

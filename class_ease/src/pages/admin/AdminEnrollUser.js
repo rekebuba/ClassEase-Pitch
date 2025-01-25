@@ -33,7 +33,7 @@ const AdminEnrollStud = ({ role }) => {
             </div>
         </div>
     );
-}
+};
 
 
 export default AdminEnrollStud;

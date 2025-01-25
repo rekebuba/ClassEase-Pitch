@@ -39,7 +39,7 @@ const StudentDashboard = () => {
    */
   const goToHome = () => {
     navigate("/");
-  }
+  };
 
   /**
    * @function toggleAssessment
@@ -57,7 +57,7 @@ const StudentDashboard = () => {
    */
   const closeAssessment = () => {
     setIsAssesOpen(false);
-  }
+  };
 
   /**
    * @function summary
@@ -67,7 +67,7 @@ const StudentDashboard = () => {
    */
   const summary = (data) => {
     setStudentSummary(data);
-  }
+  };
 
   return (
     <div className="admin-manage-container">

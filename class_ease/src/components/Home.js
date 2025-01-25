@@ -28,12 +28,12 @@ const Home = () => {
     <>
       <HomeHeader />
       {/* Hero Section */}
-      <section id="home" class="hero">
-        <img src={classEaseImage} alt="ClassEase Logo" class="hero-image" />
-        <div class="hero-content">
+      <section id="home" className="hero">
+        <img src={classEaseImage} alt="ClassEase Logo" className="hero-image" />
+        <div className="hero-content">
           <h1>Welcome to ClassEase School</h1>
           <p>Empowering students with the knowledge and skills to excel in the modern world.</p>
-          <a href="/student/registration" class="cta-btn">Apply Now</a>
+          <a href="/student/registration" className="cta-btn">Apply Now</a>
         </div>
       </section>
 
