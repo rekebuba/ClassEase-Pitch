@@ -391,7 +391,7 @@ def assign_class(admin_data):
                 storage.save()
     except Exception as e:
         storage.rollback()
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "error internal server"}), 500
 
     return jsonify({"message": "Teacher assigned successfully!"}), 201
 

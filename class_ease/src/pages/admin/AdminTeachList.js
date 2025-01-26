@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { FaSearch } from 'react-icons/fa';
 import Pagination from "../library/pagination";
 import Alert from "../../services/Alert";
@@ -28,16 +28,8 @@ const AdminTeachList = ({ toggleDropdown, teacherSummary }) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const limit = 10;
-
-    /**
-     * @function handleSearch
-     * @param {number} page - The page number for pagination.
-     * @description Fetches and filters the list of teachers based on the search term and page number.
-     * @async
-     * @returns {Promise<void>} The response data.
-     * @throws {error} The error that was caught.
-     */
-    const handleSearch = async (page) => {
+    
+    const handleSearch = useCallback(async (page) => {
         page = page || currentPage; // If page is not provided, use the current page
         try {
             const response = await api.get('/admin/teachers', {
@@ -70,11 +62,11 @@ const AdminTeachList = ({ toggleDropdown, teacherSummary }) => {
             setCurrentPage(1);
             setFilteredTeachers({ teachers: [], meta: {} });
         }
-    };
+    }, [currentPage, searchTerm]);
 
     useEffect(() => {
         handleSearch(1);  // Fetch the list of Teachers when the component loads
-    }, []);
+    }, [handleSearch]);
 
 
     /**

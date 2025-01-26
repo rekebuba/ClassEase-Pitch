@@ -22,7 +22,10 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
                             value={searchTerm}
                             onChange={handleSearchChange}
                         />
-                        <button onClick={() => handleSearch()}>
+                        <button onClick={() => {
+                            console.log('filteredStudents', filteredStudents);
+                            handleSearch();
+                            }}>
                             <FaSearch />
                         </button>
                     </div>
@@ -45,7 +48,7 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
                     {(currentStudents && currentStudents.students) &&
                         currentStudents.students.map((student, index) => (
                             // Dynamic Data Rows
-                            <tr key={index}>
+                            <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#fff' : '#f1f1f1' }}>
                                 <td>{student.student_id}</td>
                                 <td>{student.name}</td>
                                 <td>{student.father_name}</td>
@@ -144,8 +147,7 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) =>
             }
             // Reset the state
             setCurrentPage(1);
-            setFilteredStudents([]);
-            setCurrentStudents([]);
+            setFilteredStudents({ students: [], header: {} });
         }
     };
 
