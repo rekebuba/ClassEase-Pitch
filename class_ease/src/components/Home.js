@@ -90,11 +90,11 @@ const Home = () => {
         <h2>What Our Students Say</h2>
         <div className="testimonial-list">
           <div className="testimonial-item">
-            <p>"ClassEase School helped me build confidence and prepare for the future. I love it here!"</p>
+            <p>&quot;ClassEase School helped me build confidence and prepare for the future. I love it here!&quot;</p>
             <span>- John Doe, Student</span>
           </div>
           <div className="testimonial-item">
-            <p>"This school offers a welcoming community and excellent learning resources."</p>
+            <p>&quot;This school offers a welcoming community and excellent learning resources.&quot;</p>
             <span>- Jane Smith, Parent</span>
           </div>
         </div>

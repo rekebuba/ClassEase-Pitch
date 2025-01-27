@@ -12,6 +12,7 @@ from models.subject import Subject
 from models.assessment import Assessment
 from models.mark_list import MarkList
 from models.average_result import AVRGResult
+from models.teacher import Teacher
 from models.teacher_record import TeachersRecord
 from models.stud_yearly_record import StudentYearlyRecord
 from urllib.parse import urlparse, parse_qs
@@ -156,6 +157,11 @@ def get_list_of_students(teacher_data):
     if not teacher_record:
         return jsonify({"error": "you can not access this mark list!"}), 404
 
+    # query = storage.get_all(Assessment,
+    #                         grade_id=grade.id,
+
+    #                         )
+
     student_list = []
     for record in teacher_record:
         students_query = storage.get_all(MarkList,
@@ -196,6 +202,7 @@ def get_list_of_students(teacher_data):
                 "subject_id": subject.id,
                 "semester": student_data['semester'],
                 "year": student_data['year'],
+                "total_score": total_score.total if total_score else 0,
                 "assessment": []
             }
         updated_student_list[student_id]['assessment'].append({
@@ -215,6 +222,7 @@ def get_list_of_students(teacher_data):
         }
     }
     ), 200
+
 
 @teach.route('/student/assessment', methods=['GET'])
 @teacher_required
@@ -258,11 +266,11 @@ def get_student_mark_list(teacher_data):
                                 year=year
                                 )
     total_score = storage.get_first(Assessment,
-                                        student_id=student_id,
-                                        subject_id=subject_id,
-                                        semester=semester,
-                                        year=year
-                                        )
+                                    student_id=student_id,
+                                    subject_id=subject_id,
+                                    semester=semester,
+                                    year=year
+                                    )
     assessment = []
     for mark in mark_list:
         mark = mark.to_dict()
@@ -271,7 +279,7 @@ def get_student_mark_list(teacher_data):
             "score": mark['score'],
             "percentage": mark['percentage']
         })
-    return jsonify({"assessment": assessment, "total_score": total_score.total, "rank": total_score.rank}), 200
+    return jsonify({"assessment": assessment, "score": total_score.total, "rank": total_score.rank}), 200
 
 
 @teach.route('/students/assigned_grade', methods=['GET'])
