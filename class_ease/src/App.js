@@ -89,7 +89,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/teacher/students",
-    element: <TeacherManageStudents />
+    element: <ProtectedRoute element={<TeacherManageStudents />} />
   },
   {
     path: "/admin/assessment/marklist",

@@ -25,7 +25,7 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
                         <button onClick={() => {
                             console.log('filteredStudents', filteredStudents);
                             handleSearch();
-                            }}>
+                        }}>
                             <FaSearch />
                         </button>
                     </div>
@@ -87,7 +87,8 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
  * This component allows teachers to manage and filter a list of students based on various criteria such as grade, section, semester, and year. It also provides search functionality and pagination for navigating through the list of students.
  */
 const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) => {
-    const [selectedGrade, setSelectedGrade] = useState(1);
+    const [selectedGrade, setSelectedGrade] = useState('');
+    const [selectedSubjectId, setSelectedSubjectId] = useState('');
     const [selectedSemester, setSelectedSemester] = useState(1);
     const [selectedYear, setSelectedYear] = useState("2024/25");
     const [alert, setAlert] = useState({ type: "", message: "", show: false });
@@ -97,6 +98,7 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) =>
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [currentYear] = useState(new Date().getFullYear());
+    const [subjectAssigned, setSubjectAssigned] = useState({});
     const [gradeAssigned, setGradeAssigned] = useState([]);
     const [currentStudents, setCurrentStudents] = useState({ students: [], header: {} });
     const [totalPages, setTotalPages] = useState(0);
@@ -108,15 +110,17 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) =>
      * @param {number} [page] - The page number to fetch. If not provided, the current page is used.
      * @returns {void}
      */
-    const handleSearch = async (page) => {
+    const handleSearch = async (e, page) => {
+        e.preventDefault();
         if (selectedSection.length === 0) {
-            showAlert("warning", "Select Section");
+            showAlert("warning", "Please select at least one section.");
             return;
         }
         page = page || currentPage; // If page is not provided, use the current page
         try {
             const response = await api.get('/teacher/students/mark_list', {
                 params: {
+                    subject_id: selectedSubjectId,
                     grade: selectedGrade,
                     year: selectedYear,
                     sections: selectedSection.join(','), // Convert array to comma-separated string
@@ -200,7 +204,14 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) =>
      * @param {Event} e - The change event.
      * @returns {void}
      */
-    const handleGradeChange = e => setSelectedGrade(parseFloat(e.target.value));
+    const handleGradeChange = (e) => {
+        if (e.target.value === '') {
+            setSelectedGrade(e.target.value);
+        } else {
+            const value = e.target.value.replace(/\D/g, ""); // Keep only digits (0-9)
+            setSelectedGrade(value); // Convert to integer
+        }
+    };
 
     /**
      * @function handleSectionChange
@@ -249,6 +260,42 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) =>
         }
     };
 
+    const handleSubjectChange = (e) => {
+        setSelectedSubjectId(e.target.value);
+        if (e.target.value === "") {
+            setGradeAssigned([]);
+        } else {
+            fetchGrade();
+        }
+    };
+
+    const fetchGrade = async () => {
+        try {
+            const response = await api.get('/teacher/students/assigned_grade');
+            setGradeAssigned(response.data['grade']);
+        } catch (error) {
+            if (error.response && error.response.data && error.response.data['error']) {
+                showAlert("warning", error.response.data['error']);
+            } else {
+                showAlert("warning", "An unexpected error occurred.");
+            }
+        }
+
+        // Calculate the start and end indices for the students on the current page
+
+        if (filteredStudents && filteredStudents.students) {
+            const indexOfLastStudent = currentPage * limit;
+            const indexOfFirstStudent = indexOfLastStudent - limit;
+            setCurrentStudents({
+                students: filteredStudents.students.slice(indexOfFirstStudent, indexOfLastStudent),
+                header: filteredStudents.header
+            });
+            // Calculate total pages
+            setTotalPages(Math.ceil(filteredStudents.students.length / limit));
+        }
+    };
+
+
     /**
      * @hook useEffect
      * @description Fetches the assigned grades whenever the selected grade changes.
@@ -256,104 +303,107 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) =>
      */
     useEffect(() => {
         /**
-         * @description Fetches the grades assigned to the teacher.
+         * @description Fetches the subjects assigned to the teacher.
          */
-        const fetchGrade = async () => {
+
+        const subjectTaught = async () => {
             try {
-                const response = await api.get('/teacher/students/assigned_grade');
-                setGradeAssigned(response.data['grade']);
-            } catch (error) {
-                if (error.response && error.response.data && error.response.data['error']) {
-                    showAlert("warning", error.response.data['error']);
-                } else {
-                    showAlert("warning", "An unexpected error occurred.");
+                const response = await api.get('/teacher/assigned-subject');
+                if (response.status === 200) {
+                    setSubjectAssigned(response.data);
                 }
-            }
-
-            // Calculate the start and end indices for the students on the current page
-
-            if (filteredStudents && filteredStudents.students) {
-                const indexOfLastStudent = currentPage * limit;
-                const indexOfFirstStudent = indexOfLastStudent - limit;
-                setCurrentStudents({
-                    students: filteredStudents.students.slice(indexOfFirstStudent, indexOfLastStudent),
-                    header: filteredStudents.header
-                });
-                // Calculate total pages
-                setTotalPages(Math.ceil(filteredStudents.students.length / limit));
+            } catch (error) {
+                console.log(error);
             }
         };
-        fetchGrade();
-    }, [selectedGrade, currentPage, filteredStudents]);
+        subjectTaught();
+    }, []);
 
     return (
         <div className="dashboard-container">
             <div className="admin-header">
                 <h2>Manage Students</h2>
             </div>
-            <section className="admin-filters">
-                <div className="filter-group">
-                    <label htmlFor="grade">Grade:</label>
-                    <select
-                        id="grade"
-                        value={selectedGrade}
-                        onChange={handleGradeChange}
-                    >
-                        {(gradeAssigned && gradeAssigned.length > 0) &&
-                            gradeAssigned.map(grade =>
-                                <option key={grade} type="text" defaultValue={grade}>
-                                    Grade {grade}
+            <form onSubmit={handleSearch}>
+                <section className="admin-filters">
+                    <div className="filter-group">
+                        <label htmlFor="Subject">Subject:</label>
+                        <select
+                            id="Subject"
+                            value={selectedSubjectId}
+                            onChange={handleSubjectChange}
+                            required
+                        >
+                            <option value="">Select Subject</option>
+                            {subjectAssigned &&
+                                Object.entries(subjectAssigned).map(([key, value]) =>
+                                    <option key={key} type="text" value={key}>
+                                        {value}
+                                    </option>
+                                )}
+                        </select>
+                    </div>
+                    <div className="filter-group">
+                        <label htmlFor="grade">Grade:</label>
+                        <select
+                            id="grade"
+                            value={selectedGrade}
+                            onChange={handleGradeChange}
+                            required
+                        >
+                            <option value="">Select Grade</option>
+                            {(gradeAssigned && gradeAssigned.length > 0) &&
+                                gradeAssigned.map(grade =>
+                                    <option key={grade} value={grade}>
+                                        grade {grade}
+                                    </option>
+                                )}
+                        </select>
+                    </div>
+                    <div className="filter-group">
+                        <label htmlFor="section">Section:</label>
+                        <div className="checkbox-group stud-list">
+                            {['A', 'B', 'C'].map((section) => (
+                                <div className="subject-container" key={section}>
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            value={section}
+                                            checked={selectedSection.includes(section)}
+                                            onChange={handleSectionChange}
+                                        />
+                                        {section}
+                                    </label>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="filter-group">
+                        <label htmlFor="semester">Semester:</label>
+                        <select id="semester" value={selectedSemester} onChange={handleSemesterChange}>
+                            {Array.from({ length: 2 }, (_, i) => i + 1).map(semester =>
+                                <option key={semester} value={semester}>
+                                    Semester {semester}
                                 </option>
                             )}
-                    </select>
-                </div>
-                <div className="filter-group">
-                    <label htmlFor="section">Section:</label>
-                    <div className="checkbox-group stud-list">
-                        {['A', 'B', 'C'].map((section) => (
-                            <div className="subject-container" key={section}>
-                                <label>
-                                    <input
-                                        type="checkbox"
-                                        value={section}
-                                        checked={selectedSection.includes(section)}
-                                        onChange={handleSectionChange}
-                                    />
-                                    {section}
-                                </label>
-                            </div>
-                        ))}
+                        </select>
                     </div>
-                </div>
-                <div className="filter-group">
-                    <label htmlFor="semester">Semester:</label>
-                    <select id="semester" value={selectedSemester} onChange={handleSemesterChange}>
-                        {Array.from({ length: 2 }, (_, i) => i + 1).map(semester =>
-                            <option key={semester} value={semester}>
-                                Semester {semester}
-                            </option>
-                        )}
-                    </select>
-                </div>
-                <div className="filter-group">
-                    <label htmlFor="year">Year:</label>
-                    <select id="year" value={selectedYear} onChange={handleYearChange}>
-                        {/* Dynamic Year Options */}
-                        {Array.from({ length: 3 }, (_, i) => currentYear - i).map(year => (
-                            <option key={year} value={`${year}/${(year + 1) % 100}`}>
-                                {year}/{(year + 1) % 100}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <button className="filter-group-search"
-                    onClick={() => {
-                        setSearchTerm(""); // Clear the search term
-                        handleSearch();
-                    }}>
-                    Search
-                </button>
-            </section>
+                    <div className="filter-group">
+                        <label htmlFor="year">Year:</label>
+                        <select id="year" value={selectedYear} onChange={handleYearChange}>
+                            {/* Dynamic Year Options */}
+                            {Array.from({ length: 3 }, (_, i) => currentYear - i).map(year => (
+                                <option key={year} value={`${year}/${(year + 1) % 100}`}>
+                                    {year}/{(year + 1) % 100}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <button className="filter-group-search" type="submit">
+                        Search
+                    </button>
+                </section>
+            </form>
             <Alert
                 type={alert.type}
                 message={alert.message}
