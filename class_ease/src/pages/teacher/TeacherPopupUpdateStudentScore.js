@@ -48,7 +48,6 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData,
                     section_id: studentData.section_id,
                     semester: studentData.semester,
                     year: studentData.year,
-                    assessment: '',
                 },
             });
             if (res.status === 200) {
@@ -58,7 +57,7 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData,
             }
         } catch (error) {
             if (error.response?.data?.error) {
-                showAlert("warning", error.response.data.error);
+                showAlert("error", error.response.data.error);
             }
         }
     }, [studentData]);
@@ -164,7 +163,7 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData,
                             {(individualAssessment.assessment && individualAssessment.assessment.length > 0) &&
                                 individualAssessment.assessment.map((assessment, index) => (
                                     <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#fff' : '#f1f1f1' }}>
-                                        <td style={{ textAlign: "center" }}>{assessment.assessment_type} ({assessment.percentage}%)</td>
+                                        <td style={{ textAlign: "center" }}>{assessment.assessment_type} ( {assessment.percentage}% )</td>
                                         <td>
                                             {isEditing ? (
                                                 <input
@@ -187,7 +186,7 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData,
                         </tbody>
                     </table>
                     <div className='total-score'>
-                        <h3><strong>Total Score: {individualAssessment.score ? individualAssessment.score : 'N/A'} / 100</strong></h3>
+                        <h3><strong>Total Score: {individualAssessment.total_score ? individualAssessment.total_score : 'N/A'} / 100</strong></h3>
                     </div>
                     <div className='popup-table-btn'>
                         <button className="popup-table-edit-btn" onClick={handleEdit}>

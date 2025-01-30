@@ -75,7 +75,6 @@ const TeacherPanel = () => {
                 <FaUserCircle className="profile-icon" />
                 <h3>{teacherData.__class__} Panel</h3>
                 <p>Mr. {teacherData.first_name} {teacherData.last_name}</p>
-                <p>{teacherData.subject_taught} Teacher</p>
             </div>
             <nav className="menu">
                 <ul>

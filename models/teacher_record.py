@@ -35,6 +35,8 @@ class TeachersRecord(BaseModel, Base):
 
     mark_list = relationship(
         "MarkList", backref="teachers_record", cascade="save-update", passive_deletes=True)
+    assessment = relationship(
+        "Assessment", backref="teachers_record", cascade="save-update", passive_deletes=True)
 
     def __init__(self, *args, **kwargs):
         """

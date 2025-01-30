@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "../../styles/AdminManageStudents.css";
 import TeacherPanel from "../../components/TeachPanel";
 import TeacherHeader from "../../components/TeachHeader";

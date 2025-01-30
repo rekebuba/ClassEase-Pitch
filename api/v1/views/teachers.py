@@ -19,6 +19,7 @@ from urllib.parse import urlparse, parse_qs
 from sqlalchemy import update, and_
 from flask import Blueprint
 from api.v1.views.utils import teacher_required
+from api.v1.views.methods import paginate_query
 
 
 teach = Blueprint('teach', __name__, url_prefix='/api/v1/teacher')
@@ -129,6 +130,7 @@ def get_list_of_students(teacher_data):
         return jsonify({"error": "Bad Request"}), 400
 
     required_data = {
+        'subject_id',
         'grade',
         'sections',
         'semester',
@@ -149,77 +151,82 @@ def get_list_of_students(teacher_data):
         Section.section.in_(data['sections'][0].split(","))
     ).all()]
 
-    teacher_record = storage.get_session().query(TeachersRecord).filter(
-        TeachersRecord.teacher_id == teacher_data.id,
-        TeachersRecord.grade_id == grade.id,
-        TeachersRecord.section_id.in_(section_ids),
-    ).all()
-    if not teacher_record:
-        return jsonify({"error": "you can not access this mark list!"}), 404
+    # Pagination and filtering params
+    page = int(data['page'][0]) if 'page' in data else 1
+    limit = int(data['limit'][0]) if 'limit' in data else 10
+    search_term = data['search'][0] if 'search' in data else None
 
-    # query = storage.get_all(Assessment,
-    #                         grade_id=grade.id,
+    query = (
+        storage.get_session()
+        .query(Student.id,
+               Student.name,
+               Student.father_name,
+               Student.grand_father_name,
+               Section.section,
+               AVRGResult.section_id,
+               AVRGResult.grade_id,
+               Assessment.subject_id,
+               Assessment.total,
+               Assessment.rank,
+               Assessment.semester,
+               Assessment.year
+               )  # Explicitly specify the table being queried
+        .select_from(Assessment)
+        .join(TeachersRecord, TeachersRecord.id == Assessment.teachers_record_id)
+        .join(AVRGResult, AVRGResult.student_id == Assessment.student_id)
+        .join(Student, Student.id == Assessment.student_id)
+        .join(Section, Section.id == AVRGResult.section_id)
+        .filter(
+            and_(
+                TeachersRecord.teacher_id == teacher_data.id,
+                Assessment.subject_id == data['subject_id'][0],
+                AVRGResult.section_id.in_(section_ids)
+            )
+        )
+    )
 
-    #                         )
+    if search_term:
+        search_pattern = f"%{search_term}%"
+        query = (
+            query.filter(Student.id.ilike(search_pattern) |
+                         Student.name.ilike(search_pattern) |
+                         Student.father_name.ilike(search_pattern) |
+                         Student.grand_father_name.ilike(search_pattern)
+                         )
+        )
+
+    # Use the paginate_query function to handle pagination
+    paginated_result = paginate_query(query, page, limit)
+    # Check if any students are found
+    if not paginated_result['items']:
+        return jsonify({"error": "No student found"}), 404
 
     student_list = []
-    for record in teacher_record:
-        students_query = storage.get_all(MarkList,
-                                         teachers_record_id=record.id,
-                                         semester=data['semester'][0],
-                                         year=data['year'][0]
-                                         )
-        if students_query:
-            student_list.extend([student.to_dict()
-                                for student in students_query])
 
-    if not student_list:
-        return jsonify({"error": "No students found"}), 404
-
-    updated_student_list = {}
-    for student_data in student_list:
-        student_id = student_data['student_id']
-        if student_id not in updated_student_list:
-            student = storage.get_first(Student, id=student_id)
-            section = storage.get_first(Section, id=student_data['section_id'])
-            subject = storage.get_first(Subject, id=student_data['subject_id'])
-            total_score = storage.get_first(Assessment,
-                                            student_id=student_id,
-                                            subject_id=student_data['subject_id'],
-                                            semester=student_data['semester'],
-                                            year=student_data['year']
-                                            )
-            updated_student_list[student_id] = {
-                "student_id": student_id,
-                "name": student.name,
-                "father_name": student.father_name,
-                "grand_father_name": student.grand_father_name,
-                "section": section.section,
-                "section_id": section.id,
-                "grade": grade.grade,
-                "grade_id": grade.id,
-                "subject": subject.name,
-                "subject_id": subject.id,
-                "semester": student_data['semester'],
-                "year": student_data['year'],
-                "total_score": total_score.total if total_score else 0,
-                "assessment": []
-            }
-        updated_student_list[student_id]['assessment'].append({
-            "assessment_type": student_data['type'],
-            "score": student_data['score'],
-            "percentage": student_data['percentage']
+    for id, name, f_name, G_name, section, section_id, grade_id, subject_id, total, rank, semester, year in paginated_result['items']:
+        student_list.append({
+            "student_id": id,
+            "name": name,
+            "father_name": f_name,
+            "grand_father_name": G_name,
+            "section": section,
+            "section_id": section_id,
+            "grade_id": grade_id,
+            "subject_id": subject_id,
+            "total_score": total,
+            "rank": rank,
+            "semester": semester,
+            "year": year
         })
-
-    student_list = list(updated_student_list.values())
 
     return jsonify({
         "students": student_list,
+        "meta": paginated_result['meta'],
         "header": {
             "grade": data['grade'][0],
             "year": data['year'][0],
-            "subject": student_list[0]['subject'],
-        }
+            "subject": 'None',
+        },
     }
     ), 200
 
@@ -250,36 +257,59 @@ def get_student_mark_list(teacher_data):
     section_id = data['section_id'][0]
     semester = data['semester'][0]
     year = data['year'][0]
+    try:
+        query = (
+            storage.get_session()
+            .query(MarkList.type,
+                   MarkList.score,
+                   MarkList.percentage
+                   )
+            .join(TeachersRecord, TeachersRecord.id == MarkList.teachers_record_id)
+            .filter(MarkList.student_id == student_id,
+                    MarkList.grade_id == grade_id,
+                    MarkList.subject_id == subject_id,
+                    MarkList.section_id == section_id,
+                    MarkList.semester == semester,
+                    MarkList.year == year,
+                    TeachersRecord.teacher_id == teacher_data.id
+                    )
+            .order_by(MarkList.percentage.asc(), MarkList.type.asc())
+        ).all()
 
-    teacher_record = storage.get_first(TeachersRecord,
-                                       teacher_id=teacher_data.id,
-                                       grade_id=grade_id,
-                                       section_id=section_id
-                                       )
-    if not teacher_record:
-        return jsonify({"error": "you can not access this mark list!"}), 404
+        assessment = []
+        for type, score, percentage in query:
+            assessment.append({
+                "assessment_type": type,
+                "score": score,
+                "percentage": percentage
+            })
+    except Exception as e:
+        print(e)
+        return jsonify({"error": f"Failed to retrieve student assessment"}), 500
 
-    mark_list = storage.get_all(MarkList,
-                                teachers_record_id=teacher_record.id,
-                                student_id=student_id,
-                                semester=semester,
-                                year=year
-                                )
-    total_score = storage.get_first(Assessment,
-                                    student_id=student_id,
-                                    subject_id=subject_id,
-                                    semester=semester,
-                                    year=year
-                                    )
-    assessment = []
-    for mark in mark_list:
-        mark = mark.to_dict()
-        assessment.append({
-            "assessment_type": mark['type'],
-            "score": mark['score'],
-            "percentage": mark['percentage']
+    return jsonify({"assessment": assessment}), 200
+
+
+@teach.route('/assigned-subject', methods=['GET'])
+@teacher_required
+def teacher_assigned_subjects(teacher_data):
+    query = (
+        storage.get_session()
+        .query(Subject.name, Subject.id)
+        .join(TeachersRecord, TeachersRecord.subject_id == Subject.id)
+        .join(Teacher, Teacher.id == TeachersRecord.teacher_id)
+        .filter(Teacher.id == teacher_data.id)
+        .distinct(Subject.id)
+    ).all()
+
+    assigned_subjects = []
+    for name, id in query:
+        assigned_subjects.append({
+            "id": id,
+            "name": name
         })
-    return jsonify({"assessment": assessment, "score": total_score.total, "rank": total_score.rank}), 200
+
+    return jsonify(assigned_subjects), 200
 
 
 @teach.route('/students/assigned_grade', methods=['GET'])

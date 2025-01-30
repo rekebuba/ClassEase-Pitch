@@ -245,7 +245,6 @@ const AdminStudentsList = ({ toggleProfile, profileSummary }) => {
      * and triggers the handleSearch function to fetch students based on the new year.
      */
     const handleYearChange = e => {
-        console.log(e.target.value);
         setSelectedYear(e.target.value);
     };
 

@@ -1,35 +1,33 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { FaSearch } from 'react-icons/fa';
 import Pagination from '../library/pagination';
 import api from "../../services/api";
 import Alert from '../../services/Alert';
 
-function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStudents, currentStudents, toggleDropdown, studentSummary }) {
+function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStudents, toggleDropdown, studentSummary }) {
     return (
         <section className="table-section">
             {(filteredStudents && filteredStudents.students && filteredStudents.students.length > 0) && (
-                <div className="table-head">
-                    <h3>Student List</h3>
-                    <h3>
-                        <span>{`Academic Year: ${filteredStudents.header.year}`}</span>
-                        <span style={{ marginLeft: '20px' }}>{`Grade: ${filteredStudents.header.grade}`}</span>
-                        <span style={{ marginLeft: '20px' }}>{`Subject: ${filteredStudents.header.subject}`}</span>
-                    </h3>
-                    <div className="table-search-bar">
-                        <input
-                            type="text"
-                            placeholder="Search Student"
-                            value={searchTerm}
-                            onChange={handleSearchChange}
-                        />
-                        <button onClick={() => {
-                            console.log('filteredStudents', filteredStudents);
-                            handleSearch();
-                        }}>
-                            <FaSearch />
-                        </button>
+                <form onSubmit={handleSearch}>
+                    <div className="table-head">
+                        <h3>Student List</h3>
+                        <h3>
+                            <span>{`Academic Year: ${filteredStudents.header.year}`}</span>
+                            <span style={{ marginLeft: '20px' }}>{`Grade: ${filteredStudents.header.grade}`}</span>
+                            <span style={{ marginLeft: '20px' }}>{`Subject: ${filteredStudents.header.subject}`}</span>
+                        </h3>
+                        <div className="table-search-bar">
+                            <input
+                                type="text"
+                                placeholder="Search Student"
+                                value={searchTerm}
+                                onChange={handleSearchChange}
+                                required
+                            />
+                            <button><FaSearch /></button>
+                        </div>
                     </div>
-                </div>
+                </form>
             )}
 
             <table className="data-table">
@@ -41,12 +39,13 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
                         <th>G.Father Name</th>
                         <th>Section</th>
                         <th>Total Score</th>
+                        <th>Rank</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {(currentStudents && currentStudents.students) &&
-                        currentStudents.students.map((student, index) => (
+                    {(filteredStudents && filteredStudents.students) &&
+                        filteredStudents.students.map((student, index) => (
                             // Dynamic Data Rows
                             <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#fff' : '#f1f1f1' }}>
                                 <td>{student.student_id}</td>
@@ -55,6 +54,7 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
                                 <td>{student.grand_father_name}</td>
                                 <td>{student.section ? student.section : 'N/A'}</td>
                                 <td>{student.total_score ? student.total_score : 0}</td>
+                                <td>{student.rank ? student.rank : 0}</td>
                                 <td>
                                     <button className="detail-btn" onClick={() => {
                                         toggleDropdown();
@@ -93,16 +93,14 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) =>
     const [selectedYear, setSelectedYear] = useState("2024/25");
     const [alert, setAlert] = useState({ type: "", message: "", show: false });
     const [allStudents, setAllStudents] = useState({ students: [], header: {} });        // Store all students
-    const [filteredStudents, setFilteredStudents] = useState({ students: [], header: {} });  // Store the filtered search results
+    const [filteredStudents, setFilteredStudents] = useState({ students: [], meta: {}, header: {} });  // Store the filtered search results
     const [selectedSection, setSelectedSection] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [currentYear] = useState(new Date().getFullYear());
-    const [subjectAssigned, setSubjectAssigned] = useState({});
+    const [subjectAssigned, setSubjectAssigned] = useState([]);
     const [gradeAssigned, setGradeAssigned] = useState([]);
-    const [currentStudents, setCurrentStudents] = useState({ students: [], header: {} });
-    const [totalPages, setTotalPages] = useState(0);
-    const limit = 10;
+    const limit = 10; // Number of students per page
 
     /**
      * @function handleSearch
@@ -111,7 +109,9 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) =>
      * @returns {void}
      */
     const handleSearch = async (e, page) => {
-        e.preventDefault();
+        e?.preventDefault(); // Prevent default if event exists
+        setFilteredStudents({ students: [], meta: {}, header: {} }); // clear any search result for the new one
+        setSearchTerm("");
         if (selectedSection.length === 0) {
             showAlert("warning", "Please select at least one section.");
             return;
@@ -133,6 +133,7 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) =>
 
             const data = {
                 students: response.data['students'],
+                meta: response.data['meta'],
                 header: response.data['header']
             };
 
@@ -151,30 +152,34 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) =>
             }
             // Reset the state
             setCurrentPage(1);
-            setFilteredStudents({ students: [], header: {} });
+            setFilteredStudents({ students: [], meta: {}, header: {} });
         }
     };
 
+    // if (saveStudent) {
+    //     handleSearch(undefined, currentPage);
+    // }
 
-    useEffect(() => {
-        if (Object.keys(saveStudent).length === 0) {
-            return;
-        }
-        const found = currentStudents.students.find(items => items.student_id === saveStudent.student_id);
-        found.total_score = saveStudent.score;
-    }, [saveStudent, currentStudents.students]);
+
+    // useEffect(() => {
+    //     if (saveStudent) {
+    //         handleSearch(undefined, currentPage);
+    //     }
+    // }, [currentPage, saveStudent, handleSearch]);
 
     // Handle Next Page
-    const handleNextPage = () => {
-        if (currentPage < totalPages) {
-            setCurrentPage((prevPage) => prevPage + 1);
+    const handleNextPage = (e) => {
+        if (currentPage < filteredStudents.meta.total_pages) {
+            const newPage = currentPage + 1;  // Increment the page
+            handleSearch(e, newPage);
         }
     };
 
     // Handle Previous Page
-    const handlePreviousPage = () => {
+    const handlePreviousPage = (e) => {
         if (currentPage > 1) {
-            setCurrentPage((prevPage) => prevPage - 1);
+            const newPage = currentPage - 1;  // Decrement the page
+            handleSearch(e, newPage);
         }
     };
 
@@ -208,6 +213,8 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) =>
         if (e.target.value === '') {
             setSelectedGrade(e.target.value);
         } else {
+            setFilteredStudents({ students: [], meta: {}, header: {} }); // clear any search result for the new one
+            setSearchTerm("");
             const value = e.target.value.replace(/\D/g, ""); // Keep only digits (0-9)
             setSelectedGrade(value); // Convert to integer
         }
@@ -220,6 +227,8 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) =>
      * @returns {void}
      */
     const handleSectionChange = e => {
+        setFilteredStudents({ students: [], meta: {}, header: {} });
+        setSearchTerm("");
         const { value, checked } = e.target;
         if (checked) {
             setSelectedSection([...selectedSection, value]);
@@ -235,6 +244,8 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) =>
      * @returns {void}
      */
     const handleSemesterChange = (e) => {
+        setFilteredStudents({ students: [], meta: {}, header: {} });
+        setSearchTerm("");
         setSelectedSemester(parseFloat(e.target.value));
     };
 
@@ -262,9 +273,11 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) =>
 
     const handleSubjectChange = (e) => {
         setSelectedSubjectId(e.target.value);
+        setSearchTerm("");
         if (e.target.value === "") {
             setGradeAssigned([]);
         } else {
+            setFilteredStudents({ students: [], meta: {}, header: {} });
             fetchGrade();
         }
     };
@@ -279,19 +292,6 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) =>
             } else {
                 showAlert("warning", "An unexpected error occurred.");
             }
-        }
-
-        // Calculate the start and end indices for the students on the current page
-
-        if (filteredStudents && filteredStudents.students) {
-            const indexOfLastStudent = currentPage * limit;
-            const indexOfFirstStudent = indexOfLastStudent - limit;
-            setCurrentStudents({
-                students: filteredStudents.students.slice(indexOfFirstStudent, indexOfLastStudent),
-                header: filteredStudents.header
-            });
-            // Calculate total pages
-            setTotalPages(Math.ceil(filteredStudents.students.length / limit));
         }
     };
 
@@ -313,7 +313,11 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) =>
                     setSubjectAssigned(response.data);
                 }
             } catch (error) {
-                console.log(error);
+                if (error.response && error.response.data && error.response.data['error']) {
+                    showAlert("warning", error.response.data['error']);
+                } else {
+                    showAlert("warning", "An unexpected error occurred.");
+                }
             }
         };
         subjectTaught();
@@ -324,7 +328,7 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) =>
             <div className="admin-header">
                 <h2>Manage Students</h2>
             </div>
-            <form onSubmit={handleSearch}>
+            <form onSubmit={(e) => handleSearch(e, 1)}>
                 <section className="admin-filters">
                     <div className="filter-group">
                         <label htmlFor="Subject">Subject:</label>
@@ -336,9 +340,9 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) =>
                         >
                             <option value="">Select Subject</option>
                             {subjectAssigned &&
-                                Object.entries(subjectAssigned).map(([key, value]) =>
-                                    <option key={key} type="text" value={key}>
-                                        {value}
+                                subjectAssigned.map((subject) =>
+                                    <option key={subject.id} type="text" value={subject.id}>
+                                        {subject.name}
                                     </option>
                                 )}
                         </select>
@@ -416,19 +420,15 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) =>
                 handleSearchChange={handleSearchChange}
                 handleSearch={handleSearch}
                 filteredStudents={filteredStudents}
-                currentStudents={currentStudents}
                 toggleDropdown={toggleDropdown}
                 studentSummary={studentSummary}
             />
-            {
-                (totalPages > 1 && filteredStudents && filteredStudents.students && filteredStudents.students.length >= limit) &&
+            {filteredStudents.meta.total_pages > 1 &&
                 <Pagination
                     handlePreviousPage={handlePreviousPage}
                     currentPage={currentPage}
                     handleNextPage={handleNextPage}
-                    meta={{
-                        total_pages: totalPages
-                    }}
+                    meta={filteredStudents.meta}
                 />
             }
         </div>

@@ -20,7 +20,7 @@ from models.teacher_record import TeachersRecord
 from sqlalchemy import update, select, and_
 from urllib.parse import urlparse, parse_qs
 from api.v1.views.utils import admin_required
-from math import ceil
+from api.v1.views.methods import paginate_query
 
 
 auth = Blueprint('auth', __name__, url_prefix='/api/v1/admin')
@@ -361,9 +361,9 @@ def assign_class(admin_data):
                 return jsonify({"error": f"Section not found, Mark List was not created for the grade {data['grade']}"}), 404
 
             for section_id in section_ids:
-                # check if the teacher is already assigned to the subject
+                # check if the another teacher is already assigned to the subject
                 teacher_record = storage.get_first(
-                    TeachersRecord, teacher_id=teacher.id, grade_id=grade_id, section_id=section_id, subject_id=subject.id)
+                    TeachersRecord, grade_id=grade_id, section_id=section_id, subject_id=subject.id)
                 if not teacher_record:
                     # update the teacher record
                     teacher_record = TeachersRecord(
@@ -376,13 +376,24 @@ def assign_class(admin_data):
                     storage.add(teacher_record)
 
                 # Update the MarkList table
-                update_result = storage.get_session().execute(
+                storage.get_session().execute(
                     update(MarkList)
                     .where(and_(
                         MarkList.grade_id == grade_id,
                         MarkList.section_id == section_id,
                         MarkList.subject_id == subject.id,
                         MarkList.year == data['mark_list_year']
+                    ))
+                    .values(teachers_record_id=teacher_record.id)
+                )
+
+                # Update the Assessment table
+                storage.get_session().execute(
+                    update(Assessment)
+                    .where(and_(
+                        Assessment.grade_id == grade_id,
+                        Assessment.subject_id == subject.id,
+                        Assessment.year == data['mark_list_year']
                     ))
                     .values(teachers_record_id=teacher_record.id)
                 )
@@ -450,11 +461,12 @@ def create_mark_list(admin_data):
                     return jsonify({"error": "Type must be a string and percentage must be an integer"}), 400
 
     # Get the grade_id from the Grade table
-    grade_id = storage.get_session().execute(
-        select(Grade.id).where(Grade.grade == data['grade'])
-    ).scalars().first()
-    if not grade_id:
+    grade = storage.get_first(Grade, grade=data['grade'])
+
+    if not grade:
         return jsonify({"error": "Grade not found"}), 404
+    else:
+        grade_id = grade.id
 
     # Update the Section table
     existing_sections = {}
@@ -544,8 +556,14 @@ def create_mark_list(admin_data):
                 assessments.append(Assessment(
                     student_id=student.student_id, grade_id=grade_id, subject_id=subject.id, semester=data['semester'], year=data['year']))
 
-            average_result.append(AVRGResult(
-                student_id=student.student_id, semester=data['semester'], year=data['year']))
+            average_result.append(
+                AVRGResult(student_id=student.student_id,
+                           grade_id=grade_id,
+                           section_id=student.section_id,
+                           semester=data['semester'],
+                           year=data['year']
+                           )
+            )
 
         # Save the objects to the database
         storage.get_session().bulk_save_objects(mark_lists)
@@ -628,42 +646,6 @@ def show_mark_list(admin_data):
 
     return jsonify(student_list), 200
 
-
-def paginate_query(query, page, limit):
-    """
-    Paginate SQLAlchemy queries.
-
-    :param query: SQLAlchemy query object to paginate
-    :param request: Flask request object to get query parameters (page, limit)
-    :param default_limit: Default number of records per page if limit is not provided
-    :return: Dictionary with paginated data and meta information
-    """
-
-    # Calculate total number of records
-    total_items = query.count()
-
-    # Calculate offset and apply limit and offset to the query
-    offset = (page - 1) * limit
-    paginated_query = query.limit(limit).offset(offset)
-
-    # Get the paginated results
-    items = paginated_query.all()
-
-    # Calculate total pages
-    total_pages = ceil(total_items / limit)
-
-    # Return the paginated data and meta information
-    return {
-        "items": items,
-        "meta": {
-            "total_items": total_items,
-            "current_page": page,
-            "limit": limit,
-            "total_pages": total_pages,
-        }
-    }
-
-
 @auth.route('/manage/students', methods=['GET'])
 @admin_required
 def admin_student_data(admin_data):
@@ -708,7 +690,6 @@ def admin_student_data(admin_data):
     grade = storage.get_first(Grade, grade=data['grade'][0])
     if not grade:
         return jsonify({"error": "Grade not found"}), 404
-    print(data['year'][0])
 
     # Pagination and filtering params
     page = int(data['page'][0]) if 'page' in data else 1
