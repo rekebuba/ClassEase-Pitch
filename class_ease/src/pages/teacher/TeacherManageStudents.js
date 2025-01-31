@@ -15,7 +15,7 @@ import TeacherPopupUpdateStudentScore from "./TeacherPopupUpdateStudentScore";
 const TeacherManageStudents = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [studentSummary, setStudentSummary] = useState({});
-    const [onSave, setOnSave] = useState({});
+    const [onSave, setOnSave] = useState(false);
 
     /**
      * @function toggleDropdown
@@ -45,8 +45,8 @@ const TeacherManageStudents = () => {
         setStudentSummary(data);
     };
 
-    const handelSaving = (individualStudent) => {
-        setOnSave(individualStudent);
+    const handelSaving = (value) => {
+        setOnSave(value);
     };
 
     return (
@@ -54,7 +54,7 @@ const TeacherManageStudents = () => {
             <TeacherPanel />
             <main className="content">
                 <TeacherHeader />
-                <TeacherStudentsList toggleDropdown={toggleDropdown} studentSummary={summary} saveStudent={onSave}/>
+                <TeacherStudentsList toggleDropdown={toggleDropdown} studentSummary={summary} saveStudent={onSave} toggleSave={handelSaving} />
                 <TeacherPopupUpdateStudentScore isOpen={isOpen} toggleAssessment={toggleAssessment} studentData={studentSummary} onSave={handelSaving} />
             </main>
         </div>

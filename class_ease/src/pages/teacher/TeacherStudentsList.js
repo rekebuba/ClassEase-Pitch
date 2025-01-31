@@ -86,7 +86,7 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
  * @description
  * This component allows teachers to manage and filter a list of students based on various criteria such as grade, section, semester, and year. It also provides search functionality and pagination for navigating through the list of students.
  */
-const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) => {
+const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, toggleSave }) => {
     const [selectedGrade, setSelectedGrade] = useState('');
     const [selectedSubjectId, setSelectedSubjectId] = useState('');
     const [selectedSemester, setSelectedSemester] = useState(1);
@@ -102,13 +102,14 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) =>
     const [gradeAssigned, setGradeAssigned] = useState([]);
     const limit = 10; // Number of students per page
 
+
     /**
      * @function handleSearch
      * @description Fetches and filters the list of students based on the selected criteria and search term.
      * @param {number} [page] - The page number to fetch. If not provided, the current page is used.
      * @returns {void}
      */
-    const handleSearch = async (e, page) => {
+    const handleSearch = useCallback(async (e, page) => {
         e?.preventDefault(); // Prevent default if event exists
         setFilteredStudents({ students: [], meta: {}, header: {} }); // clear any search result for the new one
         setSearchTerm("");
@@ -154,18 +155,24 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent }) =>
             setCurrentPage(1);
             setFilteredStudents({ students: [], meta: {}, header: {} });
         }
-    };
+    }, [currentPage, selectedGrade, selectedSection, selectedSemester, selectedSubjectId, selectedYear, searchTerm]);
 
+    // if (saveStudent) {
+    //     console.log("filteredStudents", saveStudent);
+    //     handleSearch(undefined, currentPage);
+    //     toggleSave(false);
+    // }
     // if (saveStudent) {
     //     handleSearch(undefined, currentPage);
     // }
 
 
-    // useEffect(() => {
-    //     if (saveStudent) {
-    //         handleSearch(undefined, currentPage);
-    //     }
-    // }, [currentPage, saveStudent, handleSearch]);
+    useEffect(() => {
+        if (saveStudent) {
+            handleSearch(undefined, currentPage);
+            toggleSave(false);
+        }
+    }, [currentPage, saveStudent, handleSearch, toggleSave]);
 
     // Handle Next Page
     const handleNextPage = (e) => {

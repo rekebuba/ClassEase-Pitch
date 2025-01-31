@@ -53,7 +53,6 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData,
             if (res.status === 200) {
                 const updatedData = { ...studentData, ...res.data };
                 setIndividualAssessment(updatedData);
-                return updatedData; // Return updated data
             }
         } catch (error) {
             if (error.response?.data?.error) {
@@ -134,9 +133,13 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData,
             }
             console.error(error);
         }
-        // Fetch updated data and pass it to onSave
-        const updatedData = await fetchIndividualAssessment();
-        onSave(updatedData); // Use the returned data directly
+                // Fetch updated data and pass it to onSave
+        await fetchIndividualAssessment();
+        onSave(true); // to get teh updated student data
+    };
+
+    const calculateTotalScore = (assessments) => {
+        return assessments.reduce((total, item) => total + item.score, 0);
     };
 
     return (
@@ -186,7 +189,7 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData,
                         </tbody>
                     </table>
                     <div className='total-score'>
-                        <h3><strong>Total Score: {individualAssessment.total_score ? individualAssessment.total_score : 'N/A'} / 100</strong></h3>
+                        <h3><strong>Total Score: {individualAssessment.assessment ? calculateTotalScore(individualAssessment.assessment) : 'N/A'} / 100</strong></h3>
                     </div>
                     <div className='popup-table-btn'>
                         <button className="popup-table-edit-btn" onClick={handleEdit}>

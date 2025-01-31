@@ -183,6 +183,7 @@ def get_list_of_students(teacher_data):
                 AVRGResult.section_id.in_(section_ids)
             )
         )
+        .order_by(Section.section.asc(), Student.name.asc(), Student.father_name.asc(), Student.grand_father_name.asc(), Student.id.asc())
     )
 
     if search_term:
@@ -262,7 +263,7 @@ def get_student_mark_list(teacher_data):
             storage.get_session()
             .query(MarkList.type,
                    MarkList.score,
-                   MarkList.percentage
+                   MarkList.percentage,
                    )
             .join(TeachersRecord, TeachersRecord.id == MarkList.teachers_record_id)
             .filter(MarkList.student_id == student_id,
@@ -277,14 +278,13 @@ def get_student_mark_list(teacher_data):
         ).all()
 
         assessment = []
-        for type, score, percentage in query:
+        for type, score, percentage  in query:
             assessment.append({
                 "assessment_type": type,
                 "score": score,
-                "percentage": percentage
+                "percentage": percentage,
             })
     except Exception as e:
-        print(e)
         return jsonify({"error": f"Failed to retrieve student assessment"}), 500
 
     return jsonify({"assessment": assessment}), 200
