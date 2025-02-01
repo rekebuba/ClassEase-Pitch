@@ -1,4 +1,3 @@
-import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Home from "./components/Home";
 import Login from "./services/Login";
@@ -21,6 +20,7 @@ import AdminAssignTeacher from "./pages/admin/AdminAssignTeacher";
 import TeacherUpdateProfile from "./pages/teacher/TeacherUpdateProfile";
 import AdminUpdateProfile from "./pages/admin/AdminUpdateProfile";
 import StudentUpdateProfile from "./pages/student/StudentUpdateProfile";
+import '../src/index.css';
 
 /**
  * Defines the routes for the application using `createBrowserRouter`.

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
 import { FaSignOutAlt, FaUserCircle } from "react-icons/fa";
 import api from '../services/api';

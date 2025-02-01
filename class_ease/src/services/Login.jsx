@@ -56,12 +56,14 @@ const Login = () => {
   };
 
   return (
-    <div className="login-section">
-      <div className="login-box">
-        <h2>Login to your account</h2>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white shadow-lg rounded-lg p-8 w-full max-w-md">
+        <h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">
+          Login to your account
+        </h2>
         <form onSubmit={handleSubmit}>
-          <div className="input-group" style={{ marginBottom: '20px', position: 'relative' }}>
-            <i className="fa fa-user" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
+          <div className="relative mb-5">
+            <i className="fa fa-user absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
             <input
               type="text"
               name="id"
@@ -69,21 +71,28 @@ const Login = () => {
               value={id}
               onChange={(e) => setId(e.target.value)}
               required
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:border-blue-500"
             />
           </div>
-          <div className="input-group" style={{ marginBottom: '20px', position: 'relative' }}>
-            <i className="fa fa-lock" style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#888' }} />
+          <div className="relative mb-5">
+            <i className="fa fa-lock absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" />
             <input
               type="password"
               name="password"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-            required
+              required
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring focus:border-blue-500"
             />
           </div>
-          {warning && <p className="warning">{warning}</p>}
-          <button type="submit" className="login-button">
+          {warning && (
+            <p className="text-red-500 text-sm mb-4">{warning}</p>
+          )}
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition-colors"
+          >
             Login
           </button>
         </form>

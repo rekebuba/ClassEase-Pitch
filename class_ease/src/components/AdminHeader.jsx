@@ -8,16 +8,10 @@ import {
     FaUsers,
     FaUserShield,
     FaBookOpen,
-    FaBuilding,
-    FaBook,
-    FaChalkboard,
     FaUserPlus,
-    FaCalendarAlt,
     FaFileAlt,
     FaBookReader,
-    FaFileSignature,
     FaGraduationCap,
-    FaPenAlt,
     FaChartPie,
     FaFileInvoice,
     FaFileContract,
@@ -28,7 +22,6 @@ import {
 } from "react-icons/fa";
 import classEaseHeader from '../images/ClassEase-header.png';
 import { useNavigate } from "react-router-dom";
-import React from "react";
 
 /**
  * AdminHeader component renders the header section of the admin dashboard.
@@ -73,35 +66,35 @@ const AdminHeader = () => {
         navigate("/admin/manage/students");
     };
 
-    const manageTeachers = e => {
+    const manageTeachers = () => {
         navigate("/admin/manage/teachers");
     };
 
-    const assessMarkList = e => {
+    const assessMarkList = () => {
         navigate("/admin/assessment/marklist");
     };
 
-    const createEvent = e => {
+    const createEvent = () => {
         navigate("/admin/events/newevent");
     };
 
-    const goToDashboard = e => {
+    const goToDashboard = () => {
         navigate("/admin/dashboard");
     };
 
-    const userAccessControl = e => {
+    const userAccessControl = () => {
         navigate("/admin/users/accesscontrol");
     };
 
-    const enrollStudent = e => {
+    const enrollStudent = () => {
         navigate("/admin/student/registration");
     };
 
-    const enrollTeacher = e => {
+    const enrollTeacher = () => {
         navigate("/admin/teacher/registration");
     };
 
-    const updateProfile = e => {
+    const updateProfile = () => {
         navigate("/admin/update/profile");
     };
 

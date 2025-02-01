@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 """ Module for Student class """
 
-from sqlalchemy import Column, Integer, String, ForeignKey, CheckConstraint, Float, DateTime
+from sqlalchemy import Column, Integer, String, ForeignKey, CheckConstraint, Float, Boolean, Text, DateTime
 from models.engine.db_storage import BaseModel, Base
-
+from sqlalchemy.orm import relationship
 
 class Student(BaseModel, Base):
     """
@@ -27,22 +27,54 @@ class Student(BaseModel, Base):
         __init__(*args, **kwargs): Initializes a new instance of the Student class.
     """
     __tablename__ = 'student'
-    id = Column(String(120), ForeignKey('users.id'), primary_key=True, unique=True)
+    id = Column(String(120), ForeignKey('users.id'),
+                primary_key=True, unique=True)
     name = Column(String(50), nullable=False)
     father_name = Column(String(50), nullable=False)
     grand_father_name = Column(String(50))
     date_of_birth = Column(DateTime, nullable=False)
+
+    # Parent/Guardian Contacts
     father_phone = Column(String(25))
     mother_phone = Column(String(25))
+    guardian_name = Column(String(50))  # If student lives with someone else
+    guardian_phone = Column(String(25))
 
+    # Academic Info
     start_year = Column(String(10), nullable=False)
     end_year = Column(String(10))
+    # If transferring from another school
+    previous_school = Column(String(100))
+    grade = Column(Integer, nullable=False)  # Current grade level
+    section = Column(String(10))  # Class section (A, B, C, etc.)
+
+    # Identification & Legal Docs
+    birth_certificate = Column(String(255))  # Path to uploaded file
+    national_id = Column(String(50))  # Optional national ID/passport
+
+    # Health & Special Needs
+    has_medical_condition = Column(Boolean, default=False)
+    medical_details = Column(Text)  # Explanation of medical conditions
+    has_disability = Column(Boolean, default=False)
+    disability_details = Column(Text)  # Explanation of disabilities
+    requires_special_accommodation = Column(Boolean, default=False)
+    special_accommodation_details = Column(Text)  # Any special support needed
+
+    # Student Status
+    is_transferring = Column(Boolean, default=False)
+    # Whether the student is currently enrolled
+    is_active = Column(Boolean, default=True)
 
     __table_args__ = (
         CheckConstraint(
-            'father_phone IS NOT NULL OR mother_phone IS NOT NULL'),
+            'father_phone IS NOT NULL OR mother_phone IS NOT NULL OR guardian_phone IS NOT NULL',
+            name='at_least_one_contact'
+        ),
     )
 
+    # # Relationships
+    # # If linked to a User table
+    # user = relationship("User", back_populates="student")
 
     def __init__(self, *args, **kwargs):
         """
