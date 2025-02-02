@@ -65,63 +65,63 @@ const TeacherHeader = () => {
     };
 
     return (
-        <header className="flex items-center justify-between bg-white shadow px-6 py-4">
+        <header className="w-full bg-gray-100 shadow container mx-auto flex">
             {/* Logo Section */}
-            <div className="cursor-pointer" onClick={goToHome}>
-                <img src={classEaseHeader} alt="ClassEase School" className="h-12" />
-            </div>
-
-            {/* Navigation */}
-            <nav className="flex space-x-6 items-center justify-center">
-                {/* Home Link */}
-                <div>
-                    <span
-                        onClick={goToDashboard}
-                        className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 cursor-pointer"
-                    >
-                        <FaHome className="h-5 w-5" />
-                        <span>Home</span>
-                    </span>
+                <div className="cursor-pointer flex-shrink-0" onClick={goToHome}>
+                    <img src={classEaseHeader} alt="ClassEase School" className="h-10" />
                 </div>
 
-                {/* Assessments & Exams Dropdown */}
-                <div className="relative group">
-                    <span className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 cursor-pointer">
-                        <FaFileAlt className="h-5 w-5" />
-                        <span>Assessments & Exams</span>
-                    </span>
-                    <div className="absolute left-0 mt-2 w-48 bg-white shadow-lg rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-                        <div className="py-2">
-                            <div
-                                onClick={manageStudents}
-                                className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
-                            >
-                                <FaUserGraduate className="h-5 w-5" />
-                                <span>My Students</span>
+                {/* Navigation */}
+                <nav className="flex space-x-6 items-center justify-center">
+                    {/* Home Link */}
+                    <div>
+                        <span
+                            onClick={goToDashboard}
+                            className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 cursor-pointer"
+                        >
+                            <FaHome className="h-5 w-5" />
+                            <span>Home</span>
+                        </span>
+                    </div>
+
+                    {/* Assessments & Exams Dropdown */}
+                    <div className="relative group">
+                        <span className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 cursor-pointer">
+                            <FaFileAlt className="h-5 w-5" />
+                            <span>Assessments & Exams</span>
+                        </span>
+                        <div className="absolute left-0 mt-2 w-48 bg-white shadow-lg rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+                            <div className="py-2">
+                                <div
+                                    onClick={manageStudents}
+                                    className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
+                                >
+                                    <FaUserGraduate className="h-5 w-5" />
+                                    <span>My Students</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                {/* Settings Dropdown */}
-                <div className="relative group">
-                    <span className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 cursor-pointer">
-                        <FaCog className="h-5 w-5" />
-                        <span>Settings</span>
-                    </span>
-                    <div className="absolute left-0 mt-2 w-48 bg-white shadow-lg rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-                        <div className="py-2">
-                            <div
-                                onClick={updateProfile}
-                                className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
-                            >
-                                <FaCogs className="h-5 w-5" />
-                                <span>Update Profile</span>
+                    {/* Settings Dropdown */}
+                    <div className="relative group">
+                        <span className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 cursor-pointer">
+                            <FaCog className="h-5 w-5" />
+                            <span>Settings</span>
+                        </span>
+                        <div className="absolute left-0 mt-2 w-48 bg-white shadow-lg rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+                            <div className="py-2">
+                                <div
+                                    onClick={updateProfile}
+                                    className="flex items-center space-x-2 px-4 py-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
+                                >
+                                    <FaCogs className="h-5 w-5" />
+                                    <span>Update Profile</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </nav>
+                </nav>
         </header>
     );
 };
