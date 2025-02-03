@@ -19,12 +19,9 @@ const TeacherDashboard = () => {
       {/* Main content area: Sidebar + Content */}
       <div className="flex flex-1">
         {/* Sidebar */}
-        <aside className="w-64 bg-gray-50 border-r border-gray-200 p-6">
           <TeacherPanel />
-        </aside>
-
         {/* Main Dashboard Content */}
-        <main className="flex-1 p-6 bg-gray-100">
+        <main className="flex-1 p-6 bg-gray-100 overflow-scroll">
           {/* Teacher Stats */}
           <section className="mb-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

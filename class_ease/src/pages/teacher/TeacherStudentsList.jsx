@@ -1,30 +1,48 @@
 import { useState, useEffect, useCallback } from "react";
 import { FaSearch } from 'react-icons/fa';
-import Pagination from '../library/pagination';
+// import Pagination from '../library/pagination';
 import api from "../../services/api";
 import Alert from '../../services/Alert';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination"
 
 function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStudents, toggleDropdown, studentSummary }) {
     return (
         <section className="table-section">
             {(filteredStudents && filteredStudents.students && filteredStudents.students.length > 0) && (
                 <form onSubmit={handleSearch}>
-                    <div className="table-head">
+                    <div className="flex justify-between items-center mb-4 ">
                         <h3>Student List</h3>
                         <h3>
                             <span>{`Academic Year: ${filteredStudents.header.year}`}</span>
-                            <span style={{ marginLeft: '20px' }}>{`Grade: ${filteredStudents.header.grade}`}</span>
-                            <span style={{ marginLeft: '20px' }}>{`Subject: ${filteredStudents.header.subject}`}</span>
+                            <span className="ml-5">{`Grade: ${filteredStudents.header.grade}`}</span>
+                            <span className="ml-5">{`Subject: ${filteredStudents.header.subject}`}</span>
                         </h3>
-                        <div className="table-search-bar">
-                            <input
-                                type="text"
+                        <div className="flex items-center justify-between mr-4 w-100">
+                            <Input
+                                className="bg-white mr-3"
                                 placeholder="Search Student"
                                 value={searchTerm}
                                 onChange={handleSearchChange}
                                 required
                             />
-                            <button><FaSearch /></button>
+                            <Button className="h-9 w-9"><FaSearch /></Button>
                         </div>
                     </div>
                 </form>
@@ -47,7 +65,8 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
                     {(filteredStudents && filteredStudents.students) &&
                         filteredStudents.students.map((student, index) => (
                             // Dynamic Data Rows
-                            <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#fff' : '#f1f1f1' }}>
+                            <tr key={index}
+                                className={`bg-${index % 2 === 0 ? 'white' : 'gray-100'} hover:bg-gray-200`}>
                                 <td>{student.student_id}</td>
                                 <td>{student.name}</td>
                                 <td>{student.father_name}</td>
@@ -56,10 +75,13 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
                                 <td>{student.total_score ? student.total_score : 0}</td>
                                 <td>{student.rank ? student.rank : 0}</td>
                                 <td>
-                                    <button className="detail-btn" onClick={() => {
-                                        toggleDropdown();
-                                        studentSummary(student); // Pass the data for the clicked student
-                                    }}>Detail</button>
+                                    <Button className="h-9 w-15 hover:border-gray-50"
+                                        onClick={() => {
+                                            toggleDropdown();
+                                            studentSummary(student); // Pass the data for the clicked student
+                                        }}>
+                                        Detail
+                                    </Button>
                                 </td>
                             </tr>
                         ))}
@@ -174,22 +196,6 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
         }
     }, [currentPage, saveStudent, handleSearch, toggleSave]);
 
-    // Handle Next Page
-    const handleNextPage = (e) => {
-        if (currentPage < filteredStudents.meta.total_pages) {
-            const newPage = currentPage + 1;  // Increment the page
-            handleSearch(e, newPage);
-        }
-    };
-
-    // Handle Previous Page
-    const handlePreviousPage = (e) => {
-        if (currentPage > 1) {
-            const newPage = currentPage - 1;  // Decrement the page
-            handleSearch(e, newPage);
-        }
-    };
-
     /**
      * @function showAlert
      * @description Displays an alert message.
@@ -216,15 +222,11 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
      * @param {Event} e - The change event.
      * @returns {void}
      */
-    const handleGradeChange = (e) => {
-        if (e.target.value === '') {
-            setSelectedGrade(e.target.value);
-        } else {
-            setFilteredStudents({ students: [], meta: {}, header: {} }); // clear any search result for the new one
-            setSearchTerm("");
-            const value = e.target.value.replace(/\D/g, ""); // Keep only digits (0-9)
-            setSelectedGrade(value); // Convert to integer
-        }
+    const handleGradeChange = (value) => {
+        setFilteredStudents({ students: [], meta: {}, header: {} }); // clear any search result for the new one
+        setSearchTerm("");
+        console.log((value));
+        setSelectedGrade(value); // Convert to integer
     };
 
     /**
@@ -233,15 +235,13 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
      * @param {Event} e - The change event.
      * @returns {void}
      */
-    const handleSectionChange = e => {
+    const handleSectionChange = (section) => {
         setFilteredStudents({ students: [], meta: {}, header: {} });
         setSearchTerm("");
-        const { value, checked } = e.target;
-        if (checked) {
-            setSelectedSection([...selectedSection, value]);
-        } else {
-            setSelectedSection(selectedSection.filter((section) => section !== value));
-        }
+
+        setSelectedSection((prev) =>
+            prev.includes(section) ? prev.filter((s) => s !== section) : [...prev, section]
+        );
     };
 
     /**
@@ -250,10 +250,10 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
      * @param {Event} e - The change event.
      * @returns {void}
      */
-    const handleSemesterChange = (e) => {
+    const handleSemesterChange = (value) => {
         setFilteredStudents({ students: [], meta: {}, header: {} });
         setSearchTerm("");
-        setSelectedSemester(parseFloat(e.target.value));
+        setSelectedSemester(parseFloat(value));
     };
 
     /**
@@ -262,7 +262,7 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
      * @param {Event} e - The change event.
      * @returns {void}
      */
-    const handleYearChange = e => setSelectedYear(e.target.value);
+    const handleYearChange = (value) => setSelectedYear(value);
 
     /**
      * @function handleSearchChange
@@ -278,10 +278,10 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
         }
     };
 
-    const handleSubjectChange = (e) => {
-        setSelectedSubjectId(e.target.value);
+    const handleSubjectChange = (value) => {
+        setSelectedSubjectId(value);
         setSearchTerm("");
-        if (e.target.value === "") {
+        if (value === "") {
             setGradeAssigned([]);
         } else {
             setFilteredStudents({ students: [], meta: {}, header: {} });
@@ -299,6 +299,12 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
             } else {
                 showAlert("warning", "An unexpected error occurred.");
             }
+        }
+    };
+
+    const handlePageChange = (e, page) => {
+        if (page > 0 && page <= filteredStudents.meta.total_pages) {
+            handleSearch(e, page);
         }
     };
 
@@ -331,88 +337,84 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
     }, []);
 
     return (
-        <div className="dashboard-container">
-            <div className="admin-header">
-                <h2>Manage Students</h2>
-            </div>
+        <div className="flex flex-col p-6 bg-gray-100">
             <form onSubmit={(e) => handleSearch(e, 1)}>
-                <section className="admin-filters">
-                    <div className="filter-group">
-                        <label htmlFor="Subject">Subject:</label>
-                        <select
-                            id="Subject"
-                            value={selectedSubjectId}
-                            onChange={handleSubjectChange}
-                            required
-                        >
-                            <option value="">Select Subject</option>
-                            {subjectAssigned &&
-                                subjectAssigned.map((subject) =>
-                                    <option key={subject.id} type="text" value={subject.id}>
-                                        {subject.name}
-                                    </option>
+                <section className="flex flex-wrap justify-between bg-white p-4 rounded shadow w-full mb-10">
+                    <div style={{ width: '9rem' }}>
+                        <Select onValueChange={handleSubjectChange} required>
+                            <SelectTrigger className="w-full p-2 border border-gray-300 rounded bg-gray-50">
+                                <SelectValue placeholder="Select Subject" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {subjectAssigned &&
+                                    subjectAssigned.map((subject) =>
+                                        <SelectItem key={subject.id} type="text" value={subject.id}>
+                                            {subject.name}
+                                        </SelectItem>
+                                    )}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div style={{ width: '9rem' }}>
+                        <Select onValueChange={handleGradeChange} required>
+                            <SelectTrigger className="w-full p-2 border border-gray-300 rounded bg-gray-50">
+                                <SelectValue placeholder="Select Grade" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {(gradeAssigned && gradeAssigned.length > 0) &&
+                                    gradeAssigned.map((grade) => (
+                                        <SelectItem key={grade} value={`${grade}`}>
+                                            Grade {grade}
+                                        </SelectItem>
+                                    ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div style={{ width: '9rem' }}>
+                        <Select onValueChange={handleSectionChange} required>
+                            <SelectTrigger className="w-full p-2 border border-gray-300 rounded bg-gray-50">
+                                <SelectValue placeholder="Select Section" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {['A', 'B', 'C'].map((section) => (
+                                    <SelectItem key={section} value={section}>
+                                        Section {section}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div style={{ width: '9rem' }}>
+                        <Select onValueChange={handleSemesterChange} required>
+                            <SelectTrigger className="w-full p-2 border border-gray-300 rounded bg-gray-50">
+                                <SelectValue placeholder="Select Semester" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {Array.from({ length: 2 }, (_, i) => i + 1).map(semester =>
+                                    <SelectItem key={semester} value={`${semester}`}>
+                                        Semester {semester}
+                                    </SelectItem>
                                 )}
-                        </select>
+                            </SelectContent>
+                        </Select>
                     </div>
-                    <div className="filter-group">
-                        <label htmlFor="grade">Grade:</label>
-                        <select
-                            id="grade"
-                            value={selectedGrade}
-                            onChange={handleGradeChange}
-                            required
-                        >
-                            <option value="">Select Grade</option>
-                            {(gradeAssigned && gradeAssigned.length > 0) &&
-                                gradeAssigned.map(grade =>
-                                    <option key={grade} value={grade}>
-                                        grade {grade}
-                                    </option>
-                                )}
-                        </select>
+                    <div style={{ width: '9rem' }}>
+                        <Select onValueChange={handleYearChange} required>
+                            <SelectTrigger className="w-full p-2 border border-gray-300 rounded bg-gray-50">
+                                <SelectValue placeholder="Select Year" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {Array.from({ length: 3 }, (_, i) => currentYear - i).map(year => (
+                                    <SelectItem key={year} value={`${year}/${(year + 1) % 100}`}>
+                                        {year}/{(year + 1) % 100}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
-                    <div className="filter-group">
-                        <label htmlFor="section">Section:</label>
-                        <div className="checkbox-group stud-list">
-                            {['A', 'B', 'C'].map((section) => (
-                                <div className="subject-container" key={section}>
-                                    <label>
-                                        <input
-                                            type="checkbox"
-                                            value={section}
-                                            checked={selectedSection.includes(section)}
-                                            onChange={handleSectionChange}
-                                        />
-                                        {section}
-                                    </label>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    <div className="filter-group">
-                        <label htmlFor="semester">Semester:</label>
-                        <select id="semester" value={selectedSemester} onChange={handleSemesterChange}>
-                            {Array.from({ length: 2 }, (_, i) => i + 1).map(semester =>
-                                <option key={semester} value={semester}>
-                                    Semester {semester}
-                                </option>
-                            )}
-                        </select>
-                    </div>
-                    <div className="filter-group">
-                        <label htmlFor="year">Year:</label>
-                        <select id="year" value={selectedYear} onChange={handleYearChange}>
-                            {/* Dynamic Year Options */}
-                            {Array.from({ length: 3 }, (_, i) => currentYear - i).map(year => (
-                                <option key={year} value={`${year}/${(year + 1) % 100}`}>
-                                    {year}/{(year + 1) % 100}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <button className="filter-group-search" type="submit">
+                    <Button>
                         Search
-                    </button>
+                    </Button>
                 </section>
             </form>
             <Alert
@@ -430,14 +432,48 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
                 toggleDropdown={toggleDropdown}
                 studentSummary={studentSummary}
             />
-            {filteredStudents.meta.total_pages > 1 &&
-                <Pagination
-                    handlePreviousPage={handlePreviousPage}
-                    currentPage={currentPage}
-                    handleNextPage={handleNextPage}
-                    meta={filteredStudents.meta}
-                />
-            }
+            {filteredStudents.meta.total_pages > 1 && (
+                <>
+                    {/* Pagination Component */}
+                    <Pagination className="mt-4">
+                        <PaginationContent>
+                            <PaginationItem>
+                                <PaginationPrevious
+                                    className="hover:bg-gray-200 hover:cursor-pointer"
+                                    onClick={(e) => {
+                                        handlePageChange(e, currentPage - 1);
+                                    }}
+                                />
+                            </PaginationItem>
+
+                            {[...Array(filteredStudents.meta.total_pages)].map((_, index) => (
+                                <PaginationItem key={index}>
+                                    <PaginationLink
+                                        className="hover:bg-gray-200 hover:cursor-pointer"
+                                        isActive={currentPage === index + 1}
+                                        onClick={(e) => {
+                                            handlePageChange(e, index + 1);
+                                        }}
+                                    >
+                                        {index + 1}
+                                    </PaginationLink>
+                                </PaginationItem>
+                            ))}
+
+                            {filteredStudents.meta.total_pages > 5 && <PaginationItem><PaginationEllipsis /></PaginationItem>}
+
+                            <PaginationItem>
+                                <PaginationNext
+                                    className="hover:bg-gray-200 hover:cursor-pointer"
+                                    onClick={(e) => {
+                                        handlePageChange(e, currentPage + 1);
+                                    }}
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
+                </>
+            )}
         </div>
     );
 };

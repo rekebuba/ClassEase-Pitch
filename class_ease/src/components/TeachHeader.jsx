@@ -65,14 +65,15 @@ const TeacherHeader = () => {
     };
 
     return (
-        <header className="w-full bg-gray-100 shadow container mx-auto flex">
-            {/* Logo Section */}
+        <header className="w-full bg-white shadow border-b border-gray-200">
+            <div className="w-full container mx-auto flex items-center justify-between py-4">
+                {/* Left Section: Logo */}
                 <div className="cursor-pointer flex-shrink-0" onClick={goToHome}>
                     <img src={classEaseHeader} alt="ClassEase School" className="h-10" />
                 </div>
 
-                {/* Navigation */}
-                <nav className="flex space-x-6 items-center justify-center">
+                {/* Center Section: Navigation */}
+                <nav className="flex-1 flex justify-center space-x-6 items-center">
                     {/* Home Link */}
                     <div>
                         <span
@@ -122,6 +123,10 @@ const TeacherHeader = () => {
                         </div>
                     </div>
                 </nav>
+
+                {/* Right Section: Empty filler to balance layout */}
+                <div className="w-24"></div>
+            </div>
         </header>
     );
 };

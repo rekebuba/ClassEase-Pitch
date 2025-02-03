@@ -50,13 +50,15 @@ const TeacherManageStudents = () => {
     };
 
     return (
-        <div className="admin-manage-container">
-            <TeacherPanel />
-            <main className="content">
-                <TeacherHeader />
-                <TeacherStudentsList toggleDropdown={toggleDropdown} studentSummary={summary} saveStudent={onSave} toggleSave={handelSaving} />
-                <TeacherPopupUpdateStudentScore isOpen={isOpen} toggleAssessment={toggleAssessment} studentData={studentSummary} onSave={handelSaving} />
-            </main>
+        <div className="min-h-screen flex flex-col">
+            <TeacherHeader />
+            <div className="flex flex-1">
+                <TeacherPanel />
+                <main className="flex-1 p-6 bg-gray-100 overflow-scroll">
+                    <TeacherStudentsList toggleDropdown={toggleDropdown} studentSummary={summary} saveStudent={onSave} toggleSave={handelSaving} />
+                    <TeacherPopupUpdateStudentScore isOpen={isOpen} toggleAssessment={toggleAssessment} studentData={studentSummary} onSave={handelSaving} />
+                </main>
+            </div>
         </div>
     );
 };

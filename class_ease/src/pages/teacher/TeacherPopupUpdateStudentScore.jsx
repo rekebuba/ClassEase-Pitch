@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import api from '../../services/api';
 import Alert from '../../services/Alert';
+import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
 
 /**
  * TeacherPopupUpdateStudentScore component allows teachers to update student scores.
@@ -133,7 +134,7 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData,
             }
             console.error(error);
         }
-                // Fetch updated data and pass it to onSave
+        // Fetch updated data and pass it to onSave
         await fetchIndividualAssessment();
         onSave(true); // to get teh updated student data
     };
@@ -167,23 +168,24 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData,
                                 individualAssessment.assessment.map((assessment, index) => (
                                     <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#fff' : '#f1f1f1' }}>
                                         <td style={{ textAlign: "center" }}>{assessment.assessment_type} ( {assessment.percentage}% )</td>
-                                        <td>
-                                            {isEditing ? (
-                                                <input
-                                                    type="number"
-                                                    min={0}
-                                                    max={assessment.percentage}
-                                                    value={updateAssessmentData[index].score || 0}
-                                                    onChange={(e) => {
-                                                        let value = parseFloat(e.target.value);
-                                                        if (value > assessment.percentage) value = assessment.percentage;
-                                                        handleScoreChange(index, value);
-                                                    }}
-                                                />
-                                            ) : (
-                                                assessment.score !== null ? assessment.score : 'N/A'
-                                            )}
-                                        </td>
+                                        <InputOTP
+                                            maxLength={1}
+                                            value={updateAssessmentData[index].score || 0}
+                                            onChange={(value) => {
+                                                let newScore = parseFloat(value);
+                                                if (newScore > assessment.percentage) newScore = assessment.percentage;
+                                                handleScoreChange(index, value);
+                                            }}>
+                                            <InputOTPGroup>
+                                                <td>
+                                                    {isEditing ? (
+                                                        <InputOTPSlot key={index} index={index} />
+                                                    ) : (
+                                                        assessment.score !== null ? assessment.score : 'N/A'
+                                                    )}
+                                                </td>
+                                            </InputOTPGroup>
+                                        </InputOTP>
                                     </tr>
                                 ))}
                         </tbody>
@@ -207,7 +209,6 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData,
                     onClose={closeAlert}
                 />
             </div>
-
         </div>
     );
 };

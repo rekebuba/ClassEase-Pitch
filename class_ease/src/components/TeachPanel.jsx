@@ -70,9 +70,9 @@ const TeacherPanel = () => {
     };
 
     return (
-        <aside className="flex flex-col justify-between h-screen bg-gray-50 p-6 border-r border-gray-200">
+        <aside className="flex flex-col justify-between bg-white p-6 border-r border-gray-200">
             {/* Top Profile Section */}
-            <div className="profile-section">
+            <div className="flex flex-col items-center space-y-4">
                 <FaUserCircle className="w-16 h-16 text-gray-500" />
                 <h3 className="mt-4 text-xl font-semibold text-gray-800">
                     {teacherData.__class__} Panel
