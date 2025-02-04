@@ -4,6 +4,8 @@ import TeacherPanel from "../../components/TeachPanel";
 import TeacherHeader from "../../components/TeachHeader";
 import TeacherStudentsList from "./TeacherStudentsList";
 import TeacherPopupUpdateStudentScore from "./TeacherPopupUpdateStudentScore";
+import { Toaster } from '@/components/ui/sonner';
+
 
 /**
  * TeacherManageStudents component
@@ -50,13 +52,14 @@ const TeacherManageStudents = () => {
     };
 
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex overflow-hidden flex-col">
             <TeacherHeader />
-            <div className="flex flex-1">
-                <TeacherPanel />
-                <main className="flex-1 p-6 bg-gray-100 overflow-scroll">
+            <div className="flex flex-1 scroll-m-0">
+            <TeacherPanel />
+                <main className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
                     <TeacherStudentsList toggleDropdown={toggleDropdown} studentSummary={summary} saveStudent={onSave} toggleSave={handelSaving} />
                     <TeacherPopupUpdateStudentScore isOpen={isOpen} toggleAssessment={toggleAssessment} studentData={studentSummary} onSave={handelSaving} />
+                    <Toaster />
                 </main>
             </div>
         </div>

@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import api from '../../services/api';
-import Alert from '../../services/Alert';
-import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { toast } from "sonner"
 
 /**
  * TeacherPopupUpdateStudentScore component allows teachers to update student scores.
@@ -17,25 +18,11 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
  * @param {string} props.studentData.father_name - Father's name of the student.
  *
  * @example
- * const studentData = {
- *   name: "John",
- *   father_name: "Doe",
- *   assessment: [
- *     { assessment_type: "Quiz", percentage: 20, score: 18 },
- *     { assessment_type: "Exam", percentage: 80, score: 70 }
- *   ]
- * };
- * <TeacherPopupUpdateStudentScore
- *   isOpen={true}
- *   toggleAssessment={toggleFunction}
- *   studentData={studentData}
- * />
  *
  * @returns {JSX.Element} The TeacherPopupUpdateStudentScore component.
  */
 const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData, onSave }) => {
     const [isEditing, setIsEditing] = useState(false);
-    const [alert, setAlert] = useState({ type: "", message: "", show: false });
     const [updateAssessmentData, setUpdateAssessmentData] = useState([]);
     const [individualAssessment, setIndividualAssessment] = useState({});
 
@@ -57,18 +44,21 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData,
             }
         } catch (error) {
             if (error.response?.data?.error) {
-                showAlert("error", error.response.data.error);
+                toast.error(error.response.data['error'], {
+                    description: "Please try again later, if the problem persists, contact the administrator.",
+                    style: { color: 'red' }
+                });
             }
         }
     }, [studentData]);
 
     useEffect(() => {
-        if (studentData === undefined) {
+        if (Object.keys(studentData).length === 0) {
             return;
         }
         fetchIndividualAssessment();
     }, [studentData, fetchIndividualAssessment]);
-
+    
     /**
      * @function handleScoreChange
      * @description Updates the score of an assessment.
@@ -80,26 +70,6 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData,
         const updatedAssessments = [...updateAssessmentData];
         updatedAssessments[index].score = value;
         setUpdateAssessmentData(updatedAssessments);
-    };
-
-    /**
-     * @function showAlert
-     * @description Sets the alert message.
-     * @param {string} type - Type of the alert.
-     * @param {string} message - Message to display in the alert.
-     * @returns {void}
-     */
-    const showAlert = (type, message) => {
-        setAlert({ type, message, show: true });
-    };
-
-    /**
-     * @function closeAlert
-     * @description Closes the alert message.
-     * @returns {void}
-     */
-    const closeAlert = () => {
-        setAlert({ ...alert, show: false });
     };
 
     /**
@@ -125,18 +95,31 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData,
         try {
             const res = await api.put('/teacher/students/mark_list', { student_data: studentData, assessments: updateAssessmentData });
             if (res.status === 201) {
-                showAlert("success", res.data['message']);
+                const currentTime = new Date().toLocaleString("en-US", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "2-digit",
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true,
+                });
+                toast.success(res.data['message'], {
+                    description: currentTime,
+                    style: { color: 'green' }
+                });
             }
-
         } catch (error) {
             if (error.response && error.response.data && error.response.data['error']) {
-                showAlert("warning", error.response.data['error']);
+                toast.error(error.response.data['error'], {
+                    description: "Please try again later, if the problem persists, contact the administrator.",
+                    style: { color: 'red' }
+                });
             }
-            console.error(error);
         }
         // Fetch updated data and pass it to onSave
         await fetchIndividualAssessment();
-        onSave(true); // to get teh updated student data
+        onSave(true); // to get the updated student data
     };
 
     const calculateTotalScore = (assessments) => {
@@ -147,67 +130,74 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData,
         <div className={`popup-overlay ${isOpen ? "open" : "close"}`}>
             <div className='popup-overlay-container score'>
                 <div className="popup-table">
-                    <div className="close-popup">
-                        <h3>{studentData.name} {studentData.father_name} Score</h3>
-                        <button onClick={() => {
-                            setIsEditing(false);
-                            setUpdateAssessmentData([]);
-                            toggleAssessment();
-                        }}
-                        ><FaTimes size={15} /></button>
+                    <div className="flex justify-between items-center p-2">
+                        <h3 className='text-center text-lg font-bold'>{studentData.name} {studentData.father_name} ({studentData.student_id})</h3>
+                        <Button
+                            className='bg-opacity-0 text-black hover:bg-opacity-10 hover:text-red-400 hover:scale-150'
+                            onClick={() => {
+                                setIsEditing(false);
+                                setUpdateAssessmentData([]);
+                                toggleAssessment();
+                            }}
+                        ><FaTimes size={15} /></Button>
                     </div>
-                    <table className="data-table">
+                    <table className='w-full text-left border-collapse'>
                         <thead>
-                            <tr>
-                                <th style={{ textAlign: "center" }}>Type</th>
-                                <th>Score</th>
+                            <tr className='bg-gray-200'>
+                                <th className='p-1.5 overflow-hidden'>Type</th>
+                                <th className='p-1.5 overflow-hidden'>Score</th>
                             </tr>
                         </thead>
                         <tbody>
                             {(individualAssessment.assessment && individualAssessment.assessment.length > 0) &&
                                 individualAssessment.assessment.map((assessment, index) => (
-                                    <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#fff' : '#f1f1f1' }}>
-                                        <td style={{ textAlign: "center" }}>{assessment.assessment_type} ( {assessment.percentage}% )</td>
-                                        <InputOTP
-                                            maxLength={1}
-                                            value={updateAssessmentData[index].score || 0}
-                                            onChange={(value) => {
-                                                let newScore = parseFloat(value);
-                                                if (newScore > assessment.percentage) newScore = assessment.percentage;
-                                                handleScoreChange(index, value);
-                                            }}>
-                                            <InputOTPGroup>
-                                                <td>
-                                                    {isEditing ? (
-                                                        <InputOTPSlot key={index} index={index} />
-                                                    ) : (
-                                                        assessment.score !== null ? assessment.score : 'N/A'
-                                                    )}
-                                                </td>
-                                            </InputOTPGroup>
-                                        </InputOTP>
+                                    <tr key={index} className={`text-left bg-${index % 2 === 0 ? 'white' : 'gray-100'} hover:bg-gray-200`}>
+                                        <td className='text-left p-2'>{assessment.assessment_type} ( {assessment.percentage}% )</td>
+                                        <td>
+                                            {isEditing ? (
+                                                <Input
+                                                    className="w-12 text-center border-solid border-2 border-gray-300"
+                                                    id={index}
+                                                    value={updateAssessmentData[index].score || ''}
+                                                    onChange={(e) => {
+                                                        let newScore = parseFloat(e.target.value);
+                                                        if (newScore > assessment.percentage) newScore = assessment.percentage;
+                                                        handleScoreChange(index, newScore);
+                                                    }}>
+                                                </Input>
+                                            ) : (
+                                                assessment.score !== null ? assessment.score : '-'
+                                            )}
+                                        </td>
                                     </tr>
                                 ))}
                         </tbody>
                     </table>
-                    <div className='total-score'>
+                    <div className='text-right text-lg p-2'>
                         <h3><strong>Total Score: {individualAssessment.assessment ? calculateTotalScore(individualAssessment.assessment) : 'N/A'} / 100</strong></h3>
                     </div>
                     <div className='popup-table-btn'>
-                        <button className="popup-table-edit-btn" onClick={handleEdit}>
-                            Edit
-                        </button>
-                        <button className="popup-table-save-btn" onClick={handleSave}>
+                        {isEditing ?
+                            <Button className="bg-red-600 min-w-16 hover:bg-opacity-50"
+                                onClick={() => {
+                                    setIsEditing(false);
+                                    setUpdateAssessmentData([]);
+                                }}>
+                                Cancel
+                            </Button>
+                            :
+                            <Button className="bg-blue-600 min-w-16 hover:bg-opacity-50" onClick={handleEdit}>
+                                Edit
+                            </Button>
+                        }<Button
+                            style={{ pointerEvents: 'auto' }}
+                            className={`${isEditing ? 'bg-green-600 min-w-16 hover:bg-opacity-50' : 'bg-gray-400 opacity-50 cursor-not-allowed'}`}
+                            disabled={!isEditing}
+                            onClick={handleSave}>
                             Save
-                        </button>
+                        </Button>
                     </div>
                 </div>
-                <Alert
-                    type={alert.type}
-                    message={alert.message}
-                    show={alert.show}
-                    onClose={closeAlert}
-                />
             </div>
         </div>
     );

@@ -4,6 +4,7 @@
 from flask import request, jsonify
 from sqlalchemy import func
 from models import storage
+from datetime import datetime
 from models.users import User
 from models.grade import Grade
 from models.student import Student
@@ -20,6 +21,7 @@ from sqlalchemy import update, and_
 from flask import Blueprint
 from api.v1.views.utils import teacher_required
 from api.v1.views.methods import paginate_query
+from models.base_model import BaseModel
 
 
 teach = Blueprint('teach', __name__, url_prefix='/api/v1/teacher')
@@ -35,7 +37,7 @@ def teacher_dashboard(teacher_data):
         teacher_data (object): The teacher data object. Should have a `to_dict` method.
 
     Returns:
-        Response: A JSON response containing the teacher data if found, 
+        Response: A JSON response containing the teacher data if found,
                   otherwise an error message with a 404 status code.
     """
     if not teacher_data:
@@ -105,7 +107,7 @@ def get_list_of_students(teacher_data):
         teacher_data (object): The teacher data object containing the teacher's information.
 
     Returns:
-        Response: A JSON response containing the list of students and relevant header information, 
+        Response: A JSON response containing the list of students and relevant header information,
                   or an error message with the appropriate HTTP status code.
 
     Query Parameters:
@@ -146,10 +148,11 @@ def get_list_of_students(teacher_data):
         return jsonify({"error": "Grade not found"}), 404
 
     # get the section_id
-    section_ids = [id[0] for id in storage.get_session().query(Section.id).filter(
-        Section.grade_id == grade.id,
-        Section.section.in_(data['sections'][0].split(","))
-    ).all()]
+    section = storage.get_first(Section,
+                                    grade_id=grade.id,
+                                    section=(data['sections'][0]))
+    if not section:
+        return jsonify({"error": "Section not found"}), 404
 
     # Pagination and filtering params
     page = int(data['page'][0]) if 'page' in data else 1
@@ -180,7 +183,7 @@ def get_list_of_students(teacher_data):
             and_(
                 TeachersRecord.teacher_id == teacher_data.id,
                 Assessment.subject_id == data['subject_id'][0],
-                AVRGResult.section_id.in_(section_ids)
+                AVRGResult.section_id == section.id
             )
         )
         .order_by(Section.section.asc(), Student.name.asc(), Student.father_name.asc(), Student.grand_father_name.asc(), Student.id.asc())
@@ -278,7 +281,7 @@ def get_student_mark_list(teacher_data):
         ).all()
 
         assessment = []
-        for type, score, percentage  in query:
+        for type, score, percentage in query:
             assessment.append({
                 "assessment_type": type,
                 "score": score,
@@ -312,7 +315,7 @@ def teacher_assigned_subjects(teacher_data):
     return jsonify(assigned_subjects), 200
 
 
-@teach.route('/students/assigned_grade', methods=['GET'])
+@teach.route('/assigned', methods=['GET'])
 @teacher_required
 def get_teacher_assigned_grade(teacher_data):
     """
@@ -329,18 +332,23 @@ def get_teacher_assigned_grade(teacher_data):
     """
     assigned_grade = (
         storage.get_session()
-        .query(Grade)
+        .query(Grade.grade, Section.section)
         .join(TeachersRecord, TeachersRecord.grade_id == Grade.id)
+        .join(Section, Section.id == TeachersRecord.section_id)
         .filter(TeachersRecord.teacher_id == teacher_data.id)
         .distinct(Grade.id)
     )
-
     if not assigned_grade.all():
         return jsonify({"error": f"No grades were assigned"}), 404
 
-    grade_names = [grade.grade for grade in assigned_grade]
+    assigned = {}
+    for grade, section in assigned_grade:
+        if grade not in assigned:
+            assigned[grade] = []
+        assigned[grade].append(section)
 
-    return jsonify({"grade": grade_names}), 200
+    print(assigned)
+    return jsonify(assigned), 200
 
 
 @teach.route('/students/mark_list', methods=['PUT'])
@@ -406,7 +414,7 @@ def update_student_assessment(teacher_data):
                     MarkList.year == student_data['year'],
                     MarkList.type == assessment['assessment_type']
                 ))
-                .values(score=assessment['score'])
+                .values(score=assessment['score'], updated_at=datetime.utcnow().isoformat())
             )
 
             if update_score.rowcount == 0:
@@ -422,7 +430,7 @@ def update_student_assessment(teacher_data):
     except Exception as e:
         return jsonify({"error": f"Unexpected error occurred Failed to update score"}), 500
 
-    return jsonify({"message": "Student Mark Updated Successfully!"}), 201
+    return jsonify({"message": "Student Score Updated Successfully."}), 201
 
 
 def subject_sum(student_data):
@@ -470,6 +478,7 @@ def subject_sum(student_data):
                 subject_id=sum.subject_id,
                 semester=sum.semester,
                 year=sum.year,
+                updated_at=datetime.utcnow().isoformat()
             )
             storage.add(overall)
         else:
@@ -520,6 +529,7 @@ def semester_average(student_data):
                 student_id=avg.student_id,
                 semester=avg.semester,
                 year=avg.year,
+                updated_at=datetime.utcnow().isoformat()
             )
             storage.add(overall)
         else:
@@ -565,7 +575,8 @@ def yearly_average(student_data):
         overall = StudentYearlyRecord(
             student_id=student_data['student_id'],
             year=student_data['year'],
-            final_score=yearly_avg
+            final_score=yearly_avg,
+            updated_at=datetime.utcnow().isoformat()
         )
         storage.add(overall)
     else:

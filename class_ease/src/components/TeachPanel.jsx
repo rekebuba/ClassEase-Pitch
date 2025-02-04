@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from 'react-router-dom';
-import { FaSignOutAlt, FaUserCircle } from "react-icons/fa";
+import { FaUserCircle } from "react-icons/fa";
 import api from '../services/api';
-
+import Logout from "../services/Logout";
 
 /**
  * TeacherPanel component renders the sidebar for the teacher's dashboard.
@@ -28,7 +27,6 @@ import api from '../services/api';
  * logout option that navigates to the logout page.
  */
 const TeacherPanel = () => {
-    const navigate = useNavigate();
     const [teacherData, setTeacherData] = useState({});
 
     /**
@@ -61,38 +59,19 @@ const TeacherPanel = () => {
         fetchAdmin();
     }, []);
 
-    /**
-     * @function handleLogout
-     * @description Navigates to the logout page.
-     */
-    const handleLogout = () => {
-        navigate('/logout');
-    };
-
     return (
-        <aside className="flex flex-col justify-between bg-white p-6 border-r border-gray-200">
+        <aside className="flex flex-col justify-between fixed mt-[4.6rem] h-full max-w-48 w-45 bg-white p-7 border-r border-gray-200">
             {/* Top Profile Section */}
             <div className="flex flex-col items-center space-y-4">
                 <FaUserCircle className="w-16 h-16 text-gray-500" />
                 <h3 className="mt-4 text-xl font-semibold text-gray-800">
                     {teacherData.__class__} Panel
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 text-wrap text-center">
                     Mr. {teacherData.first_name} {teacherData.last_name}
                 </p>
             </div>
-            {/* Bottom Navigation Section */}
-            <nav className="menu">
-                <ul>
-                    <li
-                        onClick={handleLogout}
-                        className="flex items-center space-x-2 cursor-pointer text-gray-700 hover:text-red-600 transition-colors"
-                    >
-                        <FaSignOutAlt className="w-5 h-5" />
-                        <span>Logout</span>
-                    </li>
-                </ul>
-            </nav>
+            <Logout />
         </aside>
     );
 };

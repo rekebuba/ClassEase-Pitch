@@ -1,7 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Home from "./components/Home";
 import Login from "./services/Login";
-import Logout from "./services/Logout";
 import NotFound from './services/NotFound';
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import ProtectedRoute from "./services/ProtectedRoute";
@@ -34,10 +33,6 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
-  },
-  {
-    path: "/logout",
-    element: <Logout />,
   },
   {
     path: "/admin/dashboard",
@@ -120,7 +115,7 @@ const router = createBrowserRouter([
  */
 function App() {
   return (
-    <RouterProvider router={router} />
+      <RouterProvider router={router} />
   );
 }
 

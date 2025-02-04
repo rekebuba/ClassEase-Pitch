@@ -65,14 +65,14 @@ const TeacherHeader = () => {
     };
 
     return (
-        <header className="w-full bg-white shadow border-b border-gray-200">
-            <div className="w-full container mx-auto flex items-center justify-between py-4">
-                {/* Left Section: Logo */}
-                <div className="cursor-pointer flex-shrink-0" onClick={goToHome}>
-                    <img src={classEaseHeader} alt="ClassEase School" className="h-10" />
-                </div>
+        <header className="flex w-full p-2 bg-white shadow border-b border-gray-200 fixed">
+            {/* Left Section: Logo */}
+            <div className="cursor-pointer flex-shrink-0 align-middle" onClick={goToHome}>
+                <img src={classEaseHeader} alt="ClassEase School" className="h-10" />
+            </div>
 
-                {/* Center Section: Navigation */}
+            {/* Center Section: Navigation */}
+            <div className="container mx-auto flex items-center justify-between py-4">
                 <nav className="flex-1 flex justify-center space-x-6 items-center">
                     {/* Home Link */}
                     <div>

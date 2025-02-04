@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import { FaSearch } from 'react-icons/fa';
 // import Pagination from '../library/pagination';
 import api from "../../services/api";
-import Alert from '../../services/Alert';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,6 +20,8 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination"
+import { toast } from "sonner"
+
 
 function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStudents, toggleDropdown, studentSummary }) {
     return (
@@ -29,7 +30,7 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
                 <form onSubmit={handleSearch}>
                     <div className="flex justify-between items-center mb-4 ">
                         <h3>Student List</h3>
-                        <h3>
+                        <h3 className="text-lg font-semibold">
                             <span>{`Academic Year: ${filteredStudents.header.year}`}</span>
                             <span className="ml-5">{`Grade: ${filteredStudents.header.grade}`}</span>
                             <span className="ml-5">{`Subject: ${filteredStudents.header.subject}`}</span>
@@ -112,8 +113,7 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
     const [selectedGrade, setSelectedGrade] = useState('');
     const [selectedSubjectId, setSelectedSubjectId] = useState('');
     const [selectedSemester, setSelectedSemester] = useState(1);
-    const [selectedYear, setSelectedYear] = useState("2024/25");
-    const [alert, setAlert] = useState({ type: "", message: "", show: false });
+    const [selectedYear, setSelectedYear] = useState("");
     const [allStudents, setAllStudents] = useState({ students: [], header: {} });        // Store all students
     const [filteredStudents, setFilteredStudents] = useState({ students: [], meta: {}, header: {} });  // Store the filtered search results
     const [selectedSection, setSelectedSection] = useState([]);
@@ -121,9 +121,10 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
     const [currentPage, setCurrentPage] = useState(1);
     const [currentYear] = useState(new Date().getFullYear());
     const [subjectAssigned, setSubjectAssigned] = useState([]);
+    const [gradeAndSectionAssigned, setGradeAndSectionAssigned] = useState({});
     const [gradeAssigned, setGradeAssigned] = useState([]);
+    const [sectionAssigned, setSectionAssigned] = useState([]);
     const limit = 10; // Number of students per page
-
 
     /**
      * @function handleSearch
@@ -135,10 +136,6 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
         e?.preventDefault(); // Prevent default if event exists
         setFilteredStudents({ students: [], meta: {}, header: {} }); // clear any search result for the new one
         setSearchTerm("");
-        if (selectedSection.length === 0) {
-            showAlert("warning", "Please select at least one section.");
-            return;
-        }
         page = page || currentPage; // If page is not provided, use the current page
         try {
             const response = await api.get('/teacher/students/mark_list', {
@@ -169,9 +166,15 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
             setCurrentPage(page);
         } catch (error) {
             if (error.response && error.response.data && error.response.data['error']) {
-                showAlert("warning", error.response.data['error']);
+                toast.error(error.response.data['error'], {
+                    description: "Please try again later, if the problem persists, contact the administrator.",
+                    style: { color: 'red' }
+                });
             } else {
-                showAlert("warning", "An unexpected error occurred.");
+                toast.error("An unexpected error occurred.", {
+                    description: "Please try again later, if the problem persists, contact the administrator.",
+                    style: { color: 'red' }
+                });
             }
             // Reset the state
             setCurrentPage(1);
@@ -179,42 +182,12 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
         }
     }, [currentPage, selectedGrade, selectedSection, selectedSemester, selectedSubjectId, selectedYear, searchTerm]);
 
-    // if (saveStudent) {
-    //     console.log("filteredStudents", saveStudent);
-    //     handleSearch(undefined, currentPage);
-    //     toggleSave(false);
-    // }
-    // if (saveStudent) {
-    //     handleSearch(undefined, currentPage);
-    // }
-
-
     useEffect(() => {
         if (saveStudent) {
             handleSearch(undefined, currentPage);
             toggleSave(false);
         }
     }, [currentPage, saveStudent, handleSearch, toggleSave]);
-
-    /**
-     * @function showAlert
-     * @description Displays an alert message.
-     * @param {string} type - The type of alert (e.g., "warning").
-     * @param {string} message - The alert message.
-     * @returns {void}
-     */
-    const showAlert = (type, message) => {
-        setAlert({ type, message, show: true });
-    };
-
-    /**
-     * @function closeAlert
-     * @description Closes the alert message.
-     * @returns {void}
-     */
-    const closeAlert = () => {
-        setAlert({ ...alert, show: false });
-    };
 
     /**
      * @function handleGradeChange
@@ -225,8 +198,8 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
     const handleGradeChange = (value) => {
         setFilteredStudents({ students: [], meta: {}, header: {} }); // clear any search result for the new one
         setSearchTerm("");
-        console.log((value));
-        setSelectedGrade(value); // Convert to integer
+        setSelectedGrade(value);
+        setSectionAssigned(gradeAndSectionAssigned[value]);
     };
 
     /**
@@ -285,19 +258,29 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
             setGradeAssigned([]);
         } else {
             setFilteredStudents({ students: [], meta: {}, header: {} });
-            fetchGrade();
+            fetchGradeAndSection();
         }
     };
 
-    const fetchGrade = async () => {
+    const fetchGradeAndSection = async () => {
         try {
-            const response = await api.get('/teacher/students/assigned_grade');
-            setGradeAssigned(response.data['grade']);
+            const response = await api.get('/teacher/assigned');
+            if (response.status === 200) {
+                const gradeList = Object.keys(response.data);
+                setGradeAndSectionAssigned(response.data);
+                setGradeAssigned(gradeList);
+            }
         } catch (error) {
             if (error.response && error.response.data && error.response.data['error']) {
-                showAlert("warning", error.response.data['error']);
+                toast.error(error.response.data['error'], {
+                    description: "Please try again later, if the problem persists, contact the administrator.",
+                    style: { color: 'red' }
+                });
             } else {
-                showAlert("warning", "An unexpected error occurred.");
+                toast.error(error.response.data['error'], {
+                    description: "Please try again later, if the problem persists, contact the administrator.",
+                    style: { color: 'red' }
+                });
             }
         }
     };
@@ -327,9 +310,15 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
                 }
             } catch (error) {
                 if (error.response && error.response.data && error.response.data['error']) {
-                    showAlert("warning", error.response.data['error']);
+                    toast.error(error.response.data['error'], {
+                        description: "Please try again later, if the problem persists, contact the administrator.",
+                        style: { color: 'red' }
+                    });
                 } else {
-                    showAlert("warning", "An unexpected error occurred.");
+                    toast.error("An unexpected error occurred.", {
+                        description: "Please try again later, if the problem persists, contact the administrator.",
+                        style: { color: 'red' }
+                    });
                 }
             }
         };
@@ -361,8 +350,8 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
                                 <SelectValue placeholder="Select Grade" />
                             </SelectTrigger>
                             <SelectContent>
-                                {(gradeAssigned && gradeAssigned.length > 0) &&
-                                    gradeAssigned.map((grade) => (
+                                {gradeAndSectionAssigned && Object.keys(gradeAndSectionAssigned).length !== 0 &&
+                                    Object.keys(gradeAndSectionAssigned).map((grade) => (
                                         <SelectItem key={grade} value={`${grade}`}>
                                             Grade {grade}
                                         </SelectItem>
@@ -376,11 +365,12 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
                                 <SelectValue placeholder="Select Section" />
                             </SelectTrigger>
                             <SelectContent>
-                                {['A', 'B', 'C'].map((section) => (
-                                    <SelectItem key={section} value={section}>
-                                        Section {section}
-                                    </SelectItem>
-                                ))}
+                                {gradeAndSectionAssigned && gradeAndSectionAssigned[selectedGrade] &&
+                                    gradeAndSectionAssigned[selectedGrade].map((section) => (
+                                        <SelectItem key={section} value={section}>
+                                            Section {section}
+                                        </SelectItem>
+                                    ))}
                             </SelectContent>
                         </Select>
                     </div>
@@ -417,12 +407,6 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
                     </Button>
                 </section>
             </form>
-            <Alert
-                type={alert.type}
-                message={alert.message}
-                show={alert.show}
-                onClose={closeAlert}
-            />
             {/* Student List */}
             <StudentList
                 searchTerm={searchTerm}
