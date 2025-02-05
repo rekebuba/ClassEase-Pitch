@@ -111,7 +111,7 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
  */
 const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, toggleSave }) => {
     const [selectedGrade, setSelectedGrade] = useState('');
-    const [selectedSubjectId, setSelectedSubjectId] = useState('');
+    const [selectedSubject, setSelectedSubject] = useState('');
     const [selectedSemester, setSelectedSemester] = useState(1);
     const [selectedYear, setSelectedYear] = useState("");
     const [allStudents, setAllStudents] = useState({ students: [], header: {} });        // Store all students
@@ -121,9 +121,7 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
     const [currentPage, setCurrentPage] = useState(1);
     const [currentYear] = useState(new Date().getFullYear());
     const [subjectAssigned, setSubjectAssigned] = useState([]);
-    const [gradeAndSectionAssigned, setGradeAndSectionAssigned] = useState({});
-    const [gradeAssigned, setGradeAssigned] = useState([]);
-    const [sectionAssigned, setSectionAssigned] = useState([]);
+    const [assigned, setAssigned] = useState({});
     const limit = 10; // Number of students per page
 
     /**
@@ -140,7 +138,7 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
         try {
             const response = await api.get('/teacher/students/mark_list', {
                 params: {
-                    subject_id: selectedSubjectId,
+                    // subject_id: selectedSubjectId,
                     grade: selectedGrade,
                     year: selectedYear,
                     sections: selectedSection.join(','), // Convert array to comma-separated string
@@ -180,7 +178,7 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
             setCurrentPage(1);
             setFilteredStudents({ students: [], meta: {}, header: {} });
         }
-    }, [currentPage, selectedGrade, selectedSection, selectedSemester, selectedSubjectId, selectedYear, searchTerm]);
+    }, [currentPage, selectedGrade, selectedSection, selectedSemester, selectedYear, searchTerm]);
 
     useEffect(() => {
         if (saveStudent) {
@@ -199,7 +197,6 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
         setFilteredStudents({ students: [], meta: {}, header: {} }); // clear any search result for the new one
         setSearchTerm("");
         setSelectedGrade(value);
-        setSectionAssigned(gradeAndSectionAssigned[value]);
     };
 
     /**
@@ -252,38 +249,34 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
     };
 
     const handleSubjectChange = (value) => {
-        setSelectedSubjectId(value);
+        setSelectedSubject(value);
         setSearchTerm("");
-        if (value === "") {
-            setGradeAssigned([]);
-        } else {
-            setFilteredStudents({ students: [], meta: {}, header: {} });
-            fetchGradeAndSection();
-        }
+
+        setFilteredStudents({ students: [], meta: {}, header: {} });
+        // fetchGradeAndSection();
+
     };
 
-    const fetchGradeAndSection = async () => {
-        try {
-            const response = await api.get('/teacher/assigned');
-            if (response.status === 200) {
-                const gradeList = Object.keys(response.data);
-                setGradeAndSectionAssigned(response.data);
-                setGradeAssigned(gradeList);
-            }
-        } catch (error) {
-            if (error.response && error.response.data && error.response.data['error']) {
-                toast.error(error.response.data['error'], {
-                    description: "Please try again later, if the problem persists, contact the administrator.",
-                    style: { color: 'red' }
-                });
-            } else {
-                toast.error(error.response.data['error'], {
-                    description: "Please try again later, if the problem persists, contact the administrator.",
-                    style: { color: 'red' }
-                });
-            }
-        }
-    };
+    // const fetchGradeAndSection = async () => {
+    //     try {
+    //         const response = await api.get('/teacher/assigned');
+    //         if (response.status === 200) {
+    //             setAssigned(response.data);
+    //         }
+    //     } catch (error) {
+    //         if (error.response && error.response.data && error.response.data['error']) {
+    //             toast.error(error.response.data['error'], {
+    //                 description: "Please try again later, if the problem persists, contact the administrator.",
+    //                 style: { color: 'red' }
+    //             });
+    //         } else {
+    //             toast.error(error.response.data['error'], {
+    //                 description: "Please try again later, if the problem persists, contact the administrator.",
+    //                 style: { color: 'red' }
+    //             });
+    //         }
+    //     }
+    // };
 
     const handlePageChange = (e, page) => {
         if (page > 0 && page <= filteredStudents.meta.total_pages) {
@@ -304,9 +297,10 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
 
         const subjectTaught = async () => {
             try {
-                const response = await api.get('/teacher/assigned-subject');
+                const response = await api.get('/teacher/assigned');
                 if (response.status === 200) {
-                    setSubjectAssigned(response.data);
+                    // setSubjectAssigned(response.data);
+                    setAssigned(response.data);
                 }
             } catch (error) {
                 if (error.response && error.response.data && error.response.data['error']) {
@@ -335,10 +329,10 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
                                 <SelectValue placeholder="Select Subject" />
                             </SelectTrigger>
                             <SelectContent>
-                                {subjectAssigned &&
-                                    subjectAssigned.map((subject) =>
-                                        <SelectItem key={subject.id} type="text" value={subject.id}>
-                                            {subject.name}
+                                {assigned && Object.keys(assigned).length !== 0 &&
+                                    Object.keys(assigned).map((subject) =>
+                                        <SelectItem key={subject} type="text" value={subject}>
+                                            {subject}
                                         </SelectItem>
                                     )}
                             </SelectContent>
@@ -350,8 +344,8 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
                                 <SelectValue placeholder="Select Grade" />
                             </SelectTrigger>
                             <SelectContent>
-                                {gradeAndSectionAssigned && Object.keys(gradeAndSectionAssigned).length !== 0 &&
-                                    Object.keys(gradeAndSectionAssigned).map((grade) => (
+                                {assigned && assigned[selectedSubject] &&
+                                    assigned[selectedSubject]['grades'].map((grade) => (
                                         <SelectItem key={grade} value={`${grade}`}>
                                             Grade {grade}
                                         </SelectItem>
@@ -365,8 +359,8 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
                                 <SelectValue placeholder="Select Section" />
                             </SelectTrigger>
                             <SelectContent>
-                                {gradeAndSectionAssigned && gradeAndSectionAssigned[selectedGrade] &&
-                                    gradeAndSectionAssigned[selectedGrade].map((section) => (
+                                {assigned && assigned[selectedSubject] &&
+                                    assigned[selectedSubject]['sections'].map((section) => (
                                         <SelectItem key={section} value={section}>
                                             Section {section}
                                         </SelectItem>

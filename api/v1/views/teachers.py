@@ -149,8 +149,8 @@ def get_list_of_students(teacher_data):
 
     # get the section_id
     section = storage.get_first(Section,
-                                    grade_id=grade.id,
-                                    section=(data['sections'][0]))
+                                grade_id=grade.id,
+                                section=(data['sections'][0]))
     if not section:
         return jsonify({"error": "Section not found"}), 404
 
@@ -293,63 +293,28 @@ def get_student_mark_list(teacher_data):
     return jsonify({"assessment": assessment}), 200
 
 
-@teach.route('/assigned-subject', methods=['GET'])
+@teach.route('/assigned', methods=['GET'])
 @teacher_required
 def teacher_assigned_subjects(teacher_data):
     query = (
         storage.get_session()
-        .query(Subject.name, Subject.id)
+        .query(Subject.name, Grade.grade, Section.section)
         .join(TeachersRecord, TeachersRecord.subject_id == Subject.id)
-        .join(Teacher, Teacher.id == TeachersRecord.teacher_id)
-        .filter(Teacher.id == teacher_data.id)
+        .join(Grade, Grade.id == TeachersRecord.grade_id)
+        .join(Section, Section.id == TeachersRecord.section_id)
+        .filter(TeachersRecord.teacher_id == teacher_data.id)
         .distinct(Subject.id)
     ).all()
 
-    assigned_subjects = []
-    for name, id in query:
-        assigned_subjects.append({
-            "id": id,
-            "name": name
-        })
-
-    return jsonify(assigned_subjects), 200
-
-
-@teach.route('/assigned', methods=['GET'])
-@teacher_required
-def get_teacher_assigned_grade(teacher_data):
-    """
-    Retrieve the grades assigned to a specific teacher.
-
-    Args:
-        teacher_data (object): An object containing the teacher's data, 
-                               specifically the teacher's ID.
-
-    Returns:
-        Response: A JSON response containing the list of grades assigned to the teacher 
-                  if found, or an error message if no grades were assigned.
-        int: HTTP status code 200 if grades are found, 404 if no grades are assigned.
-    """
-    assigned_grade = (
-        storage.get_session()
-        .query(Grade.grade, Section.section)
-        .join(TeachersRecord, TeachersRecord.grade_id == Grade.id)
-        .join(Section, Section.id == TeachersRecord.section_id)
-        .filter(TeachersRecord.teacher_id == teacher_data.id)
-        .distinct(Grade.id)
-    )
-    if not assigned_grade.all():
-        return jsonify({"error": f"No grades were assigned"}), 404
-
     assigned = {}
-    for grade, section in assigned_grade:
-        if grade not in assigned:
-            assigned[grade] = []
-        assigned[grade].append(section)
+    for subject, grade, section in query:
+        if subject not in assigned:
+            assigned[subject] = {"grades": [], "sections": []}
+        if grade not in assigned[subject]["grades"]:
+            assigned[subject]["grades"].append(grade)
+        assigned[subject]["sections"].append(section)
 
-    print(assigned)
     return jsonify(assigned), 200
-
 
 @teach.route('/students/mark_list', methods=['PUT'])
 @teacher_required
