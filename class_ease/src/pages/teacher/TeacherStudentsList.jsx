@@ -251,32 +251,9 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
     const handleSubjectChange = (value) => {
         setSelectedSubject(value);
         setSearchTerm("");
-
         setFilteredStudents({ students: [], meta: {}, header: {} });
-        // fetchGradeAndSection();
 
     };
-
-    // const fetchGradeAndSection = async () => {
-    //     try {
-    //         const response = await api.get('/teacher/assigned');
-    //         if (response.status === 200) {
-    //             setAssigned(response.data);
-    //         }
-    //     } catch (error) {
-    //         if (error.response && error.response.data && error.response.data['error']) {
-    //             toast.error(error.response.data['error'], {
-    //                 description: "Please try again later, if the problem persists, contact the administrator.",
-    //                 style: { color: 'red' }
-    //             });
-    //         } else {
-    //             toast.error(error.response.data['error'], {
-    //                 description: "Please try again later, if the problem persists, contact the administrator.",
-    //                 style: { color: 'red' }
-    //             });
-    //         }
-    //     }
-    // };
 
     const handlePageChange = (e, page) => {
         if (page > 0 && page <= filteredStudents.meta.total_pages) {

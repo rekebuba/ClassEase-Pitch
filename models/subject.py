@@ -23,7 +23,7 @@ class Subject(BaseModel, Base):
     """
     __tablename__ = 'subjects'
     name = Column(String(50), nullable=False)
-    code = Column(String(10), nullable=False)
+    code = Column(String(10), nullable=False, unique=True)
     grade_id = Column(String(120), ForeignKey('grades.id'), nullable=False)
     year = Column(String(10), nullable=False)
 
