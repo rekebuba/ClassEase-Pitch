@@ -280,11 +280,6 @@ def register_new_teacher():
     return jsonify({"message": "Teacher registered successfully!"}), 201
 
 
-def decode(subject: str, grade):
-    code = subject[:3].upper() + str(grade)
-    return code
-
-
 @auth.route('/assign-teacher', methods=['PUT'])
 @admin_required
 def assign_class(admin_data):
@@ -525,14 +520,16 @@ def create_mark_list(admin_data):
 
         # Update the Subject table
         for course in data['subjects']:
-            # TODO:
-            code = decode(course, data['grade'])
-            subject = storage.get_first(
+            # Tokenize the subject name by spaces and join the first 2 characters of each word
+            code = ''.join([word[:2].upper()
+                           for word in course.split()]) + str(data['grade'])
+            subject_code = storage.get_first(
                 Subject, code=code, grade_id=grade_id, name=course)
-            if not subject:
-                subject = Subject(name=course, code=code,
-                                  grade_id=grade_id, year=data['year'])
-                storage.add(subject)
+            if subject_code:
+                code = code + '_II'
+            new_subject = Subject(name=course, code=code,
+                            grade_id=grade_id, year=data['year'])
+            storage.add(new_subject)
 
         mark_lists = []  # A list to hold mark_list objects
         assessments = []  # A list to hold assessment objects
@@ -645,6 +642,7 @@ def show_mark_list(admin_data):
         student_list.append(student.to_dict())
 
     return jsonify(student_list), 200
+
 
 @auth.route('/manage/students', methods=['GET'])
 @admin_required
