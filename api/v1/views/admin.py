@@ -520,13 +520,13 @@ def create_mark_list(admin_data):
 
         # Update the Subject table
         for course in data['subjects']:
-            # Tokenize the subject name by spaces and join the first 2 characters of each word
-            code = ''.join([word[:2].upper()
+            # Tokenize the subject name by spaces and join the first 3 characters of each word
+            code = ''.join([word[:2 if len(course.split()) > 1 else 3].upper()
                            for word in course.split()]) + str(data['grade'])
             subject_code = storage.get_first(
                 Subject, code=code, grade_id=grade_id, name=course)
             if subject_code:
-                code = code + '_II'
+                code = code + 'I'
             new_subject = Subject(name=course, code=code,
                             grade_id=grade_id, year=data['year'])
             storage.add(new_subject)

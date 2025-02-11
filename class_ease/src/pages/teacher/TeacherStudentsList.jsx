@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
 import { FaSearch } from 'react-icons/fa';
-// import Pagination from '../library/pagination';
 import api from "../../services/api";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -120,7 +119,6 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
     const [searchTerm, setSearchTerm] = useState("");
     const [currentPage, setCurrentPage] = useState(1);
     const [currentYear] = useState(new Date().getFullYear());
-    const [subjectAssigned, setSubjectAssigned] = useState([]);
     const [assigned, setAssigned] = useState({});
     const limit = 10; // Number of students per page
 
@@ -138,10 +136,10 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
         try {
             const response = await api.get('/teacher/students/mark_list', {
                 params: {
-                    // subject_id: selectedSubjectId,
+                    subject_code: assigned[selectedSubject]['subject_code'] || '',
                     grade: selectedGrade,
                     year: selectedYear,
-                    sections: selectedSection.join(','), // Convert array to comma-separated string
+                    sections: selectedSection,
                     semester: selectedSemester,
                     page: page,
                     limit: limit,
@@ -209,9 +207,7 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
         setFilteredStudents({ students: [], meta: {}, header: {} });
         setSearchTerm("");
 
-        setSelectedSection((prev) =>
-            prev.includes(section) ? prev.filter((s) => s !== section) : [...prev, section]
-        );
+        setSelectedSection(section);
     };
 
     /**
@@ -276,7 +272,6 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
             try {
                 const response = await api.get('/teacher/assigned');
                 if (response.status === 200) {
-                    // setSubjectAssigned(response.data);
                     setAssigned(response.data);
                 }
             } catch (error) {

@@ -132,7 +132,7 @@ def get_list_of_students(teacher_data):
         return jsonify({"error": "Bad Request"}), 400
 
     required_data = {
-        'subject_id',
+        'subject_code',
         'grade',
         'sections',
         'semester',
@@ -153,6 +153,10 @@ def get_list_of_students(teacher_data):
                                 section=(data['sections'][0]))
     if not section:
         return jsonify({"error": "Section not found"}), 404
+
+    subject = storage.get_first(Subject, code=data['subject_code'][0])
+    if not subject:
+        return jsonify({"error": "Subject not found"}), 404
 
     # Pagination and filtering params
     page = int(data['page'][0]) if 'page' in data else 1
@@ -182,7 +186,7 @@ def get_list_of_students(teacher_data):
         .filter(
             and_(
                 TeachersRecord.teacher_id == teacher_data.id,
-                Assessment.subject_id == data['subject_id'][0],
+                Assessment.subject_id == subject.id,
                 AVRGResult.section_id == section.id
             )
         )
@@ -295,10 +299,10 @@ def get_student_mark_list(teacher_data):
 
 @teach.route('/assigned', methods=['GET'])
 @teacher_required
-def teacher_assigned_subjects(teacher_data):
+def teacher_assigned(teacher_data):
     query = (
         storage.get_session()
-        .query(Subject.name, Grade.grade, Section.section)
+        .query(Subject.name, Subject.code, Grade.grade, Section.section)
         .join(TeachersRecord, TeachersRecord.subject_id == Subject.id)
         .join(Grade, Grade.id == TeachersRecord.grade_id)
         .join(Section, Section.id == TeachersRecord.section_id)
@@ -307,11 +311,13 @@ def teacher_assigned_subjects(teacher_data):
     ).all()
 
     assigned = {}
-    for subject, grade, section in query:
+    for subject, code, grade, section in query:
         if subject not in assigned:
-            assigned[subject] = {"grades": [], "sections": []}
+            assigned[subject] = {"grades": [], "sections": [], "subject_code": ''}
         if grade not in assigned[subject]["grades"]:
             assigned[subject]["grades"].append(grade)
+        if not assigned[subject]["subject_code"]:
+            assigned[subject]["subject_code"] = code
         assigned[subject]["sections"].append(section)
 
     return jsonify(assigned), 200
