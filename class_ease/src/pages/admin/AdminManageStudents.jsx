@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import "../../styles/AdminManageStudents.css";
 import AdminPanel from "../../components/AdminPanel";
 import AdminHeader from "../../components/AdminHeader";
 import StudentProfile from "./AdminStudProfile";
 import AdminStudentsList from "./AdminStudList";
 import PopupScore from "../student/StudPopupScore";
+import { Toaster } from '@/components/ui/sonner';
+
 
 /**
  * AdminManageStudents component manages the state and behavior for the admin's student management interface.
@@ -92,27 +94,30 @@ const AdminManageStudents = () => {
   };
 
   return (
-    <div className="admin-manage-container">
-      <AdminPanel />
-      <main className="content">
-        <AdminHeader />
-        <AdminStudentsList
-          toggleProfile={toggleProfile}
-          profileSummary={profileSummary}
-        />
-        <StudentProfile
-          isProfileOpen={isProfileOpen}
-          toggleAssessment={toggleAssessment}
-          closeProfile={closeProfile}
-          studentProfileSummary={studentProfileSummary}
-          assessmentSummary={assessmentSummary}
-        />
-        <PopupScore
-          isAssesOpen={isAssesOpen}
-          closeAssessment={closeAssessment}
-          assessmentSummary={studentAssessmentSummary}
-        />
-      </main>
+    <div className="min-h-screen flex overflow-hidden flex-col">
+      <AdminHeader />
+      <div className="flex flex-1 scroll-m-0">
+        <AdminPanel />
+        <main className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
+          <AdminStudentsList
+            toggleProfile={toggleProfile}
+            profileSummary={profileSummary}
+          />
+          <StudentProfile
+            isProfileOpen={isProfileOpen}
+            toggleAssessment={toggleAssessment}
+            closeProfile={closeProfile}
+            studentProfileSummary={studentProfileSummary}
+            assessmentSummary={assessmentSummary}
+          />
+          <PopupScore
+            isAssesOpen={isAssesOpen}
+            closeAssessment={closeAssessment}
+            assessmentSummary={studentAssessmentSummary}
+          />
+          <Toaster />
+        </main>
+      </div>
     </div>
   );
 };

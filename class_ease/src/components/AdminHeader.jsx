@@ -22,7 +22,7 @@ import {
 } from "react-icons/fa";
 import classEaseHeader from '../images/ClassEase-header.png';
 import { useNavigate } from "react-router-dom";
-
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 /**
  * AdminHeader component renders the header section of the admin dashboard.
  * It includes navigation links for various administrative tasks such as 
@@ -99,80 +99,152 @@ const AdminHeader = () => {
     };
 
     return (
-        <header className="dashboard-header">
-            <div className="header-logo" onClick={goToHome}>
-                <img src={classEaseHeader} alt="ClassEase School" />
+        <header className="flex w-full p-2 bg-white shadow border-b border-gray-200 fixed">
+            {/* Left Section: Logo */}
+            <div className="cursor-pointer flex-shrink-0 align-middle" onClick={goToHome}>
+                <img src={classEaseHeader} alt="ClassEase School" className="h-10" />
             </div>
-            <div className="dashboard-nav">
-                <div className="nav-item" onClick={goToDashboard}>
-                    <span className="nav-link">
-                        <FaHome /> Home
-                    </span>
-                </div>
-                <div className="nav-item dropdown">
-                    <span className="nav-link">
-                        <FaUsers /> User Management
-                    </span>
-                    <div className="dropdown-content">
-                        <div className="dropdown-item" onClick={manageStudents}><FaUserGraduate /> Manage Students</div>
-                        <div className="dropdown-item" onClick={manageTeachers}><FaChalkboardTeacher /> Manage Teachers</div>
-                        <div className="dropdown-item" onClick={userAccessControl}><FaUserShield /> Roles & Permissions</div>
+            {/* Center Section: Navigation */}
+            <div className="container mx-auto flex items-center justify-between py-4">
+                <nav className="flex-1 flex justify-center space-x-6 items-center">
+
+                    <div>
+                        <span
+                            onClick={goToDashboard}
+                            className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 cursor-pointer"
+                        >
+                            <FaHome className="h-5 w-5" />
+                            <span>Home</span>
+                        </span>
                     </div>
-                </div>
-                <div className="nav-item dropdown">
-                    <span className="nav-link">
-                        <FaBookOpen /> Registration
-                    </span>
-                    <div className="dropdown-content">
-                        <div className="dropdown-item" onClick={enrollStudent}><FaUserPlus /> Enroll Students</div>
-                        <div className="dropdown-item" onClick={enrollTeacher}><FaUserPlus /> Register Teacher</div>
-                        {/* <div className="dropdown-item"><FaBuilding /> Class Management</div>
-                        <div className="dropdown-item"><FaBook /> Subject Management</div>
-                        <div className="dropdown-item"><FaChalkboard /> Assign Teachers</div>
-                        <div className="dropdown-item"><FaCalendarAlt /> Timetable Setup</div> */}
-                    </div>
-                </div>
-                <div className="nav-item dropdown">
-                    <span className="nav-link">
-                        <FaFileAlt /> Assessments & Exams
-                    </span>
-                    <div className="dropdown-content">
-                        <div className="dropdown-item" onClick={assessMarkList}><FaBookReader /> Create Mark List</div>
-                        {/* <div className="dropdown-item"><FaFileSignature /> Manage Tests & Quizzes</div>
-                        <div className="dropdown-item"><FaPenAlt /> Manage Midterm Exams</div> */}
-                        <div className="dropdown-item"><FaGraduationCap /> Manage Final Exams</div>
-                    </div>
-                </div>
-                <div className="nav-item dropdown">
-                    <span className="nav-link">
-                        <FaCalendarCheck /> Events & Activities
-                    </span>
-                    <div className="dropdown-content">
-                        <div className="dropdown-item" onClick={createEvent}><FaPlusCircle /> Create New Event</div>
-                        <div className="dropdown-item"><FaEdit /> Manage Events</div>
-                        <div className="dropdown-item"><FaRegCalendarAlt /> Event Calendar</div>
-                    </div>
-                </div>
-                <div className="nav-item dropdown">
-                    <span className="nav-link">
-                        <FaChartBar /> Report
-                    </span>
-                    <div className="dropdown-content">
-                        <div className="dropdown-item"><FaChartPie /> Student Performance Report</div>
-                        <div className="dropdown-item"><FaFileInvoice /> Attendance Reports</div>
-                        <div className="dropdown-item"><FaFileContract /> Exam Reports</div>
-                    </div>
-                </div>
-                <div className="nav-item dropdown">
-                    <span className="nav-link">
-                        <FaCog /> Settings
-                    </span>
-                    <div className="dropdown-content">
-                        <div className="dropdown-item" onClick={updateProfile}><FaCogs /> Update Profile</div>
-                    </div>
-                </div>
-            </div>
-        </header>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <span className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 cursor-pointer">
+                                <FaUsers className="h-5 w-5" />
+                                <span>User Management</span>
+                            </span>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-48">
+                            <DropdownMenuItem onClick={manageStudents}>
+                                <FaUserGraduate className="h-5 w-5" />
+                                <span>Manage Students</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={manageTeachers}>
+                                <FaChalkboardTeacher className="h-5 w-5" />
+                                <span>Manage Teachers</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={userAccessControl}>
+                                <FaUserShield className="h-5 w-5" />
+                                <span>Roles & Permissions</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <span className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 cursor-pointer">
+                                <FaBookOpen className="h-5 w-5" />
+                                <span>Registration</span>
+                            </span>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-48">
+                            <DropdownMenuItem onClick={enrollStudent}>
+                                <FaUserPlus className="h-5 w-5" />
+                                <span>Enroll Students</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={enrollTeacher}>
+                                <FaUserPlus className="h-5 w-5" />
+                                <span>Register Teacher</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <span
+                                className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 cursor-pointer">
+                                <FaFileAlt className="h-5 w-5" />
+                                <span>Assessments & Exams</span>
+                            </span>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-48">
+                            <DropdownMenuItem onClick={assessMarkList}>
+                                <FaBookReader />
+                                <span>Create Mark List</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                                <FaGraduationCap className="h-5 w-5" />
+                                <span>Manage Final Exams</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <span
+                                className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 cursor-pointer">
+                                <FaCalendarCheck className="h-5 w-5" />
+                                <span>Events & Activities</span>
+                            </span>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-48">
+                            <DropdownMenuItem onClick={createEvent}>
+                                <FaPlusCircle />
+                                <span>Create New Event</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                                <FaEdit className="h-5 w-5" />
+                                <span>Manage Events</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                                <FaRegCalendarAlt className="h-5 w-5" />
+                                <span>Event Calendar</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <span
+                                className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 cursor-pointer">
+                                <FaChartBar className="h-5 w-5" />
+                                <span>Report</span>
+                            </span>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-48">
+                            <DropdownMenuItem onClick={createEvent}>
+                                <FaChartPie />
+                                <span>Student Performance Report</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                                <FaFileInvoice className="h-5 w-5" />
+                                <span>Attendance Reports</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem>
+                                <FaFileContract className="h-5 w-5" />
+                                <span>Exam Reports</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <span
+                                className="flex items-center space-x-2 text-gray-700 hover:text-blue-600 cursor-pointer">
+                                <FaCog className="h-5 w-5" />
+                                <span>Settings</span>
+                            </span>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent className="w-48">
+                            <DropdownMenuItem onClick={updateProfile}>
+                                <FaCogs className="h-5 w-5" />
+                                <span>Update Profile</span>
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </nav>
+            </div >
+        </header >
     );
 };
 

@@ -1,9 +1,26 @@
 import { useState } from "react";
 import { FaSearch } from 'react-icons/fa';
 import api from "../../services/api";
-import Alert from "../../services/Alert";
-import Pagination from "../library/pagination";
 import '../../styles/Table.css';
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination"
+import { toast } from "sonner"
 
 /**
  * @function StudentList - Displays a list of students with search functionality.
@@ -21,33 +38,35 @@ import '../../styles/Table.css';
  * button, and a table displaying the student data. Each row in the table contains the student's ID,
  * name, father's name, grandfather's name, section, and a button to view the student's details.
  */
-function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStudents, toggleProfile, profileSummary }) {
+function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStudents, toggleProfile, profileSummary, currentPage }) {
     return (
         <section className="table-section">
             {(filteredStudents.students.length > 0) && (
-                <div className="table-head">
-                    <h3>Student List</h3>
-                    <h3>
-                        <span>{`Academic Year: ${filteredStudents.header.year}`}</span>
-                        <span style={{ marginLeft: '20px' }}>{`Grade: ${filteredStudents.header.grade}`}</span>
-                    </h3>
-                    <div className="table-search-bar">
-                        <input
-                            type="text"
-                            placeholder="Search Student"
-                            value={searchTerm}
-                            onChange={handleSearchChange}
-                        />
-                        <button onClick={() => handleSearch()}>
-                            <FaSearch />
-                        </button>
+                <form onSubmit={handleSearch}>
+                    <div className="flex justify-between items-center mb-4">
+                        <h3>Student List</h3>
+                        <h3 className="text-lg font-semibold">
+                            <span>{`Academic Year: ${filteredStudents.header.year}`}</span>
+                            <span className="ml-5">{`Grade: ${filteredStudents.header.grade}`}</span>
+                        </h3>
+                        <div className="flex items-center justify-between mr-4 w-100">
+                            <Input
+                                className="bg-white mr-3"
+                                placeholder="Search Student"
+                                value={searchTerm}
+                                onChange={handleSearchChange}
+                                required
+                            />
+                            <Button className="h-9 w-9"><FaSearch /></Button>
+                        </div>
                     </div>
-                </div>
+                </form>
             )}
 
             <table className="data-table">
                 <thead>
                     <tr>
+                        <th>No.</th>
                         <th>ID</th>
                         <th>Name</th>
                         <th>Father Name</th>
@@ -59,17 +78,23 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
                 <tbody>
                     {filteredStudents.students.map((student, index) => (
                         // Dynamic Data Rows
-                        <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#fff' : '#f1f1f1' }}>
+                        <tr key={index}
+                            className={`bg-${index % 2 === 0 ? 'white' : 'gray-100'} hover:bg-gray-200`}>
+                            <td>{index + ((currentPage - 1) * 10) + 1}</td>
                             <td>{student.student_id}</td>
                             <td>{student.name}</td>
                             <td>{student.father_name}</td>
                             <td>{student.grand_father_name}</td>
                             <td>{student.section ? student.section : 'N/A'}</td>
                             <td>
-                                <button className="detail-btn" onClick={() => {
-                                    toggleProfile();
-                                    profileSummary(student); // Pass the data for the clicked student
-                                }}>Detail</button>
+                                <Button className="h-9 w-15 hover:border-gray-50"
+                                    onClick={() => {
+                                        toggleProfile();
+                                        profileSummary(student); // Pass the data for the clicked student
+                                    }}>
+                                    Detail
+                                </Button>
+
                             </td>
                         </tr>
                     ))}
@@ -112,7 +137,6 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
 const AdminStudentsList = ({ toggleProfile, profileSummary }) => {
     const [selectedGrade, setSelectedGrade] = useState(1);
     const [selectedYear, setSelectedYear] = useState("2024/25");
-    const [alert, setAlert] = useState({ type: "", message: "", show: false });
     const [allStudents, setAllStudents] = useState({ students: [], meta: {} });        // Store all students
     const [filteredStudents, setFilteredStudents] = useState({ students: [], meta: {}, header: {} });  // Store the filtered search results
     const [searchTerm, setSearchTerm] = useState("");
@@ -130,7 +154,10 @@ const AdminStudentsList = ({ toggleProfile, profileSummary }) => {
      * If an error occurs during the search, an alert is displayed with the error message.
      * The function also resets the current page and state if an error occurs.
      */
-    const handleSearch = async (page) => {
+    const handleSearch = async (e, page) => {
+        e?.preventDefault(); // Prevent default if event exists
+        setFilteredStudents({ students: [], meta: {}, header: {} }); // clear any search result for the new one
+        setSearchTerm("");
         page = page || currentPage; // If page is not provided, use the current page
         try {
             const response = await api.get('/admin/manage/students', {
@@ -158,9 +185,15 @@ const AdminStudentsList = ({ toggleProfile, profileSummary }) => {
             setCurrentPage(page);
         } catch (error) {
             if (error.response && error.response.data && error.response.data['error']) {
-                showAlert("warning", error.response.data['error']);
+                toast.error(error.response.data['error'], {
+                    description: "Please try again later, if the problem persists, contact the administrator.",
+                    style: { color: 'red' }
+                });
             } else {
-                showAlert("warning", "An unexpected error occurred.");
+                toast.error("An unexpected error occurred.", {
+                    description: "Please try again later, if the problem persists, contact the administrator.",
+                    style: { color: 'red' }
+                });
             }
             // Reset the state
             setCurrentPage(1);
@@ -168,85 +201,32 @@ const AdminStudentsList = ({ toggleProfile, profileSummary }) => {
         }
     };
 
-    /**
-     * @function handleNextPage - Handles the pagination to the next page.
-     * @description
-     * This function increments the current page number and calls the handleSearch function
-     * to fetch the next page of students based on the current search criteria.
-     * If the current page is less than the total number of pages, the search is performed.
-     * Otherwise, the function does nothing.
-     * The function is triggered when the user clicks on the next page button in the pagination component.
-     * The function also updates the current page state.
-     * @returns {void}
-     */
-    const handleNextPage = () => {
-        if (currentPage < filteredStudents.meta.total_pages) {
-            const newPage = currentPage + 1;  // Increment the page
-            handleSearch(newPage);
+    const handlePageChange = (e, page) => {
+        if (page > 0 && page <= filteredStudents.meta.total_pages) {
+            handleSearch(e, page);
         }
     };
 
     /**
-     * @function handlePreviousPage - Handles the pagination to the previous page.
-     * @description
-     * This function decrements the current page number and calls the handleSearch function
-     * to fetch the previous page of students based on the current search criteria.
-     * If the current page is greater than 1, the search is performed.
-     * Otherwise, the function does nothing.
+     * @function handleGradeChange
+     * @description Handles changes to the selected grade.
+     * @param {Event} e - The change event.
+     * @returns {void}
      */
-    const handlePreviousPage = () => {
-        if (currentPage > 1) {
-            const newPage = currentPage - 1;  // Decrement the page
-            handleSearch(newPage);
-        }
+    const handleGradeChange = (value) => {
+        setFilteredStudents({ students: [], meta: {}, header: {} }); // clear any search result for the new one
+        setSearchTerm("");
+        setSelectedGrade(value);
     };
 
     /**
-     * @function showAlert - Displays an alert with a specified type and message.
-     * @param {string} type - The type of alert (e.g., "success", "warning", "error").
-     * @param {string} message - The message to display in the alert.
+     * @function handleYearChange
+     * @description Handles changes to the selected year.
+     * @param {Event} e - The change event.
      * @returns {void}
-     * @description
-     * This function updates the alert state with the specified type and message
-     * and sets the visibility status to true to display the alert.
-     * The function is used to show feedback messages to the user based on the result of an action.
      */
-    const showAlert = (type, message) => {
-        setAlert({ type, message, show: true });
-    };
+    const handleYearChange = (value) => setSelectedYear(value);
 
-    /**
-     * @function closeAlert - Closes the currently displayed alert.
-     * @returns {void}
-     * @description
-     * This function updates the alert state to hide the currently displayed alert
-     * by setting the visibility status to false. The function is triggered
-     * for a certain timeout period.
-     */
-    const closeAlert = () => {
-        setAlert({ ...alert, show: false });
-    };
-
-    /**
-     * @function handleGradeChange - Updates the selected grade state.
-     * @param {Object} e - The event object representing the grade selection.
-     * @returns {void}
-     * @description
-     * This function updates the selected grade state based on the value selected
-     */
-    const handleGradeChange = e => setSelectedGrade(parseFloat(e.target.value));
-
-    /**
-     * @function handleYearChange - Updates the selected year state.
-     * @param {Object} e - The event object representing the year selection.
-     * @returns {void}
-     * @description
-     * This function updates the selected year state based on the value selected
-     * and triggers the handleSearch function to fetch students based on the new year.
-     */
-    const handleYearChange = e => {
-        setSelectedYear(e.target.value);
-    };
 
     /**
      * @function handleSearchChange - Updates the search term state and filters students accordingly.
@@ -265,50 +245,42 @@ const AdminStudentsList = ({ toggleProfile, profileSummary }) => {
     };
 
     return (
-        <div className="manage-student-container">
-            <div className="admin-header">
-                <h2>Manage Students</h2>
-            </div>
-            <section className="admin-filters">
-                <div className="filter-group">
-                    <label htmlFor="grade">Grade:</label>
-                    <select
-                        id="grade"
-                        value={selectedGrade}
-                        onChange={handleGradeChange}
-                    >
-                        {Array.from({ length: 12 }, (_, i) => i + 1).map(grade =>
-                            <option key={grade} value={grade}>
-                                Grade {grade}
-                            </option>
-                        )}
-                    </select>
-                </div>
-                <div className="filter-group">
-                    <label htmlFor="year">Year:</label>
-                    <select id="year" value={selectedYear} onChange={handleYearChange}>
-                        {/* Dynamic Year Options */}
-                        {Array.from({ length: 3 }, (_, i) => currentYear - i).map(year => (
-                            <option key={year} value={`${year}/${(year + 1) % 100}`}>
-                                {year}/{(year + 1) % 100}
-                            </option>
-                        ))}
-                    </select>
-                </div>
-                <button className="filter-group-search"
-                    onClick={() => {
-                        setSearchTerm(""); // Clear the search term
-                        handleSearch();
-                    }}>
-                    Search
-                </button>
-            </section>
-            <Alert
-                type={alert.type}
-                message={alert.message}
-                show={alert.show}
-                onClose={closeAlert}
-            />
+        <div className="flex flex-col p-6 bg-gray-100">
+            <form onSubmit={(e) => handleSearch(e, 1)}>
+                <section className="flex flex-wrap justify-between bg-white p-4 rounded shadow w-full mb-10">
+                    <div style={{ width: '9rem' }}>
+                        <Select onValueChange={handleGradeChange} required>
+                            <SelectTrigger className="w-full p-2 border border-gray-300 rounded bg-gray-50">
+                                <SelectValue placeholder="Select Grade" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {Array.from({ length: 12 }, (_, i) => i + 1).map((grade) => (
+                                    <SelectItem key={grade} value={`${grade}`}>
+                                        Grade {grade}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <div style={{ width: '9rem' }}>
+                        <Select onValueChange={handleYearChange} required>
+                            <SelectTrigger className="w-full p-2 border border-gray-300 rounded bg-gray-50">
+                                <SelectValue placeholder="Select Year" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {Array.from({ length: 3 }, (_, i) => currentYear - i).map(year => (
+                                    <SelectItem key={year} value={`${year}/${(year + 1) % 100}`}>
+                                        {year}/{(year + 1) % 100}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                    <Button>
+                        Search
+                    </Button>
+                </section>
+            </form>
             {/* Student List */}
             <StudentList
                 searchTerm={searchTerm}
@@ -317,16 +289,53 @@ const AdminStudentsList = ({ toggleProfile, profileSummary }) => {
                 filteredStudents={filteredStudents}
                 toggleProfile={toggleProfile}
                 profileSummary={profileSummary}
+                currentPage={currentPage}
             />
-            {
-                (filteredStudents.meta.total_pages > 1 && filteredStudents.students.length >= limit) &&
-                <Pagination
-                    handlePreviousPage={handlePreviousPage}
-                    currentPage={currentPage}
-                    handleNextPage={handleNextPage}
-                    meta={filteredStudents.meta}
-                />
-            }
+            {filteredStudents.meta.total_pages > 1 && (
+                <>
+                    {/* Pagination Component */}
+                    <Pagination className="mt-4">
+                        <PaginationContent>
+                            <PaginationItem>
+                                <PaginationPrevious
+                                    className="hover:bg-gray-200 hover:cursor-pointer"
+                                    onClick={(e) => {
+                                        handlePageChange(e, currentPage - 1);
+                                    }}
+                                />
+                            </PaginationItem>
+
+                            {[...Array(filteredStudents.meta.total_pages)].map((_, index) => (
+                                <PaginationItem key={index}>
+                                    <PaginationLink
+                                        className="hover:bg-gray-200 hover:cursor-pointer"
+                                        isActive={currentPage === index + 1}
+                                        onClick={(e) => {
+                                            handlePageChange(e, index + 1);
+                                        }}
+                                    >
+                                        {index + 1}
+                                    </PaginationLink>
+                                </PaginationItem>
+                            ))}
+
+                            {filteredStudents.meta.total_pages > 5 &&
+                                <PaginationItem>
+                                    <PaginationEllipsis />
+                                </PaginationItem>}
+
+                            <PaginationItem>
+                                <PaginationNext
+                                    className="hover:bg-gray-200 hover:cursor-pointer"
+                                    onClick={(e) => {
+                                        handlePageChange(e, currentPage + 1);
+                                    }}
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
+                </>
+            )}
         </div>
     );
 };

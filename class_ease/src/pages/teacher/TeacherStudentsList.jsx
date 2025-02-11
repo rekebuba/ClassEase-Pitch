@@ -22,12 +22,12 @@ import {
 import { toast } from "sonner"
 
 
-function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStudents, toggleDropdown, studentSummary }) {
+function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStudents, toggleDropdown, studentSummary, currentPage }) {
     return (
         <section className="table-section">
             {(filteredStudents && filteredStudents.students && filteredStudents.students.length > 0) && (
                 <form onSubmit={handleSearch}>
-                    <div className="flex justify-between items-center mb-4 ">
+                    <div className="flex justify-between items-center mb-4">
                         <h3>Student List</h3>
                         <h3 className="text-lg font-semibold">
                             <span>{`Academic Year: ${filteredStudents.header.year}`}</span>
@@ -51,6 +51,7 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
             <table className="data-table">
                 <thead>
                     <tr>
+                        <th>No.</th>
                         <th>ID</th>
                         <th>Name</th>
                         <th>Father Name</th>
@@ -67,6 +68,7 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
                             // Dynamic Data Rows
                             <tr key={index}
                                 className={`bg-${index % 2 === 0 ? 'white' : 'gray-100'} hover:bg-gray-200`}>
+                                <td>{index + ((currentPage - 1) * 10) + 1}</td>
                                 <td>{student.student_id}</td>
                                 <td>{student.name}</td>
                                 <td>{student.father_name}</td>
@@ -381,6 +383,7 @@ const TeacherStudentsList = ({ toggleDropdown, studentSummary, saveStudent, togg
                 filteredStudents={filteredStudents}
                 toggleDropdown={toggleDropdown}
                 studentSummary={studentSummary}
+                currentPage={currentPage}
             />
             {filteredStudents.meta.total_pages > 1 && (
                 <>

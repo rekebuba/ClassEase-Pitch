@@ -528,7 +528,7 @@ def create_mark_list(admin_data):
             if subject_code:
                 code = code + 'I'
             new_subject = Subject(name=course, code=code,
-                            grade_id=grade_id, year=data['year'])
+                                  grade_id=grade_id, year=data['year'])
             storage.add(new_subject)
 
         mark_lists = []  # A list to hold mark_list objects
@@ -694,16 +694,29 @@ def admin_student_data(admin_data):
     limit = int(data['limit'][0]) if 'limit' in data else 10
     search_term = data['search'][0] if 'search' in data else None
 
-    query = storage.get_session().query(StudentYearlyRecord).filter(
-        StudentYearlyRecord.grade_id == grade.id,
-        StudentYearlyRecord.year == data['year'][0]
+    query = (
+        storage.get_session()
+        .query(Student.id,
+               Student.name,
+               Student.father_name,
+               Student.grand_father_name,
+               Section.section,
+               Section.id,
+               StudentYearlyRecord.grade_id
+               )
+        .select_from(StudentYearlyRecord)
+        .join(Student, Student.id == StudentYearlyRecord.student_id)
+        .join(Section, Section.id == StudentYearlyRecord.section_id)
+        .filter(
+            StudentYearlyRecord.grade_id == grade.id,
+            StudentYearlyRecord.year == data['year'][0]
+        )
+        .order_by(Section.section.asc(), Student.name.asc(), Student.father_name.asc(), Student.grand_father_name.asc(), Student.id.asc())
     )
 
     if search_term:
         search_pattern = f"%{search_term}%"
-        joined = query.join(Student, Student.id ==
-                            StudentYearlyRecord.student_id)
-        query = joined.filter(
+        query = query.filter(
             StudentYearlyRecord.student_id.ilike(search_pattern) |
             Student.name.ilike(search_pattern) |
             Student.father_name.ilike(search_pattern) |
@@ -718,80 +731,90 @@ def admin_student_data(admin_data):
         return jsonify({"error": "No student found"}), 404
 
     student_list = []
-    for student in paginated_result['items']:
-        section = None
-        student_data = storage.get_first(Student, id=student.student_id)
-        if student.section_id:
-            section = storage.get_first(Section, id=student.section_id).section
-        if not student_data:
-            return jsonify({"error": "No student found"}), 404
-
-        student_mark = storage.get_all(
-            MarkList, student_id=student_data.id, year=data['year'][0])
-
-        if not student_mark:
-            return jsonify({"error": f"Grade {data['grade'][0]} for the year {data['year'][0]} Dose not have mark list"}), 404
-
-        # Filter Unique subjects for a student
-        # Subquery to get unique subject_ids
-        unique_subjects = (
-            storage.get_session()
-            .query(Assessment.subject_id)
-            .filter(Assessment.student_id == student_data.id, Assessment.year == data['year'][0])
-            .distinct()
-            .all()
-        )
-        if not unique_subjects:
-            return jsonify({"error": f"{student_data.name} does not have a mark list"}), 404
-
-        performance = []
-        for subject_id in unique_subjects:
-            subject = storage.get_first(Subject, id=subject_id[0])
-            semesters = {}
-            for semester in storage.get_all(
-                MarkList,
-                student_id=student_data.id,
-                subject_id=subject.id,
-                year=data['year'][0]
-            ):
-                if semester.semester not in semesters:
-                    assessment = storage.get_first(
-                        Assessment, student_id=student_data.id, subject_id=subject.id, semester=semester.semester)
-                    semesters[semester.semester] = [
-                        {"subject_total": {"total": assessment.total, "rank": assessment.rank}}]
-
-                semesters[semester.semester].append({
-                    "type": semester.type,
-                    "score": semester.score,
-                    "percentage": semester.percentage
-                })
-
-            semester_result = {
-                "subject": subject.name,
-                "semesters": semesters
-            }
-            performance.append(semester_result)
-
-        # Student Summary
-        student_summary = {
-            "student_id": student_data.id,
-            "name": student_data.name,
-            "father_name": student_data.father_name,
-            "grand_father_name": student_data.grand_father_name,
-            "grade": data['grade'][0],
-            "year": data['year'][0],
-            "date_of_birth": student_data.date_of_birth,
+    for id, name, f_name, g_name, section, section_id, grade_id in paginated_result['items']:
+        student_list.append({
+            "student_id": id,
+            "name": name,
+            "father_name": f_name,
+            "grand_father_name": g_name,
             "section": section,
-            "performance": performance,
-        }
-
-        student_list.append(student_summary)
+            "section_id": section_id,
+            "grade_id": grade_id,
+            "year": data['year'][0],
+        })
 
     return jsonify({
         "students": student_list,
         "meta": paginated_result['meta'],
         "header": {"grade": data['grade'][0], "year": data['year'][0]}
     }), 200
+
+
+@auth.route('/student/assessment', methods=['GET'])
+@admin_required
+def student_assessment(admin_data):
+    """
+    Retrieve and display a list of assessments for students based on the provided query parameters.
+
+    Args:
+        admin_data (dict): Data related to the admin making the request.
+
+    Returns:
+        Response: A JSON response containing the list of student assessments or an error message with the appropriate HTTP status code.
+
+    Query Parameters:
+        grade (str): The grade level.
+        section (str): The section within the grade.
+        year (str): The academic year.
+
+    Responses:
+        200: A JSON list of student assessments.
+        400: A JSON error message indicating a missing required field.
+        404: A JSON error message indicating that the grade, section, subject, or students were not found.
+    """
+    url = request.url
+    parsed_url = urlparse(url)
+    data = parse_qs(parsed_url.query)
+
+    required_data = {
+        'student_id',
+        'grade_id',
+        'section_id',
+        'year'
+    }
+
+    student_id = data['student_id'][0]
+    grade_id = data['grade_id'][0]
+    section_id = data['section_id'][0]
+    year = data['year'][0]
+    # Check if required fields are present
+    for field in required_data:
+        if field not in data:
+            return jsonify({"error": f"Missing {field}"}), 400
+
+    students = (
+        storage.get_session()
+        .query(Subject.name,
+               Assessment.total,
+               Assessment.rank,
+               )
+        .select_from(Assessment)
+        .join(Subject, Assessment.subject_id == Subject.id)
+        .filter(
+            Assessment.student_id == student_id,
+            Assessment.grade_id == grade_id,
+            Assessment.section_id == section_id,
+            Assessment.year == year
+        )
+    )
+    if not students:
+        return jsonify({"error": "Student not found"}), 404
+
+    student_list = []
+    for student in students:
+        student_list.append(student.to_dict())
+
+    return jsonify(student_list), 200
 
 
 @auth.route('/teachers', methods=['GET'])
