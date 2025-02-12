@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """ Module for TeachersRecord class """
 
-from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy import Column, String, ForeignKey, Integer
 from sqlalchemy.orm import relationship
 from models.engine.db_storage import BaseModel, Base
 
@@ -32,6 +32,7 @@ class TeachersRecord(BaseModel, Base):
         'grades.id'), nullable=True, default=None)
     section_id = Column(String(120), ForeignKey(
         'sections.id'), nullable=True, default=None)
+    semester = Column(Integer, nullable=False)
 
     mark_list = relationship(
         "MarkList", backref="teachers_record", cascade="save-update", passive_deletes=True)

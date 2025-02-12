@@ -187,7 +187,9 @@ def get_list_of_students(teacher_data):
             and_(
                 TeachersRecord.teacher_id == teacher_data.id,
                 Assessment.subject_id == subject.id,
-                AVRGResult.section_id == section.id
+                Assessment.semester == data['semester'][0],
+                AVRGResult.semester == data['semester'][0],
+                AVRGResult.section_id == section.id,
             )
         )
         .order_by(Section.section.asc(), Student.name.asc(), Student.father_name.asc(), Student.grand_father_name.asc(), Student.id.asc())
@@ -369,7 +371,8 @@ def update_student_assessment(teacher_data):
             TeachersRecord.teacher_id == teacher_data.id,
             TeachersRecord.grade_id == student_data['grade_id'],
             TeachersRecord.section_id == student_data['section_id'],
-            TeachersRecord.subject_id == student_data['subject_id']
+            TeachersRecord.subject_id == student_data['subject_id'],
+            TeachersRecord.semester == student_data['semester'],
         ).first()
 
         if not teacher_record:

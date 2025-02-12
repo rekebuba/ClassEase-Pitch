@@ -317,7 +317,8 @@ def assign_class(admin_data):
         'grade',
         'section',
         'subjects_taught',
-        'mark_list_year'
+        'semester',
+        'mark_list_year',
     ]
     # Check if required fields are present
     for field in required_data:
@@ -358,17 +359,19 @@ def assign_class(admin_data):
             for section_id in section_ids:
                 # check if the another teacher is already assigned to the subject
                 teacher_record = storage.get_first(
-                    TeachersRecord, grade_id=grade_id, section_id=section_id, subject_id=subject.id)
-                if not teacher_record:
-                    # update the teacher record
-                    teacher_record = TeachersRecord(
-                        teacher_id=teacher.id,
-                        grade_id=grade_id,
-                        section_id=section_id,
-                        subject_id=subject.id
-                    )
+                    TeachersRecord, grade_id=grade_id, section_id=section_id, subject_id=subject.id, semester=data['semester'])
+                # update the teacher record
+                if teacher_record:
+                    return jsonify({"error": "Teacher already assigned"}), 409
+                teacher_record = TeachersRecord(
+                    teacher_id=teacher.id,
+                    grade_id=grade_id,
+                    section_id=section_id,
+                    subject_id=subject.id,
+                    semester=data['semester']
+                )
 
-                    storage.add(teacher_record)
+                storage.add(teacher_record)
 
                 # Update the MarkList table
                 storage.get_session().execute(
@@ -377,6 +380,7 @@ def assign_class(admin_data):
                         MarkList.grade_id == grade_id,
                         MarkList.section_id == section_id,
                         MarkList.subject_id == subject.id,
+                        MarkList.semester == data['semester'],
                         MarkList.year == data['mark_list_year']
                     ))
                     .values(teachers_record_id=teacher_record.id)
@@ -388,6 +392,7 @@ def assign_class(admin_data):
                     .where(and_(
                         Assessment.grade_id == grade_id,
                         Assessment.subject_id == subject.id,
+                        Assessment.semester == data['semester'],
                         Assessment.year == data['mark_list_year']
                     ))
                     .values(teachers_record_id=teacher_record.id)
@@ -520,16 +525,18 @@ def create_mark_list(admin_data):
 
         # Update the Subject table
         for course in data['subjects']:
-            # Tokenize the subject name by spaces and join the first 3 characters of each word
-            code = ''.join([word[:2 if len(course.split()) > 1 else 3].upper()
-                           for word in course.split()]) + str(data['grade'])
-            subject_code = storage.get_first(
-                Subject, code=code, grade_id=grade_id, name=course)
-            if subject_code:
-                code = code + 'I'
-            new_subject = Subject(name=course, code=code,
-                                  grade_id=grade_id, year=data['year'])
-            storage.add(new_subject)
+            query = storage.get_first(Subject, grade_id=grade_id, name=course)
+            if not query:
+                # Tokenize the subject name by spaces and join the first 3 characters of each word
+                code = ''.join([word[:2 if len(course.split()) > 1 else 3].upper()
+                                for word in course.split()]) + str(data['grade'])
+                subject_code = storage.get_first(
+                    Subject, code=code, grade_id=grade_id, name=course)
+                if subject_code:
+                    code = code + 'I'
+                new_subject = Subject(name=course, code=code,
+                                      grade_id=grade_id, year=data['year'])
+                storage.add(new_subject)
 
         mark_lists = []  # A list to hold mark_list objects
         assessments = []  # A list to hold assessment objects
@@ -550,8 +557,14 @@ def create_mark_list(admin_data):
                         "year": data['year'],
                     }
                     mark_lists.append(MarkList(**values, **assessment_type))
-                assessments.append(Assessment(
-                    student_id=student.student_id, grade_id=grade_id, subject_id=subject.id, semester=data['semester'], year=data['year']))
+                assessments.append(
+                    Assessment(student_id=student.student_id,
+                               grade_id=grade_id,
+                               subject_id=subject.id,
+                               semester=data['semester'],
+                               year=data['year']
+                               )
+                )
 
             average_result.append(
                 AVRGResult(student_id=student.student_id,
@@ -646,7 +659,7 @@ def show_mark_list(admin_data):
 
 @auth.route('/manage/students', methods=['GET'])
 @admin_required
-def admin_student_data(admin_data):
+def admin_student_list(admin_data):
     """
     Retrieve and filter student data based on the provided admin data.
 
@@ -792,29 +805,47 @@ def student_assessment(admin_data):
         if field not in data:
             return jsonify({"error": f"Missing {field}"}), 400
 
-    students = (
+    query = (
         storage.get_session()
-        .query(Subject.name,
+        .query(Subject.code,
+               Subject.name,
+               Assessment.semester,
                Assessment.total,
                Assessment.rank,
                )
         .select_from(Assessment)
+        .join(TeachersRecord, TeachersRecord.id == Assessment.teachers_record_id)
         .join(Subject, Assessment.subject_id == Subject.id)
+        .join(AVRGResult, and_(AVRGResult.student_id == Assessment.student_id,
+                               AVRGResult.grade_id == Assessment.grade_id,
+                               AVRGResult.semester == Assessment.semester,
+                               AVRGResult.year == Assessment.year))
         .filter(
             Assessment.student_id == student_id,
             Assessment.grade_id == grade_id,
-            Assessment.section_id == section_id,
             Assessment.year == year
         )
-    )
-    if not students:
+        .order_by(Subject.name)
+    ).all()
+
+    if not query:
         return jsonify({"error": "Student not found"}), 404
 
-    student_list = []
-    for student in students:
-        student_list.append(student.to_dict())
+    student_assessment = {}
+    for code, name, semester, total, rank in query:
+        if code not in student_assessment:
+            # Initialize with placeholders for semesters
+            student_assessment[code] = {
+                "subject": name,
+                "semI": {"total": None, "rank": None},
+                "semII": {"total": None, "rank": None},
+            }
+        if semester == 1:
+            student_assessment[code]["semI"] = {"total": total, "rank": rank}
+        elif semester == 2:
+            student_assessment[code]["semII"] = {"total": total, "rank": rank}
 
-    return jsonify(student_list), 200
+    return jsonify(list(student_assessment.values())), 200
 
 
 @auth.route('/teachers', methods=['GET'])
@@ -834,38 +865,6 @@ def all_teachers(admin_data):
         page (int, optional): The page number for pagination. Defaults to 1.
         limit (int, optional): The number of items per page for pagination. Defaults to 10.
         search (str, optional): A search term to filter teachers by id, first name, last name, email, or phone.
-
-    Response JSON Structure:
-        {
-            "teachers": [
-                {
-                    "id": int,
-                    "name": str,
-                    "first_name": str,
-                    "last_name": str,
-                    "email": str,
-                    "phone": str,
-                    "age": int,
-                    "experience": int,
-                    "no_of_mark_list": int,
-                    "record": [
-                        {
-                            "grade": str,
-                            "section": str,
-                            "subject": str
-                        },
-                        ...
-                    ],
-                    "subjects": [str],
-                    "qualifications": [str]
-                },
-                ...
-            ],
-            "meta": {
-                "page": int,
-                "limit": int,
-                "total_items": int,
-                "total_pages": int
 
     Raises:
         404: If no teachers are found or if no teachers match the search criteria.
