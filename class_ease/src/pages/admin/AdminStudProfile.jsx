@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import ExamAssessmentReports from "./AdminExamAssessmentReports";
 import api from '../../services/api';
 import { SubjectList } from '../student/StudSubjectList';
+import { Button } from '@/components/ui/button';
+import { toast } from "sonner"
+
+
 
 /**
  * StudentProfile component displays a detailed profile of a student including their personal information and performance overview.
@@ -27,6 +31,7 @@ import { SubjectList } from '../student/StudSubjectList';
  */
 const StudentProfile = ({ isProfileOpen, toggleAssessment, closeProfile, studentProfileSummary, assessmentSummary }) => {
     const [allSubjects, setAllSubjects] = useState([]);
+    const [studentAssessment, setStudentAssessment] = useState([]);
     const [student, setStudent] = useState({});
 
     /**
@@ -55,15 +60,15 @@ const StudentProfile = ({ isProfileOpen, toggleAssessment, closeProfile, student
         const lodeStudentSubjectList = async () => {
             try {
                 if (studentProfileSummary !== undefined && Object.keys(studentProfileSummary).length > 0) {
-                    const response = await api.get(`/student/score`, {
+                    const response = await api.get(`/admin/student/assessment`, {
                         params: {
                             student_id: studentProfileSummary.student_id,
-                            grade: studentProfileSummary.grade,
-                            semester: 1
+                            grade_id: studentProfileSummary.grade_id,
+                            section_id: studentProfileSummary.section_id,
+                            year: studentProfileSummary.year
                         }
                     });
-                    setAllSubjects(response.data['student_assessment']);
-                    // setStudent(response.data['student']);
+                    setStudentAssessment(response.data);
                 }
             } catch (error) {
                 if (error.response && error.response.data && error.response.data['error']) {
@@ -78,9 +83,14 @@ const StudentProfile = ({ isProfileOpen, toggleAssessment, closeProfile, student
     return (
         <div className={`popup-overlay ${isProfileOpen ? "open" : "close"}`}>
             <div className='popup-overlay-container'>
-                <div className="close-popup">
-                    <h2 style={{ margin: 0 }}>Student Summary</h2>
-                    <button onClick={closeProfile} style={{ background: 'none', border: 'none', cursor: 'pointer' }}><FaTimes size={24} /></button>
+                <div className="flex justify-between items-center p-2">
+                    <h3 className='text-center text-lg font-bold'>student Summary</h3>
+                    <Button
+                        className='bg-opacity-0 text-black hover:bg-opacity-10 hover:text-red-400 hover:scale-150'
+                        onClick={closeProfile}
+                    >
+                        <FaTimes size={24} />
+                    </Button>
                 </div>
                 <div className="popup-profile-header">
                     <div className="popup-profile-picture">
@@ -98,6 +108,7 @@ const StudentProfile = ({ isProfileOpen, toggleAssessment, closeProfile, student
                     <h3>Performance Overview</h3>
                     <ExamAssessmentReports subjectSummary={allSubjects} />
                     <SubjectList
+                        studentAssessment={studentAssessment}
                         allSubjects={allSubjects}
                         student={student}
                         toggleAssessment={toggleAssessment}

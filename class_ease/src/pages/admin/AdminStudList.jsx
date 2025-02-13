@@ -28,8 +28,8 @@ import { toast } from "sonner"
  * @param {string} props.searchTerm - The current search term for filtering students by name.
  * @param {Function} props.handleSearchChange - Function to handle changes in the search input.
  * @param {Function} props.handleSearch - Function to handle the search functionality.
- * @param {Object} props.filteredStudents - The state containing filtered students data.
  * @param {Function} props.toggleProfile - Function to toggle the profile view.
+ * @param {Object} props.filteredStudents - The state containing filtered students data.
  * @param {Function} props.profileSummary - Function to display the profile summary for a student.
  * @returns {JSX.Element} The rendered StudentList component.
  * @description
@@ -72,6 +72,8 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
                         <th>Father Name</th>
                         <th>G.Father Name</th>
                         <th>Section</th>
+                        <th>AVR Score</th>
+                        <th>Rank</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -86,6 +88,8 @@ function StudentList({ searchTerm, handleSearchChange, handleSearch, filteredStu
                             <td>{student.father_name}</td>
                             <td>{student.grand_father_name}</td>
                             <td>{student.section ? student.section : 'N/A'}</td>
+                            <td>{student.final_score ? student.final_score : '-' }</td>
+                            <td>{student.rank ? student.rank : '-' }</td>
                             <td>
                                 <Button className="h-9 w-15 hover:border-gray-50"
                                     onClick={() => {

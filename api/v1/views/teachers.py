@@ -13,6 +13,7 @@ from models.subject import Subject
 from models.assessment import Assessment
 from models.mark_list import MarkList
 from models.average_result import AVRGResult
+from models.average_subject import AVRGSubject
 from models.teacher import Teacher
 from models.teacher_record import TeachersRecord
 from models.stud_yearly_record import StudentYearlyRecord
@@ -243,7 +244,7 @@ def get_list_of_students(teacher_data):
 
 @teach.route('/student/assessment', methods=['GET'])
 @teacher_required
-def get_student_mark_list(teacher_data):
+def get_student_assessment(teacher_data):
     url = request.url
     parsed_url = urlparse(url)
     data = parse_qs(parsed_url.query)
@@ -315,7 +316,8 @@ def teacher_assigned(teacher_data):
     assigned = {}
     for subject, code, grade, section in query:
         if subject not in assigned:
-            assigned[subject] = {"grades": [], "sections": [], "subject_code": ''}
+            assigned[subject] = {"grades": [],
+                                 "sections": [], "subject_code": ''}
         if grade not in assigned[subject]["grades"]:
             assigned[subject]["grades"].append(grade)
         if not assigned[subject]["subject_code"]:
@@ -323,6 +325,7 @@ def teacher_assigned(teacher_data):
         assigned[subject]["sections"].append(section)
 
     return jsonify(assigned), 200
+
 
 @teach.route('/students/mark_list', methods=['PUT'])
 @teacher_required
@@ -398,6 +401,7 @@ def update_student_assessment(teacher_data):
             storage.save()
 
         subject_sum(student_data)
+        subject_average(student_data)
         semester_average(student_data)
         yearly_average(student_data)
 
@@ -412,7 +416,7 @@ def subject_sum(student_data):
     Calculate the total score for a specific subject and student, and update or create an Assessment record.
 
     This function queries the MarkList table to sum the scores for a given student, subject, semester, and year.
-    It then updates or creates an Assessment record with the total score. Finally, it calls the subject_ranks
+    It then updates or creates an Assessment record with the total score. Finally, it calls the total_subject_ranks
     function to update the subject ranks.
 
     Args:
@@ -459,7 +463,31 @@ def subject_sum(student_data):
             overall.total = sum.total_score
 
     storage.save()
-    subject_ranks(student_data)
+    total_subject_ranks(student_data)
+
+
+def subject_average(student_data):
+    average_subject = storage.get_session().query(
+        Assessment.student_id,
+        Assessment.subject_id,
+        Assessment.year,
+        func.avg(Assessment.total).label('average_subject')
+    ).filter(
+        Assessment.student_id == student_data['student_id'],
+        Assessment.year == student_data['year']
+    ).group_by(Assessment.subject_id).all()
+
+    for student in average_subject:
+        overall = storage.get_session().query(AVRGSubject).filter_by(
+            student_id=student.student_id,
+            subject_id=student.subject_id,
+            year=student.year,
+        ).first()
+
+        overall.average = student.average_subject
+
+    storage.save()
+    average_subject_ranks(student_data)
 
 
 def semester_average(student_data):
@@ -560,7 +588,7 @@ def yearly_average(student_data):
     year_ranks(student_data)
 
 
-def subject_ranks(student_data):
+def total_subject_ranks(student_data):
     """
     Calculate and assign ranks to students based on their total scores in a specific subject, semester, and year.
 
@@ -585,6 +613,23 @@ def subject_ranks(student_data):
             semester=student_data['semester'],
             year=student_data['year']
         ).order_by(Assessment.total.desc()).all()
+
+        for rank, total in enumerate(totals, start=1):
+            total.rank = rank
+
+    storage.save()
+
+
+def average_subject_ranks(student_data):
+    for subject_id in storage.get_session().query(Subject.id).filter(
+        Subject.id == student_data['subject_id'],
+        Subject.year == student_data['year']
+    ):
+        totals = storage.get_session().query(AVRGSubject).filter_by(
+            # subject_id is a tuple, we need to access the first element
+            subject_id=subject_id[0],
+            year=student_data['year']
+        ).order_by(AVRGSubject.average.desc()).all()
 
         for rank, total in enumerate(totals, start=1):
             total.rank = rank

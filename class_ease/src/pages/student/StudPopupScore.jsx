@@ -1,5 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
+import api from '../../services/api';
+import { toast } from "sonner"
+import { Button } from '@/components/ui/button';
+
 
 /**
  * PopupScore component displays a popup with assessment scores.
@@ -18,62 +22,86 @@ import { FaTimes } from 'react-icons/fa';
  * @returns {JSX.Element} The rendered PopupScore component.
  */
 const PopupScore = ({ isAssesOpen, closeAssessment, assessmentSummary }) => {
-    const [assessmentData, setAssessmentData] = useState([]);
+    const [assessmentData, setAssessmentData] = useState({});
 
     /**
      * @hook useEffect
      * @description Sets the assessment data when the assessment summary changes.
      */
     useEffect(() => {
-        if (assessmentSummary.assessment) {
-            setAssessmentData(assessmentSummary.assessment);
+        const assessmentReport = async () => {
+            try {
+                const res = await api.get('/admin/student/assessment/report', {
+                    params: {
+                        student_id: assessmentSummary.student_id,
+                        grade_id: assessmentSummary.grade_id,
+                        subject_id: assessmentSummary.subject_id,
+                        section_id: assessmentSummary.section_id,
+                        year: assessmentSummary.year,
+                    },
+                });
+                if (res.status === 200) {
+                    console.log(res.data);
+                    setAssessmentData(res.data);
+                }
+            } catch (error) {
+                if (error.response?.data?.error) {
+                    toast.error(error.response.data['error'], {
+                        description: "Please try again later, if the problem persists, contact the administrator.",
+                        style: { color: 'red' }
+                    });
+                }
+            }
         }
-    }, [assessmentSummary.assessment]);
+        assessmentReport()
+    }, [assessmentSummary]);
 
-    /**
-     * @function calculateTotal
-     * @description Calculates the total score of all assessments.
-     */
-    const calculateTotal = () => {
-        if (assessmentData.length === 0) return 'N/A';
-        const totalScore = assessmentData.reduce((acc, assessment) => acc + (assessment.score || 0), 0);
-        return totalScore;
+    const calculateTotalScore = (assessments) => {
+        return parseFloat(assessments.reduce((total, item) => total + item.score, 0).toFixed(2));
     };
 
     return (
         <div className={`popup-overlay ${isAssesOpen ? "open" : "close"}`}>
-            <div className='popup-overlay-container score'>
+            <div className='bg-white rounded-md p-5 shadow-slate-400 overflow-auto'>
                 <div className="popup-table">
-                    <div className="close-popup" >
-                        <h3>{assessmentSummary.subject}</h3>
-                        <button onClick={() => {
-                            closeAssessment();
-                        }}
-                        ><FaTimes size={15} /></button>
+                    <div className="flex justify-between items-center p-2">
+                        <h3 className='text-center text-lg font-bold'>History</h3>
+                        <Button
+                            className='bg-opacity-0 text-black hover:bg-opacity-10 hover:text-red-400 hover:scale-150'
+                            onClick={() => {
+                                closeAssessment();
+                            }}
+                        ><FaTimes size={15} /></Button>
                     </div>
-                    <table className="data-table">
-                        <thead>
-                            <tr>
-                                <th>No.</th>
-                                <th>Assessment</th>
-                                <th>Score</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {(assessmentData && assessmentData.length > 0) &&
-                                assessmentData.map((assessment, index) => (
-                                    <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#fff' : '#f1f1f1' }}>
-                                        <td>{index + 1}</td>
-                                        <td>{assessment.assessment_type} ( {assessment.percentage}% )</td>
-                                        <td>
-                                            {assessment.score || 'N/A'}
-                                        </td>
-                                    </tr>
-                                ))}
-                        </tbody>
-                    </table>
-                    <div className='total-score'>
-                        <h3><strong>Total Score: {calculateTotal()} / 100</strong></h3>
+                    <div className='flex flex-wrap justify-between p-2 gap-10'>
+                        {(assessmentData && Object.entries(assessmentData).length !== 0) &&
+                            Object.keys(assessmentData).map((semester) => (
+                                <div key={semester} className='flex-1 p-4 w-96 min-w-[250px] border border-gray-300 rounded-lg shadow-md bg-white'>
+                                    <h3 className='text-center text-lg font-bold'>Semester {semester}</h3>
+                                    <table className='w-full text-left border-collapse'>
+                                        <thead>
+                                            <tr className='bg-gray-200'>
+                                                <th className='p-1.5 overflow-hidden'>No.</th>
+                                                <th className='p-1.5 overflow-hidden'>Type</th>
+                                                <th className='p-1.5 overflow-hidden'>Score</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {assessmentData[semester].map((assessment, i) => (
+                                                <tr key={i} className={`text-left ${i % 2 === 0 ? 'bg-white' : 'bg-gray-100'} hover:bg-gray-200`}>
+                                                    <td className="p-2">{i + 1}</td>
+                                                    <td className='text-left p-2'>{assessment.assessment_type} ({assessment.percentage}%)</td>
+                                                    <td className="p-2">{assessment.score || 'N/A'}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                    <div className='text-right text-lg p-2'>
+                                        <h3><strong>Total Score: {assessmentData[semester] ? calculateTotalScore(assessmentData[semester]) : 'N/A'} / 100</strong></h3>
+                                    </div>
+                                </div>
+                            ))
+                        }
                     </div>
                 </div>
             </div>

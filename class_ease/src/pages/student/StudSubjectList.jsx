@@ -2,60 +2,106 @@ import React, { useState, useEffect } from "react";
 import '../../styles/StudDashboard.css';
 import '../../styles/Table.css';
 import '../../styles/Dashboard.css';
-import Alert from "../../services/Alert";
 import api from "../../services/api";
+import PropTypes from 'prop-types';
+import { toast } from "sonner"
+import CollapsibleTable from "../admin/SortableTable";
 
-export function SubjectList({ student, allSubjects, toggleAssessment, assessmentSummary }) {
+
+export function SubjectList({ studentAssessment, student, toggleAssessment, assessmentSummary }) {
     return (
         <section className="table-section">
             <div className="list-head">
                 {student.year && (
                     <h3>
                         <span>{`Academic Year: ${student.year}`}</span>
-                        <span style={{ marginLeft: '20px' }}>{`Grade: ${student.grade}`}</span>
-                        <span style={{ marginLeft: '20px' }}>{`Semester: ${student.semester}`}</span>
+                        <span className="ml-5">{`Grade: ${student.grade}`}</span>
+                        <span className="ml-5">{`Semester: ${student.semester}`}</span>
                     </h3>
                 )}
             </div>
 
+            {studentAssessment && studentAssessment.assessment &&
+                (<CollapsibleTable studentAssessment={studentAssessment.assessment}/>)
+            }
             <table className="data-table">
                 <thead>
                     <tr>
                         <th>No.</th>
                         <th>Subject</th>
-                        <th>Average</th>
-                        <th>Rank</th>
+                        <th>Sem I Total</th>
+                        <th>Sem I Rank</th>
+                        <th>Sem II Total</th>
+                        <th>Sem II Rank</th>
+                        <th>Average Total</th>
+                        <th>Average Rank</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {allSubjects.map((subject, index) => (
-                        <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#fff' : '#f1f1f1' }}>
-                            <td>{index + 1}</td>
-                            <td>{subject.subject}</td>
-                            <td>{subject.subject_average}</td>
-                            <td>{subject.rank || 'N/A'}</td>
-                            <td>
-                                <button
-                                    className="detail-btn"
-                                    onClick={() => {
-                                        assessmentSummary(subject);
-                                        toggleAssessment();
-                                    }}
-                                >
-                                    Detail
-                                </button>
+                    {studentAssessment && studentAssessment.assessment &&
+                        studentAssessment.assessment.map((assessment, index) => {
+                            const { subject, avg_total, avg_rank, semI, semII } = assessment;
+                            // Compute averages; adjust logic if necessary
+                            return (
+                                <tr key={index}>
+                                    <td>{index + 1}</td>
+                                    <td>{subject}</td>
+                                    <td>{semI.total !== null ? semI.total : '-'}</td>
+                                    <td>{semI.rank !== null ? semI.rank : '-'}</td>
+                                    <td>{semII.total !== null ? semII.total : '-'}</td>
+                                    <td>{semII.rank !== null ? semII.rank : '-'}</td>
+                                    <td>{avg_total}</td>
+                                    <td>{avg_rank}</td>
+                                    <td>
+                                        <button
+                                            className="detail-btn"
+                                            onClick={() => {
+                                                assessmentSummary({ ...student, subject_id: assessment.subject_id });
+                                                toggleAssessment();
+                                            }}
+                                        >
+                                            Detail
+                                        </button>
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    <tr>
+                        {studentAssessment && studentAssessment.summary &&
+                            (<td colSpan="9" className="bg-gray-100 py-4">
+                                <div className="flex justify-between items-center px-6 mr-28">
+                                    {/* Total Section */}
+                                    <div className="text-lg font-semibold text-gray-700">Total</div>
+                                    {studentAssessment.summary.semesters.map((semester, index) => (
+                                        <React.Fragment key={index}>
+                                            {/* Semester I Section */}
+                                            <div className="text-center">
+                                                <div className="text-sm font-medium text-gray-600">Semester {semester.semester}</div>
+                                                <div className="text-lg font-bold text-gray-800">{semester.semester_average}</div>
+                                                <div className="text-sm text-gray-500">Rank: {semester.semester_rank}</div>
+                                            </div>
+                                        </React.Fragment>
+                                    ))}
+
+                                    {/* Average Section */}
+                                    <div className="text-center">
+                                        <div className="text-sm font-medium text-gray-600">Average</div>
+                                        <div className="text-lg font-bold text-green-600">{studentAssessment.summary.final_score}</div>
+                                        <div className="text-sm text-gray-500">Rank: {studentAssessment.summary.final_rank}</div>
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-between items-center px-6 mr-28 mt-5">
+                                    {/* status */}
+                                    <div className="text-lg font-semibold text-gray-700">Academic Status: <span className="text-lg font-bold text-green-600">Pending</span></div>
+                                </div>
                             </td>
-                        </tr>
-                    ))}
-                    <tr className="summary-row">
-                        <td colSpan="3">Total Average</td>
-                        <td>{student.semester_average}</td>
-                        <td>Rank: {student.rank}</td>
+                            )}
                     </tr>
                 </tbody>
-            </table>
-        </section>
+            </table >
+        </section >
     );
 }
 
@@ -85,7 +131,6 @@ export function SubjectList({ student, allSubjects, toggleAssessment, assessment
  */
 const StudentSubjectList = ({ toggleAssessment, assessmentSummary }) => {
     const [selectedSemester, setSelectedSemester] = useState(1);
-    const [alert, setAlert] = useState({ type: "", message: "", show: false });
     const [gradeAssigned, setGradeAssigned] = useState([]);
     const [selectedGrade, setSelectedGrade] = useState(gradeAssigned.length > 0 ? gradeAssigned[0] : null);
     const [allSubjects, setAllSubjects] = useState([]);
@@ -112,31 +157,20 @@ const StudentSubjectList = ({ toggleAssessment, assessmentSummary }) => {
             setAllSubjects(response.data['student_assessment']);
             setStudent(response.data['student']);
         } catch (error) {
-            const errorMessage = error.response?.data?.error || "An unexpected error occurred.";
+            if (error.response && error.response.data && error.response.data['error']) {
+                toast.error(error.response.data['error'], {
+                    description: "Please try again later, if the problem persists, contact the administrator.",
+                    style: { color: 'red' }
+                });
+            } else {
+                toast.error("An unexpected error occurred.", {
+                    description: "Please try again later, if the problem persists, contact the administrator.",
+                    style: { color: 'red' }
+                });
+            }
             setAllSubjects([]);
             setStudent({});
-            showAlert("warning", errorMessage);
         }
-    };
-
-    /**
-     * @function showAlert
-     * @description Sets the alert message and type.
-     * @param {string} type - The type of alert (e.g., "warning", "success").
-     * @param {string} message - The alert message.
-     * @returns {void}
-     */
-    const showAlert = (type, message) => {
-        setAlert({ type, message, show: true });
-    };
-
-    /**
-     * @function closeAlert
-     * @description Closes the alert.
-     * @returns {void}
-     */
-    const closeAlert = () => {
-        setAlert({ ...alert, show: false });
     };
 
     /**
@@ -158,31 +192,40 @@ const StudentSubjectList = ({ toggleAssessment, assessmentSummary }) => {
         setSelectedGrade(parseFloat(e.target.value));
     };
 
-    /**
-     * @function fetchAssignedGrade
-     * @description Fetches the assigned grade for the student.
-     * @async
-     * @returns {Promise<void>} A promise that resolves when the grade is fetched.
-     * @throws {Error} An error if the grade fetch fails.
-     * @throws {string} An error message if the grade fetch fails.
-     * @throws {number[]} An array of assigned grades if the fetch is successful.
-     */
-    const fetchAssignedGrade = async () => {
-        try {
-            const response = await api.get('/student/assigned_grade');
-            setGradeAssigned(response.data['grade']);
-            setSelectedGrade(response.data['grade'][0]);
-        } catch (error) {
-            const errorMessage = error.response?.data?.error || "An unexpected error occurred.";
-            showAlert("warning", errorMessage);
-        }
-    };
 
     /**
      * @hook useEffect
      * @description Fetches the assigned grade when the component mounts.
      */
     useEffect(() => {
+        /**
+         * @function fetchAssignedGrade
+         * @description Fetches the assigned grade for the student.
+         * @async
+         * @returns {Promise<void>} A promise that resolves when the grade is fetched.
+         * @throws {Error} An error if the grade fetch fails.
+         * @throws {string} An error message if the grade fetch fails.
+         * @throws {number[]} An array of assigned grades if the fetch is successful.
+         */
+        const fetchAssignedGrade = async () => {
+            try {
+                const response = await api.get('/student/assigned_grade');
+                setGradeAssigned(response.data['grade']);
+                setSelectedGrade(response.data['grade'][0]);
+            } catch (error) {
+                if (error.response && error.response.data && error.response.data['error']) {
+                    toast.error(error.response.data['error'], {
+                        description: "Please try again later, if the problem persists, contact the administrator.",
+                        style: { color: 'red' }
+                    });
+                } else {
+                    toast.error("An unexpected error occurred.", {
+                        description: "Please try again later, if the problem persists, contact the administrator.",
+                        style: { color: 'red' }
+                    });
+                }
+            }
+        };
         fetchAssignedGrade();
     }, []);
 
@@ -224,20 +267,23 @@ const StudentSubjectList = ({ toggleAssessment, assessmentSummary }) => {
                     Search
                 </button>
             </section>
-            <Alert
-                type={alert.type}
-                message={alert.message}
-                show={alert.show}
-                onClose={closeAlert}
-            />
             <SubjectList
-                allSubjects={allSubjects}
                 student={student}
                 toggleAssessment={toggleAssessment}
                 assessmentSummary={assessmentSummary}
             />
         </div>
     );
+};
+SubjectList.propTypes = {
+    studentAssessment: PropTypes.object,
+    student: PropTypes.shape({
+        year: PropTypes.string,
+        grade: PropTypes.string,
+        semester: PropTypes.string,
+    }),
+    toggleAssessment: PropTypes.func.isRequired,
+    assessmentSummary: PropTypes.func.isRequired,
 };
 
 export default StudentSubjectList;

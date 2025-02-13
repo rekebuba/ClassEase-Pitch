@@ -15,6 +15,7 @@ from models.section import Section
 from models.mark_list import MarkList
 from models.assessment import Assessment
 from models.average_result import AVRGResult
+from models.average_subject import AVRGSubject
 from models.stud_yearly_record import StudentYearlyRecord
 from models.teacher_record import TeachersRecord
 from sqlalchemy import update, select, and_
@@ -398,6 +399,17 @@ def assign_class(admin_data):
                     .values(teachers_record_id=teacher_record.id)
                 )
 
+                # Update the AVRGSubject table
+                storage.get_session().execute(
+                    update(AVRGSubject)
+                    .where(and_(
+                        AVRGSubject.grade_id == grade_id,
+                        AVRGSubject.subject_id == subject.id,
+                        AVRGSubject.year == data['mark_list_year']
+                    ))
+                    .values(teachers_record_id=teacher_record.id)
+                )
+
                 # Commit the final updates to the database
                 storage.save()
     except Exception as e:
@@ -540,6 +552,7 @@ def create_mark_list(admin_data):
 
         mark_lists = []  # A list to hold mark_list objects
         assessments = []  # A list to hold assessment objects
+        average_subject = []
         average_result = []
 
         for student in students:
@@ -566,6 +579,23 @@ def create_mark_list(admin_data):
                                )
                 )
 
+                avg_subject = storage.get_first(AVRGSubject,
+                                                student_id=student.student_id,
+                                                grade_id=grade_id,
+                                                subject_id=subject.id,
+                                                section_id=student.section_id,
+                                                year=data['year']
+                                                )
+                if not avg_subject:
+                    average_subject.append(
+                        AVRGSubject(
+                            student_id=student.student_id,
+                            grade_id=grade_id,
+                            subject_id=subject.id,
+                            section_id=student.section_id,
+                            year=data['year']
+                        ))
+
             average_result.append(
                 AVRGResult(student_id=student.student_id,
                            grade_id=grade_id,
@@ -579,6 +609,8 @@ def create_mark_list(admin_data):
         storage.get_session().bulk_save_objects(mark_lists)
         storage.get_session().bulk_save_objects(assessments)
         storage.get_session().bulk_save_objects(average_result)
+        if average_subject:
+            storage.get_session().bulk_save_objects(average_subject)
 
         storage.save()
     except Exception as e:
@@ -715,7 +747,9 @@ def admin_student_list(admin_data):
                Student.grand_father_name,
                Section.section,
                Section.id,
-               StudentYearlyRecord.grade_id
+               StudentYearlyRecord.grade_id,
+               StudentYearlyRecord.final_score,
+               StudentYearlyRecord.rank
                )
         .select_from(StudentYearlyRecord)
         .join(Student, Student.id == StudentYearlyRecord.student_id)
@@ -744,7 +778,7 @@ def admin_student_list(admin_data):
         return jsonify({"error": "No student found"}), 404
 
     student_list = []
-    for id, name, f_name, g_name, section, section_id, grade_id in paginated_result['items']:
+    for id, name, f_name, g_name, section, section_id, grade_id, final_score, rank in paginated_result['items']:
         student_list.append({
             "student_id": id,
             "name": name,
@@ -753,6 +787,8 @@ def admin_student_list(admin_data):
             "section": section,
             "section_id": section_id,
             "grade_id": grade_id,
+            "final_score": final_score,
+            "rank": rank,
             "year": data['year'][0],
         })
 
@@ -809,9 +845,13 @@ def student_assessment(admin_data):
         storage.get_session()
         .query(Subject.code,
                Subject.name,
+               Assessment.subject_id,
                Assessment.semester,
                Assessment.total,
                Assessment.rank,
+               AVRGSubject.average,
+               AVRGSubject.rank,
+               Assessment.year
                )
         .select_from(Assessment)
         .join(TeachersRecord, TeachersRecord.id == Assessment.teachers_record_id)
@@ -820,6 +860,10 @@ def student_assessment(admin_data):
                                AVRGResult.grade_id == Assessment.grade_id,
                                AVRGResult.semester == Assessment.semester,
                                AVRGResult.year == Assessment.year))
+        .join(AVRGSubject, and_(AVRGSubject.student_id == Assessment.student_id,
+                                AVRGSubject.grade_id == Assessment.grade_id,
+                                AVRGSubject.subject_id == Assessment.subject_id,
+                                AVRGSubject.year == Assessment.year))
         .filter(
             Assessment.student_id == student_id,
             Assessment.grade_id == grade_id,
@@ -832,20 +876,113 @@ def student_assessment(admin_data):
         return jsonify({"error": "Student not found"}), 404
 
     student_assessment = {}
-    for code, name, semester, total, rank in query:
+    for code, name, subject_id, semester, total, rank, avg_total, avg_rank, year in query:
         if code not in student_assessment:
             # Initialize with placeholders for semesters
             student_assessment[code] = {
                 "subject": name,
+                "subject_id": subject_id,
+                "avg_total": avg_total,
+                "avg_rank": avg_rank,
+                "year": year,
                 "semI": {"total": None, "rank": None},
                 "semII": {"total": None, "rank": None},
             }
         if semester == 1:
-            student_assessment[code]["semI"] = {"total": total, "rank": rank}
+            student_assessment[code][f"semI"] = {"total": total, "rank": rank}
         elif semester == 2:
             student_assessment[code]["semII"] = {"total": total, "rank": rank}
 
-    return jsonify(list(student_assessment.values())), 200
+    summary = (
+        storage.get_session()
+        .query(AVRGResult.semester,
+               AVRGResult.average,
+               AVRGResult.rank,
+               StudentYearlyRecord.final_score,
+               StudentYearlyRecord.rank
+               )
+        .select_from(AVRGResult)
+        .join(StudentYearlyRecord, and_(StudentYearlyRecord.student_id == AVRGResult.student_id,
+                                        StudentYearlyRecord.grade_id == AVRGResult.grade_id,
+                                        StudentYearlyRecord.year == AVRGResult.year))
+        .filter(AVRGResult.student_id == student_id)
+        .order_by(AVRGResult.semester)
+    ).all()
+
+    if not summary:
+        return jsonify({"error": "Summary not found"}), 404
+
+    summary_result = {
+        "final_score": summary[0][3],
+        "final_rank": summary[0][4],
+        "semesters": []
+    }
+
+    for semester, semester_average, semester_rank, _, _ in summary:
+        summary_result['semesters'].append({
+            "semester": semester,
+            "semester_average": semester_average,
+            "semester_rank": semester_rank,
+        })
+
+    return jsonify({"assessment": list(student_assessment.values()), "summary": summary_result}), 200
+
+
+@auth.route('/student/assessment/report', methods=['GET'])
+@admin_required
+def student_assessment_report(admin_data):
+    url = request.url
+    parsed_url = urlparse(url)
+    data = parse_qs(parsed_url.query)
+
+    required_data = {
+        'student_id',
+        'grade_id',
+        'subject_id',
+        'section_id',
+        'year'
+    }
+
+    for field in required_data:
+        if field not in data:
+            return jsonify({"error": f"Missing {field}"}), 400
+
+    student_id = data['student_id'][0]
+    grade_id = data['grade_id'][0]
+    subject_id = data['subject_id'][0]
+    section_id = data['section_id'][0]
+    year = data['year'][0]
+
+    try:
+        query = (
+            storage.get_session()
+            .query(MarkList.type,
+                   MarkList.score,
+                   MarkList.percentage,
+                   MarkList.semester
+                   )
+            .filter(MarkList.student_id == student_id,
+                    MarkList.grade_id == grade_id,
+                    MarkList.subject_id == subject_id,
+                    MarkList.section_id == section_id,
+                    MarkList.year == year,
+                    )
+            .order_by(MarkList.percentage.asc(), MarkList.type.asc())
+        ).all()
+
+        assessment = {}
+        for type, score, percentage, semester in query:
+            if semester not in assessment:
+                assessment[semester] = []
+            assessment[semester].append({
+                "assessment_type": type,
+                "score": score,
+                "percentage": percentage,
+            })
+    except Exception as e:
+        return jsonify({"error": f"Failed to retrieve student assessment"}), 500
+
+    return jsonify(assessment), 200
 
 
 @auth.route('/teachers', methods=['GET'])

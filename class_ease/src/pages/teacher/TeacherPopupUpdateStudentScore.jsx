@@ -58,7 +58,7 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData,
         }
         fetchIndividualAssessment();
     }, [studentData, fetchIndividualAssessment]);
-    
+
     /**
      * @function handleScoreChange
      * @description Updates the score of an assessment.
@@ -123,7 +123,7 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData,
     };
 
     const calculateTotalScore = (assessments) => {
-        return assessments.reduce((total, item) => total + item.score, 0);
+        return parseFloat(assessments.reduce((total, item) => total + item.score, 0).toFixed(2));
     };
 
     return (
@@ -139,7 +139,9 @@ const TeacherPopupUpdateStudentScore = ({ isOpen, toggleAssessment, studentData,
                                 setUpdateAssessmentData([]);
                                 toggleAssessment();
                             }}
-                        ><FaTimes size={15} /></Button>
+                        >
+                            <FaTimes size={15} />
+                        </Button>
                     </div>
                     <table className='w-full text-left border-collapse'>
                         <thead>

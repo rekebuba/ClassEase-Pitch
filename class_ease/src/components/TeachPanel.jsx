@@ -46,7 +46,7 @@ const TeacherPanel = () => {
          * @param {string} error.response.data['error'] - The error message from the API response.
          */
         const fetchAdmin = async () => {
-            try {
+        try {
                 const response = await api.get('/teacher/dashboard');
                 setTeacherData(response.data);
             } catch (error) {
