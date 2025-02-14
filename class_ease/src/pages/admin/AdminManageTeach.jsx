@@ -1,18 +1,15 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { AdminHeader, AdminPanel } from "@/components/layout";
+import { AdminTeacherProfile, AdminTeacherList, AdminAssignTeacher } from "@/features/admin";
 import "../../styles/AdminManageStudents.css";
-import AdminPanel from "../../components/AdminPanel";
-import AdminHeader from "../../components/AdminHeader";
-import AdminTeachProfile from "./AdminTeachProfile";
-import AdminTeachList from "./AdminTeachList";
-import AssignTeacher from "./AdminAssignTeacher";
 
 /**
- * AdminManageStudents component manages the state and rendering of the admin panel for managing teachers.
+ * AdminManageTeacher component manages the state and rendering of the admin panel for managing teachers.
  * 
  * @component
  * @example
  * return (
- *   <AdminManageStudents />
+ *   <AdminManageTeacher />
  * )
  * 
  * @returns {JSX.Element} The rendered component.
@@ -22,13 +19,13 @@ import AssignTeacher from "./AdminAssignTeacher";
  * It also manages the summary data of a selected teacher.
  * 
  * @function
- * @name AdminManageStudents
+ * @name AdminManageTeacher
  * 
  * @property {boolean} isDetailOpen - State to track if the detail profile is open.
  * @property {boolean} isEditOpen - State to track if the edit profile is open.
  * @property {Object} teacherSummary - State to store the summary data of a selected teacher.
  */
-const AdminManageStudents = () => {
+const AdminManageTeacher = () => {
 
     const [isDetailOpen, setIsDetailOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
@@ -89,12 +86,12 @@ const AdminManageStudents = () => {
             <AdminPanel />
             <main className="content">
                 <AdminHeader />
-                <AdminTeachList toggleDropdown={toggleDropdown} teacherSummary={summary} />
-                <AdminTeachProfile isDetailOpen={isDetailOpen} toggleDetailProfile={toggleDetailProfile} teacherData={teacherSummary} />
-                <AssignTeacher isEditOpen={isEditOpen} toggleEditProfile={toggleEditProfile} teacherData={teacherSummary} />
+                <AdminTeacherList toggleDropdown={toggleDropdown} teacherSummary={summary} />
+                <AdminTeacherProfile isDetailOpen={isDetailOpen} toggleDetailProfile={toggleDetailProfile} teacherData={teacherSummary} />
+                <AdminAssignTeacher isEditOpen={isEditOpen} toggleEditProfile={toggleEditProfile} teacherData={teacherSummary} />
             </main>
         </div>
     );
 };
 
-export default AdminManageStudents;
+export default AdminManageTeacher;

@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { AdminHeader, AdminPanel } from "@/components/layout";
+import { toast } from "sonner"
+import { api } from "@/api";
 import '../../styles/updateProfile.css';
-import AdminHeader from '../../components/AdminHeader';
-import AdminPanel from '../../components/AdminPanel';
-import api from '../../services/api';
-import Alert from '../../services/Alert';
 
 /**
  * AdminUpdateProfile component allows an admin to view and update their profile information.
@@ -38,7 +37,6 @@ const AdminUpdateProfile = () => {
     const [formData, setFormData] = useState({});
     const [previewImage, setPreviewImage] = useState('');
     const [editMode, setEditMode] = useState(false);
-    const [alert, setAlert] = useState({ type: "", message: "", show: false });
 
     /**
      * @function handleChange
@@ -89,14 +87,21 @@ const AdminUpdateProfile = () => {
     const saveAdminData = async () => {
         try {
             const response = await api.put(`/admin/update-profile`, formData);
-            console.log(response.data);
-            showAlert("success", response.data.message);
+            toast.success(response.data['message'], {
+                description: currentTime,
+                style: { color: 'green' }
+            });
         } catch (error) {
-            if (error.response && error.response.data) {
-                showAlert("warning", error.response.data['error']);
-            }
-            else {
-                showAlert("warning", "An unexpected error occurred.");
+            if (error.response && error.response.data && error.response.data['error']) {
+                toast.error(error.response.data['error'], {
+                    description: "Please try again later, if the problem persists, contact the administrator.",
+                    style: { color: 'red' }
+                });
+            } else {
+                toast.error("An unexpected error occurred.", {
+                    description: "Please try again later, if the problem persists, contact the administrator.",
+                    style: { color: 'red' }
+                });
             }
         }
     };
@@ -109,26 +114,6 @@ const AdminUpdateProfile = () => {
     const handleSave = () => {
         setEditMode(false);
         saveAdminData();
-    };
-
-    /**
-     * @function showAlert
-     * @description Displays an alert with the specified type and message.
-     * @param {string} type - The type of the alert (e.g., "success", "warning").
-     * @param {string} message - The message to display in the alert.
-     * @returns {void}
-     */
-    const showAlert = (type, message) => {
-        setAlert({ type, message, show: true });
-    };
-
-    /**
-     * @function closeAlert
-     * @description Closes the alert.
-     * @returns {void}
-     */
-    const closeAlert = () => {
-        setAlert({ ...alert, show: false });
     };
 
     /**
@@ -255,12 +240,6 @@ const AdminUpdateProfile = () => {
                             </button>
                         )}
                     </div>
-                    <Alert
-                        type={alert.type}
-                        message={alert.message}
-                        show={alert.show}
-                        onClose={closeAlert}
-                    />
                 </div>
             </main>
         </div>

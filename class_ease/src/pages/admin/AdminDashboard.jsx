@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
+import { AdminHeader, AdminPanel } from "@/components/layout";
+import { AdminStudentPerformance } from "@/features/admin";
+import { api } from "@/api";
 import "../../styles/Dashboard.css";
 import "../../styles/AdminDashboard.css";
 import '../../styles/Table.css';
-import api from "../../services/api";
-import AdminPanel from "../../components/AdminPanel";
-import AdminHeader from "../../components/AdminHeader";
-import AdminStudPerformance from "./AdminStudPerformance";
 
 /**
  * AdminDashboard component renders the main dashboard for the admin panel.
@@ -89,7 +88,7 @@ const AdminDashboard = () => {
               </div>
             </div>
           </section>
-          <AdminStudPerformance
+          <AdminStudentPerformance
             enrollmentByGrade={overview.enrollment_by_grade}
             performanceBySubject={overview.performance_by_subject}
           />

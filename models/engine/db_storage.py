@@ -18,6 +18,7 @@ from models.average_result import AVRGResult
 from models.average_subject import AVRGSubject
 from models.stud_yearly_record import StudentYearlyRecord
 from models.teacher_record import TeachersRecord
+from models.blacklist_token import BlacklistToken
 from datetime import datetime
 
 

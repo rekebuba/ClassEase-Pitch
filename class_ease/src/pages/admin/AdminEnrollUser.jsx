@@ -1,8 +1,6 @@
-import React from 'react';
-import AdminPanel from '../../components/AdminPanel';
-import AdminHeader from '../../components/AdminHeader';
-import StudentRegistrationForm from '../student/StudentRegistrationForm';
-import TeacherRegistrationForm from '../teacher/TeacherRegistrationForm';
+import { AdminHeader, AdminPanel } from "@/components/layout";
+import { StudentRegistrationForm } from "@/pages/student";
+import { TeacherRegistrationForm } from "@/features/teacher";
 
 /**
  * AdminEnrollStud component renders the admin dashboard container with the appropriate registration form

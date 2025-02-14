@@ -1,44 +1,43 @@
 import { useState, useEffect } from 'react';
-import { TeacherHeader, TeacherPanel } from "@/components/layout";
-import { api } from '@/api';
+import { StudentPanel } from "@/components/layout";
+import { api } from "@/api";
 import { toast } from "sonner"
 import '../../styles/updateProfile.css';
 
 /**
- * TeacherUpdateProfile component allows teachers to update their profile information.
- * It includes functionalities for loading existing teacher data, handling form changes,
- * previewing profile pictures, and saving updated data.
+ * Component for updating student profile.
  *
  * @component
  * @example
  * return (
- *   <TeacherUpdateProfile />
+ *   <StudentUpdateProfile />
  * )
  *
  * @returns {JSX.Element} The rendered component.
  *
- * @function
- * @name TeacherUpdateProfile
- *
  * @description
- * This component manages the state for form data, preview image, edit mode, and alert messages.
- * It provides functions to handle form changes, load teacher data from the server, save updated
- * data to the server, and display alert messages.
+ * This component allows students to update their profile information. It includes fields for profile picture, name, date of birth, father's phone, mother's phone, and password. The component fetches the current student data on mount and displays it. Users can toggle between view and edit modes. In edit mode, users can update their information and save changes.
  *
- * @property {Object} formData - The state object holding the form data.
+ * @function
+ * @name StudentUpdateProfile
+ *
+ * @property {Object} formData - The state object holding form data.
  * @property {string} previewImage - The state string holding the URL of the preview image.
- * @property {boolean} editMode - The state boolean indicating whether the form is in edit mode.
- * @property {Object} alert - The state object holding alert message details.
+ * @property {boolean} editMode - The state boolean indicating if the form is in edit mode.
+ * @property {Object} alert - The state object holding alert information.
+ * @property {string} alert.type - The type of alert (e.g., "success", "warning").
+ * @property {string} alert.message - The alert message.
+ * @property {boolean} alert.show - Boolean indicating if the alert is visible.
  */
-const TeacherUpdateProfile = () => {
+const StudentUpdateProfile = () => {
     const [formData, setFormData] = useState({});
     const [previewImage, setPreviewImage] = useState('');
     const [editMode, setEditMode] = useState(false);
 
     /**
      * @function handleChange
-     * @description Handles changes in the form inputs and updates the formData state.
-     * @param {Object} e - The event object.
+     * @description Handles changes to form inputs and updates the state.
+     * @param {Event} e - The event object.
      * @returns {void}
      */
     const handleChange = (e) => {
@@ -53,18 +52,16 @@ const TeacherUpdateProfile = () => {
     };
 
     /**
-     * @function loadTeacherData
-     * @description Loads the teacher's data from the server and updates the formData and previewImage states.
+     * @function loadStudentData
+     * @description Fetches student data from the API and updates the state.
      * @returns {void}
      * @async
-     * @throws {error} Any error while fetching the data.
-     * @throws {error.response.data.message} The error message received from the server.
+     * @throws {error} Any error while fetching data.
      */
-    const loadTeacherData = async () => {
+    const loadStudentData = async () => {
         try {
-            const response = await api.get(`/teacher/dashboard`);
+            const response = await api.get(`/student/dashboard`);
             const data = response.data;
-            console.log(data);
             setFormData(data);
             if (data.profilePicture) {
                 setPreviewImage(data.profilePicture);
@@ -77,18 +74,18 @@ const TeacherUpdateProfile = () => {
     };
 
     /**
-     * @function saveTeacherData
-     * @description Sends the updated formData to the server to save the changes.
+     * @function saveStudentData
+     * @description Sends updated student data to the API to save changes.
      * @returns {void}
      * @async
-     * @throws {error} Any error while saving the data.
-     * @throws {error.response.data.error} The error message received from the server.
-     * @throws {error.response.data.message} The success message received from the server.
-     * @throws {error.response.data} The unexpected error message received from the server.
+     * @throws {error} Any error while saving data.
+     * @throws {error} An error if the form submission fails.
+     * @throws {error} An unexpected error occurred.
      */
-    const saveTeacherData = async () => {
+    const saveStudentData = async () => {
         try {
-            const response = await api.put(`/teacher/update-profile`, formData);
+            const response = await api.put(`/student/update-profile`, formData);
+            console.log(response.data);
             toast.success(response.data['message'], {
                 description: currentTime,
                 style: { color: 'green' }
@@ -110,29 +107,31 @@ const TeacherUpdateProfile = () => {
 
     /**
      * @function handleSave
-     * @description Disables edit mode and calls saveTeacherData to save the changes.
+     * @description Handles the save button click, toggles edit mode off, and saves student data.
      * @returns {void}
      */
     const handleSave = () => {
         setEditMode(false);
-        saveTeacherData();
+        saveStudentData();
     };
 
     /**
      * @hook useEffect
-     * @description Loads the teacher's data when the component mounts.
+     * @description Loads student data on component mount.
      * @returns {void}
      */
     useEffect(() => {
-        loadTeacherData();
+        loadStudentData();
     }, []);
 
     return (
         <div className="admin-manage-container">
-            <TeacherPanel />
+            <StudentPanel />
             <main className="content">
+                <header className="dashboard-header">
+                    <div className="dashboard-logo">ClassEase School</div>
+                </header>
                 <div className="user-profile">
-                    <TeacherHeader />
                     <h2>User Profile</h2>
 
                     <div className="profile-details">
@@ -145,59 +144,52 @@ const TeacherUpdateProfile = () => {
                         <div className='profile-data'>
                             <div className="profile-form-group">
                                 <label>Name</label>
+                                <p>{formData.name} {formData.father_name} {formData.grand_father_name}</p>
+                            </div>
+                            <div className="profile-form-group">
+                                <label htmlFor="dateOfBirth">Date of Birth</label>
                                 {editMode ? (
                                     <input
-                                        type="text"
-                                        name="first_name"
-                                        value={formData.first_name || ''}
+                                        type="date"
+                                        id="dateOfBirth"
+                                        name="date_of_birth"
+                                        value={formData.date_of_birth || ''}
                                         onChange={handleChange}
+                                        required
                                     />
                                 ) : (
-                                    <p>{formData.first_name}</p>
+                                    <p>{formData.date_of_birth}</p>
                                 )}
                             </div>
 
                             <div className="profile-form-group" style={{ marginBottom: '15px' }}>
-                                <label>Email</label>
-                                {editMode ? (
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        value={formData.email || ''}
-                                        onChange={handleChange}
-                                    />
-                                ) : (
-                                    <p>{formData.email}</p>
-                                )}
-                            </div>
-
-                            <div className="profile-form-group" style={{ marginBottom: '15px' }}>
-                                <label>Phone</label>
+                                <label>Father Phone</label>
                                 {editMode ? (
                                     <input
                                         type="tel"
-                                        name="phone"
-                                        value={formData.phone || ''}
+                                        name="father_phone"
+                                        value={formData.father_phone || ''}
                                         onChange={handleChange}
                                     />
                                 ) : (
-                                    <p>{formData.phone}</p>
+                                    <p>{formData.father_phone}</p>
                                 )}
                             </div>
 
                             <div className="profile-form-group" style={{ marginBottom: '15px' }}>
-                                <label>Address</label>
+                                <label>Mother Phone</label>
                                 {editMode ? (
                                     <input
-                                        type="text"
-                                        name="address"
-                                        value={formData.address || ''}
+                                        type="tel"
+                                        name="mother_phone"
+                                        value={formData.mother_phone || ''}
                                         onChange={handleChange}
                                     />
                                 ) : (
-                                    <p>{formData.address}</p>
+                                    <p>{formData.mother_phone}</p>
                                 )}
                             </div>
+
                             {editMode &&
                                 <div className="profile-form-group" style={{ marginBottom: '15px' }}>
                                     <label>Current Password</label>
@@ -248,4 +240,4 @@ const TeacherUpdateProfile = () => {
     );
 };
 
-export default TeacherUpdateProfile;
+export default StudentUpdateProfile;

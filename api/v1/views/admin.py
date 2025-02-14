@@ -24,10 +24,10 @@ from api.v1.views.utils import admin_required
 from api.v1.views.methods import paginate_query
 
 
-auth = Blueprint('auth', __name__, url_prefix='/api/v1/admin')
+admin = Blueprint('admin', __name__, url_prefix='/api/v1/admin')
 
 
-@auth.route('/dashboard', methods=['GET'])
+@admin.route('/dashboard', methods=['GET'])
 @admin_required
 def admin_dashboard(admin_data):
     """
@@ -49,7 +49,7 @@ def admin_dashboard(admin_data):
     return jsonify(admin_data.to_dict()), 200
 
 
-@auth.route('/update-profile', methods=['PUT'])
+@admin.route('/update-profile', methods=['PUT'])
 @admin_required
 def update_admin_profile(admin_data):
     """
@@ -112,7 +112,7 @@ def update_admin_profile(admin_data):
     return jsonify({"message": "Profile Updated Successfully"}), 200
 
 
-@auth.route('/overview', methods=['GET'])
+@admin.route('/overview', methods=['GET'])
 @admin_required
 def school_overview(admin_data):
     """
@@ -164,7 +164,7 @@ def school_overview(admin_data):
     }), 200
 
 
-@auth.route('/registration', methods=['POST'])
+@admin.route('/registration', methods=['POST'])
 def register_new_admin():
     """
     Registers a new admin user.
@@ -211,7 +211,7 @@ def register_new_admin():
     return jsonify({"message": "Admin registered successfully!"}), 201
 
 
-@auth.route('/teachers/registration', methods=['POST'])
+@admin.route('/teachers/registration', methods=['POST'])
 # @admin_required
 def register_new_teacher():
     """
@@ -281,7 +281,7 @@ def register_new_teacher():
     return jsonify({"message": "Teacher registered successfully!"}), 201
 
 
-@auth.route('/assign-teacher', methods=['PUT'])
+@admin.route('/assign-teacher', methods=['PUT'])
 @admin_required
 def assign_class(admin_data):
     """
@@ -419,7 +419,7 @@ def assign_class(admin_data):
     return jsonify({"message": "Teacher assigned successfully!"}), 201
 
 
-@auth.route('/students/mark_list', methods=['PUT'])
+@admin.route('/students/mark_list', methods=['PUT'])
 @admin_required
 def create_mark_list(admin_data):
     """
@@ -620,7 +620,7 @@ def create_mark_list(admin_data):
     return jsonify({"message": "Mark list created successfully!"}), 201
 
 
-@auth.route('/students/mark_list', methods=['GET'])
+@admin.route('/students/mark_list', methods=['GET'])
 @admin_required
 def show_mark_list(admin_data):
     """
@@ -689,7 +689,7 @@ def show_mark_list(admin_data):
     return jsonify(student_list), 200
 
 
-@auth.route('/manage/students', methods=['GET'])
+@admin.route('/manage/students', methods=['GET'])
 @admin_required
 def admin_student_list(admin_data):
     """
@@ -738,6 +738,8 @@ def admin_student_list(admin_data):
     page = int(data['page'][0]) if 'page' in data else 1
     limit = int(data['limit'][0]) if 'limit' in data else 10
     search_term = data['search'][0] if 'search' in data else None
+    order_by = data['order_by'][0] if 'order_by' in data else None
+    order = data['order'][0] if 'order' in data else None
 
     query = (
         storage.get_session()
@@ -758,7 +760,7 @@ def admin_student_list(admin_data):
             StudentYearlyRecord.grade_id == grade.id,
             StudentYearlyRecord.year == data['year'][0]
         )
-        .order_by(Section.section.asc(), Student.name.asc(), Student.father_name.asc(), Student.grand_father_name.asc(), Student.id.asc())
+        .order_by(StudentYearlyRecord.final_score.asc() if order == 'asc' else StudentYearlyRecord.final_score.desc() if order_by == 'final_score' else Section.section.asc(), Student.name.asc(), Student.father_name.asc(), Student.grand_father_name.asc(), Student.id.asc())
     )
 
     if search_term:
@@ -799,7 +801,7 @@ def admin_student_list(admin_data):
     }), 200
 
 
-@auth.route('/student/assessment', methods=['GET'])
+@admin.route('/student/assessment', methods=['GET'])
 @admin_required
 def student_assessment(admin_data):
     """
@@ -843,9 +845,11 @@ def student_assessment(admin_data):
 
     query = (
         storage.get_session()
-        .query(Subject.code,
+        .query(Assessment.student_id,
+               Subject.code,
                Subject.name,
                Assessment.subject_id,
+               Assessment.grade_id,
                Assessment.semester,
                Assessment.total,
                Assessment.rank,
@@ -856,10 +860,6 @@ def student_assessment(admin_data):
         .select_from(Assessment)
         .join(TeachersRecord, TeachersRecord.id == Assessment.teachers_record_id)
         .join(Subject, Assessment.subject_id == Subject.id)
-        .join(AVRGResult, and_(AVRGResult.student_id == Assessment.student_id,
-                               AVRGResult.grade_id == Assessment.grade_id,
-                               AVRGResult.semester == Assessment.semester,
-                               AVRGResult.year == Assessment.year))
         .join(AVRGSubject, and_(AVRGSubject.student_id == Assessment.student_id,
                                 AVRGSubject.grade_id == Assessment.grade_id,
                                 AVRGSubject.subject_id == Assessment.subject_id,
@@ -876,12 +876,14 @@ def student_assessment(admin_data):
         return jsonify({"error": "Student not found"}), 404
 
     student_assessment = {}
-    for code, name, subject_id, semester, total, rank, avg_total, avg_rank, year in query:
+    for student_id, code, name, subject_id, grade_id, semester, total, rank, avg_total, avg_rank, year in query:
         if code not in student_assessment:
             # Initialize with placeholders for semesters
             student_assessment[code] = {
+                "student_id": student_id,
                 "subject": name,
                 "subject_id": subject_id,
+                "grade_id": grade_id,
                 "avg_total": avg_total,
                 "avg_rank": avg_rank,
                 "year": year,
@@ -928,7 +930,7 @@ def student_assessment(admin_data):
     return jsonify({"assessment": list(student_assessment.values()), "summary": summary_result}), 200
 
 
-@auth.route('/student/assessment/report', methods=['GET'])
+@admin.route('/student/assessment/report', methods=['GET'])
 @admin_required
 def student_assessment_report(admin_data):
     url = request.url
@@ -939,7 +941,6 @@ def student_assessment_report(admin_data):
         'student_id',
         'grade_id',
         'subject_id',
-        'section_id',
         'year'
     }
 
@@ -950,7 +951,6 @@ def student_assessment_report(admin_data):
     student_id = data['student_id'][0]
     grade_id = data['grade_id'][0]
     subject_id = data['subject_id'][0]
-    section_id = data['section_id'][0]
     year = data['year'][0]
 
     try:
@@ -964,7 +964,6 @@ def student_assessment_report(admin_data):
             .filter(MarkList.student_id == student_id,
                     MarkList.grade_id == grade_id,
                     MarkList.subject_id == subject_id,
-                    MarkList.section_id == section_id,
                     MarkList.year == year,
                     )
             .order_by(MarkList.percentage.asc(), MarkList.type.asc())
@@ -985,7 +984,7 @@ def student_assessment_report(admin_data):
     return jsonify(assessment), 200
 
 
-@auth.route('/teachers', methods=['GET'])
+@admin.route('/teachers', methods=['GET'])
 @admin_required
 def all_teachers(admin_data):
     """

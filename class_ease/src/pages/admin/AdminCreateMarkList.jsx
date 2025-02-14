@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
-import AdminPanel from "../../components/AdminPanel";
-import AdminHeader from "../../components/AdminHeader";
+import { useState } from 'react';
+import { AdminHeader, AdminPanel } from "@/components/layout";
+import { FaPlus } from 'react-icons/fa';
+import { api } from "@/api";
+import { toast } from "sonner"
 import '../../styles/AdminDashboard.css';
 import '../../styles/Table.css';
-import { FaPlus } from 'react-icons/fa';
-import api from "../../services/api";
-import Alert from '../../services/Alert';
 
 /**
  * AdminCreateMarkList component for creating a mark list for students.
@@ -66,7 +65,6 @@ const AdminCreateMarkList = () => {
     const [selectAll, setSelectAll] = useState(false);
     const [totalAssessment, setTotalAssessment] = useState(0);
     const [currentYear] = useState(new Date().getFullYear());
-    const [alert, setAlert] = useState({ type: "", message: "", show: false });
 
     /**
      * @function handleGradeChange
@@ -202,38 +200,29 @@ const AdminCreateMarkList = () => {
     const checkValidData = (e) => {
         e.preventDefault();
         if (selectedSection.length === 0) {
-            showAlert("warning", "Please select at least one section.");
+            toast.error("Please select at least one section.", {
+                style: { color: 'red' }
+            });
             return;
         } else if (selectedSubjects.length === 0) {
-            showAlert("warning", "Please select at least one subject.");
+            toast.error("Please select at least one subject.", {
+                style: { color: 'red' }
+            });
             return;
         } else if (assessmentTypes.length < 1) {
-            showAlert("warning", "Please add assessment.");
+            toast.error("Please add assessment.", {
+                style: { color: 'red' }
+            });
             return;
         } else if (totalAssessment !== 100) {
-            showAlert("warning", "Total assessment percentage should be 100%.");
+            toast.error("Total assessment percentage should be 100%.", {
+                style: { color: 'red' }
+            });
             return;
         }
         handleSubmit();
     };
 
-    /**
-     * @function showAlert
-     * @description Displays an alert message.
-     * @param {string} type - The type of alert (e.g., "warning", "success").
-     * @param {string} message - The alert message.
-      */
-    const showAlert = (type, message) => {
-        setAlert({ type, message, show: true });
-    };
-
-    /**
-     * @function closeAlert
-     * @description Closes the alert message.
-      */
-    const closeAlert = () => {
-        setAlert({ ...alert, show: false });
-    };
 
     /**
      * @function handleSubmit
@@ -251,15 +240,24 @@ const AdminCreateMarkList = () => {
             "year": schoolYear
         };
         try {
-            await api.put('admin/students/mark_list', mark_list_data);
+            const response = await api.put('admin/students/mark_list', mark_list_data);
 
             // If successful, show a success alert
-            showAlert("success", "Mark list created successfully!");
+            toast.success(response.data['message'], {
+                description: currentTime,
+                style: { color: 'green' }
+            });
         } catch (error) {
             if (error.response && error.response.data && error.response.data['error']) {
-                showAlert("warning", error.response.data['error']);
+                toast.error(error.response.data['error'], {
+                    description: "Please try again later, if the problem persists, contact the administrator.",
+                    style: { color: 'red' }
+                });
             } else {
-                showAlert("warning", "An unexpected error occurred.");
+                toast.error("An unexpected error occurred.", {
+                    description: "Please try again later, if the problem persists, contact the administrator.",
+                    style: { color: 'red' }
+                });
             }
         }
     };
@@ -420,12 +418,6 @@ const AdminCreateMarkList = () => {
                             <button className="add-assessment-btn" onClick={addAssessmentType}>
                                 <FaPlus /> Add Assessment
                             </button>
-                            <Alert
-                                type={alert.type}
-                                message={alert.message}
-                                show={alert.show}
-                                onClose={closeAlert}
-                            />
                         </div>
                         <button type="submit" className="submit-btn">Create Mark List</button>
                     </form>

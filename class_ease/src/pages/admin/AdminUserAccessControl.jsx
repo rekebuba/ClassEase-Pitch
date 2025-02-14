@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import AdminPanel from '../../components/AdminPanel';
-import AdminHeader from '../../components/AdminHeader';
+import { useState, useEffect } from 'react';
+import { AdminHeader, AdminPanel } from "@/components/layout";
+
 
 
 // Mock Data for Users and Roles

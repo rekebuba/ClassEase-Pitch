@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import AdminPanel from '../../components/AdminPanel';
-import AdminHeader from '../../components/AdminHeader';
+import { useState } from 'react';
+import { AdminHeader, AdminPanel } from "@/components/layout";
+
 
 /**
  * 

@@ -38,14 +38,14 @@ def create_app(config_name):
     CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 
     # Import and register blueprints
-    from api.v1.views.admin import auth
+    from api.v1.views.auth import auth
+    from api.v1.views.admin import admin
     from api.v1.views.students import stud
     from api.v1.views.teachers import teach
-    from api.v1.views.public import app_views
 
-    app.register_blueprint(stud)
     app.register_blueprint(auth)
+    app.register_blueprint(admin)
+    app.register_blueprint(stud)
     app.register_blueprint(teach)
-    app.register_blueprint(app_views)
 
     return app

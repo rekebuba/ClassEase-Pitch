@@ -1,7 +1,6 @@
-import TeacherPanel from "../../components/TeachPanel";
+import { TeacherHeader, TeacherPanel } from "@/components/layout";
 import "../../styles/TeacherDashboard.css";
 import "../../styles/Dashboard.css";
-import TeacherHeader from "../../components/TeachHeader";
 
 /**
  * TeacherDashboard component
