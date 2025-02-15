@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { FaSearch } from 'react-icons/fa';
-import { api } from '@/api';
+import { adminApi } from '@/api';
 import { toast } from "sonner"
 // import Pagination from "../../library/pagination";
 
@@ -32,12 +32,10 @@ const AdminTeachList = ({ toggleDropdown, teacherSummary }) => {
     const handleSearch = useCallback(async (page) => {
         page = page || currentPage; // If page is not provided, use the current page
         try {
-            const response = await api.get('/admin/teachers', {
-                params: {
-                    page: page,
-                    limit: limit,
-                    search: searchTerm
-                }
+            const response = await adminApi.getTeachers({
+                page: page,
+                limit: limit,
+                search: searchTerm
             });
 
             const data = {

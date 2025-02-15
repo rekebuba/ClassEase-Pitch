@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { AdminHeader, AdminPanel } from "@/components/layout";
+import { Toaster } from '@/components/ui/sonner';
 
 
 
@@ -221,6 +222,7 @@ const AdminUserAccessControl = () => {
                         ))}
                     </ul>
                 </div>
+                <Toaster />
             </main>
         </div>
     );

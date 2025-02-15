@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { toast } from "sonner"
-import { api } from '@/api';
+import { adminApi } from '@/api';
 
 
 /**
@@ -57,7 +57,7 @@ const AdminAssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
         e.preventDefault();
 
         try {
-            const response = await api.put('/admin/assign-teacher', {
+            const response = await adminApi.assignTeacher({
                 teacher_id: teacherData.id,
                 grade: classGrade,
                 section: selectedSection,

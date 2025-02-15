@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { AdminHeader, AdminPanel } from "@/components/layout";
+import { Toaster } from '@/components/ui/sonner';
 
 
 /**
@@ -66,6 +67,7 @@ const EventManagement = () => {
                         ))}
                     </ul>
                 </div>
+                <Toaster />
             </main>
         </div>
     );

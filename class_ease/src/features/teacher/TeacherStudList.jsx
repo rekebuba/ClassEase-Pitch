@@ -3,7 +3,7 @@ import { FaSearch } from 'react-icons/fa';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner"
-import { api } from "@/api";
+import { teacherApi } from "@/api";
 import {
     Select,
     SelectContent,
@@ -136,17 +136,15 @@ const TeacherStudentList = ({ toggleDropdown, studentSummary, saveStudent, toggl
         setSearchTerm("");
         page = page || currentPage; // If page is not provided, use the current page
         try {
-            const response = await api.get('/teacher/students/mark_list', {
-                params: {
-                    subject_code: assigned[selectedSubject]['subject_code'] || '',
-                    grade: selectedGrade,
-                    year: selectedYear,
-                    sections: selectedSection,
-                    semester: selectedSemester,
-                    page: page,
-                    limit: limit,
-                    search: searchTerm
-                }
+            const response = await teacherApi.getStudents({
+                subject_code: assigned[selectedSubject]['subject_code'] || '',
+                grade: selectedGrade,
+                year: selectedYear,
+                sections: selectedSection,
+                semester: selectedSemester,
+                page: page,
+                limit: limit,
+                search: searchTerm
             });
 
             const data = {
@@ -272,7 +270,7 @@ const TeacherStudentList = ({ toggleDropdown, studentSummary, saveStudent, toggl
 
         const subjectTaught = async () => {
             try {
-                const response = await api.get('/teacher/assigned');
+                const response = await teacherApi.getAssignedStudents();
                 if (response.status === 200) {
                     setAssigned(response.data);
                 }

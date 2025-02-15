@@ -12,15 +12,10 @@ import "../../styles/Dashboard.css";
 const TeacherDashboard = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Top Header */}
       <TeacherHeader />
-
-      {/* Main content area: Sidebar + Content */}
       <div className="flex flex-1">
-        {/* Sidebar */}
           <TeacherPanel />
-        {/* Main Dashboard Content */}
-        <main className="flex-1 p-6 bg-gray-100 overflow-scroll">
+        <main className="flex-1 p-10 bg-gray-100 overflow-scroll">
           {/* Teacher Stats */}
           <section className="mb-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { AdminHeader, AdminPanel } from "@/components/layout";
 import { toast } from "sonner"
-import { api } from "@/api";
+import { adminApi } from "@/api";
 import '../../styles/updateProfile.css';
+import { Toaster } from '@/components/ui/sonner';
 
 /**
  * AdminUpdateProfile component allows an admin to view and update their profile information.
@@ -62,7 +63,7 @@ const AdminUpdateProfile = () => {
      */
     const loadAdminData = async () => {
         try {
-            const response = await api.get(`/admin/dashboard`);
+            const response = await adminApi.getDashboardData();
             const data = response.data;
             console.log(data);
             setFormData(data);
@@ -86,11 +87,13 @@ const AdminUpdateProfile = () => {
      */
     const saveAdminData = async () => {
         try {
-            const response = await api.put(`/admin/update-profile`, formData);
-            toast.success(response.data['message'], {
-                description: currentTime,
-                style: { color: 'green' }
-            });
+            const response = await adminApi.updateProfile(formData);
+            if (response.status === 200) {
+                toast.success(response.data['message'], {
+                    description: currentTime,
+                    style: { color: 'green' }
+                });
+            }
         } catch (error) {
             if (error.response && error.response.data && error.response.data['error']) {
                 toast.error(error.response.data['error'], {
@@ -241,6 +244,7 @@ const AdminUpdateProfile = () => {
                         )}
                     </div>
                 </div>
+                <Toaster />
             </main>
         </div>
     );

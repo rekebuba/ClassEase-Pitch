@@ -31,7 +31,7 @@ const StudentPopupScore = ({ isAssesOpen, closeAssessment, assessmentSummary }) 
     useEffect(() => {
         const assessmentReport = async () => {
             try {
-                const res = await api.get('/admin/student/assessment/report', {
+                const res = await api.get('/student/assessment/detail', {
                     params: {
                         student_id: assessmentSummary.student_id,
                         grade_id: assessmentSummary.grade_id,

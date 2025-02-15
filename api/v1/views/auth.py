@@ -60,16 +60,19 @@ def login():
 
 @auth.route("/auth/logout", methods=["POST"])
 @student_teacher_or_admin_required
-def logout():
+def logout(student, teacher, admin):
     token = request.headers['Authorization'].split()[1]  # Extract the token
     try:
         # Decode the token to get the JTI
         payload = jwt.decode(token, options={"verify_signature": False})
         jti = payload.get("jti")
 
+        print(jti)
         # Add the JTI to the blacklist table
-        BlacklistToken(jti=jti).save()
+        black_list = BlacklistToken(jti=jti)
+        storage.add(black_list)
 
         return jsonify({'message': 'Successfully logged out'}), 200
     except Exception as e:
+        print(str(e))
         return jsonify({'error': 'Logout failed', 'error': str(e)}), 500

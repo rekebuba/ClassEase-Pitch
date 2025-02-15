@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { FaUserCircle } from "react-icons/fa";
-import { api } from '@/api';
+import { teacherApi } from '@/api';
 import { Logout } from "@/features/auth";
 
 /**
@@ -47,7 +47,7 @@ const TeacherPanel = () => {
          */
         const fetchAdmin = async () => {
         try {
-                const response = await api.get('/teacher/dashboard');
+                const response = await teacherApi.getDashboardData();
                 setTeacherData(response.data);
             } catch (error) {
                 if (error.response && error.response.data && error.response.data['error']) {
@@ -60,14 +60,14 @@ const TeacherPanel = () => {
     }, []);
 
     return (
-        <aside className="flex flex-col justify-between fixed mt-[4.6rem] h-full max-w-48 w-45 bg-white p-7 border-r border-gray-200">
+        <aside className="flex flex-col justify-between fixed mt-[4.6rem] h-full w-48 bg-white p-7 border-r border-gray-200">
             {/* Top Profile Section */}
             <div className="flex flex-col items-center space-y-4">
                 <FaUserCircle className="w-16 h-16 text-gray-500" />
-                <h3 className="mt-4 text-xl font-semibold text-gray-800">
+                <h3 className="mt-4 text-center text-xl font-semibold text-gray-800">
                     {teacherData.__class__} Panel
                 </h3>
-                <p className="text-sm text-gray-600 text-wrap text-center">
+                <p className="text-sm text-gray-600 text-wrap text-center font-semibold">
                     Mr. {teacherData.first_name} {teacherData.last_name}
                 </p>
             </div>

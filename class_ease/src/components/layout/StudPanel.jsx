@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
-import { FaSignOutAlt, FaUserCircle, FaCogs } from "react-icons/fa";
-import { api } from '@/api';
+import { FaUserCircle } from "react-icons/fa";
+import { Logout } from "@/features/auth";
+import { studentApi } from '@/api';
 
 
 /**
@@ -31,11 +32,11 @@ const StudentPanel = () => {
   /**
    * @hook useEffect
    * @description Fetches student data from the API when the component mounts.
-   * @param {Function} fetchAdmin - Fetches student data from the API.
+   * @param {Function} fetchStudent - Fetches student data from the API.
    * @returns {Object} The student data fetched from the API.
    * @throws {Error} If there is an error fetching the student data.
    * @async
-   * @function fetchAdmin
+   * @function fetchStudent
    * @description Fetches student data from the API and updates the state.
    * @returns {Object} The student data fetched from the API.
    * @throws {Error} If there is an error fetching the student data.
@@ -46,9 +47,9 @@ const StudentPanel = () => {
    * @returns {undefined} Returns early if there is an error.
    */
   useEffect(() => {
-    const fetchAdmin = async () => {
+    const fetchStudent = async () => {
       try {
-        const response = await api.get('/student/dashboard');
+        const response = await studentApi.getPanelData();
         setStudentData(response.data);
       } catch (error) {
         if (error.response && error.response.data && error.response.data['error']) {
@@ -57,16 +58,8 @@ const StudentPanel = () => {
         return;
       }
     };
-    fetchAdmin();
+    fetchStudent();
   }, []);
-
-  /**
-   * @function handleLogout
-   * @description Navigates to the logout route.
-   */
-  const handleLogout = () => {
-    navigate('/logout');
-  };
 
   /**
    * @function updateProfile
@@ -77,20 +70,13 @@ const StudentPanel = () => {
   };
 
   return (
-    <aside className="sidebar">
-      <div className="profile-section">
-        <FaUserCircle className="profile-icon" />
-        <h3>{studentData.name} {studentData.father_name} {studentData.grand_father_name}</h3>
-        <p>Grade {studentData.grade} - Section {studentData.section}</p>
+    <aside className="flex flex-col justify-between fixed mt-[4.6rem] h-full w-48 bg-white p-7 border-r border-gray-200">
+      {/* Top Profile Section */}
+      <div className="flex flex-col items-center space-y-4">
+        <FaUserCircle className="w-16 h-16 text-gray-500 cursor-pointer" onClick={updateProfile} />
+        <h3 className="mt-4 text-center text-xl font-semibold text-gray-800">{studentData.name} {studentData.father_name} {studentData.grand_father_name}</h3>
       </div>
-      <nav className="menu">
-        <ul>
-          <li onClick={updateProfile}><FaCogs /> Update Profile</li>
-          <li onClick={handleLogout}>
-            <FaSignOutAlt /> Logout
-          </li>
-        </ul>
-      </nav>
+      <Logout />
     </aside>
   );
 };

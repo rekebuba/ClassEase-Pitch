@@ -1,6 +1,7 @@
 import { AdminHeader, AdminPanel } from "@/components/layout";
 import { StudentRegistrationForm } from "@/pages/student";
 import { TeacherRegistrationForm } from "@/features/teacher";
+import { Toaster } from '@/components/ui/sonner';
 
 /**
  * AdminEnrollStud component renders the admin dashboard container with the appropriate registration form
@@ -27,6 +28,7 @@ const AdminEnrollStud = ({ role }) => {
                     <AdminHeader />
                     {role === 'teacher' ? <TeacherRegistrationForm /> : <StudentRegistrationForm role='admin' />
                     }
+                    <Toaster />
                 </main>
             </div>
         </div>

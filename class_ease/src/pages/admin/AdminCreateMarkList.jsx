@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { AdminHeader, AdminPanel } from "@/components/layout";
 import { FaPlus } from 'react-icons/fa';
-import { api } from "@/api";
+import { adminApi } from "@/api";
 import { toast } from "sonner"
+import { Toaster } from '@/components/ui/sonner';
 import '../../styles/AdminDashboard.css';
 import '../../styles/Table.css';
 
@@ -231,7 +232,7 @@ const AdminCreateMarkList = () => {
      * @returns {Promise<void>}
      */
     const handleSubmit = async () => {
-        const mark_list_data = {
+        const markListData = {
             "grade": selectedGrade,
             "sections": selectedSection,
             "subjects": selectedSubjects,
@@ -240,7 +241,7 @@ const AdminCreateMarkList = () => {
             "year": schoolYear
         };
         try {
-            const response = await api.put('admin/students/mark_list', mark_list_data);
+            const response = await adminApi.createMarkList(markListData);
 
             // If successful, show a success alert
             toast.success(response.data['message'], {
@@ -422,6 +423,7 @@ const AdminCreateMarkList = () => {
                         <button type="submit" className="submit-btn">Create Mark List</button>
                     </form>
                 </div>
+                <Toaster />
             </main>
         </div>
     );

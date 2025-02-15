@@ -49,7 +49,7 @@ def admin_dashboard(admin_data):
     return jsonify(admin_data.to_dict()), 200
 
 
-@admin.route('/update-profile', methods=['PUT'])
+@admin.route('/profile', methods=['PUT'])
 @admin_required
 def update_admin_profile(admin_data):
     """
@@ -689,7 +689,7 @@ def show_mark_list(admin_data):
     return jsonify(student_list), 200
 
 
-@admin.route('/manage/students', methods=['GET'])
+@admin.route('/students', methods=['GET'])
 @admin_required
 def admin_student_list(admin_data):
     """
@@ -930,9 +930,9 @@ def student_assessment(admin_data):
     return jsonify({"assessment": list(student_assessment.values()), "summary": summary_result}), 200
 
 
-@admin.route('/student/assessment/report', methods=['GET'])
+@admin.route('/student/assessment/detail', methods=['GET'])
 @admin_required
-def student_assessment_report(admin_data):
+def student_assessment_detail(admin_data):
     url = request.url
     parsed_url = urlparse(url)
     data = parse_qs(parsed_url.query)

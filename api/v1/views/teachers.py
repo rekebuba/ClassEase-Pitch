@@ -46,7 +46,7 @@ def teacher_dashboard(teacher_data):
     return jsonify(teacher_data.to_dict()), 200
 
 
-@teach.route('/update-profile', methods=['PUT'])
+@teach.route('/profile', methods=['PUT'])
 @teacher_required
 def update_teacher_profile(teacher_data):
     """
@@ -98,7 +98,7 @@ def update_teacher_profile(teacher_data):
     return jsonify({"message": "Profile Updated Successfully"}), 200
 
 
-@teach.route('/students/mark_list', methods=['GET'])
+@teach.route('/students', methods=['GET'])
 @teacher_required
 def get_list_of_students(teacher_data):
     """
@@ -300,7 +300,7 @@ def get_student_assessment(teacher_data):
     return jsonify({"assessment": assessment}), 200
 
 
-@teach.route('/assigned', methods=['GET'])
+@teach.route('/students/assigned', methods=['GET'])
 @teacher_required
 def teacher_assigned(teacher_data):
     query = (

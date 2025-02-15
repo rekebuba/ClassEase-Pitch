@@ -2,6 +2,7 @@
 """Utility functions for the API"""
 
 import jwt
+import uuid
 from datetime import datetime, timedelta
 from flask import current_app  # Import current_app to access app context
 from functools import wraps
@@ -14,6 +15,7 @@ from sqlalchemy import func
 from models import storage
 from models.mark_list import MarkList
 from models.average_result import AVRGResult
+from models.blacklist_token import BlacklistToken
 from apscheduler.schedulers.background import BackgroundScheduler
 
 
@@ -34,7 +36,8 @@ def create_admin_token(admin_id):
         'id': admin_id,
         # Admin token expires in 30 minutes
         'exp': datetime.utcnow() + timedelta(minutes=720),
-        'role': 'admin'
+        'role': 'admin',
+        "jti": str(uuid.uuid4())
     }
     token = jwt.encode(
         payload, current_app.config["ADMIN_SECRET_KEY"], algorithm="HS256")
@@ -61,7 +64,8 @@ def create_teacher_token(teacher_id):
         'id': teacher_id,
         # teacher token expires in 15 minutes
         'exp': datetime.utcnow() + timedelta(minutes=720),
-        'role': 'teacher'
+        'role': 'teacher',
+        "jti": str(uuid.uuid4())
     }
     token = jwt.encode(
         payload, current_app.config["TEACHER_SECRET_KEY"], algorithm="HS256")
@@ -83,11 +87,33 @@ def create_student_token(student_id):
         'id': student_id,
         # teacher token expires in 15 minutes
         'exp': datetime.utcnow() + timedelta(minutes=720),
-        'role': 'student'
+        'role': 'student',
+        "jti": str(uuid.uuid4())
     }
     token = jwt.encode(
         payload, current_app.config["STUDENT_SECRET_KEY"], algorithm="HS256")
     return token
+
+
+def check_blacklist_token(token):
+    # Check if the token is blacklisted
+    try:
+        # Decode the token without verifying the signature to get the JTI
+        unverified_payload = jwt.decode(
+            token, options={"verify_signature": False})
+        jti = unverified_payload.get("jti")  # Extract the JTI
+        if not jti:
+            return True, None
+
+        # Query the blacklist table to check if the JTI is blacklisted
+        result = storage.get_first(BlacklistToken, jti=jti)
+
+        if result:
+            return True, "Token is blacklisted. Please log in again."
+
+        return False, None  # Token is not blacklisted
+    except Exception as e:
+        return True, f"Invalid token: {str(e)}"
 
 
 # Decorator for Admin JWT verification
@@ -118,6 +144,11 @@ def admin_required(f):
 
         if not token:
             return jsonify({"error": "Unauthorized", "reason": "UNAUTHORIZED"}), 401
+
+        # Check if the token is blacklisted
+        is_blacklisted, error_message = check_blacklist_token(token)
+        if is_blacklisted:
+            return jsonify({'message': error_message}), 401
 
         try:
             payload = jwt.decode(
@@ -162,6 +193,11 @@ def teacher_required(f):
         if not token:
             return jsonify({'message': 'Token is missing!'}), 401
 
+        # Check if the token is blacklisted
+        is_blacklisted, error_message = check_blacklist_token(token)
+        if is_blacklisted:
+            return jsonify({'message': error_message}), 401
+
         try:
             payload = jwt.decode(
                 token, current_app.config["TEACHER_SECRET_KEY"], algorithms=["HS256"])
@@ -202,6 +238,11 @@ def student_required(f):
 
         if not token:
             return jsonify({'message': 'Token is missing!'}), 401
+
+        # Check if the token is blacklisted
+        is_blacklisted, error_message = check_blacklist_token(token)
+        if is_blacklisted:
+            return jsonify({'message': error_message}), 401
 
         try:
             payload = jwt.decode(
@@ -251,6 +292,11 @@ def student_or_admin_required(f):
         if not token:
             return jsonify({'message': 'Token is missing!'}), 401
 
+        # Check if the token is blacklisted
+        is_blacklisted, error_message = check_blacklist_token(token)
+        if is_blacklisted:
+            return jsonify({'message': error_message}), 401
+
         try:
             # First, try decoding as a student token
             payload = jwt.decode(
@@ -292,6 +338,11 @@ def student_teacher_or_admin_required(f):
         if not token:
             return jsonify({'message': 'Token is missing!'}), 401
 
+        # Check if the token is blacklisted
+        is_blacklisted, error_message = check_blacklist_token(token)
+        if is_blacklisted:
+            return jsonify({'message': error_message}), 401
+
         try:
             # First, try decoding as a student token
             payload = jwt.decode(
@@ -299,11 +350,23 @@ def student_teacher_or_admin_required(f):
             student_data = storage.get_first(
                 StudentYearlyRecord, student_id=payload['id'])
             if student_data:
-                return f(student_data, None, *args, **kwargs)
+                return f(student_data, None, None, *args, **kwargs)
         except jwt.ExpiredSignatureError:
             return jsonify({'message': 'Token has expired'}), 401
         except jwt.InvalidTokenError:
             pass  # Invalid for student, let's check for admin
+
+        try:
+            # Then, try decoding as an teacher token
+            payload = jwt.decode(
+                token, current_app.config["TEACHER_SECRET_KEY"], algorithms=["HS256"])
+            teacher_data = storage.get_first(Teacher, id=payload['id'])
+            if teacher_data:
+                return f(None, teacher_data, None, *args, **kwargs)
+        except jwt.ExpiredSignatureError:
+            return jsonify({'message': 'Token has expired'}), 401
+        except jwt.InvalidTokenError:
+            pass  # Invalid for teacher, let's check for admin
 
         try:
             # try decoding as an admin token
@@ -311,19 +374,7 @@ def student_teacher_or_admin_required(f):
                 token, current_app.config["ADMIN_SECRET_KEY"], algorithms=["HS256"])
             admin_data = storage.get_first(Admin, id=payload['id'])
             if admin_data:
-                return f(None, admin_data, *args, **kwargs)
-        except jwt.ExpiredSignatureError:
-            return jsonify({'message': 'Token has expired'}), 401
-        except jwt.InvalidTokenError:
-            return jsonify({'message': 'Invalid token'}), 401
-
-        try:
-            # Then, try decoding as an teacher token
-            payload = jwt.decode(
-                token, current_app.config["ADMIN_SECRET_KEY"], algorithms=["HS256"])
-            teacher_data = storage.get_first(Teacher, id=payload['id'])
-            if teacher_data:
-                return f(None, teacher_data, *args, **kwargs)
+                return f(None, None, admin_data, *args, **kwargs)
         except jwt.ExpiredSignatureError:
             return jsonify({'message': 'Token has expired'}), 401
         except jwt.InvalidTokenError:

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { FaSearch } from 'react-icons/fa';
-import { api } from '@/api';
+import { adminApi } from '@/api';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner"
@@ -184,15 +184,13 @@ const AdminStudentList = ({ toggleProfile, profileSummary }) => {
         setSearchTerm("");
         page = page || currentPage; // If page is not provided, use the current page
         try {
-            const response = await api.get('/admin/manage/students', {
-                params: {
-                    grade: selectedGrade,
-                    year: selectedYear,
-                    page: page,
-                    limit: limit,
-                    search: searchTerm,
-                    ...orderBy
-                }
+            const response = await adminApi.getStudents({
+                grade: selectedGrade,
+                year: selectedYear,
+                page: page,
+                limit: limit,
+                search: searchTerm,
+                ...orderBy
             });
 
             const data = {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import { Logout } from "@/features/auth";
-import { api } from '@/api';
+import { adminApi } from '@/api';
 
 /**
  * AdminPanel component renders the admin dashboard sidebar.
@@ -43,7 +43,7 @@ const AdminPanel = () => {
     useEffect(() => {
         const fetchAdmin = async () => {
             try {
-                const response = await api.get('/admin/dashboard');
+                const response = await adminApi.getDashboardData();
                 setAdminData(response.data);
             } catch (error) {
                 if (error.response && error.response.data && error.response.data['error']) {
@@ -56,7 +56,7 @@ const AdminPanel = () => {
     }, []);
 
     return (
-        <aside className="flex flex-col justify-between fixed mt-[4.6rem] h-full max-w-48 w-45 bg-white p-7 border-r border-gray-200">
+        <aside className="flex flex-col justify-between fixed mt-[4.6rem] h-full w-48 bg-white p-7 border-r border-gray-200">
             <div className="flex flex-col items-center space-y-4">
                 <FaUserCircle className="w-16 h-16 text-gray-500" />
                 <h3 className="mt-4 text-xl font-semibold text-gray-800">{adminData.__class__} Panel</h3>

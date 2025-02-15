@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { Button } from '@/components/ui/button';
-import { api } from '@/api';
+import { adminApi } from '@/api';
 import ExamAssessmentReports from "./AdminExamAssessmentReports";
 import CollapsibleTable from "./CollapsibleTable";
 
@@ -59,13 +59,11 @@ const AdminStudentProfile = ({ isProfileOpen, toggleAssessment, closeProfile, st
         const lodeStudentSubjectList = async () => {
             try {
                 if (studentProfileSummary !== undefined && Object.keys(studentProfileSummary).length > 0) {
-                    const response = await api.get(`/admin/student/assessment`, {
-                        params: {
-                            student_id: studentProfileSummary.student_id,
-                            grade_id: studentProfileSummary.grade_id,
-                            section_id: studentProfileSummary.section_id,
-                            year: studentProfileSummary.year
-                        }
+                    const response = await adminApi.getStudentAssessment({
+                        student_id: studentProfileSummary.student_id,
+                        grade_id: studentProfileSummary.grade_id,
+                        section_id: studentProfileSummary.section_id,
+                        year: studentProfileSummary.year
                     });
                     setStudentAssessment(response.data.assessment);
                     setStudentReport(response.data.summary)

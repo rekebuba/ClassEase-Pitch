@@ -14,12 +14,37 @@ from models.average_result import AVRGResult
 from models.stud_yearly_record import StudentYearlyRecord
 from api.v1.views.utils import student_required, student_or_admin_required
 from urllib.parse import urlparse, parse_qs
+from sqlalchemy import update, and_
 from datetime import datetime
 
 stud = Blueprint('stud', __name__, url_prefix='/api/v1/student')
 
 
-@stud.route('/dashboard', methods=['GET'])
+@stud.route('/panel', methods=['GET'])
+@student_required
+def student_panel_data(student_data):
+    """
+    Generates the student panel data.
+
+    Args:
+        student_data (object): An object containing student identifiers such as student_id, grade_id, and section_id.
+
+    Returns:
+        Response: A JSON response containing the student's information, including grade and section, or an error message if the student is not found.
+    """
+    if not student_data:
+        return jsonify({"error": "Student not found"}), 404
+
+    student = storage.get_first(Student, id=student_data.student_id)
+    if not student:
+        return jsonify({"error": "Student not found"}), 404
+
+    student_dict = student.to_dict()
+
+    return jsonify(student_dict), 200
+
+
+@stud.route('/yearly_score', methods=['GET'])
 @student_required
 def student_dashboard(student_data):
     """
@@ -38,18 +63,61 @@ def student_dashboard(student_data):
     if not student:
         return jsonify({"error": "Student not found"}), 404
 
-    student_dict = student.to_dict()
+    query = (
+        storage.get_session()
+        .query(StudentYearlyRecord.final_score, Grade.grade)
+        .join(Grade, StudentYearlyRecord.grade_id == Grade.id)
+        .filter(StudentYearlyRecord.student_id == student_data.student_id)
+    ).all()
 
-    grade = storage.get_first(Grade, id=student_data.grade_id)
-    student_dict['grade'] = grade.grade if grade else "N/A"
+    score = []
+    for final_score, grade in query:
+        score.append({
+            "final_score": final_score,
+            "grade": grade
+        })
 
-    section = storage.get_first(Section, id=student_data.section_id)
-    student_dict['section'] = section.section if section else "N/A"
-
-    return jsonify(student_dict), 200
+    return jsonify({"score": score}), 200
 
 
-@stud.route('/update-profile', methods=['PUT'])
+@stud.route('/detail_yearly_score', methods=['GET'])
+@student_required
+def student_detail_yearly_scores(student_data):
+    """
+    Generates the student yearly scores data.
+
+    Args:
+        student_data (object): An object containing student identifiers such as student_id, grade_id, and section_id.
+
+    Returns:
+        Response: A JSON response containing the student's yearly scores, or an error message if the student is not found.
+    """
+
+    query = (
+        storage.get_session()
+        .query(Grade.grade, AVRGResult.semester, AVRGResult.average, StudentYearlyRecord.final_score)
+        .join(Grade, AVRGResult.grade_id == Grade.id)
+        .join(StudentYearlyRecord, StudentYearlyRecord.student_id == AVRGResult.student_id)
+        .filter(and_(AVRGResult.student_id == student_data.student_id,
+                     StudentYearlyRecord.grade_id == AVRGResult.grade_id,
+                     StudentYearlyRecord.year == AVRGResult.year))
+        .order_by(Grade.grade, AVRGResult.semester)
+    ).all()
+
+    score = {}
+    for grade, semester, average, final_score in query:
+        if grade not in score:
+            score[grade] = {"grade": grade, "final_score": final_score}
+            score[grade]['semester'] = []
+        score[grade]['semester'].append({
+            "semester": semester,
+            "average": average
+        })
+
+    return jsonify(score=score), 200
+
+
+@stud.route('/profile', methods=['PUT'])
 @student_required
 def update_student_profile(student_data):
     """

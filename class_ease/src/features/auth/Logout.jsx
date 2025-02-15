@@ -4,6 +4,8 @@ import { FaSignOutAlt } from "react-icons/fa";
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { authApi } from "@/api";
+
 /**
  * Logout component that handles user logout functionality.
  *
@@ -22,16 +24,30 @@ const Logout = () => {
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
         setOpen(false);
-        // Clear tokens from local storage
-        localStorage.removeItem('Authorization');
-        // Redirect to the login page
-        navigate('/login');
-        toast.success("Logged out successfully!", {
-            description: currentTime,
-            style: { color: 'green' }
-        });
+        try {
+            const response = await authApi.logout();
+            localStorage.removeItem('Authorization'); // Clear tokens from local storage
+            navigate('/login');
+            toast.success(response.data['message'], {
+                description: currentTime,
+                style: { color: 'green' }
+            });
+        } catch (error) {
+            console.log(error.response.data)
+            if (error.response && error.response.data && error.response.data['error']) {
+                toast.error(error.response.data['error'], {
+                    description: "Please try again later, if the problem persists, contact the administrator.",
+                    style: { color: 'red' }
+                });
+            } else {
+                toast.error("An unexpected error occurred.", {
+                    description: "Please try again later, if the problem persists, contact the administrator.",
+                    style: { color: 'red' }
+                });
+            }
+        }
     };
 
     return (

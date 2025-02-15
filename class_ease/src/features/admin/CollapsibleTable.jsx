@@ -12,7 +12,7 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { api } from '@/api';
+import { adminApi } from '@/api';
 import { toast } from "sonner"
 
 function createData(index, subject, semITotal, semIRank, semIITotal, semIIRank, avgTotal, avgRank, studentId, gradeId, subjectId, year) {
@@ -51,13 +51,11 @@ function Row(props) {
 
     const assessmentReport = async () => {
         try {
-            const res = await api.get('/admin/student/assessment/report', {
-                params: {
-                    student_id: row.studentId,
-                    grade_id: row.gradeId,
-                    subject_id: row.subjectId,
-                    year: row.year,
-                },
+            const res = await adminApi.getStudentAssessmentDetail({
+                student_id: row.studentId,
+                grade_id: row.gradeId,
+                subject_id: row.subjectId,
+                year: row.year,
             });
             if (res.status === 200) {
                 setDetailAssessment(res.data)
@@ -80,7 +78,7 @@ function Row(props) {
     return (
         <React.Fragment>
             <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}
-            className={`bg-${row.index % 2 === 0 ? 'white' : 'gray-100'} hover:bg-gray-200`}
+                className={`bg-${row.index % 2 === 0 ? 'white' : 'gray-100'} hover:bg-gray-200`}
             >
                 <TableCell>
                     <IconButton

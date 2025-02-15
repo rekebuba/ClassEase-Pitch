@@ -6,3 +6,4 @@ pip install pytest
 pip install ethiopian-date
 pip install Flask-CORS
 pip install flask_apscheduler
+pip install schedule

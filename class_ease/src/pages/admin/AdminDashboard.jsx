@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { AdminHeader, AdminPanel } from "@/components/layout";
 import { AdminStudentPerformance } from "@/features/admin";
-import { api } from "@/api";
+import { Toaster } from '@/components/ui/sonner';
+import { adminApi } from "@/api";
 import "../../styles/Dashboard.css";
 import "../../styles/AdminDashboard.css";
 import '../../styles/Table.css';
@@ -52,7 +53,7 @@ const AdminDashboard = () => {
    */
   const retrieveData = async () => {
     try {
-      const data = await api.get("/admin/overview");
+      const data = await adminApi.getSchoolOverview();
       setOverview(data.data);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -92,6 +93,7 @@ const AdminDashboard = () => {
             enrollmentByGrade={overview.enrollment_by_grade}
             performanceBySubject={overview.performance_by_subject}
           />
+          <Toaster />
         </main>
       </div>
     </div>

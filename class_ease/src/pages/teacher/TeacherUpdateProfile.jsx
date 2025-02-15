@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { TeacherHeader, TeacherPanel } from "@/components/layout";
-import { api } from '@/api';
+import { teacherApi } from '@/api';
 import { toast } from "sonner"
 import '../../styles/updateProfile.css';
 
@@ -62,9 +62,8 @@ const TeacherUpdateProfile = () => {
      */
     const loadTeacherData = async () => {
         try {
-            const response = await api.get(`/teacher/dashboard`);
+            const response = await teacherApi.getDashboardData();
             const data = response.data;
-            console.log(data);
             setFormData(data);
             if (data.profilePicture) {
                 setPreviewImage(data.profilePicture);
@@ -88,7 +87,7 @@ const TeacherUpdateProfile = () => {
      */
     const saveTeacherData = async () => {
         try {
-            const response = await api.put(`/teacher/update-profile`, formData);
+            const response = await teacherApi.updateProfile(formData);
             toast.success(response.data['message'], {
                 description: currentTime,
                 style: { color: 'green' }

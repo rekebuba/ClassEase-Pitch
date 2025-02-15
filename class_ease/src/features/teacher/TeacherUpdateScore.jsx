@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { api } from '@/api';
+import { teacherApi } from '@/api';
 import { toast } from "sonner"
 
 /**
@@ -28,15 +28,13 @@ const TeacherUpdateScore = ({ isOpen, toggleAssessment, studentData, onSave }) =
 
     const fetchIndividualAssessment = useCallback(async () => {
         try {
-            const res = await api.get('/teacher/student/assessment', {
-                params: {
-                    student_id: studentData.student_id,
-                    grade_id: studentData.grade_id,
-                    subject_id: studentData.subject_id,
-                    section_id: studentData.section_id,
-                    semester: studentData.semester,
-                    year: studentData.year,
-                },
+            const res = await teacherApi.getStudentAssessment({
+                student_id: studentData.student_id,
+                grade_id: studentData.grade_id,
+                subject_id: studentData.subject_id,
+                section_id: studentData.section_id,
+                semester: studentData.semester,
+                year: studentData.year,
             });
             if (res.status === 200) {
                 const updatedData = { ...studentData, ...res.data };
