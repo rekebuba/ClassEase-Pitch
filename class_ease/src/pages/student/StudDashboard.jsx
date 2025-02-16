@@ -41,7 +41,6 @@ const StudentDashboard = () => {
   const [isAssesOpen, setIsAssesOpen] = useState(false);
   const [studentSummary, setStudentSummary] = useState({});
   const [yearlyScore, setYearlyScore] = useState([]);
-  const [detailYearlyScore, setDetailYearlyScore] = useState({});
 
 
   useEffect(() => {
@@ -69,34 +68,10 @@ const StudentDashboard = () => {
     fetchStudent();
   }, []);
 
-  /**
-   * @function toggleAssessment
-   * @description Toggles the visibility of the assessment popup.
-   * @returns {void}
-   */
-  const toggleAssessment = async (status) => {
-    setIsAssesOpen(status);
-    try {
-      const response = await studentApi.getDetailYearlyScore();
-      if (response.status === 200) {
-        setDetailYearlyScore(response.data.score);
-      }
-    } catch (error) {
-      if (error.response && error.response.data && error.response.data['error']) {
-        toast.error(error.response.data['error'], {
-          description: "Please try again later, if the problem persists, contact the administrator.",
-          style: { color: 'red' }
-        });
-      } else {
-        toast.error("An unexpected error occurred.", {
-          description: "Please try again later, if the problem persists, contact the administrator.",
-          style: { color: 'red' }
-        });
-      }
-    }
+  const toggleAssessment = (value) => {
+    setIsAssesOpen(value);
   };
 
-  console.log(detailYearlyScore);
 
   /**
    * @function closeAssessment
@@ -130,7 +105,7 @@ const StudentDashboard = () => {
           </div>
           {isAssesOpen && (
             <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-              <Card className="bg-white p-2 rounded-lg shadow-lg w-[45rem]">
+              <Card className={`bg-white p-2 rounded-lg shadow-lg w-[45rem] transform transition-all duration-300 ease-out ${isAssesOpen ? "opacity-100 scale-100" : "opacity-0 scale-90"}`}>
                 <CardHeader>
                   <div className="flex justify-between items-center">
                     <h3 className='text-center text-lg font-bold'>student Score</h3>
@@ -144,10 +119,11 @@ const StudentDashboard = () => {
                 </CardHeader>
                 <CardContent className="p-4">
                   <div className="mt-3 space-y-2">
-                    {detailYearlyScore &&
-                      Object.keys(detailYearlyScore).length > 0 &&
-                      Object.entries(detailYearlyScore).map(([key, item]) => (
-                        <div key={item.grade}>
+                    {/* detailed student yearly Score */}
+                    {yearlyScore &&
+                      Object.keys(yearlyScore).length > 0 &&
+                      Object.entries(yearlyScore).map(([key, item]) => (
+                        <div key={key}>
                           {/* Parent container for Grade */}
                           <div className="flex justify-between border-b-2 border-gray-100 pb-2">
                             <p>Grade {item.grade}</p>

@@ -44,45 +44,45 @@ def student_panel_data(student_data):
     return jsonify(student_dict), 200
 
 
+# @stud.route('/yearly_score', methods=['GET'])
+# @student_required
+# def student_dashboard(student_data):
+#     """
+#     Generates the student dashboard data.
+
+#     Args:
+#         student_data (object): An object containing student identifiers such as student_id, grade_id, and section_id.
+
+#     Returns:
+#         Response: A JSON response containing the student's information, including grade and section, or an error message if the student is not found.
+#     """
+#     if not student_data:
+#         return jsonify({"error": "Student not found"}), 404
+
+#     student = storage.get_first(Student, id=student_data.student_id)
+#     if not student:
+#         return jsonify({"error": "Student not found"}), 404
+
+#     query = (
+#         storage.get_session()
+#         .query(StudentYearlyRecord.final_score, Grade.grade)
+#         .join(Grade, StudentYearlyRecord.grade_id == Grade.id)
+#         .filter(StudentYearlyRecord.student_id == student_data.student_id)
+#     ).all()
+
+#     score = []
+#     for final_score, grade in query:
+#         score.append({
+#             "final_score": final_score,
+#             "grade": grade
+#         })
+
+#     return jsonify({"score": score}), 200
+
+
 @stud.route('/yearly_score', methods=['GET'])
 @student_required
-def student_dashboard(student_data):
-    """
-    Generates the student dashboard data.
-
-    Args:
-        student_data (object): An object containing student identifiers such as student_id, grade_id, and section_id.
-
-    Returns:
-        Response: A JSON response containing the student's information, including grade and section, or an error message if the student is not found.
-    """
-    if not student_data:
-        return jsonify({"error": "Student not found"}), 404
-
-    student = storage.get_first(Student, id=student_data.student_id)
-    if not student:
-        return jsonify({"error": "Student not found"}), 404
-
-    query = (
-        storage.get_session()
-        .query(StudentYearlyRecord.final_score, Grade.grade)
-        .join(Grade, StudentYearlyRecord.grade_id == Grade.id)
-        .filter(StudentYearlyRecord.student_id == student_data.student_id)
-    ).all()
-
-    score = []
-    for final_score, grade in query:
-        score.append({
-            "final_score": final_score,
-            "grade": grade
-        })
-
-    return jsonify({"score": score}), 200
-
-
-@stud.route('/detail_yearly_score', methods=['GET'])
-@student_required
-def student_detail_yearly_scores(student_data):
+def student_yearly_scores(student_data):
     """
     Generates the student yearly scores data.
 
