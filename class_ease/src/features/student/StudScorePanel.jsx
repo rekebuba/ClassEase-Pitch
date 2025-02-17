@@ -39,7 +39,7 @@ const StudentScorePanel = ({ yearlyScore, isAssesOpen }) => {
                         {yearlyScore &&
                             Object.keys(yearlyScore).length > 0 &&
                             Object.entries(yearlyScore).map(([key, item], index) => (
-                                <div key={index} className={`flex justify-between border-b-2 border-gray-100 pb-2 ${index === 0 ? 'border-t-2' : ''}`}>
+                                <div key={key} className={`flex justify-between border-b-2 border-gray-100 pb-2 ${index === 0 ? 'border-t-2' : ''}`}>
                                     <p>Grade {item.grade}</p>
                                     <p className="flex items-center">
                                         {item.final_score}% <CheckCircle className="h-5 w-5 text-green-500 ml-1" />

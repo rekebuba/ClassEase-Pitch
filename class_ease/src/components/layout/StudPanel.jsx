@@ -75,6 +75,8 @@ const StudentPanel = () => {
       <div className="flex flex-col items-center space-y-4">
         <FaUserCircle className="w-16 h-16 text-gray-500 cursor-pointer" onClick={updateProfile} />
         <h3 className="mt-4 text-center text-xl font-semibold text-gray-800">{studentData.name} {studentData.father_name} {studentData.grand_father_name}</h3>
+        <h3 className="mt-4 text-center text-gray-800">{studentData.id}</h3>
+
       </div>
       <Logout />
     </aside>

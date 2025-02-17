@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { FaUserCircle } from "react-icons/fa";
 import { AdminHeader, AdminPanel } from "@/components/layout";
 import { toast } from "sonner"
 import { adminApi } from "@/api";
@@ -107,6 +108,8 @@ const AdminUpdateProfile = () => {
                 });
             }
         }
+
+        await loadAdminData();
     };
 
     /**
@@ -129,123 +132,126 @@ const AdminUpdateProfile = () => {
     }, []);
 
     return (
-        <div className="admin-manage-container">
-            <AdminPanel />
-            <main className="content">
-                <div className="user-profile">
-                    <AdminHeader />
-                    <h2>User Profile</h2>
+        <div className="min-h-screen flex overflow-hidden flex-col">
+            <AdminHeader />
+            <div className="flex flex-1 scroll-m-0">
+                <AdminPanel />
+                <main className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
+                    <div className="m-0 p-5">
+                        <div className="profile-details">
+                            <div className="profile-picture">
+                                {formData.profile ?
+                                    <img src={previewImage} alt="Profile" /> :
+                                    <FaUserCircle className="w-36 h-36 text-gray-500 cursor-pointer" />
+                                }
+                                {editMode && (
+                                    <input type="file" name="profilePicture" onChange={handleChange} />
+                                )}
+                            </div>
+                            <div className='profile-data'>
+                                <div className="profile-form-group">
+                                    <label>Name</label>
+                                    {editMode ? (
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            value={formData.name || ''}
+                                            onChange={handleChange}
+                                        />
+                                    ) : (
+                                        <p>{formData.name}</p>
+                                    )}
+                                </div>
 
-                    <div className="profile-details">
-                        <div className="profile-picture">
-                            <img src={previewImage} alt="Profile" />
-                            {editMode && (
-                                <input type="file" name="profilePicture" onChange={handleChange} />
+                                <div className="profile-form-group" style={{ marginBottom: '15px' }}>
+                                    <label>Email</label>
+                                    {editMode ? (
+                                        <input
+                                            type="email"
+                                            name="email"
+                                            value={formData.email || ''}
+                                            onChange={handleChange}
+                                        />
+                                    ) : (
+                                        <p>{formData.email}</p>
+                                    )}
+                                </div>
+
+                                <div className="profile-form-group" style={{ marginBottom: '15px' }}>
+                                    <label>Phone</label>
+                                    {editMode ? (
+                                        <input
+                                            type="tel"
+                                            name="phone"
+                                            value={formData.phone || ''}
+                                            onChange={handleChange}
+                                        />
+                                    ) : (
+                                        <p>{formData.phone}</p>
+                                    )}
+                                </div>
+
+                                <div className="profile-form-group" style={{ marginBottom: '15px' }}>
+                                    <label>Address</label>
+                                    {editMode ? (
+                                        <input
+                                            type="text"
+                                            name="address"
+                                            value={formData.address || ''}
+                                            onChange={handleChange}
+                                        />
+                                    ) : (
+                                        <p>{formData.address}</p>
+                                    )}
+                                </div>
+                                {editMode &&
+                                    <div className="profile-form-group" style={{ marginBottom: '15px' }}>
+                                        <label>Current Password</label>
+                                        <input
+                                            type="password"
+                                            name="current_password"
+                                            placeholder="Enter current password"
+                                            onChange={handleChange}
+                                        />
+                                    </div>
+                                }
+
+                                <div className="profile-form-group" style={{ marginBottom: '15px' }}>
+                                    <label>Password</label>
+                                    {editMode ? (
+                                        <input
+                                            type="password"
+                                            name="new_password"
+                                            placeholder="Enter new password"
+                                            onChange={handleChange}
+                                        />
+                                    ) : (
+                                        <p>********</p>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="button-group">
+                            {editMode ? (
+                                <>
+                                    <button className="save-button" onClick={handleSave}>
+                                        Save Changes
+                                    </button>
+                                    <button className="cancel-button" onClick={() => setEditMode(false)}>
+                                        Cancel
+                                    </button>
+                                </>
+                            ) : (
+                                <button className="edit-button" onClick={() => setEditMode(true)}>
+                                    Edit Profile
+                                </button>
                             )}
                         </div>
-                        <div className='profile-data'>
-                            <div className="profile-form-group">
-                                <label>Name</label>
-                                {editMode ? (
-                                    <input
-                                        type="text"
-                                        name="name"
-                                        value={formData.name || ''}
-                                        onChange={handleChange}
-                                    />
-                                ) : (
-                                    <p>{formData.name}</p>
-                                )}
-                            </div>
-
-                            <div className="profile-form-group" style={{ marginBottom: '15px' }}>
-                                <label>Email</label>
-                                {editMode ? (
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        value={formData.email || ''}
-                                        onChange={handleChange}
-                                    />
-                                ) : (
-                                    <p>{formData.email}</p>
-                                )}
-                            </div>
-
-                            <div className="profile-form-group" style={{ marginBottom: '15px' }}>
-                                <label>Phone</label>
-                                {editMode ? (
-                                    <input
-                                        type="tel"
-                                        name="phone"
-                                        value={formData.phone || ''}
-                                        onChange={handleChange}
-                                    />
-                                ) : (
-                                    <p>{formData.phone}</p>
-                                )}
-                            </div>
-
-                            <div className="profile-form-group" style={{ marginBottom: '15px' }}>
-                                <label>Address</label>
-                                {editMode ? (
-                                    <input
-                                        type="text"
-                                        name="address"
-                                        value={formData.address || ''}
-                                        onChange={handleChange}
-                                    />
-                                ) : (
-                                    <p>{formData.address}</p>
-                                )}
-                            </div>
-                            {editMode &&
-                                <div className="profile-form-group" style={{ marginBottom: '15px' }}>
-                                    <label>Current Password</label>
-                                    <input
-                                        type="password"
-                                        name="current_password"
-                                        placeholder="Enter current password"
-                                        onChange={handleChange}
-                                    />
-                                </div>
-                            }
-
-                            <div className="profile-form-group" style={{ marginBottom: '15px' }}>
-                                <label>Password</label>
-                                {editMode ? (
-                                    <input
-                                        type="password"
-                                        name="new_password"
-                                        placeholder="Enter new password"
-                                        onChange={handleChange}
-                                    />
-                                ) : (
-                                    <p>********</p>
-                                )}
-                            </div>
-                        </div>
                     </div>
-
-                    <div className="button-group">
-                        {editMode ? (
-                            <>
-                                <button className="save-button" onClick={handleSave}>
-                                    Save Changes
-                                </button>
-                                <button className="cancel-button" onClick={() => setEditMode(false)}>
-                                    Cancel
-                                </button>
-                            </>
-                        ) : (
-                            <button className="edit-button" onClick={() => setEditMode(true)}>
-                                Edit Profile
-                            </button>
-                        )}
-                    </div>
-                </div>
-                <Toaster />
-            </main>
+                    <Toaster />
+                </main>
+            </div>
         </div>
     );
 };

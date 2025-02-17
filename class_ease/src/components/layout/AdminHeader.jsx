@@ -95,10 +95,6 @@ const AdminHeader = () => {
         navigate("/admin/teacher/registration");
     };
 
-    const updateProfile = () => {
-        navigate("/admin/update/profile");
-    };
-
     return (
         <header className="flex w-full p-2 bg-white shadow border-b border-gray-200 fixed">
             {/* Left Section: Logo */}
@@ -237,10 +233,6 @@ const AdminHeader = () => {
                             </span>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent className="w-48">
-                            <DropdownMenuItem onClick={updateProfile}>
-                                <FaCogs className="h-5 w-5" />
-                                <span>Update Profile</span>
-                            </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </nav>

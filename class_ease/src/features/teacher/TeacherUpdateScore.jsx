@@ -91,7 +91,7 @@ const TeacherUpdateScore = ({ isOpen, toggleAssessment, studentData, onSave }) =
     const handleSave = async () => {
         setIsEditing(false);
         try {
-            const res = await api.put('/teacher/students/mark_list', { student_data: studentData, assessments: updateAssessmentData });
+            const res = await teacherApi.updateScore({ student_data: studentData, assessments: updateAssessmentData });
             if (res.status === 201) {
                 const currentTime = new Date().toLocaleString("en-US", {
                     weekday: "long",

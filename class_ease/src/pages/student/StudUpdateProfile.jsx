@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { FaUserCircle } from "react-icons/fa";
 import { StudentHeader, StudentPanel } from "@/components/layout";
 import { studentApi } from "@/api";
 import { toast } from "sonner"
@@ -52,6 +53,28 @@ const StudentUpdateProfile = () => {
     };
 
     /**
+         * @function loadStudentData
+         * @description Fetches student data from the API and updates the state.
+         * @returns {void}
+         * @async
+         * @throws {error} Any error while fetching data.
+        */
+    const loadStudentData = async () => {
+        try {
+            const response = await studentApi.getDashboardData();
+            const data = response.data;
+            setFormData(data);
+            if (data.profilePicture) {
+                setPreviewImage(data.profilePicture);
+            }
+        } catch (error) {
+            if (error.response && error.response.data) {
+                console.log(error.response.data.message);
+            }
+        }
+    };
+
+    /**
      * @function saveStudentData
      * @description Sends updated student data to the API to save changes.
      * @returns {void}
@@ -63,7 +86,6 @@ const StudentUpdateProfile = () => {
     const saveStudentData = async () => {
         try {
             const response = await studentApi.updateProfile(formData);
-            console.log(response.data);
             toast.success(response.data['message'], {
                 description: currentTime,
                 style: { color: 'green' }
@@ -81,6 +103,7 @@ const StudentUpdateProfile = () => {
                 });
             }
         }
+        await loadStudentData();
     };
 
     /**
@@ -99,28 +122,6 @@ const StudentUpdateProfile = () => {
      * @returns {void}
      */
     useEffect(() => {
-        /**
-         * @function loadStudentData
-         * @description Fetches student data from the API and updates the state.
-         * @returns {void}
-         * @async
-         * @throws {error} Any error while fetching data.
-        */
-        const loadStudentData = async () => {
-            try {
-                const response = await studentApi.getDashboardData();
-                const data = response.data;
-                setFormData(data);
-                if (data.profilePicture) {
-                    setPreviewImage(data.profilePicture);
-                }
-            } catch (error) {
-                if (error.response && error.response.data) {
-                    console.log(error.response.data.message);
-                }
-            }
-        };
-
         loadStudentData();
     }, []);
 
@@ -133,6 +134,10 @@ const StudentUpdateProfile = () => {
                     <div className="user-profile">
                         <div className="profile-details">
                             <div className="profile-picture">
+                                {formData.profile ?
+                                    <img src={previewImage} alt="Profile" /> :
+                                    <FaUserCircle className="w-36 h-36 text-gray-500 cursor-pointer" />
+                                }
                                 <img src={previewImage} alt="Profile" />
                                 {editMode && (
                                     <input type="file" name="profilePicture" onChange={handleChange} />

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { StudentHeader, StudentPanel } from "@/components/layout";
 import { StudentPopupScore, StudentSubjectList, StudentEventPanel, StudentScorePanel } from "@/features/student";
 import { studentApi } from "@/api";
@@ -38,13 +39,17 @@ import { CheckCircle } from "lucide-react";
  * - Updates the student summary with provided data.
  */
 const StudentDashboard = () => {
+  const navigate = useNavigate();
   const [isAssesOpen, setIsAssesOpen] = useState(false);
-  const [studentSummary, setStudentSummary] = useState({});
   const [yearlyScore, setYearlyScore] = useState([]);
 
+  const studentReportCard = (data) => {
+    const queryParam = new URLSearchParams(data).toString();
+    navigate(`/student/report-card?${queryParam}`);
+  };
 
   useEffect(() => {
-    const fetchStudent = async () => {
+    const studentYearlyScore = async () => {
       try {
         const response = await studentApi.getYearlyScore();
         if (response.data) {
@@ -65,31 +70,11 @@ const StudentDashboard = () => {
       }
     };
 
-    fetchStudent();
+    studentYearlyScore();
   }, []);
 
   const toggleAssessment = (value) => {
     setIsAssesOpen(value);
-  };
-
-
-  /**
-   * @function closeAssessment
-   * @description Closes the assessment popup.
-   * @returns {void}
-   */
-  const closeAssessment = () => {
-    setIsAssesOpen(false);
-  };
-
-  /**
-   * @function summary
-   * @param {object} data - The summary of the student's assessments.
-   * @description Updates the student summary with provided data.
-   * @returns {void}
-   */
-  const summary = (data) => {
-    setStudentSummary(data);
   };
 
   return (
@@ -125,7 +110,9 @@ const StudentDashboard = () => {
                       Object.entries(yearlyScore).map(([key, item]) => (
                         <div key={key}>
                           {/* Parent container for Grade */}
-                          <div className="flex justify-between border-b-2 border-gray-100 pb-2">
+                          <div className="flex justify-between border-b-2 border-gray-100 pb-2"
+                            onClick={() => studentReportCard({ student_id: item.student_id, grade_id: item.grade_id, year: item.year })}
+                          >
                             <p>Grade {item.grade}</p>
                             <p className="flex items-center">
                               {item.final_score} % <CheckCircle className="h-5 w-5 text-green-500 ml-1" />

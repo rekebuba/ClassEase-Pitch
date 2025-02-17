@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AdminHeader, AdminPanel } from "@/components/layout";
 import { Toaster } from '@/components/ui/sonner';
+import { Button } from '@/components/ui/button';
 
 
 /**
@@ -21,54 +22,55 @@ const EventManagement = () => {
     };
 
     return (
-        <div className="admin-manage-container">
+        <div className="min-h-screen flex overflow-hidden flex-col">
             <AdminPanel />
-            <main className="content">
+            <div className="flex flex-1 scroll-m-0">
                 <AdminHeader />
-                <h2>Event Management</h2>
-                <div className="new-event-form">
-                    <h3>Add New Event</h3>
-                    <div className="new-event-group">
-                        <label htmlFor="dob">Event Date: </label>
+                <main className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
+                    <h2>Event Management</h2>
+                    <div className="new-event-form">
+                        <h3>Add New Event</h3>
+                        <div className="new-event-group">
+                            <label htmlFor="dob">Event Date: </label>
+                            <input
+                                type="date"
+                                name="date"
+                                value={newEvent.date}
+                                onChange={handleInputChange}
+                                required
+                            />
+                        </div>
                         <input
-                            type="date"
-                            name="date"
-                            value={newEvent.date}
+                            type="text"
+                            name="title"
+                            placeholder="Event Title"
+                            value={newEvent.title}
                             onChange={handleInputChange}
-                            required
                         />
+                        <textarea
+                            name="description"
+                            placeholder="Event Description"
+                            value={newEvent.description}
+                            onChange={handleInputChange}
+                        />
+                        <Button onClick={addEvent} disabled={!newEvent.date || !newEvent.title || !newEvent.description}>
+                            Add Event
+                        </Button>
                     </div>
-                    <input
-                        type="text"
-                        name="title"
-                        placeholder="Event Title"
-                        value={newEvent.title}
-                        onChange={handleInputChange}
-                    />
-                    <textarea
-                        name="description"
-                        placeholder="Event Description"
-                        value={newEvent.description}
-                        onChange={handleInputChange}
-                    />
-                    <button onClick={addEvent} disabled={!newEvent.date || !newEvent.title || !newEvent.description}>
-                        Add Event
-                    </button>
-                </div>
-
-                <h3>Upcoming Events</h3>
-                <div className="new-event-list">
-                    <ul>
-                        {events.map((event, index) => (
-                            <li key={index}>
-                                <strong>{event.title}</strong> on {event.date}
-                                <p>{event.description}</p>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-                <Toaster />
-            </main>
+                    <h3>Upcoming Events</h3>
+                    <div className="new-event-list">
+                        <ul>
+                            {events.map((event, index) => (
+                                <li key={index}>
+                                    <strong>{event.title}</strong> on {event.date}
+                                    <p>{event.description}</p>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <Toaster />
+                </main>
+            </div>
         </div>
     );
 };

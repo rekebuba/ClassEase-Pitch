@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import { Button } from '@/components/ui/button';
-import { adminApi } from '@/api';
+import { sharedApi } from '@/api';
+import { toast } from "sonner"
 import ExamAssessmentReports from "./AdminExamAssessmentReports";
 import CollapsibleTable from "./CollapsibleTable";
 
@@ -59,7 +60,7 @@ const AdminStudentProfile = ({ isProfileOpen, toggleAssessment, closeProfile, st
         const lodeStudentSubjectList = async () => {
             try {
                 if (studentProfileSummary !== undefined && Object.keys(studentProfileSummary).length > 0) {
-                    const response = await adminApi.getStudentAssessment({
+                    const response = await sharedApi.getStudentAssessment({
                         student_id: studentProfileSummary.student_id,
                         grade_id: studentProfileSummary.grade_id,
                         section_id: studentProfileSummary.section_id,
@@ -70,7 +71,15 @@ const AdminStudentProfile = ({ isProfileOpen, toggleAssessment, closeProfile, st
                 }
             } catch (error) {
                 if (error.response && error.response.data && error.response.data['error']) {
-                    console.error(error.response.data['error']);
+                    toast.error(error.response.data['error'], {
+                        description: "Please try again later, if the problem persists, contact the administrator.",
+                        style: { color: 'red' }
+                    });
+                } else {
+                    toast.error("An unexpected error occurred.", {
+                        description: "Please try again later, if the problem persists, contact the administrator.",
+                        style: { color: 'red' }
+                    });
                 }
             }
         };

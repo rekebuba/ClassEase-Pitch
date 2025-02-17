@@ -1,0 +1,209 @@
+#!/usr/bin/python3
+"""Teacher views module for the API"""
+
+from flask import request, jsonify
+from sqlalchemy import func
+from models import storage
+from datetime import datetime
+from models.users import User
+from models.grade import Grade
+from models.student import Student
+from models.section import Section
+from models.subject import Subject
+from models.assessment import Assessment
+from models.mark_list import MarkList
+from models.average_result import AVRGResult
+from models.average_subject import AVRGSubject
+from models.teacher import Teacher
+from models.teacher_record import TeachersRecord
+from models.stud_yearly_record import StudentYearlyRecord
+from urllib.parse import urlparse, parse_qs
+from sqlalchemy import update, and_
+from flask import Blueprint
+from api.v1.views.utils import admin_or_student_required
+from api.v1.views.methods import paginate_query
+from models.base_model import BaseModel
+
+
+shared = Blueprint('shared', __name__, url_prefix='/api/v1')
+
+
+@shared.route('/student/assessment', methods=['GET'])
+@admin_or_student_required
+def student_assessment(admin_data, student_data):
+    """
+    Retrieve and display a list of assessments for students based on the provided query parameters.
+
+    Args:
+        admin_data (dict): Data related to the admin making the request.
+
+    Returns:
+        Response: A JSON response containing the list of student assessments or an error message with the appropriate HTTP status code.
+
+    Query Parameters:
+        grade (str): The grade level.
+        section (str): The section within the grade.
+        year (str): The academic year.
+
+    Responses:
+        200: A JSON list of student assessments.
+        400: A JSON error message indicating a missing required field.
+        404: A JSON error message indicating that the grade, section, subject, or students were not found.
+    """
+    url = request.url
+    parsed_url = urlparse(url)
+    data = parse_qs(parsed_url.query)
+
+    required_data = {
+        'student_id',
+        'grade_id',
+        'year'
+    }
+
+    student_id = data['student_id'][0]
+    grade_id = data['grade_id'][0]
+    year = data['year'][0]
+    # Check if required fields are present
+    for field in required_data:
+        if field not in data:
+            return jsonify({"error": f"Missing {field}"}), 400
+
+    query = (
+        storage.get_session()
+        .query(Assessment.student_id,
+               Subject.code,
+               Subject.name,
+               Assessment.subject_id,
+               Assessment.grade_id,
+               Assessment.semester,
+               Assessment.total,
+               Assessment.rank,
+               AVRGSubject.average,
+               AVRGSubject.rank,
+               Assessment.year
+               )
+        .select_from(Assessment)
+        .join(TeachersRecord, TeachersRecord.id == Assessment.teachers_record_id)
+        .join(Subject, Assessment.subject_id == Subject.id)
+        .join(AVRGSubject, and_(AVRGSubject.student_id == Assessment.student_id,
+                                AVRGSubject.grade_id == Assessment.grade_id,
+                                AVRGSubject.subject_id == Assessment.subject_id,
+                                AVRGSubject.year == Assessment.year))
+        .filter(
+            Assessment.student_id == student_id,
+            Assessment.grade_id == grade_id,
+            Assessment.year == year
+        )
+        .order_by(Subject.name)
+    ).all()
+
+    if not query:
+        return jsonify({"error": "Student not found"}), 404
+
+    student_assessment = {}
+    for student_id, code, name, subject_id, grade_id, semester, total, rank, avg_total, avg_rank, year in query:
+        if code not in student_assessment:
+            # Initialize with placeholders for semesters
+            student_assessment[code] = {
+                "student_id": student_id,
+                "subject": name,
+                "subject_id": subject_id,
+                "grade_id": grade_id,
+                "avg_total": avg_total,
+                "avg_rank": avg_rank,
+                "year": year,
+                "semI": {"total": None, "rank": None},
+                "semII": {"total": None, "rank": None},
+            }
+        if semester == 1:
+            student_assessment[code][f"semI"] = {"total": total, "rank": rank}
+        elif semester == 2:
+            student_assessment[code]["semII"] = {"total": total, "rank": rank}
+
+    summary = (
+        storage.get_session()
+        .query(AVRGResult.semester,
+               AVRGResult.average,
+               AVRGResult.rank,
+               StudentYearlyRecord.final_score,
+               StudentYearlyRecord.rank
+               )
+        .select_from(AVRGResult)
+        .join(StudentYearlyRecord, and_(StudentYearlyRecord.student_id == AVRGResult.student_id,
+                                        StudentYearlyRecord.grade_id == AVRGResult.grade_id,
+                                        StudentYearlyRecord.year == AVRGResult.year))
+        .filter(AVRGResult.student_id == student_id)
+        .order_by(AVRGResult.semester)
+    ).all()
+
+    if not summary:
+        return jsonify({"error": "Summary not found"}), 404
+
+    summary_result = {
+        "final_score": summary[0][3],
+        "final_rank": summary[0][4],
+        "semesters": []
+    }
+
+    for semester, semester_average, semester_rank, _, _ in summary:
+        summary_result['semesters'].append({
+            "semester": semester,
+            "semester_average": semester_average,
+            "semester_rank": semester_rank,
+        })
+
+    return jsonify({"assessment": list(student_assessment.values()), "summary": summary_result}), 200
+
+
+@shared.route('/student/assessment/detail', methods=['GET'])
+@admin_or_student_required
+def student_assessment_detail(admin_data, student_data):
+    url = request.url
+    parsed_url = urlparse(url)
+    data = parse_qs(parsed_url.query)
+
+    required_data = {
+        'student_id',
+        'grade_id',
+        'subject_id',
+        'year'
+    }
+
+    for field in required_data:
+        if field not in data:
+            return jsonify({"error": f"Missing {field}"}), 400
+
+    student_id = data['student_id'][0]
+    grade_id = data['grade_id'][0]
+    subject_id = data['subject_id'][0]
+    year = data['year'][0]
+
+    try:
+        query = (
+            storage.get_session()
+            .query(MarkList.type,
+                   MarkList.score,
+                   MarkList.percentage,
+                   MarkList.semester
+                   )
+            .filter(MarkList.student_id == student_id,
+                    MarkList.grade_id == grade_id,
+                    MarkList.subject_id == subject_id,
+                    MarkList.year == year,
+                    )
+            .order_by(MarkList.percentage.asc(), MarkList.type.asc())
+        ).all()
+
+        assessment = {}
+        for type, score, percentage, semester in query:
+            if semester not in assessment:
+                assessment[semester] = []
+            assessment[semester].append({
+                "assessment_type": type,
+                "score": score,
+                "percentage": percentage,
+            })
+    except Exception as e:
+        return jsonify({"error": f"Failed to retrieve student assessment"}), 500
+
+    return jsonify(assessment), 200

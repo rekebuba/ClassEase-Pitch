@@ -12,7 +12,7 @@ import TableRow from '@mui/material/TableRow';
 import Paper from '@mui/material/Paper';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
-import { adminApi } from '@/api';
+import { sharedApi } from '@/api';
 import { toast } from "sonner"
 
 function createData(index, subject, semITotal, semIRank, semIITotal, semIIRank, avgTotal, avgRank, studentId, gradeId, subjectId, year) {
@@ -51,7 +51,7 @@ function Row(props) {
 
     const assessmentReport = async () => {
         try {
-            const res = await adminApi.getStudentAssessmentDetail({
+            const res = await sharedApi.getStudentAssessmentDetail({
                 student_id: row.studentId,
                 grade_id: row.gradeId,
                 subject_id: row.subjectId,
@@ -107,7 +107,7 @@ function Row(props) {
                             <div className='flex flex-wrap justify-between p-2 gap-10'>
                                 {(detailAssessment && Object.entries(detailAssessment).length !== 0) &&
                                     Object.keys(detailAssessment).map((semester) => (
-                                        <div key={semester} className='flex-1 p-4 w-96 min-w-[250px] border border-gray-300 rounded-lg shadow-md bg-white'>
+                                        <div key={semester} className='flex-1 p-4 min-w-[250px] max-w-md border border-gray-300 rounded-lg shadow-md bg-white'>
                                             <h3 className='text-center text-lg font-bold'>Semester {semester}</h3>
                                             <Table size="small" aria-label="purchases">
                                                 <TableHead className='bg-gray-200'>
@@ -121,7 +121,7 @@ function Row(props) {
                                                     {detailAssessment[semester].map((assessment, index) => (
                                                         <TableRow key={index} className={`bg-${index % 2 === 0 ? 'white' : 'gray-100'} hover:bg-gray-200`}>
                                                             <TableCell component="th" scope="row">{index + 1}</TableCell>
-                                                            <TableCell>{assessment.assessment_type}</TableCell>
+                                                            <TableCell>{assessment.assessment_type} ( {assessment.percentage} )%</TableCell>
                                                             <TableCell align="center">{assessment.score}</TableCell>
                                                         </TableRow>
                                                     ))}

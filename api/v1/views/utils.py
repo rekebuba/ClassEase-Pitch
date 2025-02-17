@@ -264,7 +264,7 @@ def student_required(f):
 # Unified decorator for Student and Admin JWT verification
 
 
-def student_or_admin_required(f):
+def admin_or_student_required(f):
     """
     Decorator to ensure that the request is made by either a student or an admin.
 
@@ -298,25 +298,25 @@ def student_or_admin_required(f):
             return jsonify({'message': error_message}), 401
 
         try:
-            # First, try decoding as a student token
+            # First, try decoding as an admin token
             payload = jwt.decode(
-                token, current_app.config["STUDENT_SECRET_KEY"], algorithms=["HS256"])
-            student_data = storage.get_first(
-                StudentYearlyRecord, student_id=payload['id'])
-            if student_data:
-                return f(student_data, None, *args, **kwargs)
+                token, current_app.config["ADMIN_SECRET_KEY"], algorithms=["HS256"])
+            admin_data = storage.get_first(Admin, id=payload['id'])
+            if admin_data:
+                return f(admin_data, None, *args, **kwargs)
         except jwt.ExpiredSignatureError:
             return jsonify({'message': 'Token has expired'}), 401
         except jwt.InvalidTokenError:
             pass  # Invalid for student, let's check for admin
 
         try:
-            # Then, try decoding as an admin token
+            # Then, try decoding as a student token
             payload = jwt.decode(
-                token, current_app.config["ADMIN_SECRET_KEY"], algorithms=["HS256"])
-            admin_data = storage.get_first(Admin, id=payload['id'])
-            if admin_data:
-                return f(None, admin_data, *args, **kwargs)
+                token, current_app.config["STUDENT_SECRET_KEY"], algorithms=["HS256"])
+            student_data = storage.get_first(
+                StudentYearlyRecord, student_id=payload['id'])
+            if student_data:
+                return f(None, student_data, *args, **kwargs)
         except jwt.ExpiredSignatureError:
             return jsonify({'message': 'Token has expired'}), 401
         except jwt.InvalidTokenError:

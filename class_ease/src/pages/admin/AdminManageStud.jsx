@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Toaster } from '@/components/ui/sonner';
 import { AdminHeader, AdminPanel } from "@/components/layout";
 import { AdminStudentProfile, AdminStudentList } from "@/features/admin";
-import "../../styles/AdminManageStudents.css";
 
 
 /**

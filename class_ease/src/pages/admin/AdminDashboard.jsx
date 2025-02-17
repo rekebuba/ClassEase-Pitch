@@ -3,9 +3,6 @@ import { AdminHeader, AdminPanel } from "@/components/layout";
 import { AdminStudentPerformance } from "@/features/admin";
 import { Toaster } from '@/components/ui/sonner';
 import { adminApi } from "@/api";
-import "../../styles/Dashboard.css";
-import "../../styles/AdminDashboard.css";
-import '../../styles/Table.css';
 
 /**
  * AdminDashboard component renders the main dashboard for the admin panel.

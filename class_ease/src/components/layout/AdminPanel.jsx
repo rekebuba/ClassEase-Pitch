@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaUserCircle } from "react-icons/fa";
 import { Logout } from "@/features/auth";
 import { adminApi } from '@/api';
@@ -33,6 +34,7 @@ import { adminApi } from '@/api';
  * - `api` (assumed to be an instance of Axios or similar for making HTTP requests)
  */
 const AdminPanel = () => {
+    const navigate = useNavigate();
     const [adminData, setAdminData] = useState({});
 
     /**
@@ -55,10 +57,16 @@ const AdminPanel = () => {
         fetchAdmin();
     }, []);
 
+    const updateProfile = () => {
+        navigate("/admin/update/profile");
+    };
+
     return (
         <aside className="flex flex-col justify-between fixed mt-[4.6rem] h-full w-48 bg-white p-7 border-r border-gray-200">
             <div className="flex flex-col items-center space-y-4">
-                <FaUserCircle className="w-16 h-16 text-gray-500" />
+                <FaUserCircle
+                    className="w-16 h-16 text-gray-500 cursor-pointer"
+                    onClick={updateProfile} />
                 <h3 className="mt-4 text-xl font-semibold text-gray-800">{adminData.__class__} Panel</h3>
                 <p className="text-sm text-gray-600 text-wrap text-center font-bold">Mr. {adminData.name}</p>
                 <p className="text-sm text-gray-600 text-wrap text-center font-bold">Principal</p>

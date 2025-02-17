@@ -42,10 +42,12 @@ def create_app(config_name):
     from api.v1.views.admin import admin
     from api.v1.views.students import stud
     from api.v1.views.teachers import teach
+    from api.v1.views.shared_access import shared
 
     app.register_blueprint(auth)
     app.register_blueprint(admin)
     app.register_blueprint(stud)
     app.register_blueprint(teach)
+    app.register_blueprint(shared)
 
     return app

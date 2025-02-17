@@ -622,8 +622,7 @@ def total_subject_ranks(student_data):
 
 def average_subject_ranks(student_data):
     for subject_id in storage.get_session().query(Subject.id).filter(
-        Subject.id == student_data['subject_id'],
-        Subject.year == student_data['year']
+        Subject.id == student_data['subject_id']
     ):
         totals = storage.get_session().query(AVRGSubject).filter_by(
             # subject_id is a tuple, we need to access the first element

@@ -83,15 +83,17 @@ const AdminManageTeacher = () => {
     };
 
     return (
-        <div className="admin-manage-container">
-            <AdminPanel />
-            <main className="content">
-                <AdminHeader />
-                <AdminTeacherList toggleDropdown={toggleDropdown} teacherSummary={summary} />
-                <AdminTeacherProfile isDetailOpen={isDetailOpen} toggleDetailProfile={toggleDetailProfile} teacherData={teacherSummary} />
-                <AdminAssignTeacher isEditOpen={isEditOpen} toggleEditProfile={toggleEditProfile} teacherData={teacherSummary} />
-                <Toaster />
-            </main>
+        <div className="min-h-screen flex overflow-hidden flex-col">
+            <AdminHeader />
+            <div className="flex flex-1 scroll-m-0">
+                <AdminPanel />
+                <main className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
+                    <AdminTeacherList toggleDropdown={toggleDropdown} teacherSummary={summary} />
+                    <AdminTeacherProfile isDetailOpen={isDetailOpen} toggleDetailProfile={toggleDetailProfile} teacherData={teacherSummary} />
+                    <AdminAssignTeacher isEditOpen={isEditOpen} toggleEditProfile={toggleEditProfile} teacherData={teacherSummary} />
+                    <Toaster />
+                </main>
+            </div>
         </div>
     );
 };

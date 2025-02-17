@@ -12,7 +12,7 @@ from models.assessment import Assessment
 from models.subject import Subject
 from models.average_result import AVRGResult
 from models.stud_yearly_record import StudentYearlyRecord
-from api.v1.views.utils import student_required, student_or_admin_required
+from api.v1.views.utils import student_required, admin_or_student_required
 from urllib.parse import urlparse, parse_qs
 from sqlalchemy import update, and_
 from datetime import datetime
@@ -44,42 +44,6 @@ def student_panel_data(student_data):
     return jsonify(student_dict), 200
 
 
-# @stud.route('/yearly_score', methods=['GET'])
-# @student_required
-# def student_dashboard(student_data):
-#     """
-#     Generates the student dashboard data.
-
-#     Args:
-#         student_data (object): An object containing student identifiers such as student_id, grade_id, and section_id.
-
-#     Returns:
-#         Response: A JSON response containing the student's information, including grade and section, or an error message if the student is not found.
-#     """
-#     if not student_data:
-#         return jsonify({"error": "Student not found"}), 404
-
-#     student = storage.get_first(Student, id=student_data.student_id)
-#     if not student:
-#         return jsonify({"error": "Student not found"}), 404
-
-#     query = (
-#         storage.get_session()
-#         .query(StudentYearlyRecord.final_score, Grade.grade)
-#         .join(Grade, StudentYearlyRecord.grade_id == Grade.id)
-#         .filter(StudentYearlyRecord.student_id == student_data.student_id)
-#     ).all()
-
-#     score = []
-#     for final_score, grade in query:
-#         score.append({
-#             "final_score": final_score,
-#             "grade": grade
-#         })
-
-#     return jsonify({"score": score}), 200
-
-
 @stud.route('/yearly_score', methods=['GET'])
 @student_required
 def student_yearly_scores(student_data):
@@ -95,7 +59,14 @@ def student_yearly_scores(student_data):
 
     query = (
         storage.get_session()
-        .query(Grade.grade, AVRGResult.semester, AVRGResult.average, StudentYearlyRecord.final_score)
+        .query(StudentYearlyRecord.student_id,
+               Grade.id,
+               Grade.grade,
+               AVRGResult.semester,
+               AVRGResult.average,
+               StudentYearlyRecord.final_score,
+               StudentYearlyRecord.year
+               )
         .join(Grade, AVRGResult.grade_id == Grade.id)
         .join(StudentYearlyRecord, StudentYearlyRecord.student_id == AVRGResult.student_id)
         .filter(and_(AVRGResult.student_id == student_data.student_id,
@@ -105,9 +76,10 @@ def student_yearly_scores(student_data):
     ).all()
 
     score = {}
-    for grade, semester, average, final_score in query:
+    for student_id, grade_id, grade, semester, average, final_score, year in query:
         if grade not in score:
-            score[grade] = {"grade": grade, "final_score": final_score}
+            score[grade] = {"student_id": student_id, "grade": grade, "grade_id": grade_id,
+                            "final_score": final_score, "year": year}
             score[grade]['semester'] = []
         score[grade]['semester'].append({
             "semester": semester,
@@ -305,7 +277,7 @@ def get_student_grade(student_data):
 
 
 @stud.route('/score', methods=['GET'])
-@student_or_admin_required
+@admin_or_student_required
 def get_student_score(student_data, admin_data):
     """
     Retrieve and return the score details of a student for a specific grade and semester.

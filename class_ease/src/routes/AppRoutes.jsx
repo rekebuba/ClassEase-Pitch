@@ -3,7 +3,7 @@ import { Home, NotFound } from "@/pages/public";
 import { Login } from "@/features/auth";
 import { AdminDashboard, AdminCreateMarkList, AdminEnrollUser, AdminEventManagement, AdminManageStudents, AdminManageTeacher, AdminUpdateProfile, AdminUserAccessControl } from "@/pages/admin";
 import { TeacherDashboard, TeacherManageStudent, TeacherUpdateProfile } from "@/pages/teacher";
-import { StudentDashboard, StudentUpdateProfile, StudentRegistrationForm } from "@/pages/student";
+import { StudentDashboard, StudentUpdateProfile, StudentRegistrationForm, StudentReportCard } from "@/pages/student";
 import { ProtectedRoute } from "@/routes";
 
 
@@ -25,38 +25,6 @@ const router = createBrowserRouter([
         element: <ProtectedRoute element={<AdminDashboard />} allowedRoles={['admin']}/>,
     },
     {
-        path: "/teacher/dashboard",
-        element: <ProtectedRoute element={<TeacherDashboard />} allowedRoles={['teacher']} />,
-    },
-    {
-        path: "/student/dashboard",
-        element: <ProtectedRoute element={<StudentDashboard />} allowedRoles={['student']} />,
-    },
-    {
-        path: "/student/registration",
-        element: <ProtectedRoute element={<StudentRegistrationForm />} allowedRoles={['admin']} />,
-    },
-    {
-        path: "admin/student/registration",
-        element: <AdminEnrollUser role="student" />
-    },
-    {
-        path: "admin/teacher/registration",
-        element: <AdminEnrollUser role="teacher" />
-    },
-    {
-        path: "/teacher/update/profile",
-        element: <ProtectedRoute element={<TeacherUpdateProfile />} allowedRoles={['teacher']} />,
-    },
-    {
-        path: "/admin/update/profile",
-        element: <ProtectedRoute element={<AdminUpdateProfile />} allowedRoles={['admin']} />,
-    },
-    {
-        path: "/student/update/profile",
-        element: <ProtectedRoute element={<StudentUpdateProfile />} allowedRoles={['student']} />
-    },
-    {
         path: "/admin/manage/students",
         element: <AdminManageStudents />
     },
@@ -65,8 +33,8 @@ const router = createBrowserRouter([
         element: <AdminManageTeacher />
     },
     {
-        path: "/teacher/students",
-        element: <ProtectedRoute element={<TeacherManageStudent />} allowedRoles={['teacher']}/>
+        path: "admin/student/registration",
+        element: <AdminEnrollUser role="student" />
     },
     {
         path: "/admin/assessment/marklist",
@@ -79,6 +47,42 @@ const router = createBrowserRouter([
     {
         path: "/admin/users/accesscontrol",
         element: <AdminUserAccessControl />
+    },
+    {
+        path: "/admin/update/profile",
+        element: <ProtectedRoute element={<AdminUpdateProfile />} allowedRoles={['admin']} />,
+    },
+    {
+        path: "admin/teacher/registration",
+        element: <AdminEnrollUser role="teacher" />
+    },
+    {
+        path: "/teacher/dashboard",
+        element: <ProtectedRoute element={<TeacherDashboard />} allowedRoles={['teacher']} />,
+    },
+    {
+        path: "/teacher/students",
+        element: <ProtectedRoute element={<TeacherManageStudent />} allowedRoles={['teacher']}/>
+    },
+    {
+        path: "/teacher/update/profile",
+        element: <ProtectedRoute element={<TeacherUpdateProfile />} allowedRoles={['teacher']} />,
+    },
+    {
+        path: "/student/dashboard",
+        element: <ProtectedRoute element={<StudentDashboard />} allowedRoles={['student']} />,
+    },
+    {
+        path: "/student/registration",
+        element: <ProtectedRoute element={<StudentRegistrationForm />} allowedRoles={['admin']} />,
+    },
+    {
+        path: "/student/update/profile",
+        element: <ProtectedRoute element={<StudentUpdateProfile />} allowedRoles={['student']} />
+    },
+    {
+        path: "/student/report-card",
+        element: <ProtectedRoute element={<StudentReportCard />} allowedRoles={['student']} />
     }
 ]);
 

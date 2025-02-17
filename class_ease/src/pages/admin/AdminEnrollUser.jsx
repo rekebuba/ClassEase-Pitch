@@ -18,14 +18,14 @@ import { Toaster } from '@/components/ui/sonner';
  *
  * @returns {JSX.Element} The rendered component.
  */
-const AdminEnrollStud = ({ role }) => {
+const AdminEnrollUser = ({ role }) => {
 
     return (
-        <div className="admin-dashboard-container">
-            <AdminPanel />
-            <div className="content">
-                <main className="dashboard-content">
-                    <AdminHeader />
+        <div className="min-h-screen flex overflow-hidden flex-col">
+            <AdminHeader />
+            <div className="flex flex-1 scroll-m-0">
+                <AdminPanel />
+                <main className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
                     {role === 'teacher' ? <TeacherRegistrationForm /> : <StudentRegistrationForm role='admin' />
                     }
                     <Toaster />
@@ -36,4 +36,4 @@ const AdminEnrollStud = ({ role }) => {
 };
 
 
-export default AdminEnrollStud;
+export default AdminEnrollUser;

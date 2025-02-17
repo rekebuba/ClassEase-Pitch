@@ -108,15 +108,15 @@ const AdminStudentPerformance = ({ enrollmentByGrade, performanceBySubject }) =>
     return (
         <>
             <h2>School Overview</h2>
-            <div className="admin-manage-container">
-                <div className="charts-container">
+            <div className="flex h-full">
+                <div className="flex flex-wrap justify-between w-full h-fit">
                     {/* Line Chart for Student Enrollment */}
-                    <div className="chart-card">
+                    <div className="bg-white p-5 m-3 max-w-lg h-1/2 w-full">
                         <h3>Student Enrollment by Grade</h3>
                         <Line data={studentEnrollmentData} />
                     </div>
                     {/* Bar Chart for Subject Performance */}
-                    <div className="chart-card">
+                    <div className="bg-white p-5 m-3 max-w-lg h-1/2 w-full">
                         <h3>Average Performance by Subject</h3>
                         <Bar data={subjectPerformanceData} />
                     </div>
