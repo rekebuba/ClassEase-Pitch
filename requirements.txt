@@ -1,9 +1,0 @@
-pip install SQLAlchemy
-pip install mysql-connector-python
-pip install Flask-JWT-Extended
-pip install bcrypt
-pip install pytest
-pip install ethiopian-date
-pip install Flask-CORS
-pip install flask_apscheduler
-pip install schedule

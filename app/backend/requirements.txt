@@ -1,0 +1,12 @@
+Flask-JWT-Extended
+Flask-CORS
+flask_apscheduler
+flask-sqlalchemy
+SQLAlchemy
+bcrypt
+ethiopian-date
+python-dotenv
+mysqlclient
+mysql-connector-python
+pytest
+schedule
