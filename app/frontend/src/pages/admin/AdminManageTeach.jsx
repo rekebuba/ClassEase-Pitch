@@ -49,15 +49,6 @@ const AdminManageTeacher = () => {
 
     /**
      * @method
-     * @name toggleDetailProfile
-     * @description Closes the detail profile.
-     */
-    const toggleDetailProfile = () => {
-        setIsDetailOpen(false);
-    };
-
-    /**
-     * @method
      * @name toggleEditProfile
      * @description Closes the edit profile.
      */
@@ -89,7 +80,6 @@ const AdminManageTeacher = () => {
                 <AdminPanel />
                 <main className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
                     <AdminTeacherList toggleDropdown={toggleDropdown} teacherSummary={summary} />
-                    <AdminTeacherProfile isDetailOpen={isDetailOpen} toggleDetailProfile={toggleDetailProfile} teacherData={teacherSummary} />
                     <AdminAssignTeacher isEditOpen={isEditOpen} toggleEditProfile={toggleEditProfile} teacherData={teacherSummary} />
                     <Toaster />
                 </main>

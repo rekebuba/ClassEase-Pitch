@@ -32,7 +32,7 @@ const assignTeacherData = (data) => {
  *
  * @returns {JSX.Element} The rendered TeachProfile component.
  */
-const AdminTeacherProfile = ({ isDetailOpen, toggleDetailProfile, teacherData }) => {
+const AdminTeacherProfile = ({ teacherData }) => {
     const [teacher, setTeacher] = useState({
         name: '',
         age: null,
@@ -56,52 +56,46 @@ const AdminTeacherProfile = ({ isDetailOpen, toggleDetailProfile, teacherData })
     }, [teacherData]);
 
     return (
-        <div className={`popup-overlay ${isDetailOpen ? "open" : "close"}`}>
-            <div className='popup-overlay-container'>
-                <div className="close-popup">
-                    <h2 style={{ margin: 0 }}>Teacher Data</h2>
-                    <button onClick={toggleDetailProfile}><FaTimes size={24} /></button>
+        <>
+            <div className="flex mb-5">
+                <div className="mr-5">
+                    <img className=' w-[150px] h-[150px] object-cover rounded-[50%]' src={teacher.pictureUrl} alt="Teacher" />
                 </div>
-                <div className="popup-profile-header">
-                    <div className="popup-profile-picture">
-                        <img src={teacher.pictureUrl} alt="Teacher" />
-                    </div>
-                    <div className="popup-profile-info">
-                        <h2>{teacher.name}</h2>
-                        <p>Age: {teacher.age}</p>
-                        <p>Experience: {teacher.experience}</p>
-                        <p>Email: {teacher.email}</p>
-                        <p>Phone: {teacher.phone}</p>
-                    </div>
-                </div>
-
-                <div className="popup-profile-content">
-                    <h3>Subjects Taught</h3>
-                    <ul>
-                        {teacher.subjects && teacher.subjects.map((subject, index) => (
-                            <li key={index}>{subject}</li>
-                        ))}
-                    </ul>
-
-                    <h3>Classes Handled</h3>
-                    <ul>
-                        {teacher.classes && teacher.classes.length > 0 ? (
-                            teacher.classes.map((cls, index) => (
-                                <li key={index}>Grade: {cls.grade}, Section: {cls.section}, Subject: {cls.subject}</li>
-                            ))
-                        ) : (
-                            <li key='N/A'>N/A</li>
-                        )}
-                    </ul>
-                    <h3>Qualifications</h3>
-                    <ul>
-                        {teacher.qualifications && teacher.qualifications.map((qualification, index) => (
-                            <li key={index}>{qualification}</li>
-                        ))}
-                    </ul>
+                <div className="flex-1">
+                    <h2 className='mt-0 mb-2.5 mx-0'>{teacher.name}</h2>
+                    <p>Age: {teacher.age}</p>
+                    <p>Experience: {teacher.experience}</p>
+                    <p>Email: {teacher.email}</p>
+                    <p>Phone: {teacher.phone}</p>
                 </div>
             </div>
-        </div>
+
+            <div className="mb-3">
+                <h3>Subjects Taught</h3>
+                <ul>
+                    {teacher.subjects && teacher.subjects.map((subject, index) => (
+                        <li key={index}>{subject}</li>
+                    ))}
+                </ul>
+
+                <h3>Classes Handled</h3>
+                <ul>
+                    {teacher.classes && teacher.classes.length > 0 ? (
+                        teacher.classes.map((cls, index) => (
+                            <li key={index}>Grade: {cls.grade}, Section: {cls.section}, Subject: {cls.subject}</li>
+                        ))
+                    ) : (
+                        <li key='N/A'>N/A</li>
+                    )}
+                </ul>
+                <h3>Qualifications</h3>
+                <ul>
+                    {teacher.qualifications && teacher.qualifications.map((qualification, index) => (
+                        <li key={index}>{qualification}</li>
+                    ))}
+                </ul>
+            </div>
+        </>
     );
 };
 

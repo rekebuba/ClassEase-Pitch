@@ -1,6 +1,4 @@
 import { useState, useEffect } from 'react';
-import { FaTimes } from 'react-icons/fa';
-import { Button } from '@/components/ui/button';
 import { sharedApi } from '@/api';
 import { toast } from "sonner"
 import ExamAssessmentReports from "./AdminExamAssessmentReports";
@@ -15,24 +13,23 @@ import CollapsibleTable from "./CollapsibleTable";
  * @param {boolean} props.isProfileOpen - A flag indicating whether the profile popup is open or closed.
  * @param {function} props.toggleAssessment - A function to toggle the assessment view.
  * @param {function} props.closeProfile - A function to close the profile popup.
- * @param {Object} props.studentProfileSummary - An object containing the summary of the student's profile.
- * @param {string} props.studentProfileSummary.student_id - The ID of the student.
- * @param {string} props.studentProfileSummary.grade - The grade of the student.
- * @param {string} props.studentProfileSummary.pictureUrl - The URL of the student's picture.
- * @param {string} props.studentProfileSummary.name - The name of the student.
- * @param {string} props.studentProfileSummary.father_name - The father's name of the student.
- * @param {string} props.studentProfileSummary.grand_father_name - The grandfather's name of the student.
- * @param {string} props.studentProfileSummary.date_of_birth - The date of birth of the student in 'YYYY-MM-DD' format.
- * @param {string} props.studentProfileSummary.section - The section of the student.
+ * @param {Object} props.student - An object containing the summary of the student's profile.
+ * @param {string} props.student.student_id - The ID of the student.
+ * @param {string} props.student.grade - The grade of the student.
+ * @param {string} props.student.pictureUrl - The URL of the student's picture.
+ * @param {string} props.student.name - The name of the student.
+ * @param {string} props.student.father_name - The father's name of the student.
+ * @param {string} props.student.grand_father_name - The grandfather's name of the student.
+ * @param {string} props.student.date_of_birth - The date of birth of the student in 'YYYY-MM-DD' format.
+ * @param {string} props.student.section - The section of the student.
  * @param {Object} props.assessmentSummary - An object containing the summary of the student's assessment.
  *
  * @returns {JSX.Element} The rendered StudentProfile component.
  */
-const AdminStudentProfile = ({ isProfileOpen, toggleAssessment, closeProfile, studentProfileSummary }) => {
+const AdminStudentProfile = ({ student }) => {
     const [allSubjects, setAllSubjects] = useState([]);
     const [studentAssessment, setStudentAssessment] = useState([]);
     const [studentReport, setStudentReport] = useState([]);
-    const [student, setStudent] = useState({});
 
     /**
      * @function calculateAge
@@ -59,12 +56,12 @@ const AdminStudentProfile = ({ isProfileOpen, toggleAssessment, closeProfile, st
          */
         const lodeStudentSubjectList = async () => {
             try {
-                if (studentProfileSummary !== undefined && Object.keys(studentProfileSummary).length > 0) {
+                if (student !== undefined && Object.keys(student).length > 0) {
                     const response = await sharedApi.getStudentAssessment({
-                        student_id: studentProfileSummary.student_id,
-                        grade_id: studentProfileSummary.grade_id,
-                        section_id: studentProfileSummary.section_id,
-                        year: studentProfileSummary.year
+                        student_id: student.student_id,
+                        grade_id: student.grade_id,
+                        section_id: student.section_id,
+                        year: student.year
                     });
                     setStudentAssessment(response.data.assessment);
                     setStudentReport(response.data.summary)
@@ -84,49 +81,39 @@ const AdminStudentProfile = ({ isProfileOpen, toggleAssessment, closeProfile, st
             }
         };
         lodeStudentSubjectList();
-        setStudent(studentProfileSummary);
-    }, [isProfileOpen, studentProfileSummary]);
+    }, [student]);
 
     return (
-        <div className={`popup-overlay ${isProfileOpen ? "open" : "close"}`}>
-            <div className='popup-overlay-container'>
-                <div className="flex justify-between items-center p-2">
-                    <h3 className='text-center text-lg font-bold'>student Summary</h3>
-                    <Button
-                        className='bg-opacity-0 text-black hover:bg-opacity-10 hover:text-red-400 hover:scale-150'
-                        onClick={closeProfile}
-                    >
-                        <FaTimes size={24} />
-                    </Button>
+        <>
+            <div className="flex mb-5">
+                <div className="mr-5">
+                    <img
+                        className=' w-[150px] h-[150px] object-cover rounded-[50%]'
+                        src={student.pictureUrl} alt="Student" />
                 </div>
-                <div className="popup-profile-header">
-                    <div className="popup-profile-picture">
-                        <img src={student.pictureUrl} alt="Student" />
-                    </div>
-                    <div className="popup-profile-info">
-                        <h2>{student.name} {student.father_name} {student.grand_father_name} </h2>
-                        <p>Age: {calculateAge(student.date_of_birth)}</p>
-                        <p>Grade: {student.grade}</p>
-                        <p style={{ margin: 0 }}>Section: {student.section}</p>
-                    </div>
-                </div>
-
-                <div className="popup-profile-content">
-                    <h3>Performance Overview</h3>
-                    <ExamAssessmentReports subjectSummary={allSubjects} />
-                    <div className="list-head">
-                        <h3>
-                            <span>{`Academic Year: ${student.year}`}</span>
-                            <span className="ml-5">{`Grade: ${student.grade}`}</span>
-                            <span className="ml-5">{`Semester: ${student.semester}`}</span>
-                        </h3>
-                    </div>
-                    {studentAssessment &&
-                        (<CollapsibleTable studentAssessment={studentAssessment} studentReport={studentReport} />)
-                    }
+                <div className="flex-1">
+                    <h2 className='mt-0 mb-2.5 mx-0'>{student.name} {student.father_name} {student.grand_father_name} </h2>
+                    <p>Age: {calculateAge(student.date_of_birth)}</p>
+                    <p>Grade: {student.grade}</p>
+                    <p style={{ margin: 0 }}>Section: {student.section}</p>
                 </div>
             </div>
-        </div>
+
+            <div className="mb-3">
+                <h3>Performance Overview</h3>
+                <ExamAssessmentReports subjectSummary={allSubjects} />
+                <div className='flex justify-between items-center'>
+                    <h3 className="text-lg font-bold mt-5">
+                        <span>{`Academic Year: ${student.year}`}</span>
+                        <span className="ml-5">{`Grade: ${student.grade}`}</span>
+                        <span className="ml-5">{`Semester: ${student.semester}`}</span>
+                    </h3>
+                </div>
+                {studentAssessment &&
+                    (<CollapsibleTable studentAssessment={studentAssessment} studentReport={studentReport} />)
+                }
+            </div>
+        </>
     );
 };
 

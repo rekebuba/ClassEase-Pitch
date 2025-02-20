@@ -562,11 +562,14 @@ def yearly_average(student_data):
         year=student_data['year']
     ).all()
 
-    if len(result) != 2:
-        return
+    # if len(result) != 2:
+    #     return
 
     # Calculate the yearly average
-    yearly_avg = sum([res.average for res in result if res.average]) / 2
+    if len(result) == 1:
+        yearly_avg = result[0].average
+    else:
+        yearly_avg = sum([res.average for res in result if res.average]) / 2
 
     overall = storage.get_session().query(StudentYearlyRecord).filter_by(
         student_id=student_data['student_id'],

@@ -734,12 +734,12 @@ def admin_student_list(admin_data):
     if not grade:
         return jsonify({"error": "Grade not found"}), 404
 
-    # Pagination and filtering params
-    page = int(data['page'][0]) if 'page' in data else 1
-    limit = int(data['limit'][0]) if 'limit' in data else 10
-    search_term = data['search'][0] if 'search' in data else None
-    order_by = data['order_by'][0] if 'order_by' in data else None
-    order = data['order'][0] if 'order' in data else None
+    # # Pagination and filtering params
+    # page = int(data['page'][0]) if 'page' in data else 1
+    # limit = int(data['limit'][0]) if 'limit' in data else 10
+    # search_term = data['search'][0] if 'search' in data else None
+    # order_by = data['order_by'][0] if 'order_by' in data else None
+    # order = data['order'][0] if 'order' in data else None
 
     query = (
         storage.get_session()
@@ -760,27 +760,27 @@ def admin_student_list(admin_data):
             StudentYearlyRecord.grade_id == grade.id,
             StudentYearlyRecord.year == data['year'][0]
         )
-        .order_by(StudentYearlyRecord.final_score.asc() if order == 'asc' else StudentYearlyRecord.final_score.desc() if order_by == 'final_score' else Section.section.asc(), Student.name.asc(), Student.father_name.asc(), Student.grand_father_name.asc(), Student.id.asc())
-    )
+        .order_by(Section.section.asc(), Student.name.asc(), Student.father_name.asc(), Student.grand_father_name.asc(), Student.id.asc())
+    ).all()
 
-    if search_term:
-        search_pattern = f"%{search_term}%"
-        query = query.filter(
-            StudentYearlyRecord.student_id.ilike(search_pattern) |
-            Student.name.ilike(search_pattern) |
-            Student.father_name.ilike(search_pattern) |
-            Student.grand_father_name.ilike(search_pattern)
-        )
+    # if search_term:
+    #     search_pattern = f"%{search_term}%"
+    #     query = query.filter(
+    #         StudentYearlyRecord.student_id.ilike(search_pattern) |
+    #         Student.name.ilike(search_pattern) |
+    #         Student.father_name.ilike(search_pattern) |
+    #         Student.grand_father_name.ilike(search_pattern)
+    #     )
 
     # Use the paginate_query function to handle pagination
-    paginated_result = paginate_query(query, page, limit)
+    # paginated_result = paginate_query(query, page, limit)
 
     # Check if any students are found
-    if not paginated_result['items']:
+    if not query:
         return jsonify({"error": "No student found"}), 404
 
     student_list = []
-    for id, name, f_name, g_name, section, section_id, grade_id, final_score, rank in paginated_result['items']:
+    for id, name, f_name, g_name, section, section_id, grade_id, final_score, rank in query:
         student_list.append({
             "student_id": id,
             "name": name,
@@ -796,7 +796,7 @@ def admin_student_list(admin_data):
 
     return jsonify({
         "students": student_list,
-        "meta": paginated_result['meta'],
+        "meta": {},
         "header": {"grade": data['grade'][0], "year": data['year'][0]}
     }), 200
 
