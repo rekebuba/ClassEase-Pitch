@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """Student views module for the API"""
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, url_for
 from models import storage
 from models.users import User
 from models.grade import Grade
@@ -16,6 +16,7 @@ from api.v1.views.utils import student_required, admin_or_student_required
 from urllib.parse import urlparse, parse_qs
 from sqlalchemy import update, and_
 from datetime import datetime
+from api.v1.views.methods import save_profile, validate_request
 
 stud = Blueprint('stud', __name__, url_prefix='/api/v1/student')
 
@@ -35,13 +36,20 @@ def student_panel_data(student_data):
     if not student_data:
         return jsonify({"error": "Student not found"}), 404
 
-    student = storage.get_first(Student, id=student_data.student_id)
-    if not student:
-        return jsonify({"error": "Student not found"}), 404
+    query = (storage.get_session()
+             .query(User.image_path, Student.id, Student.name, Student.father_name, Student.grand_father_name)
+             .join(Student, Student.id == User.id)
+             .filter(User.id == student_data.student_id)
+             ).first()
 
-    student_dict = student.to_dict()
+    data = {key: value for key, value in query._asdict().items()}
 
-    return jsonify(student_dict), 200
+    image_url = url_for('static', filename=data['image_path'], _external=True)
+
+    return jsonify({
+        **data,
+        "image_url": image_url
+    }), 200
 
 
 @stud.route('/yearly_score', methods=['GET'])
@@ -187,23 +195,18 @@ def register_new_student():
         - father_phone (str): The phone number of the student's father.
         - mother_phone (str): The phone number of the student's mother.
     """
-    data = request.get_json()
+    required_fields = ['name', 'father_name',
+                       'grand_father_name', 'grade', 'date_of_birth', 'start_year']
 
-    if not data:
-        return jsonify({"error": "Not a JSON"}), 404
+    error_response = validate_request(required_fields)
+    if error_response:
+        return error_response  # Return error if any field is missing
 
-    required_data = [
-        'name',
-        'father_name',
-        'grand_father_name',
-        'grade',
-        'date_of_birth',
-        'start_year',
-    ]
-    # Check if required fields are present
-    for field in required_data:
-        if field not in data:
-            return jsonify({"error": f"Missing {field}"}), 400
+    # Extract all form fields into a dictionary
+    data = {key:
+            request.files.get(
+                key) if key == 'profilePicture' else request.form.get(key)
+            for key in request.form.keys()}
 
     if 'father_phone' not in data and 'mother_phone' not in data:
         return jsonify({"error": "Need to provide at least one phone number"}), 400
@@ -233,7 +236,10 @@ def register_new_student():
     if existing_student:
         return jsonify({"error": "Student already exists"}), 409
 
-    new_student = User(role='Student')
+    # Validate file type and save it
+    filepath = save_profile(data['profilePicture'])
+
+    new_student = User(role='Student', image_path=filepath)
     new_student.hash_password(new_student.id)
 
     try:

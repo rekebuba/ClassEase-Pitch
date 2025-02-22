@@ -43,10 +43,17 @@ class Student(BaseModel, Base):
     # Academic Info
     start_year = Column(String(10), nullable=False)
     end_year = Column(String(10))
+
     # If transferring from another school
     previous_school = Column(String(100))
     grade = Column(Integer, nullable=False)  # Current grade level
     section = Column(String(10))  # Class section (A, B, C, etc.)
+
+    # Academic Performance
+    current_grade = Column(Integer, nullable=False)
+    current_semester = Column(Integer, nullable=False)
+    has_passed = Column(Boolean, default=False)
+    registration_window_start = Column(DateTime)
 
     # Identification & Legal Docs
     birth_certificate = Column(String(255))  # Path to uploaded file
@@ -62,6 +69,7 @@ class Student(BaseModel, Base):
 
     # Student Status
     is_transferring = Column(Boolean, default=False)
+
     # Whether the student is currently enrolled
     is_active = Column(Boolean, default=True)
 

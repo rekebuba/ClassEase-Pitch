@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 import { MoreHorizontal } from "lucide-react";
-
+import { FaUserCircle } from "react-icons/fa";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -18,12 +18,23 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog"
 import { AdminTeacherProfile } from "@/features/admin";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 
 export const teacherColumn = [
     {
-        accessorKey: "No",
-        header: "No",
+        accessorKey: "profile",
+        id: "actions",
+        cell: ({ row }) => {
+            const teacher = row.original
+
+            return (
+                <Avatar>
+                    <AvatarImage src={teacher.image_path} />
+                    <AvatarFallback><FaUserCircle /></AvatarFallback>
+                </Avatar>
+            )
+        },
     },
     {
         accessorKey: "id",
@@ -40,42 +51,56 @@ export const teacherColumn = [
         },
     },
     {
-        accessorKey: "first_name",
+        accessorKey: "firstName",
         header: ({ column }) => {
             return (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    Name
+                    first Name
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )
         },
     },
     {
-        accessorKey: "last_name",
+        accessorKey: "lastName",
         header: ({ column }) => {
             return (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    Father Name
+                    last Name
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )
         },
     },
     {
-        accessorKey: "subjects",
+        accessorKey: "email",
         header: ({ column }) => {
             return (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    subject
+                    email
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            )
+        },
+    },
+    {
+        accessorKey: "markList",
+        header: ({ column }) => {
+            return (
+                <Button
+                    variant="mark List"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    mark List
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )

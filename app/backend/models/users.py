@@ -30,6 +30,7 @@ class User(BaseModel, Base):
     id = Column(String(120), primary_key=True, unique=True)
     password = Column(String(120), nullable=False)
     role = Column(String(50), nullable=False)
+    image_path = Column(String(255), nullable=True)
 
 
 

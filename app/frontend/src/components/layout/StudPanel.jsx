@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaUserCircle } from "react-icons/fa";
 import { Logout } from "@/features/auth";
 import { studentApi } from '@/api';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 
 /**
@@ -28,6 +29,8 @@ import { studentApi } from '@/api';
 const StudentPanel = () => {
   const navigate = useNavigate();
   const [studentData, setStudentData] = useState({});
+  const [previewImage, setPreviewImage] = useState('');
+
 
   /**
    * @hook useEffect
@@ -50,7 +53,9 @@ const StudentPanel = () => {
     const fetchStudent = async () => {
       try {
         const response = await studentApi.getPanelData();
+        console.log(response.data)
         setStudentData(response.data);
+        setPreviewImage(response.data.image_url);
       } catch (error) {
         if (error.response && error.response.data && error.response.data['error']) {
           console.error(error.response.data['error']);
@@ -73,13 +78,16 @@ const StudentPanel = () => {
     <aside className="flex flex-col justify-between fixed mt-[4.6rem] h-full w-48 bg-white p-7 border-r border-gray-200">
       {/* Top Profile Section */}
       <div className="flex flex-col items-center space-y-4">
-        <FaUserCircle className="w-16 h-16 text-gray-500 cursor-pointer" onClick={updateProfile} />
+        <Avatar className="w-16 h-16 cursor-pointer" onClick={updateProfile}>
+          <AvatarImage src={previewImage} />
+          <AvatarFallback><FaUserCircle className="w-16 h-16 text-gray-500 cursor-pointer" /></AvatarFallback>
+        </Avatar>
         <h3 className="mt-4 text-center text-xl font-semibold text-gray-800">{studentData.name} {studentData.father_name} {studentData.grand_father_name}</h3>
         <h3 className="mt-4 text-center text-gray-800">{studentData.id}</h3>
 
       </div>
       <Logout />
-    </aside>
+    </aside >
   );
 };
 

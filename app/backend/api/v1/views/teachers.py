@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """Teacher views module for the API"""
 
-from flask import request, jsonify
+from flask import request, jsonify, url_for
 from sqlalchemy import func
 from models import storage
 from datetime import datetime
@@ -21,11 +21,43 @@ from urllib.parse import urlparse, parse_qs
 from sqlalchemy import update, and_
 from flask import Blueprint
 from api.v1.views.utils import teacher_required
-from api.v1.views.methods import paginate_query
+from api.v1.views.methods import paginate_query, save_profile
 from models.base_model import BaseModel
 
 
 teach = Blueprint('teach', __name__, url_prefix='/api/v1/teacher')
+
+
+@teach.route('/panel', methods=['GET'])
+@teacher_required
+def teacher_panel(teacher_data):
+    """
+    Handle the teacher panel view.
+
+    Args:
+        teacher_data (object): The teacher data object. Should have a `to_dict` method.
+
+    Returns:
+        Response: A JSON response containing the teacher data if found,
+                  otherwise an error message with a 404 status code.
+    """
+    if not teacher_data:
+        return jsonify({"error": "Teacher not found"}), 404
+
+    query = (storage.get_session()
+             .query(User.image_path, Teacher.id, Teacher.first_name, Teacher.last_name)
+             .join(Teacher, Teacher.id == User.id)
+             .filter(User.id == teacher_data.id)
+             ).first()
+
+    data = {key: value for key, value in query._asdict().items()}
+
+    image_url = url_for('static', filename=data['image_path'], _external=True)
+
+    return jsonify({
+        **data,
+        "image_url": image_url
+    }), 200
 
 
 @teach.route('/dashboard', methods=['GET'])

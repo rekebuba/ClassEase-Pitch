@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 """Admin views module for the API"""
 
-from flask import request, jsonify
+import os
+from flask import request, jsonify, url_for
 from sqlalchemy import func
 from models import storage
 from flask import Blueprint
@@ -21,7 +22,7 @@ from models.teacher_record import TeachersRecord
 from sqlalchemy import update, select, and_
 from urllib.parse import urlparse, parse_qs
 from api.v1.views.utils import admin_required
-from api.v1.views.methods import paginate_query
+from api.v1.views.methods import paginate_query, save_profile, validate_request
 
 
 admin = Blueprint('admin', __name__, url_prefix='/api/v1/admin')
@@ -46,7 +47,21 @@ def admin_dashboard(admin_data):
     """
     if not admin_data:
         return jsonify({"error": "Admin not found"}), 404
-    return jsonify(admin_data.to_dict()), 200
+
+    query = (storage.get_session()
+             .query(User.image_path)
+             .join(Admin, Admin.id == User.id)
+             .filter(Admin.id == admin_data.id)
+             ).first()
+
+    filename = query[0]
+
+    image_url = url_for('static', filename=f'{filename}', _external=True)
+
+    return jsonify({
+        **(admin_data.to_dict()),
+        "image_url": image_url
+    }), 200
 
 
 @admin.route('/profile', methods=['PUT'])
@@ -182,16 +197,26 @@ def register_new_admin():
         - 404: Request data is not a valid JSON.
         - 500: Internal server error during the registration process.
     """
-    data = request.get_json()
+    required_fields = []
 
-    if not data:
-        return jsonify({"error": "Not a JSON"}), 404
+    error_response = validate_request(required_fields)
+    if error_response:
+        return error_response  # Return error if any field is missing
+
+    # Extract all form fields into a dictionary
+    data = {key:
+            request.files.get(
+                key) if key == 'profilePicture' else request.form.get(key)
+            for key in request.form.keys()}
 
     # Check if required fields are present
-    if 'name' not in data or 'email' not in data:
+    if "name" not in data or "email" not in data:
         return jsonify({"error": "Missing name or email"}), 400
 
-    new_admin = User(role='Admin')
+    # Validate file type and save it
+    filepath = save_profile(data['profilePicture'])
+
+    new_admin = User(role='Admin', image_path=filepath)
     new_admin.hash_password(new_admin.id)
 
     try:
@@ -211,7 +236,7 @@ def register_new_admin():
     return jsonify({"message": "Admin registered successfully!"}), 201
 
 
-@admin.route('/teachers/registration', methods=['POST'])
+@admin.route('/teacher/registration', methods=['POST'])
 # @admin_required
 def register_new_teacher():
     """
@@ -229,12 +254,7 @@ def register_new_teacher():
                   - 409: Teacher already exists.
                   - 500: Internal server error.
     """
-    data = request.get_json()
-
-    if not data:
-        return jsonify({"error": "Not a JSON"}), 404
-
-    required_data = {
+    required_fields = [
         "first_name",
         "last_name",
         "age",
@@ -245,12 +265,17 @@ def register_new_teacher():
         "experience",
         "qualification",
         "subject_taught",
-    }
+    ]
 
-    # Check if required fields are present
-    for field in required_data:
-        if field not in data:
-            return jsonify({"error": f"Missing {field}"}), 400
+    error_response = validate_request(required_fields)
+    if error_response:
+        return error_response  # Return error if any field is missing
+
+    # Extract all form fields into a dictionary
+    data = {key:
+            request.files.get(
+                key) if key == 'profilePicture' else request.form.get(key)
+            for key in request.form.keys()}
 
     # check if a Teacher with the same email, first name, and last name already exists
     existing_teacher = storage.get_first(
@@ -262,7 +287,10 @@ def register_new_teacher():
     if existing_teacher:
         return jsonify({"error": "Teacher already exists"}), 409
 
-    new_teacher = User(role='Teacher')
+    # Validate file type and save it
+    filepath = save_profile(data['profilePicture'])
+
+    new_teacher = User(role='Teacher', image_path=filepath)
     new_teacher.hash_password(new_teacher.id)
 
     try:
@@ -734,16 +762,9 @@ def admin_student_list(admin_data):
     if not grade:
         return jsonify({"error": "Grade not found"}), 404
 
-    # # Pagination and filtering params
-    # page = int(data['page'][0]) if 'page' in data else 1
-    # limit = int(data['limit'][0]) if 'limit' in data else 10
-    # search_term = data['search'][0] if 'search' in data else None
-    # order_by = data['order_by'][0] if 'order_by' in data else None
-    # order = data['order'][0] if 'order' in data else None
-
     query = (
         storage.get_session()
-        .query(Student.id,
+        .query(Student.id.label('student_id'),
                Student.name,
                Student.father_name,
                Student.grand_father_name,
@@ -751,10 +772,13 @@ def admin_student_list(admin_data):
                Section.id,
                StudentYearlyRecord.grade_id,
                StudentYearlyRecord.final_score,
-               StudentYearlyRecord.rank
+               StudentYearlyRecord.rank,
+               StudentYearlyRecord.year,
+               User.image_path
                )
         .select_from(StudentYearlyRecord)
         .join(Student, Student.id == StudentYearlyRecord.student_id)
+        .join(User, User.id == Student.id)
         .join(Section, Section.id == StudentYearlyRecord.section_id)
         .filter(
             StudentYearlyRecord.grade_id == grade.id,
@@ -763,42 +787,19 @@ def admin_student_list(admin_data):
         .order_by(Section.section.asc(), Student.name.asc(), Student.father_name.asc(), Student.grand_father_name.asc(), Student.id.asc())
     ).all()
 
-    # if search_term:
-    #     search_pattern = f"%{search_term}%"
-    #     query = query.filter(
-    #         StudentYearlyRecord.student_id.ilike(search_pattern) |
-    #         Student.name.ilike(search_pattern) |
-    #         Student.father_name.ilike(search_pattern) |
-    #         Student.grand_father_name.ilike(search_pattern)
-    #     )
-
-    # Use the paginate_query function to handle pagination
-    # paginated_result = paginate_query(query, page, limit)
-
     # Check if any students are found
     if not query:
         return jsonify({"error": "No student found"}), 404
 
-    student_list = []
-    for id, name, f_name, g_name, section, section_id, grade_id, final_score, rank in query:
-        student_list.append({
-            "student_id": id,
-            "name": name,
-            "father_name": f_name,
-            "grand_father_name": g_name,
-            "section": section,
-            "section_id": section_id,
-            "grade_id": grade_id,
-            "final_score": final_score,
-            "rank": rank,
-            "year": data['year'][0],
-        })
+    student_list = [{key: url_for('static', filename=value, _external=True)
+                     if key == 'image_path' else value for key, value in q._asdict().items()} for q in query]
 
     return jsonify({
         "students": student_list,
         "meta": {},
         "header": {"grade": data['grade'][0], "year": data['year'][0]}
     }), 200
+
 
 @admin.route('/teachers', methods=['GET'])
 @admin_required
@@ -825,66 +826,26 @@ def all_teachers(admin_data):
     parsed_url = urlparse(url)
     data = parse_qs(parsed_url.query)
 
-    # Pagination and filtering params
-    page = int(data['page'][0]) if 'page' in data else 1
-    limit = int(data['limit'][0]) if 'limit' in data else 10
-    search_term = data['search'][0] if 'search' in data else None
+    query = (storage.get_session()
+                .query(Teacher.id,
+                       Teacher.first_name.label('firstName'),
+                       Teacher.last_name.label('lastName'),
+                       Teacher.email,
+                       Teacher.no_of_mark_list.label('markList'),
+                       User.image_path
+                       )
+                .join(TeachersRecord, Teacher.id == TeachersRecord.teacher_id)
+                .join(User, User.id == Teacher.id)
+                .filter(TeachersRecord.semester == 1)
+                .group_by(Teacher.id)
+                )
 
-    teachers = storage.get_session().query(Teacher)
-
-    if not teachers:
+    if not query:
         return jsonify({"error": "No teachers found"}), 404
 
-    if search_term:
-        search_pattern = f"%{search_term}%"
-        teachers = teachers.filter(
-            Teacher.id.ilike(search_pattern) |
-            Teacher.first_name.ilike(search_pattern) |
-            Teacher.last_name.ilike(search_pattern) |
-            Teacher.email.ilike(search_pattern) |
-            Teacher.phone.ilike(search_pattern)
-        )
-
-    # Use the paginate_query function to handle pagination
-    paginated_result = paginate_query(teachers, page, limit)
-
-    # Check if any Teachers are found
-    if not paginated_result['items']:
-        return jsonify({"error": "No Teacher found"}), 404
-
-    teacher_list = []
-    for teacher in paginated_result['items']:
-        class_handled = []
-        teachers_record = storage.get_all(
-            TeachersRecord, teacher_id=teacher.id)
-        for record in teachers_record:
-            grade = storage.get_first(Grade, id=record.grade_id).grade
-            section = storage.get_first(Section, id=record.section_id).section
-            subject = storage.get_first(Subject, id=record.subject_id).name
-            class_handled.append({
-                "grade": grade,
-                "section": section,
-                "subject": subject
-            })
-            # Teacher Summary
-        teacher_summary = {
-            "id": teacher.id,
-            "name": "Mr." + teacher.first_name + " " + teacher.last_name,
-            "first_name": teacher.first_name,
-            "last_name": teacher.last_name,
-            "email": teacher.email,
-            "phone": teacher.phone,
-            "age": teacher.age,
-            "experience": teacher.experience,
-            "no_of_mark_list": teacher.no_of_mark_list,
-            "record": class_handled,
-            "subjects": [teacher.subject_taught],
-            "qualifications": [teacher.qualification],
-        }
-
-        teacher_list.append(teacher_summary)
+    teacher_list = [{key: url_for('static', filename=value, _external=True)
+                     if key == 'image_path' else value for key, value in q._asdict().items()} for q in query]
 
     return jsonify({
         "teachers": teacher_list,
-        "meta": paginated_result['meta']
     }), 200

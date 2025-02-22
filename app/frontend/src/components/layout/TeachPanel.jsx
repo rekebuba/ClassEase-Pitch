@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaUserCircle } from "react-icons/fa";
 import { teacherApi } from '@/api';
 import { Logout } from "@/features/auth";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 /**
  * TeacherPanel component renders the sidebar for the teacher's dashboard.
@@ -27,7 +29,9 @@ import { Logout } from "@/features/auth";
  * logout option that navigates to the logout page.
  */
 const TeacherPanel = () => {
+    const navigate = useNavigate();
     const [teacherData, setTeacherData] = useState({});
+    const [previewImage, setPreviewImage] = useState('');
 
     /**
      * @hook useEffect
@@ -46,9 +50,10 @@ const TeacherPanel = () => {
          * @param {string} error.response.data['error'] - The error message from the API response.
          */
         const fetchAdmin = async () => {
-        try {
-                const response = await teacherApi.getDashboardData();
+            try {
+                const response = await teacherApi.getPanelData();
                 setTeacherData(response.data);
+                setPreviewImage(response.data.image_url);
             } catch (error) {
                 if (error.response && error.response.data && error.response.data['error']) {
                     console.error(error.response.data['error']);
@@ -59,13 +64,20 @@ const TeacherPanel = () => {
         fetchAdmin();
     }, []);
 
+    const updateProfile = () => {
+        navigate("/teacher/update/profile");
+    };
+
     return (
         <aside className="flex flex-col justify-between fixed mt-[4.6rem] h-full w-48 bg-white p-7 border-r border-gray-200">
             {/* Top Profile Section */}
             <div className="flex flex-col items-center space-y-4">
-                <FaUserCircle className="w-16 h-16 text-gray-500" />
+                <Avatar className="w-16 h-16 cursor-pointer" onClick={updateProfile}>
+                    <AvatarImage src={previewImage} />
+                    <AvatarFallback><FaUserCircle className="w-16 h-16 text-gray-500 cursor-pointer" /></AvatarFallback>
+                </Avatar>
                 <h3 className="mt-4 text-center text-xl font-semibold text-gray-800">
-                    {teacherData.__class__} Panel
+                    Teacher Panel
                 </h3>
                 <p className="text-sm text-gray-600 text-wrap text-center font-semibold">
                     Mr. {teacherData.first_name} {teacherData.last_name}

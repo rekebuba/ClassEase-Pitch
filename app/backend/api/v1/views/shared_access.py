@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """Teacher views module for the API"""
 
-from flask import request, jsonify
+from flask import request, jsonify, current_app, url_for
 from sqlalchemy import func
 from models import storage
 from datetime import datetime
@@ -20,10 +20,12 @@ from models.stud_yearly_record import StudentYearlyRecord
 from urllib.parse import urlparse, parse_qs
 from sqlalchemy import update, and_
 from flask import Blueprint
-from api.v1.views.utils import admin_or_student_required
+from api.v1.views.utils import admin_or_student_required, student_teacher_or_admin_required
 from api.v1.views.methods import paginate_query
 from models.base_model import BaseModel
-
+from api.v1.views.methods import save_profile
+from werkzeug.utils import secure_filename
+import os
 
 shared = Blueprint('shared', __name__, url_prefix='/api/v1')
 
@@ -207,3 +209,34 @@ def student_assessment_detail(admin_data, student_data):
         return jsonify({"error": f"Failed to retrieve student assessment"}), 500
 
     return jsonify(assessment), 200
+
+
+@shared.route('/upload/profile', methods=['POST'])
+@student_teacher_or_admin_required
+def upload_profile(student_data, teacher_data, admin_data):
+    user = student_data or teacher_data or admin_data
+    # Check if the request contains a file
+    if 'profilePicture' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files['profilePicture']
+
+    # Check if a file is selected
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    # Validate file type and save it
+    filepath = save_profile(file)
+
+    if filepath:
+        # Save the file path to the database
+        query = storage.get_session().query(User).filter(User.id == user.id).first()
+        query.image_path = filepath
+        storage.save()
+
+
+        return jsonify({
+            "message": "File uploaded successfully",
+        }), 200
+    else:
+        return jsonify({"error": "File type not allowed"}), 400

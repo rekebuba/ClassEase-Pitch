@@ -1,3 +1,4 @@
+import { FaUserCircle } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { ArrowUpDown } from "lucide-react";
 import { MoreHorizontal } from "lucide-react";
@@ -18,12 +19,22 @@ import {
     DialogDescription,
 } from "@/components/ui/dialog"
 import { AdminStudentProfile } from "@/features/admin";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 
 export const studentColumn = [
     {
-        accessorKey: "No",
-        header: "No",
+        id: "actions",
+        cell: ({ row }) => {
+            const student = row.original
+
+            return (
+                <Avatar>
+                    <AvatarImage src={student.image_path} />
+                    <AvatarFallback><FaUserCircle/></AvatarFallback>
+                </Avatar>
+            )
+        },
     },
     {
         accessorKey: "student_id",

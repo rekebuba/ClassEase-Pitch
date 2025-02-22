@@ -1,4 +1,8 @@
+import os
+from flask import current_app, request, jsonify
 from math import ceil
+from werkzeug.utils import secure_filename
+
 
 def paginate_query(query, page, limit):
     """
@@ -33,3 +37,37 @@ def paginate_query(query, page, limit):
             "total_pages": total_pages,
         }
     }
+
+
+def allowed_file(filename):
+    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def save_profile(profile):
+    # Validate file type and save it
+    if profile and allowed_file(profile.filename):
+        filename = secure_filename(profile.filename)
+        base_dir = os.path.abspath(os.path.dirname("static"))
+        static_dir = os.path.join(base_dir, 'api/v1/static')
+        filepath = os.path.join(
+            static_dir, current_app.config['UPLOAD_FOLDER'], filename)
+        profile.save(filepath)
+
+        # Return the file path
+        return os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+    else:
+        return None
+
+
+def validate_request(required_fields, file_fields=[]):
+    """Checks for required form and file fields in the request."""
+    missing_fields = [
+        field for field in required_fields if not request.form.get(field)]
+    missing_files = [
+        field for field in file_fields if not request.files.get(field)]
+
+    if missing_fields or missing_files:
+        return jsonify({"error": f"Missing fields: {', '.join(missing_fields + missing_files)}"}), 400
+
+    return None  # No errors

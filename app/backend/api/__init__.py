@@ -1,3 +1,4 @@
+import os
 from flask import Flask
 from flask_cors import CORS
 from models import storage
@@ -21,7 +22,9 @@ def create_app(config_name):
     - Imports and registers the necessary blueprints for different parts of the application.
     """
     """ Create a Flask application """
-    app = Flask(__name__)
+    base_dir = os.path.abspath(os.path.dirname(__file__))
+    static_dir = os.path.join(base_dir, 'v1/static')
+    app = Flask(__name__, static_folder=static_dir, static_url_path='/static')
 
     # Load configuration
     if config_name == 'testing':

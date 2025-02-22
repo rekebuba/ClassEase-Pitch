@@ -2,20 +2,13 @@ import { useState, useEffect } from 'react';
 import { FaUserCircle } from "react-icons/fa";
 import { AdminHeader, AdminPanel } from "@/components/layout";
 import { toast } from "sonner"
-import { adminApi } from "@/api";
+import { adminApi, sharedApi } from "@/api";
 import '../../styles/updateProfile.css';
 import { Toaster } from '@/components/ui/sonner';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 /**
  * AdminUpdateProfile component allows an admin to view and update their profile information.
- * 
- * @component
- * @returns {JSX.Element} The rendered component.
- * 
- * @example
- * return (
- *   <AdminUpdateProfile />
- * )
  * 
  * @description
  * This component fetches the admin's profile data from the server and displays it. 
@@ -32,8 +25,6 @@ import { Toaster } from '@/components/ui/sonner';
  * @property {Function} setPreviewImage - The function to update the previewImage state.
  * @property {boolean} editMode - The state indicating whether the form is in edit mode.
  * @property {Function} setEditMode - The function to update the editMode state.
- * @property {Object} alert - The state object holding alert information.
- * @property {Function} setAlert - The function to update the alert state.
  */
 const AdminUpdateProfile = () => {
     const [formData, setFormData] = useState({});
@@ -47,35 +38,24 @@ const AdminUpdateProfile = () => {
      */
     const handleChange = (e) => {
         const { name, value, files } = e.target;
-        if (name === 'profilePicture' && files.length) {
-            const imageUrl = URL.createObjectURL(files[0]);
+        if (name === 'profilePicture' && files && files.length) {
+            const file = files[0];
+            // Validate file type and size
+            if (!file.type.startsWith('image/')) {
+                toast.error('Please upload a valid image file.');
+                return;
+            }
+            if (file.size > 5 * 1024 * 1024) { // 5MB limit
+                toast.error('File size should not exceed 5MB.');
+                return;
+            }
+            const imageUrl = URL.createObjectURL(file);
             setPreviewImage(imageUrl);
-            setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
+            setFormData((prevData) => ({ ...prevData, [name]: file }));
         } else {
             setFormData((prevData) => ({ ...prevData, [name]: value }));
         }
-    };
-
-    /**
-     * @function loadAdminData
-     * @description Fetches the admin's profile data from the server and updates the formData state.
-     * @async
-     * @returns {Promise<void>}
-     */
-    const loadAdminData = async () => {
-        try {
-            const response = await adminApi.getDashboardData();
-            const data = response.data;
-            console.log(data);
-            setFormData(data);
-            if (data.profilePicture) {
-                setPreviewImage(data.profilePicture);
-            }
-        } catch (error) {
-            if (error.response && error.response.data) {
-                console.log(error.response.data.message);
-            }
-        }
+        console.log(formData);
     };
 
     /**
@@ -88,28 +68,27 @@ const AdminUpdateProfile = () => {
      */
     const saveAdminData = async () => {
         try {
-            const response = await adminApi.updateProfile(formData);
+            const formDataToSend = new FormData();
+            for (const key in formData) {
+                formDataToSend.append(key, formData[key]);
+            }
+
+            console.log(formDataToSend);
+            const response = await sharedApi.updateProfile(formDataToSend);
             if (response.status === 200) {
-                toast.success(response.data['message'], {
-                    description: currentTime,
-                    style: { color: 'green' }
+                toast.success(response.data.message, {
+                    description: new Date().toLocaleString(),
+                    style: { color: 'green' },
                 });
+
             }
         } catch (error) {
-            if (error.response && error.response.data && error.response.data['error']) {
-                toast.error(error.response.data['error'], {
-                    description: "Please try again later, if the problem persists, contact the administrator.",
-                    style: { color: 'red' }
-                });
-            } else {
-                toast.error("An unexpected error occurred.", {
-                    description: "Please try again later, if the problem persists, contact the administrator.",
-                    style: { color: 'red' }
-                });
-            }
+            const errorMessage = error.response?.data?.error || "An unexpected error occurred.";
+            toast.error(errorMessage, {
+                description: "Please try again later, if the problem persists, contact the administrator.",
+                style: { color: 'red' },
+            });
         }
-
-        await loadAdminData();
     };
 
     /**
@@ -128,7 +107,27 @@ const AdminUpdateProfile = () => {
      * @returns {void}
      */
     useEffect(() => {
-        loadAdminData();
+        let isMounted = true;
+        const fetchData = async () => {
+            try {
+                const response = await adminApi.getDashboardData();
+                if (isMounted) {
+                    const data = response.data;
+                    setFormData(data);
+                    if (data.image_url) {
+                        setPreviewImage(data.image_url);
+                    }
+                }
+            } catch (error) {
+                if (isMounted && error.response?.data) {
+                    console.log(error.response.data.message);
+                }
+            }
+        };
+        fetchData();
+        return () => {
+            isMounted = false;
+        };
     }, []);
 
     return (
@@ -139,11 +138,11 @@ const AdminUpdateProfile = () => {
                 <main className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
                     <div className="m-0 p-5">
                         <div className="profile-details">
-                            <div className="profile-picture">
-                                {formData.profile ?
-                                    <img src={previewImage} alt="Profile" /> :
-                                    <FaUserCircle className="w-36 h-36 text-gray-500 cursor-pointer" />
-                                }
+                            <div className="flex self-start flex-col gap-5">
+                                <Avatar className="w-40 h-40">
+                                    <AvatarImage src={previewImage} />
+                                    <AvatarFallback><FaUserCircle className="w-40 h-40 text-gray-500" /></AvatarFallback>
+                                </Avatar>
                                 {editMode && (
                                     <input type="file" name="profilePicture" onChange={handleChange} />
                                 )}
