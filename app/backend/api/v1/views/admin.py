@@ -214,7 +214,7 @@ def register_new_admin():
         return jsonify({"error": "Missing name or email"}), 400
 
     # Validate file type and save it
-    filepath = save_profile(data['profilePicture'])
+    filepath = save_profile(data)
 
     new_admin = User(role='Admin', image_path=filepath)
     new_admin.hash_password(new_admin.id)
@@ -288,7 +288,7 @@ def register_new_teacher():
         return jsonify({"error": "Teacher already exists"}), 409
 
     # Validate file type and save it
-    filepath = save_profile(data['profilePicture'])
+    filepath = save_profile(data)
 
     new_teacher = User(role='Teacher', image_path=filepath)
     new_teacher.hash_password(new_teacher.id)
@@ -792,7 +792,7 @@ def admin_student_list(admin_data):
         return jsonify({"error": "No student found"}), 404
 
     student_list = [{key: url_for('static', filename=value, _external=True)
-                     if key == 'image_path' else value for key, value in q._asdict().items()} for q in query]
+                     if key == 'image_path' and value is not None else value for key, value in q._asdict().items()} for q in query]
 
     return jsonify({
         "students": student_list,
@@ -827,24 +827,22 @@ def all_teachers(admin_data):
     data = parse_qs(parsed_url.query)
 
     query = (storage.get_session()
-                .query(Teacher.id,
-                       Teacher.first_name.label('firstName'),
-                       Teacher.last_name.label('lastName'),
-                       Teacher.email,
-                       Teacher.no_of_mark_list.label('markList'),
-                       User.image_path
-                       )
-                .join(TeachersRecord, Teacher.id == TeachersRecord.teacher_id)
-                .join(User, User.id == Teacher.id)
-                .filter(TeachersRecord.semester == 1)
-                .group_by(Teacher.id)
-                )
+             .query(Teacher.id,
+                    Teacher.first_name.label('firstName'),
+                    Teacher.last_name.label('lastName'),
+                    Teacher.email,
+                    Teacher.no_of_mark_list.label('markList'),
+                    User.image_path
+                    )
+             .join(User, User.id == Teacher.id)
+             .group_by(Teacher.id)
+             )
 
     if not query:
         return jsonify({"error": "No teachers found"}), 404
 
     teacher_list = [{key: url_for('static', filename=value, _external=True)
-                     if key == 'image_path' else value for key, value in q._asdict().items()} for q in query]
+                     if key == 'image_path' and value is not None else value for key, value in q._asdict().items()} for q in query]
 
     return jsonify({
         "teachers": teacher_list,

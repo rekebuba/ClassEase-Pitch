@@ -237,7 +237,7 @@ def register_new_student():
         return jsonify({"error": "Student already exists"}), 409
 
     # Validate file type and save it
-    filepath = save_profile(data['profilePicture'])
+    filepath = save_profile(data)
 
     new_student = User(role='Student', image_path=filepath)
     new_student.hash_password(new_student.id)

@@ -44,19 +44,24 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
-def save_profile(profile):
+def save_profile(data):
     # Validate file type and save it
-    if profile and allowed_file(profile.filename):
-        filename = secure_filename(profile.filename)
-        base_dir = os.path.abspath(os.path.dirname("static"))
-        static_dir = os.path.join(base_dir, 'api/v1/static')
-        filepath = os.path.join(
-            static_dir, current_app.config['UPLOAD_FOLDER'], filename)
-        profile.save(filepath)
+    try:
+        profile = data['profilePicture']
 
-        # Return the file path
-        return os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-    else:
+        if profile and allowed_file(profile.filename):
+            filename = secure_filename(profile.filename)
+            base_dir = os.path.abspath(os.path.dirname("static"))
+            static_dir = os.path.join(base_dir, 'api/v1/static')
+            filepath = os.path.join(
+                static_dir, current_app.config['UPLOAD_FOLDER'], filename)
+            profile.save(filepath)
+
+            # Return the file path
+            return os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+        else:
+            return None
+    except Exception as e:
         return None
 
 

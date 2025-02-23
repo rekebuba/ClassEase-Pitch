@@ -438,6 +438,7 @@ def update_student_assessment(teacher_data):
         yearly_average(student_data)
 
     except Exception as e:
+        print(e)
         return jsonify({"error": f"Unexpected error occurred Failed to update score"}), 500
 
     return jsonify({"message": "Student Score Updated Successfully."}), 201
@@ -462,165 +463,28 @@ def subject_sum(student_data):
         None
     """
     total = storage.get_session().query(
-        MarkList.subject_id,
-        MarkList.student_id,
-        MarkList.year,
-        MarkList.semester,
         func.sum(MarkList.score).label('total_score')
     ).filter(
         MarkList.student_id == student_data['student_id'],
         MarkList.subject_id == student_data['subject_id'],
         MarkList.semester == student_data['semester'],
         MarkList.year == student_data['year']
-    ).group_by(MarkList.subject_id).all()
+    ).group_by(MarkList.subject_id).first()
 
-    for sum in total:
-        overall = storage.get_session().query(Assessment).filter_by(
-            student_id=sum.student_id,
-            subject_id=sum.subject_id,
-            semester=sum.semester,
-            year=sum.year,
-        ).first()
-
-        if not overall:
-            overall = Assessment(
-                student_id=sum.student_id,
-                subject_id=sum.subject_id,
-                semester=sum.semester,
-                year=sum.year,
-                updated_at=datetime.utcnow().isoformat()
-            )
-            storage.add(overall)
-        else:
-            overall.total = sum.total_score
+    storage.get_session().execute(
+        update(Assessment)
+        .where(and_(
+            Assessment.student_id == student_data['student_id'],
+            Assessment.subject_id == student_data['subject_id'],
+            Assessment.semester == student_data['semester'],
+            Assessment.year == student_data['year']
+        ))
+        .values(total=total.total_score, updated_at=datetime.utcnow().isoformat())
+    )
 
     storage.save()
+
     total_subject_ranks(student_data)
-
-
-def subject_average(student_data):
-    average_subject = storage.get_session().query(
-        Assessment.student_id,
-        Assessment.subject_id,
-        Assessment.year,
-        func.avg(Assessment.total).label('average_subject')
-    ).filter(
-        Assessment.student_id == student_data['student_id'],
-        Assessment.year == student_data['year']
-    ).group_by(Assessment.subject_id).all()
-
-    for student in average_subject:
-        overall = storage.get_session().query(AVRGSubject).filter_by(
-            student_id=student.student_id,
-            subject_id=student.subject_id,
-            year=student.year,
-        ).first()
-
-        overall.average = student.average_subject
-
-    storage.save()
-    average_subject_ranks(student_data)
-
-
-def semester_average(student_data):
-    """
-    Calculate the average score for a student in a specific semester and year,
-    update or create an AVRGResult entry with the calculated average, and 
-    subsequently update the semester ranks.
-
-    Args:
-        student_data (dict): A dictionary containing the student's ID, semester, 
-                             and year. Example:
-                             {
-                                 'student_id': <student_id>,
-                                 'semester': <semester>,
-                                 'year': <year>
-                             }
-
-    Returns:
-        None
-    """
-    average = storage.get_session().query(
-        Assessment.student_id,
-        Assessment.year,
-        Assessment.semester,
-        func.avg(Assessment.total).label('average_score')
-    ).filter(
-        Assessment.student_id == student_data['student_id'],
-        Assessment.semester == student_data['semester'],
-        Assessment.year == student_data['year']
-    ).group_by(Assessment.semester).all()
-
-    for avg in average:
-        overall = storage.get_session().query(AVRGResult).filter_by(
-            student_id=avg.student_id,
-            semester=avg.semester,
-            year=avg.year,
-        ).first()
-
-        if not overall:
-            overall = AVRGResult(
-                student_id=avg.student_id,
-                semester=avg.semester,
-                year=avg.year,
-                updated_at=datetime.utcnow().isoformat()
-            )
-            storage.add(overall)
-        else:
-            overall.average = avg.average_score
-
-    storage.save()
-    semester_ranks(student_data)
-
-
-def yearly_average(student_data):
-    """
-    Calculate and update the yearly average score for a student.
-
-    This function retrieves the average results for a student for a given year,
-    calculates the yearly average, and updates or creates a record in the 
-    StudentYearlyRecord table with the calculated average. It also triggers 
-    the year_ranks function to update the student's ranking.
-
-    Args:
-        student_data (dict): A dictionary containing 'student_id' and 'year' keys.
-
-    Returns:
-        None
-    """
-
-    result = storage.get_session().query(AVRGResult).filter_by(
-        student_id=student_data['student_id'],
-        year=student_data['year']
-    ).all()
-
-    # if len(result) != 2:
-    #     return
-
-    # Calculate the yearly average
-    if len(result) == 1:
-        yearly_avg = result[0].average
-    else:
-        yearly_avg = sum([res.average for res in result if res.average]) / 2
-
-    overall = storage.get_session().query(StudentYearlyRecord).filter_by(
-        student_id=student_data['student_id'],
-        year=student_data['year'],
-    ).first()
-
-    if not overall:
-        overall = StudentYearlyRecord(
-            student_id=student_data['student_id'],
-            year=student_data['year'],
-            final_score=yearly_avg,
-            updated_at=datetime.utcnow().isoformat()
-        )
-        storage.add(overall)
-    else:
-        overall.final_score = yearly_avg
-
-    storage.save()
-    year_ranks(student_data)
 
 
 def total_subject_ranks(student_data):
@@ -637,38 +501,125 @@ def total_subject_ranks(student_data):
     For each subject, it retrieves all assessments, orders them by total score in descending order, and assigns ranks
     based on their position in the sorted list. The ranks are then saved back to the database.
     """
-    for subject_id in storage.get_session().query(Assessment.subject_id).filter(
-        Assessment.subject_id == student_data['subject_id'],
-        Assessment.semester == student_data['semester'],
-        Assessment.year == student_data['year']
-    ).distinct():
-        totals = storage.get_session().query(Assessment).filter_by(
-            # subject_id is a tuple, we need to access the first element
-            subject_id=subject_id[0],
-            semester=student_data['semester'],
-            year=student_data['year']
-        ).order_by(Assessment.total.desc()).all()
+    ranked_data_subquery = (storage.get_session().query(
+        Assessment.student_id,
+        Assessment.subject_id,
+        Assessment.semester,
+        Assessment.year,
+        func.rank().over(order_by=Assessment.total.desc()).label('new_rank')
+    )
+        .where(and_(
+            Assessment.subject_id == student_data['subject_id'],
+            Assessment.total.isnot(None)))
+        .subquery()
+    )
 
-        for rank, total in enumerate(totals, start=1):
-            total.rank = rank
+    storage.get_session().execute(
+        update(Assessment)
+        .where(and_(
+            Assessment.student_id == ranked_data_subquery.c.student_id,  # c is short for Column
+            Assessment.subject_id == ranked_data_subquery.c.subject_id,
+            Assessment.semester == ranked_data_subquery.c.semester,
+            Assessment.year == ranked_data_subquery.c.year,
+        ))
+        .values(rank=ranked_data_subquery.c.new_rank, updated_at=datetime.utcnow().isoformat())
+    )
 
     storage.save()
+
+
+def subject_average(student_data):
+    average_subject = storage.get_session().query(
+        Assessment.student_id,
+        Assessment.subject_id,
+        Assessment.year,
+        func.avg(Assessment.total).label('average_subject')
+    ).filter(
+        Assessment.student_id == student_data['student_id'],
+        Assessment.subject_id == student_data['subject_id'],
+        Assessment.year == student_data['year']
+    ).group_by(Assessment.subject_id).first()
+
+    storage.get_session().execute(
+        update(AVRGSubject)
+        .where(and_(
+            AVRGSubject.student_id == average_subject.student_id,
+            AVRGSubject.subject_id == average_subject.subject_id,
+            AVRGSubject.year == average_subject.year
+        ))
+        .values(average=average_subject.average_subject, updated_at=datetime.utcnow().isoformat())
+    )
+
+    storage.save()
+
+    average_subject_ranks(student_data)
 
 
 def average_subject_ranks(student_data):
-    for subject_id in storage.get_session().query(Subject.id).filter(
-        Subject.id == student_data['subject_id']
-    ):
-        totals = storage.get_session().query(AVRGSubject).filter_by(
-            # subject_id is a tuple, we need to access the first element
-            subject_id=subject_id[0],
-            year=student_data['year']
-        ).order_by(AVRGSubject.average.desc()).all()
 
-        for rank, total in enumerate(totals, start=1):
-            total.rank = rank
+    ranked_data_subquery = (storage.get_session().query(
+        AVRGSubject.student_id,
+        AVRGSubject.subject_id,
+        AVRGSubject.year,
+        func.rank().over(order_by=AVRGSubject.average.desc()).label('new_rank')
+    )
+        .where(and_(
+            AVRGSubject.subject_id == student_data['subject_id'],
+            AVRGSubject.average.isnot(None)))
+        .subquery()
+    )
+
+    storage.get_session().execute(
+        update(AVRGSubject)
+        .where(and_(
+            AVRGSubject.student_id == ranked_data_subquery.c.student_id,  # c is short for Column
+            AVRGSubject.subject_id == ranked_data_subquery.c.subject_id,
+            AVRGSubject.year == ranked_data_subquery.c.year,
+        ))
+        .values(rank=ranked_data_subquery.c.new_rank, updated_at=datetime.utcnow().isoformat())
+    )
 
     storage.save()
+
+
+def semester_average(student_data):
+    """
+    Calculate the average score for a student in a specific semester and year,
+    update or create an AVRGResult entry with the calculated average, and
+    subsequently update the semester ranks.
+
+    Returns:
+        None
+    """
+    average = (
+        storage.get_session().query(
+            Assessment.student_id,
+            Assessment.semester,
+            Assessment.year,
+            func.avg(Assessment.total).label('average_score')
+        ).filter(
+            Assessment.student_id == student_data['student_id'],
+            Assessment.semester == student_data['semester'],
+            Assessment.year == student_data['year']
+        ).group_by(Assessment.semester)
+        # Check if all marks are entered
+        .having(func.count(Assessment.total) == func.count())
+    ).first()
+
+    if average:
+        storage.get_session().execute(
+            update(AVRGResult)
+            .where(and_(
+                AVRGResult.student_id == average.student_id,
+                AVRGResult.semester == average.semester,
+                AVRGResult.year == average.year
+            ))
+            .values(average=average.average_score, updated_at=datetime.utcnow().isoformat())
+        )
+
+        storage.save()
+
+        semester_ranks(student_data)
 
 
 def semester_ranks(student_data):
@@ -685,19 +636,69 @@ def semester_ranks(student_data):
         student_data = {'semester': 'Fall', 'year': 2023}
         semester_ranks(student_data)
     """
-    for semester in storage.get_session().query(AVRGResult.semester).filter(
-        AVRGResult.semester == student_data['semester'],
-        AVRGResult.year == student_data['year']
-    ).distinct():
-        average = storage.get_session().query(AVRGResult).filter_by(
-            semester=semester[0],
-            year=student_data['year']
-        ).order_by(AVRGResult.average.desc()).all()
+    ranked_data_subquery = (storage.get_session().query(
+        AVRGResult.student_id,
+        AVRGResult.semester,
+        AVRGResult.year,
+        func.rank().over(order_by=AVRGResult.average.desc()).label('new_rank')
+    )
+        .where(and_(
+            AVRGResult.semester == student_data['semester'],
+            AVRGResult.year == student_data['year'],
+            AVRGResult.average.isnot(None)))
+        .subquery()
+    )
 
-        for rank, avrg in enumerate(average, start=1):
-            avrg.rank = rank
+    storage.get_session().execute(
+        update(AVRGResult)
+        .where(and_(
+            AVRGResult.student_id == ranked_data_subquery.c.student_id,  # c is short for Column
+            AVRGResult.semester == ranked_data_subquery.c.semester,
+            AVRGResult.year == ranked_data_subquery.c.year,
+        ))
+        .values(rank=ranked_data_subquery.c.new_rank, updated_at=datetime.utcnow().isoformat())
+    )
 
     storage.save()
+
+
+def yearly_average(student_data):
+    """
+    Calculate and update the yearly average score for a student.
+
+    This function retrieves the average results for a student for a given year,
+    calculates the yearly average, and updates or creates a record in the
+    StudentYearlyRecord table with the calculated average. It also triggers
+    the year_ranks function to update the student's ranking.
+
+    Args:
+        student_data (dict): A dictionary containing 'student_id' and 'year' keys.
+
+    Returns:
+        None
+    """
+
+    average = storage.get_session().query(
+        AVRGResult.student_id,
+        AVRGResult.year,
+        func.avg(AVRGResult.average).label('semester_average')
+    ).filter(
+        AVRGResult.student_id == student_data['student_id'],
+        AVRGResult.year == student_data['year']
+    ).group_by(AVRGResult.student_id).first()
+
+    # Calculate the yearly average
+    overall = storage.get_session().execute(
+        update(StudentYearlyRecord)
+        .where(and_(
+            StudentYearlyRecord.student_id == average.student_id,
+            StudentYearlyRecord.year == average.year
+        ))
+        .values(final_score=average.semester_average, updated_at=datetime.utcnow().isoformat())
+    )
+
+    storage.save()
+    year_ranks(student_data)
 
 
 def year_ranks(student_data):
@@ -716,14 +717,25 @@ def year_ranks(student_data):
     3. Assigns ranks to students based on their final scores.
     4. Saves the updated ranks back to the database.
     """
-    for year in storage.get_session().query(StudentYearlyRecord.year).filter(
-        StudentYearlyRecord.year == student_data['year'],
-    ).distinct():
-        average = storage.get_session().query(StudentYearlyRecord).filter_by(
-            year=year[0],
-        ).order_by(StudentYearlyRecord.final_score.desc()).all()
+    ranked_data_subquery = (storage.get_session().query(
+        StudentYearlyRecord.student_id,
+        StudentYearlyRecord.year,
+        func.rank().over(order_by=StudentYearlyRecord.final_score.desc()).label('new_rank')
+    )
+        .where(and_(
+            StudentYearlyRecord.year == student_data['year'],
+            StudentYearlyRecord.final_score.isnot(None)))
+        .subquery()
+    )
 
-        for rank, avrg in enumerate(average, start=1):
-            avrg.rank = rank
+    storage.get_session().execute(
+        update(StudentYearlyRecord)
+        .where(and_(
+            # c is short for Column
+            StudentYearlyRecord.student_id == ranked_data_subquery.c.student_id,
+            AVRGResult.year == ranked_data_subquery.c.year,
+        ))
+        .values(rank=ranked_data_subquery.c.new_rank, updated_at=datetime.utcnow().isoformat())
+    )
 
     storage.save()
