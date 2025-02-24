@@ -78,8 +78,7 @@ const AdminStudentList = () => {
      * @param {Event} e - The change event.
      * @returns {void}
      */
-    const handleGradeChange = (value) => {setSelectedGrade(value);
-    };
+    const handleGradeChange = (value) => setSelectedGrade(value);
 
     /**
      * @function handleYearChange

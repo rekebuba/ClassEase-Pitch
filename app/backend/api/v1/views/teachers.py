@@ -50,13 +50,11 @@ def teacher_panel(teacher_data):
              .filter(User.id == teacher_data.id)
              ).first()
 
-    data = {key: value for key, value in query._asdict().items()}
-
-    image_url = url_for('static', filename=data['image_path'], _external=True)
+    data = {key: url_for('static', filename=value, _external=True)
+            if key == 'image_path' and value is not None else value for key, value in query._asdict().items()}
 
     return jsonify({
         **data,
-        "image_url": image_url
     }), 200
 
 
@@ -167,7 +165,6 @@ def get_list_of_students(teacher_data):
     required_data = {
         'subject_code',
         'grade',
-        'sections',
         'semester',
         'year'
     }
@@ -176,36 +173,20 @@ def get_list_of_students(teacher_data):
         if field not in data:
             return jsonify({"error": f"Missing {field}"}), 400
 
-    grade = storage.get_first(Grade, grade=data['grade'][0])
-    if not grade:
-        return jsonify({"error": "Grade not found"}), 404
-
-    # get the section_id
-    section = storage.get_first(Section,
-                                grade_id=grade.id,
-                                section=(data['sections'][0]))
-    if not section:
-        return jsonify({"error": "Section not found"}), 404
-
     subject = storage.get_first(Subject, code=data['subject_code'][0])
     if not subject:
         return jsonify({"error": "Subject not found"}), 404
 
-    # Pagination and filtering params
-    page = int(data['page'][0]) if 'page' in data else 1
-    limit = int(data['limit'][0]) if 'limit' in data else 10
-    search_term = data['search'][0] if 'search' in data else None
-
     query = (
         storage.get_session()
-        .query(Student.id,
+        .query(Student.id.label('student_id'),
                Student.name,
-               Student.father_name,
-               Student.grand_father_name,
+               Student.father_name.label('fatherName'),
+               Student.grand_father_name.label('grandFatherName'),
+               Grade.id.label('grade_id'),
                Section.section,
-               AVRGResult.section_id,
-               AVRGResult.grade_id,
-               Assessment.subject_id,
+               Section.id.label('section_id'),
+               Assessment.subject_id.label('subject_id'),
                Assessment.total,
                Assessment.rank,
                Assessment.semester,
@@ -213,58 +194,25 @@ def get_list_of_students(teacher_data):
                )  # Explicitly specify the table being queried
         .select_from(Assessment)
         .join(TeachersRecord, TeachersRecord.id == Assessment.teachers_record_id)
-        .join(AVRGResult, AVRGResult.student_id == Assessment.student_id)
         .join(Student, Student.id == Assessment.student_id)
-        .join(Section, Section.id == AVRGResult.section_id)
+        .join(Grade, Grade.id == Assessment.grade_id)
+        .join(Section, Section.id == Assessment.section_id)
         .filter(
             and_(
                 TeachersRecord.teacher_id == teacher_data.id,
                 Assessment.subject_id == subject.id,
                 Assessment.semester == data['semester'][0],
-                AVRGResult.semester == data['semester'][0],
-                AVRGResult.section_id == section.id,
+                Grade.grade == data['grade'][0],
             )
         )
-        .order_by(Section.section.asc(), Student.name.asc(), Student.father_name.asc(), Student.grand_father_name.asc(), Student.id.asc())
+        .order_by(Student.name.asc(), Student.father_name.asc(), Student.grand_father_name.asc(), Student.id.asc())
     )
 
-    if search_term:
-        search_pattern = f"%{search_term}%"
-        query = (
-            query.filter(Student.id.ilike(search_pattern) |
-                         Student.name.ilike(search_pattern) |
-                         Student.father_name.ilike(search_pattern) |
-                         Student.grand_father_name.ilike(search_pattern)
-                         )
-        )
-
-    # Use the paginate_query function to handle pagination
-    paginated_result = paginate_query(query, page, limit)
-    # Check if any students are found
-    if not paginated_result['items']:
-        return jsonify({"error": "No student found"}), 404
-
-    student_list = []
-
-    for id, name, f_name, G_name, section, section_id, grade_id, subject_id, total, rank, semester, year in paginated_result['items']:
-        student_list.append({
-            "student_id": id,
-            "name": name,
-            "father_name": f_name,
-            "grand_father_name": G_name,
-            "section": section,
-            "section_id": section_id,
-            "grade_id": grade_id,
-            "subject_id": subject_id,
-            "total_score": total,
-            "rank": rank,
-            "semester": semester,
-            "year": year
-        })
+    student_list = [{key: value for key, value in q._asdict().items()} for q in query]
 
     return jsonify({
         "students": student_list,
-        "meta": paginated_result['meta'],
+        "meta": {},
         "header": {
             "grade": data['grade'][0],
             "year": data['year'][0],
@@ -285,7 +233,7 @@ def get_student_assessment(teacher_data):
         'student_id',
         'grade_id',
         'subject_id',
-        'section_id',
+        # 'section_id',
         'semester',
         'year'
     }
@@ -297,7 +245,7 @@ def get_student_assessment(teacher_data):
     student_id = data['student_id'][0]
     grade_id = data['grade_id'][0]
     subject_id = data['subject_id'][0]
-    section_id = data['section_id'][0]
+    # section_id = data['section_id'][0]
     semester = data['semester'][0]
     year = data['year'][0]
     try:
@@ -311,7 +259,7 @@ def get_student_assessment(teacher_data):
             .filter(MarkList.student_id == student_id,
                     MarkList.grade_id == grade_id,
                     MarkList.subject_id == subject_id,
-                    MarkList.section_id == section_id,
+                    # MarkList.section_id == section_id,
                     MarkList.semester == semester,
                     MarkList.year == year,
                     TeachersRecord.teacher_id == teacher_data.id
@@ -400,6 +348,19 @@ def update_student_assessment(teacher_data):
 
     student_data = data.get('student_data')
     assessments = data.get('assessments')
+
+    required_student_data = {
+        "student_id",
+        "grade_id",
+        "section_id",
+        "subject_id",
+        "semester",
+        "year",
+    }
+    
+    for field in required_student_data:
+        if field not in student_data:
+            return jsonify({"error": f"Missing {field}"}), 400
 
     try:
         teacher_record = storage.get_session().query(TeachersRecord).filter(
@@ -529,7 +490,7 @@ def total_subject_ranks(student_data):
 
 
 def subject_average(student_data):
-    average_subject = storage.get_session().query(
+    average_subject = (storage.get_session().query(
         Assessment.student_id,
         Assessment.subject_id,
         Assessment.year,
@@ -538,25 +499,27 @@ def subject_average(student_data):
         Assessment.student_id == student_data['student_id'],
         Assessment.subject_id == student_data['subject_id'],
         Assessment.year == student_data['year']
-    ).group_by(Assessment.subject_id).first()
+    ).group_by(Assessment.subject_id)
+        .having(func.count(Assessment.total) == func.count())
+    ).first()
 
-    storage.get_session().execute(
-        update(AVRGSubject)
-        .where(and_(
-            AVRGSubject.student_id == average_subject.student_id,
-            AVRGSubject.subject_id == average_subject.subject_id,
-            AVRGSubject.year == average_subject.year
-        ))
-        .values(average=average_subject.average_subject, updated_at=datetime.utcnow().isoformat())
-    )
+    if average_subject:
+        storage.get_session().execute(
+            update(AVRGSubject)
+            .where(and_(
+                AVRGSubject.student_id == average_subject.student_id,
+                AVRGSubject.subject_id == average_subject.subject_id,
+                AVRGSubject.year == average_subject.year
+            ))
+            .values(average=average_subject.average_subject, updated_at=datetime.utcnow().isoformat())
+        )
 
-    storage.save()
+        storage.save()
 
-    average_subject_ranks(student_data)
+        average_subject_ranks(student_data)
 
 
 def average_subject_ranks(student_data):
-
     ranked_data_subquery = (storage.get_session().query(
         AVRGSubject.student_id,
         AVRGSubject.subject_id,
@@ -687,18 +650,18 @@ def yearly_average(student_data):
         AVRGResult.year == student_data['year']
     ).group_by(AVRGResult.student_id).first()
 
-    # Calculate the yearly average
-    overall = storage.get_session().execute(
-        update(StudentYearlyRecord)
-        .where(and_(
-            StudentYearlyRecord.student_id == average.student_id,
-            StudentYearlyRecord.year == average.year
-        ))
-        .values(final_score=average.semester_average, updated_at=datetime.utcnow().isoformat())
-    )
+    if average:
+        storage.get_session().execute(
+            update(StudentYearlyRecord)
+            .where(and_(
+                StudentYearlyRecord.student_id == average.student_id,
+                StudentYearlyRecord.year == average.year
+            ))
+            .values(final_score=average.semester_average, updated_at=datetime.utcnow().isoformat())
+        )
 
-    storage.save()
-    year_ranks(student_data)
+        storage.save()
+        year_ranks(student_data)
 
 
 def year_ranks(student_data):

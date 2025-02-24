@@ -231,13 +231,13 @@ export default function CollapsibleTable(props) {
                                     {/* Average Section */}
                                     <div className="text-center">
                                         <div className="text-sm font-medium text-gray-600">Average</div>
-                                        <div className="text-lg font-bold text-green-600">{studentReport.final_score}</div>
+                                        <div className={`text-lg font-bold ${studentReport.final_score >= 60 ? "text-green-600" : "text-red-600"}`}>{studentReport.final_score}</div>
                                         <div className="text-sm text-gray-500">Rank: {studentReport.final_rank}</div>
                                     </div>
                                 </div>
                                 <div className="flex justify-between items-center px-6 mr-28 mt-5">
                                     {/* status */}
-                                    <div className="text-lg font-semibold text-gray-700">Academic Status: <span className="text-lg font-bold text-green-600">Pending</span></div>
+                                    <div className="text-lg font-semibold text-gray-700">Academic Status: <span className={`text-lg font-bold ${studentReport.final_score >= 60 ? "text-green-600" : "text-red-600"}`}>{studentReport.final_score >= 60 ? "Pass" : "Fail"}</span></div>
                                 </div>
                             </TableCell>
                         </TableRow>

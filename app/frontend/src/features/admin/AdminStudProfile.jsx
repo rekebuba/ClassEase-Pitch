@@ -10,19 +10,7 @@ import CollapsibleTable from "./CollapsibleTable";
  *
  * @component
  * @param {Object} props - The properties object.
- * @param {boolean} props.isProfileOpen - A flag indicating whether the profile popup is open or closed.
- * @param {function} props.toggleAssessment - A function to toggle the assessment view.
- * @param {function} props.closeProfile - A function to close the profile popup.
  * @param {Object} props.student - An object containing the summary of the student's profile.
- * @param {string} props.student.student_id - The ID of the student.
- * @param {string} props.student.grade - The grade of the student.
- * @param {string} props.student.pictureUrl - The URL of the student's picture.
- * @param {string} props.student.name - The name of the student.
- * @param {string} props.student.father_name - The father's name of the student.
- * @param {string} props.student.grand_father_name - The grandfather's name of the student.
- * @param {string} props.student.date_of_birth - The date of birth of the student in 'YYYY-MM-DD' format.
- * @param {string} props.student.section - The section of the student.
- * @param {Object} props.assessmentSummary - An object containing the summary of the student's assessment.
  *
  * @returns {JSX.Element} The rendered StudentProfile component.
  */

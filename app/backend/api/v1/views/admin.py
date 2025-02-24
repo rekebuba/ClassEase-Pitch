@@ -602,6 +602,7 @@ def create_mark_list(admin_data):
                     Assessment(student_id=student.student_id,
                                grade_id=grade_id,
                                subject_id=subject.id,
+                               section_id=student.section_id,
                                semester=data['semester'],
                                year=data['year']
                                )
