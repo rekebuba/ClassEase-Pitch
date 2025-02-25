@@ -27,6 +27,7 @@ class AVRGResult(BaseModel, Base):
     section_id = Column(String(120), ForeignKey('sections.id'), nullable=False)
     average = Column(Float, default=None)  # The actual average score of the student in this for all subject
     semester = Column(Integer, nullable=False)
+    semester_id = Column(String(120), ForeignKey('semesters.id'), nullable=False)
     year = Column(String(10), nullable=False)
     rank = Column(Integer, default=None)
 

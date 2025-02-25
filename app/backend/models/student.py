@@ -52,6 +52,7 @@ class Student(BaseModel, Base):
     # Academic Performance
     current_grade = Column(Integer, nullable=False)
     current_semester = Column(Integer, nullable=False)
+    semester_id = Column(String(120), ForeignKey('semesters.id'))
     has_passed = Column(Boolean, default=False)
     registration_window_start = Column(DateTime)
 

@@ -34,6 +34,7 @@ class MarkList(BaseModel, Base):
     subject_id = Column(String(120), ForeignKey('subjects.id'), nullable=False)
     teachers_record_id = Column(String(120), ForeignKey('teachers_record.id', ondelete="SET NULL"), nullable=True, default=None)
     semester = Column(Integer, nullable=False)
+    semester_id = Column(String(120), ForeignKey('semesters.id'), nullable=False)
     year = Column(String(10), nullable=False)
     type = Column(String(50), nullable=False)  # e.g., 'Test', 'Quiz', 'Assignment', 'Midterm', 'Final'
     percentage = Column(Float, nullable=False)  # percentage of this assessment towards the final score

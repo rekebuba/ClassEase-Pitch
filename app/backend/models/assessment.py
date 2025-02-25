@@ -32,6 +32,7 @@ class Assessment(BaseModel, Base):
     total = Column(Float, default=None)  # The subject sum score of the student for each assessment
     rank = Column(Integer, default=None)
     semester = Column(Integer, nullable=False)
+    semester_id = Column(String(120), ForeignKey('semesters.id'), nullable=False)
     year = Column(String(10), nullable=False)
 
     def __init__(self, *args, **kwargs):
