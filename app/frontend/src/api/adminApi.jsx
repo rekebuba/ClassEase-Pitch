@@ -1,3 +1,4 @@
+import { create } from 'lodash';
 import api from './api';
 
 const adminApi = {
@@ -10,6 +11,8 @@ const adminApi = {
     assignTeacher: (requirements) => api.post('/admin/assign-teacher', requirements),
     updateProfile: (userData) => api.put('/admin/profile', userData),
     deleteUser: (userId) => api.delete(`/admin/users/${userId}`),
+    events: () => api.get('/admin/events'),
+    createRegistrationEvent: (eventData) => api.post('/admin/events/registration', eventData),
 };
 
 export default adminApi;

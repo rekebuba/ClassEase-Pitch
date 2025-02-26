@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { AdminHeader, AdminPanel } from "@/components/layout";
-import { Toaster } from '@/components/ui/sonner';
 
 
 
@@ -144,7 +143,7 @@ const AdminUserAccessControl = () => {
             <AdminHeader />
             <div className="flex flex-1 scroll-m-0">
                 <AdminPanel />
-                <main className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
+                <div className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
                     <h2 className="access-control-h2">User Access Control</h2>
 
                     <div className="add-user">
@@ -222,8 +221,7 @@ const AdminUserAccessControl = () => {
                             ))}
                         </ul>
                     </div>
-                    <Toaster />
-                </main>
+                </div>
             </div>
         </div>
     );

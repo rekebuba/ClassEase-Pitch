@@ -4,7 +4,6 @@ import { AdminHeader, AdminPanel } from "@/components/layout";
 import { toast } from "sonner"
 import { adminApi, sharedApi } from "@/api";
 import '../../styles/updateProfile.css';
-import { Toaster } from '@/components/ui/sonner';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 /**
@@ -135,7 +134,7 @@ const AdminUpdateProfile = () => {
             <AdminHeader />
             <div className="flex flex-1 scroll-m-0">
                 <AdminPanel />
-                <main className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
+                <div className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
                     <div className="m-0 p-5">
                         <div className="profile-details">
                             <div className="flex self-start flex-col gap-5">
@@ -248,8 +247,7 @@ const AdminUpdateProfile = () => {
                             )}
                         </div>
                     </div>
-                    <Toaster />
-                </main>
+                </div>
             </div>
         </div>
     );

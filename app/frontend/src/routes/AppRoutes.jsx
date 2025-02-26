@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import { Home, NotFound } from "@/pages/public";
 import { Login } from "@/features/auth";
-import { AdminDashboard, AdminCreateMarkList, AdminEnrollUser, AdminEventManagement, AdminManageStudents, AdminManageTeacher, AdminUpdateProfile, AdminUserAccessControl } from "@/pages/admin";
+import { AdminDashboard, AdminCreateMarkList, AdminEnrollUser, AdminManageEvent, AdminManageStudents, AdminManageTeacher, AdminUpdateProfile, AdminUserAccessControl } from "@/pages/admin";
 import { TeacherDashboard, TeacherManageStudent, TeacherUpdateProfile } from "@/pages/teacher";
 import { StudentDashboard, StudentUpdateProfile, StudentRegistrationForm, StudentReportCard } from "@/pages/student";
 import { ProtectedRoute } from "@/routes";
@@ -42,7 +42,7 @@ const router = createBrowserRouter([
     },
     {
         path: "/admin/events/newevent",
-        element: <AdminEventManagement />
+        element: <AdminManageEvent />
     },
     {
         path: "/admin/users/accesscontrol",

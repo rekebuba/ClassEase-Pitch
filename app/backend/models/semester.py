@@ -11,9 +11,9 @@ class Semester(BaseModel, Base):
     __tablename__ = 'semesters'
     name = Column(String(50), nullable=False)
     academic_year_EC = Column(Integer, nullable=False)
-    academic_year_GC = Column(String(50), nullable=False)
+    academic_year_GC = Column(String(50))
     start_date = Column(DateTime, nullable=False)
-    end_date = Column(DateTime, nullable=False)
+    end_date = Column(DateTime)
     registration_start = Column(DateTime, nullable=False)
     registration_end = Column(DateTime, nullable=False)
 

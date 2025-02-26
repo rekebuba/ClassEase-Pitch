@@ -1,6 +1,5 @@
 import { TeacherHeader, TeacherPanel } from "@/components/layout";
 import { TeacherStudentList } from "@/features/teacher";
-import { Toaster } from '@/components/ui/sonner';
 import "../../styles/AdminManageStudents.css";
 
 
@@ -17,10 +16,9 @@ const TeacherManageStudent = () => {
             <TeacherPanel />
             <div className="flex flex-1 scroll-m-0">
                 <TeacherHeader />
-                <main className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
+                <div className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
                     <TeacherStudentList />
-                    <Toaster />
-                </main>
+                </div>
             </div>
         </div>
     );

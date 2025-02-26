@@ -3,7 +3,6 @@ import { AdminHeader, AdminPanel } from "@/components/layout";
 import { FaPlus } from 'react-icons/fa';
 import { adminApi } from "@/api";
 import { toast } from "sonner"
-import { Toaster } from '@/components/ui/sonner';
 import '../../styles/AdminDashboard.css';
 import '../../styles/Table.css';
 
@@ -266,7 +265,7 @@ const AdminCreateMarkList = () => {
     return (
         <div className="admin-manage-container">
             <AdminPanel />
-            <main className="content">
+            <div className="content">
                 <AdminHeader />
                 <div className="admin-create-marklist-container">
                     <h2>Create Students Mark List</h2>
@@ -423,8 +422,7 @@ const AdminCreateMarkList = () => {
                         <button type="submit" className="submit-btn">Create Mark List</button>
                     </form>
                 </div>
-                <Toaster />
-            </main>
+            </div>
         </div>
     );
 };

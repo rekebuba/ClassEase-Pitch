@@ -1,4 +1,3 @@
-import { Toaster } from '@/components/ui/sonner';
 import { AdminHeader, AdminPanel } from "@/components/layout";
 import { AdminStudentList } from "@/features/admin";
 
@@ -22,10 +21,9 @@ const AdminManageStudents = () => {
       <AdminHeader />
       <div className="flex flex-1 scroll-m-0">
         <AdminPanel />
-        <main className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
+        <div className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
           <AdminStudentList />
-          <Toaster />
-        </main>
+        </div>
       </div>
     </div>
   );

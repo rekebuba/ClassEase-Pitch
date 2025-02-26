@@ -2,7 +2,6 @@ import { useState } from "react";
 import { AdminHeader, AdminPanel } from "@/components/layout";
 import { AdminTeacherProfile, AdminTeacherList, AdminAssignTeacher } from "@/features/admin";
 import "../../styles/AdminManageStudents.css";
-import { Toaster } from '@/components/ui/sonner';
 
 /**
  * AdminManageTeacher component manages the state and rendering of the admin panel for managing teachers.
@@ -78,11 +77,10 @@ const AdminManageTeacher = () => {
             <AdminHeader />
             <div className="flex flex-1 scroll-m-0">
                 <AdminPanel />
-                <main className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
+                <div className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
                     <AdminTeacherList toggleDropdown={toggleDropdown} teacherSummary={summary} />
                     <AdminAssignTeacher isEditOpen={isEditOpen} toggleEditProfile={toggleEditProfile} teacherData={teacherSummary} />
-                    <Toaster />
-                </main>
+                </div>
             </div>
         </div>
     );

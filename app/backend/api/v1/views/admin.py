@@ -19,11 +19,11 @@ from models.average_result import AVRGResult
 from models.average_subject import AVRGSubject
 from models.stud_yearly_record import StudentYearlyRecord
 from models.teacher_record import TeachersRecord
+from models.semester import Semester
 from sqlalchemy import update, select, and_
 from urllib.parse import urlparse, parse_qs
 from api.v1.views.utils import admin_required
 from api.v1.views.methods import paginate_query, save_profile, validate_request
-
 
 admin = Blueprint('admin', __name__, url_prefix='/api/v1/admin')
 
@@ -445,6 +445,72 @@ def assign_class(admin_data):
         return jsonify({"error": "error internal server"}), 500
 
     return jsonify({"message": "Teacher assigned successfully!"}), 201
+
+
+@admin.route('/events', methods=['GET'])
+@admin_required
+def events(admin_data):
+    """
+    Handle the creation and retrieval of events.
+
+    Args:
+        admin_data (object): The admin data object.
+
+    Returns:
+        Response: A JSON response containing the list of events or an error message with the appropriate HTTP status code.
+    """
+
+    query = storage.get_session().query(Semester).all()
+
+    if not query:
+        return jsonify({"error": "No events found"}), 404
+
+    events = [event.to_dict() for event in query]
+
+    return jsonify(events), 200
+
+
+@admin.route('/events/registration', methods=['POST'])
+@admin_required
+def create_events(admin_data):
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Not a JSON"}), 404
+
+    required_data = {
+        'name',
+        'academicYearEC',
+        'startDate',
+        'endDate',
+        'registrationStart',
+        'registrationEnd'
+    }
+
+    # Check if required fields are present
+    for field in required_data:
+        if field not in data:
+            return jsonify({"error": f"Missing {field}"}), 400
+        elif field in {'name', 'academicYearEC'} and type(data[field]) != int:
+            return jsonify({"error": f"{field} must be an integer"}), 400
+        elif field in {'startDate', 'endDate', 'registrationStart', 'registrationEnd'} and type(data[field]) != str:
+            return jsonify({"error": f"{field} must be a string"}), 400
+
+    try:
+        new_event = Semester(
+            name=data['name'],
+            academic_year_EC=data['academicYearEC'],
+            start_date=data['startDate'],
+            end_date=data['endDate'],
+            registration_start=data['registrationStart'],
+            registration_end=data['registrationEnd']
+        )
+        storage.add(new_event)
+        storage.save()
+    except Exception as e:
+        print(str(e))
+        return jsonify({"error": str(e)}), 500
+
+    return jsonify(new_event.to_dict()), 201
 
 
 @admin.route('/students/mark_list', methods=['PUT'])

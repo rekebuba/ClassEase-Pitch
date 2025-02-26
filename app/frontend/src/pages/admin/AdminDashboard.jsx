@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { AdminHeader, AdminPanel } from "@/components/layout";
 import { AdminStudentPerformance } from "@/features/admin";
-import { Toaster } from '@/components/ui/sonner';
 import { adminApi } from "@/api";
 
 /**
@@ -73,7 +72,7 @@ const AdminDashboard = () => {
       {/* Main content area: Sidebar + Content */}
       <div className="flex flex-1 scroll-m-0">
         <AdminPanel />
-        <main className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
+        <div className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
           <section className="mb-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-white p-4 rounded shadow text-center">
@@ -90,8 +89,7 @@ const AdminDashboard = () => {
             enrollmentByGrade={overview.enrollment_by_grade}
             performanceBySubject={overview.performance_by_subject}
           />
-          <Toaster />
-        </main>
+        </div>
       </div>
     </div>
   );

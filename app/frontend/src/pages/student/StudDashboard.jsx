@@ -4,7 +4,6 @@ import { StudentHeader, StudentPanel } from "@/components/layout";
 import { StudentPopupScore, StudentSubjectList, StudentEventPanel, StudentScorePanel } from "@/features/student";
 import { studentApi } from "@/api";
 import { toast } from "sonner"
-import { Toaster } from '@/components/ui/sonner';
 import '../../styles/StudDashboard.css';
 import '../../styles/Dashboard.css';
 import {
@@ -82,7 +81,7 @@ const StudentDashboard = () => {
       <StudentHeader />
       <div className="flex flex-1 scroll-m-0">
         <StudentPanel />
-        <main className="p-10 mt-[4.6rem] ml-[11rem] bg-gray-50">
+        <div className="p-10 mt-[4.6rem] ml-[11rem] bg-gray-50">
 
           <div className="flex space-x-10">
             <StudentEventPanel />
@@ -143,8 +142,7 @@ const StudentDashboard = () => {
             closeAssessment={closeAssessment}
             assessmentSummary={studentSummary}
           /> */}
-          <Toaster />
-        </main>
+        </div>
       </div>
     </div>
   );
