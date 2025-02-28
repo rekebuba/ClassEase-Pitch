@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AdminHeader, AdminPanel } from "@/components/layout";
+import { AdminLayout } from "@/components/layout";
 import { FaPlus } from 'react-icons/fa';
 import { adminApi } from "@/api";
 import { toast } from "sonner"
@@ -263,167 +263,163 @@ const AdminCreateMarkList = () => {
     };
 
     return (
-        <div className="admin-manage-container">
-            <AdminPanel />
-            <div className="content">
-                <AdminHeader />
-                <div className="admin-create-marklist-container">
-                    <h2>Create Students Mark List</h2>
-                    <form onSubmit={(e) => checkValidData(e)} className="marklist-form">
-                        <div className="grade-section">
-                            <div className="form-group">
-                                <label htmlFor="grade">Grade:</label>
-                                <select id="grade" value={selectedGrade} onChange={handleGradeChange}>
-                                    {Array.from({ length: 12 }, (_, i) => i + 1).map(grade =>
-                                        <option key={grade} value={grade}>
-                                            Grade {grade}
-                                        </option>
-                                    )}
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="semester">Semester:</label>
-                                <select id="semester" value={selectedSemester} onChange={handleSemesterChange}>
-                                    {Array.from({ length: 2 }, (_, i) => i + 1).map(semester =>
-                                        <option key={semester} value={semester}>
-                                            Semester {semester}
-                                        </option>
-                                    )}
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label htmlFor="schoolYear">School Year:</label>
-                                <select id="schoolYear" value={schoolYear} onChange={handleYearChange}>
-                                    {Array.from({ length: 3 }, (_, i) => currentYear - i).map(year => (
-                                        <option key={year} value={year}>
-                                            {year}/{(year + 1) % 100}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
+        <AdminLayout>
+            <div className="admin-create-marklist-container">
+                <h2>Create Students Mark List</h2>
+                <form onSubmit={(e) => checkValidData(e)} className="marklist-form">
+                    <div className="grade-section">
+                        <div className="form-group">
+                            <label htmlFor="grade">Grade:</label>
+                            <select id="grade" value={selectedGrade} onChange={handleGradeChange}>
+                                {Array.from({ length: 12 }, (_, i) => i + 1).map(grade =>
+                                    <option key={grade} value={grade}>
+                                        Grade {grade}
+                                    </option>
+                                )}
+                            </select>
                         </div>
-
-                        <div className="form-group subjects">
-                            <label htmlFor="section">Section:</label>
-                            <div className="checkbox-group">
-                                {['A', 'B', 'C'].map((section) => (
-                                    <div className="subject-container" key={section}>
-                                        <label>
-                                            <input
-                                                type="checkbox"
-                                                value={section}
-                                                checked={selectedSection.includes(section)}
-                                                onChange={handleSectionChange}
-                                            />
-                                            {section}
-                                        </label>
-                                    </div>
+                        <div className="form-group">
+                            <label htmlFor="semester">Semester:</label>
+                            <select id="semester" value={selectedSemester} onChange={handleSemesterChange}>
+                                {Array.from({ length: 2 }, (_, i) => i + 1).map(semester =>
+                                    <option key={semester} value={semester}>
+                                        Semester {semester}
+                                    </option>
+                                )}
+                            </select>
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="schoolYear">School Year:</label>
+                            <select id="schoolYear" value={schoolYear} onChange={handleYearChange}>
+                                {Array.from({ length: 3 }, (_, i) => currentYear - i).map(year => (
+                                    <option key={year} value={year}>
+                                        {year}/{(year + 1) % 100}
+                                    </option>
                                 ))}
-                            </div>
+                            </select>
                         </div>
-                        <div className="form-group subjects">
-                            <label htmlFor="subjects">Subjects:
-                                <input
-                                    type="checkbox"
-                                    checked={selectAll}
-                                    onChange={handleSelectAll}
-                                />
-                            </label>
-                            <div className="checkbox-group">
-                                {subjects.map((subject) => (
-                                    <div className="subject-container" key={subject}>
-                                        <label>
-                                            <input
-                                                type="checkbox"
-                                                value={subject}
-                                                checked={selectedSubjects.includes(subject)}
-                                                onChange={handleSubjectChange}
-                                            />
-                                            {subject}
-                                        </label>
-                                    </div>
-                                ))}
-                                {/* Plus Icon Button */}
-                                {!AddNewCheckbox &&
-                                    <button
-                                        onClick={() => setAddNewCheckbox(true)}
-                                        style={{ fontSize: '15px', marginBottom: '20px', marginLeft: '10px' }}
-                                    >
-                                        <FaPlus /> Add
-                                    </button>}
-                            </div>
-                            {AddNewCheckbox &&
-                                <div className="add-checkbox">
-                                    <input
-                                        type="text"
-                                        value={newCheckboxLabel}
-                                        onChange={(e) => setNewCheckboxLabel(e.target.value)}
-                                        placeholder="New subject"
-                                    />
-                                    <button onClick={(e) => addCheckbox(e)}>Add Subject</button>
-                                    <button onClick={() => setAddNewCheckbox(false)}>Cancel</button>
-                                </div>}
-                        </div>
+                    </div>
 
-                        <div className="assessment-container">
-                            <h3>Assessment Types:&nbsp;
-                                <span style={{ color: totalAssessment > 100 ? "red" : totalAssessment === 100 ? "green" : "" }}>
-                                    {totalAssessment}%
-                                </span>
-                            </h3>
-                            {assessmentTypes.map((assessment, index) => (
-                                <div className="assessment-row" key={index}>
-                                    <select
-                                        type="text"
-                                        placeholder="Type"
-                                        value={assessment.type}
-                                        className="assessment-input"
-                                        required
-                                        onChange={e => {
-                                            const newAssessments = [...assessmentTypes];
-                                            newAssessments[index].type = e.target.value;
-                                            setAssessmentTypes(newAssessments);
-                                        }}
-                                    >
-                                        <option key={index} value="">Type</option>
-                                        <option key={index} value="Test 1">Test 1</option>
-                                        <option key={index} value="Test 2">Test 2</option>
-                                        <option key={index} value="Test 3">Test 3</option>
-                                        <option key={index} value="Quiz">Quiz</option>
-                                        <option key={index} value="Attendance">Attendance</option>
-                                        <option key={index} value="Mid Exam">Mid Exam</option>
-                                        <option key={index} value="Final Exam">Final Exam</option>
-                                        <option key={index} value="Model">Model</option>
-                                    </select>
-                                    <select
-                                        value={assessment.percentage}
-                                        className="assessment-select"
-                                        required
-                                        onChange={e => {
-                                            const newAssessments = [...assessmentTypes];
-                                            newAssessments[index].percentage = parseFloat(e.target.value);
-                                            setAssessmentTypes(newAssessments);
-                                            handleTotalAssessment(e);
-                                        }}
-                                    >
-                                        <option value="">Percentage</option>
-                                        {
-                                            percentages.map((percentage) => (
-                                                <option key={percentage} value={percentage}>{percentage}%</option>
-                                            ))
-                                        }
-                                    </select>
+                    <div className="form-group subjects">
+                        <label htmlFor="section">Section:</label>
+                        <div className="checkbox-group">
+                            {['A', 'B', 'C'].map((section) => (
+                                <div className="subject-container" key={section}>
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            value={section}
+                                            checked={selectedSection.includes(section)}
+                                            onChange={handleSectionChange}
+                                        />
+                                        {section}
+                                    </label>
                                 </div>
                             ))}
-                            <button className="add-assessment-btn" onClick={addAssessmentType}>
-                                <FaPlus /> Add Assessment
-                            </button>
                         </div>
-                        <button type="submit" className="submit-btn">Create Mark List</button>
-                    </form>
-                </div>
+                    </div>
+                    <div className="form-group subjects">
+                        <label htmlFor="subjects">Subjects:
+                            <input
+                                type="checkbox"
+                                checked={selectAll}
+                                onChange={handleSelectAll}
+                            />
+                        </label>
+                        <div className="checkbox-group">
+                            {subjects.map((subject) => (
+                                <div className="subject-container" key={subject}>
+                                    <label>
+                                        <input
+                                            type="checkbox"
+                                            value={subject}
+                                            checked={selectedSubjects.includes(subject)}
+                                            onChange={handleSubjectChange}
+                                        />
+                                        {subject}
+                                    </label>
+                                </div>
+                            ))}
+                            {/* Plus Icon Button */}
+                            {!AddNewCheckbox &&
+                                <button
+                                    onClick={() => setAddNewCheckbox(true)}
+                                    style={{ fontSize: '15px', marginBottom: '20px', marginLeft: '10px' }}
+                                >
+                                    <FaPlus /> Add
+                                </button>}
+                        </div>
+                        {AddNewCheckbox &&
+                            <div className="add-checkbox">
+                                <input
+                                    type="text"
+                                    value={newCheckboxLabel}
+                                    onChange={(e) => setNewCheckboxLabel(e.target.value)}
+                                    placeholder="New subject"
+                                />
+                                <button onClick={(e) => addCheckbox(e)}>Add Subject</button>
+                                <button onClick={() => setAddNewCheckbox(false)}>Cancel</button>
+                            </div>}
+                    </div>
+
+                    <div className="assessment-container">
+                        <h3>Assessment Types:&nbsp;
+                            <span style={{ color: totalAssessment > 100 ? "red" : totalAssessment === 100 ? "green" : "" }}>
+                                {totalAssessment}%
+                            </span>
+                        </h3>
+                        {assessmentTypes.map((assessment, index) => (
+                            <div className="assessment-row" key={index}>
+                                <select
+                                    type="text"
+                                    placeholder="Type"
+                                    value={assessment.type}
+                                    className="assessment-input"
+                                    required
+                                    onChange={e => {
+                                        const newAssessments = [...assessmentTypes];
+                                        newAssessments[index].type = e.target.value;
+                                        setAssessmentTypes(newAssessments);
+                                    }}
+                                >
+                                    <option key={index} value="">Type</option>
+                                    <option key={index} value="Test 1">Test 1</option>
+                                    <option key={index} value="Test 2">Test 2</option>
+                                    <option key={index} value="Test 3">Test 3</option>
+                                    <option key={index} value="Quiz">Quiz</option>
+                                    <option key={index} value="Attendance">Attendance</option>
+                                    <option key={index} value="Mid Exam">Mid Exam</option>
+                                    <option key={index} value="Final Exam">Final Exam</option>
+                                    <option key={index} value="Model">Model</option>
+                                </select>
+                                <select
+                                    value={assessment.percentage}
+                                    className="assessment-select"
+                                    required
+                                    onChange={e => {
+                                        const newAssessments = [...assessmentTypes];
+                                        newAssessments[index].percentage = parseFloat(e.target.value);
+                                        setAssessmentTypes(newAssessments);
+                                        handleTotalAssessment(e);
+                                    }}
+                                >
+                                    <option value="">Percentage</option>
+                                    {
+                                        percentages.map((percentage) => (
+                                            <option key={percentage} value={percentage}>{percentage}%</option>
+                                        ))
+                                    }
+                                </select>
+                            </div>
+                        ))}
+                        <button className="add-assessment-btn" onClick={addAssessmentType}>
+                            <FaPlus /> Add Assessment
+                        </button>
+                    </div>
+                    <button type="submit" className="submit-btn">Create Mark List</button>
+                </form>
             </div>
-        </div>
+        </AdminLayout>
     );
 };
 

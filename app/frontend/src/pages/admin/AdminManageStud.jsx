@@ -1,4 +1,4 @@
-import { AdminHeader, AdminPanel } from "@/components/layout";
+import { AdminLayout } from "@/components/layout";
 import { AdminStudentList } from "@/features/admin";
 
 
@@ -17,15 +17,9 @@ import { AdminStudentList } from "@/features/admin";
 const AdminManageStudents = () => {
 
   return (
-    <div className="min-h-screen flex overflow-hidden flex-col">
-      <AdminHeader />
-      <div className="flex flex-1 scroll-m-0">
-        <AdminPanel />
-        <div className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
-          <AdminStudentList />
-        </div>
-      </div>
-    </div>
+    <AdminLayout>
+      <AdminStudentList />
+    </AdminLayout>
   );
 };
 

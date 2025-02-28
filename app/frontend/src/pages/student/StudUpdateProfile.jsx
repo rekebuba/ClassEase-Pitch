@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FaUserCircle } from "react-icons/fa";
-import { StudentHeader, StudentPanel } from "@/components/layout";
+import { StudentLayout } from "@/components/layout";
 import { studentApi } from "@/api";
 import { toast } from "sonner"
 import '../../styles/updateProfile.css';
@@ -126,120 +126,115 @@ const StudentUpdateProfile = () => {
     }, []);
 
     return (
-        <div className="min-h-screen flex overflow-hidden flex-col">
-            <StudentHeader />
-            <div className="flex flex-1 scroll-m-0">
-                <StudentPanel />
-                <main className="flex-1 p-10 mt-[4.6rem] ml-[11rem] bg-gray-100">
-                    <div className="user-profile">
-                        <div className="profile-details">
-                            <div className="profile-picture">
-                                {formData.profile ?
-                                    <img src={previewImage} alt="Profile" /> :
-                                    <FaUserCircle className="w-36 h-36 text-gray-500 cursor-pointer" />
-                                }
-                                <img src={previewImage} alt="Profile" />
-                                {editMode && (
-                                    <input type="file" name="profilePicture" onChange={handleChange} />
-                                )}
-                            </div>
-                            <div className='profile-data'>
-                                <div className="profile-form-group">
-                                    <label>Name</label>
-                                    <p>{formData.name} {formData.father_name} {formData.grand_father_name}</p>
-                                </div>
-                                <div className="profile-form-group">
-                                    <label htmlFor="dateOfBirth">Date of Birth</label>
-                                    {editMode ? (
-                                        <input
-                                            type="date"
-                                            id="dateOfBirth"
-                                            name="date_of_birth"
-                                            value={formData.date_of_birth || ''}
-                                            onChange={handleChange}
-                                            required
-                                        />
-                                    ) : (
-                                        <p>{formData.date_of_birth}</p>
-                                    )}
-                                </div>
-
-                                <div className="profile-form-group" style={{ marginBottom: '15px' }}>
-                                    <label>Father Phone</label>
-                                    {editMode ? (
-                                        <input
-                                            type="tel"
-                                            name="father_phone"
-                                            value={formData.father_phone || ''}
-                                            onChange={handleChange}
-                                        />
-                                    ) : (
-                                        <p>{formData.father_phone}</p>
-                                    )}
-                                </div>
-
-                                <div className="profile-form-group" style={{ marginBottom: '15px' }}>
-                                    <label>Mother Phone</label>
-                                    {editMode ? (
-                                        <input
-                                            type="tel"
-                                            name="mother_phone"
-                                            value={formData.mother_phone || ''}
-                                            onChange={handleChange}
-                                        />
-                                    ) : (
-                                        <p>{formData.mother_phone}</p>
-                                    )}
-                                </div>
-
-                                {editMode &&
-                                    <div className="profile-form-group" style={{ marginBottom: '15px' }}>
-                                        <label>Current Password</label>
-                                        <input
-                                            type="password"
-                                            name="current_password"
-                                            placeholder="Enter current password"
-                                            onChange={handleChange}
-                                        />
-                                    </div>
-                                }
-
-                                <div className="profile-form-group" style={{ marginBottom: '15px' }}>
-                                    <label>Password</label>
-                                    {editMode ? (
-                                        <input
-                                            type="password"
-                                            name="new_password"
-                                            placeholder="Enter new password"
-                                            onChange={handleChange}
-                                        />
-                                    ) : (
-                                        <p>********</p>
-                                    )}
-                                </div>
-                            </div>
+        <StudentLayout>
+            <div className="user-profile">
+                <div className="profile-details">
+                    <div className="profile-picture">
+                        {formData.profile ?
+                            <img src={previewImage} alt="Profile" /> :
+                            <FaUserCircle className="w-36 h-36 text-gray-500 cursor-pointer" />
+                        }
+                        <img src={previewImage} alt="Profile" />
+                        {editMode && (
+                            <input type="file" name="profilePicture" onChange={handleChange} />
+                        )}
+                    </div>
+                    <div className='profile-data'>
+                        <div className="profile-form-group">
+                            <label>Name</label>
+                            <p>{formData.name} {formData.father_name} {formData.grand_father_name}</p>
+                        </div>
+                        <div className="profile-form-group">
+                            <label htmlFor="dateOfBirth">Date of Birth</label>
+                            {editMode ? (
+                                <input
+                                    type="date"
+                                    id="dateOfBirth"
+                                    name="date_of_birth"
+                                    value={formData.date_of_birth || ''}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            ) : (
+                                <p>{formData.date_of_birth}</p>
+                            )}
                         </div>
 
-                        <div className="button-group">
+                        <div className="profile-form-group" style={{ marginBottom: '15px' }}>
+                            <label>Father Phone</label>
                             {editMode ? (
-                                <>
-                                    <button className="save-button" onClick={handleSave}>
-                                        Save Changes
-                                    </button>
-                                    <button className="cancel-button" onClick={() => setEditMode(false)}>
-                                        Cancel
-                                    </button>
-                                </>
+                                <input
+                                    type="tel"
+                                    name="father_phone"
+                                    value={formData.father_phone || ''}
+                                    onChange={handleChange}
+                                />
                             ) : (
-                                <button className="edit-button" onClick={() => setEditMode(true)}>
-                                    Edit Profile
-                                </button>
+                                <p>{formData.father_phone}</p>
+                            )}
+                        </div>
+
+                        <div className="profile-form-group" style={{ marginBottom: '15px' }}>
+                            <label>Mother Phone</label>
+                            {editMode ? (
+                                <input
+                                    type="tel"
+                                    name="mother_phone"
+                                    value={formData.mother_phone || ''}
+                                    onChange={handleChange}
+                                />
+                            ) : (
+                                <p>{formData.mother_phone}</p>
+                            )}
+                        </div>
+
+                        {editMode &&
+                            <div className="profile-form-group" style={{ marginBottom: '15px' }}>
+                                <label>Current Password</label>
+                                <input
+                                    type="password"
+                                    name="current_password"
+                                    placeholder="Enter current password"
+                                    onChange={handleChange}
+                                />
+                            </div>
+                        }
+
+                        <div className="profile-form-group" style={{ marginBottom: '15px' }}>
+                            <label>Password</label>
+                            {editMode ? (
+                                <input
+                                    type="password"
+                                    name="new_password"
+                                    placeholder="Enter new password"
+                                    onChange={handleChange}
+                                />
+                            ) : (
+                                <p>********</p>
                             )}
                         </div>
                     </div>
-                </main>
+                </div>
+
+                <div className="button-group">
+                    {editMode ? (
+                        <>
+                            <button className="save-button" onClick={handleSave}>
+                                Save Changes
+                            </button>
+                            <button className="cancel-button" onClick={() => setEditMode(false)}>
+                                Cancel
+                            </button>
+                        </>
+                    ) : (
+                        <button className="edit-button" onClick={() => setEditMode(true)}>
+                            Edit Profile
+                        </button>
+                    )}
+                </div>
             </div>
-        </div>
+        </StudentLayout>
+
     );
 };
 

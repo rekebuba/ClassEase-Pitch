@@ -23,7 +23,7 @@ export const eventColumn = [
         },
     },
     {
-        accessorKey: "academic_year_GC",
+        accessorKey: "academicYearEC",
         header: ({ column }) => {
             return (
                 <Button
@@ -37,7 +37,7 @@ export const eventColumn = [
         },
     },
     {
-        accessorKey: "start_date",
+        accessorKey: "startDate",
         header: ({ column }) => {
             return (
                 <Button
@@ -51,7 +51,7 @@ export const eventColumn = [
         },
     },
     {
-        accessorKey: "end_date",
+        accessorKey: "endDate",
         header: ({ column }) => {
             return (
                 <Button
@@ -104,7 +104,7 @@ export const eventColumn = [
                         <DialogTrigger>
                             <Button size="sm"
                                 variant="outline"
-                                className="h-9 w-15 hover:scale-50">Edit</Button>
+                                className="h-9 w-15">Edit</Button>
                         </DialogTrigger>
                         <DialogContent>
                         </DialogContent>
@@ -114,7 +114,7 @@ export const eventColumn = [
                             <Button
                                 size="sm"
                                 variant="destructive"
-                                className="h-9 w-15 hover:scale-50">Delete</Button>
+                                className="h-9 w-15">Delete</Button>
                         </DialogTrigger>
                         <DialogContent>
                         </DialogContent>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { StudentHeader, StudentPanel } from "@/components/layout";
+import { StudentLayout } from "@/components/layout";
 import { StudentPopupScore, StudentSubjectList, StudentEventPanel, StudentScorePanel } from "@/features/student";
 import { studentApi } from "@/api";
 import { toast } from "sonner"
@@ -77,63 +77,58 @@ const StudentDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen flex overflow-hidden flex-col">
-      <StudentHeader />
-      <div className="flex flex-1 scroll-m-0">
-        <StudentPanel />
-        <div className="p-10 mt-[4.6rem] ml-[11rem] bg-gray-50">
+    <StudentLayout>
+      <div className="flex space-x-10">
+        <StudentEventPanel />
+        <StudentScorePanel yearlyScore={yearlyScore} isAssesOpen={toggleAssessment} />
+      </div>
+      {isAssesOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <Card className={`bg-white p-2 rounded-lg shadow-lg w-[45rem] transform transition-all duration-300 ease-out ${isAssesOpen ? "opacity-100 scale-100" : "opacity-0 scale-90"}`}>
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <h3 className='text-center text-lg font-bold'>student Score</h3>
+                <Button
+                  className='bg-opacity-0 text-black hover:bg-opacity-10 hover:text-red-400 hover:scale-150'
+                  onClick={() => toggleAssessment(false)}
+                >
+                  <FaTimes size={24} />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="mt-3 space-y-2">
+                {/* detailed student yearly Score */}
+                {yearlyScore &&
+                  Object.keys(yearlyScore).length > 0 &&
+                  Object.entries(yearlyScore).map(([key, item]) => (
+                    <div key={key}>
+                      {/* Parent container for Grade */}
+                      <div className="flex justify-between border-b-2 border-gray-100 pb-2"
+                        onClick={() => studentReportCard({ student_id: item.student_id, grade_id: item.grade_id, year: item.year })}
+                      >
+                        <p>Grade {item.grade}</p>
+                        <p className="flex items-center">
+                          {item.final_score} % <CheckCircle className="h-5 w-5 text-green-500 ml-1" />
+                        </p>
+                      </div>
 
-          <div className="flex space-x-10">
-            <StudentEventPanel />
-            <StudentScorePanel yearlyScore={yearlyScore} isAssesOpen={toggleAssessment} />
-          </div>
-          {isAssesOpen && (
-            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-              <Card className={`bg-white p-2 rounded-lg shadow-lg w-[45rem] transform transition-all duration-300 ease-out ${isAssesOpen ? "opacity-100 scale-100" : "opacity-0 scale-90"}`}>
-                <CardHeader>
-                  <div className="flex justify-between items-center">
-                    <h3 className='text-center text-lg font-bold'>student Score</h3>
-                    <Button
-                      className='bg-opacity-0 text-black hover:bg-opacity-10 hover:text-red-400 hover:scale-150'
-                      onClick={() => toggleAssessment(false)}
-                    >
-                      <FaTimes size={24} />
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4">
-                  <div className="mt-3 space-y-2">
-                    {/* detailed student yearly Score */}
-                    {yearlyScore &&
-                      Object.keys(yearlyScore).length > 0 &&
-                      Object.entries(yearlyScore).map(([key, item]) => (
-                        <div key={key}>
-                          {/* Parent container for Grade */}
-                          <div className="flex justify-between border-b-2 border-gray-100 pb-2"
-                            onClick={() => studentReportCard({ student_id: item.student_id, grade_id: item.grade_id, year: item.year })}
-                          >
-                            <p>Grade {item.grade}</p>
-                            <p className="flex items-center">
-                              {item.final_score} % <CheckCircle className="h-5 w-5 text-green-500 ml-1" />
-                            </p>
-                          </div>
-
-                          {/* Nested iteration over semesters */}
-                          {item && Object.keys(item.semester).length > 0 && item.semester.map((sem, index) => (
-                            <div key={index} className="flex justify-between border-b-2 border-gray-100 pb-2 ml-4">
-                              <p>Semester {sem.semester}</p>
-                              <p className="flex items-center">{sem.average} %</p>
-                            </div>
-                          ))}
+                      {/* Nested iteration over semesters */}
+                      {item && Object.keys(item.semester).length > 0 && item.semester.map((sem, index) => (
+                        <div key={index} className="flex justify-between border-b-2 border-gray-100 pb-2 ml-4">
+                          <p>Semester {sem.semester}</p>
+                          <p className="flex items-center">{sem.average} %</p>
                         </div>
                       ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
+                    </div>
+                  ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
 
-          {/* <StudentSubjectList
+      {/* <StudentSubjectList
             toggleAssessment={toggleAssessment}
             assessmentSummary={summary}
           />
@@ -142,9 +137,7 @@ const StudentDashboard = () => {
             closeAssessment={closeAssessment}
             assessmentSummary={studentSummary}
           /> */}
-        </div>
-      </div>
-    </div>
+    </StudentLayout>
   );
 };
 export default StudentDashboard;

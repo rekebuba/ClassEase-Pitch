@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { StudentHeader, StudentPanel } from "@/components/layout";
+import { StudentLayout } from "@/components/layout";
 import { sharedApi } from "@/api";
 import { toast } from "sonner"
 import { CollapsibleTable } from '@/features/admin';
@@ -44,17 +44,11 @@ const StudentReportCard = () => {
     }, [student_id, grade_id, year]);
 
     return (
-        <div className="min-h-screen flex overflow-hidden flex-col">
-            <StudentHeader />
-            <div className="flex flex-1 scroll-m-0">
-                <StudentPanel />
-                <main className="flex-1 p-10 mt-[4.6rem] ml-[11rem] bg-gray-100">
-                    {studentAssessment &&
-                        (<CollapsibleTable studentAssessment={studentAssessment} studentReport={studentReport} />)
-                    }
-                </main>
-            </div>
-        </div>
+        <StudentLayout>
+            {studentAssessment &&
+                (<CollapsibleTable studentAssessment={studentAssessment} studentReport={studentReport} />)
+            }
+        </StudentLayout>
     );
 };
 

@@ -1,7 +1,7 @@
 import { createBrowserRouter } from "react-router-dom";
 import { Home, NotFound } from "@/pages/public";
 import { Login } from "@/features/auth";
-import { AdminDashboard, AdminCreateMarkList, AdminEnrollUser, AdminManageEvent, AdminManageStudents, AdminManageTeacher, AdminUpdateProfile, AdminUserAccessControl } from "@/pages/admin";
+import { AdminDashboard, AdminCreateMarkList, AdminEnrollUser, AdminManageEvent, AdminManageStudents, AdminManageTeacher, AdminUpdateProfile, AdminUserAccessControl, AdminEventForm } from "@/pages/admin";
 import { TeacherDashboard, TeacherManageStudent, TeacherUpdateProfile } from "@/pages/teacher";
 import { StudentDashboard, StudentUpdateProfile, StudentRegistrationForm, StudentReportCard } from "@/pages/student";
 import { ProtectedRoute } from "@/routes";
@@ -55,6 +55,10 @@ const router = createBrowserRouter([
     {
         path: "admin/teacher/registration",
         element: <AdminEnrollUser role="teacher" />
+    },
+    {
+        path: '/admin/manage-event/new',
+        element: <AdminEventForm />
     },
     {
         path: "/teacher/dashboard",

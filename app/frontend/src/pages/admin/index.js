@@ -6,3 +6,4 @@ export { default as AdminManageStudents } from './AdminManageStud';
 export { default as AdminManageTeacher } from './AdminManageTeach';
 export { default as AdminUpdateProfile } from './AdminUpdateProfile';
 export { default as AdminUserAccessControl } from './AdminUserAccessControl';
+export { default as AdminEventForm } from './AdminEventForm';

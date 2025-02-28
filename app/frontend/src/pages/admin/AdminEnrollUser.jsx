@@ -1,4 +1,4 @@
-import { AdminHeader, AdminPanel } from "@/components/layout";
+import { AdminLayout } from "@/components/layout";
 import { StudentRegistrationForm } from "@/pages/student";
 import { TeacherRegistrationForm } from "@/features/teacher";
 
@@ -20,17 +20,12 @@ import { TeacherRegistrationForm } from "@/features/teacher";
 const AdminEnrollUser = ({ role }) => {
 
     return (
-        <div className="min-h-screen flex overflow-hidden flex-col">
-            <AdminHeader />
-            <div className="flex flex-1 scroll-m-0">
-                <AdminPanel />
-                <div className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
-                    {role === 'teacher' ? <TeacherRegistrationForm /> : <StudentRegistrationForm role='admin' />
-                    }
-                    
-                </div>
+        <AdminLayout>
+            <div className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
+                {role === 'teacher' ? <TeacherRegistrationForm /> : <StudentRegistrationForm role='admin' />
+                }
             </div>
-        </div>
+        </AdminLayout>
     );
 };
 

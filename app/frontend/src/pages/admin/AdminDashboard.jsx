@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { AdminHeader, AdminPanel } from "@/components/layout";
+import { AdminLayout } from "@/components/layout";
 import { AdminStudentPerformance } from "@/features/admin";
 import { adminApi } from "@/api";
 
@@ -65,33 +65,24 @@ const AdminDashboard = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Top Header */}
-      <AdminHeader />
-
-      {/* Main content area: Sidebar + Content */}
-      <div className="flex flex-1 scroll-m-0">
-        <AdminPanel />
-        <div className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
-          <section className="mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white p-4 rounded shadow text-center">
-                <h3>Total Students</h3>
-                <p>{overview.total_students}</p>
-              </div>
-              <div className="bg-white p-4 rounded shadow text-center">
-                <h3>Total Teachers</h3>
-                <p>{overview.total_teachers}</p>
-              </div>
-            </div>
-          </section>
-          <AdminStudentPerformance
-            enrollmentByGrade={overview.enrollment_by_grade}
-            performanceBySubject={overview.performance_by_subject}
-          />
+    <AdminLayout>
+      <section className="mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white p-4 rounded shadow text-center">
+            <h3>Total Students</h3>
+            <p>{overview.total_students}</p>
+          </div>
+          <div className="bg-white p-4 rounded shadow text-center">
+            <h3>Total Teachers</h3>
+            <p>{overview.total_teachers}</p>
+          </div>
         </div>
-      </div>
-    </div>
+      </section>
+      <AdminStudentPerformance
+        enrollmentByGrade={overview.enrollment_by_grade}
+        performanceBySubject={overview.performance_by_subject}
+      />
+    </AdminLayout>
   );
 };
 

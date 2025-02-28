@@ -11,8 +11,8 @@ const adminApi = {
     assignTeacher: (requirements) => api.post('/admin/assign-teacher', requirements),
     updateProfile: (userData) => api.put('/admin/profile', userData),
     deleteUser: (userId) => api.delete(`/admin/users/${userId}`),
-    events: () => api.get('/admin/events'),
-    createRegistrationEvent: (eventData) => api.post('/admin/events/registration', eventData),
+    createEvent: (eventData) => api.post('/admin/event/new', eventData),
+    getEvents: () => api.get('/admin/events'),
 };
 
 export default adminApi;

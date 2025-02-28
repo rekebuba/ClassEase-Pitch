@@ -19,7 +19,9 @@ from models.average_result import AVRGResult
 from models.average_subject import AVRGSubject
 from models.stud_yearly_record import StudentYearlyRecord
 from models.teacher_record import TeachersRecord
+from models.event import Event
 from models.semester import Semester
+from datetime import datetime
 from sqlalchemy import update, select, and_
 from urllib.parse import urlparse, parse_qs
 from api.v1.views.utils import admin_required
@@ -460,17 +462,28 @@ def events(admin_data):
         Response: A JSON response containing the list of events or an error message with the appropriate HTTP status code.
     """
 
-    query = storage.get_session().query(Semester).all()
+    semesters = storage.get_session().query(Semester).all()
 
-    if not query:
+    if not semesters:
         return jsonify({"error": "No events found"}), 404
 
-    events = [event.to_dict() for event in query]
+    # Convert DateTime fields to string (YYYY-MM-DD) before sending
+    formatted_semesters = [
+        {
+            "id": sem.id,
+            "name": sem.name,
+            "academicYearEC": sem.academic_year_EC,
+            "startDate": sem.start_date.strftime("%Y-%m-%d"),
+            "endDate": sem.end_date.strftime("%Y-%m-%d"),
+            "registrationStart": sem.registration_start.strftime("%Y-%m-%d"),
+            "registrationEnd": sem.registration_end.strftime("%Y-%m-%d"),
+        }
+        for sem in semesters
+    ]
+    return jsonify(formatted_semesters), 200
 
-    return jsonify(events), 200
 
-
-@admin.route('/events/registration', methods=['POST'])
+@admin.route('/event/new', methods=['POST'])
 @admin_required
 def create_events(admin_data):
     data = request.get_json()
@@ -478,7 +491,7 @@ def create_events(admin_data):
         return jsonify({"error": "Not a JSON"}), 404
 
     required_data = {
-        'name',
+        'semester',
         'academicYearEC',
         'startDate',
         'endDate',
@@ -490,14 +503,23 @@ def create_events(admin_data):
     for field in required_data:
         if field not in data:
             return jsonify({"error": f"Missing {field}"}), 400
-        elif field in {'name', 'academicYearEC'} and type(data[field]) != int:
+        elif field in {'semester', 'academicYearEC'} and type(data[field]) != int:
             return jsonify({"error": f"{field} must be an integer"}), 400
         elif field in {'startDate', 'endDate', 'registrationStart', 'registrationEnd'} and type(data[field]) != str:
             return jsonify({"error": f"{field} must be a string"}), 400
 
+    data['startDate'] = datetime.strptime(
+        data['startDate'], "%Y-%m-%d")
+    data['endDate'] = datetime.strptime(
+        data['endDate'], "%Y-%m-%d")
+    data['registrationStart'] = datetime.strptime(
+        data['registrationStart'], "%Y-%m-%d")
+    data['registrationEnd'] = datetime.strptime(
+        data['registrationEnd'], "%Y-%m-%d")
+
     try:
         new_event = Semester(
-            name=data['name'],
+            name=data['semester'],
             academic_year_EC=data['academicYearEC'],
             start_date=data['startDate'],
             end_date=data['endDate'],
@@ -510,7 +532,17 @@ def create_events(admin_data):
         print(str(e))
         return jsonify({"error": str(e)}), 500
 
-    return jsonify(new_event.to_dict()), 201
+    formatted_semesters = {
+        "id": new_event.id,
+        "semester": new_event.semester,
+        "academicYearEC": new_event.academic_year_EC,
+        "startDate": new_event.start_date.strftime("%Y-%m-%d"),
+        "endDate": new_event.end_date.strftime("%Y-%m-%d"),
+        "registrationStart": new_event.registration_start.strftime("%Y-%m-%d"),
+        "registrationEnd": new_event.registration_end.strftime("%Y-%m-%d"),
+    }
+
+    return jsonify(formatted_semesters), 201
 
 
 @admin.route('/students/mark_list', methods=['PUT'])

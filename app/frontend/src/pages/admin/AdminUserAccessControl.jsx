@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { AdminHeader, AdminPanel } from "@/components/layout";
+import { AdminLayout } from "@/components/layout";
 
 
 
@@ -139,91 +139,85 @@ const AdminUserAccessControl = () => {
     };
 
     return (
-        <div className="min-h-screen flex overflow-hidden flex-col">
-            <AdminHeader />
-            <div className="flex flex-1 scroll-m-0">
-                <AdminPanel />
-                <div className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
-                    <h2 className="access-control-h2">User Access Control</h2>
+        <AdminLayout>
+            <h2 className="access-control-h2">User Access Control</h2>
 
-                    <div className="add-user">
-                        <h3>Add New User</h3>
-                        <input
-                            type="text"
-                            placeholder="User Name"
-                            name="name"
-                            value={newUser.name}
-                            onChange={handleUserInputChange}
-                        />
-                        <select name="role" value={newUser.role} onChange={handleUserInputChange}>
-                            <option value="">Select Role</option>
-                            {roles.map(role => (
-                                <option key={role} value={role}>
-                                    {role}
-                                </option>
-                            ))}
-                        </select>
-                        <button onClick={addUser} disabled={!newUser.name || !newUser.role}>
-                            Add User
-                        </button>
-                    </div>
-
-                    {/* User List Section */}
-                    <div className="user-list">
-                        <h3>Manage Users</h3>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Role</th>
-                                    <th>Last Activity</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {users.map(user => (
-                                    <tr key={user.id}>
-                                        <td>{user.id}</td>
-                                        <td>{user.name}</td>
-                                        <td>
-                                            <select
-                                                value={user.role}
-                                                onChange={e => updateUserRole(user.id, e.target.value)}
-                                            >
-                                                {roles.map(role => (
-                                                    <option key={role} value={role}>
-                                                        {role}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                        </td>
-                                        <td>{user.lastActivity} on {user.activityDate}</td>
-                                        <td>
-                                            <button className="delete-btn" onClick={() => setUsers(users.filter(u => u.id !== user.id))}>
-                                                Delete
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
-
-                    {/* Activity Log Section */}
-                    <div className="activity-log">
-                        <h3>User Activity Log</h3>
-                        <ul>
-                            {activityLog.map((log, index) => (
-                                <li key={index}>
-                                    <strong>{log.name}</strong> - {log.lastActivity} on {log.date}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </div>
+            <div className="add-user">
+                <h3>Add New User</h3>
+                <input
+                    type="text"
+                    placeholder="User Name"
+                    name="name"
+                    value={newUser.name}
+                    onChange={handleUserInputChange}
+                />
+                <select name="role" value={newUser.role} onChange={handleUserInputChange}>
+                    <option value="">Select Role</option>
+                    {roles.map(role => (
+                        <option key={role} value={role}>
+                            {role}
+                        </option>
+                    ))}
+                </select>
+                <button onClick={addUser} disabled={!newUser.name || !newUser.role}>
+                    Add User
+                </button>
             </div>
-        </div>
+
+            {/* User List Section */}
+            <div className="user-list">
+                <h3>Manage Users</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Last Activity</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {users.map(user => (
+                            <tr key={user.id}>
+                                <td>{user.id}</td>
+                                <td>{user.name}</td>
+                                <td>
+                                    <select
+                                        value={user.role}
+                                        onChange={e => updateUserRole(user.id, e.target.value)}
+                                    >
+                                        {roles.map(role => (
+                                            <option key={role} value={role}>
+                                                {role}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </td>
+                                <td>{user.lastActivity} on {user.activityDate}</td>
+                                <td>
+                                    <button className="delete-btn" onClick={() => setUsers(users.filter(u => u.id !== user.id))}>
+                                        Delete
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+
+            {/* Activity Log Section */}
+            <div className="activity-log">
+                <h3>User Activity Log</h3>
+                <ul>
+                    {activityLog.map((log, index) => (
+                        <li key={index}>
+                            <strong>{log.name}</strong> - {log.lastActivity} on {log.date}
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        </AdminLayout>
     );
 };
 
