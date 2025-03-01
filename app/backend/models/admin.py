@@ -22,7 +22,7 @@ class Admin(BaseModel, Base):
         __init__(*args, **kwargs): Initializes the admin instance.
     """
     __tablename__ = 'admin'
-    id = Column(String(120), ForeignKey('users.id'), primary_key=True, unique=True)
+    user_id = Column(String(120), ForeignKey('users.id'), unique=True, nullable=False)
     name = Column(String(100), nullable=False)
     email = Column(String(120), nullable=False, unique=True)
 

@@ -5,7 +5,7 @@ import jwt
 from flask import Blueprint, request, jsonify
 from api.v1.views.utils import create_student_token, create_teacher_token, create_admin_token, student_teacher_or_admin_required
 from models import storage
-from models.users import User
+from models.user import User
 from models.blacklist_token import BlacklistToken
 
 auth = Blueprint('auth', __name__, url_prefix='/api/v1')

@@ -2,6 +2,7 @@ import os
 from flask import Flask
 from flask_cors import CORS
 from models import storage
+from flask import jsonify
 
 
 def create_app(config_name):
@@ -46,11 +47,13 @@ def create_app(config_name):
     from api.v1.views.students import stud
     from api.v1.views.teachers import teach
     from api.v1.views.shared_access import shared
+    from api.v1.views.errors import errors
 
     app.register_blueprint(auth)
     app.register_blueprint(admin)
     app.register_blueprint(stud)
     app.register_blueprint(teach)
     app.register_blueprint(shared)
+    app.register_blueprint(errors)
 
     return app

@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 from flask_sqlalchemy import SQLAlchemy
 from models.base_model import Base, BaseModel
 from models.grade import Grade, seed_grades
-from models.users import User
+from models.user import User
 from models.student import Student
 from models.section import Section
 from models.admin import Admin
@@ -33,7 +33,7 @@ class DBStorage:
 
     Methods:
         __init__():
-        get_session():
+        session:
         new(obj):
         init_app(app):
         close():
@@ -57,7 +57,8 @@ class DBStorage:
         """
         self.__engine = SQLAlchemy()
 
-    def get_session(self):
+    @property
+    def session(self):
         """
         Retrieves the current database session.
 
@@ -65,6 +66,9 @@ class DBStorage:
             Session: The current database session.
         """
         return self.__engine.session
+
+    def begin(self):
+        return self.__engine.session.begin()
 
     def new(self, obj):
         """
@@ -74,7 +78,7 @@ class DBStorage:
             obj: The object to be added to the session.
         """
         """add the object to the current database session"""
-        self.get_session().add(obj)
+        self.session.add(obj)
 
     def init_app(self, app):
         """
@@ -91,15 +95,15 @@ class DBStorage:
             # Create tables using Base's metadata
             Base.metadata.create_all(bind=self.__engine.engine)
 
-            with self.__engine.session.begin():
-                seed_grades(self.__engine.session)
+            with self.session.begin():
+                seed_grades(self.session)
 
     def close(self):
         """
         Closes the current session by removing it from the session registry.
         This ensures that the session is properly cleaned up and resources are released.
         """
-        self.get_session().remove()
+        self.session.remove()
 
     def add(self, obj):
         """
@@ -108,9 +112,7 @@ class DBStorage:
         Args:
             obj: The object to be added to the session.
         """
-        session = self.get_session()
-        session.add(obj)
-        session.commit()
+        self.session.add(obj)
 
     def delete(self, obj=None):
         """
@@ -120,7 +122,7 @@ class DBStorage:
             obj: The object to be deleted from the database session. If None, no action is taken.
         """
         if obj is not None:
-            self.get_session().delete(obj)
+            self.session.delete(obj)
 
     def all(self, cls=None):
         """
@@ -135,7 +137,7 @@ class DBStorage:
                   If `cls` is None, the method returns None.
         """
         if cls is not None:
-            return self.get_session().query(cls).all()
+            return self.session.query(cls).all()
         return
 
     def save(self):
@@ -145,7 +147,7 @@ class DBStorage:
         This method commits any pending transactions to the database, ensuring that all changes made
         during the current session are saved.
         """
-        self.__engine.session.commit()
+        self.session.commit()
 
     def drop_all(self):
         """
@@ -169,7 +171,7 @@ class DBStorage:
         in the current session, ensuring that the database state is 
         consistent with the last committed state.
         """
-        self.get_session().rollback()
+        self.session.rollback()
 
     def get_first(self, cls, **data):
         """
@@ -182,7 +184,7 @@ class DBStorage:
         Returns:
             object: The first record that matches the given criteria, or None if no match is found.
         """
-        return self.get_session().query(cls).filter_by(**data).first()
+        return self.session.query(cls).filter_by(**data).first()
 
     def get_all(self, cls, **data):
         """
@@ -195,7 +197,7 @@ class DBStorage:
         Returns:
             List: A list of all records that match the filter criteria.
         """
-        return self.get_session().query(cls).filter_by(**data).all()
+        return self.session.query(cls).filter_by(**data).all()
 
     def get_random(self, cls, **data):
         """
@@ -209,4 +211,4 @@ class DBStorage:
             An instance of `cls` that matches the filter criteria, selected randomly.
             If no matching record is found, returns None.
         """
-        return self.get_session().query(cls).filter_by(**data).order_by(func.random()).first()
+        return self.session.query(cls).filter_by(**data).order_by(func.random()).first()

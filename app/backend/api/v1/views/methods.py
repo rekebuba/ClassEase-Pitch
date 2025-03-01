@@ -1,4 +1,5 @@
 import os
+import re
 from flask import current_app, request, jsonify
 from math import ceil
 from werkzeug.utils import secure_filename
@@ -39,30 +40,22 @@ def paginate_query(query, page, limit):
     }
 
 
-def allowed_file(filename):
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+def save_profile(file):
+    """Save the uploaded file to the server and return the file path."""
+    filename = secure_filename(file.filename)
+    base_dir = os.path.abspath(os.path.dirname("static"))
+    static_dir = os.path.join(base_dir, 'api/v1/static')
+    upload_folder = os.path.join(
+        static_dir, current_app.config['UPLOAD_FOLDER'])
 
+    # Ensure the upload folder exists
+    os.makedirs(upload_folder, exist_ok=True)
 
-def save_profile(data):
-    # Validate file type and save it
-    try:
-        profile = data['profilePicture']
+    filepath = os.path.join(upload_folder, filename)
+    file.save(filepath)
 
-        if profile and allowed_file(profile.filename):
-            filename = secure_filename(profile.filename)
-            base_dir = os.path.abspath(os.path.dirname("static"))
-            static_dir = os.path.join(base_dir, 'api/v1/static')
-            filepath = os.path.join(
-                static_dir, current_app.config['UPLOAD_FOLDER'], filename)
-            profile.save(filepath)
-
-            # Return the file path
-            return os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
-        else:
-            return None
-    except Exception as e:
-        return None
+    # Return the relative file path
+    return os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
 
 
 def validate_request(required_fields, file_fields=[]):

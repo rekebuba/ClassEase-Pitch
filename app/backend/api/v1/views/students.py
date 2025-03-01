@@ -3,7 +3,7 @@
 
 from flask import Blueprint, request, jsonify, url_for
 from models import storage
-from models.users import User
+from models.user import User
 from models.grade import Grade
 from models.student import Student
 from models.section import Section
@@ -36,8 +36,7 @@ def student_panel_data(student_data):
     if not student_data:
         return jsonify({"error": "Student not found"}), 404
 
-    query = (storage.get_session()
-             .query(User.image_path, Student.id, Student.name, Student.father_name, Student.grand_father_name)
+    query = (storage.session.query(User.image_path, Student.id, Student.name, Student.father_name, Student.grand_father_name)
              .join(Student, Student.id == User.id)
              .filter(User.id == student_data.student_id)
              ).first()
@@ -66,15 +65,14 @@ def student_yearly_scores(student_data):
     """
 
     query = (
-        storage.get_session()
-        .query(StudentYearlyRecord.student_id,
-               Grade.id,
-               Grade.grade,
-               AVRGResult.semester,
-               AVRGResult.average,
-               StudentYearlyRecord.final_score,
-               StudentYearlyRecord.year
-               )
+        storage.session.query(StudentYearlyRecord.student_id,
+                              Grade.id,
+                              Grade.grade,
+                              AVRGResult.semester,
+                              AVRGResult.average,
+                              StudentYearlyRecord.final_score,
+                              StudentYearlyRecord.year
+                              )
         .join(Grade, AVRGResult.grade_id == Grade.id)
         .join(StudentYearlyRecord, StudentYearlyRecord.student_id == AVRGResult.student_id)
         .filter(and_(AVRGResult.student_id == student_data.student_id,
@@ -326,7 +324,7 @@ def get_student_score(student_data, admin_data):
     if not grade:
         return jsonify({"error": "Grade not found"}), 404
 
-    mark_list = storage.get_session().query(MarkList).filter(
+    mark_list = storage.session.query(MarkList).filter(
         MarkList.student_id == student_id,
         MarkList.grade_id == grade.id,
         MarkList.semester == data['semester'][0]

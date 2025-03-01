@@ -10,3 +10,6 @@ mysqlclient
 mysql-connector-python
 pytest
 schedule
+-U marshmallow
+flask-marshmallow
+pyethiodate

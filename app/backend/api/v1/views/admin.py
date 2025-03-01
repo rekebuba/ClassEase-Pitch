@@ -3,10 +3,11 @@
 
 import os
 from flask import request, jsonify, url_for
+from marshmallow import ValidationError
 from sqlalchemy import func
 from models import storage
 from flask import Blueprint
-from models.users import User
+from models.user import User
 from models.admin import Admin
 from models.subject import Subject
 from models.teacher import Teacher
@@ -25,10 +26,13 @@ from datetime import datetime
 from sqlalchemy import update, select, and_
 from urllib.parse import urlparse, parse_qs
 from api.v1.views.utils import admin_required
-from api.v1.views.methods import paginate_query, save_profile, validate_request
+from api.v1.views.methods import save_profile, validate_request
+from api.v1.schemas.admin_schema import AdminSchema
+from api.v1.schemas.user_schema import UserSchema
+from api.v1.services.admin_service import AdminService
+from api.v1.services.base_user_service import BaseUserService
 
 admin = Blueprint('admin', __name__, url_prefix='/api/v1/admin')
-
 
 @admin.route('/dashboard', methods=['GET'])
 @admin_required
@@ -47,11 +51,7 @@ def admin_dashboard(admin_data):
                - If `admin_data` is valid, returns a JSON response with the admin data 
                  dictionary and a 200 status code.
     """
-    if not admin_data:
-        return jsonify({"error": "Admin not found"}), 404
-
-    query = (storage.get_session()
-             .query(User.image_path)
+    query = (storage.session.query(User.image_path)
              .join(Admin, Admin.id == User.id)
              .filter(Admin.id == admin_data.id)
              ).first()
@@ -153,14 +153,14 @@ def school_overview(admin_data):
     """
     total_teachers = storage.get_all(Teacher)
     total_students = storage.get_all(Student)
-    enrollment_by_grade = storage.get_session().query(
+    enrollment_by_grade = storage.session.query(
         Grade.grade,
         func.count(StudentYearlyRecord.student_id)
     ).join(Grade, StudentYearlyRecord.grade_id == Grade.id).group_by(
         StudentYearlyRecord.grade_id,
     ).all()
 
-    performance_by_subject = storage.get_session().query(
+    performance_by_subject = storage.session.query(
         Subject.name,
         func.avg(MarkList.score)
     ).join(Subject, MarkList.subject_id == Subject.id).group_by(
@@ -179,63 +179,6 @@ def school_overview(admin_data):
             for subject, average_percentage in performance_by_subject
         ]
     }), 200
-
-
-@admin.route('/registration', methods=['POST'])
-def register_new_admin():
-    """
-    Registers a new admin user.
-
-    This function handles the registration of a new admin user by extracting 
-    data from a JSON request, validating the required fields, creating a new 
-    User object with the role 'Admin', and saving it to the storage. It then 
-    creates an Admin object with the same ID and saves it to the storage.
-
-    Returns:
-        Response: A JSON response indicating the success or failure of the 
-        registration process.
-        - 201: Admin registered successfully.
-        - 400: Missing name or email in the request data.
-        - 404: Request data is not a valid JSON.
-        - 500: Internal server error during the registration process.
-    """
-    required_fields = []
-
-    error_response = validate_request(required_fields)
-    if error_response:
-        return error_response  # Return error if any field is missing
-
-    # Extract all form fields into a dictionary
-    data = {key:
-            request.files.get(
-                key) if key == 'profilePicture' else request.form.get(key)
-            for key in request.form.keys()}
-
-    # Check if required fields are present
-    if "name" not in data or "email" not in data:
-        return jsonify({"error": "Missing name or email"}), 400
-
-    # Validate file type and save it
-    filepath = save_profile(data)
-
-    new_admin = User(role='Admin', image_path=filepath)
-    new_admin.hash_password(new_admin.id)
-
-    try:
-        # Save User first
-        storage.add(new_admin)
-
-        # Create the Admin object, using the same id
-        admin = Admin(id=new_admin.id, name=data['name'], email=data['email'])
-
-        # Save Admin
-        storage.add(admin)
-    except Exception as e:
-        storage.rollback()
-        print(e)
-        return jsonify({"error": str(e)}), 500
-
-    return jsonify({"message": "Admin registered successfully!"}), 201
 
 
 @admin.route('/teacher/registration', methods=['POST'])
@@ -362,14 +305,14 @@ def assign_class(admin_data):
         return jsonify({"error": "Teacher not found"}), 404
 
     # Get the grade_id from the Grade table
-    grade_id = storage.get_session().execute(
+    grade_id = storage.session.execute(
         select(Grade.id).where(Grade.grade == data['grade'])
     ).scalars().first()
     if not grade_id:
         return jsonify({"error": "No grade found for the teacher"}), 404
 
     # get the subject_id
-    subjects_taught = storage.get_session().query(Subject).filter(
+    subjects_taught = storage.session.query(Subject).filter(
         Subject.grade_id == grade_id,
         Subject.name.in_(data['subjects_taught'])
     ).all()
@@ -379,7 +322,7 @@ def assign_class(admin_data):
     try:
         for subject in subjects_taught:
             # get the section_id
-            section_ids = [id[0] for id in storage.get_session().query(Section.id).filter(
+            section_ids = [id[0] for id in storage.session.query(Section.id).filter(
                 Section.grade_id == grade_id,
                 Section.section.in_(data['section'])
             ).all()]
@@ -405,7 +348,7 @@ def assign_class(admin_data):
                 storage.add(teacher_record)
 
                 # Update the MarkList table
-                storage.get_session().execute(
+                storage.session.execute(
                     update(MarkList)
                     .where(and_(
                         MarkList.grade_id == grade_id,
@@ -418,7 +361,7 @@ def assign_class(admin_data):
                 )
 
                 # Update the Assessment table
-                storage.get_session().execute(
+                storage.session.execute(
                     update(Assessment)
                     .where(and_(
                         Assessment.grade_id == grade_id,
@@ -430,7 +373,7 @@ def assign_class(admin_data):
                 )
 
                 # Update the AVRGSubject table
-                storage.get_session().execute(
+                storage.session.execute(
                     update(AVRGSubject)
                     .where(and_(
                         AVRGSubject.grade_id == grade_id,
@@ -462,7 +405,7 @@ def events(admin_data):
         Response: A JSON response containing the list of events or an error message with the appropriate HTTP status code.
     """
 
-    semesters = storage.get_session().query(Semester).all()
+    semesters = storage.session.query(Semester).all()
 
     if not semesters:
         return jsonify({"error": "No events found"}), 404
@@ -618,7 +561,7 @@ def create_mark_list(admin_data):
             storage.add(section)
 
     mark_list_exists = (
-        storage.get_session().query(MarkList)
+        storage.session.query(MarkList)
         .filter(MarkList.grade_id == grade_id,
                 MarkList.semester == data['semester'],
                 MarkList.year == data['year'],
@@ -636,7 +579,7 @@ def create_mark_list(admin_data):
 
     try:
         students = (
-            storage.get_session().query(StudentYearlyRecord)
+            storage.session.query(StudentYearlyRecord)
             .filter(StudentYearlyRecord.grade_id == grade_id, StudentYearlyRecord.year == data['year'])
             .all()
         )
@@ -650,7 +593,7 @@ def create_mark_list(admin_data):
                 section = storage.get_random(Section, grade_id=grade_id)
                 if not section:
                     return jsonify({"error": "Section not found"}), 404
-                update_result = storage.get_session().execute(
+                update_result = storage.session.execute(
                     update(StudentYearlyRecord)
                     .where(StudentYearlyRecord.student_id == student.student_id)
                     .values(section_id=section.id)
@@ -733,11 +676,11 @@ def create_mark_list(admin_data):
             )
 
         # Save the objects to the database
-        storage.get_session().bulk_save_objects(mark_lists)
-        storage.get_session().bulk_save_objects(assessments)
-        storage.get_session().bulk_save_objects(average_result)
+        storage.session.bulk_save_objects(mark_lists)
+        storage.session.bulk_save_objects(assessments)
+        storage.session.bulk_save_objects(average_result)
         if average_subject:
-            storage.get_session().bulk_save_objects(average_subject)
+            storage.session.bulk_save_objects(average_subject)
 
         storage.save()
     except Exception as e:
@@ -862,19 +805,18 @@ def admin_student_list(admin_data):
         return jsonify({"error": "Grade not found"}), 404
 
     query = (
-        storage.get_session()
-        .query(Student.id.label('student_id'),
-               Student.name,
-               Student.father_name,
-               Student.grand_father_name,
-               Section.section,
-               Section.id,
-               StudentYearlyRecord.grade_id,
-               StudentYearlyRecord.final_score,
-               StudentYearlyRecord.rank,
-               StudentYearlyRecord.year,
-               User.image_path
-               )
+        storage.session.query(Student.id.label('student_id'),
+                              Student.name,
+                              Student.father_name,
+                              Student.grand_father_name,
+                              Section.section,
+                              Section.id,
+                              StudentYearlyRecord.grade_id,
+                              StudentYearlyRecord.final_score,
+                              StudentYearlyRecord.rank,
+                              StudentYearlyRecord.year,
+                              User.image_path
+                              )
         .select_from(StudentYearlyRecord)
         .join(Student, Student.id == StudentYearlyRecord.student_id)
         .join(User, User.id == Student.id)
@@ -925,17 +867,17 @@ def all_teachers(admin_data):
     parsed_url = urlparse(url)
     data = parse_qs(parsed_url.query)
 
-    query = (storage.get_session()
-             .query(Teacher.id,
-                    Teacher.first_name.label('firstName'),
-                    Teacher.last_name.label('lastName'),
-                    Teacher.email,
-                    Teacher.no_of_mark_list.label('markList'),
-                    User.image_path
-                    )
-             .join(User, User.id == Teacher.id)
-             .group_by(Teacher.id)
-             )
+    query = (
+        storage.session.query(Teacher.id,
+                              Teacher.first_name.label('firstName'),
+                              Teacher.last_name.label('lastName'),
+                              Teacher.email,
+                              Teacher.no_of_mark_list.label('markList'),
+                              User.image_path
+                              )
+        .join(User, User.id == Teacher.id)
+        .group_by(Teacher.id)
+    )
 
     if not query:
         return jsonify({"error": "No teachers found"}), 404

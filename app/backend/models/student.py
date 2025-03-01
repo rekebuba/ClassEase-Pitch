@@ -27,11 +27,10 @@ class Student(BaseModel, Base):
         __init__(*args, **kwargs): Initializes a new instance of the Student class.
     """
     __tablename__ = 'student'
-    id = Column(String(120), ForeignKey('users.id'),
-                primary_key=True, unique=True)
+    user_id = Column(String(120), ForeignKey('users.id'), unique=True, nullable=False)
     name = Column(String(50), nullable=False)
     father_name = Column(String(50), nullable=False)
-    grand_father_name = Column(String(50))
+    grand_father_name = Column(String(50), nullable=False)
     date_of_birth = Column(DateTime, nullable=False)
 
     # Parent/Guardian Contacts
@@ -41,17 +40,15 @@ class Student(BaseModel, Base):
     guardian_phone = Column(String(25))
 
     # Academic Info
-    start_year = Column(String(10), nullable=False)
+    start_year_EC = Column(String(15), nullable=False)
+    start_year_GC = Column(String(15), nullable=False)
     end_year = Column(String(10))
 
     # If transferring from another school
     previous_school = Column(String(100))
-    grade = Column(Integer, nullable=False)  # Current grade level
-    section = Column(String(10))  # Class section (A, B, C, etc.)
 
     # Academic Performance
     current_grade = Column(Integer, nullable=False)
-    current_semester = Column(Integer, nullable=False)
     semester_id = Column(String(120), ForeignKey('semesters.id'))
     has_passed = Column(Boolean, default=False)
     registration_window_start = Column(DateTime)

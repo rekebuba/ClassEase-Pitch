@@ -28,8 +28,7 @@ class Teacher(BaseModel, Base):
         __init__(*args, **kwargs): Initializes the Teacher instance.
     """
     __tablename__ = 'teacher'
-    id = Column(String(120), ForeignKey('users.id'),
-                primary_key=True, unique=True, nullable=False)
+    user_id = Column(String(120), ForeignKey('users.id'), unique=True, nullable=False)
     first_name = Column(String(50), nullable=False)
     last_name = Column(String(50), nullable=False)
     gender = Column(String(10), nullable=False)

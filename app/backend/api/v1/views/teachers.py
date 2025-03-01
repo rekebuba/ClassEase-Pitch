@@ -5,7 +5,7 @@ from flask import request, jsonify, url_for
 from sqlalchemy import func
 from models import storage
 from datetime import datetime
-from models.users import User
+from models.user import User
 from models.grade import Grade
 from models.student import Student
 from models.section import Section
@@ -44,8 +44,7 @@ def teacher_panel(teacher_data):
     if not teacher_data:
         return jsonify({"error": "Teacher not found"}), 404
 
-    query = (storage.get_session()
-             .query(User.image_path, Teacher.id, Teacher.first_name, Teacher.last_name)
+    query = (storage.session.query(User.image_path, Teacher.id, Teacher.first_name, Teacher.last_name)
              .join(Teacher, Teacher.id == User.id)
              .filter(User.id == teacher_data.id)
              ).first()
@@ -178,20 +177,20 @@ def get_list_of_students(teacher_data):
         return jsonify({"error": "Subject not found"}), 404
 
     query = (
-        storage.get_session()
-        .query(Student.id.label('student_id'),
-               Student.name,
-               Student.father_name.label('fatherName'),
-               Student.grand_father_name.label('grandFatherName'),
-               Grade.id.label('grade_id'),
-               Section.section,
-               Section.id.label('section_id'),
-               Assessment.subject_id.label('subject_id'),
-               Assessment.total,
-               Assessment.rank,
-               Assessment.semester,
-               Assessment.year
-               )  # Explicitly specify the table being queried
+        storage.session.query(Student.id.label('student_id'),
+                              Student.name,
+                              Student.father_name.label('fatherName'),
+                              Student.grand_father_name.label(
+                                  'grandFatherName'),
+                              Grade.id.label('grade_id'),
+                              Section.section,
+                              Section.id.label('section_id'),
+                              Assessment.subject_id.label('subject_id'),
+                              Assessment.total,
+                              Assessment.rank,
+                              Assessment.semester,
+                              Assessment.year
+                              )  # Explicitly specify the table being queried
         .select_from(Assessment)
         .join(TeachersRecord, TeachersRecord.id == Assessment.teachers_record_id)
         .join(Student, Student.id == Assessment.student_id)
@@ -208,7 +207,8 @@ def get_list_of_students(teacher_data):
         .order_by(Student.name.asc(), Student.father_name.asc(), Student.grand_father_name.asc(), Student.id.asc())
     )
 
-    student_list = [{key: value for key, value in q._asdict().items()} for q in query]
+    student_list = [{key: value for key, value in q._asdict().items()}
+                    for q in query]
 
     return jsonify({
         "students": student_list,
@@ -250,11 +250,10 @@ def get_student_assessment(teacher_data):
     year = data['year'][0]
     try:
         query = (
-            storage.get_session()
-            .query(MarkList.type,
-                   MarkList.score,
-                   MarkList.percentage,
-                   )
+            storage.session.query(MarkList.type,
+                                  MarkList.score,
+                                  MarkList.percentage,
+                                  )
             .join(TeachersRecord, TeachersRecord.id == MarkList.teachers_record_id)
             .filter(MarkList.student_id == student_id,
                     MarkList.grade_id == grade_id,
@@ -284,8 +283,8 @@ def get_student_assessment(teacher_data):
 @teacher_required
 def teacher_assigned(teacher_data):
     query = (
-        storage.get_session()
-        .query(Subject.name, Subject.code, Grade.grade, Section.section)
+        storage.session.query(
+            Subject.name, Subject.code, Grade.grade, Section.section)
         .join(TeachersRecord, TeachersRecord.subject_id == Subject.id)
         .join(Grade, Grade.id == TeachersRecord.grade_id)
         .join(Section, Section.id == TeachersRecord.section_id)
@@ -357,13 +356,13 @@ def update_student_assessment(teacher_data):
         "semester",
         "year",
     }
-    
+
     for field in required_student_data:
         if field not in student_data:
             return jsonify({"error": f"Missing {field}"}), 400
 
     try:
-        teacher_record = storage.get_session().query(TeachersRecord).filter(
+        teacher_record = storage.session.query(TeachersRecord).filter(
             TeachersRecord.teacher_id == teacher_data.id,
             TeachersRecord.grade_id == student_data['grade_id'],
             TeachersRecord.section_id == student_data['section_id'],
@@ -375,7 +374,7 @@ def update_student_assessment(teacher_data):
             return jsonify({"error": "Teacher record not found"}), 404
 
         for assessment in assessments:
-            update_score = storage.get_session().execute(
+            update_score = storage.session.execute(
                 update(MarkList)
                 .where(and_(
                     MarkList.teachers_record_id == teacher_record.id,
@@ -423,7 +422,7 @@ def subject_sum(student_data):
     Returns:
         None
     """
-    total = storage.get_session().query(
+    total = storage.session.query(
         func.sum(MarkList.score).label('total_score')
     ).filter(
         MarkList.student_id == student_data['student_id'],
@@ -432,7 +431,7 @@ def subject_sum(student_data):
         MarkList.year == student_data['year']
     ).group_by(MarkList.subject_id).first()
 
-    storage.get_session().execute(
+    storage.session.execute(
         update(Assessment)
         .where(and_(
             Assessment.student_id == student_data['student_id'],
@@ -462,7 +461,7 @@ def total_subject_ranks(student_data):
     For each subject, it retrieves all assessments, orders them by total score in descending order, and assigns ranks
     based on their position in the sorted list. The ranks are then saved back to the database.
     """
-    ranked_data_subquery = (storage.get_session().query(
+    ranked_data_subquery = (storage.session.query(
         Assessment.student_id,
         Assessment.subject_id,
         Assessment.semester,
@@ -475,7 +474,7 @@ def total_subject_ranks(student_data):
         .subquery()
     )
 
-    storage.get_session().execute(
+    storage.session.execute(
         update(Assessment)
         .where(and_(
             Assessment.student_id == ranked_data_subquery.c.student_id,  # c is short for Column
@@ -490,7 +489,7 @@ def total_subject_ranks(student_data):
 
 
 def subject_average(student_data):
-    average_subject = (storage.get_session().query(
+    average_subject = (storage.session.query(
         Assessment.student_id,
         Assessment.subject_id,
         Assessment.year,
@@ -504,7 +503,7 @@ def subject_average(student_data):
     ).first()
 
     if average_subject:
-        storage.get_session().execute(
+        storage.session.execute(
             update(AVRGSubject)
             .where(and_(
                 AVRGSubject.student_id == average_subject.student_id,
@@ -520,7 +519,7 @@ def subject_average(student_data):
 
 
 def average_subject_ranks(student_data):
-    ranked_data_subquery = (storage.get_session().query(
+    ranked_data_subquery = (storage.session.query(
         AVRGSubject.student_id,
         AVRGSubject.subject_id,
         AVRGSubject.year,
@@ -532,7 +531,7 @@ def average_subject_ranks(student_data):
         .subquery()
     )
 
-    storage.get_session().execute(
+    storage.session.execute(
         update(AVRGSubject)
         .where(and_(
             AVRGSubject.student_id == ranked_data_subquery.c.student_id,  # c is short for Column
@@ -555,7 +554,7 @@ def semester_average(student_data):
         None
     """
     average = (
-        storage.get_session().query(
+        storage.session.query(
             Assessment.student_id,
             Assessment.semester,
             Assessment.year,
@@ -570,7 +569,7 @@ def semester_average(student_data):
     ).first()
 
     if average:
-        storage.get_session().execute(
+        storage.session.execute(
             update(AVRGResult)
             .where(and_(
                 AVRGResult.student_id == average.student_id,
@@ -599,7 +598,7 @@ def semester_ranks(student_data):
         student_data = {'semester': 'Fall', 'year': 2023}
         semester_ranks(student_data)
     """
-    ranked_data_subquery = (storage.get_session().query(
+    ranked_data_subquery = (storage.session.query(
         AVRGResult.student_id,
         AVRGResult.semester,
         AVRGResult.year,
@@ -612,7 +611,7 @@ def semester_ranks(student_data):
         .subquery()
     )
 
-    storage.get_session().execute(
+    storage.session.execute(
         update(AVRGResult)
         .where(and_(
             AVRGResult.student_id == ranked_data_subquery.c.student_id,  # c is short for Column
@@ -641,7 +640,7 @@ def yearly_average(student_data):
         None
     """
 
-    average = storage.get_session().query(
+    average = storage.session.query(
         AVRGResult.student_id,
         AVRGResult.year,
         func.avg(AVRGResult.average).label('semester_average')
@@ -651,7 +650,7 @@ def yearly_average(student_data):
     ).group_by(AVRGResult.student_id).first()
 
     if average:
-        storage.get_session().execute(
+        storage.session.execute(
             update(StudentYearlyRecord)
             .where(and_(
                 StudentYearlyRecord.student_id == average.student_id,
@@ -680,7 +679,7 @@ def year_ranks(student_data):
     3. Assigns ranks to students based on their final scores.
     4. Saves the updated ranks back to the database.
     """
-    ranked_data_subquery = (storage.get_session().query(
+    ranked_data_subquery = (storage.session.query(
         StudentYearlyRecord.student_id,
         StudentYearlyRecord.year,
         func.rank().over(order_by=StudentYearlyRecord.final_score.desc()).label('new_rank')
@@ -691,7 +690,7 @@ def year_ranks(student_data):
         .subquery()
     )
 
-    storage.get_session().execute(
+    storage.session.execute(
         update(StudentYearlyRecord)
         .where(and_(
             # c is short for Column

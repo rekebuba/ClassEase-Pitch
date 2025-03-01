@@ -27,7 +27,7 @@ class User(BaseModel, Base):
         id_exists(id): Checks if the generated ID already exists in the users table.
     """
     __tablename__ = 'users'
-    id = Column(String(120), primary_key=True, unique=True)
+    identification = Column(String(120), unique=True, nullable=False)
     password = Column(String(120), nullable=False)
     role = Column(String(50), nullable=False)
     image_path = Column(String(255), nullable=True)
@@ -43,11 +43,11 @@ class User(BaseModel, Base):
             **kwargs: Arbitrary keyword arguments.
 
         Attributes:
-            id (str): The unique identifier generated based on the user's role.
+            identification (str): The unique identifier generated based on the user's role.
         """
         """initializes score"""
         super().__init__(*args, **kwargs)
-        self.id = self.generate_id(self.role)
+        self.identification = self.generate_id(self.role)
 
     def generate_id(self, role):
         """
@@ -64,37 +64,39 @@ class User(BaseModel, Base):
         Returns:
             str: A unique custom ID.
         """
-        id = ''
+        identification = ''
         section = ''
 
         # Assign prefix based on role
-        if role == 'Student':
+        if role == 'Student' or 'student':
             section = 'MAS'
-        elif role == 'Teacher':
+        elif role == 'Teacher' or 'teacher':
             section = 'MAT'
-        elif role == 'Admin':
+        elif role == 'Admin' or 'admin':
             section = 'MAA'
+        else:
+            section = 'Staff'
 
         unique = True
         while unique:
             num = random.randint(1000, 9999)
             starting_year = EthiopianDateConverter.date_to_ethiopian(
                 datetime.now()).year % 100  # Get last 2 digits of the year
-            id = f'{section}/{num}/{starting_year}'
+            identification = f'{section}/{num}/{starting_year}'
 
             # Check if the generated ID already exists in the users table
-            if not self.id_exists(id):
+            if not self.id_exists(identification):
                 unique = False
 
-        return id
+        return identification
 
 
-    def id_exists(self, id):
+    def id_exists(self, identification):
         """
         Checks if the generated ID already exists in the users table.
 
         Args:
-            id (str): The ID to check for existence in the users table.
+            identification (str): The ID to check for existence in the users table.
 
         Returns:
             bool: True if the ID exists in the users table, False otherwise.
@@ -102,6 +104,6 @@ class User(BaseModel, Base):
         """Checks if the generated ID already exists in the users table"""
         from models import storage
         # Check in the `users` table for the ID
-        if storage.get_first(User, id=id):
+        if storage.get_first(User, identification=identification):
             return True
         return False

@@ -1,11 +1,13 @@
 #!/usr/bin/python3
 """Teacher views module for the API"""
 
+import os
 from flask import request, jsonify, current_app, url_for
+from marshmallow import ValidationError
 from sqlalchemy import func
 from models import storage
 from datetime import datetime
-from models.users import User
+from models.user import User
 from models.grade import Grade
 from models.student import Student
 from models.section import Section
@@ -21,13 +23,45 @@ from urllib.parse import urlparse, parse_qs
 from sqlalchemy import update, and_
 from flask import Blueprint
 from api.v1.views.utils import admin_or_student_required, student_teacher_or_admin_required
+from api.v1.services.base_user_service import BaseUserService
 from api.v1.views.methods import paginate_query
+from api.v1.views import errors
 from models.base_model import BaseModel
 from api.v1.views.methods import save_profile
 from werkzeug.utils import secure_filename
-import os
 
 shared = Blueprint('shared', __name__, url_prefix='/api/v1')
+
+
+@shared.route('/registration/<role>', methods=['POST'])
+def register_new_user(role: str):
+    """
+    Registers a new user (Admin, Student, Teacher) in the system.
+
+    Args:
+        role (str): The role of the user to be registered. It should be one of 'Admin', 'Student', or 'Teacher'.
+
+    Returns:
+        Response: A JSON response indicating the success or failure of the registration process.
+    """
+    role = role.lower()
+    if role not in ['admin', 'student', 'teacher']:
+        return jsonify({"error": "Invalid role"}), 400
+
+    try:
+        data = request.form.to_dict()  # Get form data as a dictionary
+
+        result = BaseUserService.create_role_based_user(role, data)
+        if not result:
+            raise Exception("Failed to register user")
+
+        return {"message": f"{role} registered successfully!"}, 201
+    except ValidationError as e:
+        storage.rollback()
+        return errors.handle_validation_error(e)
+    except Exception as e:
+        storage.rollback()
+        return errors.handle_internal_error(e)
 
 
 @shared.route('/student/assessment', methods=['GET'])
@@ -71,19 +105,18 @@ def student_assessment(admin_data, student_data):
             return jsonify({"error": f"Missing {field}"}), 400
 
     query = (
-        storage.get_session()
-        .query(Assessment.student_id,
-               Subject.code,
-               Subject.name,
-               Assessment.subject_id,
-               Assessment.grade_id,
-               Assessment.semester,
-               Assessment.total,
-               Assessment.rank,
-               AVRGSubject.average,
-               AVRGSubject.rank,
-               Assessment.year
-               )
+        storage.session.query(Assessment.student_id,
+                              Subject.code,
+                              Subject.name,
+                              Assessment.subject_id,
+                              Assessment.grade_id,
+                              Assessment.semester,
+                              Assessment.total,
+                              Assessment.rank,
+                              AVRGSubject.average,
+                              AVRGSubject.rank,
+                              Assessment.year
+                              )
         .select_from(Assessment)
         .join(TeachersRecord, TeachersRecord.id == Assessment.teachers_record_id)
         .join(Subject, Assessment.subject_id == Subject.id)
@@ -123,13 +156,12 @@ def student_assessment(admin_data, student_data):
             student_assessment[code]["semII"] = {"total": total, "rank": rank}
 
     summary = (
-        storage.get_session()
-        .query(AVRGResult.semester,
-               AVRGResult.average,
-               AVRGResult.rank,
-               StudentYearlyRecord.final_score,
-               StudentYearlyRecord.rank
-               )
+        storage.session.query(AVRGResult.semester,
+                              AVRGResult.average,
+                              AVRGResult.rank,
+                              StudentYearlyRecord.final_score,
+                              StudentYearlyRecord.rank
+                              )
         .select_from(AVRGResult)
         .join(StudentYearlyRecord, and_(StudentYearlyRecord.student_id == AVRGResult.student_id,
                                         StudentYearlyRecord.grade_id == AVRGResult.grade_id,
@@ -182,12 +214,11 @@ def student_assessment_detail(admin_data, student_data):
 
     try:
         query = (
-            storage.get_session()
-            .query(MarkList.type,
-                   MarkList.score,
-                   MarkList.percentage,
-                   MarkList.semester
-                   )
+            storage.session.query(MarkList.type,
+                                  MarkList.score,
+                                  MarkList.percentage,
+                                  MarkList.semester
+                                  )
             .filter(MarkList.student_id == student_id,
                     MarkList.grade_id == grade_id,
                     MarkList.subject_id == subject_id,
@@ -230,10 +261,9 @@ def upload_profile(student_data, teacher_data, admin_data):
 
     if filepath:
         # Save the file path to the database
-        query = storage.get_session().query(User).filter(User.id == user.id).first()
+        query = storage.session.query(User).filter(User.id == user.id).first()
         query.image_path = filepath
         storage.save()
-
 
         return jsonify({
             "message": "File uploaded successfully",

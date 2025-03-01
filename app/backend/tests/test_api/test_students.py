@@ -41,7 +41,7 @@ class TestStudents(unittest.TestCase):
 
         This method is called after each test to clean up the database by removing the session and dropping all tables.
         """
-        storage.get_session().remove()
+        storage.session.remove()
         storage.drop_all()
 
     def test_student_register_success(self):
