@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """ Module for Admin class """
 
-from sqlalchemy import Column, String, ForeignKey
+from sqlalchemy import CheckConstraint, Column, Date, String, ForeignKey
 from sqlalchemy.orm import relationship
 from models.base_model import BaseModel, Base
 
@@ -22,10 +22,22 @@ class Admin(BaseModel, Base):
         __init__(*args, **kwargs): Initializes the admin instance.
     """
     __tablename__ = 'admin'
-    user_id = Column(String(120), ForeignKey('users.id'), unique=True, nullable=False)
-    name = Column(String(100), nullable=False)
-    email = Column(String(120), nullable=False, unique=True)
+    user_id = Column(String(120), ForeignKey(
+        'users.id'), unique=True, nullable=False)
+    first_name = Column(String(50), nullable=False)
+    father_name = Column(String(50), nullable=False)
+    date_of_birth = Column(Date, nullable=False)
+    gender = Column(String(1), nullable=False)
+    email = Column(String(120), nullable=False)
+    phone = Column(String(25), nullable=False)
+    address = Column(String(120), nullable=False)
 
+    __table_args__ = (
+        CheckConstraint(
+            "gender IN ('M', 'F')",
+            name="check_admin_gender"
+        ),
+    )
 
     def __init__(self, *args, **kwargs):
         """initializes score"""

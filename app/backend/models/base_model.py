@@ -127,28 +127,3 @@ class BaseModel:
             str: The table name in lowercase.
         """
         return cls.__name__.lower()
-
-    def hash_password(self, password):
-        """
-        Hashes a given password using bcrypt and stores the hashed password.
-
-        Args:
-            password (str): The plaintext password to be hashed.
-
-        Returns:
-            None
-        """
-        self.password = bcrypt.hashpw(password.encode(
-            'utf-8'), bcrypt.gensalt()).decode('utf-8')
-
-    def check_password(self, password):
-        """
-        Check if the provided password matches the stored hashed password.
-
-        Args:
-            password (str): The plaintext password to check.
-
-        Returns:
-            bool: True if the password matches the stored hashed password, False otherwise.
-        """
-        return bcrypt.checkpw(password.encode('utf-8'), self.password.encode('utf-8'))

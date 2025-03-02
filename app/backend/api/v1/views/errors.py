@@ -23,3 +23,11 @@ def handle_internal_error(error):
         "message": "Internal server error",
         "error": str(error)
     }), 500
+
+@errors.app_errorhandler(404)
+def handle_not_found_error(error):
+    logging.error(f"Not Found Error: {error}")
+    return jsonify({
+        "message": "Resource not found",
+        "error": str(error)
+    }), 404

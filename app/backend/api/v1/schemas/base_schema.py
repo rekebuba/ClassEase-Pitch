@@ -1,5 +1,5 @@
 import re
-from marshmallow import Schema, post_dump, post_load
+from marshmallow import Schema, ValidationError, post_dump, post_load, validates
 
 
 def to_snake(data):
@@ -41,3 +41,10 @@ class BaseSchema(Schema):
     def convert_to_snake_case(self, data, **kwargs):
         """Convert keys to snake_case when deserializing (loading)."""
         return to_snake(data)
+
+    def validate_phone(self, value):
+        pattern = r'^\+?[0-9]{1,3}[-.\s]?\(?[0-9]{1,4}\)?[-.\s]?[0-9]{1,4}[-.\s]?[0-9]{1,9}$'
+
+        # Check if the phone number matches the pattern
+        if not re.match(pattern, value):
+            raise ValidationError("Invalid phone number format.")

@@ -23,7 +23,7 @@ from urllib.parse import urlparse, parse_qs
 from sqlalchemy import update, and_
 from flask import Blueprint
 from api.v1.views.utils import admin_or_student_required, student_teacher_or_admin_required
-from api.v1.services.base_user_service import BaseUserService
+from api.v1.services.user_service import UserService
 from api.v1.views.methods import paginate_query
 from api.v1.views import errors
 from models.base_model import BaseModel
@@ -51,7 +51,7 @@ def register_new_user(role: str):
     try:
         data = request.form.to_dict()  # Get form data as a dictionary
 
-        result = BaseUserService.create_role_based_user(role, data)
+        result = UserService().create_role_based_user(role, data)
         if not result:
             raise Exception("Failed to register user")
 

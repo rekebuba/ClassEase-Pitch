@@ -34,7 +34,6 @@ def create_admin_token(admin_id):
     """
     payload = {
         'id': admin_id,
-        # Admin token expires in 30 minutes
         'exp': datetime.utcnow() + timedelta(minutes=720),
         'role': 'admin',
         "jti": str(uuid.uuid4())
@@ -62,7 +61,6 @@ def create_teacher_token(teacher_id):
     """
     payload = {
         'id': teacher_id,
-        # teacher token expires in 15 minutes
         'exp': datetime.utcnow() + timedelta(minutes=720),
         'role': 'teacher',
         "jti": str(uuid.uuid4())
@@ -85,7 +83,6 @@ def create_student_token(student_id):
     """
     payload = {
         'id': student_id,
-        # teacher token expires in 15 minutes
         'exp': datetime.utcnow() + timedelta(minutes=720),
         'role': 'student',
         "jti": str(uuid.uuid4())

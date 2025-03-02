@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 """ Module for Student class """
 
-from sqlalchemy import Column, Integer, String, ForeignKey, CheckConstraint, Float, Boolean, Text, DateTime
+from sqlalchemy import Column, Date, Integer, String, ForeignKey, CheckConstraint, Float, Boolean, Text, DateTime
 from models.engine.db_storage import BaseModel, Base
 from sqlalchemy.orm import relationship
+
 
 class Student(BaseModel, Base):
     """
@@ -27,11 +28,13 @@ class Student(BaseModel, Base):
         __init__(*args, **kwargs): Initializes a new instance of the Student class.
     """
     __tablename__ = 'student'
-    user_id = Column(String(120), ForeignKey('users.id'), unique=True, nullable=False)
-    name = Column(String(50), nullable=False)
+    user_id = Column(String(120), ForeignKey(
+        'users.id'), unique=True, nullable=False)
+    first_name = Column(String(50), nullable=False)
     father_name = Column(String(50), nullable=False)
     grand_father_name = Column(String(50), nullable=False)
-    date_of_birth = Column(DateTime, nullable=False)
+    date_of_birth = Column(Date, nullable=False)
+    gender = Column(String(1), nullable=False)
 
     # Parent/Guardian Contacts
     father_phone = Column(String(25))
@@ -40,12 +43,13 @@ class Student(BaseModel, Base):
     guardian_phone = Column(String(25))
 
     # Academic Info
-    start_year_EC = Column(String(15), nullable=False)
-    start_year_GC = Column(String(15), nullable=False)
-    end_year = Column(String(10))
+    start_year_ethiopian = Column(String(15), nullable=False)
+    start_year_gregorian = Column(String(15), nullable=False)
+    end_year_ethiopian = Column(String(15), default=None)
+    end_year_gregorian = Column(String(15), default=None)
 
     # If transferring from another school
-    previous_school = Column(String(100))
+    previous_school = Column(String(100), default=None)
 
     # Academic Performance
     current_grade = Column(Integer, nullable=False)
@@ -54,8 +58,8 @@ class Student(BaseModel, Base):
     registration_window_start = Column(DateTime)
 
     # Identification & Legal Docs
-    birth_certificate = Column(String(255))  # Path to uploaded file
-    national_id = Column(String(50))  # Optional national ID/passport
+    birth_certificate = Column(
+        String(255), nullable=True, default=None)  # Path to uploaded file
 
     # Health & Special Needs
     has_medical_condition = Column(Boolean, default=False)
@@ -69,18 +73,22 @@ class Student(BaseModel, Base):
     is_transferring = Column(Boolean, default=False)
 
     # Whether the student is currently enrolled
-    is_active = Column(Boolean, default=True)
+    is_active = Column(Boolean, default=False)
 
     __table_args__ = (
         CheckConstraint(
             'father_phone IS NOT NULL OR mother_phone IS NOT NULL OR guardian_phone IS NOT NULL',
             name='at_least_one_contact'
         ),
+        CheckConstraint(
+            'current_grade >= 1 AND current_grade <= 12',
+            name='valid_grade_range'
+        ),
+        CheckConstraint(
+            'gender IN ("M", "F")',
+            name='check_student_gender'
+        )
     )
-
-    # # Relationships
-    # # If linked to a User table
-    # user = relationship("User", back_populates="student")
 
     def __init__(self, *args, **kwargs):
         """

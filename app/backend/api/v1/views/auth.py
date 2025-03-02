@@ -4,9 +4,12 @@
 import jwt
 from flask import Blueprint, request, jsonify
 from api.v1.views.utils import create_student_token, create_teacher_token, create_admin_token, student_teacher_or_admin_required
+from marshmallow import ValidationError
 from models import storage
 from models.user import User
 from models.blacklist_token import BlacklistToken
+from api.v1.schemas.user.auth_schema import AuthSchema
+from api.v1.views import errors
 
 auth = Blueprint('auth', __name__, url_prefix='/api/v1')
 
@@ -15,47 +18,25 @@ auth = Blueprint('auth', __name__, url_prefix='/api/v1')
 def login():
     """
     Handle user login by validating credentials and generating an access token.
-
-    This function extracts the 'id' and 'password' from the query parameters of the request URL.
-    It checks if the required fields are present and validates the user's credentials.
-    If the credentials are valid, it generates an access token based on the user's role
-    (Student, Teacher, or Admin) and returns it in the response.
-
-    Returns:
-        Response: A JSON response containing the access token and user role if the credentials are valid.
-                  A JSON response with an error message and appropriate status code if the credentials are invalid
-                  or if required fields are missing.
-
-    Status Codes:
-        200: Successful login with valid credentials.
-        400: Missing 'id' or 'password' in the request.
-        401: Invalid credentials or invalid user role.
     """
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "Not a JSON"}), 400
+    try:
+        auth_schema = AuthSchema()
+        valid_user = auth_schema.load(request.get_json())
 
-    required_fields = {'id', 'password'}
-    for field in required_fields:
-        if field not in data:
-            return jsonify({"error": "Missing id or password"}), 400
+        # Generate an access token based on the user's role
+        access_token = None
+        if valid_user['role'] == 'student':
+            access_token = create_student_token(valid_user['identification'])
+        elif valid_user['role'] == 'teacher':
+            access_token = create_teacher_token(valid_user['identification'])
+        elif valid_user['role'] == 'admin':
+            access_token = create_admin_token(valid_user['identification'])
 
-    if 'id' not in data or 'password' not in data:
-        return jsonify({"error": "Missing id or password"}), 400
-
-    user = storage.get_first(User, id=data['id'])
-    if user and user.check_password(data['password']):
-        if user.role == 'Student':
-            access_token = create_student_token(user.id)
-        elif user.role == 'Teacher':
-            access_token = create_teacher_token(user.id)
-        elif user.role == 'Admin':
-            access_token = create_admin_token(user.id)
-        else:
-            return jsonify({"error": "Invalid role"}), 401
-        return jsonify(access_token=access_token, role=user.role), 200
-
-    return jsonify({"error": "Invalid credentials"}), 401
+        return {"access_token": access_token, "role": valid_user['role']}, 200
+    except ValidationError as e:
+        return errors.handle_validation_error(e)
+    except Exception as e:
+        return errors.handle_internal_error(e)
 
 
 @auth.route("/auth/logout", methods=["POST"])

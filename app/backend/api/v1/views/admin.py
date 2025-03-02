@@ -27,10 +27,10 @@ from sqlalchemy import update, select, and_
 from urllib.parse import urlparse, parse_qs
 from api.v1.views.utils import admin_required
 from api.v1.views.methods import save_profile, validate_request
-from api.v1.schemas.admin_schema import AdminSchema
-from api.v1.schemas.user_schema import UserSchema
+from api.v1.schemas.admin.registration_schema import AdminRegistrationSchema
+from api.v1.schemas.user.registration_schema import UserRegistrationSchema
 from api.v1.services.admin_service import AdminService
-from api.v1.services.base_user_service import BaseUserService
+from api.v1.services.user_service import UserService
 
 admin = Blueprint('admin', __name__, url_prefix='/api/v1/admin')
 
@@ -179,79 +179,6 @@ def school_overview(admin_data):
             for subject, average_percentage in performance_by_subject
         ]
     }), 200
-
-
-@admin.route('/teacher/registration', methods=['POST'])
-# @admin_required
-def register_new_teacher():
-    """
-    Registers a new teacher in the system.
-
-    This function retrieves JSON data from the request, validates the required fields,
-    checks for the existence of a teacher with the same email, first name, and last name,
-    and then creates a new User and Teacher record in the storage.
-
-    Returns:
-        Response: A JSON response indicating the success or failure of the registration process.
-                  - 201: Teacher registered successfully.
-                  - 400: Missing required fields.
-                  - 404: Not a JSON.
-                  - 409: Teacher already exists.
-                  - 500: Internal server error.
-    """
-    required_fields = [
-        "first_name",
-        "last_name",
-        "age",
-        "gender",
-        "email",
-        "phone",
-        "address",
-        "experience",
-        "qualification",
-        "subject_taught",
-    ]
-
-    error_response = validate_request(required_fields)
-    if error_response:
-        return error_response  # Return error if any field is missing
-
-    # Extract all form fields into a dictionary
-    data = {key:
-            request.files.get(
-                key) if key == 'profilePicture' else request.form.get(key)
-            for key in request.form.keys()}
-
-    # check if a Teacher with the same email, first name, and last name already exists
-    existing_teacher = storage.get_first(
-        Teacher,
-        email=data['email'],
-        first_name=data['first_name'],
-        last_name=data['last_name']
-    )
-    if existing_teacher:
-        return jsonify({"error": "Teacher already exists"}), 409
-
-    # Validate file type and save it
-    filepath = save_profile(data)
-
-    new_teacher = User(role='Teacher', image_path=filepath)
-    new_teacher.hash_password(new_teacher.id)
-
-    try:
-        # Save User first
-        storage.add(new_teacher)
-
-        # Create the Teacher object, using the same id
-        teacher = Teacher(id=new_teacher.id, **data)
-
-        # Save the Teacher object
-        storage.add(teacher)
-    except Exception as e:
-        storage.rollback()
-        return jsonify({"error": str(e)}), 500
-
-    return jsonify({"message": "Teacher registered successfully!"}), 201
 
 
 @admin.route('/assign-teacher', methods=['PUT'])

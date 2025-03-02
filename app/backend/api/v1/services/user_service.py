@@ -1,21 +1,27 @@
+import bcrypt
 from flask import request
 from marshmallow import ValidationError
-from api.v1.schemas.user_schema import UserSchema
+from api.v1.schemas.user.registration_schema import UserRegistrationSchema
 from api.v1.views.methods import save_profile
+from models.teacher import Teacher
+from models.student import Student
 from models.user import User
 from models import storage
 from models.admin import Admin
-from api.v1.schemas.admin_schema import AdminSchema
-from api.v1.schemas.student_schema import StudentSchema
+from api.v1.schemas.admin.registration_schema import AdminRegistrationSchema
+from api.v1.schemas.student.registration_schema import StudentRegistrationSchema
+from api.v1.schemas.teacher.registration_schema import TeacherRegistrationSchema
 
 
-class BaseUserService:
+class UserService:
     """Base service for user-related operations."""
 
-    @classmethod
-    def create_user(cls, role, data):
-        user_schema = UserSchema(session=storage.session)
-        validated_user_data = user_schema.load(data).to_dict()
+    def __init__(self):
+        pass
+
+    def create_user(self, data):
+        user_schema = UserRegistrationSchema()
+        validated_user_data = user_schema.load(data)
 
         # Save the profile picture if exists
         filepath = None
@@ -24,21 +30,21 @@ class BaseUserService:
             validated_user_data['image_path'] = filepath
 
         # Create the user
-        new_user = User(role=role, **validated_user_data)
-        new_user.hash_password(new_user.id)
+        new_user = User(**validated_user_data)
 
         return new_user
 
-    @classmethod
-    def create_role_based_user(cls, role, data) -> Admin | None:
+    def create_role_based_user(self, role, data) -> Admin | None:
         """Create a user with a specific role."""
         # Start a new transaction
         with storage.begin():
             user_data = {
+                'role': role,
+                'national_id': data.pop('national_id') if 'national_id' in data else None,
                 'image_path': request.files.get('image_path')
             }
             # Call the base class method to create a user with role 'admin'
-            new_user = cls.create_user(role=role, data=user_data)
+            new_user = self.create_user(user_data)
 
             storage.session.add(new_user)
             storage.session.flush()  # Flush to get the new_user.id
@@ -49,8 +55,8 @@ class BaseUserService:
             }
             if role == 'admin':
                 # Validate and create the Admin
-                admin_schema = AdminSchema(session=storage.session)
-                validated_admin_data = admin_schema.load(fields).to_dict()
+                admin_schema = AdminRegistrationSchema()
+                validated_admin_data = admin_schema.load(fields)
 
                 new_admin = Admin(**validated_admin_data)
 
@@ -58,16 +64,22 @@ class BaseUserService:
                 storage.session.commit()
                 return new_admin
             elif role == 'student':
-                student_schema = StudentSchema(session=storage.session)
-                validated_admin_data = student_schema.load(fields).to_dict()
+                student_schema = StudentRegistrationSchema()
 
-                new_student = Admin(**validated_admin_data)
+                validated_student_data = student_schema.load(fields)
+                new_student = Student(**validated_student_data)
 
                 storage.session.add(new_student)
                 storage.session.commit()
                 return new_student
             elif role == 'teacher':
-                # Implement the teacher registration logic here
-                pass
+                teacher_schema = TeacherRegistrationSchema()
+
+                validated_teacher_data = teacher_schema.load(fields)
+                new_teacher = Teacher(**validated_teacher_data)
+
+                storage.session.add(new_teacher)
+                storage.session.commit()
+                return new_teacher
 
         return None

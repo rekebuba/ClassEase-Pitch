@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """ Module for Teacher class """
 
-from sqlalchemy import Column, Integer, String, ForeignKey
+from sqlalchemy import CheckConstraint, Column, Date, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 from models.engine.db_storage import BaseModel, Base
 
@@ -28,18 +28,29 @@ class Teacher(BaseModel, Base):
         __init__(*args, **kwargs): Initializes the Teacher instance.
     """
     __tablename__ = 'teacher'
-    user_id = Column(String(120), ForeignKey('users.id'), unique=True, nullable=False)
+    user_id = Column(String(120), ForeignKey(
+        'users.id'), unique=True, nullable=False)
     first_name = Column(String(50), nullable=False)
-    last_name = Column(String(50), nullable=False)
-    gender = Column(String(10), nullable=False)
-    age = Column(String(20), nullable=False)
+    father_name = Column(String(50), nullable=False)
+    date_of_birth = Column(Date, nullable=False)
+    gender = Column(String(1), nullable=False)
     email = Column(String(120), nullable=False)
     phone = Column(String(25), nullable=False)
     address = Column(String(120), nullable=False)
-    experience = Column(Integer, nullable=False)
+    year_of_experience = Column(Integer, nullable=False)
     qualification = Column(String(120), nullable=False)
-    subject_taught = Column(String(120), nullable=False)
-    no_of_mark_list = Column(Integer, nullable=True, default=0)
+    assigned_mark_lists = Column(Integer, nullable=True, default=0)
+
+    __table_args__ = (
+        CheckConstraint(
+            "gender IN ('M', 'F')",
+            name="check_teacher_gender"
+        ),
+        CheckConstraint(
+            "year_of_experience >= 0",
+            name="check_teacher_experience"
+        )
+    )
 
     def __init__(self, *args, **kwargs):
         """
