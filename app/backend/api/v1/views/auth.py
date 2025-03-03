@@ -10,6 +10,7 @@ from models.user import User
 from models.blacklist_token import BlacklistToken
 from api.v1.schemas.user.auth_schema import AuthSchema
 from api.v1.views import errors
+from api.v1.services.user_service import UserService
 
 auth = Blueprint('auth', __name__, url_prefix='/api/v1')
 
@@ -23,16 +24,10 @@ def login():
         auth_schema = AuthSchema()
         valid_user = auth_schema.load(request.get_json())
 
-        # Generate an access token based on the user's role
-        access_token = None
-        if valid_user['role'] == 'student':
-            access_token = create_student_token(valid_user['identification'])
-        elif valid_user['role'] == 'teacher':
-            access_token = create_teacher_token(valid_user['identification'])
-        elif valid_user['role'] == 'admin':
-            access_token = create_admin_token(valid_user['identification'])
+        # Generate an api_key token based on the user's role
+        api_key = UserService.generate_api_key(valid_user['role'], valid_user['identification'])
 
-        return {"access_token": access_token, "role": valid_user['role']}, 200
+        return auth_schema.dump({"api_key": api_key}), 200
     except ValidationError as e:
         return errors.handle_validation_error(e)
     except Exception as e:
@@ -42,7 +37,7 @@ def login():
 @auth.route("/auth/logout", methods=["POST"])
 @student_teacher_or_admin_required
 def logout(student, teacher, admin):
-    token = request.headers['Authorization'].split()[1]  # Extract the token
+    token = request.headers['api_key'].split()[1]  # Extract the token
     try:
         # Decode the token to get the JTI
         payload = jwt.decode(token, options={"verify_signature": False})

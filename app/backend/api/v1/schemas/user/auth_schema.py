@@ -12,6 +12,7 @@ class AuthSchema(BaseSchema, Schema):
     identification = fields.String(required=True, load_only=True)
     password = fields.String(required=True, load_only=True)
     role = fields.String(required=False)
+    api_key = fields.String(dump_only=True)
 
     @staticmethod
     def _check_password(stored_password, provided_password):

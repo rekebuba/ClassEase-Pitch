@@ -3,6 +3,7 @@ from flask import request
 from marshmallow import ValidationError
 from api.v1.schemas.user.registration_schema import UserRegistrationSchema
 from api.v1.views.methods import save_profile
+from api.v1.views.utils import create_student_token, create_teacher_token, create_admin_token
 from models.teacher import Teacher
 from models.student import Student
 from models.user import User
@@ -83,3 +84,28 @@ class UserService:
                 return new_teacher
 
         return None
+
+    @staticmethod
+    def get_user_by_id(user_id):
+        return storage.session.query(User).get(user_id).to_dict()
+
+    @staticmethod
+    def get_user_by_national_id(national_id):
+        return storage.session.query(User).filter_by(national_id=national_id).first().to_dict()
+
+    @staticmethod
+    def get_user_by_email(email):
+        return storage.session.query(User).filter_by(email=email).first().to_dict()
+
+    @staticmethod
+    def generate_api_key(role, user_id):
+        """Generate an api_key token based on the user's role"""
+        api_key = None
+        if role == 'student':
+            api_key = create_student_token(user_id)
+        elif role == 'teacher':
+            api_key = create_teacher_token(user_id)
+        elif role == 'admin':
+            api_key = create_admin_token(user_id)
+
+        return api_key

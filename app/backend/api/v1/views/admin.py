@@ -362,7 +362,6 @@ def create_events(admin_data):
 
     required_data = {
         'semester',
-        'academicYearEC',
         'startDate',
         'endDate',
         'registrationStart',
