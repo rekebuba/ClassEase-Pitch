@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import unittest
+from models.user import User
 from models import storage
 from api import create_app
 from models.student import Student
@@ -52,10 +53,10 @@ class TestStudents(unittest.TestCase):
         by checking that the response status code is 201 (Created) and that the
         response JSON contains the success message 'Student registered successfully!'.
         """
-        response = register_student(self.client)
+        response = register_user(self.client, 'student')
         self.assertEqual(response.status_code, 201)
         json_data = response.get_json()
-        self.assertIn('Student registered successfully!', json_data['message'])
+        self.assertIn('student registered successfully!', json_data['message'])
 
     def test_student_login_success(self):
         """
@@ -74,16 +75,17 @@ class TestStudents(unittest.TestCase):
         - The response status code should be 200.
         - The response JSON should contain an 'access_token' key.
         """
-        register_student(self.client)
-        id = storage.get_random(Student).id
+        register_user(self.client, 'student')
+        id = storage.session.query(User).filter_by(role='student').first().identification
+
+        print(id)
         # Test that a valid login returns a token
         response = self.client.post(
-            f'/api/v1/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
+            f'/api/v1/auth/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
 
         self.assertEqual(response.status_code, 200)
         json_data = response.get_json()
-        self.access_token = json_data['access_token']
-        self.assertIn('access_token', json_data)
+        self.assertIn('apiKey', json_data)
 
     def test_student_login_wrong_id(self):
         """
@@ -105,8 +107,7 @@ class TestStudents(unittest.TestCase):
 
         # Test that a valid login returns a token
         response = self.client.post(
-            f'/api/v1/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
-
+            f'/api/v1/auth/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
         self.assertEqual(response.status_code, 401)
 
     def test_student_login_wrong_password(self):
@@ -125,7 +126,7 @@ class TestStudents(unittest.TestCase):
         Expected Result:
         - The login attempt with an incorrect password should return a 401 status code.
         """
-        register_student(self.client)
+        register_user(self.client, 'student')
         id = storage.get_random(Student).id
 
         response = self.client.post(
@@ -149,7 +150,7 @@ class TestStudents(unittest.TestCase):
         - The token is not generated.
         - The response status code is not 200.
         """
-        token = get_student_access_token(self.client)
+        token = get_student_api_key(self.client)
 
         if not token:
             self.fail(
@@ -178,7 +179,7 @@ class TestStudents(unittest.TestCase):
         Asserts:
         - The response status code is 401.
         """
-        token = get_student_access_token(self.client)
+        token = get_student_api_key(self.client)
 
         if not token:
             self.fail(

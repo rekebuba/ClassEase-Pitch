@@ -2,8 +2,11 @@
 """ Module for helper functions for testing the API """
 
 import json
+import os
 import random
+import uuid
 from faker import Faker
+import requests
 from models import storage
 from models.admin import Admin
 from models.teacher import Teacher
@@ -31,14 +34,16 @@ def generate_students(num=1):
     f = Faker()
 
     rows = [{
-        'name': f.first_name(),
+        'first_name': f.first_name(),
         'father_name': f.last_name_male(),
         'grand_father_name': f.last_name_male(),
-        'grade': 1,
-        'date_of_birth': f.date_of_birth(minimum_age=3, maximum_age=20).strftime('%Y-%m-%dT%H:%M:%S.%f'),
-        "father_phone": f.phone_number(),
-        "mother_phone": f.phone_number(),
-        "start_year": f"2024/25"
+        'date_of_birth': str(f.date_of_birth(minimum_age=3, maximum_age=20).strftime('%Y-%m-%d')),
+        "father_phone": '+2656255123',
+        "mother_phone": '+2656255123',
+        "gender": random.choice(["M", "F"]),
+        'current_grade': 1,
+        'national_id': str(uuid.uuid4()),
+        'image_path': get_ai_profile_picture(),  # Store the file path,
     }
         for _ in range(num)]
     return rows
@@ -67,15 +72,18 @@ def generate_teachers(num=1):
     f = Faker()
     rows = [{
         'first_name': f.first_name(),
-        'last_name': f.last_name_male(),
-        'age': random.randint(20, 60),
-        'gender': random.choice(["male", "female"]),
-        "email": f.email(),
-        "phone": f.phone_number(),
-        "address": f.address(),
-        "experience": random.randint(0, 5),
+        'father_name': f.last_name(),
+        'grand_father_name': f.first_name(),
+        'date_of_birth': str(f.date_of_birth(minimum_age=20, maximum_age=60).strftime('%Y-%m-%d')),
+        'email': f.email(),
+        'gender': random.choice(["M", "F"]),
+        'phone': '095564135',
+        'address': f.address(),
+        'image_path': get_ai_profile_picture(),  # Store the file path,
+        'national_id': str(uuid.uuid4()),
+        "year_of_experience": random.randint(0, 5),
         "qualification": random.choice(["Certified Teacher"]),
-        "subject_taught": random.choice(["Math", "English", "Physics", "Chemistry", "Biology", "History", "Geography", "Art", "Music", "Physical Education", "Science"]),
+        'image_path': get_ai_profile_picture(),  # Store the file path,
     }
         for _ in range(num)]
     return rows
@@ -93,11 +101,34 @@ def generate_admin(num=1):
     """
     f = Faker()
     rows = [{
-        'name': f.first_name(),
+        'first_name': f.first_name(),
+        'father_name': f.last_name(),
+        'grand_father_name': f.first_name(),
+        'date_of_birth': str(f.date_of_birth(minimum_age=20, maximum_age=60).strftime('%Y-%m-%d')),
         'email': f.email(),
+        'gender': random.choice(["M", "F"]),
+        'phone': '095564135',
+        'address': f.address(),
+        'image_path': get_ai_profile_picture(),  # Store the file path,
+        'national_id': str(uuid.uuid4()),
     }
         for _ in range(num)]
     return rows
+
+
+def get_ai_profile_picture():
+    url = "https://thispersondoesnotexist.com"
+    response = requests.get(url)
+    if response.status_code == 200:
+        directory = "profiles"
+        os.makedirs(directory, exist_ok=True)  # Ensure directory exists
+
+        file_name = f"{directory}/{uuid.uuid4()}.jpg"
+        with open(file_name, "wb") as f:
+            f.write(response.content)
+
+        return file_name  # Returns the saved file path
+    return None
 
 
 def generate_mark_list_data():
@@ -129,136 +160,85 @@ def generate_mark_list_data():
     }
 
 
-def register_admin(client):
-    """
-    Register an admin for testing.
+def register_user(client, role):
+    if role == 'admin':
+        user = generate_admin(1)[0]
+    elif role == 'teacher':
+        user = generate_teachers(1)[0]
+    elif role == 'student':
+        user = generate_students(1)[0]
 
-    This function generates a list of admin users and attempts to register 
-    each one by sending a POST request to the '/api/v1/admin/registration' 
-    endpoint. If the registration is successful, the response status code 
-    should be 201. If any registration fails, an exception is raised and 
-    the response is returned.
+    local_path = None
+    if user.get('image_path'):
+        local_path = user.get('image_path')
 
-    Args:
-        client: The test client used to send HTTP requests.
+    data = {
+        **user,
+        'image_path': open(user.pop('image_path'), 'rb')
+    }
 
-    Returns:
-        response: The response object from the failed registration attempt, 
-                  if an exception is raised. Otherwise, returns the response 
-                  object from the last successful registration attempt.
-    """
-    """Register an admin for testing."""
+    response = client.post(
+        f"/api/v1/registration/{role}", data=data, content_type='multipart/form-data')
 
-    # Register an admin before login
-    admins = generate_admin(1)
-    try:
-        for admin in admins:
-            response = client.post('/api/v1/admin/registration',
-                                   data=json.dumps(admin), content_type='application/json')
-            if response.status_code != 201:
-                raise Exception
-    except Exception as e:
-        return response
+    # remove the file
+    if os.path.exists(local_path):
+        os.remove(local_path)
+    else:
+        print("Image Was not provided for deletion")
 
     return response
 
 
-def register_teacher(client):
-    """
-    Register a teacher for testing.
-
-    This function generates a single teacher using the `generate_teachers` function
-    and attempts to register the teacher via a POST request to the '/api/v1/admin/teachers/registration' endpoint.
-    If the registration is not successful (i.e., the response status code is not 201), an exception is raised.
-
-    Args:
-        client: The test client used to make the POST request.
-
-    Returns:
-        response: The response object from the POST request.
-
-    Raises:
-        Exception: If the registration is not successful.
-    """
-    """Register an teacher for testing."""
-
-    teachers = generate_teachers(1)
-    try:
-        for teacher in teachers:
-            response = client.post('/api/v1/admin/teachers/registration',
-                                   data=json.dumps(teacher), content_type='application/json')
-            if response.status_code != 201:
-                raise Exception
-    except Exception as e:
-        return response
-
-    return response
-
-
-def register_student(client):
-    """Register a student for testing."""
-
-    students = generate_students(1)
-    response = None
-    try:
-        for student in students:
-            response = client.post('/api/v1/student/registration',
-                                   data=json.dumps(student), content_type='application/json')
-            if response.status_code != 201:
-                raise Exception
-    except Exception as e:
-        return response
-
-    return response
-
-
-def get_admin_access_token(client):
+def get_admin_api_key(client):
     """Get the access token for the admin."""
-    register_admin(client)
+    register_user(client, 'admin')
 
     id = storage.get_random(Admin).id
 
     # Test that a valid login returns a token
-    response = client.post('/api/v1/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
+    response = client.post('/api/v1/login', data=json.dumps(
+        {"id": id, "password": id}), content_type='application/json')
 
     json_data = response.get_json()
-    return json_data['access_token']
+    return json_data['ApiKey']
 
 
-def get_teacher_access_token(client):
+def get_teacher_api_key(client):
     """Get the access token for the teacher."""
-    register_teacher(client)
+    register_user(client, 'teacher')
     id = storage.get_random(Teacher).id
 
     # Test that a valid login returns a token
-    response = client.post('/api/v1/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
+    response = client.post('/api/v1/login', data=json.dumps(
+        {"id": id, "password": id}), content_type='application/json')
 
     json_data = response.get_json()
-    return json_data['access_token']
+    return json_data['ApiKey']
 
 
-def get_student_access_token(client):
+def get_student_api_key(client):
     """Get the access token for the student."""
-    register_student(client)
+    register_user(client, 'student')
     id = storage.get_random(Student).id
 
     # Test that a valid login returns a token
-    response = client.post('/api/v1/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
+    response = client.post('/api/v1/login', data=json.dumps(
+        {"id": id, "password": id}), content_type='application/json')
 
     json_data = response.get_json()
-    return json_data['access_token']
+    return json_data['ApiKey']
 
 
 def create_mark_list(client):
     """Create a mark list for testing."""
     try:
-        token = get_admin_access_token(client)
+        token = get_admin_api_key(client)
 
         if not token:
             raise Exception
 
         for _ in range(5):
-            response = register_student(client)
+            response = register_user(client, 'student')
             if response.status_code != 201:
                 raise Exception
 
@@ -282,16 +262,16 @@ def admin_course_assign_to_teacher(client):
     if not token:
         client.fail("Mark list creation failed. Test failed")
 
-    teacher_token = get_teacher_access_token(client)
+    teacher_token = get_teacher_api_key(client)
 
     if not teacher_token:
         client.fail(
             "Token not generated. Test failed. Check the login endpoint.")
 
     response = client.get('/api/v1/admin/teachers',
-                                headers={
-                                    'Authorization': f'Bearer {token}'},
-                                content_type='application/json')
+                          headers={
+                              'Authorization': f'Bearer {token}'},
+                          content_type='application/json')
 
     if response.status_code != 200:
         client.fail("Teacher data not found. Test failed.")
@@ -302,17 +282,17 @@ def admin_course_assign_to_teacher(client):
     teacher_id = random_entry.get('id')
 
     response = client.put(f'/api/v1/admin/assign-teacher',
-                                data=json.dumps(
-                                    {
-                                        "teacher_id": teacher_id,
-                                        "grade": 1,
-                                        "section": ["A", "B"],
-                                        "subjects_taught": teachers_data['teachers'][0]['subjects'],
-                                        "mark_list_year": "2024/25"
-                                    }
-                                ),
-                                headers={
-                                    'Authorization': f'Bearer {token}'},
-                                content_type='application/json')
+                          data=json.dumps(
+                              {
+                                  "teacher_id": teacher_id,
+                                  "grade": 1,
+                                  "section": ["A", "B"],
+                                  "subjects_taught": teachers_data['teachers'][0]['subjects'],
+                                  "mark_list_year": "2024/25"
+                              }
+                          ),
+                          headers={
+                              'Authorization': f'Bearer {token}'},
+                          content_type='application/json')
 
     return teacher_token

@@ -7,7 +7,7 @@ from models import storage
 
 class AdminRegistrationSchema(BaseSchema, Schema):
     """Admin schema for validating and serializing Admin data."""
-    user_id = fields.UUID(required=False)
+    user_id = fields.String(required=False)
     first_name = fields.String(required=True, validate=[
         fields.validate.Length(min=2, max=25)])
     father_name = fields.String(required=True, validate=[

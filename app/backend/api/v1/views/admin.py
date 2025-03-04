@@ -27,12 +27,17 @@ from sqlalchemy import update, select, and_
 from urllib.parse import urlparse, parse_qs
 from api.v1.views.utils import admin_required
 from api.v1.views.methods import save_profile, validate_request
+from api.v1.services.event_service import EventService
 from api.v1.schemas.admin.registration_schema import AdminRegistrationSchema
 from api.v1.schemas.user.registration_schema import UserRegistrationSchema
+from api.v1.services.semester_service import SemesterService
+from api.v1.schemas.event.create_schema import EventCreationSchema
 from api.v1.services.admin_service import AdminService
+from api.v1.schemas.semester.create_schema import SemesterCreationSchema
 from api.v1.services.user_service import UserService
-
+from api.v1.views import errors
 admin = Blueprint('admin', __name__, url_prefix='/api/v1/admin')
+
 
 @admin.route('/dashboard', methods=['GET'])
 @admin_required
@@ -356,62 +361,29 @@ def events(admin_data):
 @admin.route('/event/new', methods=['POST'])
 @admin_required
 def create_events(admin_data):
-    data = request.get_json()
-    if not data:
-        return jsonify({"error": "Not a JSON"}), 404
-
-    required_data = {
-        'semester',
-        'startDate',
-        'endDate',
-        'registrationStart',
-        'registrationEnd'
-    }
-
-    # Check if required fields are present
-    for field in required_data:
-        if field not in data:
-            return jsonify({"error": f"Missing {field}"}), 400
-        elif field in {'semester', 'academicYearEC'} and type(data[field]) != int:
-            return jsonify({"error": f"{field} must be an integer"}), 400
-        elif field in {'startDate', 'endDate', 'registrationStart', 'registrationEnd'} and type(data[field]) != str:
-            return jsonify({"error": f"{field} must be a string"}), 400
-
-    data['startDate'] = datetime.strptime(
-        data['startDate'], "%Y-%m-%d")
-    data['endDate'] = datetime.strptime(
-        data['endDate'], "%Y-%m-%d")
-    data['registrationStart'] = datetime.strptime(
-        data['registrationStart'], "%Y-%m-%d")
-    data['registrationEnd'] = datetime.strptime(
-        data['registrationEnd'], "%Y-%m-%d")
-
     try:
-        new_event = Semester(
-            name=data['semester'],
-            academic_year_EC=data['academicYearEC'],
-            start_date=data['startDate'],
-            end_date=data['endDate'],
-            registration_start=data['registrationStart'],
-            registration_end=data['registrationEnd']
-        )
-        storage.add(new_event)
-        storage.save()
+        data = request.get_json()
+        event_schema = EventCreationSchema()
+        validated_data = event_schema.load(data)
+
+        new_event = EventService.create_event(**validated_data)
+
+        if new_event.purpose == 'New Semester':
+            semester_data = {
+                "event_id": new_event.id,
+                "name": new_event.name,
+            }
+
+            semester_schema = SemesterCreationSchema()
+            valid_semester_data = semester_schema.load(semester_data)
+
+            new_semester = SemesterService.create_semester(valid_semester_data)
+
+        return {"message: Event Created Successfully"}, 201
+    except ValidationError as e:
+        errors.handle_validation_error(e)
     except Exception as e:
-        print(str(e))
-        return jsonify({"error": str(e)}), 500
-
-    formatted_semesters = {
-        "id": new_event.id,
-        "semester": new_event.semester,
-        "academicYearEC": new_event.academic_year_EC,
-        "startDate": new_event.start_date.strftime("%Y-%m-%d"),
-        "endDate": new_event.end_date.strftime("%Y-%m-%d"),
-        "registrationStart": new_event.registration_start.strftime("%Y-%m-%d"),
-        "registrationEnd": new_event.registration_end.strftime("%Y-%m-%d"),
-    }
-
-    return jsonify(formatted_semesters), 201
+        return errors.handle_internal_error(e)
 
 
 @admin.route('/students/mark_list', methods=['PUT'])

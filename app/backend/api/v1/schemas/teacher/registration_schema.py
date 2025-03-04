@@ -7,7 +7,7 @@ from models.teacher import Teacher
 
 class TeacherRegistrationSchema(BaseSchema, Schema):
     """Teacher schema for validating and serializing Teacher data."""
-    user_id = fields.UUID(required=False)
+    user_id = fields.String(required=False)
     first_name = fields.String(required=True, validate=[
         fields.validate.Length(min=2, max=25)])
     father_name = fields.String(required=True, validate=[

@@ -8,7 +8,7 @@ from marshmallow import ValidationError
 from models import storage
 from models.user import User
 from models.blacklist_token import BlacklistToken
-from api.v1.schemas.user.auth_schema import AuthSchema
+from api.v1.schemas.user.auth_schema import AuthSchema, InvalidCredentialsError
 from api.v1.views import errors
 from api.v1.services.user_service import UserService
 
@@ -30,6 +30,8 @@ def login():
         return auth_schema.dump({"api_key": api_key}), 200
     except ValidationError as e:
         return errors.handle_validation_error(e)
+    except InvalidCredentialsError as e:
+        return errors.handle_invalid_credentials_error(e)
     except Exception as e:
         return errors.handle_internal_error(e)
 

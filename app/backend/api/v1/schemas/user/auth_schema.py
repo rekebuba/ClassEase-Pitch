@@ -6,10 +6,13 @@ from models.user import User
 from werkzeug.datastructures import FileStorage
 from models import storage
 
+class InvalidCredentialsError(Exception):
+    """Exception raised when invalid credentials are provided."""
+    pass
 
 class AuthSchema(BaseSchema, Schema):
     """Schema for validating user authentication data."""
-    identification = fields.String(required=True, load_only=True)
+    id = fields.String(required=True, load_only=True)
     password = fields.String(required=True, load_only=True)
     role = fields.String(required=False)
     api_key = fields.String(dump_only=True)
@@ -21,10 +24,10 @@ class AuthSchema(BaseSchema, Schema):
 
     @validates_schema
     def validate_data(self, data, **kwargs):
-        user = storage.session.query(User).filter_by(identification=data['identification']).first()
+        user = storage.session.query(User).filter_by(identification=data['id']).first()
         if user is None or not AuthSchema._check_password(user.password, data['password']):
-            raise ValidationError('Invalid credentials.')
+            raise InvalidCredentialsError('Invalid credentials.')
 
     @post_load
     def load_user(self, data, **kwargs):
-        return storage.session.query(User).filter_by(identification=data['identification']).first().to_dict()
+        return storage.session.query(User).filter_by(identification=data['id']).first().to_dict()

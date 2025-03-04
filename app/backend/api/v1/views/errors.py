@@ -31,3 +31,11 @@ def handle_not_found_error(error):
         "message": "Resource not found",
         "error": str(error)
     }), 404
+
+@errors.app_errorhandler(401)
+def handle_invalid_credentials_error(error):
+    logging.error(f"Invalid Credentials Error: {error}")
+    return jsonify({
+        "message": "Invalid credentials",
+        "error": str(error)
+    }), 401

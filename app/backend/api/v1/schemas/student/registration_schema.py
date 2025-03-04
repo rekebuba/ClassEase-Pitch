@@ -21,7 +21,7 @@ def current_GC_year():
 
 class StudentRegistrationSchema(BaseSchema, Schema):
     """Student schema for validating and serializing Student data."""
-    user_id = fields.UUID(required=False)
+    user_id = fields.String(required=False)
     first_name = fields.String(required=True, validate=[
         fields.validate.Length(min=2, max=25)])
     father_name = fields.String(required=True, validate=[
@@ -49,21 +49,21 @@ class StudentRegistrationSchema(BaseSchema, Schema):
     current_grade = fields.Integer(required=True, validate=[
                                    fields.validate.Range(min=1, max=12)])
     semester_id = fields.UUID(required=False)
-    has_passed = fields.Boolean(required=False, default=False)
+    has_passed = fields.Boolean(required=False, dump_default=False)
     registration_window_start = fields.DateTime(required=False)
 
     birth_certificate = fields.String(required=False)
 
-    has_medical_condition = fields.Boolean(required=False, default=False)
+    has_medical_condition = fields.Boolean(required=False, dump_default=False)
     medical_details = fields.String(required=False)
-    has_disability = fields.Boolean(required=False, default=False)
+    has_disability = fields.Boolean(required=False, dump_default=False)
     disability_details = fields.String(required=False)
     requires_special_accommodation = fields.Boolean(
-        required=False, default=False)
+        required=False, dump_default=False)
     special_accommodation_details = fields.String(required=False)
 
-    is_transferring = fields.Boolean(required=False, default=False)
-    is_active = fields.Boolean(required=False, default=True)
+    is_transferring = fields.Boolean(required=False, dump_default=False)
+    is_active = fields.Boolean(required=False, dump_default=True)
 
     @pre_load
     def set_defaults(self, data, **kwargs):

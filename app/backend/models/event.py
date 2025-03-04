@@ -10,7 +10,7 @@ class Event(BaseModel, Base):
     """docstring for Semester."""
     __tablename__ = 'events'
     event_name = Column(String(255), nullable=False)
-    purpose = Column(String(50), Enum('Academic', 'Cultural', 'Sports',
+    purpose = Column(String(50), Enum('Academic', 'Cultural', 'Sports', 'Graduation',
                      'Administration', 'New Semester', 'Other'), nullable=False)
     organizer = Column(String(50), Enum('School Administration',
                        'School', 'Student Club', 'External Organizer'), nullable=False)

@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import unittest
+from models.user import User
 from models import storage
 from api import create_app
 import json
@@ -62,10 +63,10 @@ class TestAdmin(unittest.TestCase):
         2. Verifying that the response status code is 201 (Created).
         3. Checking that the response JSON contains the success message 'Admin registered successfully!'.
         """
-        response = register_admin(self.client)
+        response = register_user(self.client, 'admin')
         self.assertEqual(response.status_code, 201)
         json_data = response.get_json()
-        self.assertIn('Admin registered successfully!', json_data['message'])
+        self.assertIn('admin registered successfully!', json_data['message'])
 
     def test_admin_login_success(self):
         """
@@ -82,17 +83,18 @@ class TestAdmin(unittest.TestCase):
         The test ensures that a valid login returns an access token.
         """
         """Test that the admin login endpoint works."""
-        register_admin(self.client)
-        id = storage.get_random(Admin).id
+        register_user(self.client, 'admin')
+        id = storage.session.query(User).filter_by(
+            role='admin').first().identification
 
+        print(id)
         # Test that a valid login returns a token
         response = self.client.post(
-            f'/api/v1/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
+            f'/api/v1/auth/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
 
         self.assertEqual(response.status_code, 200)
         json_data = response.get_json()
-        self.access_token = json_data['access_token']
-        self.assertIn('access_token', json_data)
+        self.assertIn('apiKey', json_data)
 
     def test_admin_login_wrong_id(self):
         """
@@ -113,7 +115,7 @@ class TestAdmin(unittest.TestCase):
 
         # Test that a valid login returns a token
         response = self.client.post(
-            f'/api/v1/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
+            f'/api/v1/auth/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
         self.assertEqual(response.status_code, 401)
 
     def test_admin_login_wrong_password(self):
@@ -134,10 +136,11 @@ class TestAdmin(unittest.TestCase):
         - The response status code should be 401, indicating that the login attempt 
             with the wrong password is unauthorized.
         """
-        register_admin(self.client)
-        id = storage.get_random(Admin).id
+        register_user(self.client, 'admin')
+        id = storage.session.query(User).filter_by(
+            role='admin').first().identification
         response = self.client.post(
-            f'/api/v1/login', data=json.dumps({"id": id, "password": 'wrong'}), content_type='application/json')
+            f'/api/v1/auth/login', data=json.dumps({"id": id, "password": 'wrong'}), content_type='application/json')
 
         self.assertEqual(response.status_code, 401)
 
@@ -149,7 +152,7 @@ class TestAdmin(unittest.TestCase):
         can be used to access the admin dashboard endpoint successfully.
 
         Steps:
-        1. Obtain an admin access token using the `get_admin_access_token` method.
+        1. Obtain an admin access token using the `get_admin_api_key` method.
         2. If the token is not generated, the test fails with an appropriate message.
         3. Use the token to make a GET request to the admin dashboard endpoint.
         4. Assert that the response status code is 200, indicating successful access.
@@ -157,7 +160,7 @@ class TestAdmin(unittest.TestCase):
         Raises:
             AssertionError: If the token is not generated or the response status code is not 200.
         """
-        token = get_admin_access_token(self.client)
+        token = get_admin_api_key(self.client)
 
         if not token:
             self.fail(
@@ -186,7 +189,7 @@ class TestAdmin(unittest.TestCase):
         Assertions:
         - The response status code should be 401, indicating unauthorized access.
         """
-        token = get_admin_access_token(self.client)
+        token = get_admin_api_key(self.client)
 
         if not token:
             self.fail(
@@ -215,13 +218,13 @@ class TestAdmin(unittest.TestCase):
         Raises:
             AssertionError: If the token is not generated, student registration fails, or mark list creation fails.
         """
-        token = get_admin_access_token(self.client)
+        token = get_admin_api_key(self.client)
 
         if not token:
             self.fail(
                 "Token not generated. Test failed. Check the login endpoint.")
 
-        response = register_student(self.client)
+        response = register_user(self.client, 'student')
         if response.status_code != 201:
             self.fail(
                 "Student can not be registered. Test failed. Check the student registration endpoint")
@@ -252,7 +255,7 @@ class TestAdmin(unittest.TestCase):
         Asserts:
         - The response status code is 401 Unauthorized.
         """
-        token = get_admin_access_token(self.client)
+        token = get_admin_api_key(self.client)
 
         if not token:
             self.fail(
@@ -298,14 +301,14 @@ class TestAdmin(unittest.TestCase):
         Test that an admin can access teacher data.
 
         This test performs the following steps:
-        1. Obtains an admin access token by calling `get_admin_access_token`.
+        1. Obtains an admin access token by calling `get_admin_api_key`.
         2. Registers a teacher using `register_teacher`.
         3. Verifies that the token is generated; if not, the test fails.
         4. Sends a GET request to the `/api/v1/admin/teachers` endpoint with the token.
         5. Asserts that the response status code is 200, indicating successful access to teacher data.
         """
-        token = get_admin_access_token(self.client)
-        register_teacher(self.client)
+        token = get_admin_api_key(self.client)
+        register_user(self.client, 'teacher')
 
         if not token:
             self.fail(
@@ -334,7 +337,7 @@ class TestAdmin(unittest.TestCase):
         Expected Result:
         The response status code should be 401, indicating unauthorized access.
         """
-        token = get_admin_access_token(self.client)
+        token = get_admin_api_key(self.client)
 
         if not token:
             self.fail(
@@ -370,7 +373,7 @@ class TestAdmin(unittest.TestCase):
         if not token:
             self.fail("Mark list creation failed. Test failed")
 
-        teacher_token = get_teacher_access_token(self.client)
+        teacher_token = get_teacher_api_key(self.client)
 
         if not teacher_token:
             self.fail(
@@ -431,7 +434,7 @@ class TestAdmin(unittest.TestCase):
         if not token:
             self.fail("Mark list creation failed. Test failed")
 
-        teacher_token = get_teacher_access_token(self.client)
+        teacher_token = get_teacher_api_key(self.client)
 
         if not teacher_token:
             self.fail(
