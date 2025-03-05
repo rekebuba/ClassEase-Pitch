@@ -10,9 +10,10 @@ from flask import request, jsonify
 from models import storage
 from models.stud_yearly_record import StudentYearlyRecord
 from models.teacher import Teacher
-from models.admin import Admin
 from sqlalchemy import func
 from models import storage
+from models.user import User
+from models.admin import Admin
 from models.mark_list import MarkList
 from models.average_result import AVRGResult
 from models.blacklist_token import BlacklistToken
@@ -150,7 +151,7 @@ def admin_required(f):
         try:
             payload = jwt.decode(
                 token, current_app.config["ADMIN_SECRET_KEY"], algorithms=["HS256"])
-            admin_data = storage.get_first(Admin, id=payload['id'])
+            admin_data = storage.get_first(User, identification=payload['id'])
             if not admin_data:
                 return jsonify({"error": "Unauthorized", "reason": "UNAUTHORIZED"}), 404
         except jwt.ExpiredSignatureError:

@@ -59,7 +59,7 @@ class Event(BaseModel, Base):
         ),
         CheckConstraint(
             "requires_registration = True AND registration_start IS NOT NULL AND registration_end IS NOT NULL",
-            name="check_registration"
+            name="check_registration_with_dates"
         ),
         CheckConstraint(
             "has_fee = True AND fee_amount > 0",
@@ -67,7 +67,7 @@ class Event(BaseModel, Base):
         ),
         CheckConstraint(
             "eligibility = 'Invitation Only' AND requires_registration = False",
-            name="check_eligibility"
+            name="check_eligibility_with_registration"
         ),
         CheckConstraint(
             "is_hybrid = True AND location_type = 'Online'",
@@ -75,43 +75,43 @@ class Event(BaseModel, Base):
         ),
         CheckConstraint(
             "is_hybrid = False AND location_type != 'Online'",
-            name="check_hybrid"
+            name="check_hybrid_with_location"
         ),
         CheckConstraint(
             "purpose = 'New Semester' AND organizer = 'School Administration'",
-            name="check_purpose"
+            name="check_purpose_with_organizer"
         ),
         CheckConstraint(
             "purpose = 'New Semester' AND location_type = 'Online'",
-            name="check_purpose"
+            name="check_purpose_with_location"
         ),
         CheckConstraint(
             "purpose = 'New Semester' AND has_fee = True",
-            name="check_purpose"
+            name="check_purpose_with_fee"
         ),
         CheckConstraint(
             "purpose = 'New Semester' AND requires_registration = True",
-            name="check_purpose"
+            name="check_purpose_with_registration"
         ),
         CheckConstraint(
             "purpose = 'New Semester' AND eligibility = 'All'",
-            name="check_purpose"
+            name="check_purpose_with_eligibility"
         ),
         CheckConstraint(
             "purpose = 'New Semester' AND is_hybrid = True",
-            name="check_purpose"
+            name="check_purpose_with_hybrid"
         ),
         CheckConstraint(
             "purpose = 'New Semester' AND fee_amount = 0",
-            name="check_purpose"
+            name="check_purpose_with_fee_amount"
         ),
         CheckConstraint(
             "purpose = 'New Semester' AND registration_start IS NULL",
-            name="check_purpose"
+            name="check_purpose_with_registration_start"
         ),
         CheckConstraint(
             "purpose = 'New Semester' AND registration_end IS NULL",
-            name="check_purpose"
+            name="check_purpose_with_registration_end"
         )
     )
 

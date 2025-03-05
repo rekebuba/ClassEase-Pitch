@@ -5,5 +5,5 @@ node_modules
 instance/
 request.py
 fake_data
-app/backend/api/v1/static/uploads/*
 **/profiles
+**/uploads
