@@ -1,9 +1,13 @@
 #!/usr/bin/python3
 """ Module for Student class """
 
-from sqlalchemy import Column, Date, Integer, String, ForeignKey, CheckConstraint, Float, Boolean, Text, DateTime
+from sqlalchemy import Column, Date, Integer, String, ForeignKey, CheckConstraint, Float, Boolean, Text, DateTime, case
 from models.engine.db_storage import BaseModel, Base
 from sqlalchemy.orm import relationship
+from flask import current_app
+from sqlalchemy.sql import text
+
+is_mysql = "mysql" in str(current_app.config['SQLALCHEMY_DATABASE_URI'])
 
 
 class Student(BaseModel, Base):
@@ -49,13 +53,13 @@ class Student(BaseModel, Base):
     end_year_gregorian = Column(String(15), default=None)
 
     # If transferring from another school
-    previous_school = Column(String(100), default=None)
+    is_transfer = Column(Boolean, default=False)
+    previous_school_name = Column(String(100), default=None)
 
     # Academic Performance
     current_grade = Column(Integer, nullable=False)
     semester_id = Column(String(120), ForeignKey('semesters.id'))
     has_passed = Column(Boolean, default=False)
-    registration_window_start = Column(DateTime)
 
     # Identification & Legal Docs
     birth_certificate = Column(
@@ -69,13 +73,11 @@ class Student(BaseModel, Base):
     requires_special_accommodation = Column(Boolean, default=False)
     special_accommodation_details = Column(Text)  # Any special support needed
 
-    # Student Status
-    is_transferring = Column(Boolean, default=False)
-
     # Whether the student is currently enrolled
     is_active = Column(Boolean, default=False)
 
     __table_args__ = (
+
         CheckConstraint(
             'father_phone IS NOT NULL OR mother_phone IS NOT NULL OR guardian_phone IS NOT NULL',
             name='at_least_one_contact'
@@ -87,6 +89,46 @@ class Student(BaseModel, Base):
         CheckConstraint(
             'gender IN ("M", "F")',
             name='check_student_gender'
+        ),
+        CheckConstraint(
+            'start_year_ethiopian IS NOT NULL AND start_year_gregorian IS NOT NULL',
+            name='check_start_year'
+        ),
+        CheckConstraint(
+            case(
+                (is_mysql, text("is_transfer = TRUE AND previous_school_name IS NOT NULL")),
+                else_=text(
+                    "is_transfer = 1 AND previous_school_name IS NOT NULL")
+            ),
+            name='check_previous_school'
+        ),
+        CheckConstraint(
+            'is_transfer = FALSE AND previous_school_name IS NULL',
+            name='check_previous_school_null'
+        ),
+        CheckConstraint(
+            'has_medical_condition = True AND medical_details IS NOT NULL',
+            name='check_medical_condition'
+        ),
+        CheckConstraint(
+            'has_medical_condition = FALSE AND medical_details IS NULL',
+            name='check_medical_condition_null'
+        ),
+        CheckConstraint(
+            'has_disability = True AND disability_details IS NOT NULL',
+            name='check_disability'
+        ),
+        CheckConstraint(
+            'has_disability = False AND disability_details IS NULL',
+            name='check_disability_null'
+        ),
+        CheckConstraint(
+            'requires_special_accommodation = True AND special_accommodation_details IS NOT NULL',
+            name='check_special_accommodation'
+        ),
+        CheckConstraint(
+            'requires_special_accommodation = False AND special_accommodation_details IS NULL',
+            name='check_special_accommodation_null'
         )
     )
 

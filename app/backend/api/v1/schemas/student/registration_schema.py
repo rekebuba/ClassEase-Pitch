@@ -43,27 +43,26 @@ class StudentRegistrationSchema(BaseSchema, Schema):
     end_year_ethiopian = fields.String(required=False)
     end_year_gregorian = fields.String(required=False)
 
-    previous_school = fields.String(required=False, validate=[
-                                    fields.validate.Length(min=2, max=12)])
+    is_transfer = fields.Boolean(required=False)
+    previous_school_name = fields.String(required=False, validate=[
+        fields.validate.Length(min=2, max=25)])
 
     current_grade = fields.Integer(required=True, validate=[
                                    fields.validate.Range(min=1, max=12)])
     semester_id = fields.UUID(required=False)
-    has_passed = fields.Boolean(required=False, dump_default=False)
-    registration_window_start = fields.DateTime(required=False)
+    has_passed = fields.Boolean(required=False)
 
     birth_certificate = fields.String(required=False)
 
-    has_medical_condition = fields.Boolean(required=False, dump_default=False)
+    has_medical_condition = fields.Boolean(required=False)
     medical_details = fields.String(required=False)
-    has_disability = fields.Boolean(required=False, dump_default=False)
+    has_disability = fields.Boolean(required=False)
     disability_details = fields.String(required=False)
     requires_special_accommodation = fields.Boolean(
-        required=False, dump_default=False)
+        required=False)
     special_accommodation_details = fields.String(required=False)
 
-    is_transferring = fields.Boolean(required=False, dump_default=False)
-    is_active = fields.Boolean(required=False, dump_default=True)
+    is_active = fields.Boolean(required=False)
 
     @pre_load
     def set_defaults(self, data, **kwargs):

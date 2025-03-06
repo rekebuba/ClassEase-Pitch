@@ -1,8 +1,8 @@
 import os
 from flask import Flask
 from flask_cors import CORS
-from models import storage
-from flask import jsonify
+from models import init_app
+from models.engine.db_storage import DBStorage
 
 
 def create_app(config_name):
@@ -35,8 +35,12 @@ def create_app(config_name):
     else:
         app.config.from_object('config.ProductionConfig')
 
-    # Initialize database
-    storage.init_app(app)
+    db_uri = app.config['SQLALCHEMY_DATABASE_URI']
+    app.logger.info(f"Using database at {db_uri}")
+
+    # # Initialize database
+    # storage = DBStorage()
+    init_app(app)
 
     # Enable CORS
     CORS(app, resources={r"/api/v1/*": {"origins": "*"}})

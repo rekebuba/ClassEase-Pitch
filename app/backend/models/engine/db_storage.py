@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """This module defines a class to manage the database storage for ClassEase"""
 
+from sqlalchemy import create_engine
 from sqlalchemy.sql.expression import func
 from sqlalchemy.orm import sessionmaker, scoped_session
 from flask_sqlalchemy import SQLAlchemy
@@ -22,6 +23,7 @@ from models.blacklist_token import BlacklistToken
 from models.event import Event
 from models.semester import Semester
 from datetime import datetime
+from flask import current_app
 
 
 class DBStorage:
@@ -30,45 +32,45 @@ class DBStorage:
 
     Attributes:
         __engine (SQLAlchemy): The SQLAlchemy engine instance.
-
-    Methods:
-        __init__():
-        session:
-        new(obj):
-        init_app(app):
-        close():
-        add(obj):
-        delete(obj=None):
-        all(cls=None):
-        save():
-        drop_all():
-        rollback():
-        get_first(cls, **data):
-        get_all(cls, **data):
-        get_random(cls, **data):
+        __session (Session): The current database session.
     """
     __engine = None
+    __session = None
 
     def __init__(self):
         """
-        Initializes a new instance of the database storage engine.
-
-        This method sets up the SQLAlchemy engine for database interactions.
+        Initializes the SQLAlchemy engine and session factory.
         """
-        self.__engine = SQLAlchemy()
+        self.__engine = None
+        self.__session_factory = None
 
     @property
     def session(self):
         """
         Retrieves the current database session.
-
-        Returns:
-            Session: The current database session.
         """
-        return self.__engine.session
+        if self.__session is None:
+            raise RuntimeError(
+                "Session not initialized. Call init_app() first.")
+        return self.__session
+
+    def create_scoped_session(self, **kwargs):
+        """
+            Create a scoped session for the database.
+
+        Args:
+            **kwargs: Additional arguments to pass to `sessionmaker`.
+        """
+        if self.__engine is None:
+            raise RuntimeError(
+                "Engine not initialized. Call init_app() first.")
+        session_factory = sessionmaker(bind=self.__engine, **kwargs)
+
+        # return a scoped session
+        return scoped_session(session_factory)
 
     def begin(self):
-        return self.__engine.session.begin()
+        return self.session.begin()
 
     def new(self, obj):
         """
@@ -90,20 +92,26 @@ class DBStorage:
         Args:
             app (Flask): The Flask application instance to initialize the database with.
         """
-        self.__engine.init_app(app)
-        with app.app_context():
-            # Create tables using Base's metadata
-            Base.metadata.create_all(bind=self.__engine.engine)
+        # Configure the database engine
+        self.__engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+        self.__session_factory = sessionmaker(bind=self.__engine)
+        self.__session = scoped_session(self.__session_factory)
 
-            with self.session.begin():
-                seed_grades(self.session)
+        # Create tables and seed data
+        with app.app_context():
+            Base.metadata.create_all(bind=self.__engine)  # create all tables
+            self.seed_data()
+
+    def seed_data(self):
+        """Seed initial data into the database."""
+        with self.session.begin():
+            seed_grades(self.session)
 
     def close(self):
-        """
-        Closes the current session by removing it from the session registry.
-        This ensures that the session is properly cleaned up and resources are released.
-        """
-        self.session.remove()
+        """Close the current session."""
+        if self.__session:
+            self.__session.remove()
+            self.__session = None
 
     def add(self, obj):
         """
@@ -134,43 +142,27 @@ class DBStorage:
 
         Returns:
             list: A list of all instances of the specified class if `cls` is provided.
-                  If `cls` is None, the method returns None.
+                  If `cls` is None, the method returns [].
         """
         if cls is not None:
             return self.session.query(cls).all()
-        return
+        return []
 
     def save(self):
-        """
-        Commit all changes of the current database session.
-
-        This method commits any pending transactions to the database, ensuring that all changes made
-        during the current session are saved.
-        """
+        """Commit all changes of the current database session."""
         self.session.commit()
 
     def drop_all(self):
         """
         Drop all tables in the database.
 
-        This method uses the SQLAlchemy engine to drop all tables defined in the
-        metadata. It ensures that the operation is performed within a transaction
-        context to maintain database integrity.
-
         Raises:
             SQLAlchemyError: If there is an error during the drop operation.
         """
-        with self.__engine.engine.begin() as conn:
-            Base.metadata.drop_all(bind=conn)
+        Base.metadata.drop_all(bind=self.__engine)
 
     def rollback(self):
-        """
-        Rollback all changes made in the current session.
-
-        This method reverts all uncommitted changes made to the database
-        in the current session, ensuring that the database state is 
-        consistent with the last committed state.
-        """
+        """Rollback all changes made in the current session."""
         self.session.rollback()
 
     def get_first(self, cls, **data):
@@ -180,9 +172,6 @@ class DBStorage:
         Args:
             cls (Type): The class of the table to query.
             **data: Arbitrary keyword arguments representing the filter criteria.
-
-        Returns:
-            object: The first record that matches the given criteria, or None if no match is found.
         """
         return self.session.query(cls).filter_by(**data).first()
 
@@ -206,9 +195,5 @@ class DBStorage:
         Args:
             cls (Type): The class of the database model to query.
             **data: Arbitrary keyword arguments representing the filter criteria.
-
-        Returns:
-            An instance of `cls` that matches the filter criteria, selected randomly.
-            If no matching record is found, returns None.
         """
         return self.session.query(cls).filter_by(**data).order_by(func.random()).first()
