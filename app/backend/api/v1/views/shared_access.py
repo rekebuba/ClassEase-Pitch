@@ -50,7 +50,6 @@ def register_new_user(role: str):
 
     try:
         data = request.form.to_dict()  # Get form data as a dictionary
-
         result = UserService().create_role_based_user(role, data)
         if not result:
             raise Exception("Failed to register user")

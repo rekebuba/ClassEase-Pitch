@@ -30,7 +30,7 @@ class FileField(fields.Field):
         return value
 
 
-class UserRegistrationSchema(BaseSchema, Schema):
+class UserRegistrationSchema(BaseSchema):
     """Schema for validating user registration data."""
     identification = fields.String(required=False, load_only=True)
     password = fields.String(required=False, load_only=True)
@@ -40,8 +40,7 @@ class UserRegistrationSchema(BaseSchema, Schema):
 
     @staticmethod
     def _hash_password(password):
-        return bcrypt.hashpw(password.encode(
-            'utf-8'), bcrypt.gensalt()).decode('utf-8')
+        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
     @staticmethod
     def _generate_id(role):
@@ -73,7 +72,8 @@ class UserRegistrationSchema(BaseSchema, Schema):
         unique = True
         while unique:
             num = random.randint(1000, 9999)
-            starting_year = EthDate.date_to_ethiopian(datetime.now()).year % 100  # Get last 2 digits of the year
+            starting_year = EthDate.date_to_ethiopian(
+                datetime.now()).year % 100  # Get last 2 digits of the year
             identification = f'{section}/{num}/{starting_year}'
 
             # Check if the generated ID already exists in the users table
@@ -91,6 +91,8 @@ class UserRegistrationSchema(BaseSchema, Schema):
 
     @pre_load
     def assign_id_and_password(self, data, **kwargs):
-        data['identification'] = UserRegistrationSchema._generate_id(data['role'])
-        data['password'] = UserRegistrationSchema._hash_password(data['identification'])
+        data['identification'] = UserRegistrationSchema._generate_id(
+            data['role'])
+        data['password'] = UserRegistrationSchema._hash_password(
+            data['identification'])
         return data

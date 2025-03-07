@@ -7,11 +7,15 @@ from models.engine.db_storage import DBStorage
 from models.user import User
 from models.base_model import Base, BaseModel
 from models.grade import Grade, seed_grades
+from contextlib import contextmanager
+from tests.test_api.factories import *
+import os
 import json
 import random
 from models.admin import Admin
 from tests.test_api.helper_functions import *
 from models import storage
+from datetime import date
 
 
 @pytest.fixture(scope="session")
@@ -44,22 +48,74 @@ def db_session(app_session):
     storage.rollback()  # Roll back the transaction after the test
 
 
-@pytest.fixture(scope="function")
-def admin_registration(client, db_session):
-    """Function-scoped fixture for registering an admin."""
-    with override_session(AdminFactory, db_session):
-        admin = AdminFactory()
+@contextmanager
+def override_session(session, *factories):
+    """Temporarily override the sqlalchemy_session for multiple factories."""
+    original_sessions = {
+        factory: factory._meta.sqlalchemy_session for factory in factories}
 
-        # Convert the admin object to a dictionary
-        admin_data = admin.to_dict()
+    try:
+        for factory in factories:
+            factory._meta.sqlalchemy_session = session
+        yield
+    finally:
+        for factory, original_session in original_sessions.items():
+            factory._meta.sqlalchemy_session = original_session
 
-        admin_data.pop('id')
-        admin_data.pop('created_at')
-        admin_data.pop('updated_at')
-        admin_data.pop('__class__')
 
-    # Send a POST request to the registration endpoint
-    response = client.post('/api/v1/registration/admin',
-                           data=admin_data)
+@pytest.fixture(params=[(AdminFactory, 'admin'), (TeacherFactory, 'teacher'), (StudentFactory, 'student'),])
+# @pytest.fixture(params=[(TeacherFactory, 'teacher'),])
+def user_register_success(request, client, db_session):
+    factory, role = request.param
+    with override_session(db_session, factory, UserFactory):
+        user = factory(role=role)
 
-    return response
+        # Convert the user object to a dictionary
+        user_data = user.to_dict()
+        valid_data = {
+            **(user_data.pop('user')).to_dict(),
+            **user_data
+        }
+
+        valid_data.pop('id')
+        valid_data.pop('created_at')
+        valid_data.pop('updated_at')
+        valid_data.pop('__class__')
+        valid_data.pop('role')
+        valid_data.pop('identification')
+        valid_data.pop('password') if 'password' in valid_data else None
+        valid_data.pop(
+            'sqlalchemy_session') if 'sqlalchemy_session' in valid_data else None
+        user_data.pop('semester_id') if 'semester_id' in valid_data else None
+        print(valid_data)
+
+        if 'image_path' in valid_data:
+            local_path = valid_data.pop('image_path')
+            valid_data['image_path'] = open(local_path, 'rb')
+            os.remove(local_path)  # remove the file
+
+    return valid_data, role
+
+
+@pytest.fixture(params=[(AdminFactory, 'admin'), (TeacherFactory, 'teacher'), (StudentFactory, 'student'),])
+def role_based_user(request, db_session):
+    factory, role = request.param
+
+    with override_session(db_session, factory, UserFactory):
+        user = factory(role=role)
+
+        db_session.commit()
+
+    return user
+
+
+def user_auth_header(client, role_based_user):
+    # Log in the user once and reuse the token
+    response = client.post('/api/v1/auth/login', json={
+        'id': role_based_user.user.identification,
+        'password': role_based_user.user.identification
+    })
+
+    token = response.json["apiKey"]
+
+    return {"Authorization": f"Bearer {token}"}

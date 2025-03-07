@@ -1,7 +1,14 @@
+from datetime import datetime
+import os
 import random
+import uuid
+import bcrypt
 import factory
 from faker import Faker
+import requests
+from pyethiodate import EthDate
 
+from models.teacher import Teacher
 from models.student import Student
 from models.admin import Admin
 from models.user import User
@@ -13,8 +20,65 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = User
         sqlalchemy_session = None
+        # sqlalchemy_session_persistence = "commit"
 
+    @staticmethod
+    def get_ai_profile_picture():
+        url = "https://thispersondoesnotexist.com"
+        response = requests.get(url)
+        if response.status_code == 200:
+            directory = "profiles"
+            os.makedirs(directory, exist_ok=True)  # Ensure directory exists
+
+            file_name = f"{directory}/{str(fake.uuid4())}.jpg"
+            with open(file_name, "wb") as f:
+                f.write(response.content)
+
+            return file_name  # Returns the saved file path
+        return None
+
+    @staticmethod
+    def _generate_id(role):
+        """
+        Generates a custom ID based on the role (Admin, Student, Teacher).
+
+        The ID format is: <section>/<random_number>/<year_suffix>
+        - Section: 'MAS' for Student, 'MAT' for Teacher, 'MAA' for Admin
+        - Random number: A 4-digit number between 1000 and 9999
+        - Year suffix: Last 2 digits of the current Ethiopian year
+        """
+        identification = ''
+        section = ''
+
+        # Assign prefix based on role
+        if role == 'student':
+            section = 'MAS'
+        elif role == 'teacher':
+            section = 'MAT'
+        elif role == 'admin':
+            section = 'MAA'
+
+        num = random.randint(1000, 9999)
+        starting_year = EthDate.date_to_ethiopian(
+            datetime.now()).year % 100  # Get last 2 digits of the year
+        identification = f'{section}/{num}/{starting_year}'
+
+        return identification
+
+    @staticmethod
+    def _hash_password(password):
+        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+
+    # image_path = factory.LazyAttribute(
+    #     lambda x: UserFactory.get_ai_profile_picture())
+    # id = factory.LazyAttribute(lambda x: str(fake.uuid4()))
     national_id = factory.LazyAttribute(lambda x: str(fake.uuid4()))
+    role = factory.LazyAttribute(lambda x: fake.random_element(
+        elements=('admin', 'teacher', 'student')))
+    identification = factory.LazyAttribute(
+        lambda obj: UserFactory._generate_id(obj.role))
+    password = factory.LazyAttribute(
+        lambda obj: UserFactory._hash_password(obj.identification))
 
 
 class AdminFactory(UserFactory):
@@ -22,13 +86,15 @@ class AdminFactory(UserFactory):
         model = Admin
         sqlalchemy_session = None
 
+    user = factory.SubFactory(
+        UserFactory, sqlalchemy_session=Meta.sqlalchemy_session)
+    user_id = factory.LazyAttribute(lambda obj: obj.user.id)
+
     # Add additional fields for Admin
     first_name = factory.LazyAttribute(lambda x: fake.first_name())
     father_name = factory.LazyAttribute(lambda x: fake.last_name())
     grand_father_name = factory.LazyAttribute(lambda x: fake.first_name())
-    date_of_birth = factory.LazyAttribute(
-        lambda x: str(fake.date_of_birth().strftime('%Y-%m-%d'))
-    )
+    date_of_birth = factory.LazyAttribute(lambda x: fake.date_of_birth())
     email = factory.LazyAttribute(lambda x: fake.email())
     gender = factory.LazyAttribute(
         lambda x: fake.random_element(elements=('M', 'F')))
@@ -41,13 +107,23 @@ class StudentFactory(UserFactory):
         model = Student
         sqlalchemy_session = None
 
+    @staticmethod
+    def current_EC_year() -> str:
+        return str(EthDate.date_to_ethiopian(datetime.now()).year)
+
+    @staticmethod
+    def current_GC_year():
+        return f'{int(StudentFactory.current_EC_year()) + 7}/{int(StudentFactory.current_EC_year()) + 8}'
+
+    user = factory.SubFactory(
+        UserFactory, sqlalchemy_session=Meta.sqlalchemy_session)
+    user_id = factory.LazyAttribute(lambda obj: obj.user.id)
+
     # Add additional fields for Admin
     first_name = factory.LazyAttribute(lambda x: fake.first_name())
     father_name = factory.LazyAttribute(lambda x: fake.last_name())
     grand_father_name = factory.LazyAttribute(lambda x: fake.first_name())
-    date_of_birth = factory.LazyAttribute(
-        lambda x: str(fake.date_of_birth().strftime('%Y-%m-%d'))
-    )
+    date_of_birth = factory.LazyAttribute(lambda x: fake.date_of_birth())
     gender = factory.LazyAttribute(
         lambda x: fake.random_element(elements=('M', 'F')))
     father_phone = factory.LazyAttribute(lambda x: '091234567')
@@ -55,35 +131,53 @@ class StudentFactory(UserFactory):
     guardian_name = factory.LazyAttribute(lambda x: fake.name())
     guardian_phone = factory.LazyAttribute(lambda x: '091234567')
 
+    start_year_ethiopian = factory.LazyAttribute(
+        lambda x: StudentFactory.current_EC_year())
+    start_year_gregorian = factory.LazyAttribute(
+        lambda x: StudentFactory.current_GC_year())
+
     is_transfer = factory.LazyAttribute(lambda x: fake.boolean())
-    previous_school_name = factory.Maybe(
-        'is_transfer',
-        factory.LazyAttribute(lambda x: fake.company()),
-        None
-    )
+    previous_school_name = factory.LazyAttribute(
+        lambda obj: fake.company() if obj.is_transfer else '')
 
     current_grade = factory.LazyAttribute(lambda x: random.randint(1, 12))
-    semester_id = factory.LazyAttribute(lambda x: str(fake.uuid4()))
+    # semester_id = factory.LazyAttribute(lambda x: str(fake.uuid4()))
     has_passed = factory.LazyAttribute(lambda x: False)
 
     has_medical_condition = factory.LazyAttribute(lambda _: fake.boolean())
-    medical_details = factory.Maybe(
-        'has_medical_condition',
-        factory.LazyAttribute(lambda _: fake.text()),
-        None
-    )
-    has_disability = factory.LazyAttribute(lambda _: fake.boolean())
-    disability_details = factory.Maybe(
-        'has_disability',
-        factory.LazyAttribute(lambda _: fake.text()),
-        None
-    )
+    medical_details = factory.LazyAttribute(
+        lambda obj: fake.text() if obj.has_medical_condition else '')
+    has_disability = factory.LazyAttribute(lambda x_: fake.boolean())
+    disability_details = factory.LazyAttribute(
+        lambda obj: fake.text() if obj.has_disability else '')
     requires_special_accommodation = factory.LazyAttribute(
         lambda _: fake.boolean())
-    special_accommodation_details = factory.Maybe(
-        'requires_special_accommodation',
-        factory.LazyAttribute(lambda _: fake.text()),
-        None
+    special_accommodation_details = factory.LazyAttribute(
+        lambda obj: fake.text() if obj.requires_special_accommodation else ''
     )
 
     is_active = factory.LazyAttribute(lambda x: fake.boolean())
+
+
+class TeacherFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Teacher
+        sqlalchemy_session = None
+
+    user = factory.SubFactory(
+        UserFactory, sqlalchemy_session=Meta.sqlalchemy_session)
+    user_id = factory.LazyAttribute(lambda obj: obj.user.id)
+
+    # Add additional fields for Teacher
+    first_name = factory.LazyAttribute(lambda x: fake.first_name())
+    father_name = factory.LazyAttribute(lambda x: fake.last_name())
+    grand_father_name = factory.LazyAttribute(lambda x: fake.first_name())
+    date_of_birth = factory.LazyAttribute(lambda x: fake.date_of_birth())
+    email = factory.LazyAttribute(lambda x: fake.email())
+    gender = factory.LazyAttribute(lambda x: fake.random_element(
+        elements=('M', 'F')))
+    phone = factory.LazyAttribute(lambda x: '091234567')
+    address = factory.LazyAttribute(lambda x: fake.address())
+    year_of_experience = factory.LazyAttribute(lambda x: random.randint(0, 5))
+    qualification = factory.LazyAttribute(lambda x: fake.random_element(
+        elements=('Certified Teacher', 'Diploma in Education', 'Degree in Education')))

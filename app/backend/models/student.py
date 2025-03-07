@@ -4,10 +4,7 @@
 from sqlalchemy import Column, Date, Integer, String, ForeignKey, CheckConstraint, Float, Boolean, Text, DateTime, case
 from models.engine.db_storage import BaseModel, Base
 from sqlalchemy.orm import relationship
-from flask import current_app
 from sqlalchemy.sql import text
-
-is_mysql = "mysql" in str(current_app.config['SQLALCHEMY_DATABASE_URI'])
 
 
 class Student(BaseModel, Base):
@@ -67,70 +64,14 @@ class Student(BaseModel, Base):
 
     # Health & Special Needs
     has_medical_condition = Column(Boolean, default=False)
-    medical_details = Column(Text)  # Explanation of medical conditions
+    medical_details = Column(Text, nullable=True)  # Explanation of medical conditions
     has_disability = Column(Boolean, default=False)
-    disability_details = Column(Text)  # Explanation of disabilities
+    disability_details = Column(Text, nullable=True)  # Explanation of disabilities
     requires_special_accommodation = Column(Boolean, default=False)
-    special_accommodation_details = Column(Text)  # Any special support needed
+    special_accommodation_details = Column(Text, nullable=True)  # Any special support needed
 
     # Whether the student is currently enrolled
     is_active = Column(Boolean, default=False)
-
-    __table_args__ = (
-
-        CheckConstraint(
-            'father_phone IS NOT NULL OR mother_phone IS NOT NULL OR guardian_phone IS NOT NULL',
-            name='at_least_one_contact'
-        ),
-        CheckConstraint(
-            'current_grade >= 1 AND current_grade <= 12',
-            name='valid_grade_range'
-        ),
-        CheckConstraint(
-            'gender IN ("M", "F")',
-            name='check_student_gender'
-        ),
-        CheckConstraint(
-            'start_year_ethiopian IS NOT NULL AND start_year_gregorian IS NOT NULL',
-            name='check_start_year'
-        ),
-        CheckConstraint(
-            case(
-                (is_mysql, text("is_transfer = TRUE AND previous_school_name IS NOT NULL")),
-                else_=text(
-                    "is_transfer = 1 AND previous_school_name IS NOT NULL")
-            ),
-            name='check_previous_school'
-        ),
-        CheckConstraint(
-            'is_transfer = FALSE AND previous_school_name IS NULL',
-            name='check_previous_school_null'
-        ),
-        CheckConstraint(
-            'has_medical_condition = True AND medical_details IS NOT NULL',
-            name='check_medical_condition'
-        ),
-        CheckConstraint(
-            'has_medical_condition = FALSE AND medical_details IS NULL',
-            name='check_medical_condition_null'
-        ),
-        CheckConstraint(
-            'has_disability = True AND disability_details IS NOT NULL',
-            name='check_disability'
-        ),
-        CheckConstraint(
-            'has_disability = False AND disability_details IS NULL',
-            name='check_disability_null'
-        ),
-        CheckConstraint(
-            'requires_special_accommodation = True AND special_accommodation_details IS NOT NULL',
-            name='check_special_accommodation'
-        ),
-        CheckConstraint(
-            'requires_special_accommodation = False AND special_accommodation_details IS NULL',
-            name='check_special_accommodation_null'
-        )
-    )
 
     def __init__(self, *args, **kwargs):
         """
