@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import random
 import uuid
@@ -8,10 +8,12 @@ from faker import Faker
 import requests
 from pyethiodate import EthDate
 
+from models.semester import Semester
 from models.teacher import Teacher
 from models.student import Student
 from models.admin import Admin
 from models.user import User
+from models.event import Event
 
 fake = Faker()
 
@@ -71,10 +73,8 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     # image_path = factory.LazyAttribute(
     #     lambda x: UserFactory.get_ai_profile_picture())
-    # id = factory.LazyAttribute(lambda x: str(fake.uuid4()))
     national_id = factory.LazyAttribute(lambda x: str(fake.uuid4()))
-    role = factory.LazyAttribute(lambda x: fake.random_element(
-        elements=('admin', 'teacher', 'student')))
+    role = factory.LazyAttribute(lambda x: '')
     identification = factory.LazyAttribute(
         lambda obj: UserFactory._generate_id(obj.role))
     password = factory.LazyAttribute(
@@ -87,8 +87,9 @@ class AdminFactory(UserFactory):
         sqlalchemy_session = None
 
     user = factory.SubFactory(
-        UserFactory, sqlalchemy_session=Meta.sqlalchemy_session)
+        UserFactory, sqlalchemy_session=Meta.sqlalchemy_session, role='admin')
     user_id = factory.LazyAttribute(lambda obj: obj.user.id)
+    role = factory.LazyAttribute(lambda obj: obj.user.role)
 
     # Add additional fields for Admin
     first_name = factory.LazyAttribute(lambda x: fake.first_name())
@@ -116,8 +117,9 @@ class StudentFactory(UserFactory):
         return f'{int(StudentFactory.current_EC_year()) + 7}/{int(StudentFactory.current_EC_year()) + 8}'
 
     user = factory.SubFactory(
-        UserFactory, sqlalchemy_session=Meta.sqlalchemy_session)
+        UserFactory, sqlalchemy_session=Meta.sqlalchemy_session, role='student')
     user_id = factory.LazyAttribute(lambda obj: obj.user.id)
+    role = factory.LazyAttribute(lambda obj: obj.user.role)
 
     # Add additional fields for Admin
     first_name = factory.LazyAttribute(lambda x: fake.first_name())
@@ -165,8 +167,10 @@ class TeacherFactory(factory.alchemy.SQLAlchemyModelFactory):
         sqlalchemy_session = None
 
     user = factory.SubFactory(
-        UserFactory, sqlalchemy_session=Meta.sqlalchemy_session)
+        UserFactory, sqlalchemy_session=Meta.sqlalchemy_session, role='teacher')
+
     user_id = factory.LazyAttribute(lambda obj: obj.user.id)
+    role = factory.LazyAttribute(lambda obj: obj.user.role)
 
     # Add additional fields for Teacher
     first_name = factory.LazyAttribute(lambda x: fake.first_name())
@@ -181,3 +185,69 @@ class TeacherFactory(factory.alchemy.SQLAlchemyModelFactory):
     year_of_experience = factory.LazyAttribute(lambda x: random.randint(0, 5))
     qualification = factory.LazyAttribute(lambda x: fake.random_element(
         elements=('Certified Teacher', 'Diploma in Education', 'Degree in Education')))
+
+
+class EventFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Event
+        sqlalchemy_session = None
+
+    title = factory.LazyAttribute(lambda x: fake.sentence())
+    purpose = factory.LazyAttribute(lambda x: fake.random_element(
+        elements=('New Semester', 'Graduation',
+                  'Sports Event', 'Administration', 'Other')
+    ))
+    organizer = factory.LazyAttribute(lambda obj: fake.random_element(
+        elements=('School Administration', 'School',
+                  'Student Club', 'External Organizer')
+    ) if obj.purpose != 'New Semester' else 'School Administration'
+    )
+    start_date = factory.LazyAttribute(lambda x: fake.past_date())
+    end_date = factory.LazyAttribute(lambda x: fake.future_date())
+    start_time = factory.LazyAttribute(
+        lambda x: datetime.now() - timedelta(hours=1))  # Past datetime
+    end_time = factory.LazyAttribute(
+        lambda x: datetime.now() + timedelta(hours=1))  # Future datetime
+
+    location_type = factory.LazyAttribute(
+        lambda obj: fake.random_element(
+            elements=('Auditorium', 'Classroom',
+                      'Sports Field', 'Online', 'Other')
+        ) if obj.purpose != 'New Semester' else 'Online'
+    )
+
+    is_hybrid = factory.LazyAttribute(
+        lambda obj: True if obj.location_type != 'online' else False)
+    online_link = factory.LazyAttribute(
+        lambda obj: fake.url() if obj.is_hybrid else None)
+
+    requires_registration = factory.LazyAttribute(
+        lambda obj: fake.boolean() if obj.purpose != 'New Semester' else True)
+    registration_start = factory.LazyAttribute(
+        lambda obj: fake.past_date() if obj.requires_registration else None)
+    registration_end = factory.LazyAttribute(
+        lambda obj: fake.future_date() if obj.requires_registration else None)
+
+    eligibility = factory.LazyAttribute(
+        lambda obj: fake.random_element(
+            elements=('All', 'Students Only', 'Faculty Only',
+                      'Invitation Only')) if obj.purpose != 'New Semester' else 'All'
+    )
+
+    has_fee = factory.LazyAttribute(
+        lambda obj: fake.boolean() if obj.purpose != 'New Semester' else True)
+    fee_amount = factory.LazyAttribute(
+        lambda obj: random.randint(100, 900) if obj.has_fee else 0.00)
+    description = factory.LazyAttribute(lambda x: fake.text())
+
+
+class SemesterFactory(factory.alchemy.SQLAlchemyModelFactory):
+    class Meta:
+        model = Semester
+        sqlalchemy_session = None
+
+    event = factory.SubFactory(
+        EventFactory, sqlalchemy_session=Meta.sqlalchemy_session, purpose='New Semester')
+
+    event_id = factory.LazyAttribute(lambda obj: obj.event.id)
+    name = factory.LazyAttribute(lambda x: 1)

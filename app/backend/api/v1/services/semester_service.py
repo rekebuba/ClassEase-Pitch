@@ -12,5 +12,5 @@ from models import storage
 class SemesterService:
     """Service class for Semester model"""
     @staticmethod
-    def create_semester(valid_data) -> Semester:
-        return Semester(valid_data)
+    def create_semester(**kwarg) -> Semester:
+        return Semester(**kwarg)

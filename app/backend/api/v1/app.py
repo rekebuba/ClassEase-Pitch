@@ -4,9 +4,13 @@
 from flask import jsonify
 from api import create_app
 from models.engine.db_storage import DBStorage
-from models import init_app
+from models import storage
 
 app = create_app('development')
+
+@app.teardown_appcontext
+def cleanup_session(exception=None):
+    storage.session.remove()  # Clean up session after request
 
 
 if __name__ == '__main__':

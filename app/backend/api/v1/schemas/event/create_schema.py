@@ -1,114 +1,84 @@
-from marshmallow import Schema, ValidationError, fields, validates
+from marshmallow import Schema, ValidationError, fields, validates, validates_schema
 from api.v1.schemas.base_schema import BaseSchema
 from api.v1.schemas.semester.create_schema import SemesterCreationSchema
 
 
 class EventCreationSchema(BaseSchema):
     """Schema for validating event creation data."""
-    event_name = fields.String(required=True, validate=[fields.Length(max=3)])
+    title = fields.String(required=True, validate=[
+                          fields.validate.Length(min=3, max=100)])
     purpose = fields.String(required=True, validate=lambda x: x in [
                             'New Semester', 'Graduation', 'Sports Event', 'Administration', 'Other'])
     organizer = fields.String(required=True, validate=lambda x: x in [
                               'School Administration', 'School', 'Student Club', 'External Organizer'])
 
-    start_date = fields.Date(required=True, validate=[fields.Date('iso')])
-    end_date = fields.Date(required=True, validate=[fields.Date('iso')])
-    start_time = fields.DateTime(required=False, validate=[
-                                 fields.Time('iso')])
-    end_time = fields.DateTime(required=False, validate=[fields.Time('iso')])
+    start_date = fields.Date(required=True, format='iso')
+    end_date = fields.Date(required=True, format='iso')
+    start_time = fields.DateTime(load_default=None, format='%H:%M:%S')
+    end_time = fields.DateTime(load_default=None, format='%H:%M:%S')
 
-    location_type = fields.String(required=False, validate=lambda x: x in [
+    location_type = fields.String(load_default=None, validate=lambda x: x in [
                                   'Auditorium', 'Classroom', 'Sports Field', 'Online', 'Other'])
-    is_hybrid = fields.Boolean(required=False)
-    online_link = fields.Url(required=False)
+    is_hybrid = fields.Boolean(load_default=None)
+    online_link = fields.Url(load_default=None)
 
-    requires_registration = fields.Boolean(required=False)
-    registration_start = fields.Date(required=False, validate=[fields.Date('iso')])
-    registration_end = fields.Date(required=False, validate=[fields.Date('iso')])
+    requires_registration = fields.Boolean(load_default=None)
+    registration_start = fields.Date(load_default=None, format='iso')
+    registration_end = fields.Date(load_default=None, format='iso')
 
-    eligibility = fields.String(required=False, validate=lambda x: x in [
+    eligibility = fields.String(load_default=None, validate=lambda x: x in [
                                 'All', 'Students Only', 'Faculty Only', 'Invitation Only'])
-    has_fee = fields.Boolean(required=False)
-    fee_amount = fields.Float(required=False, validate=[fields.validate.Range(min=0)])
+    has_fee = fields.Boolean(load_default=None)
+    fee_amount = fields.Float(load_default=None, validate=[
+                              fields.validate.Range(min=0)])
 
-    description = fields.String(required=False)
+    description = fields.String(load_default=None)
 
-    semester = fields.Nested(SemesterCreationSchema, required=False)
+    semester = fields.Nested(
+        SemesterCreationSchema, required=True, load_only=True, exclude=("event_id",))
 
-    @validates('start_date')
-    def validate_start_date(self, value):
-        """Validate start date."""
-        if value > self.end_date:
-            raise ValidationError("Start date cannot be after end date.")
+    message = fields.String(dump_only=True)
 
-    @validates('start_time')
-    def validate_start_time(self, value):
-        """Validate start time."""
-        if value > self.end_time:
-            raise ValidationError("Start time cannot be after end time.")
-
-    @validates('registration_start')
-    def validate_registration_start(self, value):
-        """Validate registration start date."""
-        if value > self.registration_end:
-            raise ValidationError(
-                "Registration start date cannot be after registration end date.")
-
-    @validates('online_link')
-    def validate_online_link(self, value):
-        """Validate online link."""
-        if self.location_type == 'Online' and not value:
-            raise ValidationError("Online link is required for online events.")
-
-    @validates('requires_registration')
-    def validate_registration(self, value):
-        """Validate registration."""
-        if value and not self.registration_start and not self.registration_end:
-            raise ValidationError(
-                "Registration dates are required for events that require registration.")
-
-    @validates('has_fee')
-    def validate_fee(self, value):
-        """Validate fee."""
-        if value and self.fee_amount <= 0:
-            raise ValidationError(
-                "Fee amount is required for events that have a fee.")
-
-    @validates('eligibility')
-    def validate_eligibility(self, value):
-        """Validate eligibility."""
-        if value == 'Invitation Only' and not self.requires_registration:
-            raise ValidationError(
-                "Events that are invitation only must require registration.")
-
-    @validates('is_hybrid')
-    def validate_hybrid(self, value):
-        """Validate hybrid."""
-        if value and self.location_type != 'Online':
-            raise ValidationError(
-                "Hybrid events must have an online location type.")
-
-    @validates('location_type')
-    def validate_location_type(self, value):
-        """Validate location type."""
-        if self.is_hybrid and value != 'Online':
-            raise ValidationError(
-                "Hybrid events must have an online location type.")
-
-    @validates('purpose')
-    def validate_purpose(self, value):
-        """Validate purpose."""
-        if value == 'New Semester' and self.organizer != 'School Administration':
-            raise ValidationError("New semester events must be organized by the school administration.")
-        if value == 'New Semester' and self.location_type != 'Online':
-            raise ValidationError("New semester events must have an online location type.")
-        if value == 'New Semester' and not self.has_fee:
-            raise ValidationError("New semester events must have a fee.")
-        if value == 'New Semester' and not self.requires_registration:
-            raise ValidationError("New semester events must require registration.")
-        if value == 'New Semester' and self.eligibility != 'All':
-            raise ValidationError("New semester events must be open to all.")
-        if value == 'New Semester' and not self.is_hybrid:
-            raise ValidationError("New semester events must be hybrid.")
-        if value == 'New Semester' and self.fee_amount == 0:
-            raise ValidationError("New semester events must have a fee.")
+    @validates_schema
+    def validate_dates_and_times(self, data, **kwargs):
+        """Ensure start_date is before end_date and start_time is before end_time."""
+        try:
+            if data["start_date"] > data["end_date"]:
+                raise ValidationError(
+                    "Start date cannot be after end date.", "start_date")
+            if data["start_time"] > data["end_time"]:
+                raise ValidationError(
+                    "Start time cannot be after end time.", "start_time")
+            if data['registration_start'] > data['registration_end']:
+                raise ValidationError(
+                    "Registration start date cannot be after registration end date.")
+            if data['location_type'] == 'Online' and not data['online_link']:
+                raise ValidationError("Online link is required for online events.")
+            if data['requires_registration'] and not data['registration_start'] and not data['registration_end']:
+                raise ValidationError(
+                    "Registration dates are required for events that require registration.")
+            if data['has_fee'] and data['fee_amount'] <= 0:
+                raise ValidationError(
+                    "Fee amount is required for events that have a fee.")
+            if data['is_hybrid'] and data['location_type'] != 'Online':
+                raise ValidationError(
+                    "Hybrid events must have an online location type.")
+            if data['purpose'] == 'New Semester' and data['organizer'] != 'School Administration':
+                raise ValidationError(
+                    "New semester events must be organized by the school administration.")
+            if data['purpose'] == 'New Semester' and data['location_type'] != 'Online':
+                raise ValidationError(
+                    "New semester events must have an online location type.")
+            if data['purpose'] == 'New Semester' and not data['is_hybrid']:
+                raise ValidationError("New semester events must be hybrid.")
+            if data['purpose'] == 'New Semester' and not data['has_fee']:
+                raise ValidationError("New semester events must have a fee.")
+            if data['purpose'] == 'New Semester' and not data['requires_registration']:
+                raise ValidationError(
+                    "New semester events must require registration.")
+            if data['purpose'] == 'New Semester' and data['eligibility'] != 'All':
+                raise ValidationError("New semester events must be open to all.")
+            if data['purpose'] == 'New Semester' and data['fee_amount'] == 0.00:
+                raise ValidationError("New semester events must have a fee.")
+        except TypeError:
+            pass

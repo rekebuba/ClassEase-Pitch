@@ -17,7 +17,6 @@ from models.admin import Admin
 from models.mark_list import MarkList
 from models.average_result import AVRGResult
 from models.blacklist_token import BlacklistToken
-from apscheduler.schedulers.background import BackgroundScheduler
 
 
 # Function to generate JWT for Admins
@@ -157,7 +156,7 @@ def admin_required(f):
         except jwt.ExpiredSignatureError:
             return jsonify({"error": "Unauthorized", "reason": "SESSION_EXPIRED"}), 401
         except jwt.InvalidTokenError:
-            return jsonify({"error": "Unauthorized", "reason": "UNAUTHORIZED"}), 401
+            return jsonify({"error": "Unauthorized", "reason": "Invalid Token"}), 401
 
         return f(admin_data, *args, **kwargs)
 
@@ -199,7 +198,8 @@ def teacher_required(f):
         try:
             payload = jwt.decode(
                 token, current_app.config["TEACHER_SECRET_KEY"], algorithms=["HS256"])
-            teacher_data = storage.get_first(Teacher, id=payload['id'])
+            teacher_data = storage.get_first(
+                User, identification=payload['id'])
             if not teacher_data:
                 return jsonify({'message': 'Teacher not found!'}), 404
         except jwt.ExpiredSignatureError:
@@ -246,7 +246,7 @@ def student_required(f):
             payload = jwt.decode(
                 token, current_app.config["STUDENT_SECRET_KEY"], algorithms=["HS256"])
             student_data = storage.get_first(
-                StudentYearlyRecord, student_id=payload['id'])
+                User, identification=payload['id'])
             if not student_data:
                 print("notfound")
                 return jsonify({'message': 'Student not found!'}), 404
@@ -258,8 +258,6 @@ def student_required(f):
         return f(student_data, *args, **kwargs)
 
     return decorated_function
-
-# Unified decorator for Student and Admin JWT verification
 
 
 def admin_or_student_required(f):

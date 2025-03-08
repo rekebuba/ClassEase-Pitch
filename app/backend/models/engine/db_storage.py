@@ -11,7 +11,7 @@ from models.user import User
 from models.student import Student
 from models.section import Section
 from models.admin import Admin
-from models.subject import Subject
+from models.subject import Subject, seed_subjects
 from models.teacher import Teacher
 from models.assessment import Assessment
 from models.mark_list import MarkList
@@ -22,6 +22,7 @@ from models.teacher_record import TeachersRecord
 from models.blacklist_token import BlacklistToken
 from models.event import Event
 from models.semester import Semester
+from models.stream import Stream, seed_streams
 from datetime import datetime
 from flask import current_app
 
@@ -104,8 +105,10 @@ class DBStorage:
 
     def seed_data(self):
         """Seed initial data into the database."""
-        with self.session.begin():
-            seed_grades(self.session)
+        # with self.session.begin():
+        seed_grades(self.session)
+        seed_streams(self.session)
+        seed_subjects(self.session)
 
     def close(self):
         """Close the current session."""

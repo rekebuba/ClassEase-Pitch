@@ -273,3 +273,8 @@ def get_student_score(student_data, admin_data):
         "student": student_summary,
         "student_assessment": student_assessment,
     }), 200
+
+@stud.route('/course/registration', methods=['GET'])
+@student_required
+def corse_registration(student_data):
+    pass

@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """ Module for Section class """
 
-from sqlalchemy import CheckConstraint, Column, String, Integer, Boolean, Date, DateTime, Enum
+from sqlalchemy import CheckConstraint, Column, Text, String, Integer, Boolean, Date, DateTime, Enum
 from sqlalchemy.orm import relationship
 from models.engine.db_storage import BaseModel, Base
 
@@ -9,7 +9,7 @@ from models.engine.db_storage import BaseModel, Base
 class Event(BaseModel, Base):
     """docstring for Semester."""
     __tablename__ = 'events'
-    event_name = Column(String(255), nullable=False)
+    title = Column(String(100), nullable=False)
     purpose = Column(String(50), Enum('Academic', 'Cultural', 'Sports', 'Graduation',
                      'Administration', 'New Semester', 'Other'), nullable=False)
     organizer = Column(String(50), Enum('School Administration',
@@ -23,7 +23,7 @@ class Event(BaseModel, Base):
     location_type = Column(String(50), Enum(
         'Auditorium', 'Classroom', 'Sports Field', 'Online', 'Other'), nullable=True)
     is_hybrid = Column(Boolean, default=False)
-    online_link = Column(String(255), nullable=True)
+    online_link = Column(Text, nullable=True)
 
     requires_registration = Column(Boolean, default=False)
     registration_start = Column(Date, nullable=True)
@@ -66,17 +66,13 @@ class Event(BaseModel, Base):
             name="check_fee"
         ),
         CheckConstraint(
-            "eligibility = 'Invitation Only' AND requires_registration = False",
-            name="check_eligibility_with_registration"
-        ),
-        CheckConstraint(
             "is_hybrid = True AND location_type = 'Online'",
             name="check_hybrid"
         ),
-        CheckConstraint(
-            "is_hybrid = False AND location_type != 'Online'",
-            name="check_hybrid_with_location"
-        ),
+        # CheckConstraint(
+        #     "is_hybrid = False AND location_type != 'Online'",
+        #     name="check_hybrid_with_location"
+        # ),
         CheckConstraint(
             "purpose = 'New Semester' AND organizer = 'School Administration'",
             name="check_purpose_with_organizer"
@@ -102,15 +98,11 @@ class Event(BaseModel, Base):
             name="check_purpose_with_hybrid"
         ),
         CheckConstraint(
-            "purpose = 'New Semester' AND fee_amount = 0",
-            name="check_purpose_with_fee_amount"
-        ),
-        CheckConstraint(
-            "purpose = 'New Semester' AND registration_start IS NULL",
+            "purpose = 'New Semester' AND registration_start IS NOT NULL",
             name="check_purpose_with_registration_start"
         ),
         CheckConstraint(
-            "purpose = 'New Semester' AND registration_end IS NULL",
+            "purpose = 'New Semester' AND registration_end IS NOT NULL",
             name="check_purpose_with_registration_end"
         )
     )

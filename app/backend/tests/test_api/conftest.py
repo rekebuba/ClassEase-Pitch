@@ -15,7 +15,7 @@ import random
 from models.admin import Admin
 from tests.test_api.helper_functions import *
 from models import storage
-from datetime import date
+from datetime import date, time
 
 
 @pytest.fixture(scope="session")
@@ -63,59 +63,103 @@ def override_session(session, *factories):
             factory._meta.sqlalchemy_session = original_session
 
 
-@pytest.fixture(params=[(AdminFactory, 'admin'), (TeacherFactory, 'teacher'), (StudentFactory, 'student'),])
-# @pytest.fixture(params=[(TeacherFactory, 'teacher'),])
+@pytest.fixture(params=[(AdminFactory, 5), (TeacherFactory, 5), (StudentFactory, 5),])
 def user_register_success(request, client, db_session):
-    factory, role = request.param
+    factory, count = request.param
+
+    data = []
     with override_session(db_session, factory, UserFactory):
-        user = factory(role=role)
+        for _ in range(count):
+            user = factory()
 
-        # Convert the user object to a dictionary
-        user_data = user.to_dict()
-        valid_data = {
-            **(user_data.pop('user')).to_dict(),
-            **user_data
-        }
+            # Convert the user object to a dictionary
+            user_data = user.to_dict()
+            valid_data = {
+                **(user_data.pop('user')).to_dict(),
+                **user_data
+            }
 
-        valid_data.pop('id')
-        valid_data.pop('created_at')
-        valid_data.pop('updated_at')
-        valid_data.pop('__class__')
-        valid_data.pop('role')
-        valid_data.pop('identification')
-        valid_data.pop('password') if 'password' in valid_data else None
-        valid_data.pop(
-            'sqlalchemy_session') if 'sqlalchemy_session' in valid_data else None
-        user_data.pop('semester_id') if 'semester_id' in valid_data else None
-        print(valid_data)
+            # Remove unnecessary fields
+            role = valid_data.pop('role')
+            valid_data.pop('id')
+            valid_data.pop('created_at')
+            valid_data.pop('updated_at')
+            valid_data.pop('__class__')
+            valid_data.pop('identification')
+            valid_data.pop('sqlalchemy_session')
+            valid_data.pop('password') if 'password' in valid_data else None
+            user_data.pop(
+                'semester_id') if 'semester_id' in valid_data else None
 
-        if 'image_path' in valid_data:
-            local_path = valid_data.pop('image_path')
-            valid_data['image_path'] = open(local_path, 'rb')
-            os.remove(local_path)  # remove the file
+            if 'image_path' in valid_data:
+                local_path = valid_data.pop('image_path')
+                valid_data['image_path'] = open(local_path, 'rb')
+                os.remove(local_path)  # remove the file
 
-    return valid_data, role
+            data.append((valid_data, role))
+
+    return data
 
 
-@pytest.fixture(params=[(AdminFactory, 'admin'), (TeacherFactory, 'teacher'), (StudentFactory, 'student'),])
-def role_based_user(request, db_session):
-    factory, role = request.param
+@pytest.fixture
+def create_role_based_users(request, db_session):
+    factory, count = request.param
 
+    users = []
     with override_session(db_session, factory, UserFactory):
-        user = factory(role=role)
-
+        for _ in range(count):
+            user = factory()
+            users.append(user)
         db_session.commit()
 
-    return user
+    return users
 
 
-def user_auth_header(client, role_based_user):
-    # Log in the user once and reuse the token
-    response = client.post('/api/v1/auth/login', json={
-        'id': role_based_user.user.identification,
-        'password': role_based_user.user.identification
-    })
+@pytest.fixture
+def users_auth_header(client, create_role_based_users):
+    users_tokens = []
+    for user in create_role_based_users:
+        response = client.post('/api/v1/auth/login', json={
+            'id': user.user.identification,
+            'password': user.user.identification
+        })
 
-    token = response.json["apiKey"]
+        token = response.json["apiKey"]
+        users_tokens.append({"Authorization": f"Bearer {token}"})
 
-    return {"Authorization": f"Bearer {token}"}
+    return users_tokens
+
+
+@pytest.fixture
+def event_form(db_session):
+    with override_session(db_session, SemesterFactory, EventFactory):
+        form = SemesterFactory().to_dict()
+
+        semester_form = {
+            **(form.pop('event')).to_dict(),
+            'semester': {
+                **form
+            }
+        }
+
+        # Remove unnecessary fields
+        semester_form.pop('id')
+        semester_form.pop('created_at')
+        semester_form.pop('updated_at')
+        semester_form.pop('sqlalchemy_session')
+        semester_form.pop('__class__')
+        semester_form['semester'].pop('event_id')
+        semester_form['semester'].pop('id')
+        semester_form['semester'].pop('created_at')
+        semester_form['semester'].pop('updated_at')
+        semester_form['semester'].pop('__class__')
+
+    # Convert date fields to string (ISO format)
+    for key, value in semester_form.items():
+        if isinstance(value, (date, datetime)):
+            if key in ['start_time', 'end_time']:
+                semester_form[key] = value.strftime("%H:%M:%S")
+            else:
+                semester_form[key] = value.strftime("%Y-%m-%d")
+
+    return semester_form

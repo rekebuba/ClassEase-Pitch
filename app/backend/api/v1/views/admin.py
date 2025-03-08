@@ -362,35 +362,34 @@ def events(admin_data):
 @admin_required
 def create_events(admin_data):
     try:
-        with storage.begin():
-            data = request.get_json()
-            event_schema = EventCreationSchema()
-            validated_data = event_schema.load(data)
+        data = request.get_json()
+        event_schema = EventCreationSchema()
+        validated_data = event_schema.load(data)
 
-            new_event = EventService.create_event(**validated_data)
-            storage.session.add(new_event)
-            storage.session.flush()
+        new_event = EventService.create_event(**validated_data)
+        storage.add(new_event)
+        storage.session.flush()
 
-            if new_event.purpose == 'New Semester':
-                semester_data = {
-                    **data.get('semester'),
-                    "event_id": new_event.id,
-                }
+        if new_event.purpose == 'New Semester':
+            semester_data = {
+                **data.get('semester'),
+                "event_id": new_event.id,
+            }
 
-                semester_schema = SemesterCreationSchema()
-                valid_semester_data = semester_schema.load(semester_data)
+            semester_schema = SemesterCreationSchema()
+            valid_semester_data = semester_schema.load(semester_data)
 
-                new_semester = SemesterService.create_semester(
-                    valid_semester_data)
-                storage.session.add(new_semester)
+            new_semester = SemesterService.create_semester(
+                **valid_semester_data)
+            storage.add(new_semester)
 
-            storage.session.commit()
+        storage.save()
 
-            return {"message: Event Created Successfully"}, 201
+        return event_schema.dump({"message": "Event Created Successfully"}), 201
     except ValidationError as e:
         errors.handle_validation_error(e)
-    # except Exception as e:
-    #     return errors.handle_internal_error(e)
+    except Exception as e:
+        return errors.handle_internal_error(e)
 
 
 @admin.route('/students/mark_list', methods=['PUT'])

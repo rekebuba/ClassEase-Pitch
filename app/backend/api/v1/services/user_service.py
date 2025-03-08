@@ -38,50 +38,49 @@ class UserService:
     def create_role_based_user(self, role, data) -> Admin | None:
         """Create a user with a specific role."""
         # Start a new transaction
-        with storage.begin():
-            user_data = {
-                'role': role,
-                'national_id': data.pop('national_id') if 'national_id' in data else None,
-                'image_path': request.files.get('image_path')
-            }
-            # Call the base class method to create a user with role 'admin'
-            new_user = self.create_user(user_data)
+        user_data = {
+            'role': role,
+            'national_id': data.pop('national_id') if 'national_id' in data else None,
+            'image_path': request.files.get('image_path')
+        }
+        # Call the base class method to create a user with role 'admin'
+        new_user = self.create_user(user_data)
 
-            storage.session.add(new_user)
-            storage.session.flush()  # Flush to get the new_user.id
+        storage.add(new_user)
+        storage.session.flush()  # Flush to get the new_user.id
 
-            fields = {
-                **data,
-                'user_id': new_user.id
-            }
-            if role == 'admin':
-                # Validate and create the Admin
-                admin_schema = AdminRegistrationSchema()
-                validated_admin_data = admin_schema.load(fields)
+        fields = {
+            **data,
+            'user_id': new_user.id
+        }
+        if role == 'admin':
+            # Validate and create the Admin
+            admin_schema = AdminRegistrationSchema()
+            validated_admin_data = admin_schema.load(fields)
 
-                new_admin = Admin(**validated_admin_data)
+            new_admin = Admin(**validated_admin_data)
 
-                storage.session.add(new_admin)
-                storage.session.commit()
-                return new_admin
-            elif role == 'student':
-                student_schema = StudentRegistrationSchema()
+            storage.add(new_admin)
+            storage.save()
+            return new_admin
+        elif role == 'student':
+            student_schema = StudentRegistrationSchema()
 
-                validated_student_data = student_schema.load(fields)
-                new_student = Student(**validated_student_data)
+            validated_student_data = student_schema.load(fields)
+            new_student = Student(**validated_student_data)
 
-                storage.session.add(new_student)
-                storage.session.commit()
-                return new_student
-            elif role == 'teacher':
-                teacher_schema = TeacherRegistrationSchema()
+            storage.add(new_student)
+            storage.save()
+            return new_student
+        elif role == 'teacher':
+            teacher_schema = TeacherRegistrationSchema()
 
-                validated_teacher_data = teacher_schema.load(fields)
-                new_teacher = Teacher(**validated_teacher_data)
+            validated_teacher_data = teacher_schema.load(fields)
+            new_teacher = Teacher(**validated_teacher_data)
 
-                storage.session.add(new_teacher)
-                storage.session.commit()
-                return new_teacher
+            storage.add(new_teacher)
+            storage.save()
+            return new_teacher
 
         return None
 

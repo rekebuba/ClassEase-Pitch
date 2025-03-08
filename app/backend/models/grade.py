@@ -17,15 +17,13 @@ def seed_grades(session):
     Args:
         session (Session): SQLAlchemy session object used to interact with the database.
 
-    Returns:
-        None
     """
-    """Populate the Grade table with default data (1 to 12)."""
     existing_grades = session.query(Grade).all()
     if not existing_grades:  # Only seed if table is empty
         for i in range(1, 13):
-            grade = Grade(grade=i)
+            grade = Grade(name=i)
             session.add(grade)
+
         session.commit()
 
 
@@ -46,7 +44,7 @@ class Grade(BaseModel, Base):
         __init__(*args, **kwargs): Initializes a new instance of the Grade model.
     """
     __tablename__ = 'grades'
-    grade = Column(Integer, nullable=False, unique=True)
+    name = Column(Integer, nullable=False, unique=True)
 
     # Define relationships
     section = relationship("Section", backref="grade",
