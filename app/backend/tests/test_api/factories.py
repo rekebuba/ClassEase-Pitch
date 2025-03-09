@@ -81,7 +81,7 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
         lambda obj: UserFactory._hash_password(obj.identification))
 
 
-class AdminFactory(UserFactory):
+class AdminFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = Admin
         sqlalchemy_session = None
@@ -103,7 +103,7 @@ class AdminFactory(UserFactory):
     address = factory.LazyAttribute(lambda x: fake.address())
 
 
-class StudentFactory(UserFactory):
+class StudentFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = Student
         sqlalchemy_session = None
@@ -145,6 +145,8 @@ class StudentFactory(UserFactory):
     current_grade = factory.LazyAttribute(lambda x: random.randint(1, 12))
     # semester_id = factory.LazyAttribute(lambda x: str(fake.uuid4()))
     has_passed = factory.LazyAttribute(lambda x: False)
+    next_grade = factory.LazyAttribute(lambda x: None)
+    is_registered = factory.LazyAttribute(lambda x: False)
 
     has_medical_condition = factory.LazyAttribute(lambda _: fake.boolean())
     medical_details = factory.LazyAttribute(
@@ -158,7 +160,7 @@ class StudentFactory(UserFactory):
         lambda obj: fake.text() if obj.requires_special_accommodation else ''
     )
 
-    is_active = factory.LazyAttribute(lambda x: fake.boolean())
+    is_active = factory.LazyAttribute(lambda x: True)
 
 
 class TeacherFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -202,6 +204,10 @@ class EventFactory(factory.alchemy.SQLAlchemyModelFactory):
                   'Student Club', 'External Organizer')
     ) if obj.purpose != 'New Semester' else 'School Administration'
     )
+
+    ethiopian_year = factory.LazyAttribute(lambda x: '2017')
+    gregorian_year = factory.LazyAttribute(lambda x: None)
+
     start_date = factory.LazyAttribute(lambda x: fake.past_date())
     end_date = factory.LazyAttribute(lambda x: fake.future_date())
     start_time = factory.LazyAttribute(

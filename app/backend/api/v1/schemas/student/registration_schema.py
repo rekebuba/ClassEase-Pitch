@@ -1,5 +1,4 @@
 import re
-from pyethiodate import EthDate
 from datetime import datetime
 from marshmallow import Schema, ValidationError, post_load, pre_load, validates, validates_schema, fields
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
@@ -10,14 +9,6 @@ from api.v1.schemas.user.registration_schema import UserRegistrationSchema
 from api.v1.schemas.base_schema import BaseSchema
 from models import storage
 import tests.test_api.helper_functions
-
-
-def current_EC_year() -> str:
-    return str(EthDate.date_to_ethiopian(datetime.now()).year)
-
-
-def current_GC_year():
-    return f'{int(current_EC_year()) + 7}/{int(current_EC_year()) + 8}'
 
 
 class StudentRegistrationSchema(BaseSchema, Schema):
@@ -53,6 +44,10 @@ class StudentRegistrationSchema(BaseSchema, Schema):
 
     semester_id = fields.String(required=False)
     has_passed = fields.Boolean(required=False)
+    next_grade = fields.Integer(required=False, validate=[
+        fields.validate.Range(min=1, max=12)
+    ])
+    is_registered = fields.Boolean(required=False)
 
     birth_certificate = fields.String(required=False)
 
@@ -75,9 +70,9 @@ class StudentRegistrationSchema(BaseSchema, Schema):
     def set_defaults(self, data, **kwargs):
         # add default values for start_year_ethiopian and start_year_gregorian
         if not data.get('start_year_ethiopian'):
-            data['start_year_ethiopian'] = current_EC_year()
+            data['start_year_ethiopian'] = self.current_EC_year()
         if not data.get('start_year_gregorian'):
-            data['start_year_gregorian'] = current_GC_year()
+            data['start_year_gregorian'] = self.current_GC_year(int(data['start_year_ethiopian']))
         if data.get('gender'):
             data['gender'] = data['gender'].upper()
         if data.get('is_transfer') == 'True':

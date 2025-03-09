@@ -21,7 +21,7 @@ def login():
     Handle user login by validating credentials and generating an access token.
     """
     try:
-        auth_schema = AuthSchema()
+        auth_schema = AuthScwwhema()
         valid_user = auth_schema.load(request.get_json())
 
         # Generate an api_key token based on the user's role

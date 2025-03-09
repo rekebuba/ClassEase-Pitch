@@ -38,7 +38,7 @@ def client(app_session):
         yield client
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def db_session(app_session):
     """Function-scoped fixture for database transactions."""
     storage = DBStorage()
@@ -63,8 +63,8 @@ def override_session(session, *factories):
             factory._meta.sqlalchemy_session = original_session
 
 
-@pytest.fixture(params=[(AdminFactory, 5), (TeacherFactory, 5), (StudentFactory, 5),])
-def user_register_success(request, client, db_session):
+@pytest.fixture(params=[(AdminFactory, 5), (TeacherFactory, 5), (StudentFactory, 5)])
+def user_register_success(request, db_session):
     factory, count = request.param
 
     data = []
@@ -101,33 +101,37 @@ def user_register_success(request, client, db_session):
     return data
 
 
-@pytest.fixture
-def create_role_based_users(request, db_session):
-    factory, count = request.param
+@pytest.fixture(scope="session")
+def db_create_users(db_session):
+    factories = [(AdminFactory, 1), (TeacherFactory, 1), (StudentFactory, 1)]
 
     users = []
-    with override_session(db_session, factory, UserFactory):
-        for _ in range(count):
-            user = factory()
-            users.append(user)
+    for factory, count in factories:
+        with override_session(db_session, factory, UserFactory):
+            for _ in range(count):
+                user = factory()
+                users.append(user)
+
         db_session.commit()
 
     return users
 
 
-@pytest.fixture
-def users_auth_header(client, create_role_based_users):
-    users_tokens = []
-    for user in create_role_based_users:
-        response = client.post('/api/v1/auth/login', json={
-            'id': user.user.identification,
-            'password': user.user.identification
-        })
+@pytest.fixture(scope="session")
+def role(request):
+    return request.param
 
-        token = response.json["apiKey"]
-        users_tokens.append({"Authorization": f"Bearer {token}"})
 
-    return users_tokens
+@pytest.fixture(scope="session")
+def users_auth_header(client, db_session, role):
+    id = db_session.query(User.identification).filter_by(role=role).scalar()
+    response = client.post('/api/v1/auth/login', json={
+        'id': id,
+        'password': id
+    })
+
+    token = response.json["apiKey"]
+    return {"Authorization": f"Bearer {token}"}
 
 
 @pytest.fixture
@@ -163,3 +167,20 @@ def event_form(db_session):
                 semester_form[key] = value.strftime("%Y-%m-%d")
 
     return semester_form
+
+
+@pytest.fixture(scope="session")
+def db_event_form(db_session):
+    with override_session(db_session, SemesterFactory, EventFactory):
+        form = SemesterFactory().to_dict()
+
+        db_session.commit()
+
+    semester_form = {
+        **(form.pop('event')).to_dict(),
+        'semester': {
+            **form
+        }
+    }
+
+    return form

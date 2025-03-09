@@ -159,7 +159,7 @@ def school_overview(admin_data):
     total_teachers = storage.get_all(Teacher)
     total_students = storage.get_all(Student)
     enrollment_by_grade = storage.session.query(
-        Grade.grade,
+        Grade.name,
         func.count(StudentYearlyRecord.student_id)
     ).join(Grade, StudentYearlyRecord.grade_id == Grade.id).group_by(
         StudentYearlyRecord.grade_id,
@@ -238,7 +238,7 @@ def assign_class(admin_data):
 
     # Get the grade_id from the Grade table
     grade_id = storage.session.execute(
-        select(Grade.id).where(Grade.grade == data['grade'])
+        select(Grade.id).where(Grade.name == data['grade'])
     ).scalars().first()
     if not grade_id:
         return jsonify({"error": "No grade found for the teacher"}), 404
@@ -387,6 +387,7 @@ def create_events(admin_data):
 
         return event_schema.dump({"message": "Event Created Successfully"}), 201
     except ValidationError as e:
+        print(e.messages)
         errors.handle_validation_error(e)
     except Exception as e:
         return errors.handle_internal_error(e)

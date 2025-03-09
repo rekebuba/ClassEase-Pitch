@@ -154,10 +154,14 @@ def generate_code(stream, prev_data, subject, grade):
     # Append the grade number to the base code
     base_code += str(grade)
 
+    # Append the stream to the base code
+    if stream:
+        base_code += f'-{stream[0].upper()}'
+
     existing_codes = {subj.code for subj in prev_data}
 
     code = base_code
-    suffix = f'-{stream[0].upper()}' if stream else '-I'
+    suffix = '-I'
 
     while code in existing_codes:
         code = f"{base_code}{suffix}"

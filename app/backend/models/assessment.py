@@ -17,23 +17,19 @@ class Assessment(BaseModel, Base):
         subject_id (str): Foreign key referencing the subject's ID.
         total (float): The sum score of the student for each assessment. Default is None.
         rank (int): The rank of the student in the assessment. Default is None.
-        semester (int): The semester in which the assessment was taken. Cannot be null.
-        year (str): The year in which the assessment was taken. Cannot be null.
 
     Methods:
         __init__(*args, **kwargs): Initializes the assessment record with the provided arguments.
     """
     __tablename__ = 'assessments'
-    student_id = Column(String(120), ForeignKey('student.id'), nullable=False)
+    student_id = Column(String(120), ForeignKey('student.user_id'), nullable=False)
     grade_id = Column(String(120), ForeignKey('grades.id'), nullable=False)
     section_id = Column(String(120), ForeignKey('sections.id'), nullable=False)
     subject_id = Column(String(120), ForeignKey('subjects.id'), nullable=False)
     teachers_record_id = Column(String(120), ForeignKey('teachers_record.id', ondelete="SET NULL"), nullable=True, default=None)
     total = Column(Float, default=None)  # The subject sum score of the student for each assessment
     rank = Column(Integer, default=None)
-    semester = Column(Integer, nullable=False)
     semester_id = Column(String(120), ForeignKey('semesters.id'), nullable=False)
-    year = Column(String(10), nullable=False)
 
     def __init__(self, *args, **kwargs):
         """initializes score"""

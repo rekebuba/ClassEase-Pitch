@@ -1,4 +1,4 @@
-from marshmallow import Schema, ValidationError, fields, validates, validates_schema
+from marshmallow import Schema, ValidationError, fields, pre_load, validates, validates_schema
 from api.v1.schemas.base_schema import BaseSchema
 from api.v1.schemas.semester.create_schema import SemesterCreationSchema
 
@@ -11,6 +11,9 @@ class EventCreationSchema(BaseSchema):
                             'New Semester', 'Graduation', 'Sports Event', 'Administration', 'Other'])
     organizer = fields.String(required=True, validate=lambda x: x in [
                               'School Administration', 'School', 'Student Club', 'External Organizer'])
+
+    ethiopian_year = fields.String(required=True)
+    gregorian_year = fields.String(required=False, allow_none=True, load_default=None)
 
     start_date = fields.Date(required=True, format='iso')
     end_date = fields.Date(required=True, format='iso')
@@ -39,6 +42,12 @@ class EventCreationSchema(BaseSchema):
 
     message = fields.String(dump_only=True)
 
+    @pre_load
+    def set_defaults(self, data, **kwargs):
+        # add default values for ethiopian_year and gregorian_year
+        data['gregorian_year'] = self.current_GC_year(int(data['ethiopian_year']))
+        return data
+
     @validates_schema
     def validate_dates_and_times(self, data, **kwargs):
         """Ensure start_date is before end_date and start_time is before end_time."""
@@ -53,7 +62,8 @@ class EventCreationSchema(BaseSchema):
                 raise ValidationError(
                     "Registration start date cannot be after registration end date.")
             if data['location_type'] == 'Online' and not data['online_link']:
-                raise ValidationError("Online link is required for online events.")
+                raise ValidationError(
+                    "Online link is required for online events.")
             if data['requires_registration'] and not data['registration_start'] and not data['registration_end']:
                 raise ValidationError(
                     "Registration dates are required for events that require registration.")
@@ -77,8 +87,10 @@ class EventCreationSchema(BaseSchema):
                 raise ValidationError(
                     "New semester events must require registration.")
             if data['purpose'] == 'New Semester' and data['eligibility'] != 'All':
-                raise ValidationError("New semester events must be open to all.")
+                raise ValidationError(
+                    "New semester events must be open to all.")
             if data['purpose'] == 'New Semester' and data['fee_amount'] == 0.00:
                 raise ValidationError("New semester events must have a fee.")
         except TypeError:
+            print('this is why')
             pass

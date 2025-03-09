@@ -57,6 +57,8 @@ class Student(BaseModel, Base):
     current_grade = Column(Integer, nullable=False)
     semester_id = Column(String(120), ForeignKey('semesters.id'))
     has_passed = Column(Boolean, default=False)
+    next_grade = Column(Integer, nullable=True, default=None)
+    is_registered = Column(Boolean, default=False)
 
     # Identification & Legal Docs
     birth_certificate = Column(

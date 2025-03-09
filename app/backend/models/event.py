@@ -15,6 +15,9 @@ class Event(BaseModel, Base):
     organizer = Column(String(50), Enum('School Administration',
                        'School', 'Student Club', 'External Organizer'), nullable=False)
 
+    ethiopian_year = Column(String(10), nullable=False)
+    gregorian_year = Column(String(15), default=None, nullable=True)
+
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)
     start_time = Column(DateTime)
@@ -69,10 +72,6 @@ class Event(BaseModel, Base):
             "is_hybrid = True AND location_type = 'Online'",
             name="check_hybrid"
         ),
-        # CheckConstraint(
-        #     "is_hybrid = False AND location_type != 'Online'",
-        #     name="check_hybrid_with_location"
-        # ),
         CheckConstraint(
             "purpose = 'New Semester' AND organizer = 'School Administration'",
             name="check_purpose_with_organizer"

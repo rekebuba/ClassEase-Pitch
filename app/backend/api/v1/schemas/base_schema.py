@@ -1,5 +1,7 @@
+from datetime import datetime
 import re
 from marshmallow import Schema, ValidationError, post_dump, post_load, validates
+from pyethiodate import EthDate
 
 
 def to_snake(data):
@@ -48,3 +50,9 @@ class BaseSchema(Schema):
         # Check if the phone number matches the pattern
         if not re.match(pattern, value):
             raise ValidationError("Invalid phone number format.")
+
+    def current_EC_year(self) -> str:
+        return str(EthDate.date_to_ethiopian(datetime.now()).year)
+
+    def current_GC_year(self, ethiopian_year: int) -> str:
+        return f'{ethiopian_year + 7}/{ethiopian_year + 8}'

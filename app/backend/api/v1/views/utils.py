@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from flask import current_app  # Import current_app to access app context
 from functools import wraps
 from flask import request, jsonify
+from models.student import Student
 from models import storage
 from models.stud_yearly_record import StudentYearlyRecord
 from models.teacher import Teacher
@@ -245,8 +246,12 @@ def student_required(f):
         try:
             payload = jwt.decode(
                 token, current_app.config["STUDENT_SECRET_KEY"], algorithms=["HS256"])
-            student_data = storage.get_first(
-                User, identification=payload['id'])
+            student_data = (storage.session.query(
+                Student
+            )
+                .join(User, Student.user_id == User.id)
+                .filter(User.identification == payload['id'])
+            ).first()
             if not student_data:
                 print("notfound")
                 return jsonify({'message': 'Student not found!'}), 404
