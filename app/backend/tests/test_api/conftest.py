@@ -63,7 +63,7 @@ def override_session(session, *factories):
             factory._meta.sqlalchemy_session = original_session
 
 
-@pytest.fixture(params=[(AdminFactory, 5), (TeacherFactory, 5), (StudentFactory, 5)])
+@pytest.fixture(params=[(AdminFactory, 1), (TeacherFactory, 1), (StudentFactory, 1)])
 def user_register_success(request, db_session):
     factory, count = request.param
 

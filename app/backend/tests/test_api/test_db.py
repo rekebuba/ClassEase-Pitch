@@ -1,5 +1,7 @@
 from datetime import date, datetime
 import json
+from models.year import Year
+from models.subject import Subject
 from tests.test_api.factories import StudentFactory, TeacherFactory, AdminFactory
 from models.student import Student
 from models.grade import Grade
@@ -22,6 +24,24 @@ def test_db_grade_values(client, db_session):
 
     # Assert that the database has the correct grade values
     assert grade_values == list(range(1, 13))
+
+def test_db_grade_count(client, db_session):
+    # Query the database
+    grade_count = db_session.query(Grade).count()
+
+    # Assert that the database has the correct number of grades
+    assert grade_count == 12
+
+
+def test_db_subject_count(client, db_session):
+    # Query the database
+    subject = db_session.query(Subject).count()
+    assert subject > 0
+    
+def test_db_year_count(client, db_session):
+    # Query the database
+    year = db_session.query(Year).count()
+    assert year > 0
 
 
 def test_user_register_success(client, user_register_success):

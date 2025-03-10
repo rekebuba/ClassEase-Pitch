@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-""" Module for Section class """
+""" Module for Semester class """
 
 from sqlalchemy import Column, String, Integer, ForeignKey, Date
 from sqlalchemy.orm import relationship

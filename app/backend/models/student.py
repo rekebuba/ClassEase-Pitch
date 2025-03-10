@@ -44,10 +44,8 @@ class Student(BaseModel, Base):
     guardian_phone = Column(String(25))
 
     # Academic Info
-    start_year_ethiopian = Column(String(15), nullable=False)
-    start_year_gregorian = Column(String(15), nullable=False)
-    end_year_ethiopian = Column(String(15), default=None)
-    end_year_gregorian = Column(String(15), default=None)
+    start_year_id = Column(String(120), nullable=False)
+    current_year_id = Column(String(120), nullable=False)
 
     # If transferring from another school
     is_transfer = Column(Boolean, default=False)

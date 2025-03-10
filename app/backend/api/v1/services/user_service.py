@@ -1,7 +1,7 @@
 import bcrypt
 from flask import request
 from marshmallow import ValidationError
-from api.v1.schemas.user.registration_schema import UserRegistrationSchema
+from api.v1.schemas.user_schema import UserRegistrationSchema
 from api.v1.views.methods import save_profile
 from api.v1.views.utils import create_student_token, create_teacher_token, create_admin_token
 from models.teacher import Teacher
@@ -9,9 +9,9 @@ from models.student import Student
 from models.user import User
 from models import storage
 from models.admin import Admin
-from api.v1.schemas.admin.registration_schema import AdminRegistrationSchema
-from api.v1.schemas.student.registration_schema import StudentRegistrationSchema
-from api.v1.schemas.teacher.registration_schema import TeacherRegistrationSchema
+from api.v1.schemas.admin_schema import AdminRegistrationSchema
+from api.v1.schemas.student_schema import StudentRegistrationSchema
+from api.v1.schemas.teacher_schema import TeacherRegistrationSchema
 
 
 class UserService:

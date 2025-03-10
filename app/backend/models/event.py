@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """ Module for Section class """
 
-from sqlalchemy import CheckConstraint, Column, Text, String, Integer, Boolean, Date, DateTime, Enum
+from sqlalchemy import CheckConstraint, Column, ForeignKey, Text, String, Integer, Boolean, Date, DateTime, Enum
 from sqlalchemy.orm import relationship
 from models.engine.db_storage import BaseModel, Base
 
@@ -15,8 +15,9 @@ class Event(BaseModel, Base):
     organizer = Column(String(50), Enum('School Administration',
                        'School', 'Student Club', 'External Organizer'), nullable=False)
 
-    ethiopian_year = Column(String(10), nullable=False)
-    gregorian_year = Column(String(15), default=None, nullable=True)
+    # ethiopian_year = Column(String(10), nullable=False)
+    # gregorian_year = Column(String(15), default=None, nullable=True)
+    year_id = Column(String(225), ForeignKey('years.id'), nullable=False)
 
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)

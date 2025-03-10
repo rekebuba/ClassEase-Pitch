@@ -1,5 +1,5 @@
 from marshmallow import Schema, ValidationError, pre_load, validates, validates_schema, fields
-from api.v1.schemas.user.registration_schema import UserRegistrationSchema
+from api.v1.schemas.user_schema import UserRegistrationSchema
 from models.admin import Admin
 from api.v1.schemas.base_schema import BaseSchema
 from models import storage

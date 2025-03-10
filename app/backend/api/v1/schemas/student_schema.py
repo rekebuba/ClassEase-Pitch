@@ -5,7 +5,8 @@ from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
 from models.semester import Semester
 from models.user import User
 from models.student import Student
-from api.v1.schemas.user.registration_schema import UserRegistrationSchema
+from api.v1.schemas.user_schema import UserRegistrationSchema
+from api.v1.schemas.year_schema import yearValidationSchema
 from api.v1.schemas.base_schema import BaseSchema
 from models import storage
 import tests.test_api.helper_functions
@@ -30,10 +31,10 @@ class StudentRegistrationSchema(BaseSchema, Schema):
     mother_phone = fields.String(required=False)
     guardian_phone = fields.String(required=False)
 
-    start_year_ethiopian = fields.String(required=False)
-    start_year_gregorian = fields.String(required=False)
-    end_year_ethiopian = fields.String(required=False)
-    end_year_gregorian = fields.String(required=False)
+    start_year_id = fields.Nested(yearValidationSchema,
+                                  required=True, only=['year_id'])
+    current_year_id = fields.Nested(yearValidationSchema,
+                                    required=True, only=['year_id'])
 
     is_transfer = fields.Boolean(required=False)
     previous_school_name = fields.String(required=False, validate=[
@@ -72,7 +73,8 @@ class StudentRegistrationSchema(BaseSchema, Schema):
         if not data.get('start_year_ethiopian'):
             data['start_year_ethiopian'] = self.current_EC_year()
         if not data.get('start_year_gregorian'):
-            data['start_year_gregorian'] = self.current_GC_year(int(data['start_year_ethiopian']))
+            data['start_year_gregorian'] = self.current_GC_year(
+                int(data['start_year_ethiopian']))
         if data.get('gender'):
             data['gender'] = data['gender'].upper()
         if data.get('is_transfer') == 'True':

@@ -18,13 +18,15 @@ def seed_grades(session):
         session (Session): SQLAlchemy session object used to interact with the database.
 
     """
-    existing_grades = session.query(Grade).all()
-    if not existing_grades:  # Only seed if table is empty
-        for i in range(1, 13):
-            grade = Grade(name=i)
-            session.add(grade)
+    # Check if the table is already populated
+    if session.query(Grade).count() > 0:
+        return
 
-        session.commit()
+    for i in range(1, 13):
+        grade = Grade(name=i)
+        session.add(grade)
+
+    session.commit()
 
 
 class Grade(BaseModel, Base):

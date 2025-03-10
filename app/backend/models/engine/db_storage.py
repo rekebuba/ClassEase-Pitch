@@ -22,6 +22,7 @@ from models.teacher_record import TeachersRecord
 from models.blacklist_token import BlacklistToken
 from models.event import Event
 from models.semester import Semester
+from models.year import Year, seed_year
 from models.stream import Stream, seed_streams
 from datetime import datetime
 from flask import current_app
@@ -109,6 +110,7 @@ class DBStorage:
         seed_grades(self.session)
         seed_streams(self.session)
         seed_subjects(self.session)
+        seed_year(self.session)
 
     def close(self):
         """Close the current session."""

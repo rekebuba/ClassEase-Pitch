@@ -19,7 +19,7 @@ from urllib.parse import urlparse, parse_qs
 from sqlalchemy import update, and_
 from datetime import datetime
 from api.v1.views.methods import save_profile, validate_request
-from app.backend.api.v1.schemas.assessment.course_registration import CourseRegistration
+from api.v1.schemas.assessment_schema import CourseRegistration
 
 stud = Blueprint('stud', __name__, url_prefix='/api/v1/student')
 

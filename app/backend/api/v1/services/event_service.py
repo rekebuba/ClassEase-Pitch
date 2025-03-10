@@ -4,7 +4,7 @@ from models.admin import Admin
 from models.user import User
 from api.v1.services.user_service import UserService
 from models import storage
-from api.v1.schemas.admin.registration_schema import AdminRegistrationSchema
+from api.v1.schemas.admin_schema import AdminRegistrationSchema
 from models import storage
 from models.event import Event
 

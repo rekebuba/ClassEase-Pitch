@@ -8,7 +8,7 @@ from marshmallow import ValidationError
 from models import storage
 from models.user import User
 from models.blacklist_token import BlacklistToken
-from api.v1.schemas.user.auth_schema import AuthSchema, InvalidCredentialsError
+from api.v1.schemas.user_schema import AuthSchema, InvalidCredentialsError
 from api.v1.views import errors
 from api.v1.services.user_service import UserService
 
@@ -21,7 +21,7 @@ def login():
     Handle user login by validating credentials and generating an access token.
     """
     try:
-        auth_schema = AuthScwwhema()
+        auth_schema = AuthSchema()
         valid_user = auth_schema.load(request.get_json())
 
         # Generate an api_key token based on the user's role

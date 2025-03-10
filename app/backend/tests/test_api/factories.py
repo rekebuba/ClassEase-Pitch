@@ -7,7 +7,7 @@ import factory
 from faker import Faker
 import requests
 from pyethiodate import EthDate
-
+from models.year import Year
 from models.semester import Semester
 from models.teacher import Teacher
 from models.student import Student
@@ -18,11 +18,27 @@ from models.event import Event
 fake = Faker()
 
 
+def remove_fields(form, *args):
+    """Removes fields from a form."""
+    exclude_fields = {'id', 'created_at', 'updated_at',
+                      'sqlalchemy_session', '__class__',
+                      'year', 'start_year_id', 'current_year_id',
+                      'identification', 'password', 'semester_id',
+                      'event_id'}
+    data = {key: value for key, value in form.__dict__.items(
+    ) if key not in exclude_fields}
+
+    for arg in args:
+        data[arg] = {key: value for key, value in form.arg.__dict__.items(
+        ) if key not in exclude_fields}
+
+    return data
+
+
 class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
         model = User
         sqlalchemy_session = None
-        # sqlalchemy_session_persistence = "commit"
 
     @staticmethod
     def get_ai_profile_picture():
@@ -80,6 +96,14 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     password = factory.LazyAttribute(
         lambda obj: UserFactory._hash_password(obj.identification))
 
+    @factory.post_generation
+    def clean_data(self, create, extracted, **kwargs):
+        """Post-generation hook to clean up data."""
+        if not create:
+            return
+
+        return remove_fields(self)
+
 
 class AdminFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
@@ -102,6 +126,14 @@ class AdminFactory(factory.alchemy.SQLAlchemyModelFactory):
     phone = factory.LazyAttribute(lambda x: '091234567')
     address = factory.LazyAttribute(lambda x: fake.address())
 
+    @factory.post_generation
+    def clean_data(self, create, extracted, **kwargs):
+        """Post-generation hook to clean up data."""
+        if not create:
+            return
+
+        return remove_fields(self, 'user')
+
 
 class StudentFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
@@ -109,12 +141,8 @@ class StudentFactory(factory.alchemy.SQLAlchemyModelFactory):
         sqlalchemy_session = None
 
     @staticmethod
-    def current_EC_year() -> str:
-        return str(EthDate.date_to_ethiopian(datetime.now()).year)
-
-    @staticmethod
-    def current_GC_year():
-        return f'{int(StudentFactory.current_EC_year()) + 7}/{int(StudentFactory.current_EC_year()) + 8}'
+    def current_EC_year() -> int:
+        return EthDate.date_to_ethiopian(datetime.now()).year
 
     user = factory.SubFactory(
         UserFactory, sqlalchemy_session=Meta.sqlalchemy_session, role='student')
@@ -133,10 +161,12 @@ class StudentFactory(factory.alchemy.SQLAlchemyModelFactory):
     guardian_name = factory.LazyAttribute(lambda x: fake.name())
     guardian_phone = factory.LazyAttribute(lambda x: '091234567')
 
-    start_year_ethiopian = factory.LazyAttribute(
+    academic_year = factory.LazyAttribute(
         lambda x: StudentFactory.current_EC_year())
-    start_year_gregorian = factory.LazyAttribute(
-        lambda x: StudentFactory.current_GC_year())
+
+    # Allow start_year_id and current_year_id to be passed explicitly
+    start_year_id = factory.SelfAttribute('start_year.id')
+    current_year_id = factory.SelfAttribute('current_year.id')
 
     is_transfer = factory.LazyAttribute(lambda x: fake.boolean())
     previous_school_name = factory.LazyAttribute(
@@ -161,6 +191,14 @@ class StudentFactory(factory.alchemy.SQLAlchemyModelFactory):
     )
 
     is_active = factory.LazyAttribute(lambda x: True)
+
+    @factory.post_generation
+    def clean_data(self, create, extracted, **kwargs):
+        """Post-generation hook to clean up data."""
+        if not create:
+            return
+
+        return remove_fields(self, 'user', 'year')
 
 
 class TeacherFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -188,6 +226,14 @@ class TeacherFactory(factory.alchemy.SQLAlchemyModelFactory):
     qualification = factory.LazyAttribute(lambda x: fake.random_element(
         elements=('Certified Teacher', 'Diploma in Education', 'Degree in Education')))
 
+    @factory.post_generation
+    def clean_data(self, create, extracted, **kwargs):
+        """Post-generation hook to clean up data."""
+        if not create:
+            return
+
+        return remove_fields(self, 'user')
+
 
 class EventFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
@@ -205,8 +251,8 @@ class EventFactory(factory.alchemy.SQLAlchemyModelFactory):
     ) if obj.purpose != 'New Semester' else 'School Administration'
     )
 
-    ethiopian_year = factory.LazyAttribute(lambda x: '2017')
-    gregorian_year = factory.LazyAttribute(lambda x: None)
+    academic_year = factory.LazyAttribute(
+        lambda x: EthDate.date_to_ethiopian(datetime.now()).year)
 
     start_date = factory.LazyAttribute(lambda x: fake.past_date())
     end_date = factory.LazyAttribute(lambda x: fake.future_date())
@@ -246,6 +292,14 @@ class EventFactory(factory.alchemy.SQLAlchemyModelFactory):
         lambda obj: random.randint(100, 900) if obj.has_fee else 0.00)
     description = factory.LazyAttribute(lambda x: fake.text())
 
+    @factory.post_generation
+    def clean_data(self, create, extracted, **kwargs):
+        """Post-generation hook to clean up data."""
+        if not create:
+            return
+
+        return remove_fields(self)
+
 
 class SemesterFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
@@ -257,3 +311,11 @@ class SemesterFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     event_id = factory.LazyAttribute(lambda obj: obj.event.id)
     name = factory.LazyAttribute(lambda x: 1)
+
+    @factory.post_generation
+    def clean_data(self, create, extracted, **kwargs):
+        """Post-generation hook to clean up data."""
+        if not create:
+            return
+
+        return remove_fields(self, 'event')

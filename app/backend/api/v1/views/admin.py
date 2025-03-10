@@ -28,12 +28,12 @@ from urllib.parse import urlparse, parse_qs
 from api.v1.views.utils import admin_required
 from api.v1.views.methods import save_profile, validate_request
 from api.v1.services.event_service import EventService
-from api.v1.schemas.admin.registration_schema import AdminRegistrationSchema
-from api.v1.schemas.user.registration_schema import UserRegistrationSchema
+from api.v1.schemas.admin_schema import AdminRegistrationSchema
+from api.v1.schemas.user_schema import UserRegistrationSchema
 from api.v1.services.semester_service import SemesterService
-from api.v1.schemas.event.create_schema import EventCreationSchema
+from api.v1.schemas.event_schema import EventCreationSchema
 from api.v1.services.admin_service import AdminService
-from api.v1.schemas.semester.create_schema import SemesterCreationSchema
+from api.v1.schemas.semester_schema import SemesterCreationSchema
 from api.v1.services.user_service import UserService
 from api.v1.views import errors
 admin = Blueprint('admin', __name__, url_prefix='/api/v1/admin')
