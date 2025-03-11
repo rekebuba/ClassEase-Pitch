@@ -3,6 +3,7 @@
 import pytest
 import unittest
 from api import create_app
+from models.subject import Subject
 from models.engine.db_storage import DBStorage
 from models.user import User
 from models.base_model import Base, BaseModel
@@ -15,7 +16,6 @@ import random
 from models.admin import Admin
 from tests.test_api.helper_functions import *
 from models import storage
-from datetime import date, time
 
 
 @pytest.fixture(scope="session")
@@ -28,14 +28,8 @@ def app_session():
 
     yield app
 
-    storage.drop_all()  # Clean up the database after the session
-
-
-@pytest.fixture(scope="session")
-def client(app_session):
-    """Session-scoped fixture for the Flask test client."""
-    with app_session.test_client() as client:
-        yield client
+    storage.session.close_all() # Clean up the database after the session
+    storage.drop_all()
 
 
 @pytest.fixture(scope="session")
@@ -46,6 +40,13 @@ def db_session(app_session):
     yield storage.session
 
     storage.rollback()  # Roll back the transaction after the test
+
+
+@pytest.fixture(scope="session")
+def client(app_session):
+    """Session-scoped fixture for the Flask test client."""
+    with app_session.test_client() as client:
+        yield client
 
 
 @contextmanager
@@ -65,15 +66,12 @@ def override_session(session, *factories):
 
 @pytest.fixture(params=[(AdminFactory, 1), (TeacherFactory, 1), (StudentFactory, 1)])
 def user_register_success(request, db_session):
-    factory, count = request.param
+    Factory, count = request.param
 
     data = []
-    with override_session(db_session, factory, UserFactory):
+    with override_session(db_session, Factory, UserFactory):
         for _ in range(count):
-            user = factory()
-
-            # Convert the user object to a dictionary
-            user_data = user.to_dict()
+            user_data = Factory.build().to_dict()
             valid_data = {
                 **(user_data.pop('user')).to_dict(),
                 **user_data
@@ -81,15 +79,6 @@ def user_register_success(request, db_session):
 
             # Remove unnecessary fields
             role = valid_data.pop('role')
-            valid_data.pop('id')
-            valid_data.pop('created_at')
-            valid_data.pop('updated_at')
-            valid_data.pop('__class__')
-            valid_data.pop('identification')
-            valid_data.pop('sqlalchemy_session')
-            valid_data.pop('password') if 'password' in valid_data else None
-            user_data.pop(
-                'semester_id') if 'semester_id' in valid_data else None
 
             if 'image_path' in valid_data:
                 local_path = valid_data.pop('image_path')
@@ -106,10 +95,18 @@ def db_create_users(db_session):
     factories = [(AdminFactory, 1), (TeacherFactory, 1), (StudentFactory, 1)]
 
     users = []
-    for factory, count in factories:
-        with override_session(db_session, factory, UserFactory):
+    user = None
+    for Factory, count in factories:
+        with override_session(db_session, Factory, UserFactory):
             for _ in range(count):
-                user = factory()
+                if Factory == StudentFactory:
+                    user = Factory(
+                        start_year_id=db_session.query(Year.id).scalar(),
+                        current_year_id=db_session.query(Year.id).scalar(),
+                    )
+                else:
+                    user = Factory()
+
                 users.append(user)
 
         db_session.commit()
@@ -124,10 +121,10 @@ def role(request):
 
 @pytest.fixture(scope="session")
 def users_auth_header(client, db_session, role):
-    id = db_session.query(User.identification).filter_by(role=role).scalar()
+    user = db_session.query(User.identification).filter_by(role=role).first()
     response = client.post('/api/v1/auth/login', json={
-        'id': id,
-        'password': id
+        'id': user.identification,
+        'password': user.identification
     })
 
     token = response.json["apiKey"]
@@ -137,7 +134,7 @@ def users_auth_header(client, db_session, role):
 @pytest.fixture
 def event_form(db_session):
     with override_session(db_session, SemesterFactory, EventFactory):
-        form = SemesterFactory().to_dict()
+        form = SemesterFactory.build().to_dict()
 
         semester_form = {
             **(form.pop('event')).to_dict(),
@@ -146,41 +143,36 @@ def event_form(db_session):
             }
         }
 
-        # Remove unnecessary fields
-        semester_form.pop('id')
-        semester_form.pop('created_at')
-        semester_form.pop('updated_at')
-        semester_form.pop('sqlalchemy_session')
-        semester_form.pop('__class__')
-        semester_form['semester'].pop('event_id')
-        semester_form['semester'].pop('id')
-        semester_form['semester'].pop('created_at')
-        semester_form['semester'].pop('updated_at')
-        semester_form['semester'].pop('__class__')
-
-    # Convert date fields to string (ISO format)
-    for key, value in semester_form.items():
-        if isinstance(value, (date, datetime)):
-            if key in ['start_time', 'end_time']:
-                semester_form[key] = value.strftime("%H:%M:%S")
-            else:
-                semester_form[key] = value.strftime("%Y-%m-%d")
-
     return semester_form
 
 
 @pytest.fixture(scope="session")
 def db_event_form(db_session):
     with override_session(db_session, SemesterFactory, EventFactory):
-        form = SemesterFactory().to_dict()
+        form = SemesterFactory(
+            event__year_id=db_session.query(Year.id).scalar(),
+        ).to_dict()
 
         db_session.commit()
 
-    semester_form = {
-        **(form.pop('event')).to_dict(),
-        'semester': {
-            **form
-        }
-    }
-
     return form
+
+
+@pytest.fixture(scope="session")
+def course_registration(db_session):
+    student_data = db_session.query(Student).first()
+    subjects = (
+        storage.session.query(
+            Subject.name.label("subject"),
+            Subject.code.label("subject_code"),
+            Grade.name.label("grade")
+        )
+        .join(Grade, Grade.id == Subject.grade_id)
+        .filter(Grade.name == (student_data.next_grade if student_data.next_grade else student_data.current_grade))
+        .all()
+    )
+
+    subject_list = [{key: value for key, value in q._asdict().items()}
+                    for q in subjects]
+
+    return {"course": subject_list, "semester": 1, "academic_year": 2017, "grade": subject_list[0]['grade']}

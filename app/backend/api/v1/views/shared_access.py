@@ -14,11 +14,11 @@ from models.section import Section
 from models.subject import Subject
 from models.assessment import Assessment
 from models.mark_list import MarkList
-from models.average_result import AVRGResult
+from models.stud_semester_record import STUDSemesterRecord
 from models.average_subject import AVRGSubject
 from models.teacher import Teacher
 from models.teacher_record import TeachersRecord
-from models.stud_yearly_record import StudentYearlyRecord
+from models.stud_year_record import STUDYearRecord
 from urllib.parse import urlparse, parse_qs
 from sqlalchemy import update, and_
 from flask import Blueprint
@@ -155,18 +155,18 @@ def student_assessment(admin_data, student_data):
             student_assessment[code]["semII"] = {"total": total, "rank": rank}
 
     summary = (
-        storage.session.query(AVRGResult.semester,
-                              AVRGResult.average,
-                              AVRGResult.rank,
-                              StudentYearlyRecord.final_score,
-                              StudentYearlyRecord.rank
+        storage.session.query(STUDSemesterRecord.semester,
+                              STUDSemesterRecord.average,
+                              STUDSemesterRecord.rank,
+                              STUDYearRecord.final_score,
+                              STUDYearRecord.rank
                               )
-        .select_from(AVRGResult)
-        .join(StudentYearlyRecord, and_(StudentYearlyRecord.student_id == AVRGResult.student_id,
-                                        StudentYearlyRecord.grade_id == AVRGResult.grade_id,
-                                        StudentYearlyRecord.year == AVRGResult.year))
-        .filter(AVRGResult.student_id == student_id)
-        .order_by(AVRGResult.semester)
+        .select_from(STUDSemesterRecord)
+        .join(STUDYearRecord, and_(STUDYearRecord.student_id == STUDSemesterRecord.student_id,
+                                        STUDYearRecord.grade_id == STUDSemesterRecord.grade_id,
+                                        STUDYearRecord.year == STUDSemesterRecord.year))
+        .filter(STUDSemesterRecord.student_id == student_id)
+        .order_by(STUDSemesterRecord.semester)
     ).all()
 
     if not summary:

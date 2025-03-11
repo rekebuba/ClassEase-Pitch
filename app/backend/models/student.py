@@ -44,8 +44,8 @@ class Student(BaseModel, Base):
     guardian_phone = Column(String(25))
 
     # Academic Info
-    start_year_id = Column(String(120), nullable=False)
-    current_year_id = Column(String(120), nullable=False)
+    start_year_id = Column(String(120), ForeignKey('years.id'), nullable=False)
+    current_year_id = Column(String(120), ForeignKey('years.id'), nullable=False)
 
     # If transferring from another school
     is_transfer = Column(Boolean, default=False)
@@ -64,11 +64,14 @@ class Student(BaseModel, Base):
 
     # Health & Special Needs
     has_medical_condition = Column(Boolean, default=False)
-    medical_details = Column(Text, nullable=True)  # Explanation of medical conditions
+    # Explanation of medical conditions
+    medical_details = Column(Text, nullable=True)
     has_disability = Column(Boolean, default=False)
-    disability_details = Column(Text, nullable=True)  # Explanation of disabilities
+    # Explanation of disabilities
+    disability_details = Column(Text, nullable=True)
     requires_special_accommodation = Column(Boolean, default=False)
-    special_accommodation_details = Column(Text, nullable=True)  # Any special support needed
+    special_accommodation_details = Column(
+        Text, nullable=True)  # Any special support needed
 
     # Whether the student is currently enrolled
     is_active = Column(Boolean, default=False)

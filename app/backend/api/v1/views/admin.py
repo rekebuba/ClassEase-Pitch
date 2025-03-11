@@ -16,9 +16,9 @@ from models.student import Student
 from models.section import Section
 from models.mark_list import MarkList
 from models.assessment import Assessment
-from models.average_result import AVRGResult
+from models.stud_semester_record import STUDSemesterRecord
 from models.average_subject import AVRGSubject
-from models.stud_yearly_record import StudentYearlyRecord
+from models.stud_year_record import STUDYearRecord
 from models.teacher_record import TeachersRecord
 from models.event import Event
 from models.semester import Semester
@@ -160,9 +160,9 @@ def school_overview(admin_data):
     total_students = storage.get_all(Student)
     enrollment_by_grade = storage.session.query(
         Grade.name,
-        func.count(StudentYearlyRecord.student_id)
-    ).join(Grade, StudentYearlyRecord.grade_id == Grade.id).group_by(
-        StudentYearlyRecord.grade_id,
+        func.count(STUDYearRecord.student_id)
+    ).join(Grade, STUDYearRecord.grade_id == Grade.id).group_by(
+        STUDYearRecord.grade_id,
     ).all()
 
     performance_by_subject = storage.session.query(
@@ -484,8 +484,8 @@ def create_mark_list(admin_data):
 
     try:
         students = (
-            storage.session.query(StudentYearlyRecord)
-            .filter(StudentYearlyRecord.grade_id == grade_id, StudentYearlyRecord.year == data['year'])
+            storage.session.query(STUDYearRecord)
+            .filter(STUDYearRecord.grade_id == grade_id, STUDYearRecord.year == data['year'])
             .all()
         )
 
@@ -499,8 +499,8 @@ def create_mark_list(admin_data):
                 if not section:
                     return jsonify({"error": "Section not found"}), 404
                 update_result = storage.session.execute(
-                    update(StudentYearlyRecord)
-                    .where(StudentYearlyRecord.student_id == student.student_id)
+                    update(STUDYearRecord)
+                    .where(STUDYearRecord.student_id == student.student_id)
                     .values(section_id=section.id)
                 )
 
@@ -572,7 +572,7 @@ def create_mark_list(admin_data):
                         ))
 
             average_result.append(
-                AVRGResult(student_id=student.student_id,
+                STUDSemesterRecord(student_id=student.student_id,
                            grade_id=grade_id,
                            section_id=student.section_id,
                            semester=data['semester'],
@@ -716,19 +716,19 @@ def admin_student_list(admin_data):
                               Student.grand_father_name,
                               Section.section,
                               Section.id,
-                              StudentYearlyRecord.grade_id,
-                              StudentYearlyRecord.final_score,
-                              StudentYearlyRecord.rank,
-                              StudentYearlyRecord.year,
+                              STUDYearRecord.grade_id,
+                              STUDYearRecord.final_score,
+                              STUDYearRecord.rank,
+                              STUDYearRecord.year,
                               User.image_path
                               )
-        .select_from(StudentYearlyRecord)
-        .join(Student, Student.id == StudentYearlyRecord.student_id)
+        .select_from(STUDYearRecord)
+        .join(Student, Student.id == STUDYearRecord.student_id)
         .join(User, User.id == Student.id)
-        .join(Section, Section.id == StudentYearlyRecord.section_id)
+        .join(Section, Section.id == STUDYearRecord.section_id)
         .filter(
-            StudentYearlyRecord.grade_id == grade.id,
-            StudentYearlyRecord.year == data['year'][0]
+            STUDYearRecord.grade_id == grade.id,
+            STUDYearRecord.year == data['year'][0]
         )
         .order_by(Section.section.asc(), Student.name.asc(), Student.father_name.asc(), Student.grand_father_name.asc(), Student.id.asc())
     ).all()

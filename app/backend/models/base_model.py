@@ -10,7 +10,7 @@ import uuid
 import bcrypt
 from typing import Type
 
-Base: Type = declarative_base() # Base class for all models
+Base: Type = declarative_base()  # Base class for all models
 
 
 class BaseModel:
@@ -101,9 +101,13 @@ class BaseModel:
             del new_dict["_sa_instance_state"]
         if "password" in new_dict:
             del new_dict["password"]
-        new_dict['__class__'] = self.__class__.__name__
-        new_dict['created_at'] = self.created_at.isoformat()
-        new_dict['updated_at'] = self.updated_at.isoformat()
+        if '__class__' in new_dict:
+            new_dict['__class__'] = self.__class__.__name__
+        if 'created_at' in new_dict:
+            new_dict['created_at'] = self.created_at.isoformat()
+        if 'updated_at' in new_dict:
+            new_dict['updated_at'] = self.updated_at.isoformat()
+
         return new_dict
 
     def delete(self):

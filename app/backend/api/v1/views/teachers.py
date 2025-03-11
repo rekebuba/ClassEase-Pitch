@@ -12,11 +12,11 @@ from models.section import Section
 from models.subject import Subject
 from models.assessment import Assessment
 from models.mark_list import MarkList
-from models.average_result import AVRGResult
+from models.stud_semester_record import STUDSemesterRecord
 from models.average_subject import AVRGSubject
 from models.teacher import Teacher
 from models.teacher_record import TeachersRecord
-from models.stud_yearly_record import StudentYearlyRecord
+from models.stud_year_record import STUDYearRecord
 from urllib.parse import urlparse, parse_qs
 from sqlalchemy import update, and_
 from flask import Blueprint
@@ -547,7 +547,7 @@ def average_subject_ranks(student_data):
 def semester_average(student_data):
     """
     Calculate the average score for a student in a specific semester and year,
-    update or create an AVRGResult entry with the calculated average, and
+    update or create an STUDSemesterRecord entry with the calculated average, and
     subsequently update the semester ranks.
 
     Returns:
@@ -570,11 +570,11 @@ def semester_average(student_data):
 
     if average:
         storage.session.execute(
-            update(AVRGResult)
+            update(STUDSemesterRecord)
             .where(and_(
-                AVRGResult.student_id == average.student_id,
-                AVRGResult.semester == average.semester,
-                AVRGResult.year == average.year
+                STUDSemesterRecord.student_id == average.student_id,
+                STUDSemesterRecord.semester == average.semester,
+                STUDSemesterRecord.year == average.year
             ))
             .values(average=average.average_score, updated_at=datetime.utcnow().isoformat())
         )
@@ -599,24 +599,24 @@ def semester_ranks(student_data):
         semester_ranks(student_data)
     """
     ranked_data_subquery = (storage.session.query(
-        AVRGResult.student_id,
-        AVRGResult.semester,
-        AVRGResult.year,
-        func.rank().over(order_by=AVRGResult.average.desc()).label('new_rank')
+        STUDSemesterRecord.student_id,
+        STUDSemesterRecord.semester,
+        STUDSemesterRecord.year,
+        func.rank().over(order_by=STUDSemesterRecord.average.desc()).label('new_rank')
     )
         .where(and_(
-            AVRGResult.semester == student_data['semester'],
-            AVRGResult.year == student_data['year'],
-            AVRGResult.average.isnot(None)))
+            STUDSemesterRecord.semester == student_data['semester'],
+            STUDSemesterRecord.year == student_data['year'],
+            STUDSemesterRecord.average.isnot(None)))
         .subquery()
     )
 
     storage.session.execute(
-        update(AVRGResult)
+        update(STUDSemesterRecord)
         .where(and_(
-            AVRGResult.student_id == ranked_data_subquery.c.student_id,  # c is short for Column
-            AVRGResult.semester == ranked_data_subquery.c.semester,
-            AVRGResult.year == ranked_data_subquery.c.year,
+            STUDSemesterRecord.student_id == ranked_data_subquery.c.student_id,  # c is short for Column
+            STUDSemesterRecord.semester == ranked_data_subquery.c.semester,
+            STUDSemesterRecord.year == ranked_data_subquery.c.year,
         ))
         .values(rank=ranked_data_subquery.c.new_rank, updated_at=datetime.utcnow().isoformat())
     )
@@ -630,7 +630,7 @@ def yearly_average(student_data):
 
     This function retrieves the average results for a student for a given year,
     calculates the yearly average, and updates or creates a record in the
-    StudentYearlyRecord table with the calculated average. It also triggers
+    STUDYearRecord table with the calculated average. It also triggers
     the year_ranks function to update the student's ranking.
 
     Args:
@@ -641,20 +641,20 @@ def yearly_average(student_data):
     """
 
     average = storage.session.query(
-        AVRGResult.student_id,
-        AVRGResult.year,
-        func.avg(AVRGResult.average).label('semester_average')
+        STUDSemesterRecord.student_id,
+        STUDSemesterRecord.year,
+        func.avg(STUDSemesterRecord.average).label('semester_average')
     ).filter(
-        AVRGResult.student_id == student_data['student_id'],
-        AVRGResult.year == student_data['year']
-    ).group_by(AVRGResult.student_id).first()
+        STUDSemesterRecord.student_id == student_data['student_id'],
+        STUDSemesterRecord.year == student_data['year']
+    ).group_by(STUDSemesterRecord.student_id).first()
 
     if average:
         storage.session.execute(
-            update(StudentYearlyRecord)
+            update(STUDYearRecord)
             .where(and_(
-                StudentYearlyRecord.student_id == average.student_id,
-                StudentYearlyRecord.year == average.year
+                STUDYearRecord.student_id == average.student_id,
+                STUDYearRecord.year == average.year
             ))
             .values(final_score=average.semester_average, updated_at=datetime.utcnow().isoformat())
         )
@@ -680,22 +680,22 @@ def year_ranks(student_data):
     4. Saves the updated ranks back to the database.
     """
     ranked_data_subquery = (storage.session.query(
-        StudentYearlyRecord.student_id,
-        StudentYearlyRecord.year,
-        func.rank().over(order_by=StudentYearlyRecord.final_score.desc()).label('new_rank')
+        STUDYearRecord.student_id,
+        STUDYearRecord.year,
+        func.rank().over(order_by=STUDYearRecord.final_score.desc()).label('new_rank')
     )
         .where(and_(
-            StudentYearlyRecord.year == student_data['year'],
-            StudentYearlyRecord.final_score.isnot(None)))
+            STUDYearRecord.year == student_data['year'],
+            STUDYearRecord.final_score.isnot(None)))
         .subquery()
     )
 
     storage.session.execute(
-        update(StudentYearlyRecord)
+        update(STUDYearRecord)
         .where(and_(
             # c is short for Column
-            StudentYearlyRecord.student_id == ranked_data_subquery.c.student_id,
-            AVRGResult.year == ranked_data_subquery.c.year,
+            STUDYearRecord.student_id == ranked_data_subquery.c.student_id,
+            STUDSemesterRecord.year == ranked_data_subquery.c.year,
         ))
         .values(rank=ranked_data_subquery.c.new_rank, updated_at=datetime.utcnow().isoformat())
     )

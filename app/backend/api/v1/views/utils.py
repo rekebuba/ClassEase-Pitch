@@ -9,14 +9,14 @@ from functools import wraps
 from flask import request, jsonify
 from models.student import Student
 from models import storage
-from models.stud_yearly_record import StudentYearlyRecord
+from models.stud_year_record import STUDYearRecord
 from models.teacher import Teacher
 from sqlalchemy import func
 from models import storage
 from models.user import User
 from models.admin import Admin
 from models.mark_list import MarkList
-from models.average_result import AVRGResult
+from models.stud_semester_record import STUDSemesterRecord
 from models.blacklist_token import BlacklistToken
 
 
@@ -246,14 +246,8 @@ def student_required(f):
         try:
             payload = jwt.decode(
                 token, current_app.config["STUDENT_SECRET_KEY"], algorithms=["HS256"])
-            student_data = (storage.session.query(
-                Student
-            )
-                .join(User, Student.user_id == User.id)
-                .filter(User.identification == payload['id'])
-            ).first()
+            student_data = storage.get_first(User, identification=payload['id'])
             if not student_data:
-                print("notfound")
                 return jsonify({'message': 'Student not found!'}), 404
         except jwt.ExpiredSignatureError:
             return jsonify({'message': 'Student token has expired'}), 401
@@ -315,7 +309,7 @@ def admin_or_student_required(f):
             payload = jwt.decode(
                 token, current_app.config["STUDENT_SECRET_KEY"], algorithms=["HS256"])
             student_data = storage.get_first(
-                StudentYearlyRecord, student_id=payload['id'])
+                STUDYearRecord, student_id=payload['id'])
             if student_data:
                 return f(None, student_data, *args, **kwargs)
         except jwt.ExpiredSignatureError:
@@ -349,7 +343,7 @@ def student_teacher_or_admin_required(f):
             payload = jwt.decode(
                 token, current_app.config["STUDENT_SECRET_KEY"], algorithms=["HS256"])
             student_data = storage.get_first(
-                StudentYearlyRecord, student_id=payload['id'])
+                STUDYearRecord, student_id=payload['id'])
             if student_data:
                 return f(student_data, None, None, *args, **kwargs)
         except jwt.ExpiredSignatureError:

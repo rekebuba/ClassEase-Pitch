@@ -2,17 +2,18 @@ import re
 from datetime import datetime
 from marshmallow import Schema, ValidationError, post_load, pre_load, validates, validates_schema, fields
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
+from models.year import Year
 from models.semester import Semester
 from models.user import User
 from models.student import Student
 from api.v1.schemas.user_schema import UserRegistrationSchema
-from api.v1.schemas.year_schema import yearValidationSchema
+from api.v1.schemas.year_schema import YearIdField
 from api.v1.schemas.base_schema import BaseSchema
 from models import storage
 import tests.test_api.helper_functions
 
 
-class StudentRegistrationSchema(BaseSchema, Schema):
+class StudentRegistrationSchema(BaseSchema):
     """Student schema for validating and serializing Student data."""
     user_id = fields.String(required=False, load_default=None)
     first_name = fields.String(required=True, validate=[
@@ -31,10 +32,10 @@ class StudentRegistrationSchema(BaseSchema, Schema):
     mother_phone = fields.String(required=False)
     guardian_phone = fields.String(required=False)
 
-    start_year_id = fields.Nested(yearValidationSchema,
-                                  required=True, only=['year_id'])
-    current_year_id = fields.Nested(yearValidationSchema,
-                                    required=True, only=['year_id'])
+    academic_year = fields.Integer(required=True, validate=[
+        fields.validate.Range(min=2000, max=2100)])
+    start_year_id = fields.String(required=False, load_default=None)
+    current_year_id = fields.String(required=False, load_default=None)
 
     is_transfer = fields.Boolean(required=False)
     previous_school_name = fields.String(required=False, validate=[
@@ -69,12 +70,11 @@ class StudentRegistrationSchema(BaseSchema, Schema):
 
     @pre_load
     def set_defaults(self, data, **kwargs):
-        # add default values for start_year_ethiopian and start_year_gregorian
-        if not data.get('start_year_ethiopian'):
-            data['start_year_ethiopian'] = self.current_EC_year()
-        if not data.get('start_year_gregorian'):
-            data['start_year_gregorian'] = self.current_GC_year(
-                int(data['start_year_ethiopian']))
+        # add default values to the data
+
+        data['start_year_id'] = self.get_year_id(data['academic_year'])
+        data['current_year_id'] = self.get_year_id(data['academic_year'])
+
         if data.get('gender'):
             data['gender'] = data['gender'].upper()
         if data.get('is_transfer') == 'True':

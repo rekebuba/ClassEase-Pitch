@@ -1,5 +1,6 @@
 from datetime import date, datetime
 import json
+from models.user import User
 from models.year import Year
 from models.subject import Subject
 from tests.test_api.factories import StudentFactory, TeacherFactory, AdminFactory
@@ -25,19 +26,13 @@ def test_db_grade_values(client, db_session):
     # Assert that the database has the correct grade values
     assert grade_values == list(range(1, 13))
 
-def test_db_grade_count(client, db_session):
-    # Query the database
-    grade_count = db_session.query(Grade).count()
-
-    # Assert that the database has the correct number of grades
-    assert grade_count == 12
-
 
 def test_db_subject_count(client, db_session):
     # Query the database
     subject = db_session.query(Subject).count()
     assert subject > 0
-    
+
+
 def test_db_year_count(client, db_session):
     # Query the database
     year = db_session.query(Year).count()
@@ -92,5 +87,17 @@ def test_student_subjects_for_registration(client, db_session, db_create_users, 
                           headers=users_auth_header
                           )
     assert response.status_code == 200
-    assert isinstance(response.json, list)
+    assert isinstance(response.json, dict)
     assert len(response.json) > 0
+
+
+@pytest.mark.parametrize("role", ['student'], indirect=True)
+def test_student_course_registration(client, db_create_users, db_event_form, users_auth_header, course_registration):
+    print(json.dumps(course_registration, indent=4, sort_keys=True))
+    response = client.post('/api/v1/student/course/registration',
+                           json=course_registration,
+                           headers=users_auth_header
+                           )
+
+    assert response.status_code == 201
+    assert response.json['message'] == 'Course registration successful!'

@@ -22,14 +22,12 @@ class Assessment(BaseModel, Base):
         __init__(*args, **kwargs): Initializes the assessment record with the provided arguments.
     """
     __tablename__ = 'assessments'
-    student_id = Column(String(120), ForeignKey('student.user_id'), nullable=False)
-    grade_id = Column(String(120), ForeignKey('grades.id'), nullable=False)
-    section_id = Column(String(120), ForeignKey('sections.id'), nullable=False)
+    user_id = Column(String(120), ForeignKey('users.id'), nullable=False)
+    semester_record_id = Column(String(120), ForeignKey('student_semester_records.id'), nullable=False)
     subject_id = Column(String(120), ForeignKey('subjects.id'), nullable=False)
     teachers_record_id = Column(String(120), ForeignKey('teachers_record.id', ondelete="SET NULL"), nullable=True, default=None)
     total = Column(Float, default=None)  # The subject sum score of the student for each assessment
     rank = Column(Integer, default=None)
-    semester_id = Column(String(120), ForeignKey('semesters.id'), nullable=False)
 
     def __init__(self, *args, **kwargs):
         """initializes score"""

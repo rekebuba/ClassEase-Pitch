@@ -2,6 +2,8 @@
 """Student views module for the API"""
 
 from flask import Blueprint, request, jsonify, url_for
+from marshmallow import ValidationError
+from models.year import Year
 from models.semester import Semester
 from models.event import Event
 from models import storage
@@ -12,14 +14,15 @@ from models.section import Section
 from models.mark_list import MarkList
 from models.assessment import Assessment
 from models.subject import Subject
-from models.average_result import AVRGResult
-from models.stud_yearly_record import StudentYearlyRecord
+from models.stud_semester_record import STUDSemesterRecord
+from models.stud_year_record import STUDYearRecord
 from api.v1.views.utils import student_required, admin_or_student_required
 from urllib.parse import urlparse, parse_qs
 from sqlalchemy import update, and_
 from datetime import datetime
 from api.v1.views.methods import save_profile, validate_request
-from api.v1.schemas.assessment_schema import CourseRegistration
+from api.v1.schemas.assessment_schema import CourseListSchema
+from api.v1.views import errors
 
 stud = Blueprint('stud', __name__, url_prefix='/api/v1/student')
 
@@ -68,20 +71,20 @@ def student_yearly_scores(student_data):
     """
 
     query = (
-        storage.session.query(StudentYearlyRecord.student_id,
+        storage.session.query(STUDYearRecord.student_id,
                               Grade.id,
                               Grade.name,
-                              AVRGResult.semester,
-                              AVRGResult.average,
-                              StudentYearlyRecord.final_score,
-                              StudentYearlyRecord.year
+                              STUDSemesterRecord.semester,
+                              STUDSemesterRecord.average,
+                              STUDYearRecord.final_score,
+                              STUDYearRecord.year
                               )
-        .join(Grade, AVRGResult.grade_id == Grade.id)
-        .join(StudentYearlyRecord, StudentYearlyRecord.student_id == AVRGResult.student_id)
-        .filter(and_(AVRGResult.student_id == student_data.student_id,
-                     StudentYearlyRecord.grade_id == AVRGResult.grade_id,
-                     StudentYearlyRecord.year == AVRGResult.year))
-        .order_by(Grade.name, AVRGResult.semester)
+        .join(Grade, STUDSemesterRecord.grade_id == Grade.id)
+        .join(STUDYearRecord, STUDYearRecord.student_id == STUDSemesterRecord.student_id)
+        .filter(and_(STUDSemesterRecord.student_id == student_data.student_id,
+                     STUDYearRecord.grade_id == STUDSemesterRecord.grade_id,
+                     STUDYearRecord.year == STUDSemesterRecord.year))
+        .order_by(Grade.name, STUDSemesterRecord.semester)
     ).all()
 
     score = {}
@@ -190,7 +193,7 @@ def get_student_score(student_data, admin_data):
     Retrieve and return the score details of a student for a specific grade and semester.
 
     Args:
-        student_data (StudentYearlyRecord): The yearly record of the student. If not provided, it will be fetched using the student_id from the request query parameters.
+        student_data (STUDYearRecord): The yearly record of the student. If not provided, it will be fetched using the student_id from the request query parameters.
         admin_data (dict): Additional data related to the admin making the request (currently unused).
 
     Returns:
@@ -211,7 +214,7 @@ def get_student_score(student_data, admin_data):
         if 'student_id' not in data:
             return jsonify({"error": f"Missing student id"}), 400
         student_data = storage.get_first(
-            StudentYearlyRecord, student_id=data['student_id'])
+            STUDYearRecord, student_id=data['student_id'])
 
     required_data = {
         'grade',
@@ -255,7 +258,7 @@ def get_student_score(student_data, admin_data):
 
     student = storage.get_first(Student, id=student_id)
     average_score = storage.get_first(
-        AVRGResult, student_id=student_id, year=student_data.year, semester=data['semester'][0])
+        STUDSemesterRecord, student_id=student_id, year=student_data.year, semester=data['semester'][0])
 
     if not average_score:
         return jsonify({"error": "No data found"}), 404
@@ -279,7 +282,7 @@ def get_student_score(student_data, admin_data):
 
 @stud.route('/course/registration', methods=['GET'])
 @student_required
-def list_of_course_available(student_data):
+def list_of_course_available(user_data):
     """
     Retrieve the course registration status of a student.
 
@@ -290,56 +293,99 @@ def list_of_course_available(student_data):
     Returns:
         Response: A JSON response containing the course registration status of the student.
     """
-    if not student_data.is_active:
-        return jsonify({"message": "Student is not active"}), 400
+    try:
+        student_data = storage.session.query(
+            Student).filter_by(user_id=user_data.id).first()
+        if not student_data.is_active:
+            return jsonify({"message": "Student is not active"}), 400
 
-    available_semester = (
-        storage.session.query(Semester, Event)
-        .join(Event, Semester.event_id == Event.id)  # Fix join condition
-        .filter(
-            Semester.name == (
-                1 if student_data.next_grade or not student_data.semester_id else 2),
-            Event.ethiopian_year == (
-                str(int(Event.ethiopian_year) + 1)
-                if student_data.next_grade
-                else Event.ethiopian_year
-            ),
-            Event.registration_start <= datetime.now().date(),
-            Event.registration_end >= datetime.now().date(),
+        available_semester = (
+            storage.session.query(Semester.name)
+            .join(Event, Semester.event_id == Event.id)  # Fix join condition
+            .join(Year, Event.year_id == Year.id)
+            .filter(
+                Semester.name == (
+                    1 if student_data.next_grade or not student_data.semester_id else 2),
+                Year.ethiopian_year == (
+                    (int(Year.ethiopian_year) + 1)
+                    if student_data.next_grade
+                    else Year.ethiopian_year
+                ),
+                Event.registration_start <= datetime.now().date(),
+                Event.registration_end >= datetime.now().date(),
+            )
+            .first()
         )
-        .first()
-    )
-    if not available_semester:
-        return jsonify({"message": "Registration is closed"}), 400
+        if not available_semester:
+            return jsonify({"message": "Registration is closed"}), 400
 
-    # Query subjects based on student's next grade
-    subjects = (
-        storage.session.query(
-            Subject.name.label("subject"),
-            Subject.code.label("subject_code"),
-            Grade.name.label("grade")
+        # Query subjects based on student's next grade
+        subjects = (
+            storage.session.query(
+                Subject.name.label("subject"),
+                Subject.code.label("subject_code"),
+                Grade.name.label("grade")
+            )
+            .join(Grade, Grade.id == Subject.grade_id)
+            .filter(Grade.name == (student_data.next_grade if student_data.next_grade else student_data.current_grade))
+            .all()
         )
-        .join(Grade, Grade.id == Subject.grade_id)
-        .filter(Grade.name == (student_data.next_grade if student_data.next_grade else student_data.current_grade))
-        .all()
-    )
 
-    subject_list = [{key: value for key, value in q._asdict().items()}
-                    for q in subjects]
+        subject_list = [{key: value for key, value in q._asdict().items()}
+                        for q in subjects]
 
-    return jsonify(subject_list), 200
+        return jsonify({"course": subject_list, "semester": 1}), 200
+    except KeyError as e:
+        return errors.handle_internal_error(e)
 
 
 @stud.route('/course/registration', methods=['POST'])
 @student_required
-def register_course(student_data):
+def register_course(user_data):
     try:
         data = {
             **request.get_json(),
-            **student_data
+            "student_id": user_data.identification
         }
-        course_schema = CourseRegistration(many=True)
-        course_schema.load(data)
+        course_schema = CourseListSchema()
+        valid_data = course_schema.load(data)
 
-    except Exception as e:
-        return
+        new_semester_record = STUDSemesterRecord(
+            user_id=valid_data.get('user_id'),
+            semester_id=valid_data.get('semester_id'),
+            grade_id=valid_data.get('grade_id'),
+        )
+        storage.add(new_semester_record)
+        storage.session.flush()
+
+        new_assessment = []
+        for form in valid_data['course']:
+            assessment = Assessment(
+                user_id=valid_data.get('user_id'),
+                subject_id=form.get('subject_id'),
+                semester_record_id=new_semester_record.id
+            )
+            new_assessment.append(assessment)
+
+        storage.session.execute(
+            update(Student)
+            .where(Student.user_id == valid_data.get('user_id'))
+            .values(
+                semester_id=valid_data.get('semester_id'),
+                next_grade=None,
+                is_registered=True,
+                is_active=True,
+                updated_at=datetime.utcnow()
+            )
+        )
+
+        storage.session.bulk_save_objects(new_assessment)
+        storage.save()
+
+        return jsonify({"message": "Course registration successful!"}), 201
+    except ValidationError as e:
+        storage.rollback()
+        return errors.handle_validation_error(e)
+    # except Exception as e:
+    #     storage.rollback()
+    #     return errors.handle_internal_error(e)

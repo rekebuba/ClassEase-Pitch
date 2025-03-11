@@ -1,7 +1,7 @@
 from marshmallow import Schema, ValidationError, fields, pre_load, validates, validates_schema
 from api.v1.schemas.base_schema import BaseSchema
 from api.v1.schemas.semester_schema import SemesterCreationSchema
-from api.v1.schemas.year_schema import yearValidationSchema
+from api.v1.schemas.year_schema import YearIdField
 
 
 class EventCreationSchema(BaseSchema):
@@ -13,8 +13,10 @@ class EventCreationSchema(BaseSchema):
     organizer = fields.String(required=True, validate=lambda x: x in [
                               'School Administration', 'School', 'Student Club', 'External Organizer'])
 
-    year_id = fields.Nested(yearValidationSchema,
-                            required=True, only=['year_id'])
+    academic_year = fields.Integer(required=True, validate=[
+        fields.validate.Range(min=2000, max=2100)])
+
+    year_id = fields.String(required=False, load_default=None)
 
     start_date = fields.Date(required=True, format='iso')
     end_date = fields.Date(required=True, format='iso')
@@ -42,6 +44,13 @@ class EventCreationSchema(BaseSchema):
         SemesterCreationSchema, required=True, load_only=True, exclude=("event_id",))
 
     message = fields.String(dump_only=True)
+
+    @pre_load
+    def set_defaults(self, data, **kwargs):
+        # add default values to the data
+        data['year_id'] = self.get_year_id(data['academic_year'])
+
+        return data
 
     @validates_schema
     def validate_dates_and_times(self, data, **kwargs):

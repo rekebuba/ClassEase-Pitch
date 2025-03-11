@@ -15,9 +15,9 @@ from models.subject import Subject, seed_subjects
 from models.teacher import Teacher
 from models.assessment import Assessment
 from models.mark_list import MarkList
-from models.average_result import AVRGResult
+from models.stud_semester_record import STUDSemesterRecord
 from models.average_subject import AVRGSubject
-from models.stud_yearly_record import StudentYearlyRecord
+from models.stud_year_record import STUDYearRecord
 from models.teacher_record import TeachersRecord
 from models.blacklist_token import BlacklistToken
 from models.event import Event

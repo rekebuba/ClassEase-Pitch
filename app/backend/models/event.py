@@ -15,9 +15,7 @@ class Event(BaseModel, Base):
     organizer = Column(String(50), Enum('School Administration',
                        'School', 'Student Club', 'External Organizer'), nullable=False)
 
-    # ethiopian_year = Column(String(10), nullable=False)
-    # gregorian_year = Column(String(15), default=None, nullable=True)
-    year_id = Column(String(225), ForeignKey('years.id'), nullable=False)
+    year_id = Column(String(125), ForeignKey('years.id'), nullable=False)
 
     start_date = Column(Date, nullable=False)
     end_date = Column(Date, nullable=False)

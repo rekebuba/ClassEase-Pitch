@@ -4,9 +4,10 @@
 from sqlalchemy import Column, String, Integer, ForeignKey, Float
 from models.engine.db_storage import BaseModel, Base
 
-class AVRGResult(BaseModel, Base):
+
+class STUDSemesterRecord(BaseModel, Base):
     """
-    AVRGResult Model
+    STUDSemesterRecord Model
 
     This model represents the average result of a student for a particular semester and year.
 
@@ -19,14 +20,16 @@ class AVRGResult(BaseModel, Base):
         rank (int): The rank of the student based on the average score. Default is None.
 
     Methods:
-        __init__(*args, **kwargs): Initializes the AVRGResult instance.
+        __init__(*args, **kwargs): Initializes the STUDSemesterRecord instance.
     """
-    __tablename__ = 'average_result'
-    student_id = Column(String(120), ForeignKey('student.id'), nullable=False)
+    __tablename__ = 'student_semester_records'
+    user_id = Column(String(120), ForeignKey('users.id'), nullable=False)
+    semester_id = Column(String(120), ForeignKey(
+        'semesters.id'), nullable=False)
     grade_id = Column(String(120), ForeignKey('grades.id'), nullable=False)
-    section_id = Column(String(120), ForeignKey('sections.id'), nullable=False)
-    average = Column(Float, default=None)  # The actual average score of the student in this for all subject
-    semester_id = Column(String(120), ForeignKey('semesters.id'), nullable=False)
+    section_id = Column(String(120), ForeignKey('sections.id'), nullable=True)
+    year_record_id = Column(String(120), ForeignKey('student_year_records.id'), nullable=True)
+    average = Column(Float, default=None)
     rank = Column(Integer, default=None)
 
     def __init__(self, *args, **kwargs):
