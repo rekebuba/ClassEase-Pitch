@@ -14,6 +14,7 @@ import os
 import json
 import random
 from models.admin import Admin
+from sqlalchemy import update, and_
 from tests.test_api.helper_functions import *
 from models import storage
 
@@ -28,7 +29,7 @@ def app_session():
 
     yield app
 
-    storage.session.close_all() # Clean up the database after the session
+    storage.session.close_all()  # Clean up the database after the session
     storage.drop_all()
 
 
@@ -176,3 +177,51 @@ def course_registration(db_session):
                     for q in subjects]
 
     return {"course": subject_list, "semester": 1, "academic_year": 2017, "grade": subject_list[0]['grade']}
+
+
+@pytest.fixture(scope="session")
+def db_course_registration(db_session, course_registration):
+    user_id = db_session.query(User.id).filter_by(role='student').scalar()
+    grade_id = db_session.query(Grade.id).filter_by(
+        name=course_registration['grade']).scalar()
+    semester_id = db_session.query(Semester.id).filter_by(
+        name=course_registration['semester']).scalar()
+
+    new_semester_record = STUDSemesterRecord(
+        user_id=user_id,
+        semester_id=semester_id,
+        grade_id=grade_id,
+    )
+    storage.add(new_semester_record)
+    storage.session.flush()
+
+    new_assessment = []
+    for course in course_registration['course']:
+        subject_id = db_session.query(Subject.id).filter_by(
+            name=course['subject'], code=course['subject_code']).scalar()
+
+        new_assessment.append(
+            Assessment(
+                user_id=user_id,
+                subject_id=subject_id,
+                semester_record_id=new_semester_record.id,
+            )
+        )
+
+    storage.session.bulk_save_objects(new_assessment)
+
+    storage.session.execute(
+        update(Student)
+        .where(Student.user_id == user_id)
+        .values(
+            semester_id=semester_id,
+            current_grade=grade_id,
+            next_grade=None,
+            has_passed=False,
+            is_registered=True,
+            is_active=True,
+            updated_at=datetime.utcnow()
+        )
+    )
+
+    storage.save()

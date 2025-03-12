@@ -360,32 +360,35 @@ def register_course(user_data):
 
         new_assessment = []
         for form in valid_data['course']:
-            assessment = Assessment(
-                user_id=valid_data.get('user_id'),
-                subject_id=form.get('subject_id'),
-                semester_record_id=new_semester_record.id
+            new_assessment.append(
+                Assessment(
+                    user_id=valid_data.get('user_id'),
+                    subject_id=form.get('subject_id'),
+                    semester_record_id=new_semester_record.id
+                )
             )
-            new_assessment.append(assessment)
+        storage.session.bulk_save_objects(new_assessment)
 
         storage.session.execute(
             update(Student)
             .where(Student.user_id == valid_data.get('user_id'))
             .values(
                 semester_id=valid_data.get('semester_id'),
+                current_grade=valid_data.get('grade_id'),
                 next_grade=None,
+                has_passed=False,
                 is_registered=True,
                 is_active=True,
                 updated_at=datetime.utcnow()
             )
         )
 
-        storage.session.bulk_save_objects(new_assessment)
         storage.save()
 
         return jsonify({"message": "Course registration successful!"}), 201
     except ValidationError as e:
         storage.rollback()
         return errors.handle_validation_error(e)
-    # except Exception as e:
-    #     storage.rollback()
-    #     return errors.handle_internal_error(e)
+    except Exception as e:
+        storage.rollback()
+        return errors.handle_internal_error(e)

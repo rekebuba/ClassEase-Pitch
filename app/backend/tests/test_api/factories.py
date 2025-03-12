@@ -185,7 +185,7 @@ class StudentFactory(factory.alchemy.SQLAlchemyModelFactory):
     previous_school_name = factory.LazyAttribute(
         lambda obj: fake.company() if obj.is_transfer else '')
 
-    current_grade = factory.LazyAttribute(lambda x: random.randint(1, 12))
+    current_grade = factory.LazyAttribute(lambda x: random.randint(1, 10))
     semester_id = factory.LazyAttribute(lambda x: None)
     has_passed = factory.LazyAttribute(lambda x: False)
     next_grade = factory.LazyAttribute(lambda x: None)

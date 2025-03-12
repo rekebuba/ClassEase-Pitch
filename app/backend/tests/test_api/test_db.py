@@ -1,13 +1,15 @@
 from datetime import date, datetime
 import json
+import pytest
+from tests.test_api.factories import StudentFactory, TeacherFactory, AdminFactory
 from models.user import User
 from models.year import Year
 from models.subject import Subject
-from tests.test_api.factories import StudentFactory, TeacherFactory, AdminFactory
 from models.student import Student
 from models.grade import Grade
 from models.event import Event
-import pytest
+from models.assessment import Assessment
+from models.stud_semester_record import STUDSemesterRecord
 
 
 def test_db_grade_count(client, db_session):
@@ -82,7 +84,7 @@ def test_admin_create_semester(client, db_create_users, users_auth_header, event
 
 
 @pytest.mark.parametrize("role", ['student'], indirect=True)
-def test_student_subjects_for_registration(client, db_session, db_create_users, db_event_form, users_auth_header):
+def test_student_subjects_for_registration(client, db_create_users, db_event_form, users_auth_header):
     response = client.get('/api/v1/student/course/registration',
                           headers=users_auth_header
                           )
@@ -93,7 +95,6 @@ def test_student_subjects_for_registration(client, db_session, db_create_users, 
 
 @pytest.mark.parametrize("role", ['student'], indirect=True)
 def test_student_course_registration(client, db_create_users, db_event_form, users_auth_header, course_registration):
-    print(json.dumps(course_registration, indent=4, sort_keys=True))
     response = client.post('/api/v1/student/course/registration',
                            json=course_registration,
                            headers=users_auth_header
@@ -101,3 +102,17 @@ def test_student_course_registration(client, db_create_users, db_event_form, use
 
     assert response.status_code == 201
     assert response.json['message'] == 'Course registration successful!'
+
+
+@pytest.mark.parametrize("role", ['admin'], indirect=True)
+def test_admin_create_mark_list(client, db_session, db_create_users, db_event_form, users_auth_header, db_course_registration):
+    fakes = (db_session.query(Subject.code)
+             .select_from(Assessment)
+             .join(Subject, Subject.id == Assessment.subject_id)
+             )
+
+    for fake in fakes:
+        print(fake)
+        # print(json.dumps(fake, indent=4, sort_keys=True, ))
+
+    # print(len(fakes))

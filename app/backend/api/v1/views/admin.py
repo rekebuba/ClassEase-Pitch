@@ -28,7 +28,7 @@ from urllib.parse import urlparse, parse_qs
 from api.v1.views.utils import admin_required
 from api.v1.views.methods import save_profile, validate_request
 from api.v1.services.event_service import EventService
-from api.v1.schemas.admin_schema import AdminRegistrationSchema
+from api.v1.schemas.admin_schema import AdminRegistrationSchema, CreateMarkListSchema
 from api.v1.schemas.user_schema import UserRegistrationSchema
 from api.v1.services.semester_service import SemesterService
 from api.v1.schemas.event_schema import EventCreationSchema
@@ -424,6 +424,9 @@ def create_mark_list(admin_data):
     if not data:
         return jsonify({"error": "Not a JSON"}), 404
 
+    mark_list_schema = CreateMarkListSchema()
+    validated_data = mark_list_schema.load(data)
+
     required_data = {
         'grade',
         'sections',
@@ -573,11 +576,11 @@ def create_mark_list(admin_data):
 
             average_result.append(
                 STUDSemesterRecord(student_id=student.student_id,
-                           grade_id=grade_id,
-                           section_id=student.section_id,
-                           semester=data['semester'],
-                           year=data['year']
-                           )
+                                   grade_id=grade_id,
+                                   section_id=student.section_id,
+                                   semester=data['semester'],
+                                   year=data['year']
+                                   )
             )
 
         # Save the objects to the database

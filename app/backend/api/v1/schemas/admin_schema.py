@@ -5,7 +5,7 @@ from api.v1.schemas.base_schema import BaseSchema
 from models import storage
 
 
-class AdminRegistrationSchema(BaseSchema, Schema):
+class AdminRegistrationSchema(BaseSchema):
     """Admin schema for validating and serializing Admin data."""
     user_id = fields.String(required=False)
     first_name = fields.String(required=True, validate=[
@@ -38,3 +38,7 @@ class AdminRegistrationSchema(BaseSchema, Schema):
     @validates('phone')
     def validate_teacher_phone(self, value):
         self.validate_phone(value)
+
+
+class CreateMarkListSchema(BaseSchema):
+    pass
