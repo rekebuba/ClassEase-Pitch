@@ -1,3 +1,4 @@
+from dataclasses import dataclass, asdict
 from datetime import date, datetime, timedelta
 import os
 import random
@@ -48,8 +49,6 @@ class DefaultFelids:
             if isinstance(value, (date, datetime)):
                 form_dict[key] = value.strftime("%H:%M:%S") if key in [
                     'start_time', 'end_time'] else value.strftime("%Y-%m-%d")
-
-        return None
 
     @staticmethod
     def current_EC_year() -> int:
@@ -327,58 +326,55 @@ class SemesterFactory(factory.alchemy.SQLAlchemyModelFactory):
             DefaultFelids.modify_fields(self)
 
 
-class YearRecordFactory(factory.alchemy.SQLAlchemyModelFactory):
+@dataclass
+class AvailableSubject:
+    subject: str
+    subject_code: str
+
+
+@dataclass
+class AssessmentTypes:
+    type: str
+    percentage: int
+
+
+@dataclass
+class MarkList:
+    grade: int
+    subjects: list
+    assessment_type: list
+
+    def to_dict(self):
+        return asdict(self)  # Converts all fields to dict automatically
+
+
+class SubjectsFactory(factory.Factory):
     class Meta:
-        model = STUDYearRecord
-        sqlalchemy_session = None
+        model = AvailableSubject
 
-    student_id = factory.LazyAttribute(lambda x: None)
-    grade_id = factory.LazyAttribute(lambda x: None)
-    year_id = factory.LazyAttribute(lambda x: None)
-    final_score = factory.LazyAttribute(lambda x: None)
-    rank = factory.LazyAttribute(lambda x: None)
-
-    @factory.post_generation
-    def clean_data(self, create, extracted, **kwargs):
-        """Clean up data manually when needed."""
-        if not create:
-            DefaultFelids.modify_fields(self)
+    subject = factory.LazyAttribute(lambda _: None)
+    subject_code = factory.LazyAttribute(lambda _: None)
 
 
-class SemesterRecordFactory(factory.alchemy.SQLAlchemyModelFactory):
+class AssessmentTypesFactory(factory.Factory):
     class Meta:
-        model = STUDSemesterRecord
-        sqlalchemy_session = None
+        model = AssessmentTypes
 
-    student_id = factory.LazyAttribute(lambda x: None)
-    semester_id = factory.LazyAttribute(lambda x: None)
-    grade_id = factory.LazyAttribute(lambda x: None)
-    section_id = factory.LazyAttribute(lambda x: None)
-    year_record_id = factory.LazyAttribute(lambda x: None)
-    average = factory.LazyAttribute(lambda x: None)
-    rank = factory.LazyAttribute(lambda x: None)
-
-    @factory.post_generation
-    def clean_data(self, create, extracted, **kwargs):
-        """Clean up data manually when needed."""
-        if not create:
-            DefaultFelids.modify_fields(self)
+    type = factory.Faker("random_element", elements=("Mid", "Final"))
+    percentage = factory.LazyAttribute(
+        lambda obj: 30 if obj.type == "Mid" else 70)
 
 
-class AssessmentFactory(factory.alchemy.SQLAlchemyModelFactory):
+class MarkListFactory(factory.Factory):
     class Meta:
-        model = Assessment
-        sqlalchemy_session = None
+        model = MarkList
 
-    student_id = factory.LazyAttribute(lambda x: None)
-    semester_record_id = factory.LazyAttribute(lambda x: None)
-    subject_id = factory.LazyAttribute(lambda x: None)
-    teachers_record_id = factory.LazyAttribute(lambda x: None)
-    total = factory.LazyAttribute(lambda x: None)
-    rank = factory.LazyAttribute(lambda x: None)
+    grade = factory.Faker("random_int", min=1, max=10)
+    subjects = factory.LazyAttribute(
+        lambda _: SubjectsFactory.create_batch(4))
+    assessment_type = factory.LazyAttribute(
+        lambda _: AssessmentTypesFactory.create_batch(2))
 
-    @factory.post_generation
-    def clean_data(self, create, extracted, **kwargs):
-        """Clean up data manually when needed."""
-        if not create:
-            DefaultFelids.modify_fields(self)
+    @classmethod
+    def to_dict(cls, mark):
+        return mark.__dict__.copy()

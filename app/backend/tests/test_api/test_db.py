@@ -105,14 +105,5 @@ def test_student_course_registration(client, db_create_users, db_event_form, use
 
 
 @pytest.mark.parametrize("role", ['admin'], indirect=True)
-def test_admin_create_mark_list(client, db_session, db_create_users, db_event_form, users_auth_header, db_course_registration):
-    fakes = (db_session.query(Subject.code)
-             .select_from(Assessment)
-             .join(Subject, Subject.id == Assessment.subject_id)
-             )
-
-    for fake in fakes:
-        print(fake)
-        # print(json.dumps(fake, indent=4, sort_keys=True, ))
-
-    # print(len(fakes))
+def test_admin_create_mark_list(client, db_session, db_create_users, db_event_form, users_auth_header, db_course_registration, fake_mark_list):
+    pass

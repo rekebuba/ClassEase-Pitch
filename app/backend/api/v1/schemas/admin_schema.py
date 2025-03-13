@@ -40,5 +40,43 @@ class AdminRegistrationSchema(BaseSchema):
         self.validate_phone(value)
 
 
+class SubjectSchema(BaseSchema):
+    subject = fields.String(required=True)
+    subject_code = fields.String(required=True, load_only=True)
+    subject_id = fields.String(required=True, load_only=True)
+
+    @pre_load
+    def set_defaults(self, data, **kwargs):
+        # add default values to the data
+        data['subject_id'] = self.get_subject_id(
+            data.get('subject'), data.get('subject_code'), data.get('grade_id'))
+
+        return data
+
+
+class MarkListTypeSchema(BaseSchema):
+    type = fields.String(required=True, load_only=True)
+    percentage = fields.Integer(required=True, load_only=True)
+
+
 class CreateMarkListSchema(BaseSchema):
-    pass
+    grade = fields.Integer(required=True, load_only=True)
+    grade_id = fields.String(required=False, load_only=True)
+
+    subjects = fields.List(fields.Nested(SubjectSchema), required=True)
+
+    academic_year = fields.Integer(required=True, load_only=True)
+    semester = fields.Integer(required=True, load_only=True)
+    semester_id = fields.String(required=True, load_only=True)
+
+    assessment_type = fields.List(
+        fields.Nested(MarkListTypeSchema), required=True)
+
+    @pre_load
+    def set_defaults(self, data, **kwargs):
+        # add default values to the data
+        data['grade_id'] = self.get_grade_id(data.get('grade'))
+        data['semester_id'] = self.get_semester_id(
+            data.get('semester'), data.get('academic_year'))
+
+        return data

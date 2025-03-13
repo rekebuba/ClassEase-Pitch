@@ -225,3 +225,32 @@ def db_course_registration(db_session, course_registration):
     )
 
     storage.save()
+
+
+@pytest.fixture(scope="session")
+def fake_mark_list(db_session):
+    subjects = db_session.query(Subject).all()
+    custom_subjects = [
+        AvailableSubject("Math", "MTH101"),
+        AvailableSubject("Science", "SCI102")
+    ]
+
+    mark_list = MarkListFactory.create_batch(2, subjects=custom_subjects)
+    for mark in mark_list:
+        print(json.dumps(mark.to_dict(), indent=4, sort_keys=True))
+
+    return [
+        {
+            "grade": 1,
+            "subjects": [
+                {"subject": "English", "subject_code": "ENG2"},
+                {"subject": "Maths", "subject_code": "MTH2"}
+            ],
+            "assessment_type": [
+                {"type": "Test 1", "percentage": 25},
+                {"type": "Test 2", "percentage": 25},
+                {"type": "Test 3", "percentage": 25},
+                {"type": "Test 4", "percentage": 25}
+            ]
+        },
+    ]

@@ -427,173 +427,175 @@ def create_mark_list(admin_data):
     mark_list_schema = CreateMarkListSchema()
     validated_data = mark_list_schema.load(data)
 
-    required_data = {
-        'grade',
-        'sections',
-        'subjects',
-        'assessment_type',
-        'semester',
-        'year'
-    }
+    print(validated_data.to_dict())
 
-    # Check if required fields are present
-    for field in required_data:
-        if field not in data:
-            return jsonify({"error": f"Missing {field}"}), 400
-        elif field in {'grade', 'section', 'semester'} and type(data[field]) != int:
-            return jsonify({"error": f"{field} must be an integer"}), 400
-        elif field == 'assessment_type':
-            for assessment in data[field]:
-                if assessment.keys() != {'type', 'percentage'}:
-                    return jsonify({"error": "Missing type or percentage"}), 400
-                elif type(assessment['type']) != str or type(assessment['percentage']) != int:
-                    return jsonify({"error": "Type must be a string and percentage must be an integer"}), 400
+    # required_data = {
+    #     'grade',
+    #     'sections',
+    #     'subjects',
+    #     'assessment_type',
+    #     'semester',
+    #     'year'
+    # }
 
-    # Get the grade_id from the Grade table
-    grade = storage.get_first(Grade, grade=data['grade'])
+    # # Check if required fields are present
+    # for field in required_data:
+    #     if field not in data:
+    #         return jsonify({"error": f"Missing {field}"}), 400
+    #     elif field in {'grade', 'section', 'semester'} and type(data[field]) != int:
+    #         return jsonify({"error": f"{field} must be an integer"}), 400
+    #     elif field == 'assessment_type':
+    #         for assessment in data[field]:
+    #             if assessment.keys() != {'type', 'percentage'}:
+    #                 return jsonify({"error": "Missing type or percentage"}), 400
+    #             elif type(assessment['type']) != str or type(assessment['percentage']) != int:
+    #                 return jsonify({"error": "Type must be a string and percentage must be an integer"}), 400
 
-    if not grade:
-        return jsonify({"error": "Grade not found"}), 404
-    else:
-        grade_id = grade.id
+    # # Get the grade_id from the Grade table
+    # grade = storage.get_first(Grade, grade=data['grade'])
 
-    # Update the Section table
-    existing_sections = {}
-    for section in data['sections']:
-        exists = storage.get_first(
-            Section, grade_id=grade_id, section=section)
-        if exists and storage.get_first(MarkList, section_id=exists.id, year=data['year']):
-            existing_sections[section] = exists.id
-        elif not exists:
-            section = Section(grade_id=grade_id, section=section)
-            storage.add(section)
+    # if not grade:
+    #     return jsonify({"error": "Grade not found"}), 404
+    # else:
+    #     grade_id = grade.id
 
-    mark_list_exists = (
-        storage.session.query(MarkList)
-        .filter(MarkList.grade_id == grade_id,
-                MarkList.semester == data['semester'],
-                MarkList.year == data['year'],
-                MarkList.section_id.in_(list(existing_sections.values())))
-        .all()
-    )
+    # # Update the Section table
+    # existing_sections = {}
+    # for section in data['sections']:
+    #     exists = storage.get_first(
+    #         Section, grade_id=grade_id, section=section)
+    #     if exists and storage.get_first(MarkList, section_id=exists.id, year=data['year']):
+    #         existing_sections[section] = exists.id
+    #     elif not exists:
+    #         section = Section(grade_id=grade_id, section=section)
+    #         storage.add(section)
 
-    if mark_list_exists:
-        return jsonify({
-            "error": f"Mark list already exists for grade = {data['grade']}, "
-            f"Section = {' and '.join(map(str, list(existing_sections.keys())))}, "
-            f"Semester = {data['semester']}, "
-            f"School Year = {data['year']}"
-        }), 400
+    # mark_list_exists = (
+    #     storage.session.query(MarkList)
+    #     .filter(MarkList.grade_id == grade_id,
+    #             MarkList.semester == data['semester'],
+    #             MarkList.year == data['year'],
+    #             MarkList.section_id.in_(list(existing_sections.values())))
+    #     .all()
+    # )
 
-    try:
-        students = (
-            storage.session.query(STUDYearRecord)
-            .filter(STUDYearRecord.grade_id == grade_id, STUDYearRecord.year == data['year'])
-            .all()
-        )
+    # if mark_list_exists:
+    #     return jsonify({
+    #         "error": f"Mark list already exists for grade = {data['grade']}, "
+    #         f"Section = {' and '.join(map(str, list(existing_sections.keys())))}, "
+    #         f"Semester = {data['semester']}, "
+    #         f"School Year = {data['year']}"
+    #     }), 400
 
-        if not students:
-            return jsonify({"error": f"No students found for the year {data['year']}"}), 404
+    # try:
+    #     students = (
+    #         storage.session.query(STUDYearRecord)
+    #         .filter(STUDYearRecord.grade_id == grade_id, STUDYearRecord.year == data['year'])
+    #         .all()
+    #     )
 
-        # Assign a section randomly to students who do not have one
-        for student in students:
-            if not student.section_id:
-                section = storage.get_random(Section, grade_id=grade_id)
-                if not section:
-                    return jsonify({"error": "Section not found"}), 404
-                update_result = storage.session.execute(
-                    update(STUDYearRecord)
-                    .where(STUDYearRecord.student_id == student.student_id)
-                    .values(section_id=section.id)
-                )
+    #     if not students:
+    #         return jsonify({"error": f"No students found for the year {data['year']}"}), 404
 
-                if update_result.rowcount == 0:
-                    return jsonify({"error": f"Failed to update section for student {student.student_id}"}), 500
+    #     # Assign a section randomly to students who do not have one
+    #     for student in students:
+    #         if not student.section_id:
+    #             section = storage.get_random(Section, grade_id=grade_id)
+    #             if not section:
+    #                 return jsonify({"error": "Section not found"}), 404
+    #             update_result = storage.session.execute(
+    #                 update(STUDYearRecord)
+    #                 .where(STUDYearRecord.student_id == student.student_id)
+    #                 .values(section_id=section.id)
+    #             )
 
-        storage.save()
+    #             if update_result.rowcount == 0:
+    #                 return jsonify({"error": f"Failed to update section for student {student.student_id}"}), 500
 
-        # Update the Subject table
-        for course in data['subjects']:
-            query = storage.get_first(Subject, grade_id=grade_id, name=course)
-            if not query:
-                # Tokenize the subject name by spaces and join the first 3 characters of each word
-                code = ''.join([word[:2 if len(course.split()) > 1 else 3].upper()
-                                for word in course.split()]) + str(data['grade'])
-                subject_code = storage.get_first(
-                    Subject, code=code, grade_id=grade_id, name=course)
-                if subject_code:
-                    code = code + 'I'
-                new_subject = Subject(name=course, code=code,
-                                      grade_id=grade_id, year=data['year'])
-                storage.add(new_subject)
+    #     storage.save()
 
-        mark_lists = []  # A list to hold mark_list objects
-        assessments = []  # A list to hold assessment objects
-        average_subject = []
-        average_result = []
+    #     # Update the Subject table
+    #     for course in data['subjects']:
+    #         query = storage.get_first(Subject, grade_id=grade_id, name=course)
+    #         if not query:
+    #             # Tokenize the subject name by spaces and join the first 3 characters of each word
+    #             code = ''.join([word[:2 if len(course.split()) > 1 else 3].upper()
+    #                             for word in course.split()]) + str(data['grade'])
+    #             subject_code = storage.get_first(
+    #                 Subject, code=code, grade_id=grade_id, name=course)
+    #             if subject_code:
+    #                 code = code + 'I'
+    #             new_subject = Subject(name=course, code=code,
+    #                                   grade_id=grade_id, year=data['year'])
+    #             storage.add(new_subject)
 
-        for student in students:
-            subjects = storage.get_all(Subject, grade_id=grade_id)
-            if not subjects:
-                return jsonify({"error": "Subjects for the current grade not found"}), 404
-            for subject in subjects:
-                for assessment_type in data['assessment_type']:
-                    values = {
-                        "student_id": student.student_id,
-                        "grade_id": grade_id,
-                        "section_id": student.section_id,
-                        "subject_id": subject.id,
-                        "semester": data['semester'],
-                        "year": data['year'],
-                    }
-                    mark_lists.append(MarkList(**values, **assessment_type))
-                assessments.append(
-                    Assessment(student_id=student.student_id,
-                               grade_id=grade_id,
-                               subject_id=subject.id,
-                               section_id=student.section_id,
-                               semester=data['semester'],
-                               year=data['year']
-                               )
-                )
+    #     mark_lists = []  # A list to hold mark_list objects
+    #     assessments = []  # A list to hold assessment objects
+    #     average_subject = []
+    #     average_result = []
 
-                avg_subject = storage.get_first(AVRGSubject,
-                                                student_id=student.student_id,
-                                                grade_id=grade_id,
-                                                subject_id=subject.id,
-                                                section_id=student.section_id,
-                                                year=data['year']
-                                                )
-                if not avg_subject:
-                    average_subject.append(
-                        AVRGSubject(
-                            student_id=student.student_id,
-                            grade_id=grade_id,
-                            subject_id=subject.id,
-                            section_id=student.section_id,
-                            year=data['year']
-                        ))
+    #     for student in students:
+    #         subjects = storage.get_all(Subject, grade_id=grade_id)
+    #         if not subjects:
+    #             return jsonify({"error": "Subjects for the current grade not found"}), 404
+    #         for subject in subjects:
+    #             for assessment_type in data['assessment_type']:
+    #                 values = {
+    #                     "student_id": student.student_id,
+    #                     "grade_id": grade_id,
+    #                     "section_id": student.section_id,
+    #                     "subject_id": subject.id,
+    #                     "semester": data['semester'],
+    #                     "year": data['year'],
+    #                 }
+    #                 mark_lists.append(MarkList(**values, **assessment_type))
+    #             assessments.append(
+    #                 Assessment(student_id=student.student_id,
+    #                            grade_id=grade_id,
+    #                            subject_id=subject.id,
+    #                            section_id=student.section_id,
+    #                            semester=data['semester'],
+    #                            year=data['year']
+    #                            )
+    #             )
 
-            average_result.append(
-                STUDSemesterRecord(student_id=student.student_id,
-                                   grade_id=grade_id,
-                                   section_id=student.section_id,
-                                   semester=data['semester'],
-                                   year=data['year']
-                                   )
-            )
+    #             avg_subject = storage.get_first(AVRGSubject,
+    #                                             student_id=student.student_id,
+    #                                             grade_id=grade_id,
+    #                                             subject_id=subject.id,
+    #                                             section_id=student.section_id,
+    #                                             year=data['year']
+    #                                             )
+    #             if not avg_subject:
+    #                 average_subject.append(
+    #                     AVRGSubject(
+    #                         student_id=student.student_id,
+    #                         grade_id=grade_id,
+    #                         subject_id=subject.id,
+    #                         section_id=student.section_id,
+    #                         year=data['year']
+    #                     ))
 
-        # Save the objects to the database
-        storage.session.bulk_save_objects(mark_lists)
-        storage.session.bulk_save_objects(assessments)
-        storage.session.bulk_save_objects(average_result)
-        if average_subject:
-            storage.session.bulk_save_objects(average_subject)
+    #         average_result.append(
+    #             STUDSemesterRecord(student_id=student.student_id,
+    #                                grade_id=grade_id,
+    #                                section_id=student.section_id,
+    #                                semester=data['semester'],
+    #                                year=data['year']
+    #                                )
+    #         )
 
-        storage.save()
-    except Exception as e:
-        print(str(e))
-        return jsonify({"error": str(e)}), 500
+    #     # Save the objects to the database
+    #     storage.session.bulk_save_objects(mark_lists)
+    #     storage.session.bulk_save_objects(assessments)
+    #     storage.session.bulk_save_objects(average_result)
+    #     if average_subject:
+    #         storage.session.bulk_save_objects(average_subject)
+
+    #     storage.save()
+    # except Exception as e:
+    #     print(str(e))
+    #     return jsonify({"error": str(e)}), 500
 
     return jsonify({"message": "Mark list created successfully!"}), 201
 

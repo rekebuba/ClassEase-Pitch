@@ -14,12 +14,8 @@ class MarkList(BaseModel, Base):
 
     Attributes:
         student_id (str): Foreign key referencing the student's ID.
-        grade_id (str): Foreign key referencing the grade's ID.
-        section_id (str): Foreign key referencing the section's ID.
         subject_id (str): Foreign key referencing the subject's ID.
         teachers_record_id (str, optional): Foreign key referencing the teacher's record ID. Can be null and defaults to None.
-        semester (int): The semester in which the assessment was taken.
-        year (str): The academic year in which the assessment was taken.
         type (str): The type of assessment (e.g., 'Test', 'Quiz', 'Assignment', 'Midterm', 'Final').
         percentage (float): The percentage of this assessment towards the final score.
         score (float, optional): The actual score of the student in this assessment.
@@ -28,15 +24,12 @@ class MarkList(BaseModel, Base):
         __init__(*args, **kwargs): Initializes the MarkList instance, setting up the score attribute.
     """
     __tablename__ = 'mark_lists'
-    student_id = Column(String(120), ForeignKey('student.id'), nullable=False)
-    grade_id = Column(String(120), ForeignKey('grades.id'), nullable=False)
-    section_id = Column(String(120), ForeignKey('sections.id'))
-    subject_id = Column(String(120), ForeignKey('subjects.id'), nullable=False)
-    teachers_record_id = Column(String(120), ForeignKey('teachers_record.id', ondelete="SET NULL"), nullable=True, default=None)
+    user_id = Column(String(120), ForeignKey('users.id'), nullable=False)
     semester_id = Column(String(120), ForeignKey('semesters.id'), nullable=False)
-    year = Column(String(10), nullable=False)
+    teachers_record_id = Column(String(120), ForeignKey('teachers_record.id', ondelete="SET NULL"), nullable=True, default=None)
+    subject_id = Column(String(120), ForeignKey('subjects.id'), nullable=False)
     type = Column(String(50), nullable=False)  # e.g., 'Test', 'Quiz', 'Assignment', 'Midterm', 'Final'
-    percentage = Column(Float, nullable=False)  # percentage of this assessment towards the final score
+    percentage = Column(Integer, nullable=False)  # percentage of this assessment towards the final score
     score = Column(Float)  # The actual score of the student in this assessment
 
     def __init__(self, *args, **kwargs):
