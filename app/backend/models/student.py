@@ -45,17 +45,20 @@ class Student(BaseModel, Base):
 
     # Academic Info
     start_year_id = Column(String(120), ForeignKey('years.id'), nullable=False)
-    current_year_id = Column(String(120), ForeignKey('years.id'), nullable=False)
+    current_year_id = Column(
+        String(120), ForeignKey('years.id'), nullable=False)
 
     # If transferring from another school
     is_transfer = Column(Boolean, default=False)
     previous_school_name = Column(String(100), default=None)
 
     # Academic Performance
-    current_grade = Column(Integer, nullable=False)
+    current_grade_id = Column(
+        String(120), ForeignKey('grades.id'), nullable=False)
+    next_grade_id = Column(String(120), ForeignKey(
+        'grades.id'), nullable=True, default=None)
     semester_id = Column(String(120), ForeignKey('semesters.id'))
     has_passed = Column(Boolean, default=False)
-    next_grade = Column(Integer, nullable=True, default=None)
     is_registered = Column(Boolean, default=False)
 
     # Identification & Legal Docs

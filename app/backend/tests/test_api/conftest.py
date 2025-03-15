@@ -93,7 +93,7 @@ def user_register_success(request, db_session):
 
 @pytest.fixture(scope="session")
 def db_create_users(db_session):
-    factories = [(AdminFactory, 1), (TeacherFactory, 1), (StudentFactory, 1)]
+    factories = [(AdminFactory, 1), (TeacherFactory, 1), (StudentFactory, 5)]
 
     users = []
     user = None
@@ -101,9 +101,13 @@ def db_create_users(db_session):
         with override_session(db_session, Factory, UserFactory):
             for _ in range(count):
                 if Factory == StudentFactory:
+                    current_grade = random.randint(1, 10)
+
                     user = Factory(
                         start_year_id=db_session.query(Year.id).scalar(),
                         current_year_id=db_session.query(Year.id).scalar(),
+                        current_grade_id=db_session.query(Grade.id).filter_by(
+                            name=current_grade).scalar(),
                     )
                 else:
                     user = Factory()
@@ -115,21 +119,33 @@ def db_create_users(db_session):
     return users
 
 
+def user_list(db_session):
+    users = db_session.query(User).all()
+    return users
+
+
 @pytest.fixture(scope="session")
-def role(request):
-    return request.param
+def role(request, db_session):
+    role, count = request.param
+    user = db_session.query(User).filter_by(
+        role=role).limit(100 if count == 'all' else count).all()
+
+    return user
 
 
 @pytest.fixture(scope="session")
 def users_auth_header(client, db_session, role):
-    user = db_session.query(User.identification).filter_by(role=role).first()
-    response = client.post('/api/v1/auth/login', json={
-        'id': user.identification,
-        'password': user.identification
-    })
+    auth_headers = []
+    for user in role:
+        response = client.post('/api/v1/auth/login', json={
+            'id': user.identification,
+            'password': user.identification
+        })
+        token = response.json["apiKey"]
+        auth_headers.append(
+            {"header": {"Authorization": f"Bearer {token}"}, "user": user})
 
-    token = response.json["apiKey"]
-    return {"Authorization": f"Bearer {token}"}
+    return auth_headers
 
 
 @pytest.fixture
@@ -160,97 +176,90 @@ def db_event_form(db_session):
 
 
 @pytest.fixture(scope="session")
-def course_registration(db_session):
-    student_data = db_session.query(Student).first()
-    subjects = (
-        storage.session.query(
-            Subject.name.label("subject"),
-            Subject.code.label("subject_code"),
-            Grade.name.label("grade")
-        )
-        .join(Grade, Grade.id == Subject.grade_id)
-        .filter(Grade.name == (student_data.next_grade if student_data.next_grade else student_data.current_grade))
-        .all()
-    )
+def db_course_registration(db_session):
+    students = (db_session.query(Student)
+                .join(User, User.id == Student.user_id)
+                .filter(User.role == 'student')
+                .all()
+                )
 
-    subject_list = [{key: value for key, value in q._asdict().items()}
-                    for q in subjects]
+    for student in students:
+        current_grade = (db_session.query(Grade.name)
+                         .filter(Grade.id == student.current_grade_id)
+                         .scalar()
+                         )
+        grade_id = (db_session.query(Grade.id)
+                    .filter(Grade.name == (current_grade + 1))
+                    .scalar()
+                    )
+        semester_id = (db_session.query(
+            Semester.id).filter_by(name=1).scalar())
 
-    return {"course": subject_list, "semester": 1, "academic_year": 2017, "grade": subject_list[0]['grade']}
-
-
-@pytest.fixture(scope="session")
-def db_course_registration(db_session, course_registration):
-    user_id = db_session.query(User.id).filter_by(role='student').scalar()
-    grade_id = db_session.query(Grade.id).filter_by(
-        name=course_registration['grade']).scalar()
-    semester_id = db_session.query(Semester.id).filter_by(
-        name=course_registration['semester']).scalar()
-
-    new_semester_record = STUDSemesterRecord(
-        user_id=user_id,
-        semester_id=semester_id,
-        grade_id=grade_id,
-    )
-    storage.add(new_semester_record)
-    storage.session.flush()
-
-    new_assessment = []
-    for course in course_registration['course']:
-        subject_id = db_session.query(Subject.id).filter_by(
-            name=course['subject'], code=course['subject_code']).scalar()
-
-        new_assessment.append(
-            Assessment(
-                user_id=user_id,
-                subject_id=subject_id,
-                semester_record_id=new_semester_record.id,
-            )
-        )
-
-    storage.session.bulk_save_objects(new_assessment)
-
-    storage.session.execute(
-        update(Student)
-        .where(Student.user_id == user_id)
-        .values(
+        new_semester_record = STUDSemesterRecord(
+            user_id=student.id,
             semester_id=semester_id,
-            current_grade=grade_id,
-            next_grade=None,
-            has_passed=False,
-            is_registered=True,
-            is_active=True,
-            updated_at=datetime.utcnow()
+            grade_id=grade_id,
         )
-    )
+        storage.add(new_semester_record)
+        storage.session.flush()
 
-    storage.save()
+        subjects = (
+            db_session.query(
+                Subject.name.label("subject"),
+                Subject.code.label("subject_code"),
+                Grade.name.label("grade")
+            )
+            .join(Grade, Grade.id == Subject.grade_id)
+            .filter(Grade.id == (student.next_grade_id if student.next_grade_id else student.current_grade_id))
+            .all()
+        )
+
+        for subject in subjects:
+            new_assessment = []
+            subject_id = db_session.query(Subject.id).filter_by(
+                name=subject.subject, code=subject.subject_code).scalar()
+
+            new_assessment.append(
+                Assessment(
+                    user_id=student.id,
+                    subject_id=subject_id,
+                    semester_record_id=new_semester_record.id,
+                )
+            )
+
+            storage.session.bulk_save_objects(new_assessment)
+
+            storage.session.execute(
+                update(Student)
+                .where(Student.user_id == student.id)
+                .values(
+                    semester_id=semester_id,
+                    current_grade_id=grade_id,
+                    next_grade_id=None,
+                    has_passed=False,
+                    is_registered=True,
+                    is_active=True,
+                    updated_at=datetime.utcnow()
+                )
+            )
+
+            storage.save()
 
 
 @pytest.fixture(scope="session")
 def fake_mark_list(db_session):
-    subjects = db_session.query(Subject).all()
-    custom_subjects = [
-        AvailableSubject("Math", "MTH101"),
-        AvailableSubject("Science", "SCI102")
-    ]
+    # generate fake mark list for each grade
+    mark_list = MarkListFactory().to_dict()
+    for assessment in mark_list['mark_assessment']:
+        subjects = (db_session.query(Subject.name, Subject.code)
+                    .join(Grade, Grade.id == Subject.grade_id)
+                    .filter(Grade.name == assessment['grade'])
+                    .all()
+                    )
+        custom_subjects = [AvailableSubject(
+            subject=name, subject_code=code, grade=assessment['grade']).to_dict() for name, code in subjects]
+        assessment['subjects'] = custom_subjects
 
-    mark_list = MarkListFactory.create_batch(2, subjects=custom_subjects)
-    for mark in mark_list:
-        print(json.dumps(mark.to_dict(), indent=4, sort_keys=True))
+    # print(json.dumps(mark_list, indent=4, sort_keys=True))
 
-    return [
-        {
-            "grade": 1,
-            "subjects": [
-                {"subject": "English", "subject_code": "ENG2"},
-                {"subject": "Maths", "subject_code": "MTH2"}
-            ],
-            "assessment_type": [
-                {"type": "Test 1", "percentage": 25},
-                {"type": "Test 2", "percentage": 25},
-                {"type": "Test 3", "percentage": 25},
-                {"type": "Test 4", "percentage": 25}
-            ]
-        },
-    ]
+    return mark_list

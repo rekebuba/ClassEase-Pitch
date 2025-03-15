@@ -25,7 +25,7 @@ class MarkList(BaseModel, Base):
     """
     __tablename__ = 'mark_lists'
     user_id = Column(String(120), ForeignKey('users.id'), nullable=False)
-    semester_id = Column(String(120), ForeignKey('semesters.id'), nullable=False)
+    semester_record_id = Column(String(120), ForeignKey('student_semester_records.id'), nullable=False)
     teachers_record_id = Column(String(120), ForeignKey('teachers_record.id', ondelete="SET NULL"), nullable=True, default=None)
     subject_id = Column(String(120), ForeignKey('subjects.id'), nullable=False)
     type = Column(String(50), nullable=False)  # e.g., 'Test', 'Quiz', 'Assignment', 'Midterm', 'Final'

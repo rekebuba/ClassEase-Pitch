@@ -4,6 +4,7 @@ from marshmallow import Schema, ValidationError, post_dump, post_load, validates
 from models.subject import Subject
 from models.user import User
 from models.semester import Semester
+from models.student import Student
 from models.event import Event
 from models.grade import Grade
 from models.year import Year
@@ -57,6 +58,24 @@ class BaseSchema(Schema):
         # Check if the phone number matches the pattern
         if not re.match(pattern, value):
             raise ValidationError("Invalid phone number format.")
+
+    @staticmethod
+    def is_student_registered(student_id):
+        if student_id is None:
+            raise ValidationError("student id is required")
+
+        # Check if the student is already registered
+        student = (storage.session.query(Student)
+                   .join(User, User.id == Student.user_id)
+                   .filter(User.identification == student_id)
+                   .first()
+                   )
+
+        if student is None or student.id is None:
+            raise ValidationError(
+                f"No Student found for student_id: {student_id}")
+
+        return student.is_registered
 
     @staticmethod
     def get_user_id(user_identification):
@@ -126,7 +145,7 @@ class BaseSchema(Schema):
         if semester_name is None:
             raise ValidationError("semester is required")
         if academic_year is None:
-            raise ValidationError("academic_year is required")
+            raise ValidationError("academic year is required")
 
         # Fetch the semester_id from the database
         semester = (
@@ -148,8 +167,12 @@ class BaseSchema(Schema):
 
     @staticmethod
     def get_subject_id(subject_name, subject_code, grade_id):
+        if subject_name is None:
+            raise ValidationError("subject name is required")
         if subject_code is None:
-            raise ValidationError("subject_code is required")
+            raise ValidationError("subject code is required")
+        if grade_id is None:
+            raise ValidationError("grade_id is required")
 
         # Fetch the subject_id from the database
         subject = storage.session.query(Subject.id).filter_by(
@@ -158,7 +181,7 @@ class BaseSchema(Schema):
             grade_id=grade_id
         ).first()
 
-        if subject.id is None:
+        if subject is None or subject.id is None:
             raise ValidationError(
                 f"No Subject found for subject_code: {subject_code}")
 

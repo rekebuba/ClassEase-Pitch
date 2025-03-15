@@ -305,10 +305,10 @@ def list_of_course_available(user_data):
             .join(Year, Event.year_id == Year.id)
             .filter(
                 Semester.name == (
-                    1 if student_data.next_grade or not student_data.semester_id else 2),
+                    1 if student_data.next_grade_id or not student_data.semester_id else 2),
                 Year.ethiopian_year == (
                     (int(Year.ethiopian_year) + 1)
-                    if student_data.next_grade
+                    if student_data.next_grade_id
                     else Year.ethiopian_year
                 ),
                 Event.registration_start <= datetime.now().date(),
@@ -327,7 +327,7 @@ def list_of_course_available(user_data):
                 Grade.name.label("grade")
             )
             .join(Grade, Grade.id == Subject.grade_id)
-            .filter(Grade.name == (student_data.next_grade if student_data.next_grade else student_data.current_grade))
+            .filter(Grade.id == (student_data.next_grade_id if student_data.next_grade_id else student_data.current_grade_id))
             .all()
         )
 
@@ -374,8 +374,8 @@ def register_course(user_data):
             .where(Student.user_id == valid_data.get('user_id'))
             .values(
                 semester_id=valid_data.get('semester_id'),
-                current_grade=valid_data.get('grade_id'),
-                next_grade=None,
+                current_grade_id=valid_data.get('grade_id'),
+                next_grade_id=None,
                 has_passed=False,
                 is_registered=True,
                 is_active=True,

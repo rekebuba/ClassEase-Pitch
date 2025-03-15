@@ -185,9 +185,10 @@ class StudentFactory(factory.alchemy.SQLAlchemyModelFactory):
         lambda obj: fake.company() if obj.is_transfer else '')
 
     current_grade = factory.LazyAttribute(lambda x: random.randint(1, 10))
+    current_grade_id = factory.LazyAttribute(lambda x: None)
+    next_grade_id = factory.LazyAttribute(lambda x: None)
     semester_id = factory.LazyAttribute(lambda x: None)
     has_passed = factory.LazyAttribute(lambda x: False)
-    next_grade = factory.LazyAttribute(lambda x: None)
     is_registered = factory.LazyAttribute(lambda x: False)
 
     has_medical_condition = factory.LazyAttribute(lambda _: fake.boolean())
@@ -326,10 +327,14 @@ class SemesterFactory(factory.alchemy.SQLAlchemyModelFactory):
             DefaultFelids.modify_fields(self)
 
 
-@dataclass
+@dataclass(kw_only=True)
 class AvailableSubject:
+    grade: int
     subject: str
     subject_code: str
+
+    def to_dict(self):
+        return asdict(self)
 
 
 @dataclass
@@ -339,10 +344,17 @@ class AssessmentTypes:
 
 
 @dataclass
-class MarkList:
+class MarkAssessment:
     grade: int
     subjects: list
     assessment_type: list
+
+
+@dataclass
+class FakeMarkList:
+    academic_year: int
+    semester: int
+    mark_assessment: dict
 
     def to_dict(self):
         return asdict(self)  # Converts all fields to dict automatically
@@ -354,6 +366,7 @@ class SubjectsFactory(factory.Factory):
 
     subject = factory.LazyAttribute(lambda _: None)
     subject_code = factory.LazyAttribute(lambda _: None)
+    grade = factory.LazyAttribute(lambda _: None)
 
 
 class AssessmentTypesFactory(factory.Factory):
@@ -365,16 +378,26 @@ class AssessmentTypesFactory(factory.Factory):
         lambda obj: 30 if obj.type == "Mid" else 70)
 
 
-class MarkListFactory(factory.Factory):
+class MarkAssessmentFactory(factory.Factory):
     class Meta:
-        model = MarkList
+        model = MarkAssessment
 
-    grade = factory.Faker("random_int", min=1, max=10)
+    grade = factory.LazyAttribute(lambda _: random.randint(1, 10))
     subjects = factory.LazyAttribute(
         lambda _: SubjectsFactory.create_batch(4))
     assessment_type = factory.LazyAttribute(
         lambda _: AssessmentTypesFactory.create_batch(2))
 
-    @classmethod
-    def to_dict(cls, mark):
-        return mark.__dict__.copy()
+
+class MarkListFactory(factory.Factory):
+    class Meta:
+        model = FakeMarkList
+
+    academic_year = factory.LazyAttribute(
+        lambda _: DefaultFelids.current_EC_year())
+    semester = factory.LazyAttribute(lambda _: 1)
+    mark_assessment = factory.LazyAttribute(
+        lambda _: [
+            MarkAssessmentFactory() for _ in range(2)
+        ]
+    )

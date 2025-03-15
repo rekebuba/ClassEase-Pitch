@@ -1,4 +1,4 @@
-from marshmallow import ValidationError, pre_load, validates_schema, fields, post_load, Schema
+from marshmallow import ValidationError, pre_load, validates, validates_schema, fields, post_load, Schema
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from api.v1.schemas.base_schema import BaseSchema
 from models import storage
@@ -40,11 +40,21 @@ class CourseListSchema(BaseSchema):
 
     section_id = fields.String(required=False, load_only=True)
 
+    is_registered = fields.Boolean(required=False, load_only=True)
+
     @pre_load
     def set_defaults(self, data, **kwargs):
+        # add default values to the data
+        data['is_registered'] = self.is_student_registered(
+            data.get('student_id'))
         data['user_id'] = self.get_user_id(data.get('student_id'))
         data['grade_id'] = self.get_grade_id(data.get('grade'))
         data['semester_id'] = self.get_semester_id(
             data.get('semester'), data.get('academic_year'))
 
         return data
+
+    @validates('is_registered')
+    def validate_is_registered(self, value):
+        if value:
+            raise ValidationError("Student is already registered.")

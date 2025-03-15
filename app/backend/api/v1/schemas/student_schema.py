@@ -41,11 +41,12 @@ class StudentRegistrationSchema(BaseSchema):
     previous_school_name = fields.String(required=False, validate=[
         fields.validate.Length(min=2, max=50)], allow_none=True)
 
-    current_grade = fields.Integer(required=True, validate=[
+    current_grade = fields.Integer(required=False, validate=[
                                    fields.validate.Range(min=1, max=12)])
+    current_grade_id = fields.String(required=True)
 
     semester_id = fields.String(required=False)
-    has_passed = fields.Boolean(required=False)
+    has_passed = fields.Boolean(required=False, load_default=False)
     next_grade = fields.Integer(required=False, validate=[
         fields.validate.Range(min=1, max=12)
     ])
@@ -66,46 +67,35 @@ class StudentRegistrationSchema(BaseSchema):
         fields.validate.Length(min=5, max=500)
     ], allow_none=True)
 
-    is_active = fields.Boolean(required=False)
+    is_active = fields.Boolean(required=False, load_default=False)
 
     @pre_load
     def set_defaults(self, data, **kwargs):
         # add default values to the data
+        data['current_grade_id'] = self.get_grade_id(data.pop('current_grade'))
 
         data['start_year_id'] = self.get_year_id(data['academic_year'])
         data['current_year_id'] = self.get_year_id(data['academic_year'])
+        data['gender'] = data.get('gender').upper()
 
-        if data.get('gender'):
-            data['gender'] = data['gender'].upper()
-        if data.get('is_transfer') == 'True':
-            data['is_transfer'] = True
-        if data.get('is_transfer') == 'False' and data.get('previous_school_name') == '':
-            data['is_transfer'] = False
+        data['is_transfer'] = data.get('is_transfer') == 'True'
+        data['has_disability'] = data.get('has_disability') == 'True'
+        data['has_medical_condition'] = data.get(
+            'has_medical_condition') == 'True'
+        data['requires_special_accommodation'] = data.get(
+            'requires_special_accommodation') == 'True'
+
+        if not data.get('is_transfer') and not data.get('previous_school_name', '').strip():
             data['previous_school_name'] = None
 
-        if not data.get('has_passed'):
-            data['has_passed'] = False
-
-        if data.get('has_medical_condition') == 'True':
-            data['has_medical_condition'] = True
-        if data.get('has_medical_condition') == 'False' and data.get('medical_details') == '':
-            data['has_medical_condition'] = False
+        if not data.get('has_medical_condition') and not data.get('medical_details', '').strip():
             data['medical_details'] = None
 
-        if data.get('has_disability') == 'True':
-            data['has_disability'] = True
-        if data.get('has_disability') == 'False' and data.get('disability_details') == '':
-            data['has_disability'] = False
+        if not data.get('has_disability') and not data.get('disability_details', '').strip():
             data['disability_details'] = None
 
-        if data.get('requires_special_accommodation') == 'True':
-            data['requires_special_accommodation'] = True
-        if data.get('requires_special_accommodation') == 'False' and data.get('special_accommodation_details') == '':
-            data['requires_special_accommodation'] = False
+        if not data.get('requires_special_accommodation') and not data.get('special_accommodation_details', '').strip():
             data['special_accommodation_details'] = None
-
-        if not data.get('is_active'):
-            data['is_active'] = False
 
         return data
 
