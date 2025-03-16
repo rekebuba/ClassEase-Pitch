@@ -333,9 +333,6 @@ class AvailableSubject:
     subject: str
     subject_code: str
 
-    def to_dict(self):
-        return asdict(self)
-
 
 @dataclass
 class AssessmentTypes:
@@ -352,6 +349,7 @@ class MarkAssessment:
 
 @dataclass
 class FakeMarkList:
+    count: int # number of mark List to create
     academic_year: int
     semester: int
     mark_assessment: dict
@@ -396,8 +394,9 @@ class MarkListFactory(factory.Factory):
     academic_year = factory.LazyAttribute(
         lambda _: DefaultFelids.current_EC_year())
     semester = factory.LazyAttribute(lambda _: 1)
+    count = factory.LazyAttribute(lambda _: 0)
     mark_assessment = factory.LazyAttribute(
-        lambda _: [
-            MarkAssessmentFactory() for _ in range(2)
+        lambda obj: [
+            MarkAssessmentFactory() for _ in range(obj.count)
         ]
     )

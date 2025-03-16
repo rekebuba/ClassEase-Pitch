@@ -20,9 +20,11 @@ from api.v1.views.utils import student_required, admin_or_student_required
 from urllib.parse import urlparse, parse_qs
 from sqlalchemy import update, and_
 from datetime import datetime
+from api.v1.schemas.schemas import *
 from api.v1.views.methods import save_profile, validate_request
-from api.v1.schemas.assessment_schema import CourseListSchema
+from api.v1.schemas.schemas import CourseListSchema
 from api.v1.views import errors
+
 
 stud = Blueprint('stud', __name__, url_prefix='/api/v1/student')
 
@@ -39,22 +41,33 @@ def student_panel_data(student_data):
     Returns:
         Response: A JSON response containing the student's information, including grade and section, or an error message if the student is not found.
     """
-    if not student_data:
-        return jsonify({"error": "Student not found"}), 404
 
-    query = (storage.session.query(User.image_path, Student.id, Student.name, Student.father_name, Student.grand_father_name)
-             .join(Student, Student.id == User.id)
-             .filter(User.id == student_data.student_id)
-             ).first()
+    try:
+        query = (
+            storage.session.query(User, Student)
+            .join(Student, Student.user_id == User.id)
+            .filter(User.identification == student_data.identification)
+            .first()
+        )
 
-    data = {key: value for key, value in query._asdict().items()}
+        if not query:
+            return errors.handle_not_found_error("Student Not Found")
 
-    image_url = url_for('static', filename=data['image_path'], _external=True)
+        # Unpack the query result
+        user, student = query
 
-    return jsonify({
-        **data,
-        "image_url": image_url
-    }), 200
+        # Serialize the data using the schema
+        schema = StudentPanelSchema()
+        result = schema.dump({
+            "user": user,
+            "student": student
+        })
+
+        return jsonify(result), 200
+    except ValidationError as e:
+        return errors.handle_validation_error(e)
+    except Exception as e:
+        return errors.handle_internal_error(e)
 
 
 @stud.route('/yearly_score', methods=['GET'])

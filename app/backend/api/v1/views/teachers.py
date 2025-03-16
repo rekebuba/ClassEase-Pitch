@@ -2,6 +2,7 @@
 """Teacher views module for the API"""
 
 from flask import request, jsonify, url_for
+from marshmallow import ValidationError
 from sqlalchemy import func
 from models import storage
 from datetime import datetime
@@ -20,9 +21,11 @@ from models.stud_year_record import STUDYearRecord
 from urllib.parse import urlparse, parse_qs
 from sqlalchemy import update, and_
 from flask import Blueprint
+from api.v1.schemas.schemas import *
 from api.v1.views.utils import teacher_required
 from api.v1.views.methods import paginate_query, save_profile
 from models.base_model import BaseModel
+from api.v1.views import errors
 
 
 teach = Blueprint('teach', __name__, url_prefix='/api/v1/teacher')
@@ -41,20 +44,32 @@ def teacher_panel(teacher_data):
         Response: A JSON response containing the teacher data if found,
                   otherwise an error message with a 404 status code.
     """
-    if not teacher_data:
-        return jsonify({"error": "Teacher not found"}), 404
+    try:
+        query = (
+            storage.session.query(User, Teacher)
+            .join(Teacher, Teacher.user_id == User.id)
+            .filter(User.identification == teacher_data.identification)
+            .first()
+        )
 
-    query = (storage.session.query(User.image_path, Teacher.id, Teacher.first_name, Teacher.last_name)
-             .join(Teacher, Teacher.id == User.id)
-             .filter(User.id == teacher_data.id)
-             ).first()
+        if not query:
+            return errors.handle_not_found_error("Teacher Not Found")
 
-    data = {key: url_for('static', filename=value, _external=True)
-            if key == 'image_path' and value is not None else value for key, value in query._asdict().items()}
+        # Unpack the query result
+        user, teacher = query
 
-    return jsonify({
-        **data,
-    }), 200
+        # Serialize the data using the schema
+        schema = TeacherPanelSchema()
+        result = schema.dump({
+            "user": user,
+            "teacher": teacher
+        })
+
+        return jsonify(result), 200
+    except ValidationError as e:
+        return errors.handle_validation_error(e)
+    except Exception as e:
+        return errors.handle_internal_error(e)
 
 
 @teach.route('/dashboard', methods=['GET'])
@@ -614,7 +629,8 @@ def semester_ranks(student_data):
     storage.session.execute(
         update(STUDSemesterRecord)
         .where(and_(
-            STUDSemesterRecord.student_id == ranked_data_subquery.c.student_id,  # c is short for Column
+            # c is short for Column
+            STUDSemesterRecord.student_id == ranked_data_subquery.c.student_id,
             STUDSemesterRecord.semester == ranked_data_subquery.c.semester,
             STUDSemesterRecord.year == ranked_data_subquery.c.year,
         ))

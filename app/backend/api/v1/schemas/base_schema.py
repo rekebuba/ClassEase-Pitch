@@ -78,6 +78,10 @@ class BaseSchema(Schema):
         return student.is_registered
 
     @staticmethod
+    def generate_section(grade_id, semester_id):
+        pass  # TODO: new sections to generate
+
+    @staticmethod
     def get_user_id(user_identification):
         if user_identification is None:
             raise ValidationError("user is required")

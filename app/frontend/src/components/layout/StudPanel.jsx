@@ -53,8 +53,12 @@ const StudentPanel = () => {
     const fetchStudent = async () => {
       try {
         const response = await studentApi.getPanelData();
-        console.log(response.data)
-        setStudentData(response.data);
+        const flattenedData = {
+          ...response.data['user'],
+          ...response.data['student'],
+          image_url: response.data.image_url
+        };
+        setStudentData(flattenedData);
         setPreviewImage(response.data.image_url);
       } catch (error) {
         if (error.response && error.response.data && error.response.data['error']) {
@@ -82,8 +86,8 @@ const StudentPanel = () => {
           <AvatarImage src={previewImage} />
           <AvatarFallback><FaUserCircle className="w-16 h-16 text-gray-500 cursor-pointer" /></AvatarFallback>
         </Avatar>
-        <h3 className="mt-4 text-center text-xl font-semibold text-gray-800">{studentData.name} {studentData.father_name} {studentData.grand_father_name}</h3>
-        <h3 className="mt-4 text-center text-gray-800">{studentData.id}</h3>
+        <h3 className="mt-4 text-center text-gray-800">{studentData.firstName} {studentData.fatherName} {studentData.grandFatherName}</h3>
+        <h3 className="mt-4 text-center text-gray-800">{studentData.identification}</h3>
 
       </div>
       <Logout />

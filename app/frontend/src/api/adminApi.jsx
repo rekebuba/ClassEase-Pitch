@@ -1,7 +1,7 @@
-import { create } from 'lodash';
 import api from './api';
 
 const adminApi = {
+    getPanelData: () => api.get('/admin/panel'),
     getDashboardData: () => api.get('/admin/dashboard'),
     getSchoolOverview: () => api.get('/admin/overview'),
     getStudents: (requirements) => api.get('/admin/students', { params: requirements }),

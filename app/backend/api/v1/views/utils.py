@@ -246,7 +246,8 @@ def student_required(f):
         try:
             payload = jwt.decode(
                 token, current_app.config["STUDENT_SECRET_KEY"], algorithms=["HS256"])
-            student_data = storage.get_first(User, identification=payload['id'])
+            student_data = storage.get_first(
+                User, identification=payload['id'])
             if not student_data:
                 return jsonify({'message': 'Student not found!'}), 404
         except jwt.ExpiredSignatureError:

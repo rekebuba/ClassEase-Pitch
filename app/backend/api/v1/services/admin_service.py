@@ -1,14 +1,11 @@
 from flask import request
 from marshmallow import ValidationError
-from api.v1.schemas.event_schema import EventCreationSchema
-from api.v1.schemas.semester_schema import SemesterCreationSchema
+from api.v1.schemas.schemas import AdminSchema, EventCreationSchema, SemesterCreationSchema
 from api.v1.services.event_service import EventService
 from api.v1.services.semester_service import SemesterService
 from models.admin import Admin
 from models.user import User
 from api.v1.services.user_service import UserService
-from models import storage
-from api.v1.schemas.admin_schema import AdminRegistrationSchema
 from models import storage
 
 

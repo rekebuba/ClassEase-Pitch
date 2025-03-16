@@ -52,8 +52,11 @@ const TeacherPanel = () => {
         const fetchAdmin = async () => {
             try {
                 const response = await teacherApi.getPanelData();
-                setTeacherData(response.data);
-                setPreviewImage(response.data.image_url);
+                const flattenedData = {
+                    ...response.data['user'],
+                    ...response.data['teacher'],
+                };
+                setTeacherData(flattenedData);
             } catch (error) {
                 if (error.response && error.response.data && error.response.data['error']) {
                     console.error(error.response.data['error']);
@@ -73,14 +76,14 @@ const TeacherPanel = () => {
             {/* Top Profile Section */}
             <div className="flex flex-col items-center space-y-4">
                 <Avatar className="w-16 h-16 cursor-pointer" onClick={updateProfile}>
-                    <AvatarImage src={previewImage} />
+                    <AvatarImage src={teacherData.imageUrl} />
                     <AvatarFallback><FaUserCircle className="w-16 h-16 text-gray-500 cursor-pointer" /></AvatarFallback>
                 </Avatar>
                 <h3 className="mt-4 text-center text-xl font-semibold text-gray-800">
                     Teacher Panel
                 </h3>
                 <p className="text-sm text-gray-600 text-wrap text-center font-semibold">
-                    Mr. {teacherData.first_name} {teacherData.last_name}
+                    Mr. {teacherData.firstName} {teacherData.fatherName} {teacherData.grandFatherName}
                 </p>
             </div>
             <Logout />

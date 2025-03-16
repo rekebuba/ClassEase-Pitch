@@ -24,15 +24,16 @@ class TeachersRecord(BaseModel, Base):
         __init__(*args, **kwargs): Initializes a TeachersRecord instance.
     """
     __tablename__ = 'teachers_record'
-    teacher_id = Column(String(120), ForeignKey(
-        'teacher.id'), nullable=False)
+    user_id = Column(String(120), ForeignKey(
+        'users.id'), nullable=False)
     subject_id = Column(String(120), ForeignKey(
         'subjects.id'), nullable=True, default=None)
     grade_id = Column(String(120), ForeignKey(
         'grades.id'), nullable=True, default=None)
     section_id = Column(String(120), ForeignKey(
         'sections.id'), nullable=True, default=None)
-    semester = Column(Integer, nullable=False)
+    semester_id = Column(String(120), ForeignKey(
+        'semesters.id'), nullable=False)
 
     mark_list = relationship(
         "MarkList", backref="teachers_record", cascade="save-update", passive_deletes=True)

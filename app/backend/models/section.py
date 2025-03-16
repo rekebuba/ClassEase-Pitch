@@ -23,6 +23,8 @@ class Section(BaseModel, Base):
     __tablename__ = 'sections'
     section = Column(String(1))  # e.g., A, B, C, D, E, F, G
     grade_id = Column(String(120), ForeignKey('grades.id'), nullable=False)
+    semester_id = Column(String(120), ForeignKey(
+        'semesters.id'), nullable=False)
 
     def __init__(self, *args, **kwargs):
         """

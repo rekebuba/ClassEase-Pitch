@@ -184,16 +184,14 @@ def db_course_registration(db_session):
                 )
 
     for student in students:
-        current_grade = (db_session.query(Grade.name)
-                         .filter(Grade.id == student.current_grade_id)
-                         .scalar()
-                         )
         grade_id = (db_session.query(Grade.id)
-                    .filter(Grade.name == (current_grade + 1))
+                    .filter(Grade.id == (student.next_grade_id if student.next_grade_id else student.current_grade_id))
                     .scalar()
                     )
-        semester_id = (db_session.query(
-            Semester.id).filter_by(name=1).scalar())
+        semester_id = (db_session.query(Semester.id)
+                       .filter_by(name=(1 if not student.next_grade_id else 2))
+                       .scalar()
+                       )
 
         new_semester_record = STUDSemesterRecord(
             user_id=student.id,
@@ -210,7 +208,7 @@ def db_course_registration(db_session):
                 Grade.name.label("grade")
             )
             .join(Grade, Grade.id == Subject.grade_id)
-            .filter(Grade.id == (student.next_grade_id if student.next_grade_id else student.current_grade_id))
+            .filter(Grade.id == grade_id)
             .all()
         )
 
@@ -249,17 +247,29 @@ def db_course_registration(db_session):
 @pytest.fixture(scope="session")
 def fake_mark_list(db_session):
     # generate fake mark list for each grade
-    mark_list = MarkListFactory().to_dict()
-    for assessment in mark_list['mark_assessment']:
+    registered_students = (db_session.query(Grade.name)
+                           .join(STUDSemesterRecord, STUDSemesterRecord.grade_id == Grade.id)
+                           .all()
+                           )
+
+    available_teachers = (db_session.query(User.identification)
+                          .join(Teacher, User.id == Teacher.user_id)
+                          .all()
+                          )
+
+    grades = {grade.name for grade in registered_students}
+    mark_list = MarkListFactory(count=len(grades)).to_dict()
+    mark_list.pop('count')
+
+    for grade, assessment in zip(list(grades), mark_list['mark_assessment']):
+        assessment['grade'] = grade
         subjects = (db_session.query(Subject.name, Subject.code)
                     .join(Grade, Grade.id == Subject.grade_id)
                     .filter(Grade.name == assessment['grade'])
                     .all()
                     )
         custom_subjects = [AvailableSubject(
-            subject=name, subject_code=code, grade=assessment['grade']).to_dict() for name, code in subjects]
+            subject=name, subject_code=code, grade=assessment['grade']) for name, code in subjects]
         assessment['subjects'] = custom_subjects
-
-    # print(json.dumps(mark_list, indent=4, sort_keys=True))
 
     return mark_list

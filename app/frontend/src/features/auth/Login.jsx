@@ -47,10 +47,10 @@ const Login = () => {
     try {
       const response = await authApi.login({ id, password });
       if (response.status === 200) {
-        localStorage.setItem("Authorization", response.data.access_token);
+        localStorage.setItem("Authorization", response.data.apiKey);
         navigate(`/${response.data.role}/dashboard`);
       }
-    } catch (error) {
+    } catch {
       setWarning("ID or password is incorrect");
     }
   };

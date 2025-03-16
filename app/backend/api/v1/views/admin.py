@@ -29,47 +29,52 @@ from urllib.parse import urlparse, parse_qs
 from api.v1.views.utils import admin_required
 from api.v1.views.methods import save_profile, validate_request
 from api.v1.services.event_service import EventService
-from api.v1.schemas.admin_schema import AdminRegistrationSchema, CreateMarkListSchema
-from api.v1.schemas.user_schema import UserRegistrationSchema
+from api.v1.schemas.schemas import *
 from api.v1.services.semester_service import SemesterService
-from api.v1.schemas.event_schema import EventCreationSchema
 from api.v1.services.admin_service import AdminService
-from api.v1.schemas.semester_schema import SemesterCreationSchema
 from api.v1.services.user_service import UserService
 from api.v1.views import errors
+
+
 admin = Blueprint('admin', __name__, url_prefix='/api/v1/admin')
 
 
-@admin.route('/dashboard', methods=['GET'])
+@admin.route('/panel', methods=['GET'])
 @admin_required
-def admin_dashboard(admin_data):
-    """
-    Handle the admin dashboard view.
+def admin_panel(admin_data):
+    """Handle the admin Panel view
 
     Args:
-        admin_data (object): The admin data object. It should have a method `to_dict()`
-                             that converts the object to a dictionary.
+        admin_data (Admin Instance)
 
     Returns:
-        tuple: A tuple containing a JSON response and an HTTP status code.
-               - If `admin_data` is None, returns a JSON response with an error message
-                 and a 404 status code.
-               - If `admin_data` is valid, returns a JSON response with the admin data
-                 dictionary and a 200 status code.
+        Response: A JSON response containing the admin data
     """
-    query = (storage.session.query(User.image_path)
-             .join(Admin, Admin.id == User.id)
-             .filter(Admin.id == admin_data.id)
-             ).first()
+    try:
+        query = (
+            storage.session.query(User, Admin)
+            .join(Admin, Admin.user_id == User.id)
+            .filter(User.identification == admin_data.identification)
+            .first()
+        )
 
-    filename = query[0]
+        if not query:
+            return errors.handle_not_found_error("Admin Not Found")
 
-    image_url = url_for('static', filename=f'{filename}', _external=True)
+        user, admin = query
 
-    return jsonify({
-        **(admin_data.to_dict()),
-        "image_url": image_url
-    }), 200
+        # Serialize the data using the schema
+        schema = AdminPanelSchema()
+        result = schema.dump({
+            "user": user,
+            "admin": admin
+        })
+
+        return jsonify(result), 200
+    except ValidationError as e:
+        return errors.handle_validation_error(e)
+    except Exception as e:
+        return errors.handle_internal_error(e)
 
 
 @admin.route('/profile', methods=['PUT'])
@@ -414,6 +419,7 @@ def create_mark_list(admin_data):
         mark_list_schema = CreateMarkListSchema()
         validated_data = mark_list_schema.load(data)
 
+        mark_list = []
         for assessment in validated_data['mark_assessment']:
             registered_students = storage.get_all(
                 STUDSemesterRecord, grade_id=assessment['grade_id'], semester_id=validated_data['semester_id'])
@@ -427,12 +433,11 @@ def create_mark_list(admin_data):
                             type=assessment_type['type'],
                             percentage=assessment_type['percentage']
                         )
-                        storage.add(new_mark_list)
-                        storage.save()
 
-        fake = storage.session.query(MarkList).count()
+                        mark_list.append(new_mark_list)
 
-        print(fake)
+        storage.session.bulk_save_objects(mark_list)
+        storage.save()
 
         return jsonify({"message": "Mark list created successfully!"}), 201
     except ValidationError as e:

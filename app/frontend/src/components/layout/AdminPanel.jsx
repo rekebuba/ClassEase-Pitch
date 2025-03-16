@@ -35,7 +35,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
  */
 const AdminPanel = () => {
     const navigate = useNavigate();
-    const [previewImage, setPreviewImage] = useState('');
     const [adminData, setAdminData] = useState({});
 
     /**
@@ -46,9 +45,12 @@ const AdminPanel = () => {
     useEffect(() => {
         const fetchAdmin = async () => {
             try {
-                const response = await adminApi.getDashboardData();
-                setAdminData(response.data);
-                setPreviewImage(response.data.image_url);
+                const response = await adminApi.getPanelData();
+                const flattenedData = {
+                    ...response.data['user'],
+                    ...response.data['admin'],
+                };
+                setAdminData(flattenedData);
             } catch (error) {
                 if (error.response && error.response.data && error.response.data['error']) {
                     console.error(error.response.data['error']);
@@ -67,11 +69,11 @@ const AdminPanel = () => {
         <aside className="flex flex-col justify-between fixed mt-[4.6rem] h-full w-48 bg-white p-7 border-r border-gray-200">
             <div className="flex flex-col items-center space-y-4">
                 <Avatar className="w-16 h-16 cursor-pointer" onClick={updateProfile}>
-                    <AvatarImage src={previewImage} />
+                    <AvatarImage src={adminData.imageUrl} />
                     <AvatarFallback><FaUserCircle className="w-16 h-16 text-gray-500 cursor-pointer" /></AvatarFallback>
                 </Avatar>
-                <h3 className="mt-4 text-xl font-semibold text-gray-800">{adminData.__class__} Panel</h3>
-                <p className="text-sm text-gray-600 text-wrap text-center font-bold">Mr. {adminData.name}</p>
+                <h3 className="mt-4 text-xl font-semibold text-gray-800">{adminData.role} Panel</h3>
+                <p className="text-sm text-gray-600 text-wrap text-center font-bold">Mr. {adminData.firstName} {adminData.fatherName} {adminData.grandFatherName} </p>
                 <p className="text-sm text-gray-600 text-wrap text-center font-bold">Principal</p>
             </div>
             <Logout />
