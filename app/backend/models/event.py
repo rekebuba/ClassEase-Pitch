@@ -22,7 +22,7 @@ class Event(BaseModel, Base):
     start_time = Column(DateTime)
     end_time = Column(DateTime)
 
-    location_type = Column(String(50), Enum(
+    location = Column(String(50), Enum(
         'Auditorium', 'Classroom', 'Sports Field', 'Online', 'Other'), nullable=True)
     is_hybrid = Column(Boolean, default=False)
     online_link = Column(Text, nullable=True)
@@ -56,10 +56,6 @@ class Event(BaseModel, Base):
             name="check_fee_amount"
         ),
         CheckConstraint(
-            "location_type = 'Online' AND online_link IS NOT NULL",
-            name="check_online_link"
-        ),
-        CheckConstraint(
             "requires_registration = True AND registration_start IS NOT NULL AND registration_end IS NOT NULL",
             name="check_registration_with_dates"
         ),
@@ -68,15 +64,11 @@ class Event(BaseModel, Base):
             name="check_fee"
         ),
         CheckConstraint(
-            "is_hybrid = True AND location_type = 'Online'",
-            name="check_hybrid"
-        ),
-        CheckConstraint(
             "purpose = 'New Semester' AND organizer = 'School Administration'",
             name="check_purpose_with_organizer"
         ),
         CheckConstraint(
-            "purpose = 'New Semester' AND location_type = 'Online'",
+            "purpose = 'New Semester' AND location = 'Online'",
             name="check_purpose_with_location"
         ),
         CheckConstraint(
@@ -90,10 +82,6 @@ class Event(BaseModel, Base):
         CheckConstraint(
             "purpose = 'New Semester' AND eligibility = 'All'",
             name="check_purpose_with_eligibility"
-        ),
-        CheckConstraint(
-            "purpose = 'New Semester' AND is_hybrid = True",
-            name="check_purpose_with_hybrid"
         ),
         CheckConstraint(
             "purpose = 'New Semester' AND registration_start IS NOT NULL",

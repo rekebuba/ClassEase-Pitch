@@ -10,7 +10,7 @@ import { authApi } from "@/api";
  * Logout component that handles user logout functionality.
  *
  * This component performs the following actions:
- * - Clears the 'Authorization' token from local storage.
+ * - Clears the 'apiKey' token from local storage.
  * - Redirects the user to the login page.
  *
  * @component
@@ -28,7 +28,7 @@ const Logout = () => {
         setOpen(false);
         try {
             const response = await authApi.logout();
-            localStorage.removeItem('Authorization'); // Clear tokens from local storage
+            localStorage.removeItem('apiKey'); // Clear tokens from local storage
             navigate('/login');
             toast.success(response.data['message'], {
                 description: currentTime,

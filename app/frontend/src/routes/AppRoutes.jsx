@@ -22,15 +22,15 @@ const router = createBrowserRouter([
     },
     {
         path: "/admin/dashboard",
-        element: <ProtectedRoute element={<AdminDashboard />} allowedRoles={['admin']}/>,
+        element: <ProtectedRoute element={<AdminDashboard />} allowedRoles={['admin']} />,
     },
     {
         path: "/admin/manage/students",
-        element: <AdminManageStudents />
+        element: <ProtectedRoute element={<AdminManageStudents />} allowedRoles={['admin']} />,
     },
     {
         path: "/admin/manage/teachers",
-        element: <AdminManageTeacher />
+        element: <ProtectedRoute element={<AdminManageTeacher />} allowedRoles={['admin']} />,
     },
     {
         path: "admin/student/registration",
@@ -38,15 +38,15 @@ const router = createBrowserRouter([
     },
     {
         path: "/admin/assessment/marklist",
-        element: <AdminCreateMarkList />
+        element: <ProtectedRoute element={<AdminCreateMarkList />} allowedRoles={['admin']} />,
     },
     {
-        path: "/admin/events/newevent",
-        element: <AdminManageEvent />
+        path: "/admin/events",
+        element: <ProtectedRoute element={<AdminManageEvent />} allowedRoles={['admin']} />,
     },
     {
         path: "/admin/users/accesscontrol",
-        element: <AdminUserAccessControl />
+        element: <ProtectedRoute element={<AdminUserAccessControl />} allowedRoles={['admin']} />,
     },
     {
         path: "/admin/update/profile",
@@ -57,8 +57,8 @@ const router = createBrowserRouter([
         element: <AdminEnrollUser role="teacher" />
     },
     {
-        path: '/admin/manage-event/new',
-        element: <AdminEventForm />
+        path: '/admin/event/new',
+        element: <ProtectedRoute element={<AdminEventForm />} allowedRoles={['admin']} />,
     },
     {
         path: "/teacher/dashboard",
@@ -66,7 +66,7 @@ const router = createBrowserRouter([
     },
     {
         path: "/teacher/students",
-        element: <ProtectedRoute element={<TeacherManageStudent />} allowedRoles={['teacher']}/>
+        element: <ProtectedRoute element={<TeacherManageStudent />} allowedRoles={['teacher']} />
     },
     {
         path: "/teacher/update/profile",

@@ -3,7 +3,7 @@ from flask import request
 from marshmallow import ValidationError
 from api.v1.schemas.schemas import *
 from api.v1.views.methods import save_profile
-from api.v1.views.utils import create_student_token, create_teacher_token, create_admin_token
+from api.v1.views.utils import create_token
 from models.teacher import Teacher
 from models.student import Student
 from models.user import User
@@ -96,12 +96,4 @@ class UserService:
     @staticmethod
     def generate_api_key(role, user_id):
         """Generate an api_key token based on the user's role"""
-        api_key = None
-        if role == 'student':
-            api_key = create_student_token(user_id)
-        elif role == 'teacher':
-            api_key = create_teacher_token(user_id)
-        elif role == 'admin':
-            api_key = create_admin_token(user_id)
-
-        return api_key
+        return create_token(user_id, role)

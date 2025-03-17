@@ -1,6 +1,6 @@
 from flask import request
 from marshmallow import ValidationError
-from api.v1.schemas.schemas import AdminSchema, EventCreationSchema, SemesterCreationSchema
+from api.v1.schemas.schemas import AdminSchema, EventSchema, SemesterCreationSchema
 from api.v1.services.event_service import EventService
 from api.v1.services.semester_service import SemesterService
 from models.admin import Admin

@@ -16,9 +16,9 @@ const api = axios.create({
 api.interceptors.request.use(
   config => {
     // Modify request before it is sent
-    const token = localStorage.getItem("Authorization"); // Retrieve the token from local storage
+    const token = localStorage.getItem("apiKey"); // Retrieve the token from local storage
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      config.headers.apiKey = `Bearer ${token}`;
     }
     return config;
   },
@@ -33,7 +33,7 @@ api.interceptors.response.use(
 
       if (reason === "SESSION_EXPIRED") {
         window.location.href = "/login"; // Redirect to login page
-        localStorage.removeItem("Authorization"); // Clear the token
+        localStorage.removeItem("apiKey"); // Clear the token
         alert("Your session has expired. Please log in again.");
       } else if (reason === "UNAUTHORIZED") {
         window.location.href = "/login"; // Redirect to login page

@@ -370,7 +370,7 @@ class SemesterCreationSchema(BaseSchema):
             raise ValidationError('Event Was Not Created Successfully.')
 
 
-class EventCreationSchema(BaseSchema):
+class EventSchema(BaseSchema):
     """Schema for validating event creation data."""
     title = fields.String(required=True, validate=[
                           fields.validate.Length(min=3, max=100)])
@@ -389,18 +389,18 @@ class EventCreationSchema(BaseSchema):
     start_time = fields.DateTime(load_default=None, format='%H:%M:%S')
     end_time = fields.DateTime(load_default=None, format='%H:%M:%S')
 
-    location_type = fields.String(load_default=None, validate=lambda x: x in [
-                                  'Auditorium', 'Classroom', 'Sports Field', 'Online', 'Other'])
-    is_hybrid = fields.Boolean(load_default=None)
+    location = fields.String(load_default=None, validate=lambda x: x in [
+        'Auditorium', 'Classroom', 'Sports Field', 'Online', 'Other'])
+    is_hybrid = fields.Boolean(load_default=False)
     online_link = fields.Url(load_default=None)
 
-    requires_registration = fields.Boolean(load_default=None)
+    requires_registration = fields.Boolean(load_default=False)
     registration_start = fields.Date(load_default=None, format='iso')
     registration_end = fields.Date(load_default=None, format='iso')
 
     eligibility = fields.String(load_default=None, validate=lambda x: x in [
                                 'All', 'Students Only', 'Faculty Only', 'Invitation Only'])
-    has_fee = fields.Boolean(load_default=None)
+    has_fee = fields.Boolean(load_default=False)
     fee_amount = fields.Float(load_default=None, validate=[
                               fields.validate.Range(min=0)])
 
@@ -414,7 +414,7 @@ class EventCreationSchema(BaseSchema):
     @pre_load
     def set_defaults(self, data, **kwargs):
         # add default values to the data
-        data['year_id'] = self.get_year_id(data['academic_year'])
+        data['year_id'] = self.get_year_id(data.get('academic_year'))
 
         return data
 
@@ -425,32 +425,28 @@ class EventCreationSchema(BaseSchema):
             if data["start_date"] > data["end_date"]:
                 raise ValidationError(
                     "Start date cannot be after end date.", "start_date")
-            if data["start_time"] > data["end_time"]:
-                raise ValidationError(
-                    "Start time cannot be after end time.", "start_time")
+            if data["start_time"] and data["end_time"]:
+                if data["start_time"] > data["end_time"]:
+                    raise ValidationError(
+                        "Start time cannot be after end time.", "start_time")
             if data['registration_start'] > data['registration_end']:
                 raise ValidationError(
                     "Registration start date cannot be after registration end date.")
-            if data['location_type'] == 'Online' and not data['online_link']:
-                raise ValidationError(
-                    "Online link is required for online events.")
             if data['requires_registration'] and not data['registration_start'] and not data['registration_end']:
                 raise ValidationError(
                     "Registration dates are required for events that require registration.")
             if data['has_fee'] and data['fee_amount'] <= 0:
                 raise ValidationError(
                     "Fee amount is required for events that have a fee.")
-            if data['is_hybrid'] and data['location_type'] != 'Online':
+            if data['is_hybrid'] and data['online_link'] is None:
                 raise ValidationError(
-                    "Hybrid events must have an online location type.")
+                    "Online link is required for hybrid events.")
             if data['purpose'] == 'New Semester' and data['organizer'] != 'School Administration':
                 raise ValidationError(
                     "New semester events must be organized by the school administration.")
-            if data['purpose'] == 'New Semester' and data['location_type'] != 'Online':
+            if data['purpose'] == 'New Semester' and data['location'] != 'Online':
                 raise ValidationError(
                     "New semester events must have an online location type.")
-            if data['purpose'] == 'New Semester' and not data['is_hybrid']:
-                raise ValidationError("New semester events must be hybrid.")
             if data['purpose'] == 'New Semester' and not data['has_fee']:
                 raise ValidationError("New semester events must have a fee.")
             if data['purpose'] == 'New Semester' and not data['requires_registration']:
@@ -461,9 +457,8 @@ class EventCreationSchema(BaseSchema):
                     "New semester events must be open to all.")
             if data['purpose'] == 'New Semester' and data['fee_amount'] == 0.00:
                 raise ValidationError("New semester events must have a fee.")
-        except TypeError:
-            print('this is why')
-            pass
+        except TypeError as e:
+            raise e
 
 
 class CourseRegistrationSchema(BaseSchema):
@@ -604,3 +599,8 @@ class TeacherPanelSchema(BaseSchema):
     user = fields.Nested(UserSchema)
     teacher = fields.Nested(TeacherSchema, only=(
         'first_name', 'father_name', 'grand_father_name'))
+
+
+class AvailableEventsSchema(BaseSchema):
+    events = fields.List(fields.Nested(EventSchema))
+    message = fields.String(dump_only=True)

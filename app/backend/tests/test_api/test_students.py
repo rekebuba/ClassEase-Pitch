@@ -158,7 +158,7 @@ class TestStudents(unittest.TestCase):
 
         response = self.client.get('/api/v1/student/dashboard',
                                    headers={
-                                       'Authorization': f'Bearer {token}'},
+                                       'apiKey': f'Bearer {token}'},
                                    content_type='application/json')
 
         self.assertEqual(response.status_code, 200)
@@ -187,7 +187,7 @@ class TestStudents(unittest.TestCase):
 
         response = self.client.get('/api/v1/student/dashboard',
                                    headers={
-                                       'Authorization': f'Bearer {token}invalid'},
+                                       'apiKey': f'Bearer {token}invalid'},
                                    content_type='application/json')
 
         self.assertEqual(response.status_code, 401)

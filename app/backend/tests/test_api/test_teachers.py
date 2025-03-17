@@ -167,7 +167,7 @@ class TestTeachers(unittest.TestCase):
 
         response = self.client.get('/api/v1/teacher/dashboard',
                                    headers={
-                                       'Authorization': f'Bearer {token}'},
+                                       'apiKey': f'Bearer {token}'},
                                    content_type='application/json')
 
         self.assertEqual(response.status_code, 200)
@@ -196,7 +196,7 @@ class TestTeachers(unittest.TestCase):
 
         response = self.client.get('/api/v1/teacher/dashboard',
                                    headers={
-                                       'Authorization': f'Bearer {token}invalid'},
+                                       'apiKey': f'Bearer {token}invalid'},
                                    content_type='application/json')
 
         self.assertEqual(response.status_code, 401)
@@ -222,7 +222,7 @@ class TestTeachers(unittest.TestCase):
 
         response = self.client.get('/api/v1/teacher/students/assigned_grade',
                                     headers={
-                                        'Authorization': f'Bearer {teacher_token}'},
+                                        'apiKey': f'Bearer {teacher_token}'},
                                     content_type='application/json')
 
         self.assertEqual(response.status_code, 200)
@@ -253,7 +253,7 @@ class TestTeachers(unittest.TestCase):
 
         response = self.client.get('/api/v1/teacher/students/assigned_grade',
                                     headers={
-                                        'Authorization': f'Bearer {token}'},
+                                        'apiKey': f'Bearer {token}'},
                                     content_type='application/json')
 
         self.assertEqual(response.status_code, 404)

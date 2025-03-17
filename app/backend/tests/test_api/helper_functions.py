@@ -245,7 +245,7 @@ def create_mark_list(client):
         response = client.put('/api/v1/admin/students/mark_list',
                               data=json.dumps(generate_mark_list_data()),
                               headers={
-                                  'Authorization': f'Bearer {token}'},
+                                  'apiKey': f'Bearer {token}'},
                               content_type='application/json')
 
         if response.status_code != 201:
@@ -270,7 +270,7 @@ def admin_course_assign_to_teacher(client):
 
     response = client.get('/api/v1/admin/teachers',
                           headers={
-                              'Authorization': f'Bearer {token}'},
+                              'apiKey': f'Bearer {token}'},
                           content_type='application/json')
 
     if response.status_code != 200:
@@ -292,7 +292,7 @@ def admin_course_assign_to_teacher(client):
                               }
                           ),
                           headers={
-                              'Authorization': f'Bearer {token}'},
+                              'apiKey': f'Bearer {token}'},
                           content_type='application/json')
 
     return teacher_token

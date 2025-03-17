@@ -7,7 +7,7 @@ const useAuth = () => {
 
     useEffect(() => {
         // Check if a token exists in localStorage
-        const token = localStorage.getItem('Authorization');
+        const token = localStorage.getItem('apiKey');
         if (token) {
             setIsAuthenticated(true);
 

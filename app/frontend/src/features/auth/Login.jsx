@@ -47,7 +47,7 @@ const Login = () => {
     try {
       const response = await authApi.login({ id, password });
       if (response.status === 200) {
-        localStorage.setItem("Authorization", response.data.apiKey);
+        localStorage.setItem("apiKey", response.data.apiKey);
         navigate(`/${response.data.role}/dashboard`);
       }
     } catch {

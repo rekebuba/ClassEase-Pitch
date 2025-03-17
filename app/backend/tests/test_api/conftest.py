@@ -143,7 +143,7 @@ def users_auth_header(client, db_session, role):
         })
         token = response.json["apiKey"]
         auth_headers.append(
-            {"header": {"Authorization": f"Bearer {token}"}, "user": user})
+            {"header": {"apiKey": f"Bearer {token}"}, "user": user})
 
     return auth_headers
 

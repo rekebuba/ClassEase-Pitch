@@ -271,7 +271,7 @@ class EventFactory(factory.alchemy.SQLAlchemyModelFactory):
     end_time = factory.LazyAttribute(
         lambda x: datetime.now() + timedelta(hours=1))  # Future datetime
 
-    location_type = factory.LazyAttribute(
+    location = factory.LazyAttribute(
         lambda obj: fake.random_element(
             elements=('Auditorium', 'Classroom',
                       'Sports Field', 'Online', 'Other')
@@ -279,7 +279,7 @@ class EventFactory(factory.alchemy.SQLAlchemyModelFactory):
     )
 
     is_hybrid = factory.LazyAttribute(
-        lambda obj: True if obj.location_type != 'online' else False)
+        lambda obj: True if obj.location != 'online' else False)
     online_link = factory.LazyAttribute(
         lambda obj: fake.url() if obj.is_hybrid else None)
 

@@ -76,7 +76,7 @@ const AdminHeader = () => {
     };
 
     const createEvent = () => {
-        navigate("/admin/events/newevent");
+        navigate("/admin/events");
     };
 
     const goToDashboard = () => {
@@ -187,7 +187,7 @@ const AdminHeader = () => {
                         <DropdownMenuContent className="w-48">
                             <DropdownMenuItem onClick={createEvent}>
                                 <FaPlusCircle />
-                                <span>Create New Event</span>
+                                <span>Events</span>
                             </DropdownMenuItem>
                             <DropdownMenuItem>
                                 <FaEdit className="h-5 w-5" />

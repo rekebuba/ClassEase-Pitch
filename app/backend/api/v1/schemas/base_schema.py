@@ -1,6 +1,6 @@
 from datetime import datetime
 import re
-from marshmallow import Schema, ValidationError, post_dump, post_load, validates
+from marshmallow import Schema, ValidationError, post_dump, post_load, pre_load, validates
 from models.subject import Subject
 from models.user import User
 from models.semester import Semester
@@ -46,7 +46,7 @@ class BaseSchema(Schema):
         """Convert keys to camelCase when serializing (dumping)."""
         return to_camel(data)
 
-    @post_load
+    @pre_load
     def convert_to_snake_case(self, data, **kwargs):
         """Convert keys to snake_case when deserializing (loading)."""
         return to_snake(data)
@@ -100,14 +100,14 @@ class BaseSchema(Schema):
     @staticmethod
     def get_year_id(academic_year):
         if academic_year is None:
-            raise ValidationError("academic_year is required")
+            raise ValidationError("academic year is required")
 
         # Fetch the year_id from the database
         year = storage.session.query(Year.id).filter_by(
             ethiopian_year=academic_year
         ).first()
 
-        if year.id is None:
+        if year is None:
             raise ValidationError(
                 f"No Year found for academic_year: {academic_year}")
 

@@ -3,7 +3,7 @@
 
 import jwt
 from flask import Blueprint, request, jsonify
-from api.v1.views.utils import create_student_token, create_teacher_token, create_admin_token, student_teacher_or_admin_required
+from api.v1.views.utils import student_teacher_or_admin_required
 from marshmallow import ValidationError
 from models import storage
 from models.user import User
@@ -40,7 +40,7 @@ def login():
 @auth.route("/auth/logout", methods=["POST"])
 @student_teacher_or_admin_required
 def logout(student, teacher, admin):
-    token = request.headers['api_key'].split()[1]  # Extract the token
+    token = request.headers['apiKey'].split()[1]  # Extract the token
     try:
         # Decode the token to get the JTI
         payload = jwt.decode(token, options={"verify_signature": False})

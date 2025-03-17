@@ -168,7 +168,7 @@ class TestAdmin(unittest.TestCase):
 
         response = self.client.get('/api/v1/admin/dashboard',
                                    headers={
-                                       'Authorization': f'Bearer {token}'},
+                                       'apiKey': f'Bearer {token}'},
                                    content_type='application/json')
 
         self.assertEqual(response.status_code, 200)
@@ -197,7 +197,7 @@ class TestAdmin(unittest.TestCase):
 
         response = self.client.get('/api/v1/admin/dashboard',
                                    headers={
-                                       'Authorization': f'Bearer {token}invalid'},
+                                       'apiKey': f'Bearer {token}invalid'},
                                    content_type='application/json')
 
         self.assertEqual(response.status_code, 401)
@@ -233,7 +233,7 @@ class TestAdmin(unittest.TestCase):
         response = self.client.put('/api/v1/admin/students/mark_list',
                                    data=json.dumps(mark_list),
                                    headers={
-                                       'Authorization': f'Bearer {token}'},
+                                       'apiKey': f'Bearer {token}'},
                                    content_type='application/json')
 
         self.assertEqual(response.status_code, 201)
@@ -264,7 +264,7 @@ class TestAdmin(unittest.TestCase):
         response = self.client.put('/api/v1/admin/students/mark_list',
                                    data=json.dumps(generate_mark_list_data()),
                                    headers={
-                                       'Authorization': f'Bearer {token}invalid'},
+                                       'apiKey': f'Bearer {token}invalid'},
                                    content_type='application/json')
 
         self.assertEqual(response.status_code, 401)
@@ -291,7 +291,7 @@ class TestAdmin(unittest.TestCase):
 
         response = self.client.get('/api/v1/admin/manage/students?grade=1&year=2024/25',
                                    headers={
-                                       'Authorization': f'Bearer {token}'},
+                                       'apiKey': f'Bearer {token}'},
                                    content_type='application/json')
 
         self.assertEqual(response.status_code, 200)
@@ -316,7 +316,7 @@ class TestAdmin(unittest.TestCase):
 
         response = self.client.get('/api/v1/admin/teachers',
                                    headers={
-                                       'Authorization': f'Bearer {token}'},
+                                       'apiKey': f'Bearer {token}'},
                                    content_type='application/json')
 
         self.assertEqual(response.status_code, 200)
@@ -345,7 +345,7 @@ class TestAdmin(unittest.TestCase):
 
         response = self.client.get('/api/v1/admin/teachers',
                                    headers={
-                                       'Authorization': f'Bearer {token}invalid'},
+                                       'apiKey': f'Bearer {token}invalid'},
                                    content_type='application/json')
 
         self.assertEqual(response.status_code, 401)
@@ -381,7 +381,7 @@ class TestAdmin(unittest.TestCase):
 
         response = self.client.get('/api/v1/admin/teachers',
                                    headers={
-                                       'Authorization': f'Bearer {token}'},
+                                       'apiKey': f'Bearer {token}'},
                                    content_type='application/json')
 
         if response.status_code != 200:
@@ -403,7 +403,7 @@ class TestAdmin(unittest.TestCase):
                                        }
                                    ),
                                    headers={
-                                       'Authorization': f'Bearer {token}'},
+                                       'apiKey': f'Bearer {token}'},
                                    content_type='application/json')
 
         self.assertEqual(response.status_code, 201)
@@ -442,7 +442,7 @@ class TestAdmin(unittest.TestCase):
 
         response = self.client.get('/api/v1/admin/teachers',
                                    headers={
-                                       'Authorization': f'Bearer {token}'},
+                                       'apiKey': f'Bearer {token}'},
                                    content_type='application/json')
 
         if response.status_code != 200:
@@ -464,7 +464,7 @@ class TestAdmin(unittest.TestCase):
                                        }
                                    ),
                                    headers={
-                                       'Authorization': f'Bearer {token}'},
+                                       'apiKey': f'Bearer {token}'},
                                    content_type='application/json')
         self.assertEqual(response.status_code, 404)
         json_data = response.get_json()

@@ -6,6 +6,7 @@ import os
 from flask import request, jsonify, url_for
 from marshmallow import ValidationError
 from sqlalchemy import func
+from models.year import Year
 from models import storage
 from flask import Blueprint
 from models.user import User
@@ -332,36 +333,42 @@ def assign_class(admin_data):
 
 @admin.route('/events', methods=['GET'])
 @admin_required
-def events(admin_data):
+def available_events(admin_data):
     """
-    Handle the creation and retrieval of events.
+    Handle retrieval of events.
 
     Args:
         admin_data (object): The admin data object.
 
     Returns:
-        Response: A JSON response containing the list of events or an error message with the appropriate HTTP status code.
+        Response: A JSON response list of events or an error message.
     """
 
-    semesters = storage.session.query(Semester).all()
+    events = storage.session.query(Event).all()
 
-    if not semesters:
-        return jsonify({"error": "No events found"}), 404
+    if not events:
+        return errors.handle_not_found_error("No event found")
 
-    # Convert DateTime fields to string (YYYY-MM-DD) before sending
-    formatted_semesters = [
-        {
-            "id": sem.id,
-            "name": sem.name,
-            "academicYearEC": sem.academic_year_EC,
-            "startDate": sem.start_date.strftime("%Y-%m-%d"),
-            "endDate": sem.end_date.strftime("%Y-%m-%d"),
-            "registrationStart": sem.registration_start.strftime("%Y-%m-%d"),
-            "registrationEnd": sem.registration_end.strftime("%Y-%m-%d"),
-        }
-        for sem in semesters
-    ]
-    return jsonify(formatted_semesters), 200
+    schema = AvailableEventsSchema()
+    result = schema.dump(events, many=True)
+
+    print(result)
+
+    # # Convert DateTime fields to string (YYYY-MM-DD) before sending
+    # formatted_semesters = [
+    #     {
+    #         "id": sem.id,
+    #         "name": sem.name,
+    #         "academicYearEC": sem.academic_year_EC,
+    #         "startDate": sem.start_date.strftime("%Y-%m-%d"),
+    #         "endDate": sem.end_date.strftime("%Y-%m-%d"),
+    #         "registrationStart": sem.registration_start.strftime("%Y-%m-%d"),
+    #         "registrationEnd": sem.registration_end.strftime("%Y-%m-%d"),
+    #     }
+    #     for sem in semesters
+    # ]
+    # return jsonify(formatted_semesters), 200
+    return jsonify({"message": "success"}), 200
 
 
 @admin.route('/event/new', methods=['POST'])
@@ -369,10 +376,10 @@ def events(admin_data):
 def create_events(admin_data):
     try:
         data = request.get_json()
-        event_schema = EventCreationSchema()
+        event_schema = EventSchema()
         validated_data = event_schema.load(data)
 
-        new_event = EventService.create_event(**validated_data)
+        new_event = Event(**validated_data)
         storage.add(new_event)
         storage.session.flush()
 
@@ -382,20 +389,28 @@ def create_events(admin_data):
                 "event_id": new_event.id,
             }
 
+            # check for duplicate event
+            existing_event = (
+                storage.session.query(Event, Semester, Year)
+                .join(Semester, Semester.event_id == Event.id)
+                .join(Year, Year.id == Event.year_id)
+                .filter()
+            )
+
             semester_schema = SemesterCreationSchema()
             valid_semester_data = semester_schema.load(semester_data)
 
-            new_semester = SemesterService.create_semester(
-                **valid_semester_data)
+            new_semester = Semester(**valid_semester_data)
             storage.add(new_semester)
 
         storage.save()
 
         return event_schema.dump({"message": "Event Created Successfully"}), 201
     except ValidationError as e:
-        print(e.messages)
-        errors.handle_validation_error(e)
+        storage.rollback()
+        return errors.handle_validation_error(e)
     except Exception as e:
+        storage.rollback()
         return errors.handle_internal_error(e)
 
 

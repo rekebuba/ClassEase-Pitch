@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from "sonner"
 import { AdminLayout } from '@/components/layout';
 import { EventTable } from '@/features/admin/tables';
@@ -42,16 +42,14 @@ export default function AdminManageEvent() {
     };
 
     const goToEventForm = () => {
-        navigate('/admin/manage-event/new');
+        navigate('/admin/event/new');
     }
 
     return (
         <AdminLayout>
-            <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold">Semester Registration Management</h1>
-                <Button
-                    onClick={goToEventForm}
-                >Create New Semester</Button>
+            <div className="flex justify-between items-center p-5">
+                <h1 className="text-3xl font-bold">List of Events</h1>
+                <Button onClick={goToEventForm}>Create New Event</Button>
                 {/* <PopoverForm
                             initialData={selectedSemester}
                             onSubmit={handleSubmit}
