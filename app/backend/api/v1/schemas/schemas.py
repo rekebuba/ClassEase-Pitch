@@ -7,6 +7,7 @@ import bcrypt
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from api.v1.schemas.base_schema import BaseSchema
 from werkzeug.datastructures import FileStorage
+from models.year import Year
 from models import storage
 from models.user import User
 from models.semester import Semester
@@ -391,10 +392,10 @@ class EventSchema(BaseSchema):
 
     location = fields.String(load_default=None, validate=lambda x: x in [
         'Auditorium', 'Classroom', 'Sports Field', 'Online', 'Other'])
-    is_hybrid = fields.Boolean(load_default=False)
+    is_hybrid = fields.Boolean(load_default=False, load_only=True)
     online_link = fields.Url(load_default=None)
 
-    requires_registration = fields.Boolean(load_default=False)
+    requires_registration = fields.Boolean(load_default=False, load_only=True)
     registration_start = fields.Date(load_default=None, format='iso')
     registration_end = fields.Date(load_default=None, format='iso')
 
@@ -459,6 +460,22 @@ class EventSchema(BaseSchema):
                 raise ValidationError("New semester events must have a fee.")
         except TypeError as e:
             raise e
+
+    @post_dump
+    def add_academic_year(self, data, **kwargs):
+        year = (storage.session.query(
+            Year.ethiopian_year, Year.gregorian_year)
+            .filter(Year.id == data.get('year_id'))
+            .first())
+        if year:
+            ethiopian_year, gregorian_year = year
+            parts = gregorian_year.split("/")
+            # to get the last two digits of the year (e.g., 2021/2022 -> 2021/22)
+            updated_gregorian_year = f"{parts[0]}/{parts[1][-2:]}"
+
+            data['academic_year'] = f"{ethiopian_year} ({updated_gregorian_year})"
+
+        return data
 
 
 class CourseRegistrationSchema(BaseSchema):
@@ -602,5 +619,5 @@ class TeacherPanelSchema(BaseSchema):
 
 
 class AvailableEventsSchema(BaseSchema):
-    events = fields.List(fields.Nested(EventSchema))
-    message = fields.String(dump_only=True)
+    events = fields.List(fields.Nested(EventSchema), required=True, exclude=('start_time', 'end_time',
+                         'registration_start', 'registration_end', 'fee_amount', 'description', 'message'))

@@ -8,32 +8,35 @@ import { adminApi } from '@/api';
 import { useNavigate } from 'react-router-dom';
 
 export default function AdminManageEvent() {
-    const [semesters, setSemesters] = useState([]);
+    const [events, setEvents] = useState([]);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
     const navigate = useNavigate();
 
-    const fetchEvents = useCallback(async () => {
-        try {
-            const response = await adminApi.getEvents();
-            if (response.status === 200) setSemesters(response.data);
-        } catch (error) {
-            if (error.response && error.response.data && error.response.data['error']) {
-                toast.error(error.response.data['error'], {
-                    description: "Please try again later, if the problem persists, contact the administrator.",
-                    style: { color: 'red' }
-                });
-            } else {
-                toast.error("An unexpected error occurred.", {
-                    description: "Please try again later, if the problem persists, contact the administrator.",
-                    style: { color: 'red' }
-                });
-            }
-        }
-    }, []);
+
     // Mock initial data
     useEffect(() => {
+        const fetchEvents = async () => {
+            try {
+                const response = await adminApi.getEvents();
+                if (response.status === 200) {
+                    setEvents(response.data['events']);
+                };
+            } catch (error) {
+                if (error.response && error.response.data && error.response.data['error']) {
+                    toast.error(error.response.data['error'], {
+                        description: "Please try again later, if the problem persists, contact the administrator.",
+                        style: { color: 'red' }
+                    });
+                } else {
+                    toast.error("An unexpected error occurred.", {
+                        description: "Please try again later, if the problem persists, contact the administrator.",
+                        style: { color: 'red' }
+                    });
+                }
+            }
+        };
         fetchEvents();
-    }, [fetchEvents]);
+    }, []);
 
 
     const handleDelete = () => {
@@ -56,7 +59,7 @@ export default function AdminManageEvent() {
                             onCancel={() => setIsDialogOpen(false)}
                         /> */}
             </div>
-            <EventTable events={semesters} />
+            <EventTable events={events} />
             {/* Delete Confirmation Dialog */}
             <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                 <DialogContent>

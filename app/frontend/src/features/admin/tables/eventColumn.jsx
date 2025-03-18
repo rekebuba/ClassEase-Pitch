@@ -9,28 +9,56 @@ import {
 
 export const eventColumn = [
     {
-        accessorKey: "name",
+        accessorKey: "title",
         header: ({ column }) => {
             return (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    Event Name
+                    Event Name/Title
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )
         },
     },
     {
-        accessorKey: "academicYearEC",
+        accessorKey: "purpose",
         header: ({ column }) => {
             return (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    Academic Year GC
+                    Purpose
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            )
+        },
+    },
+    {
+        accessorKey: "organizer",
+        header: ({ column }) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    Organizer
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+            )
+        },
+    },
+    {
+        accessorKey: "academicYear",
+        header: ({ column }) => {
+            return (
+                <Button
+                    variant="ghost"
+                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+                >
+                    Academic Year
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )
@@ -58,35 +86,35 @@ export const eventColumn = [
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    Ending Date
+                    End Date
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )
         },
     },
     {
-        accessorKey: "duration",
+        accessorKey: "location",
         header: ({ column }) => {
             return (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    Duration
+                    Location
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )
         },
     },
     {
-        accessorKey: "status",
+        accessorKey: "eligibility",
         header: ({ column }) => {
             return (
                 <Button
                     variant="ghost"
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
-                    Status
+                    Eligibility
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )
@@ -99,7 +127,7 @@ export const eventColumn = [
             const student = row.original
 
             return (
-                <>
+                <div className="flex space-x-4">
                     <Dialog>
                         <DialogTrigger>
                             <Button size="sm"
@@ -119,7 +147,7 @@ export const eventColumn = [
                         <DialogContent>
                         </DialogContent>
                     </Dialog>
-                </>
+                </div>
             )
         },
     },

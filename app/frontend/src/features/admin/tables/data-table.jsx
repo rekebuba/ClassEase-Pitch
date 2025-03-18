@@ -50,7 +50,7 @@ export function DataTable({ columns, data }) {
     })
 
     return (
-        <section className="w-full p-5 bg-white rounded-md border">
+        <section className="w-full max-w-6xl p-5 bg-white rounded-md border">
             <div className="flex items-center py-4">
                 <Input
                     placeholder="Filter ..."

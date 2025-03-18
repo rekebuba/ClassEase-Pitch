@@ -343,32 +343,22 @@ def available_events(admin_data):
     Returns:
         Response: A JSON response list of events or an error message.
     """
+    try:
+        events = storage.session.query(Event).all()
 
-    events = storage.session.query(Event).all()
+        if not events:
+            return errors.handle_not_found_error("No event found")
 
-    if not events:
-        return errors.handle_not_found_error("No event found")
+        schema = AvailableEventsSchema()
+        result = schema.dump({
+            "events": events
+        })
 
-    schema = AvailableEventsSchema()
-    result = schema.dump(events, many=True)
-
-    print(result)
-
-    # # Convert DateTime fields to string (YYYY-MM-DD) before sending
-    # formatted_semesters = [
-    #     {
-    #         "id": sem.id,
-    #         "name": sem.name,
-    #         "academicYearEC": sem.academic_year_EC,
-    #         "startDate": sem.start_date.strftime("%Y-%m-%d"),
-    #         "endDate": sem.end_date.strftime("%Y-%m-%d"),
-    #         "registrationStart": sem.registration_start.strftime("%Y-%m-%d"),
-    #         "registrationEnd": sem.registration_end.strftime("%Y-%m-%d"),
-    #     }
-    #     for sem in semesters
-    # ]
-    # return jsonify(formatted_semesters), 200
-    return jsonify({"message": "success"}), 200
+        return jsonify(result), 200
+    except ValidationError as e:
+        return errors.handle_validation_error(e)
+    except Exception as e:
+        return errors.handle_internal_error(e)
 
 
 @admin.route('/event/new', methods=['POST'])
