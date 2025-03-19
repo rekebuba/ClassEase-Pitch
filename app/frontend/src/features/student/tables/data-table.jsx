@@ -25,7 +25,6 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { DataTablePagination } from "@/components/ui/Pagination";
 
 export function DataTable({ columns, data }) {
     const [sorting, setSorting] = useState([]);
@@ -135,7 +134,13 @@ export function DataTable({ columns, data }) {
                     )}
                 </TableBody>
             </Table>
-            <DataTablePagination table={table} />
+            <div className="flex items-center justify-between px-2 mt-3">
+                <div className="flex-1 text-sm text-muted-foreground">
+                    {table.getFilteredSelectedRowModel().rows.length} of{" "}
+                    {table.getFilteredRowModel().rows.length} row(s) selected.
+                </div>
+                <Button>Register</Button>
+            </div>
         </section>
     )
 }
