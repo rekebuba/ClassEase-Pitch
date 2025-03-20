@@ -5,7 +5,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.sql.expression import func
 from sqlalchemy.orm import sessionmaker, scoped_session
 from flask_sqlalchemy import SQLAlchemy
-from models.base_model import Base, BaseModel
+from models.base_model import Base
 from models.grade import Grade, seed_grades
 from models.user import User
 from models.student import Student
