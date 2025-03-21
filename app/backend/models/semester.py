@@ -1,17 +1,14 @@
 #!/usr/bin/python3
 """ Module for Semester class """
 
-from sqlalchemy import Column, String, Integer, ForeignKey, Date
-from sqlalchemy.orm import relationship
-from models.engine.db_storage import BaseModel, Base
+from sqlalchemy import String, Integer, ForeignKey, Date
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from models.base_model import BaseModel
 
 
-class Semester(BaseModel, Base):
+class Semester(BaseModel):
     """docstring for Semester."""
     __tablename__ = 'semesters'
-    event_id = Column(String(225), ForeignKey('events.id'), nullable=False)
-    name = Column(Integer, nullable=False)
-
-    def __init__(self, *args, **kwargs):
-        """ Initializes the registration instance. """
-        super().__init__(*args, **kwargs)
+    event_id: Mapped[str] = mapped_column(
+        String(225), ForeignKey('events.id'), nullable=False)
+    name: Mapped[int] = mapped_column(Integer, nullable=False)

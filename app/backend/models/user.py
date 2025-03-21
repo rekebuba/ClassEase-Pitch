@@ -1,15 +1,12 @@
 #!/usr/bin/python3
 """ Module for User class """
 
-from sqlalchemy import Column, String
-from sqlalchemy.orm import relationship
-from models.base_model import BaseModel, Base
-from ethiopian_date import EthiopianDateConverter
-import random
-from datetime import datetime
+from sqlalchemy import String, Enum
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from models.base_model import BaseModel
 
 
-class User(BaseModel, Base):
+class User(BaseModel):
     """
     User Model
 
@@ -17,31 +14,18 @@ class User(BaseModel, Base):
 
     Attributes:
         __tablename__ (str): The name of the table in the database.
-        id (Column): The unique identifier for the user.
-        password (Column): The password for the user.
-        role (Column): The role of the user, which can be 'admin', 'teacher', or 'student'.
+        id (mapped_column): The unique identifier for the user.
+        password (mapped_column): The password for the user.
+        role (mapped_column): The role of the user, which can be 'admin', 'teacher', or 'student'.
 
-    Methods:
-        __init__(*args, **kwargs): Initializes the User instance and generates a custom ID based on the role.
-        generate_id(role): Generates a custom ID based on the role (Admin, Student, Teacher).
-        id_exists(id): Checks if the generated ID already exists in the users table.
     """
     __tablename__ = 'users'
-    identification = Column(String(120), unique=True, nullable=False)
-    password = Column(String(120), nullable=False)
-    role = Column(String(50), nullable=False)
-    image_path = Column(String(255), nullable=True)
-    national_id = Column(String(120), nullable=False)
+    identification: Mapped[str] = mapped_column(
+        String(120), unique=True, nullable=False)
+    password: Mapped[str] = mapped_column(String(120), nullable=False)
+    role: Mapped[BaseModel.RoleEnum] = mapped_column(
+        Enum(BaseModel.RoleEnum), nullable=False)
+    image_path: Mapped[str] = mapped_column(String(255), nullable=True)
+    national_id: Mapped[str] = mapped_column(String(120), nullable=False)
 
-    def __init__(self, *args, **kwargs):
-        """
-        Initializes a new instance of the class.
-
-        Args:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-
-        Attributes:
-            identification (str): The unique identifier generated based on the user's role.
-        """
-        super().__init__(*args, **kwargs)
+    admin = relationship('Admin', back_populates='user', uselist=False)

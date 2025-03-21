@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 """ Module for Grade class """
 
-from sqlalchemy import Column, String, Integer, ForeignKey
-from sqlalchemy.orm import relationship
-from models.engine.db_storage import BaseModel, Base
+from dataclasses import dataclass, field
+from sqlalchemy import String, Integer, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship, MappedAsDataclass
+from models.base_model import BaseModel
 
 
 def seed_grades(session):
@@ -29,37 +30,11 @@ def seed_grades(session):
     session.commit()
 
 
-class Grade(BaseModel, Base):
-    """
-    Grade Model
+class Grade(BaseModel):
+    """Grade Model"""
 
-    This model represents the 'grades' table in the database and includes the following attributes and relationships:
+    __tablename__ = "grades"
 
-    Attributes:
-        grade (int): The grade value, which is an integer and must be unique and not null.
-
-    Relationships:
-        section (relationship): A one-to-many relationship with the Section model. If a grade is deleted, all associated sections are also deleted.
-        subject (relationship): A one-to-many relationship with the Subject model. If a grade is deleted, all associated subjects are also deleted.
-
-    Methods:
-        __init__(*args, **kwargs): Initializes a new instance of the Grade model.
-    """
-    __tablename__ = 'grades'
-    name = Column(Integer, nullable=False, unique=True)
-
-    # Define relationships
-    section = relationship("Section", backref="grade",
-                           cascade="all, delete-orphan")
-    subject = relationship("Subject", backref="grade",
-                           cascade="all, delete-orphan")
-
-    def __init__(self, *args, **kwargs):
-        """
-        Initializes the score.
-
-        Parameters:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-        """
-        super().__init__(*args, **kwargs)
+    # Database column
+    name: Mapped[int] = mapped_column(
+        Integer, unique=True, nullable=False, index=True)

@@ -1,12 +1,12 @@
 #!/usr/bin/python3
 """ Module for TeachersRecord class """
 
-from sqlalchemy import Column, String, ForeignKey, Integer
-from sqlalchemy.orm import relationship
-from models.engine.db_storage import BaseModel, Base
+from sqlalchemy import String, ForeignKey, Integer
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from models.base_model import BaseModel
 
 
-class TeachersRecord(BaseModel, Base):
+class TeachersRecord(BaseModel):
     """
     TeachersRecord Model
 
@@ -23,17 +23,17 @@ class TeachersRecord(BaseModel, Base):
     Methods:
         __init__(*args, **kwargs): Initializes a TeachersRecord instance.
     """
-    __tablename__ = 'teachers_record'
-    user_id = Column(String(120), ForeignKey(
+    __tablename__ = 'teachers_records'
+    user_id: Mapped[str] = mapped_column(String(120), ForeignKey(
         'users.id'), nullable=False)
-    subject_id = Column(String(120), ForeignKey(
-        'subjects.id'), nullable=True, default=None)
-    grade_id = Column(String(120), ForeignKey(
-        'grades.id'), nullable=True, default=None)
-    section_id = Column(String(120), ForeignKey(
-        'sections.id'), nullable=True, default=None)
-    semester_id = Column(String(120), ForeignKey(
+    semester_id: Mapped[str] = mapped_column(String(120), ForeignKey(
         'semesters.id'), nullable=False)
+    subject_id: Mapped[str] = mapped_column(String(120), ForeignKey(
+        'subjects.id'), nullable=True, default=None)
+    grade_id: Mapped[str] = mapped_column(String(120), ForeignKey(
+        'grades.id'), nullable=True, default=None)
+    section_id: Mapped[str] = mapped_column(String(120), ForeignKey(
+        'sections.id'), nullable=True, default=None)
 
     mark_list = relationship(
         "MarkList", backref="teachers_record", cascade="save-update", passive_deletes=True)

@@ -1,6 +1,7 @@
 from datetime import date, datetime
 import json
 import pytest
+from models.admin import Admin
 from tests.test_api.factories import StudentFactory, TeacherFactory, AdminFactory
 from models.user import User
 from models.year import Year
@@ -11,6 +12,7 @@ from models.event import Event
 from models.assessment import Assessment
 from models.mark_list import MarkList
 from models.stud_semester_record import STUDSemesterRecord
+from models.base_model import CustomTypes
 
 
 def test_db_grade_count(client, db_session):
@@ -42,21 +44,30 @@ def test_db_year_count(client, db_session):
     assert year > 0
 
 
-def test_user_register_success(client, user_register_success):
-    for valid_data, role in user_register_success:
+def test_user_register_success(client, register_users):
+    for valid_data in register_users:
         # Send a POST request to the registration endpoint
-        response = client.post(f'/api/v1/registration/{role}', data=valid_data)
+        response = client.post(
+            f'/api/v1/registration/{valid_data["role"]}', data=valid_data)
 
         # Assert that the registration was successful
         assert response.status_code == 201
-        assert response.json['message'] == f'{role} registered successfully!'
+        assert response.json['message'] == f'{valid_data["role"]} registered successfully!'
 
 
-def test_users_log_in_success(client, db_create_users):
-    for user in db_create_users:
+@pytest.mark.parametrize("register_users", [
+    (CustomTypes.RoleEnum.ADMIN, 1),
+], indirect=True)
+def test_users_log_in_success(client, db_session, register_users):
+    db_session.commit()
+
+    fake = db_session.query(User).all()
+    print(fake) # this works
+
+    for user in register_users:
         response = client.post('/api/v1/auth/login', json={
-            'id': user.user.identification,
-            'password': user.user.identification
+            'id': user['identification'],
+            'password': user['identification']
         })
 
         assert response.status_code == 200
@@ -64,7 +75,7 @@ def test_users_log_in_success(client, db_create_users):
         assert response.json["message"] == "logged in successfully."
 
 
-@pytest.mark.parametrize("role", [('teacher', 'all'),], indirect=True)
+@pytest.mark.parametrize("role", [(CustomTypes.RoleEnum.TEACHER, 'all'),], indirect=True)
 def test_teacher_dashboard(client, db_create_users, users_auth_header):
     for auth_header in users_auth_header:
         response = client.get('/api/v1/teacher/dashboard',
@@ -74,9 +85,8 @@ def test_teacher_dashboard(client, db_create_users, users_auth_header):
         assert response.status_code == 200
 
 
-@pytest.mark.parametrize("role", [('admin', 1), ], indirect=True)
+@pytest.mark.parametrize("role", [(CustomTypes.RoleEnum.ADMIN, 1), ], indirect=True)
 def test_admin_create_semester(client, db_create_users, users_auth_header, event_form):
-
     response = client.post('/api/v1/admin/event/new',
                            json=event_form,
                            headers=users_auth_header[0]['header']
@@ -86,8 +96,10 @@ def test_admin_create_semester(client, db_create_users, users_auth_header, event
     assert response.json["message"] == "Event Created Successfully"
 
 
-@pytest.mark.parametrize("role", [('student', "all"),], indirect=True)
-def test_available_subjects_for_registration(client, db_create_users, db_event_form, users_auth_header):
+@pytest.mark.parametrize("role", [(CustomTypes.RoleEnum.STUDENT, "all"),], indirect=True)
+def test_available_subjects_for_registration(client, db_session, db_create_users, event_form, users_auth_header):
+    db_session.commit()
+
     for auth_header in users_auth_header:
         response = client.get('/api/v1/student/course/registration',
                               headers=auth_header['header']
@@ -98,7 +110,8 @@ def test_available_subjects_for_registration(client, db_create_users, db_event_f
 
 
 @pytest.mark.parametrize("role", [('student', 'all'),], indirect=True)
-def test_student_course_registration(client, db_session, db_create_users, db_event_form, users_auth_header):
+def test_student_course_registration(client, db_session, db_create_users, event_form, users_auth_header):
+    db_session.commit()
 
     for auth_header in users_auth_header:
         student = (db_session.query(Student)

@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 """ Module for Subject class """
 
-from sqlalchemy import CheckConstraint, Column, Integer, String, ForeignKey
+from sqlalchemy import CheckConstraint, Integer, String, ForeignKey
 from models.grade import Grade
-from models.engine.db_storage import BaseModel, Base
+from models.base_model import BaseModel
+from sqlalchemy.orm import Mapped, mapped_column
 
 
 def seed_streams(session):
@@ -29,10 +30,10 @@ def seed_streams(session):
     session.commit()
 
 
-class Stream(BaseModel, Base):
+class Stream(BaseModel):
     __tablename__ = 'streams'
 
-    name = Column(String(10), nullable=False)
+    name: Mapped[str] = mapped_column(String(10), nullable=False)
 
     __table_args__ = (
         CheckConstraint(

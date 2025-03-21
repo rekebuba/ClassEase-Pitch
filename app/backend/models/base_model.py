@@ -58,7 +58,7 @@ class BaseModel(MappedAsDataclass, Base, CustomTypes):
         models.storage.new(self)
         models.storage.save()
 
-    def to_dict(self):
+    def to_dict(self, **kwargs):
         """Converts the instance to a dictionary representation."""
         data = asdict(self)
 
@@ -67,8 +67,11 @@ class BaseModel(MappedAsDataclass, Base, CustomTypes):
             if isinstance(value, Enum):
                 data[key] = value.value
             if isinstance(value, datetime):
-                data[key] = value.strftime('%Y-%m-%dT%H:%M:%S.%f')
-            if isinstance(value, date):
+                if 'time' in key:
+                    data[key] = value.strftime('%H:%M:%S')
+                else:
+                    data[key] = value.strftime('%Y-%m-%dT%H:%M:%S.%f')
+            elif isinstance(value, date):
                 data[key] = value.strftime('%Y-%m-%d')
 
         return data

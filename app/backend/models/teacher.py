@@ -1,12 +1,12 @@
 #!/usr/bin/python3
 """ Module for Teacher class """
 
-from sqlalchemy import CheckConstraint, Column, Date, Integer, String, ForeignKey
-from sqlalchemy.orm import relationship
-from models.engine.db_storage import BaseModel, Base
+from sqlalchemy import CheckConstraint, Date, Integer, String, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from models.base_model import BaseModel
 
 
-class Teacher(BaseModel, Base):
+class Teacher(BaseModel):
     """
     Teacher Model
     This model represents a teacher in the ClassEase system. It inherits from BaseModel and Base.
@@ -27,19 +27,19 @@ class Teacher(BaseModel, Base):
     Methods:
         __init__(*args, **kwargs): Initializes the Teacher instance.
     """
-    __tablename__ = 'teacher'
-    user_id = Column(String(120), ForeignKey(
+    __tablename__ = 'teachers'
+    user_id: Mapped[str] = mapped_column(String(120), ForeignKey(
         'users.id'), unique=True, nullable=False)
-    first_name = Column(String(50), nullable=False)
-    father_name = Column(String(50), nullable=False)
-    date_of_birth = Column(Date, nullable=False)
-    gender = Column(String(1), nullable=False)
-    email = Column(String(120), nullable=False)
-    phone = Column(String(25), nullable=False)
-    address = Column(String(120), nullable=False)
-    year_of_experience = Column(Integer, nullable=False)
-    qualification = Column(String(120), nullable=False)
-    assigned_mark_lists = Column(Integer, nullable=True, default=0)
+    first_name: Mapped[str] = mapped_column(String(50), nullable=False)
+    father_name: Mapped[str] = mapped_column(String(50), nullable=False)
+    grand_father_name: Mapped[str] = mapped_column(String(50), nullable=False)
+    date_of_birth: Mapped[Date] = mapped_column(Date, nullable=False)
+    gender: Mapped[str] = mapped_column(String(1), nullable=False)
+    email: Mapped[str] = mapped_column(String(120), nullable=False)
+    phone: Mapped[str] = mapped_column(String(25), nullable=False)
+    address: Mapped[str] = mapped_column(String(120), nullable=False)
+    year_of_experience: Mapped[int] = mapped_column(Integer, nullable=False)
+    qualification: Mapped[str] = mapped_column(String(120), nullable=False)
 
     __table_args__ = (
         CheckConstraint(
@@ -51,13 +51,3 @@ class Teacher(BaseModel, Base):
             name="check_teacher_experience"
         )
     )
-
-    def __init__(self, *args, **kwargs):
-        """
-        Initializes the score.
-
-        Parameters:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-        """
-        super().__init__(*args, **kwargs)

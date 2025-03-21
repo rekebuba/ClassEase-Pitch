@@ -18,66 +18,45 @@ class UserService:
         pass
 
     def create_user(self, data):
-        user_schema = UserSchema()
-        validated_user_data = user_schema.load(data)
 
         # Save the profile picture if exists
         filepath = None
-        if 'image_path' in validated_user_data and validated_user_data['image_path']:
-            filepath = save_profile(validated_user_data['image_path'])
-            validated_user_data['image_path'] = filepath
+        if 'image_path' in data and data['image_path']:
+            filepath = save_profile(data['image_path'])
+            data['image_path'] = filepath
 
         # Create the user
-        new_user = User(**validated_user_data)
-
-        return new_user
-
-    def create_role_based_user(self, role, data) -> Admin | None:
-        """Create a user with a specific role."""
-        # Start a new transaction
-        user_data = {
-            'role': role,
-            'national_id': data.pop('national_id') if 'national_id' in data else None,
-            'image_path': request.files.get('image_path')
-        }
-        # Call the base class method to create a user with role 'admin'
-        new_user = self.create_user(user_data)
+        new_user = User(**data)
 
         storage.add(new_user)
         storage.session.flush()  # Flush to get the new_user.id
 
-        fields = {
-            **data,
-            'user_id': new_user.id
+        return new_user
+
+    def create_role_based_user(self, role, data) -> Admin | Student | Teacher | None:
+        role_mapping = {
+            CustomTypes.RoleEnum.ADMIN: (AdminSchema, Admin),
+            CustomTypes.RoleEnum.STUDENT: (StudentSchema, Student),
+            CustomTypes.RoleEnum.TEACHER: (TeacherSchema, Teacher),
         }
-        if role == 'admin':
-            # Validate and create the Admin
-            admin_schema = AdminSchema()
-            validated_admin_data = admin_schema.load(fields)
+        # Convert role (string) to the corresponding Enum value
+        try:
+            role_enum = CustomTypes.RoleEnum(role)
+        except ValueError:
+            raise ValidationError("Invalid role")
 
-            new_admin = Admin(**validated_admin_data)
+        if role_enum in role_mapping:
+            schema_class, model_class = role_mapping[role_enum]
+            schema = schema_class()
+            validated_data = schema.load(data)
 
-            storage.add(new_admin)
+            user = validated_data.pop("user")
+            self.create_user(user)
+
+            new_instance = model_class(**validated_data)
+            storage.add(new_instance)
             storage.save()
-            return new_admin
-        elif role == 'student':
-            student_schema = StudentSchema()
-
-            validated_student_data = student_schema.load(fields)
-            new_student = Student(**validated_student_data)
-
-            storage.add(new_student)
-            storage.save()
-            return new_student
-        elif role == 'teacher':
-            teacher_schema = TeacherSchema()
-
-            validated_teacher_data = teacher_schema.load(fields)
-            new_teacher = Teacher(**validated_teacher_data)
-
-            storage.add(new_teacher)
-            storage.save()
-            return new_teacher
+            return new_instance
 
         return None
 

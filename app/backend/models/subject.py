@@ -2,10 +2,11 @@
 """ Module for Subject class """
 
 import uuid
-from sqlalchemy import CheckConstraint, Column, Integer, String, ForeignKey
+from sqlalchemy import CheckConstraint, Integer, String, ForeignKey
 from models.stream import Stream
 from models.grade import Grade
-from models.engine.db_storage import BaseModel, Base
+from models.base_model import BaseModel
+from sqlalchemy.orm import Mapped, mapped_column
 
 
 def seed_subjects(session):
@@ -116,8 +117,8 @@ def seed_subjects(session):
                 for subject in subject_per_grade[subject_list]:
                     code = generate_code(stream, bulk_insert, subject, grade)
                     bulk_insert.append(
-                        Subject(name=subject, grade_id=grade_id, code=code,
-                                stream=stream, stream_id=streams[stream])
+                        Subject(name=subject, grade_id=grade_id,
+                                code=code, stream_id=streams[stream])
                     )
             continue  # Skip to next iteration after handling streams
 
@@ -170,7 +171,7 @@ def generate_code(stream, prev_data, subject, grade):
     return code
 
 
-class Subject(BaseModel, Base):
+class Subject(BaseModel):
     """
     Subject Model
 
@@ -178,27 +179,18 @@ class Subject(BaseModel, Base):
 
     Attributes:
         __tablename__ (str): The name of the table in the database.
-        name (Column): The name of the subject, limited to 50 characters, cannot be null.
-        code (Column): The code of the subject, limited to 10 characters, cannot be null.
-        grade_id (Column): Foreign key linking to the grade, cannot be null.
-        year (Column): The academic year of the subject, limited to 10 characters, cannot be null.
+        name (mapped_column): The name of the subject, limited to 50 characters, cannot be null.
+        code (mapped_column): The code of the subject, limited to 10 characters, cannot be null.
+        grade_id (mapped_column): Foreign key linking to the grade, cannot be null.
+        year (mapped_column): The academic year of the subject, limited to 10 characters, cannot be null.
 
     Methods:
         __init__(*args, **kwargs): Initializes the subject with variable length arguments and keyword arguments.
     """
     __tablename__ = 'subjects'
-    name = Column(String(50), nullable=False)
-    code = Column(String(120), nullable=False, unique=True)
-    grade_id = Column(String(120), ForeignKey('grades.id'), nullable=False)
-    stream_id = Column(String(120), ForeignKey(
+    name: Mapped[str] = mapped_column(String(50), nullable=False)
+    code: Mapped[str] = mapped_column(String(120), nullable=False, unique=True)
+    grade_id: Mapped[str] = mapped_column(
+        String(120), ForeignKey('grades.id'), nullable=False)
+    stream_id: Mapped[str] = mapped_column(String(120), ForeignKey(
         'streams.id'), nullable=True, default=None)
-
-    def __init__(self, *args, **kwargs):
-        """
-        Initializes the score.
-
-        Parameters:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-        """
-        super().__init__(*args, **kwargs)

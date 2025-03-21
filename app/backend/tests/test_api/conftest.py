@@ -17,6 +17,8 @@ from models.admin import Admin
 from sqlalchemy import update, and_
 from tests.test_api.helper_functions import *
 from models import storage
+from models.base_model import CustomTypes
+from .factories_methods import MakeFactory
 
 
 @pytest.fixture(scope="session")
@@ -29,7 +31,6 @@ def app_session():
 
     yield app
 
-    storage.session.close_all()  # Clean up the database after the session
     storage.drop_all()
 
 
@@ -65,56 +66,87 @@ def override_session(session, *factories):
             factory._meta.sqlalchemy_session = original_session
 
 
-@pytest.fixture(params=[(AdminFactory, 1), (TeacherFactory, 1), (StudentFactory, 1)])
-def user_register_success(request, db_session):
-    Factory, count = request.param
+@pytest.fixture(params=[
+    (CustomTypes.RoleEnum.ADMIN, 1),
+    (CustomTypes.RoleEnum.TEACHER, 1),
+    (CustomTypes.RoleEnum.STUDENT, 5)
+])
+def register_users(request, db_session):
+    role, count = request.param
 
     data = []
-    with override_session(db_session, Factory, UserFactory):
-        for _ in range(count):
-            user_data = Factory.build().to_dict()
-            valid_data = {
-                **(user_data.pop('user')).to_dict(),
-                **user_data
-            }
+    role_user = None
+    for _ in range(count):
+        user = MakeFactory(UserFactory, db_session).factory(
+            role=role, keep={'id'})
+        if role == CustomTypes.RoleEnum.STUDENT:
+            current_grade = random.randint(1, 10)
+            academic_year = DefaultFelids.current_EC_year()
+            role_user = MakeFactory(StudentFactory, db_session).factory(
+                user_id=user.pop('id'),
+                start_year_id=db_session.query(Year.id).scalar(),
+                current_year_id=db_session.query(Year.id).scalar(),
+                current_grade_id=db_session.query(Grade.id).filter_by(
+                    name=current_grade).scalar(),
+                add={"current_grade": current_grade,
+                     "academic_year": academic_year}
+            )
+        elif role == CustomTypes.RoleEnum.TEACHER:
+            role_user = MakeFactory(TeacherFactory, db_session).factory(
+                user_id=user.pop('id')
+            )
+        elif role == CustomTypes.RoleEnum.ADMIN:
+            role_user = MakeFactory(AdminFactory, db_session).factory(
+                user_id=user.pop('id')
+            )
 
-            # Remove unnecessary fields
-            role = valid_data.pop('role')
+        valid_data = {
+            **user,
+            **role_user
+        }
 
-            if 'image_path' in valid_data:
-                local_path = valid_data.pop('image_path')
-                valid_data['image_path'] = open(local_path, 'rb')
-                os.remove(local_path)  # remove the file
+        if 'image_path' in valid_data and valid_data['image_path']:
+            local_path = valid_data.pop('image_path')
+            valid_data['image_path'] = open(local_path, 'rb')
+            os.remove(local_path)  # remove the file
 
-            data.append((valid_data, role))
+        data.append(valid_data)
 
     return data
 
 
 @pytest.fixture(scope="session")
 def db_create_users(db_session):
-    factories = [(AdminFactory, 1), (TeacherFactory, 1), (StudentFactory, 5)]
+    factories = [
+        (MakeFactory(AdminFactory, db_session).factory,
+         CustomTypes.RoleEnum.ADMIN, 1),
+        (MakeFactory(TeacherFactory, db_session).factory,
+         CustomTypes.RoleEnum.TEACHER, 1),
+        (MakeFactory(StudentFactory, db_session).factory,
+         CustomTypes.RoleEnum.STUDENT, 5)
+    ]
 
     users = []
     user = None
-    for Factory, count in factories:
-        with override_session(db_session, Factory, UserFactory):
-            for _ in range(count):
-                if Factory == StudentFactory:
-                    current_grade = random.randint(1, 10)
+    for Factory, role, count in factories:
+        for _ in range(count):
+            user = MakeFactory(UserFactory, db_session).factory(
+                role=role, keep={'id'})
+            if role == CustomTypes.RoleEnum.STUDENT:
+                current_grade = random.randint(1, 10)
 
-                    user = Factory(
-                        start_year_id=db_session.query(Year.id).scalar(),
-                        current_year_id=db_session.query(Year.id).scalar(),
-                        current_grade_id=db_session.query(Grade.id).filter_by(
-                            name=current_grade).scalar(),
-                    )
-                else:
-                    user = Factory()
-
-                users.append(user)
+                role_user = Factory(
+                    user_id=user['id'],
+                    start_year_id=db_session.query(Year.id).scalar(),
+                    current_year_id=db_session.query(Year.id).scalar(),
+                    current_grade_id=db_session.query(Grade.id).filter_by(
+                        name=current_grade).scalar(),
+                )
+            else:
+                role_user = Factory(user_id=user['id'])
 
         db_session.commit()
+        users.append({"user": user, "role_user": role_user})
 
     return users
 
@@ -150,29 +182,23 @@ def users_auth_header(client, db_session, role):
 
 @pytest.fixture
 def event_form(db_session):
-    with override_session(db_session, SemesterFactory, EventFactory):
-        form = SemesterFactory.build().to_dict()
+    event = MakeFactory(EventFactory, db_session).factory(
+        add={'academic_year': DefaultFelids.current_EC_year()},
+        keep={'id'},
+        year_id=db_session.query(Year.id).scalar(),
+        purpose='New Semester'
+    )
+    form = MakeFactory(SemesterFactory, db_session).factory(
+        event_id=event.pop('id'))
 
-        semester_form = {
-            **(form.pop('event')).to_dict(),
-            'semester': {
-                **form
-            }
-        }
+    semester_form = {
+        **event,
+        'semester': {
+            **form
+        },
+    }
 
     return semester_form
-
-
-@pytest.fixture(scope="session")
-def db_event_form(db_session):
-    with override_session(db_session, SemesterFactory, EventFactory):
-        form = SemesterFactory(
-            event__year_id=db_session.query(Year.id).scalar(),
-        ).to_dict()
-
-        db_session.commit()
-
-    return form
 
 
 @pytest.fixture(scope="session")

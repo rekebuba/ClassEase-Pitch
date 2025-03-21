@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 """ Module for Average Result class """
 
-from sqlalchemy import Column, String, Integer, ForeignKey, Float
-from models.engine.db_storage import BaseModel, Base
+from sqlalchemy import String, Integer, ForeignKey, Float
+from models.base_model import BaseModel
+from sqlalchemy.orm import Mapped, mapped_column
 
-
-class STUDSemesterRecord(BaseModel, Base):
+class STUDSemesterRecord(BaseModel):
     """
     STUDSemesterRecord Model
 
@@ -23,15 +23,11 @@ class STUDSemesterRecord(BaseModel, Base):
         __init__(*args, **kwargs): Initializes the STUDSemesterRecord instance.
     """
     __tablename__ = 'student_semester_records'
-    user_id = Column(String(120), ForeignKey('users.id'), nullable=False)
-    semester_id = Column(String(120), ForeignKey(
+    user_id: Mapped[str] = mapped_column(String(120), ForeignKey('users.id'), nullable=False)
+    semester_id: Mapped[str] = mapped_column(String(120), ForeignKey(
         'semesters.id'), nullable=False)
-    grade_id = Column(String(120), ForeignKey('grades.id'), nullable=False)
-    section_id = Column(String(120), ForeignKey('sections.id'), nullable=True)
-    year_record_id = Column(String(120), ForeignKey('student_year_records.id'), nullable=True)
-    average = Column(Float, default=None)
-    rank = Column(Integer, default=None)
-
-    def __init__(self, *args, **kwargs):
-        """initializes score"""
-        super().__init__(*args, **kwargs)
+    grade_id: Mapped[str] = mapped_column(String(120), ForeignKey('grades.id'), nullable=False)
+    section_id: Mapped[str] = mapped_column(String(120), ForeignKey('sections.id'), nullable=True)
+    year_record_id: Mapped[str] = mapped_column(String(120), ForeignKey('student_year_records.id'), nullable=True)
+    average: Mapped[float] = mapped_column(Float, default=None)
+    rank: Mapped[int] = mapped_column(Integer, default=None)

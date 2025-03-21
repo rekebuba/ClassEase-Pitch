@@ -56,6 +56,16 @@ class DBStorage:
                 "Session not initialized. Call init_app() first.")
         return self.__session
 
+    @property
+    def engine(self):
+        """
+        Retrieves the current database engine.
+        """
+        if self.__engine is None:
+            raise RuntimeError(
+                "Engine not initialized. Call init_app() first.")
+        return self.__engine
+
     def create_scoped_session(self, **kwargs):
         """
             Create a scoped session for the database.

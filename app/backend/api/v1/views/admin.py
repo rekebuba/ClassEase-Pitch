@@ -369,13 +369,16 @@ def create_events(admin_data):
         event_schema = EventSchema()
         validated_data = event_schema.load(data)
 
+        # extract any nested felids
+        semester = validated_data.pop('semester', None)
+
         new_event = Event(**validated_data)
         storage.add(new_event)
         storage.session.flush()
 
         if new_event.purpose == 'New Semester':
             semester_data = {
-                **data.get('semester'),
+                **semester,
                 "event_id": new_event.id,
             }
 
@@ -384,13 +387,13 @@ def create_events(admin_data):
                 storage.session.query(Event, Semester, Year)
                 .join(Semester, Semester.event_id == Event.id)
                 .join(Year, Year.id == Event.year_id)
-                .filter()
+                .filter(and_(
+                    Event.purpose == new_event.purpose,
+                    Event.organizer == new_event.organizer
+                ))
             )
 
-            semester_schema = SemesterCreationSchema()
-            valid_semester_data = semester_schema.load(semester_data)
-
-            new_semester = Semester(**valid_semester_data)
+            new_semester = Semester(**semester_data)
             storage.add(new_semester)
 
         storage.save()

@@ -1,5 +1,5 @@
 from flask import url_for
-from marshmallow import Schema, ValidationError, post_dump, post_load, pre_load, validates, validates_schema, fields
+from marshmallow import Schema, ValidationError, post_dump, post_load, pre_dump, pre_load, validates, validates_schema, fields
 from pyethiodate import EthDate
 from datetime import datetime
 import random
@@ -7,6 +7,7 @@ import bcrypt
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from api.v1.schemas.base_schema import BaseSchema
 from werkzeug.datastructures import FileStorage
+from models.base_model import CustomTypes
 from models.year import Year
 from models import storage
 from models.user import User
@@ -73,12 +74,14 @@ class UserSchema(BaseSchema):
         section = ''
 
         # Assign prefix based on role
-        if role == 'student':
+        if role == CustomTypes.RoleEnum.STUDENT.value:
             section = 'MAS'
-        elif role == 'teacher':
+        elif role == CustomTypes.RoleEnum.TEACHER.value:
             section = 'MAT'
-        elif role == 'admin':
+        elif role == CustomTypes.RoleEnum.ADMIN.value:
             section = 'MAA'
+        else:
+            raise ValidationError('Invalid Role')
 
         unique = True
         while unique:
@@ -95,7 +98,7 @@ class UserSchema(BaseSchema):
 
     @validates_schema
     def validate_data(self, data, **kwargs):
-        if data['role'] not in ['student', 'teacher', 'admin']:
+        if data['role'] not in [member.value for member in CustomTypes.RoleEnum]:
             raise ValidationError('Invalid role type.')
         if storage.session.query(User).filter_by(national_id=data['national_id']).first():
             raise ValidationError('User already exists.')
@@ -134,6 +137,7 @@ class AuthSchema(BaseSchema):
     def validate_data(self, data, **kwargs):
         user = storage.session.query(User).filter_by(
             identification=data['id']).first()
+
         if user is None or not AuthSchema._check_password(user.password, data['password']):
             raise InvalidCredentialsError('Invalid credentials.')
 
@@ -157,6 +161,8 @@ class AdminSchema(BaseSchema):
         fields.validate.OneOf(['M', 'F'])])
     phone = fields.String(required=True)
     address = fields.String(required=True)
+
+    user = fields.Nested(UserSchema)
 
     @pre_load
     def set_defaults(self, data, **kwargs):
@@ -195,7 +201,8 @@ class TeacherSchema(BaseSchema):
     year_of_experience = fields.Integer(required=True, validate=[
         fields.validate.Range(min=0)])
     qualification = fields.String(required=True)
-    assigned_mark_lists = fields.List(fields.UUID(), required=False)
+
+    user = fields.Nested(UserSchema)
 
     @pre_load
     def set_defaults(self, data, **kwargs):
@@ -234,7 +241,7 @@ class StudentSchema(BaseSchema):
     mother_phone = fields.String(required=False)
     guardian_phone = fields.String(required=False)
 
-    academic_year = fields.Integer(required=True, validate=[
+    academic_year = fields.Integer(required=False, validate=[
         fields.validate.Range(min=2000, max=2100)])
     start_year_id = fields.String(
         required=False, load_default=None, load_only=True)
@@ -248,6 +255,7 @@ class StudentSchema(BaseSchema):
     current_grade = fields.Integer(required=False, validate=[
                                    fields.validate.Range(min=1, max=12)])
     current_grade_id = fields.String(required=True)
+    next_grade_id = fields.String(required=False)
 
     semester_id = fields.String(required=False)
     has_passed = fields.Boolean(required=False, load_default=False)
@@ -273,13 +281,15 @@ class StudentSchema(BaseSchema):
 
     is_active = fields.Boolean(required=False, load_default=False)
 
+    user = fields.Nested(UserSchema)
+
     @pre_load
     def set_defaults(self, data, **kwargs):
         # add default values to the data
+        year_id = self.get_year_id(data.pop('academic_year'))
         data['current_grade_id'] = self.get_grade_id(data.pop('current_grade'))
-
-        data['start_year_id'] = self.get_year_id(data['academic_year'])
-        data['current_year_id'] = self.get_year_id(data['academic_year'])
+        data['start_year_id'] = year_id
+        data['current_year_id'] = year_id
         data['gender'] = data.get('gender').upper()
 
         data['is_transfer'] = data.get('is_transfer') == 'True'
@@ -380,8 +390,8 @@ class EventSchema(BaseSchema):
     organizer = fields.String(required=True, validate=lambda x: x in [
                               'School Administration', 'School', 'Student Club', 'External Organizer'])
 
-    academic_year = fields.Integer(required=True, validate=[
-        fields.validate.Range(min=2000, max=2100)])
+    academic_year = fields.Integer(
+        validate=[fields.validate.Range(min=2000, max=2100)])
 
     year_id = fields.String(required=False, load_default=None)
 
@@ -408,14 +418,17 @@ class EventSchema(BaseSchema):
     description = fields.String(load_default=None)
 
     semester = fields.Nested(
-        SemesterCreationSchema, required=True, load_only=True, exclude=("event_id",))
+        SemesterCreationSchema,
+        load_only=True,
+        exclude=("event_id",)
+    )
 
     message = fields.String(dump_only=True)
 
     @pre_load
     def set_defaults(self, data, **kwargs):
         # add default values to the data
-        data['year_id'] = self.get_year_id(data.get('academic_year'))
+        data['year_id'] = self.get_year_id(data.pop('academic_year', None))
 
         return data
 
@@ -423,16 +436,18 @@ class EventSchema(BaseSchema):
     def validate_dates_and_times(self, data, **kwargs):
         """Ensure start_date is before end_date and start_time is before end_time."""
         try:
-            if data["start_date"] > data["end_date"]:
-                raise ValidationError(
-                    "Start date cannot be after end date.", "start_date")
+            if data["start_date"] and data["end_date"]:
+                if data["start_date"] > data["end_date"]:
+                    raise ValidationError(
+                        "Start date cannot be after end date.", "start_date")
             if data["start_time"] and data["end_time"]:
                 if data["start_time"] > data["end_time"]:
                     raise ValidationError(
                         "Start time cannot be after end time.", "start_time")
-            if data['registration_start'] > data['registration_end']:
-                raise ValidationError(
-                    "Registration start date cannot be after registration end date.")
+            if data['registration_start'] and data['registration_end']:
+                if data['registration_start'] > data['registration_end']:
+                    raise ValidationError(
+                        "Registration start date cannot be after registration end date.")
             if data['requires_registration'] and not data['registration_start'] and not data['registration_end']:
                 raise ValidationError(
                     "Registration dates are required for events that require registration.")
@@ -479,11 +494,11 @@ class EventSchema(BaseSchema):
 
 
 class CourseRegistrationSchema(BaseSchema):
-    grade = fields.Integer(required=True, load_only=True)
-    grade_id = fields.String(required=False, load_only=True)
+    grade = fields.Integer(required=False, dump_only=True)
+    grade_id = fields.String(required=True, load_only=True)
 
-    subject = fields.String(required=True, load_only=True)
-    subject_code = fields.String(required=True, load_only=True)
+    subject = fields.String(required=True, dump_only=True)
+    subject_code = fields.String(required=True, dump_only=True)
     subject_id = fields.String(required=True, load_only=True)
 
     @pre_load
@@ -492,6 +507,18 @@ class CourseRegistrationSchema(BaseSchema):
         data['grade_id'] = self.get_grade_id(data.get('grade'))
         data['subject_id'] = self.get_subject_id(
             data.get('subject'), data.get('subject_code'), data.get('grade_id'))
+
+        return data
+
+    @pre_dump
+    def add_fields(self, data, **kwargs):
+        grade_detail = self.get_grade_detail(id=data.get('grade_id'))
+        subject_detail = self.get_subject_detail(
+            id=data.get('id'), code=data.get('code'))
+
+        data['grade'] = grade_detail.name
+        data['subject'] = subject_detail.name
+        data['subject_code'] = subject_detail.code
 
         return data
 
@@ -621,3 +648,8 @@ class TeacherPanelSchema(BaseSchema):
 class AvailableEventsSchema(BaseSchema):
     events = fields.List(fields.Nested(EventSchema), required=True, exclude=('start_time', 'end_time',
                          'registration_start', 'registration_end', 'fee_amount', 'description', 'message'))
+
+
+class AvailableCourseRegistration(BaseSchema):
+    subjects = fields.List(fields.Nested(
+        CourseRegistrationSchema), required=True)

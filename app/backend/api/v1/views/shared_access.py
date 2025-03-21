@@ -30,11 +30,12 @@ from models.base_model import BaseModel
 from api.v1.views.methods import save_profile
 from werkzeug.utils import secure_filename
 
+
 shared = Blueprint('shared', __name__, url_prefix='/api/v1')
 
 
 @shared.route('/registration/<role>', methods=['POST'])
-def register_new_user(role: str):
+def register_new_user(role):
     """
     Registers a new user (Admin, Student, Teacher) in the system.
 
@@ -50,6 +51,13 @@ def register_new_user(role: str):
 
     try:
         data = request.form.to_dict()  # Get form data as a dictionary
+        data['user'] = {
+            'national_id': data.pop('national_id', None),
+            'identification': data.pop('identification', None),
+            'role': data.pop('role', None),
+            'image_path': request.files.get('image_path'),
+        }
+
         result = UserService().create_role_based_user(role, data)
         if not result:
             raise Exception("Failed to register user")
@@ -58,9 +66,9 @@ def register_new_user(role: str):
     except ValidationError as e:
         storage.rollback()
         return errors.handle_validation_error(e)
-    except Exception as e:
-        storage.rollback()
-        return errors.handle_internal_error(e)
+    # except Exception as e:
+    #     storage.rollback()
+    #     return errors.handle_internal_error(e)
 
 
 @shared.route('/student/assessment', methods=['GET'])
@@ -163,8 +171,8 @@ def student_assessment(admin_data, student_data):
                               )
         .select_from(STUDSemesterRecord)
         .join(STUDYearRecord, and_(STUDYearRecord.student_id == STUDSemesterRecord.student_id,
-                                        STUDYearRecord.grade_id == STUDSemesterRecord.grade_id,
-                                        STUDYearRecord.year == STUDSemesterRecord.year))
+                                   STUDYearRecord.grade_id == STUDSemesterRecord.grade_id,
+                                   STUDYearRecord.year == STUDSemesterRecord.year))
         .filter(STUDSemesterRecord.student_id == student_id)
         .order_by(STUDSemesterRecord.semester)
     ).all()

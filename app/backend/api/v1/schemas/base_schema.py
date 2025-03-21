@@ -190,3 +190,41 @@ class BaseSchema(Schema):
                 f"No Subject found for subject_code: {subject_code}")
 
         return subject.id
+
+    @staticmethod
+    def get_grade_detail(**kwargs) -> Grade:
+        if kwargs is None:
+            raise ValidationError("grade details are required")
+
+        for key, value in kwargs.items():
+            if value is None:
+                raise ValidationError(f"Grade {key} is required")
+
+        # Fetch the grade details from the database
+        grade = storage.session.query(Grade).filter_by(
+            **kwargs).first()
+
+        if grade is None:
+            raise ValidationError(
+                f"No Grade found for grade details: {kwargs}")
+
+        return grade
+
+    @staticmethod
+    def get_subject_detail(**kwargs) -> Subject:
+        if kwargs is None:
+            raise ValidationError("subject details are required")
+
+        for key, value in kwargs.items():
+            if value is None:
+                raise ValidationError(f"Subject {key} is required")
+
+        # Fetch the subject details from the database
+        subject = storage.session.query(Subject).filter_by(
+            **kwargs).first()
+
+        if subject is None:
+            raise ValidationError(
+                f"No Subject found for subject details: {kwargs}")
+
+        return subject

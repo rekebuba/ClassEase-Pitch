@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 """ Module for STUDYearRecord class """
 
-from sqlalchemy import Column, Integer, String, ForeignKey, CheckConstraint, Float, DateTime
-from models.engine.db_storage import BaseModel, Base
+from sqlalchemy import Integer, String, ForeignKey, CheckConstraint, Float, DateTime
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from models.base_model import BaseModel
 
 
-class STUDYearRecord(BaseModel, Base):
+class STUDYearRecord(BaseModel):
     """
     Represents a student's yearly academic record.
 
@@ -25,18 +26,12 @@ class STUDYearRecord(BaseModel, Base):
         __init__(*args, **kwargs): Initializes the STUDYearRecord instance.
     """
     __tablename__ = 'student_year_records'
-    user_id = Column(String(120), ForeignKey('users.id'), nullable=False)
-    grade_id = Column(String(120), ForeignKey('grades.id'), nullable=False)
-    year_id = Column(String(120), ForeignKey('years.id'), nullable=False)
-    final_score = Column(Float, nullable=True, default=None)  # year-end score
-    rank = Column(Integer, nullable=True, default=None)
-
-    def __init__(self, *args, **kwargs):
-        """
-        Initializes the score.
-
-        Parameters:
-            *args: Variable length argument list.
-            **kwargs: Arbitrary keyword arguments.
-        """
-        super().__init__(*args, **kwargs)
+    user_id: Mapped[str] = mapped_column(
+        String(120), ForeignKey('users.id'), nullable=False)
+    grade_id: Mapped[str] = mapped_column(
+        String(120), ForeignKey('grades.id'), nullable=False)
+    year_id: Mapped[str] = mapped_column(
+        String(120), ForeignKey('years.id'), nullable=False)
+    final_score: Mapped[float] = mapped_column(
+        Float, nullable=True, default=None)  # year-end score
+    rank: Mapped[int] = mapped_column(Integer, nullable=True, default=None)

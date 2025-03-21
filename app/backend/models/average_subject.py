@@ -1,22 +1,21 @@
 #!/usr/bin/python3
 """ Module for Average Result class """
 
-from sqlalchemy import Column, String, Integer, ForeignKey, Float
-from models.engine.db_storage import BaseModel, Base
+from sqlalchemy import String, Integer, ForeignKey, Float
+from models.base_model import BaseModel
+from sqlalchemy.orm import Mapped, mapped_column
 
 
-class AVRGSubject(BaseModel, Base):
-    __tablename__ = 'average_subject'
-    user_id = Column(String(120), ForeignKey('users.id'), nullable=False)
-    subject_id = Column(String(120), ForeignKey('subjects.id'), nullable=False)
-    year_record_id = Column(String(120), ForeignKey(
+class AVRGSubject(BaseModel):
+    __tablename__ = 'average_subjects'
+    user_id: Mapped[str] = mapped_column(
+        String(120), ForeignKey('users.id'), nullable=False)
+    subject_id: Mapped[str] = mapped_column(
+        String(120), ForeignKey('subjects.id'), nullable=False)
+    year_record_id: Mapped[str] = mapped_column(String(120), ForeignKey(
         'student_year_records.id'), nullable=True)
-    teachers_record_id = Column(String(120), ForeignKey(
-        'teachers_record.id', ondelete="SET NULL"), nullable=True, default=None)
+    teachers_record_id: Mapped[str] = mapped_column(String(120), ForeignKey(
+        'teachers_records.id', ondelete="SET NULL"), nullable=True, default=None)
     # The actual average score of the student in this for all subject
-    average = Column(Float, default=None)
-    rank = Column(Integer, default=None)
-
-    def __init__(self, *args, **kwargs):
-        """initializes score"""
-        super().__init__(*args, **kwargs)
+    average: Mapped[float] = mapped_column(Float, default=None)
+    rank: Mapped[int] = mapped_column(Integer, default=None)

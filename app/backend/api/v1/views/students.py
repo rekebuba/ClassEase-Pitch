@@ -314,15 +314,14 @@ def list_of_course_available(user_data):
 
         available_semester = (
             storage.session.query(Semester.name)
-            .join(Event, Semester.event_id == Event.id)  # Fix join condition
+            .join(Event, Semester.event_id == Event.id)
             .join(Year, Event.year_id == Year.id)
             .filter(
                 Semester.name == (
                     1 if student_data.next_grade_id or not student_data.semester_id else 2),
                 Year.ethiopian_year == (
-                    (int(Year.ethiopian_year) + 1)
-                    if student_data.next_grade_id
-                    else Year.ethiopian_year
+                    Year.ethiopian_year +
+                    (1 if student_data.next_grade_id else 0)
                 ),
                 Event.registration_start <= datetime.now().date(),
                 Event.registration_end >= datetime.now().date(),
@@ -334,21 +333,22 @@ def list_of_course_available(user_data):
 
         # Query subjects based on student's next grade
         subjects = (
-            storage.session.query(
-                Subject.name.label("subject"),
-                Subject.code.label("subject_code"),
-                Grade.name.label("grade")
-            )
+            storage.session.query(Subject)
             .join(Grade, Grade.id == Subject.grade_id)
-            .filter(Grade.id == (student_data.next_grade_id if student_data.next_grade_id else student_data.current_grade_id))
+            .filter(Grade.id == (student_data.next_grade_id or student_data.current_grade_id))
             .all()
         )
 
-        subject_list = [{key: value for key, value in q._asdict().items()}
-                        for q in subjects]
+        # print([subject.to_dict() for subject in subjects])
+        schema = AvailableCourseRegistration()
+        result = schema.dump({
+            "subjects": [subject.to_dict() for subject in subjects]
+        })
 
-        return jsonify({"course": subject_list, "semester": 1}), 200
-    except KeyError as e:
+        return jsonify(result), 200
+    except ValidationError as e:
+        return errors.handle_validation_error(e)
+    except Exception as e:
         return errors.handle_internal_error(e)
 
 

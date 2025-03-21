@@ -1,12 +1,12 @@
 #!/usr/bin/python3
 """ Module for Admin class """
 
-from sqlalchemy import CheckConstraint, Column, Date, String, ForeignKey
-from sqlalchemy.orm import relationship
-from models.base_model import BaseModel, Base
+from sqlalchemy import CheckConstraint, Date, String, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+from models.base_model import BaseModel
 
 
-class Admin(BaseModel, Base):
+class Admin(BaseModel):
     """
     Admin Model
 
@@ -21,16 +21,19 @@ class Admin(BaseModel, Base):
     Methods:
         __init__(*args, **kwargs): Initializes the admin instance.
     """
-    __tablename__ = 'admin'
-    user_id = Column(String(120), ForeignKey(
+    __tablename__ = 'admins'
+    user_id: Mapped[str] = mapped_column(String(120), ForeignKey(
         'users.id'), unique=True, nullable=False)
-    first_name = Column(String(50), nullable=False)
-    father_name = Column(String(50), nullable=False)
-    date_of_birth = Column(Date, nullable=False)
-    gender = Column(String(1), nullable=False)
-    email = Column(String(120), nullable=False)
-    phone = Column(String(25), nullable=False)
-    address = Column(String(120), nullable=False)
+    first_name: Mapped[str] = mapped_column(String(50), nullable=False)
+    father_name: Mapped[str] = mapped_column(String(50), nullable=False)
+    grand_father_name: Mapped[str] = mapped_column(String(50), nullable=False)
+    date_of_birth: Mapped[Date] = mapped_column(Date, nullable=False)
+    gender: Mapped[str] = mapped_column(String(1), nullable=False)
+    email: Mapped[str] = mapped_column(String(120), nullable=False)
+    phone: Mapped[str] = mapped_column(String(25), nullable=False)
+    address: Mapped[str] = mapped_column(String(120), nullable=False)
+
+    user = relationship('User', back_populates='admin')
 
     __table_args__ = (
         CheckConstraint(
@@ -39,6 +42,3 @@ class Admin(BaseModel, Base):
         ),
     )
 
-    def __init__(self, *args, **kwargs):
-        """initializes score"""
-        super().__init__(*args, **kwargs)
