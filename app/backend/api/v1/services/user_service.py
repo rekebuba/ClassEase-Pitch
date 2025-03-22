@@ -50,10 +50,9 @@ class UserService:
             schema = schema_class()
             validated_data = schema.load(data)
 
-            user = validated_data.pop("user")
-            self.create_user(user)
+            new_user = self.create_user(validated_data.pop("user"))
 
-            new_instance = model_class(**validated_data)
+            new_instance = model_class(user_id=new_user.id, **validated_data)
             storage.add(new_instance)
             storage.save()
             return new_instance

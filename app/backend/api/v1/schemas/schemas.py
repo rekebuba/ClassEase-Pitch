@@ -148,7 +148,7 @@ class AuthSchema(BaseSchema):
 
 class AdminSchema(BaseSchema):
     """Admin schema for validating and serializing Admin data."""
-    user_id = fields.String(required=False, load_only=True)
+    user_id = fields.String(dump_only=True)
     first_name = fields.String(required=True, validate=[
         fields.validate.Length(min=2, max=25)])
     father_name = fields.String(required=True, validate=[
@@ -185,7 +185,7 @@ class AdminSchema(BaseSchema):
 
 class TeacherSchema(BaseSchema):
     """Teacher schema for validating and serializing Teacher data."""
-    user_id = fields.String(required=False)
+    user_id = fields.String(dump_only=True)
     first_name = fields.String(required=True, validate=[
         fields.validate.Length(min=2, max=25)])
     father_name = fields.String(required=True, validate=[
@@ -224,7 +224,7 @@ class TeacherSchema(BaseSchema):
 
 class StudentSchema(BaseSchema):
     """Student schema for validating and serializing Student data."""
-    user_id = fields.String(required=False, load_default=None, load_only=True)
+    user_id = fields.String(dump_only=True)
     first_name = fields.String(required=True, validate=[
         fields.validate.Length(min=2, max=25)])
     father_name = fields.String(required=True, validate=[

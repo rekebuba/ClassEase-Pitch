@@ -8,6 +8,7 @@ CREATE USER IF NOT EXISTS 'classease_dev' @'localhost' IDENTIFIED BY 'key_dev_pw
 
 GRANT ALL PRIVILEGES ON `classease`.* TO 'classease_dev' @'localhost';
 
-GRANT SELECT ON `performance_schema`.* TO 'classease_dev' @'localhost';
+GRANT
+SELECT ON `performance_schema`.* TO 'classease_dev' @'localhost';
 
 FLUSH PRIVILEGES;

@@ -22,15 +22,16 @@ def login():
     """
     try:
         fake = storage.session.query(User).all()
-        print(fake)
-        auth_schema = AuthSchema()
-        valid_user = auth_schema.load(request.get_json())
+        # print(len(fake))
+        # auth_schema = AuthSchema()
+        # valid_user = auth_schema.load(request.get_json())
 
-        # Generate an api_key token based on the user's role
-        api_key = UserService.generate_api_key(
-            valid_user['role'], valid_user['identification'])
+        # # Generate an api_key token based on the user's role
+        # api_key = UserService.generate_api_key(
+        #     valid_user['role'], valid_user['identification'])
 
-        return auth_schema.dump({"message": "logged in successfully.", "api_key": api_key, "role": valid_user['role']}), 200
+        # return auth_schema.dump({"message": "logged in successfully.", "api_key": api_key, "role": valid_user['role']}), 200
+        return jsonify({"message": "logged in successfully"}), 200
     except ValidationError as e:
         return errors.handle_validation_error(e)
     except InvalidCredentialsError as e:

@@ -55,19 +55,11 @@ def test_user_register_success(client, register_users):
         assert response.json['message'] == f'{valid_data["role"]} registered successfully!'
 
 
-@pytest.mark.parametrize("register_users", [
-    (CustomTypes.RoleEnum.ADMIN, 1),
-], indirect=True)
-def test_users_log_in_success(client, db_session, register_users):
-    db_session.commit()
-
-    fake = db_session.query(User).all()
-    print(fake) # this works
-
-    for user in register_users:
+def test_users_log_in_success(client, db_create_users):
+    for user in db_create_users:
         response = client.post('/api/v1/auth/login', json={
-            'id': user['identification'],
-            'password': user['identification']
+            'id': user['user']['identification'],
+            'password': user['user']['identification']
         })
 
         assert response.status_code == 200
@@ -151,8 +143,10 @@ def test_student_course_registration(client, db_session, db_create_users, event_
         assert response.json['message'] == 'Course registration successful!'
 
 
-@pytest.mark.parametrize("role", [('admin', 1),], indirect=True)
-def test_admin_create_mark_list(client, db_session, db_create_users, db_event_form, users_auth_header, db_course_registration, fake_mark_list):
+@pytest.mark.parametrize("role", [(CustomTypes.RoleEnum.ADMIN, 1),], indirect=True)
+def test_admin_create_mark_list(client, db_session, db_create_users, event_form, users_auth_header, db_course_registration, fake_mark_list):
+    # db_session.commit()
+
     response = client.post('/api/v1/admin/mark-list/new',
                            json=fake_mark_list,
                            headers=users_auth_header[0]['header']

@@ -66,6 +66,13 @@ class DBStorage:
                 "Engine not initialized. Call init_app() first.")
         return self.__engine
 
+    @property
+    def metadata(self):
+        """
+        Retrieves the metadata for the database.
+        """
+        return Base.metadata
+
     def create_scoped_session(self, **kwargs):
         """
             Create a scoped session for the database.
@@ -105,13 +112,14 @@ class DBStorage:
             app (Flask): The Flask application instance to initialize the database with.
         """
         # Configure the database engine
-        self.__engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
+        self.__engine = create_engine(
+            app.config['SQLALCHEMY_DATABASE_URI'])
         self.__session_factory = sessionmaker(bind=self.__engine)
         self.__session = scoped_session(self.__session_factory)
 
         # Create tables and seed data
         with app.app_context():
-            Base.metadata.create_all(bind=self.__engine)  # create all tables
+            self.metadata.create_all(bind=self.__engine)  # create all tables
             self.seed_data()
 
     def seed_data(self):
@@ -175,6 +183,15 @@ class DBStorage:
             SQLAlchemyError: If there is an error during the drop operation.
         """
         Base.metadata.drop_all(bind=self.__engine)
+
+    def reflect(self):
+        """
+        Reflect the database tables.
+
+        Raises:
+            SQLAlchemyError: If there is an error during the reflection operation.
+        """
+        Base.metadata.reflect(bind=self.__engine)
 
     def rollback(self):
         """Rollback all changes made in the current session."""

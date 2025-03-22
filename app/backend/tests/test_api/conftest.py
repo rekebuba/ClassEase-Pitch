@@ -14,11 +14,40 @@ import os
 import json
 import random
 from models.admin import Admin
-from sqlalchemy import update, and_
+from sqlalchemy import update, and_, text
 from tests.test_api.helper_functions import *
 from models import storage
 from models.base_model import CustomTypes
 from .factories_methods import MakeFactory
+
+# The following code can be used to test using MySQL database
+
+
+# @pytest.fixture(scope="session")
+# def storages():
+#     """Session-scoped fixture for database storage."""
+#     storage = DBStorage()
+#     yield storage
+#     storage.rollback()
+#     storage.session.remove()
+#     storage.drop_all()
+#     # Drop tables manually
+
+
+# @pytest.fixture(scope="session")
+# def app_session(storages):
+#     """Session-scoped fixture for the Flask app."""
+#     app = create_app("testing")
+#     storages.init_app(app)
+#     yield app
+
+
+# @pytest.fixture(scope="session")
+# def db_session(storages, app_session):
+#     """Function-scoped fixture for database transactions."""
+#     session = storages.session
+#     yield session
+#     storages.rollback()  # Ensure rollback after each test
 
 
 @pytest.fixture(scope="session")
@@ -31,6 +60,8 @@ def app_session():
 
     yield app
 
+    storage.rollback()
+    storage.session.remove()
     storage.drop_all()
 
 
@@ -67,12 +98,12 @@ def override_session(session, *factories):
 
 
 @pytest.fixture(params=[
+    (CustomTypes.RoleEnum.STUDENT, 1),
     (CustomTypes.RoleEnum.ADMIN, 1),
     (CustomTypes.RoleEnum.TEACHER, 1),
-    (CustomTypes.RoleEnum.STUDENT, 5)
 ])
 def register_users(request, db_session):
-    role, count = request.param
+    role, count = request.param if request.param else (None, 0)
 
     data = []
     role_user = None
@@ -115,7 +146,7 @@ def register_users(request, db_session):
     return data
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def db_create_users(db_session):
     factories = [
         (MakeFactory(AdminFactory, db_session).factory,
@@ -123,36 +154,35 @@ def db_create_users(db_session):
         (MakeFactory(TeacherFactory, db_session).factory,
          CustomTypes.RoleEnum.TEACHER, 1),
         (MakeFactory(StudentFactory, db_session).factory,
-         CustomTypes.RoleEnum.STUDENT, 5)
+         CustomTypes.RoleEnum.STUDENT, 1)
     ]
 
     users = []
-    user = None
+    start_year_id = db_session.query(Year.id).scalar()
+    current_grade = random.randint(1, 10)
+    current_grade_id = db_session.query(Grade.id).filter_by(
+        name=current_grade).scalar(),
+
     for Factory, role, count in factories:
         for _ in range(count):
             user = MakeFactory(UserFactory, db_session).factory(
                 role=role, keep={'id'})
+            db_session.commit()
             if role == CustomTypes.RoleEnum.STUDENT:
-                current_grade = random.randint(1, 10)
 
                 role_user = Factory(
-                    user_id=user['id'],
-                    start_year_id=db_session.query(Year.id).scalar(),
-                    current_year_id=db_session.query(Year.id).scalar(),
-                    current_grade_id=db_session.query(Grade.id).filter_by(
-                        name=current_grade).scalar(),
+                    user_id=user.pop('id'),
+                    start_year_id=start_year_id,
+                    current_year_id=start_year_id,  # Assuming both are the same,
+                    current_grade_id=current_grade_id,
                 )
             else:
                 role_user = Factory(user_id=user['id'])
 
-        db_session.commit()
-        users.append({"user": user, "role_user": role_user})
+            users.append({"user": user, "role_user": role_user})
 
-    return users
+    db_session.commit()
 
-
-def user_list(db_session):
-    users = db_session.query(User).all()
     return users
 
 
@@ -180,7 +210,7 @@ def users_auth_header(client, db_session, role):
     return auth_headers
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def event_form(db_session):
     event = MakeFactory(EventFactory, db_session).factory(
         add={'academic_year': DefaultFelids.current_EC_year()},
@@ -205,7 +235,7 @@ def event_form(db_session):
 def db_course_registration(db_session):
     students = (db_session.query(Student)
                 .join(User, User.id == Student.user_id)
-                .filter(User.role == 'student')
+                .filter(User.role == CustomTypes.RoleEnum.STUDENT)
                 .all()
                 )
 
@@ -219,8 +249,12 @@ def db_course_registration(db_session):
                        .scalar()
                        )
 
+        print(db_session.query(Semester.id).all())
+
         new_semester_record = STUDSemesterRecord(
             user_id=student.id,
+            section_id=None,
+            year_record_id=None,
             semester_id=semester_id,
             grade_id=grade_id,
         )

@@ -22,7 +22,8 @@ class MakeFactory:
                             'sqlalchemy_session',
                             'year', 'start_year_id', 'current_year_id',
                             'password', 'semester_id',
-                            'event_id'}
+                            'event_id', 'user_id', 'grade_id',
+                            'next_grade_id', 'current_grade_id', }
         for field in fields_to_remove:
             if field not in exclude:
                 form.pop(field, None)  # Remove the field if it exists

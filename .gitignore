@@ -8,3 +8,4 @@ fake_data
 **/profiles
 **/uploads
 test.db
+**/*.sql

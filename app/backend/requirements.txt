@@ -13,3 +13,4 @@ schedule
 -U marshmallow
 flask-marshmallow
 pyethiodate
+pytest-xdist

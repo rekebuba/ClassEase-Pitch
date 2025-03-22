@@ -35,7 +35,15 @@ class ProductionConfig(Config):
 class TestingConfig(Config):
     """Testing configuration."""
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'  # Using SQLite for testing
+    DEBUG = True
+    user = os.getenv('TEST_MYSQL_USER')
+    password = os.getenv('TEST_MYSQL_PWD')
+    host = os.getenv('TEST_MYSQL_HOST')
+    db = os.getenv('TEST_MYSQL_DB')
+    SQLALCHEMY_DATABASE_URI = f'mysql://{user}:{password}@{host}/{db}'
+    # SQLALCHEMY_DATABASE_URI = 'sqlite:///test_db'  # Using SQLite for testing
+    # SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Overriding the JWT secret keys for testing
     ADMIN_SECRET_KEY = os.getenv("TEST_ADMIN_JWT_SECRET")

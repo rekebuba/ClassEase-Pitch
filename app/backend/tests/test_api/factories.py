@@ -33,21 +33,6 @@ class DefaultFelids:
         return year_id
 
     @staticmethod
-    def modify_fields(form, *args):
-        """Removes fields from a form."""
-        fields_to_remove = {'created_at', 'updated_at',
-                            'sqlalchemy_session',
-                            'year', 'start_year_id', 'current_year_id',
-                            'identification', 'password', 'semester_id',
-                            'event_id'}
-        # Convert the object to a dictionary
-        form_dict = form.to_dict()
-
-        # Remove unwanted fields
-        for field in fields_to_remove:
-            form_dict.pop(field, None)  # Remove the field if it exists
-
-    @staticmethod
     def current_EC_year() -> int:
         return EthDate.date_to_ethiopian(datetime.now()).year
 
@@ -115,12 +100,6 @@ class UserFactory(factory.alchemy.SQLAlchemyModelFactory):
     password = factory.LazyAttribute(
         lambda obj: UserFactory._hash_password(obj.identification))
 
-    @factory.post_generation
-    def clean_data(self, create, extracted, **kwargs):
-        """Clean up data manually when needed."""
-        if not create:
-            DefaultFelids.modify_fields(self)
-
 
 class AdminFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
@@ -139,12 +118,6 @@ class AdminFactory(factory.alchemy.SQLAlchemyModelFactory):
         lambda x: fake.random_element(elements=('M', 'F')))
     phone = factory.LazyAttribute(lambda x: '091234567')
     address = factory.LazyAttribute(lambda x: fake.address())
-
-    @factory.post_generation
-    def clean_data(self, create, extracted, **kwargs):
-        """Clean up data manually when needed."""
-        if not create:
-            DefaultFelids.modify_fields(self)
 
 
 class StudentFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -193,12 +166,6 @@ class StudentFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     is_active = factory.LazyAttribute(lambda x: True)
 
-    @factory.post_generation
-    def clean_data(self, create, extracted, **kwargs):
-        """Clean up data manually when needed."""
-        if not create:
-            DefaultFelids.modify_fields(self)
-
 
 class TeacherFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
@@ -219,12 +186,6 @@ class TeacherFactory(factory.alchemy.SQLAlchemyModelFactory):
     year_of_experience = factory.LazyAttribute(lambda x: random.randint(0, 5))
     qualification = factory.LazyAttribute(lambda x: fake.random_element(
         elements=('Certified Teacher', 'Diploma in Education', 'Degree in Education')))
-
-    @factory.post_generation
-    def clean_data(self, create, extracted, **kwargs):
-        """Clean up data manually when needed."""
-        if not create:
-            DefaultFelids.modify_fields(self)
 
 
 class EventFactory(factory.alchemy.SQLAlchemyModelFactory):
@@ -283,12 +244,6 @@ class EventFactory(factory.alchemy.SQLAlchemyModelFactory):
         lambda obj: random.randint(100, 900) if obj.has_fee else 0.00)
     description = factory.LazyAttribute(lambda x: fake.text())
 
-    @factory.post_generation
-    def clean_data(self, create, extracted, **kwargs):
-        """Clean up data manually when needed."""
-        if not create:
-            DefaultFelids.modify_fields(self)
-
 
 class SemesterFactory(factory.alchemy.SQLAlchemyModelFactory):
     class Meta:
@@ -297,12 +252,6 @@ class SemesterFactory(factory.alchemy.SQLAlchemyModelFactory):
 
     event_id = factory.LazyAttribute(lambda _: None)
     name = factory.LazyAttribute(lambda x: 1)
-
-    @factory.post_generation
-    def clean_data(self, create, extracted, **kwargs):
-        """Clean up data manually when needed."""
-        if not create:
-            DefaultFelids.modify_fields(self)
 
 
 @dataclass(kw_only=True)
