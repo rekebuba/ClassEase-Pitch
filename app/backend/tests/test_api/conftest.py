@@ -31,7 +31,6 @@ from .factories_methods import MakeFactory
 #     storage.rollback()
 #     storage.session.remove()
 #     storage.drop_all()
-#     # Drop tables manually
 
 
 # @pytest.fixture(scope="session")
@@ -146,6 +145,44 @@ def register_users(request, db_session):
     return data
 
 
+def create_user(db_session, role):
+    user = MakeFactory(UserFactory, db_session).factory(
+        role=role, keep={'id'})
+    db_session.flush()
+    return user
+
+
+@pytest.fixture(scope="function")
+def db_create_admin(db_session):
+    user = create_user(db_session, CustomTypes.RoleEnum.ADMIN)
+    print(fake)
+    admin = MakeFactory(AdminFactory, db_session).factory(
+        user_id=user.pop('id')
+    )
+    db_session.commit()
+    return {"user": user, "role_user": admin}
+
+
+@pytest.fixture(scope="function")
+def db_create_teacher(db_session):
+    user = create_user(db_session, CustomTypes.RoleEnum.TEACHER)
+    teacher = MakeFactory(TeacherFactory, db_session).factory(
+        user_id=user.pop('id')
+    )
+    db_session.commit()
+    return {"user": user, "role_user": teacher}
+
+
+@pytest.fixture(scope="function")
+def db_create_student(db_session):
+    user = create_user(db_session, CustomTypes.RoleEnum.STUDENT)
+    student = MakeFactory(StudentFactory, db_session).factory(
+        user_id=user.pop('id')
+    )
+    db_session.commit()
+    return {"user": user, "role_user": student}
+
+
 @pytest.fixture(scope="function")
 def db_create_users(db_session):
     factories = [
@@ -167,7 +204,7 @@ def db_create_users(db_session):
         for _ in range(count):
             user = MakeFactory(UserFactory, db_session).factory(
                 role=role, keep={'id'})
-            db_session.commit()
+            # db_session.commit()
             if role == CustomTypes.RoleEnum.STUDENT:
 
                 role_user = Factory(
@@ -181,7 +218,7 @@ def db_create_users(db_session):
 
             users.append({"user": user, "role_user": role_user})
 
-    db_session.commit()
+    # db_session.commit()
 
     return users
 

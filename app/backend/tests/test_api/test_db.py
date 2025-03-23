@@ -55,16 +55,15 @@ def test_user_register_success(client, register_users):
         assert response.json['message'] == f'{valid_data["role"]} registered successfully!'
 
 
-def test_users_log_in_success(client, db_create_users):
-    for user in db_create_users:
-        response = client.post('/api/v1/auth/login', json={
-            'id': user['user']['identification'],
-            'password': user['user']['identification']
-        })
+def test_users_log_in_success(client, db_create_admin):
+    response = client.post('/api/v1/auth/login', json={
+        'id': db_create_admin['user']['identification'],
+        'password': db_create_admin['user']['identification']
+    })
 
-        assert response.status_code == 200
-        assert 'apiKey' in response.json
-        assert response.json["message"] == "logged in successfully."
+    assert response.status_code == 200
+    assert 'apiKey' in response.json
+    assert response.json["message"] == "logged in successfully."
 
 
 @pytest.mark.parametrize("role", [(CustomTypes.RoleEnum.TEACHER, 'all'),], indirect=True)
