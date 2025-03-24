@@ -55,19 +55,21 @@ def test_user_register_success(client, register_users):
         assert response.json['message'] == f'{valid_data["role"]} registered successfully!'
 
 
-def test_users_log_in_success(client, db_create_admin):
-    response = client.post('/api/v1/auth/login', json={
-        'id': db_create_admin['user']['identification'],
-        'password': db_create_admin['user']['identification']
-    })
+def test_users_log_in_success(client, db_create_users):
+    for role in db_create_users.keys():
+        user = db_create_users[role]
+        response = client.post('/api/v1/auth/login', json={
+            'id': user[0]['identification'],
+            'password': user[0]['identification']
+        })
 
-    assert response.status_code == 200
-    assert 'apiKey' in response.json
-    assert response.json["message"] == "logged in successfully."
+        assert response.status_code == 200
+        assert 'apiKey' in response.json
+        assert response.json["message"] == "logged in successfully."
 
 
 @pytest.mark.parametrize("role", [(CustomTypes.RoleEnum.TEACHER, 'all'),], indirect=True)
-def test_teacher_dashboard(client, db_create_users, users_auth_header):
+def test_teacher_dashboard(client, users_auth_header):
     for auth_header in users_auth_header:
         response = client.get('/api/v1/teacher/dashboard',
                               headers=auth_header['header']
@@ -76,8 +78,8 @@ def test_teacher_dashboard(client, db_create_users, users_auth_header):
         assert response.status_code == 200
 
 
-@pytest.mark.parametrize("role", [(CustomTypes.RoleEnum.ADMIN, 1), ], indirect=True)
-def test_admin_create_semester(client, db_create_users, users_auth_header, event_form):
+@pytest.mark.parametrize("role", [(CustomTypes.RoleEnum.ADMIN, 1),], indirect=True)
+def test_admin_create_semester(client, users_auth_header, event_form):
     response = client.post('/api/v1/admin/event/new',
                            json=event_form,
                            headers=users_auth_header[0]['header']
@@ -87,10 +89,8 @@ def test_admin_create_semester(client, db_create_users, users_auth_header, event
     assert response.json["message"] == "Event Created Successfully"
 
 
-@pytest.mark.parametrize("role", [(CustomTypes.RoleEnum.STUDENT, "all"),], indirect=True)
-def test_available_subjects_for_registration(client, db_session, db_create_users, event_form, users_auth_header):
-    db_session.commit()
-
+@pytest.mark.parametrize("role", [(CustomTypes.RoleEnum.STUDENT, 1),], indirect=True)
+def test_available_subjects_for_registration(client, users_auth_header, db_event_form):
     for auth_header in users_auth_header:
         response = client.get('/api/v1/student/course/registration',
                               headers=auth_header['header']
@@ -101,9 +101,7 @@ def test_available_subjects_for_registration(client, db_session, db_create_users
 
 
 @pytest.mark.parametrize("role", [('student', 'all'),], indirect=True)
-def test_student_course_registration(client, db_session, db_create_users, event_form, users_auth_header):
-    db_session.commit()
-
+def test_student_course_registration(client, db_session, db_event_form, users_auth_header):
     for auth_header in users_auth_header:
         student = (db_session.query(Student)
                    .join(User, User.id == Student.user_id)

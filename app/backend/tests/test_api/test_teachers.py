@@ -5,6 +5,9 @@ from api import create_app
 import json
 from models.teacher import Teacher
 from tests.test_api.helper_functions import *
+from tests.test_api.factories import *
+from tests.test_api.factories_methods import MakeFactory
+
 
 class TestTeachers(unittest.TestCase):
     """
@@ -22,6 +25,7 @@ class TestTeachers(unittest.TestCase):
         test_get_teacher_assigned_grade_success(): Test that the get_teacher_assigned_grade endpoint works and returns a list of grades.
         test_get_teacher_assigned_grade_no_grades(): Test that the get_teacher_assigned_grade endpoint returns a 404 status code if no grades are assigned.
     """
+
     def setUp(self):
         """
         Set up the test environment before each test.
@@ -33,6 +37,7 @@ class TestTeachers(unittest.TestCase):
         self.app = create_app('testing')
         self.client = self.app.test_client()
         self.app.app_context().push()
+        self.session = storage.session
 
     def tearDown(self):
         """
@@ -58,10 +63,23 @@ class TestTeachers(unittest.TestCase):
         4. Assert that the response JSON contains the success message.
 
         """
-        response = register_user(self.client, 'teacher')
-        self.assertEqual(response.status_code, 201)
-        json_data = response.get_json()
-        self.assertIn('teacher registered successfully!', json_data['message'])
+        role = CustomTypes.RoleEnum.TEACHER
+        user = MakeFactory(UserFactory, self.session, built=True).factory(
+            role=role, keep={'id'})
+
+        if 'image_path' in user:
+            local_path = user.pop('image_path')
+            user['image_path'] = open(local_path, 'rb')
+            os.remove(local_path)  # remove the file
+
+        teacher = MakeFactory(TeacherFactory, self.session, built=True).factory(
+            user_id=user.pop('id'))
+
+        response = self.client.post(f'/api/v1/registration/{role.value}',
+                                    data={**user, **teacher})
+
+        assert response.status_code == 201
+        assert response.json['message'] == 'teacher registered successfully!'
 
     def test_teacher_login_success(self):
         """
@@ -84,7 +102,8 @@ class TestTeachers(unittest.TestCase):
         - The response should contain an 'ApiKey' key.
         """
         register_user(self.client, 'teacher')
-        id = storage.session.query(User).filter_by(role='teacher').first().identification
+        id = storage.session.query(User).filter_by(
+            role='teacher').first().identification
 
         print(id)
         # Test that a valid login returns a token
@@ -221,9 +240,9 @@ class TestTeachers(unittest.TestCase):
             self.fail("Admin course assignment failed. Test failed")
 
         response = self.client.get('/api/v1/teacher/students/assigned_grade',
-                                    headers={
-                                        'apiKey': f'Bearer {teacher_token}'},
-                                    content_type='application/json')
+                                   headers={
+                                       'apiKey': f'Bearer {teacher_token}'},
+                                   content_type='application/json')
 
         self.assertEqual(response.status_code, 200)
         json_data = response.get_json()
@@ -249,12 +268,13 @@ class TestTeachers(unittest.TestCase):
         token = get_teacher_api_key(self.client)
 
         if not token:
-            self.fail("Token not generated. Test failed. Check the login endpoint.")
+            self.fail(
+                "Token not generated. Test failed. Check the login endpoint.")
 
         response = self.client.get('/api/v1/teacher/students/assigned_grade',
-                                    headers={
-                                        'apiKey': f'Bearer {token}'},
-                                    content_type='application/json')
+                                   headers={
+                                       'apiKey': f'Bearer {token}'},
+                                   content_type='application/json')
 
         self.assertEqual(response.status_code, 404)
         json_data = response.get_json()

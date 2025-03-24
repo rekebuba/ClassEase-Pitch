@@ -2,10 +2,14 @@
 
 import unittest
 from models.user import User
+from models.grade import Grade
 from models import storage
 from api import create_app
 from models.student import Student
 from tests.test_api.helper_functions import *
+from tests.test_api.factories import *
+from tests.test_api.factories_methods import MakeFactory
+
 
 class TestStudents(unittest.TestCase):
     """
@@ -35,6 +39,7 @@ class TestStudents(unittest.TestCase):
         self.app = create_app('testing')
         self.client = self.app.test_client()
         self.app.app_context().push()
+        self.session = storage.session
 
     def tearDown(self):
         """
@@ -42,6 +47,7 @@ class TestStudents(unittest.TestCase):
 
         This method is called after each test to clean up the database by removing the session and dropping all tables.
         """
+        storage.rollback()
         storage.session.remove()
         storage.drop_all()
 
@@ -53,10 +59,29 @@ class TestStudents(unittest.TestCase):
         by checking that the response status code is 201 (Created) and that the
         response JSON contains the success message 'Student registered successfully!'.
         """
-        response = register_user(self.client, 'student')
-        self.assertEqual(response.status_code, 201)
-        json_data = response.get_json()
-        self.assertIn('student registered successfully!', json_data['message'])
+        role = CustomTypes.RoleEnum.STUDENT
+        user = MakeFactory(UserFactory, self.session, built=True).factory(
+            role=role, keep={'id'})
+
+        if 'image_path' in user:
+            local_path = user.pop('image_path')
+            user['image_path'] = open(local_path, 'rb')
+            os.remove(local_path)  # remove the file
+
+        current_grade = random.randint(1, 10)
+        academic_year = DefaultFelids.current_EC_year()
+
+        student = MakeFactory(StudentFactory, self.session, built=True).factory(
+            user_id=user.pop('id'),
+            add={"current_grade": current_grade,
+                 "academic_year": academic_year}
+        )
+
+        response = self.client.post(f'/api/v1/registration/{role.value}',
+                                    data={**user, **student})
+
+        assert response.status_code == 201
+        assert response.json['message'] == 'student registered successfully!'
 
     def test_student_login_success(self):
         """
@@ -76,7 +101,8 @@ class TestStudents(unittest.TestCase):
         - The response JSON should contain an 'access_token' key.
         """
         register_user(self.client, 'student')
-        id = storage.session.query(User).filter_by(role='student').first().identification
+        id = storage.session.query(User).filter_by(
+            role='student').first().identification
 
         print(id)
         # Test that a valid login returns a token

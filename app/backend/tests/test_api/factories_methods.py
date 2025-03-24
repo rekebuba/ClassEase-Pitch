@@ -4,9 +4,10 @@ fake = Faker()
 
 
 class MakeFactory:
-    def __init__(self, factory, session, **kwargs):
+    def __init__(self, factory, session, built: bool = False, **kwargs):
         self.Factory = factory
         self.session = session
+        self.built = built
         self.kwargs = kwargs
 
     def _set_session(self):
@@ -40,9 +41,12 @@ class MakeFactory:
     def factory(self, add: dict | None = None, keep: set | None = None, **kwargs):
         self._set_session()
 
-        form = self.Factory.create(**kwargs).to_dict()
-
-        MakeFactory.additional_fields(form, add)
-        MakeFactory.modify_fields(form, exclude=keep)
+        if self.built:
+            form = self.Factory.build(**kwargs).to_dict()
+            MakeFactory.additional_fields(form, add)
+            MakeFactory.modify_fields(form, exclude=keep)
+        else:
+            form = self.Factory.create(**kwargs).to_dict()
+            self.session.commit()
 
         return form

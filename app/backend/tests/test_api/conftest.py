@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import time
 import pytest
 import unittest
 from api import create_app
@@ -20,42 +21,11 @@ from models import storage
 from models.base_model import CustomTypes
 from .factories_methods import MakeFactory
 
-# The following code can be used to test using MySQL database
-
-
-# @pytest.fixture(scope="session")
-# def storages():
-#     """Session-scoped fixture for database storage."""
-#     storage = DBStorage()
-#     yield storage
-#     storage.rollback()
-#     storage.session.remove()
-#     storage.drop_all()
-
-
-# @pytest.fixture(scope="session")
-# def app_session(storages):
-#     """Session-scoped fixture for the Flask app."""
-#     app = create_app("testing")
-#     storages.init_app(app)
-#     yield app
-
-
-# @pytest.fixture(scope="session")
-# def db_session(storages, app_session):
-#     """Function-scoped fixture for database transactions."""
-#     session = storages.session
-#     yield session
-#     storages.rollback()  # Ensure rollback after each test
-
 
 @pytest.fixture(scope="session")
 def app_session():
     """Session-scoped fixture for the Flask app."""
     app = create_app("testing")
-
-    storage = DBStorage()
-    storage.init_app(app)
 
     yield app
 
@@ -81,52 +51,33 @@ def client(app_session):
         yield client
 
 
-@contextmanager
-def override_session(session, *factories):
-    """Temporarily override the sqlalchemy_session for multiple factories."""
-    original_sessions = {
-        factory: factory._meta.sqlalchemy_session for factory in factories}
-
-    try:
-        for factory in factories:
-            factory._meta.sqlalchemy_session = session
-        yield
-    finally:
-        for factory, original_session in original_sessions.items():
-            factory._meta.sqlalchemy_session = original_session
-
-
 @pytest.fixture(params=[
     (CustomTypes.RoleEnum.STUDENT, 1),
     (CustomTypes.RoleEnum.ADMIN, 1),
     (CustomTypes.RoleEnum.TEACHER, 1),
-])
+], scope="session")
 def register_users(request, db_session):
     role, count = request.param if request.param else (None, 0)
 
     data = []
     role_user = None
     for _ in range(count):
-        user = MakeFactory(UserFactory, db_session).factory(
+        user = MakeFactory(UserFactory, db_session, built=True).factory(
             role=role, keep={'id'})
         if role == CustomTypes.RoleEnum.STUDENT:
             current_grade = random.randint(1, 10)
             academic_year = DefaultFelids.current_EC_year()
-            role_user = MakeFactory(StudentFactory, db_session).factory(
+            role_user = MakeFactory(StudentFactory, db_session, built=True).factory(
                 user_id=user.pop('id'),
-                start_year_id=db_session.query(Year.id).scalar(),
-                current_year_id=db_session.query(Year.id).scalar(),
-                current_grade_id=db_session.query(Grade.id).filter_by(
-                    name=current_grade).scalar(),
                 add={"current_grade": current_grade,
                      "academic_year": academic_year}
             )
         elif role == CustomTypes.RoleEnum.TEACHER:
-            role_user = MakeFactory(TeacherFactory, db_session).factory(
+            role_user = MakeFactory(TeacherFactory, db_session, built=True).factory(
                 user_id=user.pop('id')
             )
         elif role == CustomTypes.RoleEnum.ADMIN:
-            role_user = MakeFactory(AdminFactory, db_session).factory(
+            role_user = MakeFactory(AdminFactory, db_session, built=True).factory(
                 user_id=user.pop('id')
             )
 
@@ -145,45 +96,7 @@ def register_users(request, db_session):
     return data
 
 
-def create_user(db_session, role):
-    user = MakeFactory(UserFactory, db_session).factory(
-        role=role, keep={'id'})
-    db_session.flush()
-    return user
-
-
-@pytest.fixture(scope="function")
-def db_create_admin(db_session):
-    user = create_user(db_session, CustomTypes.RoleEnum.ADMIN)
-    print(fake)
-    admin = MakeFactory(AdminFactory, db_session).factory(
-        user_id=user.pop('id')
-    )
-    db_session.commit()
-    return {"user": user, "role_user": admin}
-
-
-@pytest.fixture(scope="function")
-def db_create_teacher(db_session):
-    user = create_user(db_session, CustomTypes.RoleEnum.TEACHER)
-    teacher = MakeFactory(TeacherFactory, db_session).factory(
-        user_id=user.pop('id')
-    )
-    db_session.commit()
-    return {"user": user, "role_user": teacher}
-
-
-@pytest.fixture(scope="function")
-def db_create_student(db_session):
-    user = create_user(db_session, CustomTypes.RoleEnum.STUDENT)
-    student = MakeFactory(StudentFactory, db_session).factory(
-        user_id=user.pop('id')
-    )
-    db_session.commit()
-    return {"user": user, "role_user": student}
-
-
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def db_create_users(db_session):
     factories = [
         (MakeFactory(AdminFactory, db_session).factory,
@@ -194,7 +107,11 @@ def db_create_users(db_session):
          CustomTypes.RoleEnum.STUDENT, 1)
     ]
 
-    users = []
+    users = {
+        CustomTypes.RoleEnum.ADMIN: [],
+        CustomTypes.RoleEnum.TEACHER: [],
+        CustomTypes.RoleEnum.STUDENT: []
+    }
     start_year_id = db_session.query(Year.id).scalar()
     current_grade = random.randint(1, 10)
     current_grade_id = db_session.query(Grade.id).filter_by(
@@ -204,9 +121,7 @@ def db_create_users(db_session):
         for _ in range(count):
             user = MakeFactory(UserFactory, db_session).factory(
                 role=role, keep={'id'})
-            # db_session.commit()
             if role == CustomTypes.RoleEnum.STUDENT:
-
                 role_user = Factory(
                     user_id=user.pop('id'),
                     start_year_id=start_year_id,
@@ -216,9 +131,7 @@ def db_create_users(db_session):
             else:
                 role_user = Factory(user_id=user['id'])
 
-            users.append({"user": user, "role_user": role_user})
-
-    # db_session.commit()
+            users[role].append({**user, **role_user})
 
     return users
 
@@ -233,7 +146,7 @@ def role(request, db_session):
 
 
 @pytest.fixture(scope="session")
-def users_auth_header(client, db_session, role):
+def users_auth_header(client, db_create_users, role):
     auth_headers = []
     for user in role:
         response = client.post('/api/v1/auth/login', json={
@@ -241,21 +154,25 @@ def users_auth_header(client, db_session, role):
             'password': user.identification
         })
         token = response.json["apiKey"]
-        auth_headers.append(
-            {"header": {"apiKey": f"Bearer {token}"}, "user": user})
+        auth_headers.append({
+            "header": {
+                "apiKey": f"Bearer {token}"
+            },
+            "user": user
+        })
 
     return auth_headers
 
 
 @pytest.fixture(scope="session")
 def event_form(db_session):
-    event = MakeFactory(EventFactory, db_session).factory(
+    event = MakeFactory(EventFactory, db_session, built=True).factory(
         add={'academic_year': DefaultFelids.current_EC_year()},
         keep={'id'},
         year_id=db_session.query(Year.id).scalar(),
         purpose='New Semester'
     )
-    form = MakeFactory(SemesterFactory, db_session).factory(
+    form = MakeFactory(SemesterFactory, db_session, built=True).factory(
         event_id=event.pop('id'))
 
     semester_form = {
@@ -269,6 +186,19 @@ def event_form(db_session):
 
 
 @pytest.fixture(scope="session")
+def db_event_form(db_session):
+    event = MakeFactory(EventFactory, db_session).factory(
+        year_id=db_session.query(Year.id).scalar(),
+        purpose='New Semester',
+    )
+
+    form = MakeFactory(SemesterFactory, db_session).factory(
+        event_id=event['id'])
+
+    return form
+
+
+@pytest.fixture(scope="module")
 def db_course_registration(db_session):
     students = (db_session.query(Student)
                 .join(User, User.id == Student.user_id)
@@ -341,7 +271,7 @@ def db_course_registration(db_session):
             storage.save()
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def fake_mark_list(db_session):
     # generate fake mark list for each grade
     registered_students = (db_session.query(Grade.name)

@@ -51,6 +51,9 @@ def register_new_user(role):
 
     try:
         data = request.form.to_dict()  # Get form data as a dictionary
+        if not data:
+            raise Exception("No data provided")
+
         data['user'] = {
             'national_id': data.pop('national_id', None),
             'identification': data.pop('identification', None),
@@ -66,9 +69,9 @@ def register_new_user(role):
     except ValidationError as e:
         storage.rollback()
         return errors.handle_validation_error(e)
-    # except Exception as e:
-    #     storage.rollback()
-    #     return errors.handle_internal_error(e)
+    except Exception as e:
+        storage.rollback()
+        return errors.handle_internal_error(e)
 
 
 @shared.route('/student/assessment', methods=['GET'])

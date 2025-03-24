@@ -328,6 +328,7 @@ def list_of_course_available(user_data):
             )
             .first()
         )
+        print(available_semester)
         if not available_semester:
             return jsonify({"message": "Registration is closed"}), 400
 

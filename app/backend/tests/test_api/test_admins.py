@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
 import unittest
+from tests.test_api.factories import *
+from tests.test_api.factories_methods import MakeFactory
 from models.user import User
 from models import storage
 from api import create_app
@@ -8,6 +10,7 @@ import json
 import random
 from models.admin import Admin
 from tests.test_api.helper_functions import *
+from models.base_model import CustomTypes
 
 
 class TestAdmin(unittest.TestCase):
@@ -44,6 +47,7 @@ class TestAdmin(unittest.TestCase):
         self.app = create_app('testing')
         self.client = self.app.test_client()
         self.app.app_context().push()
+        self.session = storage.session
 
     def tearDown(self):
         """
@@ -63,10 +67,23 @@ class TestAdmin(unittest.TestCase):
         2. Verifying that the response status code is 201 (Created).
         3. Checking that the response JSON contains the success message 'Admin registered successfully!'.
         """
-        response = register_user(self.client, 'admin')
-        self.assertEqual(response.status_code, 201)
-        json_data = response.get_json()
-        self.assertIn('admin registered successfully!', json_data['message'])
+        role = CustomTypes.RoleEnum.ADMIN
+        user = MakeFactory(UserFactory, self.session, built=True).factory(
+            role=role, keep={'id'})
+
+        if 'image_path' in user:
+            local_path = user.pop('image_path')
+            user['image_path'] = open(local_path, 'rb')
+            os.remove(local_path)  # remove the file
+
+        admin = MakeFactory(AdminFactory, self.session, built=True).factory(
+            user_id=user.pop('id'))
+
+        response = self.client.post(f'/api/v1/registration/{role.value}',
+                                    data={**user, **admin})
+
+        assert response.status_code == 201
+        assert response.json['message'] == 'admin registered successfully!'
 
     def test_admin_login_success(self):
         """
