@@ -276,7 +276,7 @@ class MarkAssessment:
 
 @dataclass
 class FakeMarkList:
-    count: int  # number of mark List to create
+    grade_num: int  # number of mark List to create based on available grades
     academic_year: int
     semester: int
     mark_assessment: dict
@@ -321,9 +321,9 @@ class MarkListFactory(factory.Factory):
     academic_year = factory.LazyAttribute(
         lambda _: DefaultFelids.current_EC_year())
     semester = factory.LazyAttribute(lambda _: 1)
-    count = factory.LazyAttribute(lambda _: 0)
+    grade_num = factory.LazyAttribute(lambda _: 0) # number of available grades
     mark_assessment = factory.LazyAttribute(
         lambda obj: [
-            MarkAssessmentFactory() for _ in range(obj.count)
+            MarkAssessmentFactory() for _ in range(obj.grade_num)
         ]
     )

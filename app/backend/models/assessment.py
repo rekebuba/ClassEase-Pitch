@@ -33,5 +33,5 @@ class Assessment(BaseModel):
     teachers_record_id: Mapped[str] = mapped_column(String(120), ForeignKey(
         'teachers_records.id', ondelete="SET NULL"), nullable=True, default=None)
     # The subject sum score of the student for each assessment
-    total: Mapped[float] = mapped_column(Float, default=None)
-    rank: Mapped[int] = mapped_column(Integer, default=None)
+    total: Mapped[float] = mapped_column(Float, nullable=True, default=None)
+    rank: Mapped[int] = mapped_column(Integer, nullable=True, default=None)

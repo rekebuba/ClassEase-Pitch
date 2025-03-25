@@ -2,7 +2,7 @@ from datetime import date, datetime
 import json
 import pytest
 from models.admin import Admin
-from tests.test_api.factories import StudentFactory, TeacherFactory, AdminFactory
+from tests.test_api.factories import DefaultFelids, StudentFactory, TeacherFactory, AdminFactory
 from models.user import User
 from models.year import Year
 from models.subject import Subject
@@ -91,40 +91,22 @@ def test_admin_create_semester(client, users_auth_header, event_form):
 
 @pytest.mark.parametrize("role", [(CustomTypes.RoleEnum.STUDENT, 1),], indirect=True)
 def test_available_subjects_for_registration(client, users_auth_header, db_event_form):
-    for auth_header in users_auth_header:
-        response = client.get('/api/v1/student/course/registration',
-                              headers=auth_header['header']
-                              )
-        assert response.status_code == 200
-        assert isinstance(response.json, dict)
-        assert len(response.json) > 0
+    response = client.get('/api/v1/student/course/registration',
+                          headers=users_auth_header[0]['header']
+                          )
+    assert response.status_code == 200
+    assert isinstance(response.json, dict)
+    assert len(response.json) > 0
 
 
 @pytest.mark.parametrize("role", [('student', 'all'),], indirect=True)
-def test_student_course_registration(client, db_session, db_event_form, users_auth_header):
+def test_student_course_registration(client, users_auth_header, db_event_form):
     for auth_header in users_auth_header:
-        student = (db_session.query(Student)
-                   .join(User, User.id == Student.user_id)
-                   .filter(User.identification == auth_header['user'].identification)
-                   .first()
-                   )
-
-        subjects = (
-            db_session.query(
-                Subject.name.label("subject"),
-                Subject.code.label("subject_code"),
-                Grade.name.label("grade")
-            )
-            .join(Grade, Grade.id == Subject.grade_id)
-            .filter(Grade.id == (student.next_grade_id if student.next_grade_id else student.current_grade_id))
-            .all()
-        )
-
-        subject_list = [{key: value for key, value in q._asdict().items()}
-                        for q in subjects]
-
-        courses = {"course": subject_list, "semester": 1,
-                   "academic_year": 2017, "grade": subject_list[0]['grade']}
+        get_course = client.get('/api/v1/student/course/registration',
+                                headers=auth_header['header']
+                                )
+        assert get_course.status_code == 200
+        courses = get_course.json
 
         response = client.post('/api/v1/student/course/registration',
                                json=courses,
@@ -141,9 +123,18 @@ def test_student_course_registration(client, db_session, db_event_form, users_au
 
 
 @pytest.mark.parametrize("role", [(CustomTypes.RoleEnum.ADMIN, 1),], indirect=True)
-def test_admin_create_mark_list(client, db_session, db_create_users, event_form, users_auth_header, db_course_registration, fake_mark_list):
-    # db_session.commit()
+def test_get_registered_grades(client, users_auth_header, db_course_registration):
+    response = client.get('/api/v1/admin/registered_grades',
+                          headers=users_auth_header[0]['header']
+                          )
+    assert response.status_code == 200
+    assert 'grades' in response.json
+    assert isinstance(response.json['grades'], list)
+    assert len(response.json['grades']) > 0
 
+
+@pytest.mark.parametrize("role", [(CustomTypes.RoleEnum.ADMIN, 1),], indirect=True)
+def test_admin_create_mark_list(client, db_course_registration, fake_mark_list, users_auth_header):
     response = client.post('/api/v1/admin/mark-list/new',
                            json=fake_mark_list,
                            headers=users_auth_header[0]['header']

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """Student views module for the API"""
 
+import json
 from flask import Blueprint, request, jsonify, url_for
 from marshmallow import ValidationError
 from models.year import Year
@@ -313,7 +314,7 @@ def list_of_course_available(user_data):
             return jsonify({"message": "Student is not active"}), 400
 
         available_semester = (
-            storage.session.query(Semester.name)
+            storage.session.query(Semester, Event, Year)
             .join(Event, Semester.event_id == Event.id)
             .join(Year, Event.year_id == Year.id)
             .filter(
@@ -328,7 +329,6 @@ def list_of_course_available(user_data):
             )
             .first()
         )
-        print(available_semester)
         if not available_semester:
             return jsonify({"message": "Registration is closed"}), 400
 
@@ -340,10 +340,12 @@ def list_of_course_available(user_data):
             .all()
         )
 
-        # print([subject.to_dict() for subject in subjects])
-        schema = AvailableCourseRegistration()
+        schema = CourseListSchema()
         result = schema.dump({
-            "subjects": [subject.to_dict() for subject in subjects]
+            "courses": [subject.to_dict() for subject in subjects],
+            "semester": available_semester[0].name,
+            "academic_year": available_semester[2].ethiopian_year,
+            "grade": storage.get_first(Grade, id=student_data.next_grade_id or student_data.current_grade_id).name
         })
 
         return jsonify(result), 200
@@ -357,10 +359,15 @@ def list_of_course_available(user_data):
 @student_required
 def register_course(user_data):
     try:
+        data = request.get_json()
+        if not data:
+            raise ValidationError("Not a JSON")
         data = {
-            **request.get_json(),
+            **data,
             "student_id": user_data.identification
         }
+        print(json.dumps(data, indent=4, sort_keys=True))
+
         course_schema = CourseListSchema()
         valid_data = course_schema.load(data)
 
@@ -368,12 +375,13 @@ def register_course(user_data):
             user_id=valid_data.get('user_id'),
             semester_id=valid_data.get('semester_id'),
             grade_id=valid_data.get('grade_id'),
+            year_record_id=valid_data.get('year_record_id'),
         )
         storage.add(new_semester_record)
         storage.session.flush()
 
         new_assessment = []
-        for form in valid_data['course']:
+        for form in valid_data['courses']:
             new_assessment.append(
                 Assessment(
                     user_id=valid_data.get('user_id'),

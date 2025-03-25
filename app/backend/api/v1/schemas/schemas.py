@@ -493,20 +493,20 @@ class EventSchema(BaseSchema):
         return data
 
 
-class CourseRegistrationSchema(BaseSchema):
-    grade = fields.Integer(required=False, dump_only=True)
-    grade_id = fields.String(required=True, load_only=True)
-
-    subject = fields.String(required=True, dump_only=True)
-    subject_code = fields.String(required=True, dump_only=True)
+class SubjectSchema(BaseSchema):
+    subject = fields.String(required=False)
+    subject_code = fields.String(required=False)
     subject_id = fields.String(required=True, load_only=True)
+
+    grade = fields.Integer(required=False)
+    grade_id = fields.String(required=True, load_only=True)
 
     @pre_load
     def set_defaults(self, data, **kwargs):
         # add default values to the data
-        data['grade_id'] = self.get_grade_id(data.get('grade'))
+        data['grade_id'] = self.get_grade_id(data.pop('grade'))
         data['subject_id'] = self.get_subject_id(
-            data.get('subject'), data.get('subject_code'), data.get('grade_id'))
+            data.pop('subject'), data.pop('subject_code'), data.get('grade_id'))
 
         return data
 
@@ -525,16 +525,15 @@ class CourseRegistrationSchema(BaseSchema):
 
 class CourseListSchema(BaseSchema):
     """Schema for validating a list of Course objects."""
-    course = fields.List(fields.Nested(
-        CourseRegistrationSchema), required=True)
+    courses = fields.List(fields.Nested(SubjectSchema), required=True)
     student_id = fields.String(required=True, load_only=True)
     user_id = fields.String(required=True, load_only=True)
 
-    academic_year = fields.Integer(required=True, load_only=True)
-    semester = fields.Integer(required=True, load_only=True)
+    academic_year = fields.Integer(required=True)
+    semester = fields.Integer(required=True)
     semester_id = fields.String(required=True, load_only=True)
 
-    grade = fields.Integer(required=True, load_only=True)
+    grade = fields.Integer(required=True)
     grade_id = fields.String(required=False, load_only=True)
 
     year_record_id = fields.String(required=False, load_only=True)
@@ -561,27 +560,9 @@ class CourseListSchema(BaseSchema):
             raise ValidationError("Student is already registered.")
 
 
-class SubjectSchema(BaseSchema):
-    subject = fields.String(required=False)
-    subject_code = fields.String(required=False, load_only=True)
-    subject_id = fields.String(required=True, load_only=True)
-
-    grade = fields.Integer(required=False, load_only=True)
-    grade_id = fields.String(required=True, load_only=True)
-
-    @pre_load
-    def set_defaults(self, data, **kwargs):
-        # add default values to the data
-        data['grade_id'] = self.get_grade_id(data.pop('grade'))
-        data['subject_id'] = self.get_subject_id(
-            data.pop('subject'), data.pop('subject_code'), data.get('grade_id'))
-
-        return data
-
-
 class MarkListTypeSchema(BaseSchema):
-    type = fields.String(required=True, load_only=True)
-    percentage = fields.Integer(required=True, load_only=True)
+    type = fields.String(required=True)
+    percentage = fields.Integer(required=True)
 
 
 class MarkAssessmentSchema(BaseSchema):
@@ -591,11 +572,10 @@ class MarkAssessmentSchema(BaseSchema):
     semester_id = fields.String(required=True, load_only=True)
     section_id = fields.String(required=False, load_only=True, allow_none=True)
 
-    subjects = fields.List(fields.Nested(
-        SubjectSchema), required=True)
+    subjects = fields.List(fields.Nested(SubjectSchema), required=True)
 
-    assessment_type = fields.List(fields.Nested(
-        MarkListTypeSchema), required=True)
+    assessment_type = fields.List(
+        fields.Nested(MarkListTypeSchema), required=True)
 
     @pre_load
     def set_defaults(self, data, **kwargs):
@@ -650,6 +630,5 @@ class AvailableEventsSchema(BaseSchema):
                          'registration_start', 'registration_end', 'fee_amount', 'description', 'message'))
 
 
-class AvailableCourseRegistration(BaseSchema):
-    subjects = fields.List(fields.Nested(
-        CourseRegistrationSchema), required=True)
+class RegisteredGradesSchema(BaseSchema):
+    grades = fields.List(fields.Integer, required=True)

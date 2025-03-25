@@ -27,7 +27,7 @@ class STUDSemesterRecord(BaseModel):
     semester_id: Mapped[str] = mapped_column(String(120), ForeignKey(
         'semesters.id'), nullable=False)
     grade_id: Mapped[str] = mapped_column(String(120), ForeignKey('grades.id'), nullable=False)
-    section_id: Mapped[str] = mapped_column(String(120), ForeignKey('sections.id'), nullable=True)
-    year_record_id: Mapped[str] = mapped_column(String(120), ForeignKey('student_year_records.id'), nullable=True)
-    average: Mapped[float] = mapped_column(Float, default=None)
-    rank: Mapped[int] = mapped_column(Integer, default=None)
+    section_id: Mapped[str] = mapped_column(String(120), ForeignKey('sections.id'), nullable=True, default=None)
+    year_record_id: Mapped[str] = mapped_column(String(120), ForeignKey('student_year_records.id'), nullable=True, default=None)
+    average: Mapped[float] = mapped_column(Float, nullable=True, default=None)
+    rank: Mapped[int] = mapped_column(Integer, nullable=True, default=None)

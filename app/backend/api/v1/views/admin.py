@@ -407,6 +407,40 @@ def create_events(admin_data):
         return errors.handle_internal_error(e)
 
 
+@admin.route('/registered_grades', methods=['GET'])
+@admin_required
+def registered_grades(admin_data):
+    """
+    Retrieve and return a list of registered grades.
+
+    Args:
+        admin_data (dict): Data related to the admin making the request.
+
+    Returns:
+        Response: A JSON response containing a list of registered grades.
+    """
+    try:
+        registered_grades = (
+            storage.session.query(Grade)
+            .join(STUDSemesterRecord, STUDSemesterRecord.grade_id == Grade.id)
+            .group_by(Grade.id)
+            .all()
+        )
+        if not registered_grades:
+            return errors.handle_not_found_error("No registered grades found")
+
+        schema = RegisteredGradesSchema()
+        result = schema.dump({
+            "grades": [grade.to_dict()['name'] for grade in registered_grades]
+        })
+
+        return jsonify(result), 200
+    except ValidationError as e:
+        return errors.handle_validation_error(e)
+    except Exception as e:
+        return errors.handle_internal_error(e)
+
+
 @admin.route('/mark-list/new', methods=['POST'])
 @admin_required
 def create_mark_list(admin_data):
@@ -426,17 +460,16 @@ def create_mark_list(admin_data):
 
         mark_list_schema = CreateMarkListSchema()
         validated_data = mark_list_schema.load(data)
-
         mark_list = []
         for assessment in validated_data['mark_assessment']:
             registered_students = storage.get_all(
                 STUDSemesterRecord, grade_id=assessment['grade_id'], semester_id=validated_data['semester_id'])
-            for student_semester_record in registered_students:
+            for student in registered_students:
                 for subject in assessment['subjects']:
                     for assessment_type in assessment['assessment_type']:
                         new_mark_list = MarkList(
-                            user_id=student_semester_record.user_id,
-                            semester_record_id=student_semester_record.id,
+                            user_id=student.user_id,
+                            semester_record_id=student.id,
                             subject_id=subject['subject_id'],
                             type=assessment_type['type'],
                             percentage=assessment_type['percentage']
