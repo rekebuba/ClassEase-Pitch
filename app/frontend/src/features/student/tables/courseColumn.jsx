@@ -4,7 +4,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 
 export const courseColumn = [
     {
-        id: "select",
+        id: 'select',
         header: ({ table }) => (
             <Checkbox
                 checked={
@@ -48,34 +48,6 @@ export const courseColumn = [
                     onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
                 >
                     Code
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-            )
-        },
-    },
-    {
-        accessorKey: "grade",
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    Grade
-                    <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-            )
-        },
-    },
-    {
-        accessorKey: "semester",
-        header: ({ column }) => {
-            return (
-                <Button
-                    variant="ghost"
-                    onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-                >
-                    Semester
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
             )

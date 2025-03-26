@@ -2,11 +2,11 @@ import { useState, useEffect } from 'react';
 import { StudentLayout } from "@/components/layout";
 import { useNavigate } from 'react-router-dom';
 import { studentApi } from '@/api';
-import { toast } from "sonner"
+import { toast } from "sonner";
 import { CourseTable } from "@/features/student/tables"
 
 const StudentCourseRegistration = () => {
-    const [courses, setEvents] = useState([]);
+    const [courses, setCourses] = useState({});
     const navigate = useNavigate();
 
 
@@ -16,7 +16,7 @@ const StudentCourseRegistration = () => {
             try {
                 const response = await studentApi.getCoursesToRegister();
                 if (response.status === 200) {
-                    setEvents(response.data['course']);
+                    setCourses(response.data);
                 };
             } catch (error) {
                 if (error.response && error.response.data && error.response.data['error']) {
@@ -37,10 +37,12 @@ const StudentCourseRegistration = () => {
 
     return (
         <StudentLayout>
-            <div className="flex justify-between items-center p-5">
-                <h1 className="text-2xl font-bold">List of Course To Register</h1>
+            <div className="flex flex-col justify-between items-center p-5">
+                <h3 className="text-xl font-bold">Student: abc</h3>
+                <h3 className="text-xl font-bold">Register For Grade {courses['grade']}</h3>
+                <h3 className="text-xl font-bold"> Semester: {courses['semester']}, {courses['academicYear']}</h3>
             </div>
-            <CourseTable courses={courses} />
+            <CourseTable courses={courses['courses']} />
         </StudentLayout>
     )
 
