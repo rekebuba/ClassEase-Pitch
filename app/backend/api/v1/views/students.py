@@ -85,7 +85,7 @@ def student_yearly_scores(student_data):
     """
 
     query = (
-        storage.session.query(STUDYearRecord.student_id,
+        storage.session.query(STUDYearRecord.user_id,
                               Grade.id,
                               Grade.name,
                               STUDSemesterRecord.semester,
@@ -94,8 +94,8 @@ def student_yearly_scores(student_data):
                               STUDYearRecord.year
                               )
         .join(Grade, STUDSemesterRecord.grade_id == Grade.id)
-        .join(STUDYearRecord, STUDYearRecord.student_id == STUDSemesterRecord.student_id)
-        .filter(and_(STUDSemesterRecord.student_id == student_data.student_id,
+        .join(STUDYearRecord, STUDYearRecord.user_id == STUDSemesterRecord.user_id)
+        .filter(and_(STUDSemesterRecord.user_id == student_data.user_id,
                      STUDYearRecord.grade_id == STUDSemesterRecord.grade_id,
                      STUDYearRecord.year == STUDSemesterRecord.year))
         .order_by(Grade.name, STUDSemesterRecord.semester)
@@ -120,32 +120,6 @@ def student_yearly_scores(student_data):
 def update_student_profile(student_data):
     """
     Update the profile of a student with the provided data.
-
-    Args:
-        student_data (object): The student object whose profile is to be updated.
-
-    Returns:
-        Response: A JSON response indicating the result of the update operation.
-
-    The function expects a JSON payload in the request with the following fields:
-        - date_of_birth (str): The student's date of birth.
-        - father_phone (str): The student's father's phone number.
-        - mother_phone (str): The student's mother's phone number.
-        - new_password (str, optional): The new password for the student's account.
-        - current_password (str, optional): The current password for the student's account (required if new_password is provided).
-
-    The function performs the following checks:
-        - Ensures the request payload is a valid JSON.
-        - Ensures all required fields (date_of_birth, father_phone, mother_phone) are present in the payload.
-        - If a new password is provided, ensures the current password is also provided and is correct.
-
-    The function updates the student's profile and saves the changes to the storage.
-
-    Returns:
-        - 400: If the request payload is not a valid JSON or if any required field is missing.
-        - 404: If the user associated with the student ID is not found.
-        - 400: If the current password is incorrect.
-        - 200: If the profile is updated successfully.
     """
     data = request.get_json()
     if not data:
