@@ -8,18 +8,7 @@ from models.base_model import BaseModel
 
 class Admin(BaseModel):
     """
-    Admin Model
-
     This model represents an admin in the system. It inherits from BaseModel and Base.
-
-    Attributes:
-        __tablename__ (str): The name of the table in the database.
-        id (str): The unique identifier for the admin, which is a foreign key referencing the users table.
-        name (str): The name of the admin. This field is required.
-        email (str): The email of the admin. This field is required and must be unique.
-
-    Methods:
-        __init__(*args, **kwargs): Initializes the admin instance.
     """
     __tablename__ = 'admins'
     user_id: Mapped[str] = mapped_column(String(120), ForeignKey(
@@ -41,4 +30,3 @@ class Admin(BaseModel):
             name="check_admin_gender"
         ),
     )
-
