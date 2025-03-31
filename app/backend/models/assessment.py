@@ -8,20 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 class Assessment(BaseModel):
     """
-    Assessment Model
-
     This model represents an assessment record for a student, including details such as the student's ID, grade ID, subject ID, total score, rank, semester, and year.
-
-    Attributes:
-        __tablename__ (str): The name of the table in the database.
-        student_id (str): Foreign key referencing the student's ID.
-        grade_id (str): Foreign key referencing the grade's ID.
-        subject_id (str): Foreign key referencing the subject's ID.
-        total (float): The sum score of the student for each assessment. Default is None.
-        rank (int): The rank of the student in the assessment. Default is None.
-
-    Methods:
-        __init__(*args, **kwargs): Initializes the assessment record with the provided arguments.
     """
     __tablename__ = 'assessments'
     user_id: Mapped[str] = mapped_column(
