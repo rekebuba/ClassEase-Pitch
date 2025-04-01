@@ -8,20 +8,7 @@ from models.base_model import BaseModel
 
 class MarkList(BaseModel):
     """
-    MarkList Model
-
     This model represents a list of marks for students in various assessments. It includes details about the student, grade, section, subject, teacher's record, semester, year, type of assessment, percentage contribution to the final score, and the actual score obtained.
-
-    Attributes:
-        student_id (str): Foreign key referencing the student's ID.
-        subject_id (str): Foreign key referencing the subject's ID.
-        teachers_record_id (str, optional): Foreign key referencing the teacher's record ID. Can be null and defaults to None.
-        type (str): The type of assessment (e.g., 'Test', 'Quiz', 'Assignment', 'Midterm', 'Final').
-        percentage (float): The percentage of this assessment towards the final score.
-        score (float, optional): The actual score of the student in this assessment.
-
-    Methods:
-        __init__(*args, **kwargs): Initializes the MarkList instance, setting up the score attribute.
     """
     __tablename__ = 'mark_lists'
 
