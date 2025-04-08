@@ -8,16 +8,7 @@ from models.base_model import BaseModel
 
 class User(BaseModel):
     """
-    User Model
-
     This module defines the User model which represents a user in the system. The User can have one of three roles: 'admin', 'teacher', or 'student'. Each user has a unique ID and a password.
-
-    Attributes:
-        __tablename__ (str): The name of the table in the database.
-        id (mapped_column): The unique identifier for the user.
-        password (mapped_column): The password for the user.
-        role (mapped_column): The role of the user, which can be 'admin', 'teacher', or 'student'.
-
     """
     __tablename__ = 'users'
     identification: Mapped[str] = mapped_column(
