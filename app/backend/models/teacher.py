@@ -8,24 +8,7 @@ from models.base_model import BaseModel
 
 class Teacher(BaseModel):
     """
-    Teacher Model
     This model represents a teacher in the ClassEase system. It inherits from BaseModel and Base.
-    Attributes:
-        __tablename__ (str): The name of the table in the database.
-        id (str): The unique identifier for the teacher, which is a foreign key referencing the users table.
-        first_name (str): The first name of the teacher.
-        last_name (str): The last name of the teacher.
-        gender (str): The gender of the teacher.
-        age (str): The age of the teacher.
-        email (str): The email address of the teacher.
-        phone (str): The phone number of the teacher.
-        address (str): The address of the teacher.
-        experience (int): The number of years of experience the teacher has.
-        qualification (str): The qualification of the teacher.
-        subject_taught (str): The subject that the teacher teaches.
-        no_of_mark_list (int): The number of mark lists associated with the teacher. Defaults to 0.
-    Methods:
-        __init__(*args, **kwargs): Initializes the Teacher instance.
     """
     __tablename__ = 'teachers'
     user_id: Mapped[str] = mapped_column(String(120), ForeignKey(
