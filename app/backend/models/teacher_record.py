@@ -8,20 +8,7 @@ from models.base_model import BaseModel
 
 class TeachersRecord(BaseModel):
     """
-    TeachersRecord Model
-
     This model represents the record of teachers, including their associated subjects, grades, and sections.
-
-    Attributes:
-        __tablename__ (str): The name of the table in the database.
-        teacher_id (str): Foreign key referencing the teacher's ID.
-        subject_id (str): Foreign key referencing the subject's ID. Nullable.
-        grade_id (str): Foreign key referencing the grade's ID. Nullable.
-        section_id (str): Foreign key referencing the section's ID. Nullable.
-        mark_list (relationship): Relationship to the MarkList model with cascade save-update and passive deletes.
-
-    Methods:
-        __init__(*args, **kwargs): Initializes a TeachersRecord instance.
     """
     __tablename__ = 'teachers_records'
     user_id: Mapped[str] = mapped_column(String(120), ForeignKey(
