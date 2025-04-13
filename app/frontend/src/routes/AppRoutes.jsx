@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import { Home, NotFound } from "@/pages/public";
+import { LandingPage, NotFound } from "@/pages/public";
 import { Login } from "@/features/auth";
 import {
     AdminDashboard,
@@ -33,7 +33,7 @@ import { ProtectedRoute } from "@/routes";
 const router = createBrowserRouter([
     {
         path: "/",
-        element: <Home />,
+        element: <LandingPage />,
         errorElement: <NotFound />,
     },
     {

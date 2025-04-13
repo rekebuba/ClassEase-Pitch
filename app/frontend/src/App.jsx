@@ -1,6 +1,6 @@
 import { RouterProvider } from "react-router-dom";
 import router from "./routes/AppRoutes";
-import '../src/index.css';
+import '../src/globals.css';
 
 /**
  * The main application component that sets up the router provider.
