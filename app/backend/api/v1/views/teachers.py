@@ -31,47 +31,6 @@ from api.v1.views import errors
 teach = Blueprint('teach', __name__, url_prefix='/api/v1/teacher')
 
 
-@teach.route('/panel', methods=['GET'])
-@teacher_required
-def teacher_panel(teacher_data):
-    """
-    Handle the teacher panel view.
-
-    Args:
-        teacher_data (object): The teacher data object. Should have a `to_dict` method.
-
-    Returns:
-        Response: A JSON response containing the teacher data if found,
-                  otherwise an error message with a 404 status code.
-    """
-    try:
-        query = (
-            storage.session.query(User, Teacher)
-            .join(Teacher, Teacher.user_id == User.id)
-            .filter(User.identification == teacher_data.identification)
-            .first()
-        )
-
-        if not query:
-            return errors.handle_not_found_error("Teacher Not Found")
-
-        # Unpack the query result
-        user, teacher = query
-
-        # Serialize the data using the schema
-        schema = TeacherPanelSchema()
-        result = schema.dump({
-            "user": user,
-            "teacher": teacher
-        })
-
-        return jsonify(result), 200
-    except ValidationError as e:
-        return errors.handle_validation_error(e)
-    except Exception as e:
-        return errors.handle_internal_error(e)
-
-
 @teach.route('/dashboard', methods=['GET'])
 @teacher_required
 def teacher_dashboard(teacher_data):

@@ -30,47 +30,6 @@ from api.v1.views import errors
 stud = Blueprint('stud', __name__, url_prefix='/api/v1/student')
 
 
-@stud.route('/panel', methods=['GET'])
-@student_required
-def student_panel_data(student_data):
-    """
-    Generates the student panel data.
-
-    Args:
-        student_data (object): An object containing student identifiers such as student_id, grade_id, and section_id.
-
-    Returns:
-        Response: A JSON response containing the student's information, including grade and section, or an error message if the student is not found.
-    """
-
-    try:
-        query = (
-            storage.session.query(User, Student)
-            .join(Student, Student.user_id == User.id)
-            .filter(User.identification == student_data.identification)
-            .first()
-        )
-
-        if not query:
-            return errors.handle_not_found_error("Student Not Found")
-
-        # Unpack the query result
-        user, student = query
-
-        # Serialize the data using the schema
-        schema = StudentPanelSchema()
-        result = schema.dump({
-            "user": user,
-            "student": student
-        })
-
-        return jsonify(result), 200
-    except ValidationError as e:
-        return errors.handle_validation_error(e)
-    except Exception as e:
-        return errors.handle_internal_error(e)
-
-
 @stud.route('/yearly_score', methods=['GET'])
 @student_required
 def student_yearly_scores(student_data):

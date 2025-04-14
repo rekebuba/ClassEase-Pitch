@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { StudentLayout } from "@/components/layout";
+import { Layout } from "@/components/layout";
 import { StudentPopupScore, StudentSubjectList, StudentEventPanel, StudentScorePanel } from "@/features/student";
 import { studentApi } from "@/api";
 import { toast } from "sonner"
@@ -77,7 +77,7 @@ const StudentDashboard = () => {
   };
 
   return (
-    <StudentLayout>
+    <Layout role="student">
       <div className="flex space-x-10">
         <StudentEventPanel />
         <StudentScorePanel yearlyScore={yearlyScore} isAssesOpen={toggleAssessment} />
@@ -137,7 +137,7 @@ const StudentDashboard = () => {
             closeAssessment={closeAssessment}
             assessmentSummary={studentSummary}
           /> */}
-    </StudentLayout>
+    </Layout>
   );
 };
 export default StudentDashboard;

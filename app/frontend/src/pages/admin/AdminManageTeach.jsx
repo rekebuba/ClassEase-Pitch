@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { AdminLayout } from "@/components/layout";
+import { Layout } from "@/components/layout";
 import { AdminTeacherProfile, AdminTeacherList, AdminAssignTeacher } from "@/features/admin";
 import "../../styles/AdminManageStudents.css";
 
@@ -73,10 +73,10 @@ const AdminManageTeacher = () => {
     };
 
     return (
-        <AdminLayout>
+        <Layout role="admin">
             <AdminTeacherList toggleDropdown={toggleDropdown} teacherSummary={summary} />
             <AdminAssignTeacher isEditOpen={isEditOpen} toggleEditProfile={toggleEditProfile} teacherData={teacherSummary} />
-        </AdminLayout>
+        </Layout>
     );
 };
 

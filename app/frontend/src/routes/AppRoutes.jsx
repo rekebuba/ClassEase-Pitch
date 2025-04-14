@@ -57,15 +57,15 @@ const router = createBrowserRouter([
         element: <AdminEnrollUser role="student" />
     },
     {
-        path: "/admin/assessment/marklist",
+        path: "/admin/assessment/mark-list",
         element: <ProtectedRoute element={<AdminCreateMarkList />} allowedRoles={['admin']} />,
     },
     {
-        path: "/admin/events",
+        path: "/admin/calendar/events",
         element: <ProtectedRoute element={<AdminManageEvent />} allowedRoles={['admin']} />,
     },
     {
-        path: "/admin/users/accesscontrol",
+        path: "/admin/manage/user-access",
         element: <ProtectedRoute element={<AdminUserAccessControl />} allowedRoles={['admin']} />,
     },
     {

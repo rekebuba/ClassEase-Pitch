@@ -8,6 +8,7 @@ from sqlalchemy import func
 from models import storage
 from datetime import datetime
 from models.user import User
+from models.admin import Admin
 from models.grade import Grade
 from models.student import Student
 from models.section import Section
@@ -26,7 +27,8 @@ from api.v1.views.utils import admin_or_student_required, student_teacher_or_adm
 from api.v1.services.user_service import UserService
 from api.v1.views.methods import paginate_query
 from api.v1.views import errors
-from models.base_model import BaseModel
+from api.v1.schemas.schemas import UserDetailSchema
+from models.base_model import BaseModel, CustomTypes
 from api.v1.views.methods import save_profile
 from werkzeug.utils import secure_filename
 
@@ -280,3 +282,47 @@ def upload_profile(student_data, teacher_data, admin_data):
         }), 200
     else:
         return jsonify({"error": "File type not allowed"}), 400
+
+
+@shared.route('/', methods=['GET'])
+@student_teacher_or_admin_required
+def user(user):
+    try:
+        if user.role == CustomTypes.RoleEnum.ADMIN:
+            query = (
+                storage.session.query(User, Admin)
+                .join(Admin, Admin.user_id == User.id)
+                .filter(User.identification == user.identification)
+                .first()
+            )
+        elif user.role == CustomTypes.RoleEnum.TEACHER:
+            query = (
+                storage.session.query(User, Teacher)
+                .join(Teacher, Teacher.user_id == User.id)
+                .filter(User.identification == user.identification)
+                .first()
+            )
+        elif user.role == CustomTypes.RoleEnum.STUDENT:
+            query = (
+                storage.session.query(User, Student)
+                .join(Student, Student.user_id == User.id)
+                .filter(User.identification == user.identification)
+                .first()
+            )
+        if not query:
+            return errors.handle_not_found_error("User Not Found")
+
+        user, detail = query
+        # Serialize the data using the schema
+        schema = UserDetailSchema()
+        result = schema.dump({
+            "user": user,
+            "detail": detail
+        })
+
+        return jsonify(result), 200
+
+    except ValidationError as e:
+        return errors.handle_validation_error(e)
+    except Exception as e:
+        return errors.handle_internal_error(e)

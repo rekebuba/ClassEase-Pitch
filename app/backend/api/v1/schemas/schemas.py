@@ -42,11 +42,29 @@ class FileField(fields.Field):
         return value
 
 
+class RoleEnumField(fields.Field):
+    """Custom field for RoleEnum."""
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        if value is None:
+            return None
+        return value.value.capitalize()  # Returns "Admin", "Teacher", or "Student"
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        try:
+            if isinstance(value, CustomTypes.RoleEnum):
+                return value
+            return CustomTypes.RoleEnum(value)  # Converts string to enum
+        except ValueError as error:
+            raise ValidationError(
+                "Invalid role. Must be one of: admin, teacher, student") from error
+
+
 class UserSchema(BaseSchema):
     """Schema for validating user registration data."""
     identification = fields.String(required=False)
     password = fields.String(required=False, load_only=True)
-    role = fields.String(required=True)
+    role = RoleEnumField()
     national_id = fields.String(required=True, load_only=True)
     image_path = FileField(required=False, allow_none=True)
 
@@ -112,11 +130,12 @@ class UserSchema(BaseSchema):
         return data
 
     @post_dump
-    def add_image_url(self, data, **kwargs):
+    def update_fields(self, data, **kwargs):
         # Add the full URL for the image_path if it exists
         if 'image_path' in data and data['image_path'] is not None:
             data['image_path'] = url_for(
                 'static', filename=data['image_path'], _external=True)
+
         return data
 
 
@@ -607,23 +626,25 @@ class CreateMarkListSchema(BaseSchema):
         return data
 
 
-class AdminPanelSchema(BaseSchema):
+class UserDetailSchema(BaseSchema):
     user = fields.Nested(UserSchema)
-    admin = fields.Nested(AdminSchema, only=(
-        'first_name', 'father_name', 'grand_father_name'))
+    detail = fields.Method("get_detail")
 
+    def get_detail(self, obj):
+        schema_map = {
+            CustomTypes.RoleEnum.ADMIN: AdminSchema(only=('first_name', 'father_name', 'grand_father_name')),
+            CustomTypes.RoleEnum.STUDENT: StudentSchema(only=('first_name', 'father_name', 'grand_father_name')),
+            CustomTypes.RoleEnum.TEACHER: TeacherSchema(only=('first_name', 'father_name', 'grand_father_name')),
+        }
 
-class StudentPanelSchema(BaseSchema):
-    user = fields.Nested(UserSchema)
-    student = fields.Nested(StudentSchema, only=(
-        'first_name', 'father_name', 'grand_father_name'))
+        # `role` is an attribute on the object
+        role = CustomTypes.RoleEnum(obj['user'].role)
+        schema = schema_map.get(role)
 
+        if schema:
+            return schema.dump(obj.get('detail', None))
 
-class TeacherPanelSchema(BaseSchema):
-    user = fields.Nested(UserSchema)
-    teacher = fields.Nested(TeacherSchema, only=(
-        'first_name', 'father_name', 'grand_father_name'))
-
+        return None
 
 class AvailableEventsSchema(BaseSchema):
     events = fields.List(fields.Nested(EventSchema), required=True, exclude=('start_time', 'end_time',

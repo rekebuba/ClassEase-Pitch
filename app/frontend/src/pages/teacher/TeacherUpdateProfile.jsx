@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { TeacherLayout } from "@/components/layout";
+import { Layout } from "@/components/layout";
 import { teacherApi } from '@/api';
 import { toast } from "sonner"
 import '../../styles/updateProfile.css';
@@ -127,7 +127,7 @@ const TeacherUpdateProfile = () => {
     }, []);
 
     return (
-        <TeacherLayout>
+        <Layout role="teacher">
             <div className="user-profile">
                 <h2>User Profile</h2>
 
@@ -239,7 +239,7 @@ const TeacherUpdateProfile = () => {
                     )}
                 </div>
             </div>
-        </TeacherLayout>
+        </Layout>
     );
 };
 

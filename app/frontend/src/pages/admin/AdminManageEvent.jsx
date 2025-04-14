@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from "sonner"
-import { AdminLayout } from '@/components/layout';
 import { EventTable } from '@/features/admin/tables';
 import { adminApi } from '@/api';
 import { useNavigate } from 'react-router-dom';
@@ -49,7 +48,7 @@ export default function AdminManageEvent() {
     }
 
     return (
-        <AdminLayout>
+        <Layout role="admin">
             <div className="flex justify-between items-center p-5">
                 <h1 className="text-3xl font-bold">List of Events</h1>
                 <Button onClick={goToEventForm}>Create New Event</Button>
@@ -79,6 +78,6 @@ export default function AdminManageEvent() {
                     </div>
                 </DialogContent>
             </Dialog>
-        </AdminLayout>
+        </Layout>
     );
 }

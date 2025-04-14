@@ -1,7 +1,6 @@
 import api from './api';
 
 const studentApi = {
-    getPanelData: () => api.get('/student/panel'),
     getCoursesToRegister: () => api.get('/student/course/registration'),
     registerCourses: () => api.post('/student/course/registration'),
     getYearlyScore: () => api.get('/student/yearly_score'),

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FaUserCircle } from "react-icons/fa";
-import { StudentLayout } from "@/components/layout";
+import { Layout } from "@/components/layout";
 import { studentApi } from "@/api";
 import { toast } from "sonner"
 import '../../styles/updateProfile.css';
@@ -126,7 +126,7 @@ const StudentUpdateProfile = () => {
     }, []);
 
     return (
-        <StudentLayout>
+        <Layout role="student">
             <div className="user-profile">
                 <div className="profile-details">
                     <div className="profile-picture">
@@ -233,7 +233,7 @@ const StudentUpdateProfile = () => {
                     )}
                 </div>
             </div>
-        </StudentLayout>
+        </Layout>
 
     );
 };

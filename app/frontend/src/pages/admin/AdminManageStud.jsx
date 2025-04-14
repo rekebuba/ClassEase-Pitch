@@ -1,4 +1,4 @@
-import { AdminLayout } from "@/components/layout";
+import { Layout } from "@/components/layout";
 import { AdminStudentList } from "@/features/admin";
 
 
@@ -17,9 +17,9 @@ import { AdminStudentList } from "@/features/admin";
 const AdminManageStudents = () => {
 
   return (
-    <AdminLayout>
+    <Layout role="admin">
       <AdminStudentList />
-    </AdminLayout>
+    </Layout>
   );
 };
 

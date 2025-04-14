@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { AdminLayout } from "@/components/layout";
+import { Layout } from "@/components/layout";
 
 
 
@@ -139,7 +139,7 @@ const AdminUserAccessControl = () => {
     };
 
     return (
-        <AdminLayout>
+        <Layout role="admin">
             <h2 className="access-control-h2">User Access Control</h2>
 
             <div className="add-user">
@@ -217,7 +217,7 @@ const AdminUserAccessControl = () => {
                     ))}
                 </ul>
             </div>
-        </AdminLayout>
+        </Layout>
     );
 };
 

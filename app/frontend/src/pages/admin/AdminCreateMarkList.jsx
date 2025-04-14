@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AdminLayout } from "@/components/layout";
+import { Layout } from "@/components/layout";
 import { FaPlus } from 'react-icons/fa';
 import { adminApi } from "@/api";
 import { toast } from "sonner"
@@ -263,7 +263,7 @@ const AdminCreateMarkList = () => {
     };
 
     return (
-        <AdminLayout>
+        <Layout role="admin">
             <div className="admin-create-marklist-container">
                 <h2>Create Students Mark List</h2>
                 <form onSubmit={(e) => checkValidData(e)} className="marklist-form">
@@ -419,7 +419,7 @@ const AdminCreateMarkList = () => {
                     <button type="submit" className="submit-btn">Create Mark List</button>
                 </form>
             </div>
-        </AdminLayout>
+        </Layout>
     );
 };
 

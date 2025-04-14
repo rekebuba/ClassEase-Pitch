@@ -18,6 +18,8 @@ from models.admin import Admin
 from models.mark_list import MarkList
 from models.stud_semester_record import STUDSemesterRecord
 from models.blacklist_token import BlacklistToken
+from api.v1.views import errors
+from api.v1.schemas.schemas import UserDetailSchema
 
 
 def create_token(user_id, role):
@@ -287,22 +289,23 @@ def student_teacher_or_admin_required(f):
             return jsonify({'message': error_message}), 401
 
         # Try decoding as a student token
-        student_data = decode_and_retrieve_user(
+        user = decode_and_retrieve_user(
             token, current_app.config["STUDENT_SECRET_KEY"])
-        if student_data:
-            return f(student_data, None, None, *args, **kwargs)
+
+        if user:
+            return f(user, *args, **kwargs)
 
         # Try decoding as a teacher token
-        teacher_data = decode_and_retrieve_user(
+        user = decode_and_retrieve_user(
             token, current_app.config["TEACHER_SECRET_KEY"])
-        if teacher_data:
-            return f(None, teacher_data, None, *args, **kwargs)
+        if user:
+            return f(user, *args, **kwargs)
 
         # Try decoding as an admin token
-        admin_data = decode_and_retrieve_user(
+        user = decode_and_retrieve_user(
             token, current_app.config["ADMIN_SECRET_KEY"])
-        if admin_data:
-            return f(None, None, admin_data, *args, **kwargs)
+        if user:
+            return f(user, *args, **kwargs)
 
         return jsonify({'message': 'Unauthorized access'}), 401
 

@@ -1,7 +1,6 @@
 import api from './api';
 
 const teacherApi = {
-    getPanelData: () => api.get('/teacher/panel'),
     getDashboardData: () => api.get('/teacher/dashboard'),
     getAssignedStudents: () => api.get('/teacher/students/assigned'),
     getStudents: (requirements) => api.get('/teacher/students', { params: requirements }),

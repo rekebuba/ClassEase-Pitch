@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { StudentLayout } from "@/components/layout";
+import { Layout } from "@/components/layout";
 import { useNavigate } from 'react-router-dom';
 import { studentApi } from '@/api';
 import { toast } from "sonner";
@@ -36,14 +36,14 @@ const StudentCourseRegistration = () => {
     }, []);
 
     return (
-        <StudentLayout>
+        <Layout role="student">
             <div className="flex flex-col justify-between items-center p-5">
                 <h3 className="text-xl font-bold">Student: abc</h3>
                 <h3 className="text-xl font-bold">Register For Grade {courses['grade']}</h3>
                 <h3 className="text-xl font-bold"> Semester: {courses['semester']}, {courses['academicYear']}</h3>
             </div>
             <CourseTable courses={courses['courses']} />
-        </StudentLayout>
+        </Layout>
     )
 
 };

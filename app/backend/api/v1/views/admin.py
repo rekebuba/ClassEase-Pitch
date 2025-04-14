@@ -40,44 +40,6 @@ from api.v1.views import errors
 admin = Blueprint('admin', __name__, url_prefix='/api/v1/admin')
 
 
-@admin.route('/panel', methods=['GET'])
-@admin_required
-def admin_panel(admin_data):
-    """Handle the admin Panel view
-
-    Args:
-        admin_data (Admin Instance)
-
-    Returns:
-        Response: A JSON response containing the admin data
-    """
-    try:
-        query = (
-            storage.session.query(User, Admin)
-            .join(Admin, Admin.user_id == User.id)
-            .filter(User.identification == admin_data.identification)
-            .first()
-        )
-
-        if not query:
-            return errors.handle_not_found_error("Admin Not Found")
-
-        user, admin = query
-
-        # Serialize the data using the schema
-        schema = AdminPanelSchema()
-        result = schema.dump({
-            "user": user,
-            "admin": admin
-        })
-
-        return jsonify(result), 200
-    except ValidationError as e:
-        return errors.handle_validation_error(e)
-    except Exception as e:
-        return errors.handle_internal_error(e)
-
-
 @admin.route('/profile', methods=['PUT'])
 @admin_required
 def update_admin_profile(admin_data):

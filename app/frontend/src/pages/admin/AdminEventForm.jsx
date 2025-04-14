@@ -7,7 +7,6 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { Calendar } from '@/components/ui/calendar';
 import { toast } from "sonner"
 import { useNavigate } from 'react-router-dom';
-import { AdminLayout } from '@/components/layout';
 import {
     Popover,
     PopoverContent,
@@ -100,7 +99,7 @@ const EventForm = () => {
 
 
     return (
-        <AdminLayout>
+        <Layout role="admin">
             <form onSubmit={handleSubmit} className="space-y-4 p-6 max-w-5xl mx-auto">
                 <Card>
                     <CardHeader>
@@ -389,7 +388,7 @@ const EventForm = () => {
                     <></>
                 }
             </form>
-        </AdminLayout>
+        </Layout>
     );
 }
 

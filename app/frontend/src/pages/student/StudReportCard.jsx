@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { StudentLayout } from "@/components/layout";
+import { Layout } from "@/components/layout";
 import { sharedApi } from "@/api";
 import { toast } from "sonner"
 import { CollapsibleTable } from '@/features/admin';
@@ -44,11 +44,11 @@ const StudentReportCard = () => {
     }, [student_id, grade_id, year]);
 
     return (
-        <StudentLayout>
+        <Layout role="student">
             {studentAssessment &&
                 (<CollapsibleTable studentAssessment={studentAssessment} studentReport={studentReport} />)
             }
-        </StudentLayout>
+        </Layout>
     );
 };
 

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { FaUserCircle } from "react-icons/fa";
-import { AdminLayout } from "@/components/layout";
+import { Layout } from "@/components/layout";
 import { toast } from "sonner"
 import { adminApi, sharedApi } from "@/api";
 import '../../styles/updateProfile.css';
@@ -130,7 +130,7 @@ const AdminUpdateProfile = () => {
     }, []);
 
     return (
-        <AdminLayout>
+        <Layout role="admin">
             <div className="m-0 p-5">
                 <div className="profile-details">
                     <div className="flex self-start flex-col gap-5">
@@ -243,7 +243,7 @@ const AdminUpdateProfile = () => {
                     )}
                 </div>
             </div>
-        </AdminLayout>
+        </Layout>
     );
 };
 

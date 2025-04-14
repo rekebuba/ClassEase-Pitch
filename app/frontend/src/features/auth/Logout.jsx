@@ -1,11 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FaSignOutAlt } from "react-icons/fa";
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogFooter, AlertDialogTitle, AlertDialogDescription, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { authApi } from "@/api";
-
+import { LogOut } from "lucide-react"
 /**
  * Logout component that handles user logout functionality.
  *
@@ -53,11 +51,10 @@ const Logout = () => {
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                <Button
-                    className="align-bottom space-x-2 mb-20 cursor-pointer bg-transparent hover:bg-transparent text-gray-700 hover:text-red-600 hover:scale-105 text-xl"
-                >
-                    <FaSignOutAlt className="w-5 h-5" /> Logout
-                </Button>
+                <div className='flex gap-2'>
+                    <LogOut />
+                    Log out
+                </div>
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>

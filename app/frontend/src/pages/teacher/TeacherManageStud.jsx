@@ -1,4 +1,4 @@
-import { TeacherLayout } from "@/components/layout";
+import { Layout } from "@/components/layout";
 import { TeacherStudentList } from "@/features/teacher";
 import "../../styles/AdminManageStudents.css";
 
@@ -12,9 +12,9 @@ import "../../styles/AdminManageStudents.css";
  */
 const TeacherManageStudent = () => {
     return (
-        <TeacherLayout>
+        <Layout role="teacher">
             <TeacherStudentList />
-        </TeacherLayout>
+        </Layout>
     );
 };
 

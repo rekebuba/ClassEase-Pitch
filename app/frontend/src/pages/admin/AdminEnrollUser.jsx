@@ -1,4 +1,4 @@
-import { AdminLayout } from "@/components/layout";
+import { Layout } from "@/components/layout";
 import { StudentRegistrationForm } from "@/pages/student";
 import { TeacherRegistrationForm } from "@/features/teacher";
 
@@ -20,12 +20,12 @@ import { TeacherRegistrationForm } from "@/features/teacher";
 const AdminEnrollUser = ({ role }) => {
 
     return (
-        <AdminLayout>
+        <Layout role="admin">
             <div className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
                 {role === 'teacher' ? <TeacherRegistrationForm /> : <StudentRegistrationForm role='admin' />
                 }
             </div>
-        </AdminLayout>
+        </Layout>
     );
 };
 

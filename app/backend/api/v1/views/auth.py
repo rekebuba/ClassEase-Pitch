@@ -40,7 +40,7 @@ def login():
 
 @auth.route("/auth/logout", methods=["POST"])
 @student_teacher_or_admin_required
-def logout(student, teacher, admin):
+def logout(user):
     token = request.headers['apiKey'].split()[1]  # Extract the token
     try:
         # Decode the token to get the JTI

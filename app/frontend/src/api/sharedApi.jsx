@@ -1,6 +1,7 @@
 import api from './api';
 
 const sharedApi = {
+    getUser: () => api.get('/'),
     getStudentAssessment: (requirements) => api.get('/student/assessment', { params: requirements }),
     getStudentAssessmentDetail: (requirements) => api.get('/student/assessment/detail', { params: requirements }),
     updateProfile: (data) => api.post('/upload/profile', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
