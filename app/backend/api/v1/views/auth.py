@@ -29,7 +29,6 @@ def login():
             valid_user['role'], valid_user['identification'])
 
         return auth_schema.dump({"message": "logged in successfully.", "api_key": api_key, "role": valid_user['role']}), 200
-        return jsonify({"message": "logged in successfully"}), 200
     except ValidationError as e:
         return errors.handle_validation_error(e)
     except InvalidCredentialsError as e:
@@ -47,12 +46,10 @@ def logout(user):
         payload = jwt.decode(token, options={"verify_signature": False})
         jti = payload.get("jti")
 
-        print(jti)
         # Add the JTI to the blacklist table
         black_list = BlacklistToken(jti=jti)
         storage.add(black_list)
 
         return jsonify({'message': 'Successfully logged out'}), 200
     except Exception as e:
-        print(str(e))
         return jsonify({'error': 'Logout failed', 'error': str(e)}), 500
