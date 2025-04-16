@@ -66,6 +66,6 @@ def validate_request(required_fields, file_fields=[]):
         field for field in file_fields if not request.files.get(field)]
 
     if missing_fields or missing_files:
-        return jsonify({"error": f"Missing fields: {', '.join(missing_fields + missing_files)}"}), 400
+        return jsonify({"message": f"Missing fields: {', '.join(missing_fields + missing_files)}"}), 400
 
     return None  # No errors

@@ -1,4 +1,6 @@
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 /**
  * Creates an instance of axios with a predefined base URL.
@@ -28,21 +30,26 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   response => response,
   error => {
-    if (
-      error.response &&
-      (error.response.status === 401 || error.response.status === 404)
-    ) {
-      const reason = error.response.data.reason;
+    const status = error.response?.status || 500;
 
-      if (reason === "SESSION_EXPIRED") {
-        window.location.href = "/auth"; // Redirect to login page
+    // Redirect based on status code
+    switch (status) {
+      case 401: // unauthorized
+        window.location.href = `/login?from=${encodeURIComponent(window.location.pathname)}`;;
         localStorage.removeItem("apiKey"); // Clear the token
-        alert("Your session has expired. Please log in again.");
-      } else if (reason === "UNAUTHORIZED") {
-        window.location.href = "/auth"; // Redirect to login page
-        alert("You are not authorized to access this resource.");
-      }
+        toast.warning(error.response?.data?.message || "Unauthorized access. Please log in again.");
+        break;
+      case 403:
+        window.location.href = `/forbidden?from=${encodeURIComponent(window.location.pathname)}`;;
+        break;
+      default:
+        toast.error(error.response?.data.message || "An unexpected error occurred.", {
+          description: error.response?.data.details || "Please try again later.",
+          style: { color: 'red' }
+        });
+        // window.location.href = `/server-error?from=${encodeURIComponent(window.location.pathname)}`;;
     }
+
     return Promise.reject(error);
   }
 );

@@ -82,7 +82,7 @@ def update_student_profile(student_data):
     """
     data = request.get_json()
     if not data:
-        return jsonify({"error": "Not a JSON"}), 400
+        return jsonify({"message": "Not a JSON"}), 400
 
     required_data = {
         'date_of_birth',
@@ -92,7 +92,7 @@ def update_student_profile(student_data):
 
     for field in required_data:
         if field not in data:
-            return jsonify({"error": f"Missing {field}"}), 400
+            return jsonify({"message": f"Missing {field}"}), 400
 
     student_data.date_of_birth = data['date_of_birth']
     student_data.father_phone = data['father_phone']
@@ -101,12 +101,12 @@ def update_student_profile(student_data):
     print(student_data)
     if 'new_password' in data:
         if 'current_password' not in data:
-            return jsonify({"error": "Missing old password"}), 400
+            return jsonify({"message": "Missing old password"}), 400
         user = storage.get_first(User, id=student_data.student_id)
         if not user:
-            return jsonify({"error": "User not found"}), 404
+            return jsonify({"message": "User not found"}), 404
         if not user.check_password(data['current_password']):
-            return jsonify({"error": "Incorrect password"}), 400
+            return jsonify({"message": "Incorrect password"}), 400
 
         user.hash_password(data['new_password'])
     storage.save()
@@ -155,11 +155,11 @@ def get_student_score(student_data, admin_data):
     data = parse_qs(parsed_url.query)
 
     if not data:
-        return jsonify({"error": "Bad Request"}), 400
+        return jsonify({"message": "Bad Request"}), 400
 
     if not student_data:
         if 'student_id' not in data:
-            return jsonify({"error": f"Missing student id"}), 400
+            return jsonify({"message": f"Missing student id"}), 400
         student_data = storage.get_first(
             STUDYearRecord, student_id=data['student_id'])
 
@@ -171,11 +171,11 @@ def get_student_score(student_data, admin_data):
 
     for field in required_data:
         if field not in data:
-            return jsonify({"error": f"Missing {field}"}), 400
+            return jsonify({"message": f"Missing {field}"}), 400
 
     grade = storage.get_first(Grade, grade=data['grade'][0])
     if not grade:
-        return jsonify({"error": "Grade not found"}), 404
+        return jsonify({"message": "Grade not found"}), 404
 
     mark_list = storage.session.query(MarkList).filter(
         MarkList.student_id == student_id,
@@ -208,7 +208,7 @@ def get_student_score(student_data, admin_data):
         STUDSemesterRecord, student_id=student_id, year=student_data.year, semester=data['semester'][0])
 
     if not average_score:
-        return jsonify({"error": "No data found"}), 404
+        return jsonify({"message": "No data found"}), 404
 
     student_summary = {
         "student_id": student_id,

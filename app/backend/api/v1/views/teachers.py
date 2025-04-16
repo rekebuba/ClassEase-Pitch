@@ -45,7 +45,7 @@ def teacher_dashboard(teacher_data):
                   otherwise an error message with a 404 status code.
     """
     if not teacher_data:
-        return jsonify({"error": "Teacher not found"}), 404
+        return jsonify({"message": "Teacher not found"}), 404
     return jsonify(teacher_data.to_dict()), 200
 
 
@@ -70,7 +70,7 @@ def update_teacher_profile(teacher_data):
     """
     data = request.get_json()
     if not data:
-        return jsonify({"error": "Not a JSON"}), 400
+        return jsonify({"message": "Not a JSON"}), 400
 
     required_data = {
         'first_name',
@@ -80,7 +80,7 @@ def update_teacher_profile(teacher_data):
 
     for field in required_data:
         if field not in data:
-            return jsonify({"error": f"Missing {field}"}), 400
+            return jsonify({"message": f"Missing {field}"}), 400
 
     teacher_data.first_name = data['first_name']
     teacher_data.email = data['email']
@@ -88,12 +88,12 @@ def update_teacher_profile(teacher_data):
 
     if 'new_password' in data:
         if 'current_password' not in data:
-            return jsonify({"error": "Missing old password"}), 400
+            return jsonify({"message": "Missing old password"}), 400
         user = storage.get_first(User, id=teacher_data.id)
         if not user:
-            return jsonify({"error": "User not found"}), 404
+            return jsonify({"message": "User not found"}), 404
         if not user.check_password(data['current_password']):
-            return jsonify({"error": "Incorrect password"}), 400
+            return jsonify({"message": "Incorrect password"}), 400
 
         user.hash_password(data['new_password'])
     storage.save()
@@ -133,7 +133,7 @@ def get_list_of_students(teacher_data):
     data = parse_qs(parsed_url.query)
 
     if not data:
-        return jsonify({"error": "Bad Request"}), 400
+        return jsonify({"message": "Bad Request"}), 400
 
     required_data = {
         'subject_code',
@@ -144,11 +144,11 @@ def get_list_of_students(teacher_data):
 
     for field in required_data:
         if field not in data:
-            return jsonify({"error": f"Missing {field}"}), 400
+            return jsonify({"message": f"Missing {field}"}), 400
 
     subject = storage.get_first(Subject, code=data['subject_code'][0])
     if not subject:
-        return jsonify({"error": "Subject not found"}), 404
+        return jsonify({"message": "Subject not found"}), 404
 
     query = (
         storage.session.query(Student.id.label('student_id'),
@@ -214,7 +214,7 @@ def get_student_assessment(teacher_data):
 
     for field in required_data:
         if field not in data:
-            return jsonify({"error": f"Missing {field}"}), 400
+            return jsonify({"message": f"Missing {field}"}), 400
 
     student_id = data['student_id'][0]
     grade_id = data['grade_id'][0]
@@ -248,7 +248,7 @@ def get_student_assessment(teacher_data):
                 "percentage": percentage,
             })
     except Exception as e:
-        return jsonify({"error": f"Failed to retrieve student assessment"}), 500
+        return jsonify({"message": f"Failed to retrieve student assessment"}), 500
 
     return jsonify({"assessment": assessment}), 200
 
@@ -309,7 +309,7 @@ def update_student_assessment(teacher_data):
     """
     data = request.get_json()
     if not data:
-        return jsonify({"error": "Not a JSON"}), 404
+        return jsonify({"message": "Not a JSON"}), 404
     required_data = {
         "student_data",
         "assessments",
@@ -317,7 +317,7 @@ def update_student_assessment(teacher_data):
 
     for field in required_data:
         if field not in data:
-            return jsonify({"error": f"Missing {field}"}), 400
+            return jsonify({"message": f"Missing {field}"}), 400
 
     student_data = data.get('student_data')
     assessments = data.get('assessments')
@@ -333,7 +333,7 @@ def update_student_assessment(teacher_data):
 
     for field in required_student_data:
         if field not in student_data:
-            return jsonify({"error": f"Missing {field}"}), 400
+            return jsonify({"message": f"Missing {field}"}), 400
 
     try:
         teacher_record = storage.session.query(TeachersRecord).filter(
@@ -345,7 +345,7 @@ def update_student_assessment(teacher_data):
         ).first()
 
         if not teacher_record:
-            return jsonify({"error": "Teacher record not found"}), 404
+            return jsonify({"message": "Teacher record not found"}), 404
 
         for assessment in assessments:
             update_score = storage.session.execute(
@@ -361,7 +361,7 @@ def update_student_assessment(teacher_data):
             )
 
             if update_score.rowcount == 0:
-                return jsonify({"error": f"Failed to update score for assessment type {assessment['type']} for student {student_data['name']}"}), 500
+                return jsonify({"message": f"Failed to update score for assessment type {assessment['type']} for student {student_data['name']}"}), 500
 
             # Commit the updates to the database
             storage.save()
@@ -373,7 +373,7 @@ def update_student_assessment(teacher_data):
 
     except Exception as e:
         print(e)
-        return jsonify({"error": f"Unexpected error occurred Failed to update score"}), 500
+        return jsonify({"message": f"Unexpected error occurred Failed to update score"}), 500
 
     return jsonify({"message": "Student Score Updated Successfully."}), 201
 

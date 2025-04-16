@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router-dom";
-import { LandingPage, NotFound, AuthPage } from "@/pages";
+import { LandingPage, AuthPage } from "@/pages";
+import { Forbidden, NotFound, ServerError, ServiceUnavailablePage } from "@/pages/error"
 import {
     AdminDashboard,
     AdminCreateMarkList,
@@ -34,6 +35,19 @@ const router = createBrowserRouter([
         path: "/",
         element: <LandingPage />,
         errorElement: <NotFound />,
+    },
+    {
+        path: "/forbidden",
+        element: <Forbidden />,
+        loader: () => ({ status: 403, statusText: "Forbidden" }),
+    },
+    {
+        path: "/server-error",
+        element: <ServerError />,
+    },
+    {
+        path: "/maintenance",
+        element: <ServiceUnavailablePage />,
     },
     {
         path: "/auth",

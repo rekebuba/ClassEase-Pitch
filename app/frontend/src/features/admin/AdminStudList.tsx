@@ -89,7 +89,7 @@ const AdminStudentList = () => {
     const handleYearChange = (value) => setSelectedYear(value);
 
     return (
-        <div className="flex flex-col p-6 bg-gray-100">
+        <div className="bg-gray-100">
             <form onSubmit={(e) => handleSearch(e, 1, {})}>
                 <section className="flex flex-wrap justify-between bg-white p-4 rounded shadow w-full mb-10">
                     <div style={{ width: '9rem' }}>

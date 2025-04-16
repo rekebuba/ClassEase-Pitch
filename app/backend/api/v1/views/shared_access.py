@@ -49,7 +49,7 @@ def register_new_user(role):
     """
     role = role.lower()
     if role not in ['admin', 'student', 'teacher']:
-        return jsonify({"error": "Invalid role"}), 400
+        return jsonify({"message": "Invalid role"}), 400
 
     try:
         data = request.form.to_dict()  # Get form data as a dictionary
@@ -114,7 +114,7 @@ def student_assessment(admin_data, student_data):
     # Check if required fields are present
     for field in required_data:
         if field not in data:
-            return jsonify({"error": f"Missing {field}"}), 400
+            return jsonify({"message": f"Missing {field}"}), 400
 
     query = (
         storage.session.query(Assessment.student_id,
@@ -145,7 +145,7 @@ def student_assessment(admin_data, student_data):
     ).all()
 
     if not query:
-        return jsonify({"error": "Student not found"}), 404
+        return jsonify({"message": "Student not found"}), 404
 
     student_assessment = {}
     for student_id, code, name, subject_id, grade_id, semester, total, rank, avg_total, avg_rank, year in query:
@@ -183,7 +183,7 @@ def student_assessment(admin_data, student_data):
     ).all()
 
     if not summary:
-        return jsonify({"error": "Summary not found"}), 404
+        return jsonify({"message": "Summary not found"}), 404
 
     summary_result = {
         "final_score": summary[0][3],
@@ -217,7 +217,7 @@ def student_assessment_detail(admin_data, student_data):
 
     for field in required_data:
         if field not in data:
-            return jsonify({"error": f"Missing {field}"}), 400
+            return jsonify({"message": f"Missing {field}"}), 400
 
     student_id = data['student_id'][0]
     grade_id = data['grade_id'][0]
@@ -249,7 +249,7 @@ def student_assessment_detail(admin_data, student_data):
                 "percentage": percentage,
             })
     except Exception as e:
-        return jsonify({"error": f"Failed to retrieve student assessment"}), 500
+        return jsonify({"message": f"Failed to retrieve student assessment"}), 500
 
     return jsonify(assessment), 200
 
@@ -260,13 +260,13 @@ def upload_profile(student_data, teacher_data, admin_data):
     user = student_data or teacher_data or admin_data
     # Check if the request contains a file
     if 'profilePicture' not in request.files:
-        return jsonify({"error": "No file part"}), 400
+        return jsonify({"message": "No file part"}), 400
 
     file = request.files['profilePicture']
 
     # Check if a file is selected
     if file.filename == '':
-        return jsonify({"error": "No selected file"}), 400
+        return jsonify({"message": "No selected file"}), 400
 
     # Validate file type and save it
     filepath = save_profile(file)
@@ -281,7 +281,7 @@ def upload_profile(student_data, teacher_data, admin_data):
             "message": "File uploaded successfully",
         }), 200
     else:
-        return jsonify({"error": "File type not allowed"}), 400
+        return jsonify({"message": "File type not allowed"}), 400
 
 
 @shared.route('/', methods=['GET'])

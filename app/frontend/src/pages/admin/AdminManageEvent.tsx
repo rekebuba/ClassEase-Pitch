@@ -7,6 +7,7 @@ import { toast } from "sonner"
 import { EventTable } from '@/features/admin/tables';
 import { adminApi } from '@/api';
 import { useNavigate } from 'react-router-dom';
+import { Layout } from '@/components';
 
 export default function AdminManageEvent() {
     const [events, setEvents] = useState([]);
@@ -42,7 +43,8 @@ export default function AdminManageEvent() {
 
     const handleDelete = () => {
         setIsDeleteDialogOpen(false);
-        toast({ title: 'Semester deleted successfully' });
+
+        // toast({ title: 'Semester deleted successfully' });
     };
 
     const goToEventForm = () => {

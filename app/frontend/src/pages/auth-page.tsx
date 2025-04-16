@@ -73,6 +73,7 @@ const AuthPage = () => {
 
     if (!response.success) {
       setLoginStatus("error")
+      setIsLoading(false)
       return;
     }
 

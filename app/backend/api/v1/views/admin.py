@@ -72,7 +72,7 @@ def update_admin_profile(admin_data):
     """
     data = request.get_json()
     if not data:
-        return jsonify({"error": "Not a JSON"}), 400
+        return jsonify({"message": "Not a JSON"}), 400
 
     required_data = {
         'name',
@@ -82,7 +82,7 @@ def update_admin_profile(admin_data):
 
     for field in required_data:
         if field not in data:
-            return jsonify({"error": f"Missing {field}"}), 400
+            return jsonify({"message": f"Missing {field}"}), 400
 
     admin_data.name = data['name']
     admin_data.email = data['email']
@@ -90,12 +90,12 @@ def update_admin_profile(admin_data):
 
     if 'new_password' in data:
         if 'current_password' not in data:
-            return jsonify({"error": "Missing old password"}), 400
+            return jsonify({"message": "Missing old password"}), 400
         user = storage.get_first(User, id=admin_data.id)
         if not user:
-            return jsonify({"error": "User not found"}), 404
+            return jsonify({"message": "User not found"}), 404
         if not user.check_password(data['current_password']):
-            return jsonify({"error": "Incorrect password"}), 400
+            return jsonify({"message": "Incorrect password"}), 400
 
         user.hash_password(data['new_password'])
     storage.save()
@@ -185,7 +185,7 @@ def assign_class(admin_data):
     """
     data = request.get_json()
     if not data:
-        return jsonify({"error": "Not a JSON"}), 400
+        return jsonify({"message": "Not a JSON"}), 400
 
     required_data = [
         'teacher_id',
@@ -198,19 +198,19 @@ def assign_class(admin_data):
     # Check if required fields are present
     for field in required_data:
         if field not in data:
-            return jsonify({"error": f"Missing {field}"}), 400
+            return jsonify({"message": f"Missing {field}"}), 400
 
     # Get the teacher by ID
     teacher = storage.get_first(Teacher, id=data['teacher_id'])
     if not teacher:
-        return jsonify({"error": "Teacher not found"}), 404
+        return jsonify({"message": "Teacher not found"}), 404
 
     # Get the grade_id from the Grade table
     grade_id = storage.session.execute(
         select(Grade.id).where(Grade.name == data['grade'])
     ).scalars().first()
     if not grade_id:
-        return jsonify({"error": "No grade found for the teacher"}), 404
+        return jsonify({"message": "No grade found for the teacher"}), 404
 
     # get the subject_id
     subjects_taught = storage.session.query(Subject).filter(
@@ -218,7 +218,7 @@ def assign_class(admin_data):
         Subject.name.in_(data['subjects_taught'])
     ).all()
     if not subjects_taught:
-        return jsonify({"error": "Subject not found"}), 404
+        return jsonify({"message": "Subject not found"}), 404
 
     try:
         for subject in subjects_taught:
@@ -229,7 +229,7 @@ def assign_class(admin_data):
             ).all()]
 
             if not section_ids:
-                return jsonify({"error": f"Section not found, Mark List was not created for the grade {data['grade']}"}), 404
+                return jsonify({"message": f"Section not found, Mark List was not created for the grade {data['grade']}"}), 404
 
             for section_id in section_ids:
                 # check if the another teacher is already assigned to the subject
@@ -237,7 +237,7 @@ def assign_class(admin_data):
                     TeachersRecord, grade_id=grade_id, section_id=section_id, subject_id=subject.id, semester=data['semester'])
                 # update the teacher record
                 if teacher_record:
-                    return jsonify({"error": "Teacher already assigned"}), 409
+                    return jsonify({"message": "Teacher already assigned"}), 409
                 teacher_record = TeachersRecord(
                     teacher_id=teacher.id,
                     grade_id=grade_id,
@@ -288,7 +288,7 @@ def assign_class(admin_data):
                 storage.save()
     except Exception as e:
         storage.rollback()
-        return jsonify({"error": "error internal server"}), 500
+        return jsonify({"message": "error internal server"}), 500
 
     return jsonify({"message": "Teacher assigned successfully!"}), 201
 
@@ -418,7 +418,7 @@ def create_mark_list(admin_data):
     try:
         data = request.get_json()
         if not data:
-            return jsonify({"error": "Not a JSON"}), 404
+            return jsonify({"message": "Not a JSON"}), 404
 
         mark_list_schema = CreateMarkListSchema()
         validated_data = mark_list_schema.load(data)
@@ -489,27 +489,27 @@ def show_mark_list(admin_data):
     # Check if required fields are present
     for field in required_data:
         if field not in data:
-            return jsonify({"error": f"Missing {field}"}), 400
+            return jsonify({"message": f"Missing {field}"}), 400
 
     grade = storage.get_first(Grade, grade=data['grade'][0])
     if not grade:
-        return jsonify({"error": "Grade not found"}), 404
+        return jsonify({"message": "Grade not found"}), 404
 
     section = storage.get_first(
         Section, grade_id=grade.id, section=data['section'][0], year=data['year'][0])
     if not section:
-        return jsonify({"error": "Section not found"}), 404
+        return jsonify({"message": "Section not found"}), 404
 
     subject = storage.get_first(
         Subject, grade_id=grade.id, name=data['subject'][0])
     if not subject:
-        return jsonify({"error": "Subject not found"}), 404
+        return jsonify({"message": "Subject not found"}), 404
 
     students = storage.get_all(MarkList, grade_id=grade.id, section_id=section.id,
                                subject_id=subject.id, semester=data['semester'][0],
                                year=data['year'][0])
     if not students:
-        return jsonify({"error": "Student not found"}), 404
+        return jsonify({"message": "Student not found"}), 404
 
     student_list = []
     for student in students:
@@ -557,11 +557,11 @@ def admin_student_list(admin_data):
     # Check if required fields are present
     for field in required_data:
         if field not in data:
-            return jsonify({"error": f"Missing {field}"}), 400
+            return jsonify({"message": f"Missing {field}"}), 400
 
     grade = storage.get_first(Grade, grade=data['grade'][0])
     if not grade:
-        return jsonify({"error": "Grade not found"}), 404
+        return jsonify({"message": "Grade not found"}), 404
 
     query = (
         storage.session.query(Student.id.label('student_id'),
@@ -589,7 +589,7 @@ def admin_student_list(admin_data):
 
     # Check if any students are found
     if not query:
-        return jsonify({"error": "No student found"}), 404
+        return jsonify({"message": "No student found"}), 404
 
     student_list = [{key: url_for('static', filename=value, _external=True)
                      if key == 'image_path' and value is not None else value for key, value in q._asdict().items()} for q in query]
@@ -639,7 +639,7 @@ def all_teachers(admin_data):
     )
 
     if not query:
-        return jsonify({"error": "No teachers found"}), 404
+        return jsonify({"message": "No teachers found"}), 404
 
     teacher_list = [{key: url_for('static', filename=value, _external=True)
                      if key == 'image_path' and value is not None else value for key, value in q._asdict().items()} for q in query]

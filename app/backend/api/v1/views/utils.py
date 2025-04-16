@@ -121,7 +121,7 @@ def admin_required(f):
             token = request.headers['apiKey'].split()[1]  # Bearer token
 
         if not token:
-            return jsonify({"error": "Unauthorized", "reason": "UNAUTHORIZED"}), 401
+            return jsonify({"message": "Unauthorized Access. Please Login Again."}), 401
 
         # Check if the token is blacklisted
         is_blacklisted, error_message = check_blacklist_token(token)
@@ -133,7 +133,7 @@ def admin_required(f):
         if admin_data:
             return f(admin_data, *args, **kwargs)
 
-        return jsonify({'message': 'Unauthorized access'}), 401
+        return jsonify({'message': 'Unauthorized Access. Please Login Again.'}), 401
 
     return decorated_function
 
@@ -176,7 +176,7 @@ def teacher_required(f):
         if teacher_data:
             return f(teacher_data, *args, **kwargs)
 
-        return jsonify({'message': 'Unauthorized access'}), 401
+        return jsonify({'message': 'Unauthorized Access. Please Login Again.'}), 401
 
     return decorated_function
 
@@ -217,7 +217,7 @@ def student_required(f):
         if student_data:
             return f(student_data, *args, **kwargs)
 
-        return jsonify({'message': 'Unauthorized access'}), 401
+        return jsonify({'message': 'Unauthorized Access. Please Login Again.'}), 401
 
     return decorated_function
 
@@ -267,7 +267,7 @@ def admin_or_student_required(f):
         if student_data:
             return f(None, student_data, *args, **kwargs)
 
-        return jsonify({'message': 'Unauthorized access'}), 401
+        return jsonify({'message': 'Unauthorized Access. Please Login Again.'}), 401
 
     return decorated_function
 
@@ -307,6 +307,6 @@ def student_teacher_or_admin_required(f):
         if user:
             return f(user, *args, **kwargs)
 
-        return jsonify({'message': 'Unauthorized access'}), 401
+        return jsonify({'message': 'Unauthorized Access. Please Login Again.'}), 401
 
     return decorated_function

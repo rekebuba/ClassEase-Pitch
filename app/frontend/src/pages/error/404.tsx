@@ -22,7 +22,6 @@ const NotFound = () => {
       statusCode={404}
       title="Page Not Found"
       description="Sorry, we couldn't find the page you're looking for. The page might have been moved, deleted, or never existed."
-      illustration="/illustrations/404.svg"
       actions={{
         primary: {
           label: "Back to Home",
