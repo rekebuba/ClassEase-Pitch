@@ -646,6 +646,7 @@ class UserDetailSchema(BaseSchema):
 
         return None
 
+
 class AvailableEventsSchema(BaseSchema):
     events = fields.List(fields.Nested(EventSchema), required=True, exclude=('start_time', 'end_time',
                          'registration_start', 'registration_end', 'fee_amount', 'description', 'message'))
@@ -653,3 +654,54 @@ class AvailableEventsSchema(BaseSchema):
 
 class RegisteredGradesSchema(BaseSchema):
     grades = fields.List(fields.Integer, required=True)
+
+
+class ParamSchema(BaseSchema):
+    grades = fields.List(fields.Integer)
+    grade_id = fields.List(fields.String, required=False, load_only=True)
+
+    year = fields.String()
+    year_id = fields.String(required=False, load_only=True)
+
+    @pre_load
+    def set_defaults(self, data, **kwargs):
+        # add default values to the data
+        if "grades" in data:
+            data["grade_id"] = [self.get_grade_id(grade) for grade in data["grades"]]
+
+        if "year" in data:
+            data['year_id'] = self.get_year_id(data.pop('year'))
+
+        return data
+
+
+class SectionSchema(BaseSchema):
+    section = fields.String()
+    id = fields.String(data_key='section_id')
+
+
+class STUDYearRecordSchema(BaseSchema):
+    user_id = fields.String()
+    grade_id = fields.String()
+
+    year = fields.String()
+    year_id = fields.String()
+
+    final_score = fields.Float()
+    rank = fields.Integer()
+
+    @pre_dump
+    def add_fields(self, data, **kwargs):
+        data['year'] = self.get_year_detail(id=data.get('year_id'))
+
+
+class AllStudentsSchema(BaseSchema):
+    user = fields.Nested(UserSchema(only=('identification', 'image_path')))
+    student = fields.Nested(StudentSchema(
+        only=('first_name', 'father_name', 'grand_father_name')))
+    # section = fields.Nested(SectionSchema(only=('section', 'id')))
+
+    # STUDYearRecord = fields.Nested(STUDYearRecordSchema(
+    #     only=('grade_id', 'final_score', 'rank')))
+    # total_students = fields.Integer(dump_only=True)
+    # current_year = fields.String(dump_only=True)

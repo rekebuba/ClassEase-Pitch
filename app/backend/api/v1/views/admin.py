@@ -28,7 +28,7 @@ from datetime import datetime
 from sqlalchemy import update, select, and_
 from urllib.parse import urlparse, parse_qs
 from api.v1.views.utils import admin_required
-from api.v1.views.methods import save_profile, validate_request
+from api.v1.views.methods import save_profile, validate_request, preprocess_query_params
 from api.v1.services.event_service import EventService
 from api.v1.schemas.schemas import *
 from api.v1.services.semester_service import SemesterService
@@ -524,81 +524,53 @@ def admin_student_list(admin_data):
     """
     Retrieve and filter student data based on the provided admin data.
 
-    Args:
-        admin_data (dict): The data provided by the admin to filter student records.
-
-    Returns:
         Response: A JSON response containing the filtered student data, or an error message if any required data is missing or not found.
-
-    The function performs the following steps:
-    1. Parses the request URL to extract query parameters.
-    2. Checks for the presence of required fields ('grade' and 'year') in the query parameters.
-    3. Retrieves the grade information from the storage.
-    4. Handles pagination and filtering parameters ('page', 'limit', 'search').
-    5. Queries the student records based on the grade and year.
-    6. Applies search filters if a search term is provided.
-    7. Paginates the query results.
-    8. Constructs a list of student summaries, including performance data for each student.
-    9. Returns the student data along with pagination metadata and header information.
-
-    Error Handling:
-    - Returns a 400 error if any required field is missing.
-    - Returns a 404 error if the grade is not found, no students are found, or no mark list is available for the specified grade and year.
     """
-    url = request.url
-    parsed_url = urlparse(url)
-    data = parse_qs(parsed_url.query)
+    raw_data = parse_qs(request.query_string.decode())
 
-    required_data = {
-        'grade',
-        'year'
-    }
-
-    # Check if required fields are present
-    for field in required_data:
-        if field not in data:
-            return jsonify({"message": f"Missing {field}"}), 400
-
-    grade = storage.get_first(Grade, grade=data['grade'][0])
-    if not grade:
-        return jsonify({"message": "Grade not found"}), 404
+    # Convert to Marshmallow-compatible format
+    data = preprocess_query_params(raw_data)
+    print(data)
+    schema = ParamSchema()
+    valid_data = schema.load(data)
 
     query = (
-        storage.session.query(Student.id.label('student_id'),
-                              Student.name,
-                              Student.father_name,
-                              Student.grand_father_name,
-                              Section.section,
-                              Section.id,
-                              STUDYearRecord.grade_id,
-                              STUDYearRecord.final_score,
-                              STUDYearRecord.rank,
-                              STUDYearRecord.year,
-                              User.image_path
-                              )
-        .select_from(STUDYearRecord)
-        .join(Student, Student.id == STUDYearRecord.student_id)
-        .join(User, User.id == Student.id)
-        .join(Section, Section.id == STUDYearRecord.section_id)
-        .filter(
-            STUDYearRecord.grade_id == grade.id,
-            STUDYearRecord.year == data['year'][0]
-        )
-        .order_by(Section.section.asc(), Student.name.asc(), Student.father_name.asc(), Student.grand_father_name.asc(), Student.id.asc())
+        storage.session.query(Student, User)
+        # .select_from(Student)
+        .join(User, User.id == Student.user_id)
+        # .join(STUDYearRecord, STUDYearRecord.user_id == Student.user_id)
+    )
+
+    # Apply conditional filters if additional parameters are provided
+    if 'grade_id' in valid_data:
+        query = query.filter(
+            Student.current_grade_id.in_(valid_data['grade_id']))
+
+    if 'year_id' in valid_data:
+        query = query.filter(Student.current_year_id == valid_data['year_id'])
+
+    query = query.order_by(
+        Student.first_name.asc(),
+        Student.father_name.asc(),
+        Student.grand_father_name.asc(),
+        User.identification.asc()
     ).all()
 
     # Check if any students are found
     if not query:
         return jsonify({"message": "No student found"}), 404
 
-    student_list = [{key: url_for('static', filename=value, _external=True)
-                     if key == 'image_path' and value is not None else value for key, value in q._asdict().items()} for q in query]
+    # Convert list of tuples to list of dicts
+    data_to_serialize = [
+        {"student": student.to_dict(), "user": user.to_dict()}
+        for student, user in query
+    ]
 
-    return jsonify({
-        "students": student_list,
-        "meta": {},
-        "header": {"grade": data['grade'][0], "year": data['year'][0]}
-    }), 200
+    schema = AllStudentsSchema(many=True)
+    result = schema.dump(data_to_serialize)
+    print(json.dumps(result, indent=4, sort_keys=True))
+
+    return jsonify({result}), 200
 
 
 @admin.route('/teachers', methods=['GET'])

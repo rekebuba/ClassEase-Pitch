@@ -69,3 +69,19 @@ def validate_request(required_fields, file_fields=[]):
         return jsonify({"message": f"Missing fields: {', '.join(missing_fields + missing_files)}"}), 400
 
     return None  # No errors
+
+
+def preprocess_query_params(data):
+    """Convert parse_qs output and handle comma-separated values."""
+    processed = {}
+    for key, value in data.items():
+        # parse_qs always gives lists, so we take first element
+        str_value = value[0] if value else ''
+        
+        # Check if the value contains commas (but not for certain keys)
+        if ',' in str_value and key not in ['exclude_comma_keys']:
+            processed[key] = [item.strip() for item in str_value.split(',')]
+        else:
+            # Single value (keep as string, or convert later in schema)
+            processed[key] = str_value
+    return processed
