@@ -55,3 +55,23 @@ export type DataProps = {
         navMain: NavMain[];
     };
 };
+
+export type Student = {
+    id: string
+    name: string
+    email: string
+    grade: number
+    section: string
+    status: "active" | "inactive" | "suspended"
+    attendance: number
+    averageGrade: number
+    parentName: string
+    parentEmail: string
+    joinedDate: string
+}
+
+
+export type StudentsData = {
+    data: Student[]
+    pageCount: number
+}

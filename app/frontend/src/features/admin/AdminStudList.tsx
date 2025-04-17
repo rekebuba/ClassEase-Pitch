@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { adminApi } from '@/api';
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner"
@@ -46,9 +46,11 @@ const AdminStudentList = () => {
         e?.preventDefault(); // Prevent default if event exists
         try {
             const response = await adminApi.getStudents({
-                grade: selectedGrade,
+                grade: [1, 2],
                 year: selectedYear,
             });
+
+            console.log("Response:", response.data);
 
             const data = {
                 students: response.data['students'],
@@ -71,6 +73,19 @@ const AdminStudentList = () => {
             }
         }
     };
+
+    useEffect(() => {
+        const fetchStudents = async () => {
+            try {
+                const response = await adminApi.getStudents();
+
+                console.log("Response:", response.data);
+            } catch (error) {
+                console.log("Error fetching students:", error);
+            }
+        };
+        fetchStudents();
+    }, []); // Fetch students when grade or year changes
 
     /**
      * @function handleGradeChange
@@ -126,7 +141,7 @@ const AdminStudentList = () => {
                 </section>
             </form>
             {/* Student List */}
-            <StudentTable data={allStudents.students} />
+            {/* <StudentTable data={allStudents.students} /> */}
         </div>
     );
 };

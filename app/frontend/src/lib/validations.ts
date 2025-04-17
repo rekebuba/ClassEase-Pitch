@@ -23,3 +23,18 @@ export const userSchema = z.object({
         grandFatherName: z.string()
     })
 });
+
+export const studentSchema = z.object({
+    data: z.object({
+        firstName: z.string(),
+        fatherName: z.string(),
+        grandFatherName: z.string(),
+        identification: z.string(),
+        imagePath: z.string(),
+    }),
+    pageCount: z.number(),
+
+    // year: z.number(),
+    // grade: z.string(),
+    // section: z.string(),
+});

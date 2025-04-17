@@ -570,7 +570,7 @@ def admin_student_list(admin_data):
     result = schema.dump(data_to_serialize)
     print(json.dumps(result, indent=4, sort_keys=True))
 
-    return jsonify({result}), 200
+    return jsonify({"data": result, "page_count": 1}), 200
 
 
 @admin.route('/teachers', methods=['GET'])

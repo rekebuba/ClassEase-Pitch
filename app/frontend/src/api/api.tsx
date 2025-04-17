@@ -27,6 +27,22 @@ api.interceptors.request.use(
   error => Promise.reject(error)
 );
 
+api.interceptors.request.use(config => {
+  if (config.params) {
+    config.paramsSerializer = params => {
+      return Object.entries(params)
+        .map(([key, value]) => {
+          if (Array.isArray(value)) {
+            return `${key}=${value.join(',')}`;
+          }
+          return `${key}=${value}`;
+        })
+        .join('&');
+    };
+  }
+  return config;
+});
+
 api.interceptors.response.use(
   response => response,
   error => {
@@ -47,7 +63,7 @@ api.interceptors.response.use(
           description: error.response?.data.details || "Please try again later.",
           style: { color: 'red' }
         });
-        // window.location.href = `/server-error?from=${encodeURIComponent(window.location.pathname)}`;;
+      // window.location.href = `/server-error?from=${encodeURIComponent(window.location.pathname)}`;;
     }
 
     return Promise.reject(error);

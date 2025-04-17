@@ -667,7 +667,8 @@ class ParamSchema(BaseSchema):
     def set_defaults(self, data, **kwargs):
         # add default values to the data
         if "grades" in data:
-            data["grade_id"] = [self.get_grade_id(grade) for grade in data["grades"]]
+            data["grade_id"] = [self.get_grade_id(
+                grade) for grade in data["grades"]]
 
         if "year" in data:
             data['year_id'] = self.get_year_id(data.pop('year'))
@@ -705,3 +706,14 @@ class AllStudentsSchema(BaseSchema):
     #     only=('grade_id', 'final_score', 'rank')))
     # total_students = fields.Integer(dump_only=True)
     # current_year = fields.String(dump_only=True)
+
+    @post_dump(pass_many=True)
+    def merge_nested(self, data, many, **kwargs):
+        if many:
+            return [self._merge(d) for d in data]
+        return self._merge(data)
+
+    def _merge(self, item):
+        user = item.pop('user', {})
+        student = item.pop('student', {})
+        return {**user, **student}
