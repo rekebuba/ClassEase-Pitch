@@ -58,9 +58,7 @@ export function getStudentsTableColumns({
       ),
       enableSorting: false,
       enableHiding: false,
-      meta: {
-        pinnable: false,
-      },
+      size: 40,
     },
     {
       accessorKey: "name",
@@ -88,14 +86,12 @@ export function getStudentsTableColumns({
           </div>
         )
       },
-      enableSorting: true,
-      enableHiding: true,
       meta: {
         variant: "text",
         label: "Student Name",
         placeholder: "Filter by name...",
-        pinnable: true,
       },
+      enableColumnFilter: true,
     },
     {
       accessorKey: "grade",
@@ -106,8 +102,7 @@ export function getStudentsTableColumns({
           <span className="ml-2 text-muted-foreground">({row.original.section})</span>
         </div>
       ),
-      enableSorting: true,
-      enableHiding: true,
+      enableColumnFilter: true,
       meta: {
         variant: "select",
         label: "Grade",
@@ -116,15 +111,13 @@ export function getStudentsTableColumns({
           value,
           count,
         })),
-        pinnable: true,
       },
     },
     {
       accessorKey: "section",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Section" />,
       cell: ({ row }) => <div>{row.original.section}</div>,
-      enableSorting: true,
-      enableHiding: true,
+      enableColumnFilter: true,
       meta: {
         variant: "select",
         label: "Section",
@@ -133,7 +126,6 @@ export function getStudentsTableColumns({
           { label: "Section B", value: "B" },
           { label: "Section C", value: "C" },
         ],
-        pinnable: true,
       },
     },
     {
@@ -154,8 +146,7 @@ export function getStudentsTableColumns({
           </Badge>
         )
       },
-      enableSorting: true,
-      enableHiding: true,
+      enableColumnFilter: true,
       meta: {
         variant: "select",
         label: "Status",
@@ -164,7 +155,6 @@ export function getStudentsTableColumns({
           value,
           count,
         })),
-        pinnable: true,
       },
     },
     {
@@ -182,14 +172,12 @@ export function getStudentsTableColumns({
           </div>
         )
       },
-      enableSorting: true,
-      enableHiding: true,
+      enableColumnFilter: true,
       meta: {
         variant: "range",
         label: "Attendance",
         range: attendanceRange,
         unit: "%",
-        pinnable: true,
       },
     },
     {
@@ -207,14 +195,12 @@ export function getStudentsTableColumns({
           </div>
         )
       },
-      enableSorting: true,
-      enableHiding: true,
+      enableColumnFilter: true,
       meta: {
         variant: "range",
         label: "Average Grade",
         range: gradeRange,
         unit: "%",
-        pinnable: true,
       },
     },
     {
@@ -226,13 +212,10 @@ export function getStudentsTableColumns({
           <span className="text-xs text-muted-foreground">{row.original.parentEmail}</span>
         </div>
       ),
-      enableSorting: true,
-      enableHiding: true,
       meta: {
         variant: "text",
         label: "Parent Name",
         placeholder: "Filter by parent name...",
-        pinnable: true,
       },
     },
     {
@@ -244,7 +227,6 @@ export function getStudentsTableColumns({
       meta: {
         variant: "date",
         label: "Joined Date",
-        pinnable: true,
       },
     },
     {
@@ -280,9 +262,6 @@ export function getStudentsTableColumns({
             </DropdownMenuContent>
           </DropdownMenu>
         );
-      },
-      meta: {
-        pinnable: true,
       },
     },
   ]

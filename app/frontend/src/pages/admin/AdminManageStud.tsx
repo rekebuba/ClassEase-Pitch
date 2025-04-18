@@ -6,9 +6,15 @@ import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { StudentsTable, FeatureFlagsProvider } from "@/components/data-table/data-table-students"
 import type { Student } from "@/lib/types"
+import { useSearchParams, useNavigate } from "react-router-dom";
+import { searchParamsCache, GetStudentsSchema } from "@/lib/validations";
+import { getValidFilters } from "@/lib/data-table";
+import { useUrlState } from "@/hooks/use-url-state";
+import React from "react";
+import { useQueryState } from "nuqs";
 
 // Mock data and functions for demonstration
-async function getStudentsData() {
+async function getStudentsData(input?: GetStudentsSchema) {
   // Simulate API call
   await new Promise((resolve) => setTimeout(resolve, 1000))
 
@@ -213,8 +219,25 @@ const students: Student[] = [
     joinedDate: "Aug 19, 2020",
   },
 ]
+interface SearchParams {
+  [key: string]: string | string[] | undefined;
+}
+interface IndexPageProps {
+  searchParams: Promise<SearchParams>;
+}
+
 const AdminManageStudents = () => {
-  // const [showAddStudentSheet, setShowAddStudentSheet] = React.useState(false)
+  // const [search, setSearch] = useQueryState('search')
+
+  // React.useEffect(() => {
+  //   console.log('Query changed:', search)
+  // }, [search])
+
+  // const search = searchParamsCache.parse(Object.fromEntries(searchParams.entries()));
+  // useEffect(() => {
+  //   // setSearchParams(search);
+  // }, [searchParams])
+  // const validFilters = getValidFilters(search.filters);
 
   const promises = [
     getStudentsData(),

@@ -9,10 +9,10 @@ import {
   Text,
   X,
 } from "lucide-react";
+import { useQueryState } from "nuqs";
 import * as React from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
 
-import { DataTableRangeFilter } from "@/components/data-table/data-table-range-filter";
+import { DataTableRangeFilter } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -81,9 +81,6 @@ export function DataTableFilterMenu<TData>({
   const triggerRef = React.useRef<HTMLButtonElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
-  const [searchParams, setSearchParams] = useSearchParams()
-  const navigate = useNavigate()
-
   const onOpenChange = React.useCallback((open: boolean) => {
     setOpen(open);
 
@@ -109,22 +106,17 @@ export function DataTableFilterMenu<TData>({
     [inputValue, selectedColumn],
   );
 
-  // Get filters from URL
-  const [filters, setFiltersState] = React.useState<ExtendedColumnFilter<TData>[]>([])
-
-  React.useEffect(() => {
-      const filtersParam = searchParams.get(FILTERS_KEY)
-      if (filtersParam) {
-        try {
-          const parsedFilters = JSON.parse(filtersParam) as ExtendedColumnFilter<TData>[]
-          setFiltersState(parsedFilters)
-        } catch (error) {
-          console.error("Failed to parse filters from URL", error)
-        }
-      }  
-    }, [searchParams])
-
-    const debouncedSetFilters = useDebouncedCallback(setFilters, debounceMs);
+  const [filters, setFilters] = useQueryState(
+    FILTERS_KEY,
+    getFiltersStateParser<TData>(columns.map((field) => field.id))
+      .withDefault([])
+      .withOptions({
+        clearOnDefault: true,
+        shallow,
+        throttleMs,
+      }),
+  );
+  const debouncedSetFilters = useDebouncedCallback(setFilters, debounceMs);
 
   const onFilterAdd = React.useCallback(
     (column: Column<TData>, value: string) => {

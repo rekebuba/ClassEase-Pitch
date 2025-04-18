@@ -56,7 +56,8 @@ export function DeleteStudentsDialog({
                     toast.error(error);
                     return;
                 }
-
+                
+                // Close the dialog
                 props.onOpenChange?.(false);
                 toast.success("Tasks deleted");
                 onSuccess?.();

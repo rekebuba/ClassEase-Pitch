@@ -20,33 +20,29 @@ import { useSearchParams } from "react-router-dom" // Import useSearchParams fro
 import type { Student } from "@/lib/types"
 import type { DataTableRowAction } from "@/types/data-table"
 import { useEffect, useState } from "react"
-
-// Mock useFeatureFlags hook if it doesn't exist
-function useFeatureFlags() {
-  return {
-    enableAdvancedFilter: true,
-    filterFlag: "advancedFilters",
-  }
-}
+import { useFeatureFlags } from "./feature-flags-provider"
+import { useQueryState } from "nuqs"
 
 interface StudentsTableProps {
   promises: Promise<any>[]
 }
 
 export function StudentsTable({ promises }: StudentsTableProps) {
+  const { enableAdvancedFilter, filterFlag } = useFeatureFlags()
+  const [rowAction, setRowAction] = React.useState<DataTableRowAction<Student> | null>(null)
+
   const [data, setData] = useState([]);
   const [pageCount, setPageCount] = useState(0);
   const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
   const [gradeCounts, setGradeCounts] = useState<Record<string, number>>({});
   const [attendanceRange, setAttendanceRange] = useState<[number, number]>([0, 0]);
   const [gradeRange, setGradeRange] = useState<[number, number]>([0, 0]);
-
-  const [rowAction, setRowAction] = React.useState<DataTableRowAction<Student> | null>(null)
-
-  const { enableAdvancedFilter, filterFlag } = useFeatureFlags()
+  const [search, setSearch] = useQueryState('search')
 
   //TODO: Use React.use for data fetching from promises
   useEffect(() => {
+    console.log('Query changed:', search)
+
     const fetchData = async () => {
       try {
         // Assuming promises is an array of promises
@@ -70,7 +66,7 @@ export function StudentsTable({ promises }: StudentsTableProps) {
     };
 
     fetchData();
-  }, []);
+  }, [rowAction, filterFlag]);
 
   const columns = React.useMemo(() =>
     getStudentsTableColumns({

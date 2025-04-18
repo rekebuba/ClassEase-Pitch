@@ -1,4 +1,14 @@
 import { z } from "zod";
+import { getFiltersStateParser, getSortingStateParser } from "@/lib/parsers";
+import {
+    createSearchParamsCache,
+    parseAsArrayOf,
+    parseAsInteger,
+    parseAsString,
+    parseAsStringEnum,
+} from "nuqs/server";
+import { flagConfig } from "@/config/flag";
+
 
 export const logoutSchema = z.object({
     message: z.string(),
@@ -38,3 +48,20 @@ export const studentSchema = z.object({
     // grade: z.string(),
     // section: z.string(),
 });
+
+export const searchParamsCache = z.object({
+    filterFlag: z.enum(
+        flagConfig.featureFlags.map((flag) => flag.value) as [string, ...string[]]
+    ),
+    page: z.number().default(1),
+    perPage: z.number().default(10),
+    // sort: z.array(z.object({ id: z.string(), desc: z.boolean() })).default([
+    //     { id: "createdAt", desc: true },
+    // ]),
+    filters: z.array(z.any()).default([]),
+    joinOperator: z.enum(["and", "or"]).default("and"),
+});
+
+export type GetStudentsSchema = Awaited<
+    ReturnType<typeof searchParamsCache.parse>
+>;

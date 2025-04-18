@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useQueryState } from "nuqs";
 import * as React from "react";
 
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -14,7 +14,7 @@ import { type FlagConfig, flagConfig } from "@/config/flag";
 type FilterFlag = FlagConfig["featureFlags"][number]["value"];
 
 interface FeatureFlagsContextValue {
-  filterFlag: FilterFlag | null;
+  filterFlag: FilterFlag;
   enableAdvancedFilter: boolean;
 }
 
@@ -36,30 +36,29 @@ interface FeatureFlagsProviderProps {
 }
 
 export function FeatureFlagsProvider({ children }: FeatureFlagsProviderProps) {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
-
-  // Get filterFlag from URL
-  const filterFlag = React.useMemo(() => {
-    const value = searchParams.get("filterFlag");
-    if (!value) return null;
-    const validValues = flagConfig.featureFlags.map((flag) => flag.value);
-    return validValues.includes(value as FilterFlag)
-      ? (value as FilterFlag)
-      : null;
-  }, [searchParams]);
+  const [filterFlag, setFilterFlag] = useQueryState<FilterFlag | null>(
+    "filterFlag",
+    {
+      parse: (value) => {
+        if (!value) return null;
+        const validValues = flagConfig.featureFlags.map((flag) => flag.value);
+        return validValues.includes(value as FilterFlag)
+          ? (value as FilterFlag)
+          : null;
+      },
+      serialize: (value) => value ?? "",
+      defaultValue: null,
+      clearOnDefault: true,
+      shallow: false,
+      eq: (a, b) => (!a && !b) || a === b,
+    },
+  );
 
   const onFilterFlagChange = React.useCallback(
-    (value: string) => {
-      const newSearchParams = new URLSearchParams(searchParams);
-      if (value) {
-        newSearchParams.set("filterFlag", value);
-      } else {
-        newSearchParams.delete("filterFlag");
-      }
-      setSearchParams(newSearchParams, { replace: true });
+    (value: FilterFlag) => {
+      setFilterFlag(value);
     },
-    [searchParams, setSearchParams]
+    [setFilterFlag],
   );
 
   const contextValue = React.useMemo<FeatureFlagsContextValue>(
@@ -78,7 +77,7 @@ export function FeatureFlagsProvider({ children }: FeatureFlagsProviderProps) {
           type="single"
           variant="outline"
           size="sm"
-          value={filterFlag || ""}
+          value={filterFlag}
           onValueChange={onFilterFlagChange}
           className="w-fit gap-0"
         >

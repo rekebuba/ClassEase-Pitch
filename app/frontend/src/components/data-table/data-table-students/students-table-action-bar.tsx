@@ -3,7 +3,11 @@ import { Button } from "@/components/ui/button"
 import { Download, Mail, Trash2 } from "lucide-react"
 import type { Table } from "@tanstack/react-table"
 import type { Student } from "@/lib/types"
-import { DataTableActionBar, DataTableActionBarAction, DataTableActionBarSelection } from "../data-table-action-bar"
+import {
+    DataTableActionBar,
+    DataTableActionBarAction,
+    DataTableActionBarSelection
+} from "@/components/data-table"
 import { Separator } from "@radix-ui/react-separator"
 import { useCallback, useState, useTransition } from "react"
 
@@ -23,7 +27,6 @@ export function StudentsTableActionBar({ table }: StudentsTableActionBarProps) {
     const hasSelectedRows = selectedRows.length > 0
     const [isPending, startTransition] = useTransition();
     const [currentAction, setCurrentAction] = useState<Action | null>(null);
-
 
     const getIsActionPending = useCallback(
         (action: Action) => isPending && currentAction === action,
