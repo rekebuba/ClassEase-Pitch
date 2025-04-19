@@ -52,4 +52,4 @@ def logout(user):
 
         return jsonify({'message': 'Successfully logged out'}), 200
     except Exception as e:
-        return jsonify({'error': 'Logout failed', 'error': str(e)}), 500
+        return jsonify({'message': 'Logout failed', 'error': str(e)}), 500
