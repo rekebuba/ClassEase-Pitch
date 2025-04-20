@@ -10,6 +10,8 @@ import {
 } from "@/components/data-table"
 import { Separator } from "@radix-ui/react-separator"
 import { useCallback, useState, useTransition } from "react"
+import { toast } from "sonner";
+
 
 const actions = [
     "export",
@@ -38,15 +40,19 @@ export function StudentsTableActionBar({ table }: StudentsTableActionBarProps) {
         console.log("Exporting", selectedRows.length, "students")
     }
 
-    const handleEmail = () => {
-        // Email functionality would go here
-        console.log("Emailing parents of", selectedRows.length, "students")
-    }
-
-    const handleDelete = () => {
-        // Delete functionality would go here
-        console.log("Deleting", selectedRows.length, "students")
-    }
+    const onTaskDelete = useCallback(() => {
+        setCurrentAction("delete");
+        startTransition(() => {
+            new Promise<{ error?: string }>((resolve) => setTimeout(() => resolve({}), 1000))
+            .then(({ error }) => {
+                if (error) {
+                    toast.error(error);
+                    return;
+                }
+            });
+            table.toggleAllRowsSelected(false);
+        });
+    }, [selectedRows, table]);
 
     if (!hasSelectedRows) return null
 
@@ -70,7 +76,7 @@ export function StudentsTableActionBar({ table }: StudentsTableActionBarProps) {
                     size="icon"
                     tooltip="Delete tasks"
                     isPending={getIsActionPending("delete")}
-                    onClick={handleDelete}
+                    onClick={onTaskDelete}
                 >
                     <Trash2 />
                 </DataTableActionBarAction>

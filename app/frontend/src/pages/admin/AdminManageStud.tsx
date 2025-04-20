@@ -14,7 +14,7 @@ import React from "react";
 import { useQueryState } from "nuqs";
 
 // Mock data and functions for demonstration
-async function getStudentsData(input?: GetStudentsSchema) {
+export async function getStudentsData(input?: GetStudentsSchema) {
   // Simulate API call
   await new Promise((resolve) => setTimeout(resolve, 1000))
 
@@ -24,7 +24,7 @@ async function getStudentsData(input?: GetStudentsSchema) {
   }
 }
 
-async function getStatusCounts() {
+export async function getStatusCounts() {
   // Simulate API call
   await new Promise((resolve) => setTimeout(resolve, 800))
 
@@ -35,7 +35,7 @@ async function getStatusCounts() {
   }
 }
 
-async function getGradeCounts() {
+export async function getGradeCounts() {
   // Simulate API call
   await new Promise((resolve) => setTimeout(resolve, 600))
 
@@ -47,14 +47,14 @@ async function getGradeCounts() {
   }
 }
 
-async function getAttendanceRange() {
+export async function getAttendanceRange() {
   // Simulate API call
   await new Promise((resolve) => setTimeout(resolve, 500))
 
   return [65, 98] as [number, number]
 }
 
-async function getGradeRange() {
+export async function getGradeRange() {
   // Simulate API call
   await new Promise((resolve) => setTimeout(resolve, 400))
 
@@ -227,64 +227,13 @@ interface IndexPageProps {
 }
 
 const AdminManageStudents = () => {
-  // const [search, setSearch] = useQueryState('search')
-
-  // React.useEffect(() => {
-  //   console.log('Query changed:', search)
-  // }, [search])
-
-  // const search = searchParamsCache.parse(Object.fromEntries(searchParams.entries()));
-  // useEffect(() => {
-  //   // setSearchParams(search);
-  // }, [searchParams])
-  // const validFilters = getValidFilters(search.filters);
-
-  const promises = [
-    getStudentsData(),
-    getStatusCounts(),
-    getGradeCounts(),
-    getAttendanceRange(),
-    getGradeRange()
-  ];
-
   return (
     <Layout role="admin">
 
       <div className="container mx-auto py-5">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Students</h1>
-            <p className="text-muted-foreground">
-              Manage student information, track performance, and handle enrollments.
-            </p>
-          </div>
-          <Button>
-            <Plus className="mr-2 h-4 w-4" /> Add Student
-          </Button>
-        </div>
         <Shell className="gap-2">
           <FeatureFlagsProvider>
-            <Suspense
-              fallback={
-                <DataTableSkeleton
-                  columnCount={7}
-                  filterCount={2}
-                  cellWidths={[
-                    "10rem",
-                    "30rem",
-                    "10rem",
-                    "10rem",
-                    "6rem",
-                    "6rem",
-                    "6rem",
-                  ]}
-                  shrinkZero
-                />
-              }>
-              <StudentsTable
-                promises={promises}
-              />
-            </Suspense>
+            <StudentsTable />
           </FeatureFlagsProvider>
         </Shell>
 

@@ -8,6 +8,18 @@ export function useUrlState() {
         typeof window !== "undefined" ? new URLSearchParams(window.location.search) : new URLSearchParams(),
     )
 
+    React.useEffect(() => {
+        const handlePopState = () => {
+            setSearchParamsState(new URLSearchParams(window.location.search))
+        }
+
+        window.addEventListener("popstate", handlePopState)
+
+        return () => {
+            window.removeEventListener("popstate", handlePopState)
+        }
+    }, [])
+
     // Update the URL when searchParams change
     React.useEffect(() => {
         if (typeof window === "undefined") return

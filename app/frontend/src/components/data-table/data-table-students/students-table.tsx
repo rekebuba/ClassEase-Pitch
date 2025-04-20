@@ -17,56 +17,61 @@ import { DeleteStudentsDialog } from "./delete-students-dialog"
 import { StudentsTableActionBar } from "./students-table-action-bar"
 import { useSearchParams } from "react-router-dom" // Import useSearchParams from react-router-dom
 
+import {
+  getStudentsData,
+  getStatusCounts,
+  getGradeCounts,
+  getAttendanceRange,
+  getGradeRange,
+} from "@/pages/admin/AdminManageStud";
+
 import type { Student } from "@/lib/types"
 import type { DataTableRowAction } from "@/types/data-table"
 import { useEffect, useState } from "react"
 import { useFeatureFlags } from "./feature-flags-provider"
 import { useQueryState } from "nuqs"
 
-interface StudentsTableProps {
-  promises: Promise<any>[]
-}
-
-export function StudentsTable({ promises }: StudentsTableProps) {
+export function StudentsTable() {
+  const [search, setSearch] = useQueryState('search') // from nuqs
   const { enableAdvancedFilter, filterFlag } = useFeatureFlags()
   const [rowAction, setRowAction] = React.useState<DataTableRowAction<Student> | null>(null)
 
-  const [data, setData] = useState([]);
-  const [pageCount, setPageCount] = useState(0);
-  const [statusCounts, setStatusCounts] = useState<Record<string, number>>({});
-  const [gradeCounts, setGradeCounts] = useState<Record<string, number>>({});
-  const [attendanceRange, setAttendanceRange] = useState<[number, number]>([0, 0]);
-  const [gradeRange, setGradeRange] = useState<[number, number]>([0, 0]);
-  const [search, setSearch] = useQueryState('search')
+  const [data, setData] = useState<Student[]>([])
+  const [pageCount, setPageCount] = useState(0)
+  const [statusCounts, setStatusCounts] = useState<Record<string, number>>({})
+  const [gradeCounts, setGradeCounts] = useState<Record<string, number>>({})
+  const [attendanceRange, setAttendanceRange] = useState<[number, number]>([0, 0])
+  const [gradeRange, setGradeRange] = useState<[number, number]>([0, 0])
 
-  //TODO: Use React.use for data fetching from promises
   useEffect(() => {
-    console.log('Query changed:', search)
+    console.log("search", search)
 
     const fetchData = async () => {
-      try {
-        // Assuming promises is an array of promises
-        const [
-          { data, pageCount },
-          statusCounts,
-          gradeCounts,
-          attendanceRange,
-          gradeRange
-        ] = await Promise.all(promises);
+      const [
+        { data, pageCount },
+        statusCounts,
+        gradeCounts,
+        attendanceRange,
+        gradeRange
+      ] = await Promise.all([
+        getStudentsData(),
+        getStatusCounts(),
+        getGradeCounts(),
+        getAttendanceRange(),
+        getGradeRange()
+      ])
 
-        setData(data);
-        setPageCount(pageCount);
-        setStatusCounts(statusCounts);
-        setGradeCounts(gradeCounts);
-        setAttendanceRange(attendanceRange);
-        setGradeRange(gradeRange);
-      } catch (err) {
-        throw new Error(err as string);
-      }
-    };
+      setData(data)
+      setPageCount(pageCount)
+      setStatusCounts(statusCounts)
+      setGradeCounts(gradeCounts)
+      setAttendanceRange(attendanceRange)
+      setGradeRange(gradeRange)
+    }
 
-    fetchData();
-  }, [rowAction, filterFlag]);
+    fetchData()
+  }, [search, rowAction, filterFlag])
+
 
   const columns = React.useMemo(() =>
     getStudentsTableColumns({
@@ -109,6 +114,7 @@ export function StudentsTable({ promises }: StudentsTableProps) {
                 debounceMs={debounceMs}
                 throttleMs={throttleMs}
                 align="start"
+                setSearchParams={setSearch}
               />
             ) : (
               <DataTableFilterMenu
