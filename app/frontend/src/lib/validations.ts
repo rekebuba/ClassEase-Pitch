@@ -55,13 +55,13 @@ export const searchParamsCache = z.object({
     ),
     page: z.number().default(1),
     perPage: z.number().default(10),
-    // sort: z.array(z.object({ id: z.string(), desc: z.boolean() })).default([
-    //     { id: "createdAt", desc: true },
-    // ]),
+    sort: z.array(z.object({ id: z.string(), desc: z.boolean() })).default([
+        { id: "createdAt", desc: true },
+    ]),
     filters: z.array(z.any()).default([]),
     joinOperator: z.enum(["and", "or"]).default("and"),
 });
 
-export type GetStudentsSchema = Awaited<
+export type SearchParams = Awaited<
     ReturnType<typeof searchParamsCache.parse>
 >;

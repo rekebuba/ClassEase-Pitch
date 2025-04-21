@@ -11,7 +11,6 @@ import { searchParamsCache, GetStudentsSchema } from "@/lib/validations";
 import { getValidFilters } from "@/lib/data-table";
 import { useUrlState } from "@/hooks/use-url-state";
 import React from "react";
-import { useQueryState } from "nuqs";
 
 // Mock data and functions for demonstration
 export async function getStudentsData(input?: GetStudentsSchema) {
