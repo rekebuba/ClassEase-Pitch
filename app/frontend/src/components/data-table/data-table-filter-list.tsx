@@ -9,6 +9,7 @@ import {
   ListFilter,
   Trash2,
 } from "lucide-react";
+import { parseAsStringEnum, useQueryState } from "nuqs";
 import * as React from "react";
 
 import { DataTableRangeFilter } from "@/components/data-table";
@@ -78,22 +79,15 @@ interface DataTableFilterListProps<TData>
   extends React.ComponentProps<typeof PopoverContent> {
   table: Table<TData>;
   debounceMs?: number;
+  throttleMs?: number;
   shallow?: boolean;
-  setSearch?: (search: string | null) => void;
-  filters: ExtendedColumnFilter<TData>[];
-  setFilters: (filters: ExtendedColumnFilter<TData>[] | null) => void;
-  joinOperator: JoinOperator;
-  setJoinOperator: (value: JoinOperator) => void;
 }
 
 export function DataTableFilterList<TData>({
   table,
   debounceMs = DEBOUNCE_MS,
+  throttleMs = THROTTLE_MS,
   shallow = true,
-  filters,
-  setFilters,
-  joinOperator,
-  setJoinOperator,
   ...props
 }: DataTableFilterListProps<TData>) {
   const id = React.useId();
@@ -108,9 +102,25 @@ export function DataTableFilterList<TData>({
       .filter((column) => column.columnDef.enableColumnFilter);
   }, [table]);
 
+  const [filters, setFilters] = useQueryState(
+    FILTERS_KEY,
+    getFiltersStateParser<TData>(columns.map((field) => field.id))
+      .withDefault([])
+      .withOptions({
+        clearOnDefault: true,
+        shallow,
+        throttleMs,
+      }),
+  );
   const debouncedSetFilters = useDebouncedCallback(setFilters, debounceMs);
 
-  console.log({ filters });
+  const [joinOperator, setJoinOperator] = useQueryState(
+    JOIN_OPERATOR_KEY,
+    parseAsStringEnum(["and", "or"]).withDefault("and").withOptions({
+      clearOnDefault: true,
+      shallow,
+    }),
+  );
 
   const onFilterAdd = React.useCallback(() => {
     const column = columns[0];
@@ -137,7 +147,7 @@ export function DataTableFilterList<TData>({
       updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>,
     ) => {
       debouncedSetFilters((prevFilters) => {
-        const updatedFilters = prevFilters.map((filter: ExtendedColumnFilter<TData>) => {
+        const updatedFilters = prevFilters.map((filter) => {
           if (filter.filterId === filterId) {
             return { ...filter, ...updates } as ExtendedColumnFilter<TData>;
           }

@@ -13,9 +13,10 @@ interface UpdateStudentSheetProps {
     open: boolean
     onOpenChange: (open: boolean) => void
     student: Student | null
+    onSuccess?: () => void
 }
 
-export function UpdateStudentSheet({ open, onOpenChange, student }: UpdateStudentSheetProps) {
+export function UpdateStudentSheet({ open, onOpenChange, student, onSuccess }: UpdateStudentSheetProps) {
     const [activeTab, setActiveTab] = React.useState("personal")
     const [isSubmitting, setIsSubmitting] = React.useState(false)
 

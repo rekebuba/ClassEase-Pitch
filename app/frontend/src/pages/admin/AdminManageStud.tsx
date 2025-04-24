@@ -1,16 +1,17 @@
 import { Layout } from "@/components";
 import { Shell } from "@/components/shell";
 import { DataTableSkeleton } from "@/components/data-table";
-import { Suspense } from "react"
+import { Suspense, useMemo } from "react"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { StudentsTable, FeatureFlagsProvider } from "@/components/data-table/data-table-students"
 import type { Student } from "@/lib/types"
-import { useSearchParams, useNavigate } from "react-router-dom";
-import { searchParamsCache, GetStudentsSchema } from "@/lib/validations";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
+import { searchParamsCache, GetStudentsSchema, View } from "@/lib/validations";
 import { getValidFilters } from "@/lib/data-table";
-import { useUrlState } from "@/hooks/use-url-state";
+// import { useQueryParams } from "@/hooks/use-url-state";
 import React from "react";
+import { title } from "process";
 
 // Mock data and functions for demonstration
 export async function getStudentsData(input?: GetStudentsSchema) {
@@ -19,7 +20,20 @@ export async function getStudentsData(input?: GetStudentsSchema) {
 
   return {
     data: students,
-    pageCount: 1,
+    pageCount: 2,
+  }
+}
+
+export async function getStudentsViews() {
+  // Simulate ApI call
+  await new Promise((resolve) => setTimeout(resolve, 800))
+
+  return {
+    id: "uuid-4",
+    name: "view Name",
+    columns: [""],
+    createdAt: "",
+    updatedAt: ""
   }
 }
 
@@ -231,9 +245,7 @@ const AdminManageStudents = () => {
 
       <div className="container mx-auto py-5">
         <Shell className="gap-2">
-          <FeatureFlagsProvider>
-            <StudentsTable />
-          </FeatureFlagsProvider>
+          <StudentsTable />
         </Shell>
 
       </div>
@@ -242,3 +254,6 @@ const AdminManageStudents = () => {
 };
 
 export default AdminManageStudents;
+function useEffect(arg0: () => void, arg1: URLSearchParams[]) {
+  throw new Error("Function not implemented.");
+}

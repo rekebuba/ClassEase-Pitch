@@ -17,3 +17,7 @@ export * from "./data-table-view-options";
 export * from "./data-table";
 export * from "./dynamic-container";
 export * from "./icons";
+export * from "./table-instance-provider"
+export * from "./data-table-filter-item";
+export * from "./data-table-filter-combobox";
+export * from "./data-table-advanced-faceted-filter";

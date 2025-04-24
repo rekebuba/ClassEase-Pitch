@@ -9,6 +9,7 @@ import {
   Text,
   X,
 } from "lucide-react";
+import { useQueryState } from "nuqs";
 import * as React from "react";
 
 import { DataTableRangeFilter } from "@/components/data-table";
@@ -53,18 +54,16 @@ interface DataTableFilterMenuProps<TData>
   extends React.ComponentProps<typeof PopoverContent> {
   table: Table<TData>;
   debounceMs?: number;
+  throttleMs?: number;
   shallow?: boolean;
-  filters: ExtendedColumnFilter<TData>[];
-  setFilters: (filters: ExtendedColumnFilter<TData>[] | null) => void;
 }
 
 export function DataTableFilterMenu<TData>({
   table,
   debounceMs = DEBOUNCE_MS,
+  throttleMs = THROTTLE_MS,
   shallow = true,
   align = "start",
-  filters,
-  setFilters,
   ...props
 }: DataTableFilterMenuProps<TData>) {
   const id = React.useId();
@@ -107,6 +106,16 @@ export function DataTableFilterMenu<TData>({
     [inputValue, selectedColumn],
   );
 
+  const [filters, setFilters] = useQueryState(
+    FILTERS_KEY,
+    getFiltersStateParser<TData>(columns.map((field) => field.id))
+      .withDefault([])
+      .withOptions({
+        clearOnDefault: true,
+        shallow,
+        throttleMs,
+      }),
+  );
   const debouncedSetFilters = useDebouncedCallback(setFilters, debounceMs);
 
   const onFilterAdd = React.useCallback(

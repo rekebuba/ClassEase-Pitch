@@ -61,6 +61,7 @@ export function getStudentsTableColumns({
       size: 40,
     },
     {
+      id: "name",
       accessorKey: "name",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Student" />,
       cell: ({ row }) => {
@@ -94,6 +95,7 @@ export function getStudentsTableColumns({
       enableColumnFilter: true,
     },
     {
+      id: "grade",
       accessorKey: "grade",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Grade" />,
       cell: ({ row }) => (
@@ -104,22 +106,23 @@ export function getStudentsTableColumns({
       ),
       enableColumnFilter: true,
       meta: {
-        variant: "select",
+        variant: "multiSelect",
         label: "Grade",
         options: Object.entries(gradeCounts).map(([value, count]) => ({
           label: `Grade ${value}`,
-          value,
+          value: value,
           count,
-        })),
+        }))
       },
     },
     {
+      id: "section",
       accessorKey: "section",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Section" />,
       cell: ({ row }) => <div>{row.original.section}</div>,
       enableColumnFilter: true,
       meta: {
-        variant: "select",
+        variant: "multiSelect",
         label: "Section",
         options: [
           { label: "Section A", value: "A" },
@@ -129,6 +132,7 @@ export function getStudentsTableColumns({
       },
     },
     {
+      id: "status",
       accessorKey: "status",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
       cell: ({ row }) => {
@@ -152,12 +156,13 @@ export function getStudentsTableColumns({
         label: "Status",
         options: Object.entries(statusCounts).map(([value, count]) => ({
           label: value.charAt(0).toUpperCase() + value.slice(1),
-          value,
+          value: value,
           count,
         })),
       },
     },
     {
+      id: "attendance",
       accessorKey: "attendance",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Attendance" />,
       cell: ({ row }) => {
@@ -181,6 +186,7 @@ export function getStudentsTableColumns({
       },
     },
     {
+      id: "averageGrade",
       accessorKey: "averageGrade",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Avg. Grade" />,
       cell: ({ row }) => {
@@ -204,6 +210,7 @@ export function getStudentsTableColumns({
       },
     },
     {
+      id: "parent",
       accessorKey: "parentName",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Parent" />,
       cell: ({ row }) => (
@@ -219,6 +226,7 @@ export function getStudentsTableColumns({
       },
     },
     {
+      id: "joinedDate",
       accessorKey: "joinedDate",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Joined" />,
       cell: ({ row }) => <div>{row.original.joinedDate}</div>,

@@ -1,185 +1,197 @@
 "use client"
 
+import * as React from "react"
+import { useQueryState, parseAsStringEnum, useQueryStates } from "nuqs"
+
 import {
   DataTable,
   DataTableAdvancedToolbar,
   DataTableFilterList,
   DataTableFilterMenu,
+  DataTableSkeleton,
   DataTableSortList,
   DataTableToolbar,
 } from "@/components/data-table"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Button } from "@/components/ui/button"
 
 import { useDataTable } from "@/hooks/use-data-table"
 import { getStudentsTableColumns } from "./student-table-columns"
 import { UpdateStudentSheet } from "./update-student-sheet"
 import { DeleteStudentsDialog } from "./delete-students-dialog"
 import { StudentsTableActionBar } from "./students-table-action-bar"
-
-import {
-  getStudentsData,
-  getStatusCounts,
-  getGradeCounts,
-  getAttendanceRange,
-  getGradeRange,
-} from "@/pages/admin/AdminManageStud";
+import { getFiltersStateParser } from "@/lib/parsers"
+import { useStudentsData, studentsView } from "@/hooks/use-students-data"
 
 import type { Student } from "@/lib/types"
-import type { DataTableRowAction } from "@/types/data-table"
-import { useEffect, useMemo, useState } from "react"
-import { useFeatureFlags } from "./feature-flags-provider"
-import { parseAsStringEnum, useQueryState } from "nuqs"
-import { getFiltersStateParser } from "@/lib/parsers";
-import { SearchParams } from "@/lib/validations"
+import type { DataTableRowAction, ExtendedColumnSort } from "@/types/data-table"
+import { searchParamMap, SearchParamMapSchema, searchParamsCache, type SearchParams } from "@/lib/validations"
+import { useLocation } from "react-router-dom"
+import { z, ZodError } from "zod"
+import { ShieldMoonRounded } from "@mui/icons-material"
+import { toast } from "sonner"
+import { TableInstanceProvider } from "@/components/data-table"
 
-const FILTERS_KEY = "filters";
-const JOIN_OPERATOR_KEY = "joinOperator";
+
+// Constants
+const INITIAL_SORTING = [{ id: "name", desc: true }]
+const COLUMN_PINNING = { right: ["actions"] }
+
 export function StudentsTable() {
-  const { enableAdvancedFilter, filterFlag } = useFeatureFlags()
-  const [rowAction, setRowAction] = useState<DataTableRowAction<Student> | null>(null)
+  const [rowAction, setRowAction] = React.useState<DataTableRowAction<Student> | null>(null)
+  // Search params state with debouncing
+  const [debouncedParams, setDebouncedParams] = React.useState<SearchParams | null>(null)
 
-  const [data, setData] = useState<Student[]>([])
-  const [pageCount, setPageCount] = useState(0)
-  const [statusCounts, setStatusCounts] = useState<Record<string, number>>({})
-  const [gradeCounts, setGradeCounts] = useState<Record<string, number>>({})
-  const [attendanceRange, setAttendanceRange] = useState<[number, number]>([0, 0])
-  const [gradeRange, setGradeRange] = useState<[number, number]>([0, 0])
-  const [searchParams, setSearchParams] = useState<SearchParams | null>(null)
+  // Data fetching with the custom hook
+  const {
+    data,
+    pageCount,
+    statusCounts,
+    gradeCounts,
+    attendanceRange,
+    gradeRange,
+    isLoading,
+    error,
+    refetch
+  } = useStudentsData(debouncedParams)
+  const {
+    views,
+    isViewLoading,
+    viewError
+  } = studentsView()
 
-  const columns = useMemo(() =>
-    getStudentsTableColumns({
-      statusCounts,
-      gradeCounts,
-      attendanceRange,
-      gradeRange,
-      setRowAction,
-    }),
+  // Memoized columns
+  const columns = React.useMemo(
+    () =>
+      getStudentsTableColumns({
+        statusCounts,
+        gradeCounts,
+        attendanceRange,
+        gradeRange,
+        setRowAction,
+      }),
     [statusCounts, gradeCounts, attendanceRange, gradeRange],
   )
 
-  const { table, shallow, debounceMs, throttleMs, page, perPage, sorting } = useDataTable({
+  // Table setup
+  const { table, shallow, debounceMs, throttleMs, perPage } = useDataTable({
     data,
     columns,
     pageCount,
-    enableAdvancedFilter,
     initialState: {
-      sorting: [{ id: "name", desc: true }],
-      columnPinning: { right: ["actions"] },
+      sorting: INITIAL_SORTING as ExtendedColumnSort<Student>[],
+      columnPinning: COLUMN_PINNING,
     },
     getRowId: (originalRow) => originalRow.id,
     shallow: false,
     clearOnDefault: true,
-  });
+  })
 
-  const [filters, setFilters] = useQueryState(
-    FILTERS_KEY,
-    getFiltersStateParser(columns.map((field) => field.id).filter((id): id is string => id !== undefined))
-      .withDefault([])
-      .withOptions({
-        clearOnDefault: true,
-        shallow,
-        throttleMs,
-      }),
+  const [searchParams] = useQueryStates<SearchParamMapSchema>(searchParamMap);
+
+  // Filter out empty values
+  const filteredParams = Object.fromEntries(
+    Object.entries(searchParams).filter(
+      ([_, value]) =>
+        value !== undefined &&
+        value !== null &&
+        value !== "" &&
+        !(Array.isArray(value) && value.length === 0)
+    )
   );
 
-  const [joinOperator, setJoinOperator] = useQueryState(
-    JOIN_OPERATOR_KEY,
-    parseAsStringEnum(["and", "or"]).withDefault("and").withOptions({
-      clearOnDefault: true,
-      shallow,
-    }),
-  );
-
-  // Effect to update search params - separated from data fetching
-  useEffect(() => {
-    const params: SearchParams = {
-      filterFlag,
-      page,
-      perPage,
-      filters,
-      joinOperator,
-      sort: sorting,
+  // Effect to update search params with debouncing
+  React.useEffect(() => {
+    try {
+      const validQuery = searchParamsCache.parse(filteredParams)
+      console.log("validQuery", validQuery)
+      setDebouncedParams((prev) => (JSON.stringify(prev) !== JSON.stringify(validQuery) ? validQuery : prev))
+    } catch (error) {
+      // Zod validation error
+      if (error instanceof ZodError) {
+        console.error("Validation error:", error.flatten()) // Log the error instead of returning it
+        toast.error("Validation error", {
+          description: "Invalid search parameters",
+          style: { color: 'red' }
+        });
+      }
     }
-
-    // Only update if params have changed
-    if (JSON.stringify(searchParams) !== JSON.stringify(params)) {
-      setSearchParams(params)
-    }
-  }, [filterFlag, page, perPage, filters, joinOperator, sorting, searchParams])
-
-  useEffect(() => {
-    const fetchData = async () => {
-      const [
-        { data, pageCount },
-        statusCounts,
-        gradeCounts,
-        attendanceRange,
-        gradeRange
-      ] = await Promise.all([
-        getStudentsData(),
-        getStatusCounts(),
-        getGradeCounts(),
-        getAttendanceRange(),
-        getGradeRange()
-      ])
-
-      setData(data)
-      setPageCount(pageCount)
-      setStatusCounts(statusCounts)
-      setGradeCounts(gradeCounts)
-      setAttendanceRange(attendanceRange)
-      setGradeRange(gradeRange)
-    }
-
-    fetchData()
+    return
   }, [searchParams])
+
+  // console.log("debouncedParams", debouncedParams)
+
+  // Handle sheet/dialog close
+  const handleCloseAction = React.useCallback(() => {
+    setRowAction(null)
+  }, [])
+
+  // Handle delete success
+  const handleDeleteSuccess = React.useCallback(() => {
+    rowAction?.row.toggleSelected(false)
+    refetch()
+  }, [rowAction, refetch])
+
+  // Render error state
+  if (error || viewError) {
+    return (
+      <Alert variant="destructive" className="my-4">
+        <AlertTitle>Error loading students data</AlertTitle>
+        <AlertDescription className="flex flex-col gap-2">
+          <p>There was a problem loading the student data. Please try again.</p>
+          <Button variant="outline" size="sm" onClick={() => refetch()} className="w-fit">
+            Retry
+          </Button>
+        </AlertDescription>
+      </Alert>
+    )
+  }
 
   return (
     <>
-      <DataTable
-        table={table}
-        actionBar={<StudentsTableActionBar table={table} />}
-      >
-        {enableAdvancedFilter ? (
-          <DataTableAdvancedToolbar table={table}>
-            <DataTableSortList table={table} align="start" />
-            {filterFlag === "advancedFilters" ? (
-              <DataTableFilterList
-                table={table}
-                shallow={shallow}
-                debounceMs={debounceMs}
-                align="start"
-                filters={filters}
-                setFilters={setFilters}
-                joinOperator={joinOperator}
-                setJoinOperator={setJoinOperator}
-              />
-            ) : (
-              <DataTableFilterMenu
-                table={table}
-                shallow={shallow}
-                debounceMs={debounceMs}
-                filters={filters}
-                setFilters={setFilters}
-              />
-            )}
+      {/* <DataTableAdvancedToolbar table={table} searchParams={filteredParams}>
+        <DataTableSortList table={table} align="start" />
+        <DataTableFilterList
+          table={table}
+          shallow={shallow}
+          debounceMs={debounceMs}
+          throttleMs={throttleMs}
+          align="start"
+        />
+        <DataTableFilterMenu
+          table={table}
+          shallow={shallow}
+          debounceMs={debounceMs}
+          throttleMs={throttleMs}
+        />
+      </DataTableAdvancedToolbar> */}
+      <DataTableToolbar table={table}></DataTableToolbar>
+      (
+      <TableInstanceProvider table={table}>
+        <DataTable
+          table={table}
+          actionBar={<StudentsTableActionBar table={table} />}
+        >
+          <DataTableAdvancedToolbar views={views} searchParams={filteredParams}>
+            {/* <TasksTableToolbarActions table={table} /> */}
           </DataTableAdvancedToolbar>
-        ) : (
-          <DataTableToolbar table={table}>
-            <DataTableSortList table={table} align="end" />
-          </DataTableToolbar>
-        )}
-      </DataTable>
+        </DataTable>
+      </TableInstanceProvider>
+      )
+
       <UpdateStudentSheet
         open={rowAction?.variant === "update"}
-        onOpenChange={() => setRowAction(null)}
+        onOpenChange={handleCloseAction}
         student={rowAction?.row.original ?? null}
+        onSuccess={refetch}
       />
+
       <DeleteStudentsDialog
         open={rowAction?.variant === "delete"}
-        onOpenChange={() => setRowAction(null)}
+        onOpenChange={handleCloseAction}
         students={rowAction?.row.original ? [rowAction?.row.original] : []}
         showTrigger={false}
-        onSuccess={() => rowAction?.row.toggleSelected(false)}
+        onSuccess={handleDeleteSuccess}
       />
     </>
   )

@@ -168,7 +168,6 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
 
   const filterableColumns = React.useMemo(() => {
     if (enableAdvancedFilter) return [];
-
     return columns.filter((column) => column.enableColumnFilter);
   }, [columns, enableAdvancedFilter]);
 
@@ -292,5 +291,5 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
     manualFiltering: true,
   });
 
-  return { table, shallow, debounceMs, throttleMs, page, perPage, sorting };
+  return { table, shallow, debounceMs, throttleMs, page, perPage };
 }

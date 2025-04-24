@@ -19,3 +19,21 @@ export interface QueryBuilderOpts {
   distinct?: boolean;
   nullish?: boolean;
 }
+
+export interface Option {
+  label: string
+  value: string
+  icon?: React.ComponentType<{ className?: string }>
+  withCount?: boolean
+}
+
+export interface DataTableFilterOption<TData> {
+  id: string
+  label: string
+  value: string
+  variant: string
+  options: Option[]
+  filterValues?: string[]
+  filterOperator?: string
+  isMulti?: boolean
+}
