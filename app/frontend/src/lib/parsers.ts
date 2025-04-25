@@ -52,6 +52,10 @@ export const getSortingStateParser = <TData>(
 const filterItemSchema = z.object({
   id: z.string(),
   value: z.union([z.string(), z.array(z.string())]),
+  range: z.object({
+    min: z.number(),
+    max: z.number()
+  }),
   variant: z.enum(dataTableConfig.filterVariants),
   operator: z.enum(dataTableConfig.operators),
   filterId: z.string(),
@@ -92,6 +96,7 @@ export const getFiltersStateParser = <TData>(
         (filter, index) =>
           filter.id === b[index]?.id &&
           filter.value === b[index]?.value &&
+          filter.range === b[index]?.range &&
           filter.variant === b[index]?.variant &&
           filter.operator === b[index]?.operator,
       ),

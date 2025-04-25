@@ -31,6 +31,7 @@ import { z, ZodError } from "zod"
 import { ShieldMoonRounded } from "@mui/icons-material"
 import { toast } from "sonner"
 import { TableInstanceProvider } from "@/components/data-table"
+import { FilterProvider } from "@/utils/filter-context"
 
 
 // Constants
@@ -86,6 +87,13 @@ export function StudentsTable() {
     shallow: false,
     clearOnDefault: true,
   })
+
+  const columnIds = React.useMemo(() => {
+    return table
+      .getAllColumns()
+      .filter((column) => column.columnDef.enableColumnFilter)
+      .map((column) => column.id)
+  }, [table])
 
   const [searchParams] = useQueryStates<SearchParamMapSchema>(searchParamMap);
 
@@ -149,35 +157,26 @@ export function StudentsTable() {
 
   return (
     <>
-      {/* <DataTableAdvancedToolbar table={table} searchParams={filteredParams}>
-        <DataTableSortList table={table} align="start" />
-        <DataTableFilterList
-          table={table}
-          shallow={shallow}
-          debounceMs={debounceMs}
-          throttleMs={throttleMs}
-          align="start"
-        />
-        <DataTableFilterMenu
-          table={table}
-          shallow={shallow}
-          debounceMs={debounceMs}
-          throttleMs={throttleMs}
-        />
-      </DataTableAdvancedToolbar> */}
-      <DataTableToolbar table={table}></DataTableToolbar>
-      (
-      <TableInstanceProvider table={table}>
-        <DataTable
-          table={table}
-          actionBar={<StudentsTableActionBar table={table} />}
-        >
-          <DataTableAdvancedToolbar views={views} searchParams={filteredParams}>
-            {/* <TasksTableToolbarActions table={table} /> */}
-          </DataTableAdvancedToolbar>
-        </DataTable>
-      </TableInstanceProvider>
-      )
+      <FilterProvider columnIds={columnIds}>
+        <TableInstanceProvider table={table}>
+          <DataTable
+            table={table}
+            actionBar={<StudentsTableActionBar table={table} />}
+          >
+            <DataTableAdvancedToolbar views={views} searchParams={filteredParams}>
+              <DataTableSortList table={table} align="start" />
+              <DataTableFilterList
+                table={table}
+                shallow={shallow}
+                debounceMs={debounceMs}
+                throttleMs={throttleMs}
+                align="start"
+              />
+              {/* <TasksTableToolbarActions table={table} /> */}
+            </DataTableAdvancedToolbar>
+          </DataTable>
+        </TableInstanceProvider>
+      </FilterProvider>
 
       <UpdateStudentSheet
         open={rowAction?.variant === "update"}

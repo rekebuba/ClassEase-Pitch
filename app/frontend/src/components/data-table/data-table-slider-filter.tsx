@@ -14,37 +14,52 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
-import { PlusCircle, XCircle } from "lucide-react";
+import { FormInput, PlusCircle, XCircle } from "lucide-react";
+import { TrashIcon } from "@radix-ui/react-icons"
+import { useFilters } from "@/utils/filter-context";
+import { DataTableFilterOption } from "@/types";
 
 interface Range {
   min: number;
   max: number;
 }
 
-type RangeValue = [number, number];
+type RangeValue = {
+  min: number;
+  max: number;
+};
 
-function getIsValidRange(value: unknown): value is RangeValue {
+function getIsValidRange(value: Range | undefined): value is Range {
+  if (!value) return false;
   return (
-    Array.isArray(value) &&
-    value.length === 2 &&
-    typeof value[0] === "number" &&
-    typeof value[1] === "number"
+    Object(value) &&
+    'min' in value && 'max' in value &&
+    typeof value.min === "number" &&
+    typeof value.max === "number"
   );
 }
 
 interface DataTableSliderFilterProps<TData> {
   column: Column<TData, unknown>;
   title?: string;
+  setSelectedOptions: React.Dispatch<
+    React.SetStateAction<DataTableFilterOption<TData>[]>
+  >
 }
 
 export function DataTableSliderFilter<TData>({
   column,
   title,
+  setSelectedOptions,
 }: DataTableSliderFilterProps<TData>) {
   const id = React.useId();
 
-  const columnFilterValue = getIsValidRange(column.getFilterValue())
-    ? (column.getFilterValue() as RangeValue)
+  const { addFilter, removeFilter, getFilter } = useFilters();
+  const [open, setOpen] = React.useState(true);
+
+  const columnFilter = getFilter(column?.id);
+  const columnFilterValue = getIsValidRange(columnFilter?.range)
+    ? (columnFilter?.range as RangeValue)
     : undefined;
 
   const defaultRange = column.columnDef.meta?.range;
@@ -55,7 +70,8 @@ export function DataTableSliderFilter<TData>({
     let maxValue = 100;
 
     if (defaultRange && getIsValidRange(defaultRange)) {
-      [minValue, maxValue] = defaultRange;
+      minValue = defaultRange.min;
+      maxValue = defaultRange.max;
     } else {
       const values = column.getFacetedMinMaxValues();
       if (values && Array.isArray(values) && values.length === 2) {
@@ -82,18 +98,36 @@ export function DataTableSliderFilter<TData>({
   }, [column, defaultRange]);
 
   const range = React.useMemo((): RangeValue => {
-    return columnFilterValue ?? [min, max];
+    return columnFilterValue ?? { min: min, max: max };
   }, [columnFilterValue, min, max]);
 
   const formatValue = React.useCallback((value: number) => {
     return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
   }, []);
 
+  const [fromInput, setFromInput] = React.useState({ min: range.min.toString(), max: range.max.toString() });
+
+  React.useEffect(() => {
+    setFromInput({ min: range.min.toString(), max: range.max.toString() });
+  }, [range.min, range.max]);
+
   const onFromInputChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      const numValue = Number(event.target.value);
-      if (!Number.isNaN(numValue) && numValue >= min && numValue <= range[1]) {
-        column.setFilterValue([numValue, range[1]]);
+      const value = event.target.value;
+      setFromInput((prev) => ({ ...prev, min: value }));
+
+      const numValue = Number(value);
+
+      if (
+        value !== "" &&
+        !Number.isNaN(numValue) &&
+        numValue >= min &&
+        numValue <= range.max
+      ) {
+        addFilter({
+          id: column.id,
+          range: { min: numValue, max: range.max },
+        })
       }
     },
     [column, min, range],
@@ -101,9 +135,20 @@ export function DataTableSliderFilter<TData>({
 
   const onToInputChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      const numValue = Number(event.target.value);
-      if (!Number.isNaN(numValue) && numValue <= max && numValue >= range[0]) {
-        column.setFilterValue([range[0], numValue]);
+      const value = event.target.value;
+      setFromInput((prev) => ({ ...prev, max: value }));
+
+      const numValue = Number(value);
+      if (
+        value !== "" &&
+        !Number.isNaN(numValue) &&
+        numValue <= max &&
+        numValue >= range.min
+      ) {
+        addFilter({
+          id: column.id,
+          range: { min: range.min, max: numValue },
+        })
       }
     },
     [column, max, range],
@@ -111,25 +156,31 @@ export function DataTableSliderFilter<TData>({
 
   const onSliderValueChange = React.useCallback(
     (value: RangeValue) => {
-      if (Array.isArray(value) && value.length === 2) {
-        column.setFilterValue(value);
-      }
+      addFilter({
+        id: column.id,
+        range: value,
+      });
     },
-    [column],
+    [column]
   );
 
   const onReset = React.useCallback(
-    (event: React.MouseEvent) => {
-      if (event.target instanceof HTMLDivElement) {
-        event.stopPropagation();
+    (event: React.MouseEvent | undefined, remove: boolean) => {
+      if (event?.target instanceof HTMLDivElement) {
+        event?.stopPropagation();
       }
-      column.setFilterValue(undefined);
+      removeFilter(column.id);
+      if (remove) {
+        setSelectedOptions((prev) =>
+          prev.filter((item) => item.value !== column?.id)
+        );
+      };
     },
     [column],
   );
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="outline" size="sm" className="border-dashed">
           {columnFilterValue ? (
@@ -138,7 +189,7 @@ export function DataTableSliderFilter<TData>({
               aria-label={`Clear ${title} filter`}
               tabIndex={0}
               className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              onClick={onReset}
+              onClick={() => onReset(undefined, true)}
             >
               <XCircle />
             </div>
@@ -152,8 +203,8 @@ export function DataTableSliderFilter<TData>({
                 orientation="vertical"
                 className="mx-0.5 data-[orientation=vertical]:h-4"
               />
-              {formatValue(columnFilterValue[0])} -{" "}
-              {formatValue(columnFilterValue[1])}
+              {formatValue(columnFilterValue.min)} -{" "}
+              {formatValue(columnFilterValue.max)}
               {unit ? ` ${unit}` : ""}
             </>
           ) : null}
@@ -161,9 +212,16 @@ export function DataTableSliderFilter<TData>({
       </PopoverTrigger>
       <PopoverContent align="start" className="flex w-auto flex-col gap-4">
         <div className="flex flex-col gap-3">
-          <p className="font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            {title}
-          </p>
+          <div className="flex items-center space-x-1 pl-1 pr-0.5">
+            <div className="flex flex-1 items-center space-x-1">
+              <div className="text-xs capitalize text-muted-foreground">
+                {title}
+              </div>
+            </div>
+            <Button aria-label="Remove filter" variant="ghost" size="icon" className="size-7 text-muted-foreground" onClick={() => onReset(undefined, true)}>
+              <TrashIcon className="size-4" aria-hidden="true" />
+            </Button>
+          </div>
           <div className="flex items-center gap-4">
             <Label htmlFor={`${id}-from`} className="sr-only">
               From
@@ -179,7 +237,7 @@ export function DataTableSliderFilter<TData>({
                 placeholder={min.toString()}
                 min={min}
                 max={max}
-                value={range[0]?.toString()}
+                value={fromInput.min}
                 onChange={onFromInputChange}
                 className={cn("h-8 w-24", unit && "pr-8")}
               />
@@ -203,7 +261,7 @@ export function DataTableSliderFilter<TData>({
                 placeholder={max.toString()}
                 min={min}
                 max={max}
-                value={range[1]?.toString()}
+                value={fromInput.max}
                 onChange={onToInputChange}
                 className={cn("h-8 w-24", unit && "pr-8")}
               />
@@ -222,15 +280,19 @@ export function DataTableSliderFilter<TData>({
             min={min}
             max={max}
             step={step}
-            value={range}
-            onValueChange={onSliderValueChange}
+            value={[range.min, range.max]}
+            onValueChange={(value) => {
+              if (Array.isArray(value) && value.length === 2) {
+                onSliderValueChange({ min: value[0], max: value[1] });
+              }
+            }}
           />
         </div>
         <Button
           aria-label={`Clear ${title} filter`}
           variant="outline"
           size="sm"
-          onClick={onReset}
+          onClick={() => onReset(undefined, false)}
         >
           Clear
         </Button>

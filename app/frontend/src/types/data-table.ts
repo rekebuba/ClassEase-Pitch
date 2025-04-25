@@ -9,7 +9,7 @@ declare module "@tanstack/react-table" {
     placeholder?: string;
     variant?: FilterVariant;
     options?: Option[];
-    range?: [number, number];
+    range?: {min: number, max: number};
     unit?: string;
     icon?: React.FC<React.SVGProps<SVGSVGElement>>;
   }
@@ -18,6 +18,7 @@ declare module "@tanstack/react-table" {
 export interface Option {
   label: string;
   value: string;
+  operator?: string;
   count?: number;
   icon?: React.FC<React.SVGProps<SVGSVGElement>>;
 }

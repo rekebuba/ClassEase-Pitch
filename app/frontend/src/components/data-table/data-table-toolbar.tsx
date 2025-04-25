@@ -6,6 +6,7 @@ import * as React from "react";
 import {
   DataTableDateFilter,
   DataTableFacetedFilter,
+  DataTableInputFilter,
   DataTableSliderFilter,
   DataTableViewOptions
 } from "@/components/data-table";
@@ -13,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { ExtendedColumnFilter } from "@/types/data-table";
+import { DataTableFilterOption } from "@/types";
+import { useFilters } from "@/utils/filter-context";
 
 interface DataTableToolbarProps<TData> extends React.ComponentProps<"div"> {
   table: Table<TData>;
@@ -71,13 +74,19 @@ export function DataTableToolbar<TData>({
 }
 interface DataTableToolbarFilterProps<TData> {
   column: Column<TData>;
+  setSelectedOptions: React.Dispatch<
+    React.SetStateAction<DataTableFilterOption<TData>[]>
+  >
 }
 
-function DataTableToolbarFilter<TData>({
+export function DataTableToolbarFilter<TData>({
   column,
+  setSelectedOptions,
 }: DataTableToolbarFilterProps<TData>) {
   {
     const columnMeta = column.columnDef.meta;
+    const { addFilter, removeFilter, getFilter, debouncedAddFilter } = useFilters();
+    const [textInput, setTextInput] = React.useState<string | undefined>(undefined);
 
     const onFilterRender = React.useCallback(() => {
       if (!columnMeta?.variant) return null;
@@ -85,12 +94,12 @@ function DataTableToolbarFilter<TData>({
       switch (columnMeta.variant) {
         case "text":
           return (
-            <Input
-              placeholder={columnMeta.placeholder ?? columnMeta.label}
-              value={(column.getFilterValue() as string) ?? ""}
-              onChange={(event) => column.setFilterValue(event.target.value)}
-              className="h-8 w-40 lg:w-56"
-            />
+            <DataTableInputFilter
+              column={column}
+              title={columnMeta.label ?? column.id}
+              setSelectedOptions={setSelectedOptions}
+            >
+            </DataTableInputFilter>
           );
 
         case "number":
@@ -117,6 +126,7 @@ function DataTableToolbarFilter<TData>({
             <DataTableSliderFilter
               column={column}
               title={columnMeta.label ?? column.id}
+              setSelectedOptions={setSelectedOptions}
             />
           );
 
@@ -136,6 +146,7 @@ function DataTableToolbarFilter<TData>({
             <DataTableFacetedFilter
               column={column}
               title={columnMeta.label ?? column.id}
+              setSelectedOptions={setSelectedOptions}
               options={columnMeta.options ?? []}
               multiple={columnMeta.variant === "multiSelect"}
             />

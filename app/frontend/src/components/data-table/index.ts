@@ -7,6 +7,7 @@ export * from "./data-table-date-filter";
 export * from "./data-table-faceted-filter";
 export * from "./data-table-filter-list";
 export * from "./data-table-filter-menu";
+export * from "./data-table-input-filter";
 export * from "./data-table-pagination";
 export * from "./data-table-range-filter";
 export * from "./data-table-skeleton";
@@ -18,6 +19,4 @@ export * from "./data-table";
 export * from "./dynamic-container";
 export * from "./icons";
 export * from "./table-instance-provider"
-export * from "./data-table-filter-item";
 export * from "./data-table-filter-combobox";
-export * from "./data-table-advanced-faceted-filter";

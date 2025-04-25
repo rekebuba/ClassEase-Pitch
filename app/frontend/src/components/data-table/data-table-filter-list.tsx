@@ -233,7 +233,7 @@ export function DataTableFilterList<TData>({
         <PopoverTrigger asChild>
           <Button variant="outline" size="sm" onKeyDown={onTriggerKeyDown}>
             <ListFilter />
-            Filter
+            Advanced Filter
             {filters.length > 0 && (
               <Badge
                 variant="secondary"

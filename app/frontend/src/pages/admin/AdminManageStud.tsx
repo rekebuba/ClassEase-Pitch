@@ -64,14 +64,20 @@ export async function getAttendanceRange() {
   // Simulate API call
   await new Promise((resolve) => setTimeout(resolve, 500))
 
-  return [65, 98] as [number, number]
+  return {
+    min: 65,
+    max: 98
+  }
 }
 
 export async function getGradeRange() {
   // Simulate API call
   await new Promise((resolve) => setTimeout(resolve, 400))
 
-  return [65, 94] as [number, number]
+  return {
+    min: 65,
+    max: 94
+  }
 }
 
 const students: Student[] = [

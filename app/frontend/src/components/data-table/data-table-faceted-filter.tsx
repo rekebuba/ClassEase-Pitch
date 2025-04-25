@@ -3,6 +3,7 @@
 import type { Option } from "@/types/data-table";
 import type { Column } from "@tanstack/react-table";
 import { Check, PlusCircle, XCircle } from "lucide-react";
+import { TrashIcon } from "@radix-ui/react-icons"
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,12 +24,28 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import * as React from "react";
+import { useFilters } from "@/utils/filter-context";
+import { addPointerInfo } from "motion/dist/react";
+import { dataTableConfig } from "@/config/data-table";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { useState } from "react";
+import { DataTableFilterOption } from "@/types";
 
 interface DataTableFacetedFilterProps<TData, TValue> {
   column?: Column<TData, TValue>;
-  title?: string;
+  title: string;
   options: Option[];
   multiple?: boolean;
+  setSelectedOptions: React.Dispatch<
+    React.SetStateAction<DataTableFilterOption<TData>[]>
+  >
 }
 
 export function DataTableFacetedFilter<TData, TValue>({
@@ -36,13 +53,24 @@ export function DataTableFacetedFilter<TData, TValue>({
   title,
   options,
   multiple,
+  setSelectedOptions,
 }: DataTableFacetedFilterProps<TData, TValue>) {
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(true);
+  const { addFilter, removeFilter, getFilter } = useFilters();
 
-  const columnFilterValue = column?.getFilterValue();
+  const columnFilter = getFilter(column?.id);
+  const columnFilterValue = columnFilter?.value as string[] | undefined;
   const selectedValues = new Set(
     Array.isArray(columnFilterValue) ? columnFilterValue : [],
   );
+
+  const comparisonOperators = dataTableConfig.multiSelectOperators
+
+  const operator = comparisonOperators.find(
+    (operator) => operator.value === columnFilter?.id
+  ) ?? comparisonOperators[0]
+
+  const [selectedOperator, setSelectedOperator] = useState<string>(operator.value);
 
   const onItemSelect = React.useCallback(
     (option: Option, isSelected: boolean) => {
@@ -56,19 +84,44 @@ export function DataTableFacetedFilter<TData, TValue>({
           newSelectedValues.add(option.value);
         }
         const filterValues = Array.from(newSelectedValues);
-        column.setFilterValue(filterValues.length ? filterValues : undefined);
+        addFilter({
+          id: column.id,
+          value: filterValues,
+          operator: selectedOperator,
+        }
+        )
       } else {
-        column.setFilterValue(isSelected ? undefined : [option.value]);
-        setOpen(false);
+        removeFilter(column.id)
       }
     },
-    [column, multiple, selectedValues],
+    [column, multiple, selectedValues, selectedOperator],
+  );
+
+  const onOperatorSelect = React.useCallback(
+    (value: string) => {
+      if (!column) return;
+
+      setSelectedOperator(value);
+      const filterValues = Array.from(selectedValues);
+      addFilter({
+        id: column.id,
+        value: filterValues,
+        operator: value,
+      });
+    },
+    [column, selectedValues],
   );
 
   const onReset = React.useCallback(
-    (event?: React.MouseEvent) => {
+    (event: React.MouseEvent | undefined, remove: boolean) => {
       event?.stopPropagation();
-      column?.setFilterValue(undefined);
+      removeFilter(column?.id);
+      selectedValues.clear();
+      if (remove) {
+        setSelectedOptions((prev) =>
+          prev.filter((item) => item.value !== column?.id)
+        );
+      };
     },
     [column],
   );
@@ -82,7 +135,7 @@ export function DataTableFacetedFilter<TData, TValue>({
               role="button"
               aria-label={`Clear ${title} filter`}
               tabIndex={0}
-              onClick={onReset}
+              onClick={() => onReset(undefined, true)}
               className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               <XCircle />
@@ -120,7 +173,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                         key={option.value}
                         className="rounded-sm px-1 font-normal"
                       >
-                        {option.label}
+                        {option.value}
                       </Badge>
                     ))
                 )}
@@ -131,6 +184,13 @@ export function DataTableFacetedFilter<TData, TValue>({
       </PopoverTrigger>
       <PopoverContent className="w-[12.5rem] p-0" align="start">
         <Command>
+          <FilterHeader
+            title={title}
+            comparisonOperators={comparisonOperators}
+            selectedOperator={selectedOperator}
+            onOperatorSelect={onOperatorSelect}
+            onReset={onReset}
+          />
           <CommandInput placeholder={title} />
           <CommandList className="max-h-full">
             <CommandEmpty>No results found.</CommandEmpty>
@@ -169,7 +229,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                 <CommandSeparator />
                 <CommandGroup>
                   <CommandItem
-                    onSelect={() => onReset()}
+                    onSelect={() => onReset(undefined, false)}
                     className="justify-center text-center"
                   >
                     Clear filters
@@ -180,6 +240,46 @@ export function DataTableFacetedFilter<TData, TValue>({
           </CommandList>
         </Command>
       </PopoverContent>
-    </Popover>
+    </Popover >
+  );
+}
+
+interface FilterHeaderProps {
+  title: string;
+  selectedOperator: string;
+  onOperatorSelect: (value: string) => void;
+  onReset: (event: React.MouseEvent | undefined, remove: boolean) => void;
+  comparisonOperators: {
+    value: string;
+    label: string;
+  }[];
+}
+function FilterHeader({ title, selectedOperator, onOperatorSelect, onReset, comparisonOperators }: FilterHeaderProps) {
+  return (
+    <div className="flex items-center space-x-1 pl-1 pr-0.5 mt-1">
+      <div className="flex flex-1 items-center space-x-1">
+        <div className="text-xs capitalize text-muted-foreground">
+          {title}
+        </div>
+        <Select value={selectedOperator} onValueChange={value => onOperatorSelect(value)}>
+          <SelectTrigger className="h-auto w-fit truncate border-none px-2 py-0.5 text-xs hover:bg-muted/50">
+            <SelectValue placeholder={comparisonOperators.find(op => op.value === selectedOperator)?.label || "Select operator"} />
+          </SelectTrigger>
+          <SelectContent className="dark:bg-background/95 dark:backdrop-blur-md dark:supports-[backdrop-filter]:bg-background/40">
+            <SelectGroup>
+              {comparisonOperators.map(({
+                value,
+                label
+              }) => <SelectItem key={value} value={value} className="py-1">
+                  {label}
+                </SelectItem>)}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
+      <Button aria-label="Remove filter" variant="ghost" size="icon" className="size-7 text-muted-foreground" onClick={() => onReset(undefined, true)}>
+        <TrashIcon className="size-4" aria-hidden="true" />
+      </Button>
+    </div>
   );
 }

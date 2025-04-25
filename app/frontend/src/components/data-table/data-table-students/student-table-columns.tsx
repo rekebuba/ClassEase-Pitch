@@ -27,8 +27,8 @@ import { useTransition } from "react"
 interface GetStudentsTableColumnsOptions {
   statusCounts: Record<string, number>
   gradeCounts: Record<string, number>
-  attendanceRange: [number, number]
-  gradeRange: [number, number]
+  attendanceRange: {min: number, max: number}
+  gradeRange: {min: number, max: number}
   setRowAction: React.Dispatch<React.SetStateAction<DataTableRowAction<Student> | null>>
 }
 
