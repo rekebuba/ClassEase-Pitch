@@ -20,8 +20,8 @@ interface StudentsDataResult {
     pageCount: number
     statusCounts: Record<string, number>
     gradeCounts: Record<string, number>
-    attendanceRange: [number, number]
-    gradeRange: [number, number]
+    attendanceRange: { min: number, max: number }
+    gradeRange: { min: number, max: number }
     isLoading: boolean
     error: Error | null
     refetch: () => Promise<void>
@@ -32,8 +32,8 @@ export function useStudentsData(params: SearchParams | null): StudentsDataResult
     const [pageCount, setPageCount] = useState(0)
     const [statusCounts, setStatusCounts] = useState<Record<string, number>>({})
     const [gradeCounts, setGradeCounts] = useState<Record<string, number>>({})
-    const [attendanceRange, setAttendanceRange] = useState<[number, number]>([0, 0])
-    const [gradeRange, setGradeRange] = useState<[number, number]>([0, 0])
+    const [attendanceRange, setAttendanceRange] = useState<{ min: number, max: number }>({ min: 0, max: 0 })
+    const [gradeRange, setGradeRange] = useState<{ min: number, max: number }>({ min: 0, max: 0 })
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<Error | null>(null)
 
@@ -86,7 +86,7 @@ export function useStudentsData(params: SearchParams | null): StudentsDataResult
 }
 
 export function studentsView() {
-    const [views, setViews] = useState<View | null>(null)
+    const [views, setViews] = useState<View[]>()
     const [isViewLoading, setIsViewLoading] = useState(true)
     const [viewError, setViewError] = useState<Error | null>(null)
 

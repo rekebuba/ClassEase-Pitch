@@ -1,54 +1,58 @@
-import { useEffect, useRef } from "react"
+"use client"
+
+import type React from "react"
+
+import { useEffect, useRef, useState } from "react"
 import { ChevronLeftIcon } from "@radix-ui/react-icons"
-import { useFormState, useFormStatus } from "react-dom"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
-import { LoaderIcon } from "@/components/loader-icon"
-import { editView } from "@/app/_lib/actions"
 
-import type { ViewItem } from "./data-table-views-dropdown"
 import { DeleteViewForm } from "./delete-view-form"
+import type { View } from "@/lib/validations"
+import { LoaderIcon } from "lucide-react"
 
 interface EditViewFormProps {
-  view: ViewItem
+  view: View
   setIsEditViewFormOpen: React.Dispatch<React.SetStateAction<boolean>>
+  onSave: (updatedView: View) => void
+  onDelete: (viewId: string) => void
 }
 
-export function EditViewForm({
-  view,
-  setIsEditViewFormOpen,
-}: EditViewFormProps) {
+export function EditViewForm({ view, setIsEditViewFormOpen, onSave, onDelete }: EditViewFormProps) {
   const nameInputRef = useRef<HTMLInputElement>(null)
-
-  const [state, formAction] = useFormState(editView, {
-    message: "",
-  })
+  const [name, setName] = useState(view.name)
+  const [pending, setPending] = useState(false)
 
   useEffect(() => {
     nameInputRef.current?.focus()
   }, [])
 
-  useEffect(() => {
-    if (state.status === "success") {
-      setIsEditViewFormOpen(false)
-      toast.success(state.message)
-    } else if (state.status === "error") {
-      toast.error(state.message)
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    if (name.trim() === "") {
+      toast.error("Name cannot be empty.")
+      return
     }
-  }, [state, setIsEditViewFormOpen])
+
+    setPending(true)
+
+    // Simulate API call
+    setTimeout(() => {
+      const updatedView: View = { ...view, name }
+      onSave(updatedView)
+      setIsEditViewFormOpen(false)
+      toast.success("View updated successfully.")
+      setPending(false)
+    }, 500)
+  }
 
   return (
     <div>
       <div className="flex items-center gap-1 px-1 py-1.5">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-6"
-          onClick={() => setIsEditViewFormOpen(false)}
-        >
+        <Button variant="ghost" size="icon" className="size-6" onClick={() => setIsEditViewFormOpen(false)}>
           <span className="sr-only">Close edit view form</span>
           <ChevronLeftIcon aria-hidden="true" className="size-4" />
         </Button>
@@ -57,38 +61,24 @@ export function EditViewForm({
 
       <Separator />
 
-      <form action={formAction} className="flex flex-col gap-2 p-2">
-        <input type="hidden" name="id" value={view.id} />
+      <form onSubmit={handleSubmit} className="flex flex-col gap-2 p-2">
         <Input
           ref={nameInputRef}
           type="text"
           name="name"
           placeholder="Name"
-          defaultValue={view.name}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           autoComplete="off"
         />
-        <SubmitButton />
+        <Button disabled={pending} size="sm" type="submit">
+          {pending ? <LoaderIcon aria-hidden="true" className="size-3.5 animate-spin" /> : "Save"}
+        </Button>
       </form>
 
       <Separator />
 
-      <DeleteViewForm
-        viewId={view.id}
-        setIsEditViewFormOpen={setIsEditViewFormOpen}
-      />
+      <DeleteViewForm viewId={view.id} setIsEditViewFormOpen={setIsEditViewFormOpen} onDelete={onDelete} />
     </div>
-  )
-}
-
-function SubmitButton() {
-  const { pending } = useFormStatus()
-  return (
-    <Button disabled={pending} size="sm">
-      {pending ? (
-        <LoaderIcon aria-hidden="true" className="size-3.5 animate-spin" />
-      ) : (
-        "Save"
-      )}
-    </Button>
   )
 }

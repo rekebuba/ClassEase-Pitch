@@ -85,8 +85,6 @@ export function DataTableToolbarFilter<TData>({
 }: DataTableToolbarFilterProps<TData>) {
   {
     const columnMeta = column.columnDef.meta;
-    const { addFilter, removeFilter, getFilter, debouncedAddFilter } = useFilters();
-    const [textInput, setTextInput] = React.useState<string | undefined>(undefined);
 
     const onFilterRender = React.useCallback(() => {
       if (!columnMeta?.variant) return null;

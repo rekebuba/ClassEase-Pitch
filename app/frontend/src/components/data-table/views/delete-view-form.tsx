@@ -1,64 +1,46 @@
-import { useEffect } from "react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
-import { useFormState, useFormStatus } from "react-dom"
+"use client"
+
+import type React from "react"
+
+import { useState } from "react"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
-import { LoaderIcon } from "@/components/loader-icon"
-import { deleteView } from "@/app/_lib/actions"
+import { LoaderIcon } from "lucide-react"
 
 interface DeleteViewFormProps {
   viewId: string
   setIsEditViewFormOpen: React.Dispatch<React.SetStateAction<boolean>>
+  onDelete: (viewId: string) => void
 }
 
-export function DeleteViewForm({
-  viewId,
-  setIsEditViewFormOpen,
-}: DeleteViewFormProps) {
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
+export function DeleteViewForm({ viewId, setIsEditViewFormOpen, onDelete }: DeleteViewFormProps) {
+  const [pending, setPending] = useState(false)
 
-  const [state, formAction] = useFormState(deleteView, {
-    message: "",
-  })
+  const handleDelete = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setPending(true)
 
-  useEffect(() => {
-    if (state.status === "success") {
+    // Simulate API call
+    setTimeout(() => {
+      onDelete(viewId)
       setIsEditViewFormOpen(false)
-      if (searchParams.get("viewId") === viewId) {
-        router.replace(pathname)
-      }
-      toast.success(state.message)
-    } else if (state.status === "error") {
-      toast.error(state.message)
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state, setIsEditViewFormOpen])
+      toast.success("View deleted successfully.")
+      setPending(false)
+    }, 500)
+  }
 
   return (
-    <form action={formAction} className="p-2">
-      <input type="hidden" name="id" value={viewId} />
-      <SubmitButton />
+    <form onSubmit={handleDelete} className="p-2">
+      <Button
+        disabled={pending}
+        variant="outline"
+        size="sm"
+        type="submit"
+        className="w-full border-red-800/50 bg-destructive/5 text-red-600 hover:bg-destructive/10 hover:text-red-600 active:bg-destructive/10"
+      >
+        {pending ? <LoaderIcon aria-hidden="true" className="size-3.5 animate-spin" /> : "Delete"}
+      </Button>
     </form>
-  )
-}
-
-function SubmitButton() {
-  const { pending } = useFormStatus()
-  return (
-    <Button
-      disabled={pending}
-      variant="outline"
-      size="sm"
-      className="w-full border-red-800/50 bg-destructive/5 text-red-600 hover:bg-destructive/10 hover:text-red-600 active:bg-destructive/10"
-    >
-      {pending ? (
-        <LoaderIcon aria-hidden="true" className="size-3.5 animate-spin" />
-      ) : (
-        "Delete"
-      )}
-    </Button>
   )
 }

@@ -61,7 +61,6 @@ export const searchParamsCache = z.object({
     attendance: z.array(z.coerce.number()).optional(),
     averageGrade: z.array(z.coerce.number()).optional(),
     status: z.array(z.string()).optional(),
-    estimatedHours: z.array(z.coerce.number()).optional(),
     createdAt: z.array(z.coerce.number()).optional(),
     // advanced filter
     filters: z.array(z.any()).optional(),
@@ -76,9 +75,7 @@ export const searchParamMap = {
     filterFlag: parseAsStringEnum(["Advanced filters", ""]).withDefault(""),
     page: parseAsInteger.withDefault(1),
     perPage: parseAsInteger.withDefault(10),
-    sort: getSortingStateParser().withDefault([
-        { id: "createdAt", desc: true },
-    ]),
+    sort: getSortingStateParser(),
     name: parseAsString.withDefault(""),
     grade: parseAsArrayOf(z.number()).withDefault([]),
     section: parseAsArrayOf(z.string()).withDefault([]),
@@ -90,6 +87,7 @@ export const searchParamMap = {
     // advanced filter
     filters: getFiltersStateParser().withDefault([]),
     joinOperator: parseAsStringEnum(["and", "or"]).withDefault("and"),
+    viewId: parseAsString.withDefault(""),
 }
 
 export type SearchParamMapSchema = typeof searchParamMap;
@@ -136,18 +134,7 @@ export const viewSchema = z.object({
     id: z.string().uuid(),
     name: z.string(),
     columns: z.array(z.string()),
-    filterParams: z.object({
-        joinOperator: z.enum(["and", "or"]).optional(),
-        sort: z.string().optional(),
-        filters: z
-            .object({
-                field: z.enum(["title", "status", "priority"]),
-                value: z.string(),
-                isMulti: z.boolean().default(false),
-            })
-            .array()
-            .optional(),
-    }).optional(),
+    searchParams: searchParamsCache,
     createdAt: z.string(),
     updatedAt: z.string(),
     // createdAt: z.string().transform((val) => new Date(val)),

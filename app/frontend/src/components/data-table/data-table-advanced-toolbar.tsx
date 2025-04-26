@@ -18,8 +18,9 @@ import { getFiltersStateParser } from "@/lib/parsers";
 
 interface DataTableAdvancedToolbarProps<TData>
   extends React.ComponentProps<"div"> {
+  views: View[]
   searchParams: SearchParams;
-  views: Omit<View, "createdAt" | "updatedAt">[]
+  setSearchParams: ({}) => void;
 }
 
 export function DataTableAdvancedToolbar<TData>({
@@ -27,6 +28,7 @@ export function DataTableAdvancedToolbar<TData>({
   views,
   className,
   searchParams,
+  setSearchParams,
   ...props
 }: DataTableAdvancedToolbarProps<TData>) {
 
@@ -99,7 +101,7 @@ export function DataTableAdvancedToolbar<TData>({
     >
       <div className="flex flex-1 items-center gap-2">{children}</div>
       <div className="flex flex-col items-end justify-between gap-3 sm:flex-row sm:items-center">
-        <DataTableViewsDropdown views={views} filterParams={searchParams} />
+        {views && <DataTableViewsDropdown views={views} filterParams={searchParams} />}
       </div>
       <div className="flex items-center justify-between">
         {openFilterBuilder && (

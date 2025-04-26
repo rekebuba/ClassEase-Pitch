@@ -87,6 +87,7 @@ export function StudentsTable() {
     shallow: false,
     clearOnDefault: true,
   })
+  const [searchParams, setSearchParams] = useQueryStates(searchParamMap);
 
   const columnIds = React.useMemo(() => {
     return table
@@ -95,7 +96,6 @@ export function StudentsTable() {
       .map((column) => column.id)
   }, [table])
 
-  const [searchParams] = useQueryStates<SearchParamMapSchema>(searchParamMap);
 
   // Filter out empty values
   const filteredParams = Object.fromEntries(
@@ -163,7 +163,7 @@ export function StudentsTable() {
             table={table}
             actionBar={<StudentsTableActionBar table={table} />}
           >
-            <DataTableAdvancedToolbar views={views} searchParams={filteredParams}>
+            <DataTableAdvancedToolbar views={views} searchParams={filteredParams} setSearchParams={setSearchParams}>
               <DataTableSortList table={table} align="start" />
               <DataTableFilterList
                 table={table}

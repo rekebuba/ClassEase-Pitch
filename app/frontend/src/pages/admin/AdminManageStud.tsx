@@ -28,13 +28,18 @@ export async function getStudentsViews() {
   // Simulate ApI call
   await new Promise((resolve) => setTimeout(resolve, 800))
 
-  return {
-    id: "uuid-4",
+  return [{
+    id: crypto.randomUUID(),
     name: "view Name",
     columns: [""],
+    searchParams: {
+      page: 1,
+      pageSize: 10,
+      sort: [{ id: "name", desc: true }],
+    },
     createdAt: "",
     updatedAt: ""
-  }
+  }]
 }
 
 export async function getStatusCounts() {
