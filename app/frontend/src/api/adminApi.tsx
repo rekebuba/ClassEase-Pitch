@@ -1,9 +1,27 @@
-import api from './api';
+import { SearchParams } from '@/types';
+import { api, zodApiHandler } from "@/api";
+import { toast } from 'sonner';
+import {
+    AttendanceRangeSchema,
+    AverageRangeSchema,
+    GradeCountsSchema,
+    StatusCountSchema,
+    StudentsDataSchema,
+    StudentsViewSchema
+} from '@/lib/validations';
+import { z } from 'zod';
+import qs from "qs";
 
-const adminApi = {
+export const adminApi = {
     getDashboardData: () => api.get('/admin/dashboard'),
     getSchoolOverview: () => api.get('/admin/overview'),
-    getStudents: (params?: { params: { grades?: [], year?: string } }) => api.get('/admin/students', { params }),
+    getStudents: (validQuery: SearchParams) => api.post('/admin/students', validQuery),
+    getStudentsStatusCounts: () => api.get('/admin/students/status-count'),
+    getStudentsAverageRange: () => api.get('/admin/students/average-range'),
+    getStudentsAttendanceRange: () => api.get('/admin/students/attendance-range'),
+    getGradeCounts: () => api.get('/admin/students/grade-counts'),
+    getAllStudentsViews: () => api.get('/admin/students/views'),
+    getStudentsByView: (view: string) => api.get(`/admin/students/views/${view}`),
     getTeachers: () => api.get('/admin/teachers'),
     createUser: (userData) => api.post('/admin/users', userData),
     createMarkList: (markListData) => api.post('/admin/students/mark_list', markListData),
@@ -14,4 +32,134 @@ const adminApi = {
     getEvents: () => api.get('/admin/events'),
 };
 
-export default adminApi;
+export const getStudents = async (validQuery: SearchParams) => {
+    const response = await zodApiHandler(
+        () => adminApi.getStudents(validQuery),
+        StudentsDataSchema,
+    );
+
+    if (!response.success) {
+        toast.error(response.error.message, {
+            style: { color: "red" },
+        });
+        console.error(response.error.details);
+        throw new Error("Failed to fetch students data", {
+            cause: JSON.stringify(response.error.details),
+        });
+    }
+
+    return response.data;
+}
+
+export const getStudentsStatusCounts = async () => {
+    const response = await zodApiHandler(
+        () => adminApi.getStudentsStatusCounts(),
+        StatusCountSchema,
+    );
+
+    if (!response.success) {
+        toast.error(response.error.message, {
+            description: JSON.stringify(response.error.details),
+            style: { color: "red" },
+        });
+        console.error(response.error.details);
+        throw new Error("Failed to fetch students status counts", {
+            cause: JSON.stringify(response.error.details),
+        });
+    }
+
+    return response.data;
+}
+
+export const getStudentsAverageRange = async () => {
+    const response = await zodApiHandler(
+        () => adminApi.getStudentsAverageRange(),
+        AverageRangeSchema,
+    );
+
+    if (!response.success) {
+        toast.error(response.error.message, {
+            style: { color: "red" },
+        });
+        console.error(response.error.details);
+        throw new Error("Failed to fetch students grade counts", {
+            cause: JSON.stringify(response.error.details),
+        });
+    }
+
+    return response.data;
+}
+export const getStudentsAttendanceRange = async () => {
+    const response = await zodApiHandler(
+        () => adminApi.getStudentsAttendanceRange(),
+        AttendanceRangeSchema,
+    );
+
+    if (!response.success) {
+        toast.error(response.error.message, {
+            style: { color: "red" },
+        });
+        console.error(response.error.details);
+        throw new Error("Failed to fetch students attendance range", {
+            cause: JSON.stringify(response.error.details),
+        });
+    }
+
+    return response.data;
+}
+export const getGradeCounts = async () => {
+    const response = await zodApiHandler(
+        () => adminApi.getGradeCounts(),
+        GradeCountsSchema,
+    );
+
+    if (!response.success) {
+        toast.error(response.error.message, {
+            style: { color: "red" },
+        });
+        console.error(response.error.details);
+        throw new Error("Failed to fetch students grade counts", {
+            cause: JSON.stringify(response.error.details),
+        });
+    }
+
+    return response.data;
+}
+
+export const getAllStudentsViews = async () => {
+    const response = await zodApiHandler(
+        () => adminApi.getAllStudentsViews(),
+        StudentsViewSchema.array(),
+    );
+
+    if (!response.success) {
+        toast.error(response.error.message, {
+            style: { color: "red" },
+        });
+        console.error(response.error.details);
+        throw new Error("Failed to fetch students views", {
+            cause: JSON.stringify(response.error.details),
+        });
+    }
+
+    return response.data;
+}
+
+export const getStudentsByView = async (view: string) => {
+    const response = await zodApiHandler(
+        () => adminApi.getStudentsByView(view),
+        StudentsViewSchema,
+    );
+
+    if (!response.success) {
+        toast.error(response.error.message, {
+            style: { color: "red" },
+        });
+        console.error(response.error.details);
+        throw new Error("Failed to fetch students by view", {
+            cause: JSON.stringify(response.error.details),
+        });
+    }
+
+    return response.data;
+}

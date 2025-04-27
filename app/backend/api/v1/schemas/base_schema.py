@@ -1,6 +1,7 @@
 from datetime import datetime
 import re
 from marshmallow import Schema, ValidationError, post_dump, post_load, pre_load, validates
+from models.table import Table
 from models.subject import Subject
 from models.user import User
 from models.semester import Semester
@@ -9,6 +10,7 @@ from models.event import Event
 from models.grade import Grade
 from models.year import Year
 from models import storage
+from sqlalchemy.orm import DeclarativeMeta
 
 
 def to_snake(data):
@@ -228,3 +230,24 @@ class BaseSchema(Schema):
                 f"No Subject found for subject details: {kwargs}")
 
         return subject
+
+    @staticmethod
+    def has_column(table, column_name):
+        if column_name in table.__table__.columns.keys():
+            return column_name
+        else:
+            raise ValidationError(
+                f"Column {column_name} does not exist in {table.__tablename__}")
+
+    @staticmethod
+    def get_table_id(table):
+        if table is None:
+            raise ValidationError("table is required")
+
+        # Fetch the table_id from the database
+        table_name = table.__tablename__
+        table = storage.session.query(Table).filter_by(
+            name=table_name
+        ).first()
+
+        return table.id if table else None

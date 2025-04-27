@@ -7,6 +7,7 @@ import bcrypt
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from api.v1.schemas.base_schema import BaseSchema
 from werkzeug.datastructures import FileStorage
+from models.student import Student
 from models.base_model import CustomTypes
 from models.year import Year
 from models import storage
@@ -67,6 +68,7 @@ class UserSchema(BaseSchema):
     role = RoleEnumField()
     national_id = fields.String(required=True, load_only=True)
     image_path = FileField(required=False, allow_none=True)
+    table_id = fields.String(required=False)
 
     @staticmethod
     def _hash_password(password):
@@ -135,6 +137,12 @@ class UserSchema(BaseSchema):
         if 'image_path' in data and data['image_path'] is not None:
             data['image_path'] = url_for(
                 'static', filename=data['image_path'], _external=True)
+
+        return data
+
+    @pre_dump
+    def add_fields(self, data, **kwargs):
+        data['table_id'] = self.get_table_id(User)
 
         return data
 
@@ -386,6 +394,12 @@ class StudentSchema(BaseSchema):
             semester = storage.get_first(Semester, id=value)
             if not semester:
                 raise ValidationError('Invalid semester_id.')
+
+    @pre_dump
+    def add_fields(self, data, **kwargs):
+        data['table_id'] = self.get_table_id(User)
+
+        return data
 
 
 class SemesterCreationSchema(BaseSchema):
@@ -656,7 +670,90 @@ class RegisteredGradesSchema(BaseSchema):
     grades = fields.List(fields.Integer, required=True)
 
 
+class SortSchema(BaseSchema):
+    """Schema for validating sorting parameters."""
+    id = fields.String(required=False)
+    desc = fields.Boolean(required=False)
+
+    @pre_load
+    def set_defaults(self, data, **kwargs):
+        # add default values to the data
+        data['column'] = self.has_column(Student, data.pop('id', None))
+
+        return data
+
+
+class RangeSchema(BaseSchema):
+    """Schema for validating range parameters."""
+    min = fields.Integer(required=False)
+    max = fields.Integer(required=False)
+
+
+class FilterSchema(BaseSchema):
+    """Schema for validating filter parameters."""
+    id = fields.String(required=False)
+    filter_id = fields.String(required=False)
+    range = fields.Nested(RangeSchema, required=False)
+    operator = fields.String(required=False)
+    variant = fields.String(validate=lambda x: x in [
+                            "text", "number", "multiSelect"], required=True)
+    value = fields.Raw(required=False)
+
+    @validates_schema
+    def validate_value(self, data, **kwargs):
+        if 'variant' in data:
+            value = data.get('value')
+            if data['variant'] == "text":
+                if not isinstance(value, str):
+                    raise ValidationError(
+                        "Value must be a string when variant is 'text'.", field_name="value")
+            elif data['variant'] == "multiSelect":
+                if not isinstance(value, list) or not all(isinstance(v, str) for v in value):
+                    raise ValidationError(
+                        "Value must be a list of strings when variant is 'multiSelect'.", field_name="value")
+            elif data['variant'] == "number":
+                if not isinstance(value, (int, float)):
+                    raise ValidationError(
+                        "Value must be a number when variant is 'number'.", field_name="value")
+
+        if "operator" in data:
+            operator = data.get('operator')
+            operator_config = {
+                "text": {
+                    "ilike": self.get_operator("ilike", ),
+                }
+            }
+            if data['variant'] == "text":
+                if operator not in operator_config['text'].keys():
+                    raise ValidationError(
+                        f"Invalid operator for text variant. Allowed: {', '.join(operator_config['text'].keys())}", field_name="operator")
+            elif data['variant'] == "number":
+                if operator not in ["=", "<", ">", "<=", ">=", "between"]:
+                    raise ValidationError(
+                        f"Invalid operator for number variant. Allowed: =, <, >, <=, >=, between", field_name="operator")
+
+    @pre_load
+    def set_defaults(self, data, **kwargs):
+        # add default values to the data
+        data['column'] = self.has_column(Student, data.pop('id', None))
+
+        # data['filter_id'] = self.get_filter_id(data.pop('id', None))
+        # data['value'] = self.get_value(data.pop('value'))
+        # data['variant'] = self.get_variant(data.pop('variant'))
+
+        return data
+
+
 class ParamSchema(BaseSchema):
+    """Schema for validating parameters."""
+    filter_flag = fields.String(required=False)
+    filters = fields.List(fields.Nested(FilterSchema), required=False)
+    page = fields.Integer(required=False)
+    per_page = fields.Integer(required=False)
+
+    sort = fields.List(fields.Nested(SortSchema), required=False)
+    join_operator = fields.String(required=False)
+
     grades = fields.List(fields.Integer)
     grade_id = fields.List(fields.String, required=False, load_only=True)
 
@@ -709,9 +806,25 @@ class AllStudentsSchema(BaseSchema):
 
     @post_dump(pass_many=True)
     def merge_nested(self, data, many, **kwargs):
+        table_id = {}
+        user = data[0].get('user', {})
+        user_table_id = user.pop('table_id', None)
+        for key in user.keys():
+            if key not in table_id:
+                table_id[key] = user_table_id
+
+        student = data[0].get('student', {})
+        student_table_id = student.pop('table_id', None)
+        for key in student.keys():
+            if key not in table_id:
+                table_id[key] = student_table_id
+
+        merged_data = {"table_id": table_id}
         if many:
-            return [self._merge(d) for d in data]
-        return self._merge(data)
+            merged_data['data'] = [self._merge(d) for d in data]
+        merged_data['data'] = self._merge(data)
+
+        return merged_data
 
     def _merge(self, item):
         user = item.pop('user', {})

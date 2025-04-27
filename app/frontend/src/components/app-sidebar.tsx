@@ -304,7 +304,7 @@ export function AppSidebar({ role, ...props }: AppSidebarProps) {
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             size="lg"
-                            aria-title="Go to Dashboard"
+                            // aria-title="Go to Dashboard"
                             className="data-[state=open]:bg-sidebar-accent
                             data-[state=open]:text-sidebar-accent-foreground"
                         >

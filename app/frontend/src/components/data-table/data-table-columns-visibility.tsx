@@ -1,7 +1,7 @@
 "use client";
 
 import type { Table } from "@tanstack/react-table";
-import { Check, ChevronsUpDown, Settings2 } from "lucide-react";
+import { Check, ChevronsUpDown, LayoutIcon, Settings2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -20,13 +20,13 @@ import {
 import { cn } from "@/lib/utils";
 import * as React from "react";
 
-interface DataTableViewOptionsProps<TData> {
+interface DataTableColumnsVisibilityProps<TData> {
   table: Table<TData>;
 }
 
-export function DataTableViewOptions<TData>({
+export function DataTableColumnsVisibility<TData>({
   table,
-}: DataTableViewOptionsProps<TData>) {
+}: DataTableColumnsVisibilityProps<TData>) {
   const columns = React.useMemo(
     () =>
       table
@@ -48,8 +48,8 @@ export function DataTableViewOptions<TData>({
           size="sm"
           className="ml-auto hidden h-8 lg:flex"
         >
-          <Settings2 />
-          View
+          <LayoutIcon className="mr-2 size-4" />
+          Columns
           <ChevronsUpDown className="ml-auto opacity-50" />
         </Button>
       </PopoverTrigger>

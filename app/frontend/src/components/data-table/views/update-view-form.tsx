@@ -14,10 +14,9 @@ interface UpdateViewFormProps {
   isUpdated: boolean
   currentView: View | undefined
   filterParams: FilterParams
-  onUpdate: (updatedView: View) => void
 }
 
-export default function UpdateViewForm({ isUpdated, currentView, filterParams, onUpdate }: UpdateViewFormProps) {
+export default function UpdateViewForm({ isUpdated, currentView, filterParams }: UpdateViewFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { tableInstance } = useTableInstanceContext()
 
@@ -36,14 +35,11 @@ export default function UpdateViewForm({ isUpdated, currentView, filterParams, o
     // Create updated view with current filters
     const updatedView: View = {
       ...currentView,
-      columns: visibleColumns,
-      searchParams: filterParams || {},
     }
 
     // Simulate API call
     setTimeout(() => {
       try {
-        onUpdate(updatedView)
         toast.success("View updated successfully")
       } catch (error) {
         toast.error("Failed to update view")

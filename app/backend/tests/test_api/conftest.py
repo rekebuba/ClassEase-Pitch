@@ -200,13 +200,13 @@ def db_course_registration(db_session, db_event_form):
 
     for student in students:
         grade = (db_session.query(Grade.id)
-                    .filter(Grade.id == (student.next_grade_id if student.next_grade_id else student.current_grade_id))
+                 .filter(Grade.id == (student.next_grade_id if student.next_grade_id else student.current_grade_id))
+                 .first()
+                 )
+        semester = (db_session.query(Semester.id)
+                    .filter_by(name=(1 if not student.next_grade_id else 2))
                     .first()
                     )
-        semester = (db_session.query(Semester.id)
-                       .filter_by(name=(1 if not student.next_grade_id else 2))
-                       .first()
-                       )
 
         new_semester_record = STUDSemesterRecord(
             user_id=student.user_id,

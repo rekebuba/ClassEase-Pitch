@@ -12,7 +12,7 @@ import {
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import * as React from "react";
 
-import { DataTableRangeFilter } from "@/components/data-table";
+import { DataTableRangeFilter, useTableInstanceContext } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -77,14 +77,12 @@ const REMOVE_FILTER_SHORTCUTS = ["backspace", "delete"];
 
 interface DataTableFilterListProps<TData>
   extends React.ComponentProps<typeof PopoverContent> {
-  table: Table<TData>;
   debounceMs?: number;
   throttleMs?: number;
   shallow?: boolean;
 }
 
 export function DataTableFilterList<TData>({
-  table,
   debounceMs = DEBOUNCE_MS,
   throttleMs = THROTTLE_MS,
   shallow = true,
@@ -95,6 +93,9 @@ export function DataTableFilterList<TData>({
   const descriptionId = React.useId();
   const [open, setOpen] = React.useState(false);
   const addButtonRef = React.useRef<HTMLButtonElement>(null);
+
+  const { tableInstance: table } = useTableInstanceContext()
+
 
   const columns = React.useMemo(() => {
     return table

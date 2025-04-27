@@ -22,29 +22,27 @@ import {
     DrawerTrigger,
 } from "@/components/ui/drawer";
 
-import { Loader, Trash } from "lucide-react";
+import { Loader, LoaderIcon, Trash, TrashIcon } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button"
 
 import type { Student } from "@/lib/types"
 import { useMediaQuery } from "@/hooks/use-media-query"
+import { Row, Table } from "@tanstack/react-table";
 
-interface DeleteStudentsDialogProps {
-    open: boolean
-    onOpenChange: (open: boolean) => void
-    students: Student[]
-    showTrigger?: boolean
-    onSuccess?: () => void
+interface DeleteStudentsDialogProps<TData> {
+    students: Row<Student>[];
+    showTrigger?: boolean;
+    onSuccess?: () => void;
+    onOpenChange?: (isOpen: boolean) => void;
 }
 
 export function DeleteStudentsDialog({
-    open,
     students,
     showTrigger = true,
     onSuccess,
     ...props
-}: DeleteStudentsDialogProps) {
-    const [isDeletePending, startDeleteTransition] = React.useTransition();
+}: DeleteStudentsDialogProps<Student>) {
     const [isDeleting, setIsDeleting] = React.useState(false)
     const isDesktop = useMediaQuery("(min-width: 640px)");
 
@@ -56,96 +54,57 @@ export function DeleteStudentsDialog({
                     toast.error(error);
                     return;
                 }
-                
+
                 // Close the dialog
                 props.onOpenChange?.(false);
-                toast.success("Tasks deleted");
+                toast.success(`${students.length > 1 ? "Tasks" : "Task"} deleted`)
                 onSuccess?.();
             });
         });
     }
 
 
-    if (isDesktop) {
-        return (
-            <Dialog {...props}>
-                {showTrigger ? (
-                    <DialogTrigger asChild>
-                        <Button variant="outline" size="sm">
-                            <Trash className="mr-2 size-4" aria-hidden="true" />
-                            Delete ({students.length})
-                        </Button>
-                    </DialogTrigger>
-                ) : null}
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Are you absolutely sure?</DialogTitle>
-                        <DialogDescription>
-                            This action cannot be undone. This will permanently delete your{" "}
-                            <span className="font-medium">{students.length}</span>
-                            {students.length === 1 ? " task" : " tasks"} from our servers.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter className="gap-2 sm:space-x-0">
-                        <DialogClose asChild>
-                            <Button variant="outline">Cancel</Button>
-                        </DialogClose>
-                        <Button
-                            aria-label="Delete selected rows"
-                            variant="destructive"
-                            onClick={handleDelete}
-                            disabled={isDeletePending}
-                        >
-                            {isDeletePending && (
-                                <Loader
-                                    className="mr-2 size-4 animate-spin"
-                                    aria-hidden="true"
-                                />
-                            )}
-                            Delete
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        );
-    }
+    const [isDeletePending, startDeleteTransition] = React.useTransition()
 
     return (
-        <Drawer {...props}>
+        <Dialog {...props}>
             {showTrigger ? (
-                <DrawerTrigger asChild>
+                <DialogTrigger asChild>
                     <Button variant="outline" size="sm">
-                        <Trash className="mr-2 size-4" aria-hidden="true" />
+                        <TrashIcon className="mr-2 size-4" aria-hidden="true" />
                         Delete ({students.length})
                     </Button>
-                </DrawerTrigger>
+                </DialogTrigger>
             ) : null}
-            <DrawerContent>
-                <DrawerHeader>
-                    <DrawerTitle>Are you absolutely sure?</DrawerTitle>
-                    <DrawerDescription>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Are you absolutely sure?</DialogTitle>
+                    <DialogDescription>
                         This action cannot be undone. This will permanently delete your{" "}
                         <span className="font-medium">{students.length}</span>
-                        {students.length === 1 ? " student" : " students"} from our servers.
-                    </DrawerDescription>
-                </DrawerHeader>
-                <DrawerFooter className="gap-2 sm:space-x-0">
-                    <DrawerClose asChild>
+                        {students.length === 1 ? " task" : " tasks"} from our servers.
+                    </DialogDescription>
+                </DialogHeader>
+                <DialogFooter className="gap-2 sm:space-x-0">
+                    <DialogClose asChild>
                         <Button variant="outline">Cancel</Button>
-                    </DrawerClose>
+                    </DialogClose>
                     <Button
                         aria-label="Delete selected rows"
                         variant="destructive"
-                        onClick={handleDelete}
+                        onClick={() => handleDelete()}
                         disabled={isDeletePending}
                     >
                         {isDeletePending && (
-                            <Loader className="mr-2 size-4 animate-spin" aria-hidden="true" />
+                            <LoaderIcon
+                                className="mr-1.5 size-4 animate-spin"
+                                aria-hidden="true"
+                            />
                         )}
                         Delete
                     </Button>
-                </DrawerFooter>
-            </DrawerContent>
-        </Drawer>
-    );
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
+    )
 }

@@ -25,18 +25,20 @@ import { useTransition } from "react"
 
 
 interface GetStudentsTableColumnsOptions {
+  tableId: Record<string, number>
   statusCounts: Record<string, number>
   gradeCounts: Record<string, number>
   attendanceRange: {min: number, max: number}
-  gradeRange: {min: number, max: number}
+  averageRange: {min: number, max: number}
   setRowAction: React.Dispatch<React.SetStateAction<DataTableRowAction<Student> | null>>
 }
 
 export function getStudentsTableColumns({
+  tableId,
   statusCounts,
   gradeCounts,
   attendanceRange,
-  gradeRange,
+  averageRange,
   setRowAction,
 }: GetStudentsTableColumnsOptions): ColumnDef<Student>[] {
   return [
@@ -82,7 +84,7 @@ export function getStudentsTableColumns({
             </Avatar>
             <div className="flex flex-col">
               <span className="font-medium">{row.original.name}</span>
-              <span className="text-xs text-muted-foreground">{row.original.email}</span>
+              <span className="text-xs text-muted-foreground">{row.original.id}</span>
             </div>
           </div>
         )
@@ -205,7 +207,7 @@ export function getStudentsTableColumns({
       meta: {
         variant: "range",
         label: "Average Grade",
-        range: gradeRange,
+        range: averageRange,
         unit: "%",
       },
     },
@@ -216,7 +218,7 @@ export function getStudentsTableColumns({
       cell: ({ row }) => (
         <div className="flex flex-col">
           <span>{row.original.parentName}</span>
-          <span className="text-xs text-muted-foreground">{row.original.parentEmail}</span>
+          <span className="text-xs text-muted-foreground">{row.original.parentPhone}</span>
         </div>
       ),
       meta: {

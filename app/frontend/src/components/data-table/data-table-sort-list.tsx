@@ -40,17 +40,16 @@ import {
 } from "@/components/ui/sortable";
 import { dataTableConfig } from "@/config/data-table";
 import { cn } from "@/lib/utils";
+import { useTableInstanceContext } from "./table-instance-provider";
 
 const OPEN_MENU_SHORTCUT = "s";
 const REMOVE_SORT_SHORTCUTS = ["backspace", "delete"];
 
 interface DataTableSortListProps<TData>
   extends React.ComponentProps<typeof PopoverContent> {
-  table: Table<TData>;
 }
 
 export function DataTableSortList<TData>({
-  table,
   ...props
 }: DataTableSortListProps<TData>) {
   const id = React.useId();
@@ -58,6 +57,8 @@ export function DataTableSortList<TData>({
   const descriptionId = React.useId();
   const [open, setOpen] = React.useState(false);
   const addButtonRef = React.useRef<HTMLButtonElement>(null);
+
+  const { tableInstance: table } = useTableInstanceContext()
 
   const sorting = table.getState().sorting;
   const onSortingChange = table.setSorting;

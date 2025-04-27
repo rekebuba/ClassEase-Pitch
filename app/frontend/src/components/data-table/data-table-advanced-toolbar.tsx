@@ -1,26 +1,34 @@
 "use client";
 
-import type { Table } from "@tanstack/react-table";
 import * as React from "react";
 
-import { DataTableToolbarFilter, DataTableViewOptions, useTableInstanceContext } from "@/components/data-table";
 import { cn } from "@/lib/utils";
-import { DataTableFilterCombobox } from "./data-table-filter-combobox";
+import { View } from "@/lib/validations";
+import { PlusIcon } from "@radix-ui/react-icons"
+import UpdateViewForm from "./views/update-view-form";
+
 import { DataTableFilterOption, SearchParams } from "@/types";
-import { useQueryState, useQueryStates } from "nuqs";
-import { useLocation } from "react-router-dom";
-import { searchParamMap, View } from "@/lib/validations";
+import type { Column } from "@tanstack/react-table";
+
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { CaretSortIcon, PlusIcon } from "@radix-ui/react-icons"
-import { calcFilterParams } from "./views/utils";
-import { DataTableViewsDropdown } from "@/components/data-table/views";
-import { getFiltersStateParser } from "@/lib/parsers";
+
+import {
+  DataTableColumnsVisibility,
+  useTableInstanceContext,
+  DataTableDateFilter,
+  DataTableFacetedFilter,
+  DataTableInputFilter,
+  DataTableSliderFilter,
+  DataTableFilterCombobox,
+} from "@/components/data-table";
+import { CreateViewPopover, DataTableViewsDropdown } from "@/components/data-table/views";
+
 
 interface DataTableAdvancedToolbarProps<TData>
   extends React.ComponentProps<"div"> {
   views: View[]
   searchParams: SearchParams;
-  setSearchParams: ({}) => void;
 }
 
 export function DataTableAdvancedToolbar<TData>({
@@ -28,7 +36,6 @@ export function DataTableAdvancedToolbar<TData>({
   views,
   className,
   searchParams,
-  setSearchParams,
   ...props
 }: DataTableAdvancedToolbarProps<TData>) {
 
@@ -72,7 +79,7 @@ export function DataTableAdvancedToolbar<TData>({
         (selectedOption) => selectedOption.value === option.value
       )
   )
-
+  // const currentView = views.find((view) => view.id === viewId)
 
   const [openFilterBuilder, setOpenFilterBuilder] = React.useState(
     initialSelectedOptions.length > 0 || false
@@ -84,10 +91,9 @@ export function DataTableAdvancedToolbar<TData>({
     setOpenCombobox(true)
   }
 
-  const multiFilterOptions = React.useMemo(
-    () => selectedOptions.filter((option) => option.isMulti),
-    [selectedOptions]
-  )
+  function resetToCurrentView() {
+    console.log("Resetting to current view")
+  }
 
   return (
     <div
@@ -99,10 +105,14 @@ export function DataTableAdvancedToolbar<TData>({
       )}
       {...props}
     >
-      <div className="flex flex-1 items-center gap-2">{children}</div>
       <div className="flex flex-col items-end justify-between gap-3 sm:flex-row sm:items-center">
         {views && <DataTableViewsDropdown views={views} filterParams={searchParams} />}
+        <div className="flex items-center gap-2">
+          {children}
+          <DataTableColumnsVisibility table={table} />
+        </div>
       </div>
+
       <div className="flex items-center justify-between">
         {openFilterBuilder && (
           <div className="flex h-8 items-center gap-2">
@@ -143,24 +153,108 @@ export function DataTableAdvancedToolbar<TData>({
           </DataTableFilterCombobox>
         ) : null}
 
-        {/* <div className="ml-auto flex items-center gap-2">
-          {isUpdated && currentView && (
-            <Button variant="ghost" size="sm" onClick={resetToCurrentView}>
-              Reset
-            </Button>
-          )}
+        <div className="ml-auto flex items-center gap-2">
+          <Button variant="ghost" size="sm" onClick={resetToCurrentView}>
+            Reset
+          </Button>
 
-          {isDefaultViewUpdated && !currentView && (
-            <CreateViewPopover selectedOptions={selectedOptions} />
-          )}
+          <CreateViewPopover selectedOptions={selectedOptions} />
 
           <UpdateViewForm
-            isUpdated={isUpdated}
-            currentView={currentView}
-            filterParams={filterParams}
+            isUpdated={false}
+            currentView={undefined}
+            filterParams={searchParams}
           />
-        </div> */}
+        </div>
       </div>
     </div>
   );
+}
+
+
+interface DataTableToolbarFilterProps<TData> {
+  column: Column<TData>;
+  setSelectedOptions: React.Dispatch<
+    React.SetStateAction<DataTableFilterOption<TData>[]>
+  >
+}
+
+export function DataTableToolbarFilter<TData>({
+  column,
+  setSelectedOptions,
+}: DataTableToolbarFilterProps<TData>) {
+  {
+    const columnMeta = column.columnDef.meta;
+
+    const onFilterRender = React.useCallback(() => {
+      if (!columnMeta?.variant) return null;
+
+      switch (columnMeta.variant) {
+        case "text":
+          return (
+            <DataTableInputFilter
+              column={column}
+              title={columnMeta.label ?? column.id}
+              setSelectedOptions={setSelectedOptions}
+            >
+            </DataTableInputFilter>
+          );
+
+        case "number":
+          return (
+            <div className="relative">
+              <Input
+                type="number"
+                inputMode="numeric"
+                placeholder={columnMeta.placeholder ?? columnMeta.label}
+                value={(column.getFilterValue() as string) ?? ""}
+                onChange={(event) => column.setFilterValue(event.target.value)}
+                className={cn("h-8 w-[120px]", columnMeta.unit && "pr-8")}
+              />
+              {columnMeta.unit && (
+                <span className="absolute top-0 right-0 bottom-0 flex items-center rounded-r-md bg-accent px-2 text-muted-foreground text-sm">
+                  {columnMeta.unit}
+                </span>
+              )}
+            </div>
+          );
+
+        case "range":
+          return (
+            <DataTableSliderFilter
+              column={column}
+              title={columnMeta.label ?? column.id}
+              setSelectedOptions={setSelectedOptions}
+            />
+          );
+
+        case "date":
+        case "dateRange":
+          return (
+            <DataTableDateFilter
+              column={column}
+              title={columnMeta.label ?? column.id}
+              multiple={columnMeta.variant === "dateRange"}
+            />
+          );
+
+        case "select":
+        case "multiSelect":
+          return (
+            <DataTableFacetedFilter
+              column={column}
+              title={columnMeta.label ?? column.id}
+              setSelectedOptions={setSelectedOptions}
+              options={columnMeta.options ?? []}
+              multiple={columnMeta.variant === "multiSelect"}
+            />
+          );
+
+        default:
+          return null;
+      }
+    }, [column, columnMeta]);
+
+    return onFilterRender();
+  }
 }

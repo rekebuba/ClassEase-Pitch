@@ -25,7 +25,8 @@ export const getSortingStateParser = <TData>(
   return createParser({
     parse: (value) => {
       try {
-        const parsed = JSON.parse(value);
+        const decoded = decodeURIComponent(value);
+        const parsed = JSON.parse(decoded);
         const result = z.array(sortingItemSchema).safeParse(parsed);
 
         if (!result.success) return null;
@@ -39,7 +40,7 @@ export const getSortingStateParser = <TData>(
         return null;
       }
     },
-    serialize: (value) => JSON.stringify(value),
+    serialize: (value) => encodeURIComponent(JSON.stringify(value)),
     eq: (a, b) =>
       a.length === b.length &&
       a.every(
@@ -55,7 +56,7 @@ const filterItemSchema = z.object({
   range: z.object({
     min: z.number(),
     max: z.number()
-  }),
+  }).optional(),
   variant: z.enum(dataTableConfig.filterVariants),
   operator: z.enum(dataTableConfig.operators),
   filterId: z.string(),
@@ -75,7 +76,8 @@ export const getFiltersStateParser = <TData>(
   return createParser({
     parse: (value) => {
       try {
-        const parsed = JSON.parse(value);
+        const decoded = decodeURIComponent(value);
+        const parsed = JSON.parse(decoded);
         const result = z.array(filterItemSchema).safeParse(parsed);
 
         if (!result.success) return null;
@@ -89,7 +91,7 @@ export const getFiltersStateParser = <TData>(
         return null;
       }
     },
-    serialize: (value) => JSON.stringify(value),
+    serialize: (value) => encodeURIComponent(JSON.stringify(value)),
     eq: (a, b) =>
       a.length === b.length &&
       a.every(

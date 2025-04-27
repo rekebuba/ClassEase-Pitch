@@ -1,3 +1,4 @@
+import json
 import os
 import re
 from flask import current_app, request, jsonify
@@ -77,11 +78,48 @@ def preprocess_query_params(data):
     for key, value in data.items():
         # parse_qs always gives lists, so we take first element
         str_value = value[0] if value else ''
-        
+
         # Check if the value contains commas (but not for certain keys)
         if ',' in str_value and key not in ['exclude_comma_keys']:
             processed[key] = [item.strip() for item in str_value.split(',')]
+        if key in ['sort', 'filters']:
+            # take first item and parse JSON
+            processed[key] = json.loads(value[0])
         else:
             # Single value (keep as string, or convert later in schema)
             processed[key] = str_value
     return processed
+
+
+def paginate_query(query, page, limit):
+    """
+    Paginate SQLAlchemy queries.
+
+    :param query: SQLAlchemy query object to paginate
+    :param request: Flask request object to get query parameters (page, limit)
+    :param default_limit: Default number of records per page if limit is not provided
+    :return: Dictionary with paginated data and meta information
+    """
+
+    # Calculate total number of records
+    total_items = query.count()
+
+    # Calculate offset and apply limit and offset to the query
+    offset = (page - 1) * limit
+    paginated_query = query.limit(limit).offset(offset)
+
+    # Get the paginated results
+    items = paginated_query.all()
+
+    # Calculate total pages
+    total_pages = ceil(total_items / limit)
+
+    return {
+        "items": items,
+        "meta": {
+            "total_items": total_items,
+            "current_page": page,
+            "limit": limit,
+            "total_pages": total_pages,
+        }
+    }

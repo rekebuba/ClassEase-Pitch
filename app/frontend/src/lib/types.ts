@@ -1,5 +1,16 @@
 import { z } from "zod";
-import { userSchema } from "./validations";
+import {
+    userSchema,
+    StudentSchema,
+    StudentsDataSchema
+    StatusCountSchema,
+    AttendanceRangeSchema,
+    AverageRangeSchema,
+    GradeCountsSchema,
+    searchParamsCache,
+    StudentsViewSchema,
+    tableId,
+} from "./validations";
 
 export type RoleProps = 'admin' | 'teacher' | 'student';
 export type UserDataProps = z.infer<typeof userSchema>;
@@ -56,22 +67,25 @@ export type DataProps = {
     };
 };
 
-export type Student = {
-    id: string
-    name: string
-    email: string
-    grade: number
-    section: string
-    status: "active" | "inactive" | "suspended"
-    attendance: number
-    averageGrade: number
-    parentName: string
-    parentEmail: string
-    joinedDate: string
-}
+export type Student = z.infer<typeof StudentSchema>;
+export type StudentsData = z.infer<typeof StudentsDataSchema>;
+export type TableId = z.infer<typeof tableId>;
+export type StatusCount = z.infer<typeof StatusCountSchema>;
+export type AttendanceRange = z.infer<typeof AttendanceRangeSchema>;
+export type AverageRange = z.infer<typeof AverageRangeSchema>;
+export type GradeCounts = z.infer<typeof GradeCountsSchema>;
 
-
-export type StudentsData = {
+export interface StudentsDataResult {
     data: Student[]
     pageCount: number
+    statusCounts: StatusCount
+    gradeCounts: GradeCounts
+    attendanceRange: AttendanceRange
+    averageRange: AverageRange
+    isLoading: boolean
+    error: Error | null
+    refetch: () => Promise<void>
 }
+
+export type SearchParams = z.infer<typeof searchParamsCache>;
+export type StudentsViews = z.infer<typeof StudentsViewSchema>

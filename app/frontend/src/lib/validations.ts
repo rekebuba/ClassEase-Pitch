@@ -33,43 +33,66 @@ export const userSchema = z.object({
     })
 });
 
-export const studentSchema = z.object({
-    data: z.object({
-        firstName: z.string(),
-        fatherName: z.string(),
-        grandFatherName: z.string(),
-        identification: z.string(),
-        imagePath: z.string(),
-    }),
-    pageCount: z.number(),
+export const StudentSchema = z.object({
+    id: z.string(),
+    name: z.string(),
+    avatarUrl: z.string().optional(),
+    grade: z.number(),
+    section: z.string(),
+    attendance: z.number(),
+    averageGrade: z.number(),
+    status: z.enum(["active", "inactive", "suspended"]),
+    // joinedDate: z.string().transform((val) => new Date(val)),
+    parentName: z.string(),
+    parentPhone: z.string(),
+});
 
-    // year: z.number(),
-    // grade: z.string(),
-    // section: z.string(),
+export const tableId = z.record(
+    // z.enum(Object.keys(StudentSchema.shape) as [string, ...string[]]),
+    z.string(),
+    z.string()
+);
+
+export const StudentsDataSchema = z.object({
+    data: z.array(StudentSchema),
+    pageCount: z.number(),
+    tableId: tableId,
+});
+
+const StatusFieldSchema = StudentSchema.pick({ status: true });
+
+export const StatusCountSchema = z.record(
+    StatusFieldSchema.shape.status,
+    z.number()
+);
+
+export const AttendanceRangeSchema = z.object({
+    min: z.number(),
+    max: z.number(),
+});
+
+export const AverageRangeSchema = z.object({
+    min: z.number(),
+    max: z.number(),
+});
+
+export const GradeCountsSchema = z.record(z.coerce.number(), z.number());
+
+const SortItemSchema = z.object({
+    id: z.string(),
+    desc: z.boolean(),
 });
 
 export const searchParamsCache = z.object({
     filterFlag: z.enum(["Advanced filters", ""]).default(""),
     page: z.number().default(1),
     perPage: z.number().default(10),
-    sort: z.array(z.object({ id: z.string(), desc: z.boolean() })).default([
-        { id: "createdAt", desc: true },
-    ]),
-    name: z.string().optional(),
-    grade: z.array(z.number()).optional(),
-    section: z.array(z.string()).optional(),
-    attendance: z.array(z.coerce.number()).optional(),
-    averageGrade: z.array(z.coerce.number()).optional(),
-    status: z.array(z.string()).optional(),
-    createdAt: z.array(z.coerce.number()).optional(),
     // advanced filter
+    sort: z.array(SortItemSchema).default([]),
     filters: z.array(z.any()).optional(),
     joinOperator: z.enum(["and", "or"]).default("and"),
 });
 
-export type SearchParams = Awaited<
-    ReturnType<typeof searchParamsCache.parse>
->;
 
 export const searchParamMap = {
     filterFlag: parseAsStringEnum(["Advanced filters", ""]).withDefault(""),
@@ -130,14 +153,13 @@ export type Sort = FilterParams["sort"]
 export type Filter = NonNullable<FilterParams["filters"]>[number]
 
 
-export const viewSchema = z.object({
+export const StudentsViewSchema = z.object({
     id: z.string().uuid(),
     name: z.string(),
     columns: z.array(z.string()),
-    searchParams: searchParamsCache,
-    createdAt: z.string(),
-    updatedAt: z.string(),
+    searchParams: searchParamsCache.optional(),
+    createdAt: z.string().optional(),
+    updatedAt: z.string().optional(),
     // createdAt: z.string().transform((val) => new Date(val)),
     // updatedAt: z.string().transform((val) => new Date(val)),
 })
-export type View = z.infer<typeof viewSchema>

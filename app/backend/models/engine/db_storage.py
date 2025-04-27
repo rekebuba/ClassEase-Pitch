@@ -24,9 +24,9 @@ from models.event import Event
 from models.semester import Semester
 from models.year import Year, seed_year
 from models.stream import Stream, seed_streams
+from models.table import Table, seed_table
 from datetime import datetime
 from flask import current_app
-
 
 class DBStorage:
     """
@@ -129,6 +129,7 @@ class DBStorage:
         seed_streams(self.session)
         seed_subjects(self.session)
         seed_year(self.session)
+        seed_table(self.session, self.engine)
 
     def close(self):
         """Close the current session."""

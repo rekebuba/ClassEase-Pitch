@@ -15,6 +15,7 @@ import type { FilterParams, View } from "@/lib/validations"
 
 import { CreateViewForm } from "./create-view-form"
 import { EditViewForm } from "./edit-view-form"
+import { parseAsString, useQueryState } from "nuqs"
 
 interface DataTableViewsDropdownProps {
   views: View[]
@@ -29,7 +30,8 @@ export function DataTableViewsDropdown({
   const [isCreateViewFormOpen, setIsCreateViewFormOpen] = useState(false)
   const [isEditViewFormOpen, setIsEditViewFormOpen] = useState(false)
   const [selectedView, setSelectedView] = useState<View | null>(null)
-  const [currentViewId, setCurrentViewId] = useState<string | null>(null)
+  const [currentViewId, setCurrentViewId] = useQueryState("viewId", parseAsString)
+  // const [currentViewId, setCurrentViewId] = useState<string | null>(null)
 
   // Get current view from URL
   useEffect(() => {

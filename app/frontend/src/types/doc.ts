@@ -205,7 +205,7 @@ export interface DataTablePaginationProps<TData> extends EmptyProps<"div"> {
   pageSizeOptions?: number[];
 }
 
-export interface DataTableViewOptionsProps<TData> {
+export interface DataTableColumnsVisibilityProps<TData> {
   /** The table instance. */
   table: Table<TData>;
 }

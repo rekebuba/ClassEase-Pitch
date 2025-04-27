@@ -10,7 +10,6 @@ import {
   DataTableFilterMenu,
   DataTableSkeleton,
   DataTableSortList,
-  DataTableToolbar,
 } from "@/components/data-table"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
@@ -19,19 +18,20 @@ import { useDataTable } from "@/hooks/use-data-table"
 import { getStudentsTableColumns } from "./student-table-columns"
 import { UpdateStudentSheet } from "./update-student-sheet"
 import { DeleteStudentsDialog } from "./delete-students-dialog"
-import { StudentsTableActionBar } from "./students-table-action-bar"
+import { StudentsTableFloatingBar } from "./students-table-floating-bar"
 import { getFiltersStateParser } from "@/lib/parsers"
 import { useStudentsData, studentsView } from "@/hooks/use-students-data"
 
-import type { Student } from "@/lib/types"
+import type { Student, SearchParams } from "@/lib/types"
 import type { DataTableRowAction, ExtendedColumnSort } from "@/types/data-table"
-import { searchParamMap, SearchParamMapSchema, searchParamsCache, type SearchParams } from "@/lib/validations"
+import { searchParamMap, SearchParamMapSchema, searchParamsCache } from "@/lib/validations"
 import { useLocation } from "react-router-dom"
 import { z, ZodError } from "zod"
 import { ShieldMoonRounded } from "@mui/icons-material"
 import { toast } from "sonner"
 import { TableInstanceProvider } from "@/components/data-table"
 import { FilterProvider } from "@/utils/filter-context"
+import { StudentsTableToolbarActions } from "./student-table-toolbar-action"
 
 
 // Constants
@@ -47,10 +47,11 @@ export function StudentsTable() {
   const {
     data,
     pageCount,
+    tableId,
     statusCounts,
     gradeCounts,
     attendanceRange,
-    gradeRange,
+    averageRange,
     isLoading,
     error,
     refetch
@@ -65,13 +66,14 @@ export function StudentsTable() {
   const columns = React.useMemo(
     () =>
       getStudentsTableColumns({
+        tableId,
         statusCounts,
         gradeCounts,
         attendanceRange,
-        gradeRange,
+        averageRange,
         setRowAction,
       }),
-    [statusCounts, gradeCounts, attendanceRange, gradeRange],
+    [statusCounts, gradeCounts, attendanceRange, averageRange],
   )
 
   // Table setup
@@ -87,7 +89,7 @@ export function StudentsTable() {
     shallow: false,
     clearOnDefault: true,
   })
-  const [searchParams, setSearchParams] = useQueryStates(searchParamMap);
+  const [searchParams] = useQueryStates(searchParamMap);
 
   const columnIds = React.useMemo(() => {
     return table
@@ -113,6 +115,8 @@ export function StudentsTable() {
     try {
       const validQuery = searchParamsCache.parse(filteredParams)
       console.log("validQuery", validQuery)
+      console.log("validQuery", JSON.stringify(validQuery))
+
       setDebouncedParams((prev) => (JSON.stringify(prev) !== JSON.stringify(validQuery) ? validQuery : prev))
     } catch (error) {
       // Zod validation error
@@ -126,8 +130,6 @@ export function StudentsTable() {
     }
     return
   }, [searchParams])
-
-  // console.log("debouncedParams", debouncedParams)
 
   // Handle sheet/dialog close
   const handleCloseAction = React.useCallback(() => {
@@ -161,18 +163,12 @@ export function StudentsTable() {
         <TableInstanceProvider table={table}>
           <DataTable
             table={table}
-            actionBar={<StudentsTableActionBar table={table} />}
+            floatingBar={<StudentsTableFloatingBar />}
           >
-            <DataTableAdvancedToolbar views={views} searchParams={filteredParams} setSearchParams={setSearchParams}>
-              <DataTableSortList table={table} align="start" />
-              <DataTableFilterList
-                table={table}
-                shallow={shallow}
-                debounceMs={debounceMs}
-                throttleMs={throttleMs}
-                align="start"
-              />
-              {/* <TasksTableToolbarActions table={table} /> */}
+            <DataTableAdvancedToolbar views={views} searchParams={filteredParams}>
+              <DataTableSortList align="start" />
+              <DataTableFilterList align="start" />
+              <StudentsTableToolbarActions />
             </DataTableAdvancedToolbar>
           </DataTable>
         </TableInstanceProvider>
@@ -185,13 +181,13 @@ export function StudentsTable() {
         onSuccess={refetch}
       />
 
-      <DeleteStudentsDialog
+      {/* <DeleteStudentsDialog
         open={rowAction?.variant === "delete"}
         onOpenChange={handleCloseAction}
         students={rowAction?.row.original ? [rowAction?.row.original] : []}
         showTrigger={false}
         onSuccess={handleDeleteSuccess}
-      />
+      /> */}
     </>
   )
 }

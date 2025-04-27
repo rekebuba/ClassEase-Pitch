@@ -6,7 +6,8 @@ import type { Student } from "@/lib/types"
 import {
     DataTableActionBar,
     DataTableActionBarAction,
-    DataTableActionBarSelection
+    DataTableActionBarSelection,
+    useTableInstanceContext
 } from "@/components/data-table"
 import { Separator } from "@radix-ui/react-separator"
 import { useCallback, useState, useTransition } from "react"
@@ -20,11 +21,10 @@ const actions = [
 
 type Action = (typeof actions)[number];
 
-interface StudentsTableActionBarProps {
-    table: Table<Student>
-}
 
-export function StudentsTableActionBar({ table }: StudentsTableActionBarProps) {
+export function StudentsTableFloatingBar() {
+    const { tableInstance: table } = useTableInstanceContext()
+
     const selectedRows = table.getFilteredSelectedRowModel().rows
     const hasSelectedRows = selectedRows.length > 0
     const [isPending, startTransition] = useTransition();
@@ -44,12 +44,12 @@ export function StudentsTableActionBar({ table }: StudentsTableActionBarProps) {
         setCurrentAction("delete");
         startTransition(() => {
             new Promise<{ error?: string }>((resolve) => setTimeout(() => resolve({}), 1000))
-            .then(({ error }) => {
-                if (error) {
-                    toast.error(error);
-                    return;
-                }
-            });
+                .then(({ error }) => {
+                    if (error) {
+                        toast.error(error);
+                        return;
+                    }
+                });
             table.toggleAllRowsSelected(false);
         });
     }, [selectedRows, table]);

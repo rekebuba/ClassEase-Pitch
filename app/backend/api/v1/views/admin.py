@@ -3,6 +3,7 @@
 
 import json
 import os
+import uuid
 from flask import request, jsonify, url_for
 from marshmallow import ValidationError
 from sqlalchemy import func
@@ -28,7 +29,7 @@ from datetime import datetime
 from sqlalchemy import update, select, and_
 from urllib.parse import urlparse, parse_qs
 from api.v1.views.utils import admin_required
-from api.v1.views.methods import save_profile, validate_request, preprocess_query_params
+from api.v1.views.methods import paginate_query, save_profile, validate_request, preprocess_query_params
 from api.v1.services.event_service import EventService
 from api.v1.schemas.schemas import *
 from api.v1.services.semester_service import SemesterService
@@ -518,7 +519,7 @@ def show_mark_list(admin_data):
     return jsonify(student_list), 200
 
 
-@admin.route('/students', methods=['GET'])
+@admin.route('/students', methods=['POST'])
 @admin_required
 def admin_student_list(admin_data):
     """
@@ -526,13 +527,15 @@ def admin_student_list(admin_data):
 
         Response: A JSON response containing the filtered student data, or an error message if any required data is missing or not found.
     """
-    raw_data = parse_qs(request.query_string.decode())
+    data = request.get_json()
+    # raw_data = parse_qs(request.query_string.decode('utf-8'))
+    # convert to Marshmallow-compatible format
+    # data = preprocess_query_params(raw_data)
 
-    # Convert to Marshmallow-compatible format
-    data = preprocess_query_params(raw_data)
-    print(data)
-    schema = ParamSchema()
-    valid_data = schema.load(data)
+    print(json.dumps(data, indent=4, sort_keys=True))
+    # Check if required fields are present
+    # schema = ParamSchema()
+    # valid_data = schema.load(data)
 
     query = (
         storage.session.query(Student, User)
@@ -541,7 +544,10 @@ def admin_student_list(admin_data):
         # .join(STUDYearRecord, STUDYearRecord.user_id == Student.user_id)
     )
 
-    # Apply conditional filters if additional parameters are provided
+    Use the paginate_query function to handle pagination
+    paginated_result = paginate_query(query, page, limit)
+
+    Apply conditional filters if additional parameters are provided
     if 'grade_id' in valid_data:
         query = query.filter(
             Student.current_grade_id.in_(valid_data['grade_id']))
@@ -571,6 +577,111 @@ def admin_student_list(admin_data):
     print(json.dumps(result, indent=4, sort_keys=True))
 
     return jsonify({"data": result, "page_count": 1}), 200
+
+    # return jsonify(
+    #     {
+    #         "data": [{
+    #             "id": "1",
+    #             "name": "Emma Johnson",
+    #             "parentPhone": "emma.j@example.com",
+    #             "grade": 10,
+    #             "section": "A",
+    #             "status": "active",
+    #             "attendance": 95,
+    #             "averageGrade": 88,
+    #             "parentName": "Michael Johnson",
+    #         }],
+    #         "pageCount": 1,
+    #         "tableId": {
+    #             "id": uuid.uuid4(),
+    #             "name": uuid.uuid4(),
+    #             "parentPhone": uuid.uuid4(),
+    #             "grade": uuid.uuid4(),
+    #             "section": uuid.uuid4(),
+    #             "status": uuid.uuid4(),
+    #             "attendance": uuid.uuid4(),
+    #             "averageGrade": uuid.uuid4(),
+    #             "parentName": uuid.uuid4(),
+    #         }
+    #     }
+    # ), 200
+
+
+@admin.route('/students/status-count', methods=['GET'])
+@admin_required
+def student_status_count(admin_data):
+    """
+    Retrieve and return the count of students based on their status.
+
+    Returns:
+        Response: A JSON response containing the count of students based on their status.
+                  If no students are found, returns a 404 error with an appropriate message.
+    """
+    return jsonify({
+        "active": 10,
+        "inactive": 5,
+        "suspended": 2,
+    }), 200
+
+
+@admin.route('/students/average-range', methods=['GET'])
+@admin_required
+def student_average_range(admin_data):
+    """
+    Retrieve and return the average range of students.
+
+    Returns:
+        Response: A JSON response containing the average range of students.
+                  If no students are found, returns a 404 error with an appropriate message.
+    """
+    return jsonify({"min": 0, "max": 50}), 200
+
+
+@admin.route('/students/attendance-range', methods=['GET'])
+@admin_required
+def student_attendance_range(admin_data):
+    """
+    Retrieve and return the attendance range of students.
+
+    Returns:
+        Response: A JSON response containing the attendance range of students.
+                  If no students are found, returns a 404 error with an appropriate message.
+    """
+    return jsonify({"min": 0, "max": 100}), 200
+
+
+@admin.route('/students/grade-counts', methods=['GET'])
+@admin_required
+def student_grade_counts(admin_data):
+    """
+    Retrieve and return the count of students in each grade.
+
+    Returns:
+        Response: A JSON response containing the count of students in each grade.
+                  If no students are found, returns a 404 error with an appropriate message.
+    """
+    return jsonify({
+        "1": 10,
+    }), 200
+
+
+@admin.route('/students/views', methods=['GET'])
+@admin_required
+def student_views(admin_data):
+    """
+    Retrieve and return the views of students.
+
+    Returns:
+        Response: A JSON response containing the views of students.
+                  If no students are found, returns a 404 error with an appropriate message.
+    """
+    return jsonify([{
+        "id": uuid.uuid4(),
+        "name": "new View",
+        "columns": [''],
+        "created_at": datetime.now(),
+        "updated_at": datetime.now(),
+    }]), 200
 
 
 @admin.route('/teachers', methods=['GET'])

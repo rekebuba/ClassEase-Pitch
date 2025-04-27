@@ -5,6 +5,7 @@ from models.admin import Admin
 from tests.test_api.factories import DefaultFelids, StudentFactory, TeacherFactory, AdminFactory
 from models.user import User
 from models.year import Year
+from models.table import Table
 from models.subject import Subject
 from models.student import Student
 from models.grade import Grade
@@ -42,6 +43,11 @@ def test_db_year_count(client, db_session):
     # Query the database
     year = db_session.query(Year).count()
     assert year > 0
+
+def test_db_table_count(client, db_session):
+    # Query the database
+    table = db_session.query(Table).count()
+    assert table > 0
 
 
 def test_user_register_success(client, register_users):
