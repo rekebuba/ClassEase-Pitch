@@ -28,7 +28,7 @@ import {
 export function useStudentsData(validQuery: SearchParams): StudentsDataResult {
     const [data, setData] = useState<Student[]>([])
     const [pageCount, setPageCount] = useState(0)
-    const [tableId, setTableId] = useState<TableId | null>({})
+    const [tableId, setTableId] = useState<TableId>({})
     const [statusCounts, setStatusCounts] = useState<StatusCount>({})
     const [gradeCounts, setGradeCounts] = useState<GradeCounts>({})
     const [attendanceRange, setAttendanceRange] = useState<AttendanceRange>({ min: 0, max: 0 })

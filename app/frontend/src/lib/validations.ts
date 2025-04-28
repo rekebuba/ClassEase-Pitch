@@ -48,8 +48,7 @@ export const StudentSchema = z.object({
 });
 
 export const tableId = z.record(
-    // z.enum(Object.keys(StudentSchema.shape) as [string, ...string[]]),
-    z.string(),
+    StudentSchema.keyof(),
     z.string()
 );
 

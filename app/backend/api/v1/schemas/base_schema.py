@@ -1,6 +1,8 @@
 from datetime import datetime
 import re
 from marshmallow import Schema, ValidationError, post_dump, post_load, pre_load, validates
+from sqlalchemy import and_, or_
+from models.base_model import BaseModel
 from models.table import Table
 from models.subject import Subject
 from models.user import User
@@ -10,6 +12,7 @@ from models.event import Event
 from models.grade import Grade
 from models.year import Year
 from models import storage
+import inspect as pyinspect
 from sqlalchemy.orm import DeclarativeMeta
 
 
@@ -38,6 +41,16 @@ def to_snake_case_key(s):
 def to_camel_case_key(s):
     parts = s.split('_')
     return parts[0] + ''.join(word.capitalize() for word in parts[1:])
+
+
+# Get all model classes dynamically
+def get_all_model_classes():
+    # Returns dict of {__tablename__: model_class}
+    return {
+        cls.__tablename__: cls
+        for cls in BaseModel.registry._class_registry.values()
+        if hasattr(cls, '__tablename__') and cls is not BaseModel
+    }
 
 
 class BaseSchema(Schema):
@@ -232,12 +245,23 @@ class BaseSchema(Schema):
         return subject
 
     @staticmethod
-    def has_column(table, column_name):
-        if column_name in table.__table__.columns.keys():
-            return column_name
-        else:
+    def get_table(table_id):
+        if table_id is None:
+            raise ValidationError("table_id is required")
+
+        table_name = storage.session.query(Table.name).filter_by(
+            id=table_id
+        ).first()
+        if table_name is None:
+            raise ValidationError(f"No Table found for table_id: {table_id}")
+
+        table_models = get_all_model_classes()
+        model = table_models.get(table_name[0])
+        if model is None:
             raise ValidationError(
-                f"Column {column_name} does not exist in {table.__tablename__}")
+                f"No model class found for table name: {table_name}")
+
+        return model
 
     @staticmethod
     def get_table_id(table):
@@ -251,3 +275,39 @@ class BaseSchema(Schema):
         ).first()
 
         return table.id if table else None
+
+    @staticmethod
+    def filter_data(model, column_name, operator, value):
+        """
+        Dynamically create a SQLAlchemy filter based on operator.
+        """
+        column = getattr(model, column_name, None)
+        if column is None:
+            raise ValueError(
+                f"Column '{column_name}' not found on {model.__tablename__}.")
+
+        OPERATOR_MAPPING = {
+            "eq": lambda col, val: col == val,
+            "neq": lambda col, val: col != val,
+            "lt": lambda col, val: col < val,
+            "lte": lambda col, val: col <= val,
+            "gt": lambda col, val: col > val,
+            "gte": lambda col, val: col >= val,
+            "iLike": lambda col, val: col.ilike(f"%{val}%"),
+            "like": lambda col, val: col.like(f"%{val}%"),
+            "in": lambda col, val: col.in_(val if isinstance(val, list) else [val]),
+            "not_in": lambda col, val: ~col.in_(val if isinstance(val, list) else [val]),
+            "isEmpty": lambda col, _: or_(col.is_(None), col == ""),
+            "isNotEmpty": lambda col, _: and_(col.isnot(None), col != ""),
+            "isBetween": lambda col, val: col.between(val[0], val[1]) if isinstance(val, (list, tuple)) and len(val) == 2 else ValueError("isBetween expects list/tuple with 2 elements."),
+        }
+
+        op_func = OPERATOR_MAPPING.get(operator)
+        if not op_func:
+            raise ValueError(f"Unsupported operator: {operator}")
+
+        condition = op_func(column, value)
+        if isinstance(condition, ValueError):
+            raise condition
+
+        return condition

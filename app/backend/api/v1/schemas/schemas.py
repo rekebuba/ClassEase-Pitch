@@ -5,7 +5,7 @@ from datetime import datetime
 import random
 import bcrypt
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
-from api.v1.schemas.base_schema import BaseSchema
+from api.v1.schemas.base_schema import BaseSchema, get_all_model_classes
 from werkzeug.datastructures import FileStorage
 from models.student import Student
 from models.base_model import CustomTypes
@@ -59,6 +59,18 @@ class RoleEnumField(fields.Field):
         except ValueError as error:
             raise ValidationError(
                 "Invalid role. Must be one of: admin, teacher, student") from error
+
+
+class TableField(fields.Field):
+    def _deserialize(self, value, attr, data, **kwargs):
+        table_name = value.__tablename__.lower()
+        table = get_all_model_classes().get(table_name)
+        if not table:
+            raise ValidationError(f"'{value}' is not a valid table.")
+        # if not isinstance(value, table) and type(value) != table:
+        #     raise ValidationError(f"Table {value}, {table} is not valid.")
+
+        return table
 
 
 class UserSchema(BaseSchema):
@@ -397,7 +409,7 @@ class StudentSchema(BaseSchema):
 
     @pre_dump
     def add_fields(self, data, **kwargs):
-        data['table_id'] = self.get_table_id(User)
+        data['table_id'] = self.get_table_id(Student)
 
         return data
 
@@ -674,11 +686,13 @@ class SortSchema(BaseSchema):
     """Schema for validating sorting parameters."""
     id = fields.String(required=False)
     desc = fields.Boolean(required=False)
+    table_id = fields.String(required=False)
+    table = TableField(required=False)
 
     @pre_load
     def set_defaults(self, data, **kwargs):
         # add default values to the data
-        data['column'] = self.has_column(Student, data.pop('id', None))
+        # data['table'] = self.get_table(data.get("table_id", None))
 
         return data
 
@@ -689,57 +703,80 @@ class RangeSchema(BaseSchema):
     max = fields.Integer(required=False)
 
 
+class ValueField(fields.Field):
+    """Custom field for validating value IDs."""
+
+    def _validate(self, value):
+        if not hasattr(self.parent, 'variant'):
+            raise ValidationError("Missing variant field", field_name="value")
+
+        variant = self.parent.variant
+        table = getattr(self.parent, 'table', None)
+
+        if variant == "text" and not isinstance(value, str):
+            raise ValidationError(
+                "Value must be a string when variant is 'text'.", field_name="value")
+        elif variant == "number" and not isinstance(value, (int, float)):
+            raise ValidationError(
+                "Value must be a number when variant is 'number'.", field_name="value")
+        elif variant == "multiSelect":
+            if not isinstance(value, list) or not all(isinstance(v, str) for v in value):
+                raise ValidationError(
+                    "Value must be a list of strings when variant is 'multiSelect'.", field_name="value")
+
+        return value
+
+
+class operatorField(fields.Field):
+    """Custom field for validating operator IDs."""
+
+    def _validate(self, operator):
+        if not hasattr(self.parent, 'variant'):
+            raise ValidationError("Missing variant field",
+                                  field_name="operator")
+
+        variant = self.parent.variant
+
+        operator_config = {
+            "text": ["iLike", "notLike", "startsWith", "endWith", "eq"],
+            "number": ["eq", "ne", "lt", "lte", "gt", "gte"],
+            "date": ["eq", "ne", "lt", "lte", "gt", "gte", ],
+            "multiSelect": ["in", "notIn"],
+            "boolean": ['eq', 'ne'],
+        }
+        try:
+            operators = operator_config[variant]
+            if operator not in operators:
+                raise ValidationError(
+                    f"'{variant}' is Invalid operator for {variant} variant.", field_name="operator")
+        except KeyError:
+            raise ValidationError(
+                f"'{variant}' is not a valid variant.", field_name="variant")
+
+        return operator
+
+
 class FilterSchema(BaseSchema):
     """Schema for validating filter parameters."""
-    id = fields.String(required=False)
+    column_name = fields.String(
+        required=False, data_key="id", attribute="column_name")
     filter_id = fields.String(required=False)
+    table_id = fields.String(required=False)
+    table = TableField(required=False)
     range = fields.Nested(RangeSchema, required=False)
-    operator = fields.String(required=False)
+    operator = operatorField(required=False)
     variant = fields.String(validate=lambda x: x in [
-                            "text", "number", "multiSelect"], required=True)
-    value = fields.Raw(required=False)
+                            "text", "number", "multiSelect", "boolean", "dateRange"], required=True)
+    value = ValueField(required=False)
 
     @validates_schema
     def validate_value(self, data, **kwargs):
-        if 'variant' in data:
-            value = data.get('value')
-            if data['variant'] == "text":
-                if not isinstance(value, str):
-                    raise ValidationError(
-                        "Value must be a string when variant is 'text'.", field_name="value")
-            elif data['variant'] == "multiSelect":
-                if not isinstance(value, list) or not all(isinstance(v, str) for v in value):
-                    raise ValidationError(
-                        "Value must be a list of strings when variant is 'multiSelect'.", field_name="value")
-            elif data['variant'] == "number":
-                if not isinstance(value, (int, float)):
-                    raise ValidationError(
-                        "Value must be a number when variant is 'number'.", field_name="value")
-
-        if "operator" in data:
-            operator = data.get('operator')
-            operator_config = {
-                "text": {
-                    "ilike": self.get_operator("ilike", ),
-                }
-            }
-            if data['variant'] == "text":
-                if operator not in operator_config['text'].keys():
-                    raise ValidationError(
-                        f"Invalid operator for text variant. Allowed: {', '.join(operator_config['text'].keys())}", field_name="operator")
-            elif data['variant'] == "number":
-                if operator not in ["=", "<", ">", "<=", ">=", "between"]:
-                    raise ValidationError(
-                        f"Invalid operator for number variant. Allowed: =, <, >, <=, >=, between", field_name="operator")
+        pass
 
     @pre_load
     def set_defaults(self, data, **kwargs):
         # add default values to the data
-        data['column'] = self.has_column(Student, data.pop('id', None))
-
-        # data['filter_id'] = self.get_filter_id(data.pop('id', None))
-        # data['value'] = self.get_value(data.pop('value'))
-        # data['variant'] = self.get_variant(data.pop('variant'))
+        data['table'] = self.get_table(data.get("table_id", None))
 
         return data
 
@@ -748,27 +785,41 @@ class ParamSchema(BaseSchema):
     """Schema for validating parameters."""
     filter_flag = fields.String(required=False)
     filters = fields.List(fields.Nested(FilterSchema), required=False)
+    valid_filters = fields.List(fields.Raw(), required=False)
     page = fields.Integer(required=False)
     per_page = fields.Integer(required=False)
 
     sort = fields.List(fields.Nested(SortSchema), required=False)
     join_operator = fields.String(required=False)
 
-    grades = fields.List(fields.Integer)
-    grade_id = fields.List(fields.String, required=False, load_only=True)
+    # grades = fields.List(fields.Integer)
+    # grade_id = fields.List(fields.String, required=False, load_only=True)
 
-    year = fields.String()
-    year_id = fields.String(required=False, load_only=True)
+    # year = fields.String()
+    # year_id = fields.String(required=False, load_only=True)
 
     @pre_load
     def set_defaults(self, data, **kwargs):
         # add default values to the data
-        if "grades" in data:
-            data["grade_id"] = [self.get_grade_id(
-                grade) for grade in data["grades"]]
+        valid_filters = []
+        if "filters" in data and data["filters"]:
+            for f_item in data["filters"]:
+                if "table" in f_item and f_item["table"] is not None:
+                    result = self.filter_data(
+                        f_item["table"],
+                        f_item['column_name'],
+                        f_item["operator"],
+                        f_item['value']
+                    )
+                    valid_filters.append(result)
+            data['valid_filters'] = valid_filters
 
-        if "year" in data:
-            data['year_id'] = self.get_year_id(data.pop('year'))
+        # if "grades" in data:
+        #     data["grade_id"] = [self.get_grade_id(
+        #         grade) for grade in data["grades"]]
+
+        # if "year" in data:
+        #     data['year_id'] = self.get_year_id(data.pop('year'))
 
         return data
 

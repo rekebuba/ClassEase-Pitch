@@ -7,6 +7,7 @@ import type {
   ExtendedColumnFilter,
   ExtendedColumnSort,
 } from "@/types/data-table";
+import { tableId } from "./validations";
 
 const sortingItemSchema = z.object({
   id: z.string(),
@@ -52,6 +53,7 @@ export const getSortingStateParser = <TData>(
 
 const filterItemSchema = z.object({
   id: z.string(),
+  tableId: z.string(),
   value: z.union([z.string(), z.array(z.string())]),
   range: z.object({
     min: z.number(),
@@ -97,6 +99,7 @@ export const getFiltersStateParser = <TData>(
       a.every(
         (filter, index) =>
           filter.id === b[index]?.id &&
+          filter.tableId === b[index]?.tableId &&
           filter.value === b[index]?.value &&
           filter.range === b[index]?.range &&
           filter.variant === b[index]?.variant &&

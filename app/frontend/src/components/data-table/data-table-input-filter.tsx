@@ -51,6 +51,8 @@ export function DataTableInputFilter<TData, TValue>({
                 debouncedAddFilter({
                     id: column.id,
                     value: value,
+                    variant: column.columnDef.meta?.variant,
+                    tableId: column.columnDef.meta?.tableId,
                     operator: selectedOperator,
                 })
             }
@@ -66,6 +68,8 @@ export function DataTableInputFilter<TData, TValue>({
             if (selectedText) {
                 addFilter({
                     id: column.id,
+                    variant: column.columnDef.meta?.variant,
+                    tableId: column.columnDef.meta?.tableId,
                     value: selectedText,
                     operator: value,
                 })
@@ -109,7 +113,7 @@ export function DataTableInputFilter<TData, TValue>({
                             <div className="hidden items-center gap-1 lg:flex">
                                 <Badge variant="secondary" className="rounded-sm px-1 font-normal">
                                     <span
-                                    className=" max-w-14 truncate overflow-clip"
+                                        className=" max-w-14 truncate overflow-clip"
                                     >{textFilterValue}</span>
                                 </Badge>
                             </div>

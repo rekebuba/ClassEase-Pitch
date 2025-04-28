@@ -115,7 +115,6 @@ export function StudentsTable() {
     try {
       const validQuery = searchParamsCache.parse(filteredParams)
       console.log("validQuery", validQuery)
-      console.log("validQuery", JSON.stringify(validQuery))
 
       setDebouncedParams((prev) => (JSON.stringify(prev) !== JSON.stringify(validQuery) ? validQuery : prev))
     } catch (error) {

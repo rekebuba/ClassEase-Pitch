@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
     userSchema,
     StudentSchema,
-    StudentsDataSchema
+    StudentsDataSchema,
     StatusCountSchema,
     AttendanceRangeSchema,
     AverageRangeSchema,
@@ -78,6 +78,7 @@ export type GradeCounts = z.infer<typeof GradeCountsSchema>;
 export interface StudentsDataResult {
     data: Student[]
     pageCount: number
+    tableId: TableId
     statusCounts: StatusCount
     gradeCounts: GradeCounts
     attendanceRange: AttendanceRange

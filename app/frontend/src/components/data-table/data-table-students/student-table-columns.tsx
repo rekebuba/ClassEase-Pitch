@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DataTableColumnHeader } from "@/components/data-table"
 import { Edit, Trash2, Eye, Mail, UserCog, Ellipsis } from "lucide-react"
 import type { DataTableRowAction } from "@/types/data-table"
-import { Student } from "@/lib/types"
+import { Student, TableId } from "@/lib/types"
 import { MoreHorizontal, Pencil, Trash, User } from "lucide-react"
 
 import {
@@ -25,11 +25,11 @@ import { useTransition } from "react"
 
 
 interface GetStudentsTableColumnsOptions {
-  tableId: Record<string, number>
+  tableId: TableId
   statusCounts: Record<string, number>
   gradeCounts: Record<string, number>
-  attendanceRange: {min: number, max: number}
-  averageRange: {min: number, max: number}
+  attendanceRange: { min: number, max: number }
+  averageRange: { min: number, max: number }
   setRowAction: React.Dispatch<React.SetStateAction<DataTableRowAction<Student> | null>>
 }
 
@@ -93,6 +93,7 @@ export function getStudentsTableColumns({
         variant: "text",
         label: "Student Name",
         placeholder: "Filter by name...",
+        tableId: tableId.name,
       },
       enableColumnFilter: true,
     },
@@ -114,7 +115,8 @@ export function getStudentsTableColumns({
           label: `Grade ${value}`,
           value: value,
           count,
-        }))
+        })),
+        tableId: tableId.grade,
       },
     },
     {
@@ -124,6 +126,7 @@ export function getStudentsTableColumns({
       cell: ({ row }) => <div>{row.original.section}</div>,
       enableColumnFilter: true,
       meta: {
+        tableId: tableId.section,
         variant: "multiSelect",
         label: "Section",
         options: [
@@ -154,6 +157,7 @@ export function getStudentsTableColumns({
       },
       enableColumnFilter: true,
       meta: {
+        tableId: tableId.status,
         variant: "select",
         label: "Status",
         options: Object.entries(statusCounts).map(([value, count]) => ({
@@ -181,6 +185,7 @@ export function getStudentsTableColumns({
       },
       enableColumnFilter: true,
       meta: {
+        tableId: tableId.attendance,
         variant: "range",
         label: "Attendance",
         range: attendanceRange,
@@ -205,6 +210,7 @@ export function getStudentsTableColumns({
       },
       enableColumnFilter: true,
       meta: {
+        tableId: tableId.averageGrade,
         variant: "range",
         label: "Average Grade",
         range: averageRange,
@@ -222,6 +228,7 @@ export function getStudentsTableColumns({
         </div>
       ),
       meta: {
+        tableId: tableId.parentName,
         variant: "text",
         label: "Parent Name",
         placeholder: "Filter by parent name...",

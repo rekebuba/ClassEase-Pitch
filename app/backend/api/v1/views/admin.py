@@ -7,6 +7,7 @@ import uuid
 from flask import request, jsonify, url_for
 from marshmallow import ValidationError
 from sqlalchemy import func
+from models.base_model import BaseModel
 from models.year import Year
 from models import storage
 from flask import Blueprint
@@ -534,8 +535,10 @@ def admin_student_list(admin_data):
 
     print(json.dumps(data, indent=4, sort_keys=True))
     # Check if required fields are present
-    # schema = ParamSchema()
-    # valid_data = schema.load(data)
+    schema = ParamSchema()
+    valid_data = schema.load(data)
+    print("valid data: ")
+    print(valid_data)
 
     query = (
         storage.session.query(Student, User)
@@ -596,7 +599,7 @@ def admin_student_list(admin_data):
     #             "id": uuid.uuid4(),
     #             "name": uuid.uuid4(),
     #             "parentPhone": uuid.uuid4(),
-    #             "grade": uuid.uuid4(),
+    #             "grade": "10fc035b-ac80-4fad-baca-c3cdea64cf98",
     #             "section": uuid.uuid4(),
     #             "status": uuid.uuid4(),
     #             "attendance": uuid.uuid4(),

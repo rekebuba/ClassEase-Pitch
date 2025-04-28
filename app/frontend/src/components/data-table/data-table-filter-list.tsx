@@ -132,6 +132,7 @@ export function DataTableFilterList<TData>({
       ...filters,
       {
         id: column.id as Extract<keyof TData, string>,
+        tableId: column.columnDef.meta?.tableId ?? "",
         value: "",
         variant: column.columnDef.meta?.variant ?? "text",
         operator: getDefaultFilterOperator(

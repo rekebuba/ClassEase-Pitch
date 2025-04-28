@@ -2,10 +2,10 @@
 
 import type { Option } from "@/types/data-table";
 import type { Column } from "@tanstack/react-table";
-import { Check, PlusCircle, XCircle } from "lucide-react";
+import { Check, PlusCircle, Variable, XCircle } from "lucide-react";
 import { TrashIcon } from "@radix-ui/react-icons"
 
-import { Badge } from "@/components/ui/badge";
+import { Badge, badgeVariants } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -86,6 +86,8 @@ export function DataTableFacetedFilter<TData, TValue>({
         const filterValues = Array.from(newSelectedValues);
         addFilter({
           id: column.id,
+          variant: column.columnDef.meta?.variant,
+          tableId: column.columnDef.meta?.tableId,
           value: filterValues,
           operator: selectedOperator,
         }
@@ -105,6 +107,8 @@ export function DataTableFacetedFilter<TData, TValue>({
       const filterValues = Array.from(selectedValues);
       addFilter({
         id: column.id,
+        variant: column.columnDef.meta?.variant,
+        tableId: column.columnDef.meta?.tableId,
         value: filterValues,
         operator: value,
       });
