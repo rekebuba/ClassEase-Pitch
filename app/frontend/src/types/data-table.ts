@@ -10,9 +10,13 @@ declare module "@tanstack/react-table" {
     placeholder?: string;
     variant?: FilterVariant;
     options?: Option[];
-    range?: {min: number, max: number};
+    range?: { min: number, max: number };
     unit?: string;
     icon?: React.FC<React.SVGProps<SVGSVGElement>>;
+  }
+
+  interface ColumnSort {
+    tableId: string;
   }
 }
 
@@ -30,6 +34,7 @@ export type JoinOperator = DataTableConfig["joinOperators"][number];
 
 export interface ExtendedColumnSort<TData> extends Omit<ColumnSort, "id"> {
   id: Extract<keyof TData, string>;
+  // tableId: string;
 }
 
 export interface ExtendedColumnFilter<TData> extends FilterItemSchema {

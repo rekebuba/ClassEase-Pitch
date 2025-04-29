@@ -7,11 +7,11 @@ import type {
   ExtendedColumnFilter,
   ExtendedColumnSort,
 } from "@/types/data-table";
-import { tableId } from "./validations";
 
 const sortingItemSchema = z.object({
   id: z.string(),
   desc: z.boolean(),
+  tableId: z.string()
 });
 
 export const getSortingStateParser = <TData>(
@@ -46,7 +46,9 @@ export const getSortingStateParser = <TData>(
       a.length === b.length &&
       a.every(
         (item, index) =>
-          item.id === b[index]?.id && item.desc === b[index]?.desc,
+          item.id === b[index]?.id &&
+          item.desc === b[index]?.desc &&
+          item.tableId === b[index]?.tableId,
       ),
   });
 };
@@ -54,7 +56,7 @@ export const getSortingStateParser = <TData>(
 const filterItemSchema = z.object({
   id: z.string(),
   tableId: z.string(),
-  value: z.union([z.string(), z.array(z.string())]),
+  value: z.union([z.number(), z.array(z.number()), z.string(), z.array(z.string())]),
   range: z.object({
     min: z.number(),
     max: z.number()

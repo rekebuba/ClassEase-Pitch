@@ -103,7 +103,7 @@ def seed_subjects(session):
     # Preload stream IDs once
     streams = {s.name: s.id for s in session.query(Stream).all()}
     for grade in range(1, 13):
-        grade_id = session.query(Grade.id).filter_by(name=grade).scalar()
+        grade_id = session.query(Grade.id).filter_by(grade=grade).scalar()
         if 1 <= grade <= 4:
             subjects = subject_per_grade["1-4"]
         elif 5 <= grade <= 6:

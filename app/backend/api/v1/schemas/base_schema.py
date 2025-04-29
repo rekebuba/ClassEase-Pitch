@@ -53,6 +53,23 @@ def get_all_model_classes():
     }
 
 
+OPERATOR_CONFIG = {
+    "text": ["iLike", "notLike", "startsWith", "endWith", "eq"],
+    "number": ["eq", "ne", "lt", "lte", "gt", "gte"],
+    "dateRange": ["eq", "ne", "lt", "lte", "gt", "gte"],
+    "multiSelect": ["in", "notIn"],
+    "boolean": ["eq", "ne"],
+}
+
+VALUE_TYPE_RULES = {
+    "text": str,
+    "number": (int, float),
+    "multiSelect": (str, list),
+    "boolean": bool,
+    "dateRange": (str, list),
+}
+
+
 class BaseSchema(Schema):
     """Base schema with global Case conversion."""
 
@@ -135,7 +152,7 @@ class BaseSchema(Schema):
 
         # Fetch the grade_id from the database
         grade = storage.session.query(Grade.id).filter_by(
-            name=grade_name
+            grade=grade_name
         ).first()
 
         if grade.id is None:
@@ -277,6 +294,48 @@ class BaseSchema(Schema):
         return table.id if table else None
 
     @staticmethod
+    def update_list_value(value: list[str | int], model, column_name: str) -> list:
+        """
+        Update the list value to match the model's column type.
+        """
+        if not isinstance(value, list):
+            raise ValidationError(
+                f"Expected a list for {column_name}, got {type(value)}")
+
+        # Find the column and get its Python type
+        column_obj = next(
+            (col for col in model.__table__.columns if col.name == column_name), None)
+        if column_obj is None:
+            raise ValidationError(
+                f"Column '{column_name}' not found on {model.__tablename__}.")
+
+        try:
+            expected_type = column_obj.type.python_type
+        except NotImplementedError:
+            raise ValidationError(
+                f"Unsupported type for column '{column_name}'.")
+
+        # Type conversion logic
+        converters = {
+            str: lambda v: str(v),
+            int: lambda v: int(v),
+            float: lambda v: float(v),
+            bool: lambda v: bool(v),
+            datetime: lambda v: datetime.fromisoformat(
+                v) if isinstance(v, str) else v
+        }
+
+        if expected_type not in converters:
+            raise ValidationError(
+                f"No conversion rule for type '{expected_type}' on column '{column_name}'.")
+
+        try:
+            return [converters[expected_type](item) for item in value]
+        except Exception as e:
+            raise ValueError(
+                f"Failed to convert values for column '{column_name}': {e}")
+
+    @staticmethod
     def filter_data(model, column_name, operator, value):
         """
         Dynamically create a SQLAlchemy filter based on operator.
@@ -293,8 +352,8 @@ class BaseSchema(Schema):
             "lte": lambda col, val: col <= val,
             "gt": lambda col, val: col > val,
             "gte": lambda col, val: col >= val,
-            "iLike": lambda col, val: col.ilike(f"%{val}%"),
-            "like": lambda col, val: col.like(f"%{val}%"),
+            "iLike": lambda col, val: col.ilike(f"{val}%"),
+            "like": lambda col, val: col.like(f"{val}%"),
             "in": lambda col, val: col.in_(val if isinstance(val, list) else [val]),
             "not_in": lambda col, val: ~col.in_(val if isinstance(val, list) else [val]),
             "isEmpty": lambda col, _: or_(col.is_(None), col == ""),
@@ -311,3 +370,20 @@ class BaseSchema(Schema):
             raise condition
 
         return condition
+
+    @staticmethod
+    def sort_data(model, column_name, order: bool):
+        """
+        Dynamically create a SQLAlchemy sort based on order.
+        """
+        column = getattr(model, column_name, None)
+        if column is None:
+            raise ValueError(
+                f"Column '{column_name}' not found on {model.__tablename__}.")
+
+        if order == True:
+            return column.desc()
+        elif order == False:
+            return column.asc()
+        else:
+            raise ValueError(f"Unsupported sort order: {order}")

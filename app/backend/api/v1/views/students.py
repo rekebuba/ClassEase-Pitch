@@ -46,7 +46,7 @@ def student_yearly_scores(student_data):
     query = (
         storage.session.query(STUDYearRecord.user_id,
                               Grade.id,
-                              Grade.name,
+                              Grade.grade,
                               STUDSemesterRecord.semester,
                               STUDSemesterRecord.average,
                               STUDYearRecord.final_score,
@@ -57,7 +57,7 @@ def student_yearly_scores(student_data):
         .filter(and_(STUDSemesterRecord.user_id == student_data.user_id,
                      STUDYearRecord.grade_id == STUDSemesterRecord.grade_id,
                      STUDYearRecord.year == STUDSemesterRecord.year))
-        .order_by(Grade.name, STUDSemesterRecord.semester)
+        .order_by(Grade.grade, STUDSemesterRecord.semester)
     ).all()
 
     score = {}
@@ -128,7 +128,7 @@ def get_student_grade(student_data):
         Response: A JSON response containing a list of grade names and an HTTP status code 200.
     """
     grades = storage.get_all(Grade, id=student_data.grade_id)
-    grade_names = [grade.name for grade in grades]
+    grade_names = [grade.grade for grade in grades]
 
     return jsonify({"grade": grade_names}), 200
 
@@ -215,7 +215,7 @@ def get_student_score(student_data, admin_data):
         "name": student.name,
         "father_name": student.father_name,
         "grand_father_name": student.grand_father_name,
-        "grade": grade.name,
+        "grade": grade.grade,
         "semester": data['semester'][0],
         "year": student_data.year,
         "semester_average": average_score.average,
@@ -278,7 +278,7 @@ def list_of_course_available(user_data):
             "courses": [subject.to_dict() for subject in subjects],
             "semester": available_semester[0].name,
             "academic_year": available_semester[2].ethiopian_year,
-            "grade": storage.get_first(Grade, id=student_data.next_grade_id or student_data.current_grade_id).name
+            "grade": storage.get_first(Grade, id=student_data.next_grade_id or student_data.current_grade_id).grade
         })
 
         return jsonify(result), 200

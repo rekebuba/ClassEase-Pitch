@@ -80,6 +80,7 @@ export const GradeCountsSchema = z.record(z.coerce.number(), z.number());
 const SortItemSchema = z.object({
     id: z.string(),
     desc: z.boolean(),
+    tableId: z.string()
 });
 
 export const searchParamsCache = z.object({

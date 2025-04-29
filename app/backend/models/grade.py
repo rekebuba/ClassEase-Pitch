@@ -24,7 +24,7 @@ def seed_grades(session):
         return
 
     for i in range(1, 13):
-        grade = Grade(name=i)
+        grade = Grade(grade=i)
         session.add(grade)
 
     session.commit()
@@ -36,5 +36,5 @@ class Grade(BaseModel):
     __tablename__ = "grades"
 
     # Database column
-    name: Mapped[int] = mapped_column(
+    grade: Mapped[int] = mapped_column(
         Integer, unique=True, nullable=False, index=True)

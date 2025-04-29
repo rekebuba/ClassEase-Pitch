@@ -175,7 +175,7 @@ def get_list_of_students(teacher_data):
                 TeachersRecord.teacher_id == teacher_data.id,
                 Assessment.subject_id == subject.id,
                 Assessment.semester == data['semester'][0],
-                Grade.name == data['grade'][0],
+                Grade.grade == data['grade'][0],
             )
         )
         .order_by(Student.name.asc(), Student.father_name.asc(), Student.grand_father_name.asc(), Student.id.asc())
@@ -258,7 +258,7 @@ def get_student_assessment(teacher_data):
 def teacher_assigned(teacher_data):
     query = (
         storage.session.query(
-            Subject.name, Subject.code, Grade.name, Section.section)
+            Subject.name, Subject.code, Grade.grade, Section.section)
         .join(TeachersRecord, TeachersRecord.subject_id == Subject.id)
         .join(Grade, Grade.id == TeachersRecord.grade_id)
         .join(Section, Section.id == TeachersRecord.section_id)

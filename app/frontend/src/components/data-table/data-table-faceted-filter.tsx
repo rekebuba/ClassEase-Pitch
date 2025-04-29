@@ -2,8 +2,8 @@
 
 import type { Option } from "@/types/data-table";
 import type { Column } from "@tanstack/react-table";
-import { Check, PlusCircle, Variable, XCircle } from "lucide-react";
-import { TrashIcon } from "@radix-ui/react-icons"
+import { Check, PlusCircle, XCircle } from "lucide-react";
+import { TrashIcon } from "@radix-ui/react-icons";
 
 import { Badge, badgeVariants } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
+} from "@/components/ui/select";
 import { useState } from "react";
 import { DataTableFilterOption } from "@/types";
 
@@ -45,7 +45,7 @@ interface DataTableFacetedFilterProps<TData, TValue> {
   multiple?: boolean;
   setSelectedOptions: React.Dispatch<
     React.SetStateAction<DataTableFilterOption<TData>[]>
-  >
+  >;
 }
 
 export function DataTableFacetedFilter<TData, TValue>({
@@ -64,11 +64,15 @@ export function DataTableFacetedFilter<TData, TValue>({
     Array.isArray(columnFilterValue) ? columnFilterValue : [],
   );
 
-  const comparisonOperators = dataTableConfig.multiSelectOperators
+  const comparisonOperators = dataTableConfig.multiSelectOperators;
 
-  const operator = comparisonOperators.find(
-    (operator) => operator.value === columnFilter?.id
-  ) ?? comparisonOperators[0]
+  const operator = React.useMemo(
+    () =>
+      comparisonOperators.find(
+        (op) => op.value === columnFilter?.toString()
+      ) ?? comparisonOperators[0],
+    [column, comparisonOperators]
+  );
 
   const [selectedOperator, setSelectedOperator] = useState<string>(operator.value);
 

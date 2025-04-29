@@ -130,7 +130,7 @@ def school_overview(admin_data):
     total_teachers = storage.get_all(Teacher)
     total_students = storage.get_all(Student)
     enrollment_by_grade = storage.session.query(
-        Grade.name,
+        Grade.grade,
         func.count(STUDYearRecord.student_id)
     ).join(Grade, STUDYearRecord.grade_id == Grade.id).group_by(
         STUDYearRecord.grade_id,
@@ -209,7 +209,7 @@ def assign_class(admin_data):
 
     # Get the grade_id from the Grade table
     grade_id = storage.session.execute(
-        select(Grade.id).where(Grade.name == data['grade'])
+        select(Grade.id).where(Grade.grade == data['grade'])
     ).scalars().first()
     if not grade_id:
         return jsonify({"message": "No grade found for the teacher"}), 404
@@ -395,7 +395,7 @@ def registered_grades(admin_data):
 
         schema = RegisteredGradesSchema()
         result = schema.dump({
-            "grades": [grade.to_dict()['name'] for grade in registered_grades]
+            "grades": [grade.to_dict()['grade'] for grade in registered_grades]
         })
 
         return jsonify(result), 200
@@ -540,74 +540,74 @@ def admin_student_list(admin_data):
     print("valid data: ")
     print(valid_data)
 
-    query = (
-        storage.session.query(Student, User)
-        # .select_from(Student)
-        .join(User, User.id == Student.user_id)
-        # .join(STUDYearRecord, STUDYearRecord.user_id == Student.user_id)
-    )
+    # query = (
+    #     storage.session.query(Student, User)
+    #     # .select_from(Student)
+    #     .join(User, User.id == Student.user_id)
+    #     # .join(STUDYearRecord, STUDYearRecord.user_id == Student.user_id)
+    # )
 
-    Use the paginate_query function to handle pagination
-    paginated_result = paginate_query(query, page, limit)
+    # Use the paginate_query function to handle pagination
+    # paginated_result = paginate_query(query, page, limit)
 
-    Apply conditional filters if additional parameters are provided
-    if 'grade_id' in valid_data:
-        query = query.filter(
-            Student.current_grade_id.in_(valid_data['grade_id']))
+    # Apply conditional filters if additional parameters are provided
+    # if 'grade_id' in valid_data:
+    #     query = query.filter(
+    #         Student.current_grade_id.in_(valid_data['grade_id']))
 
-    if 'year_id' in valid_data:
-        query = query.filter(Student.current_year_id == valid_data['year_id'])
+    # if 'year_id' in valid_data:
+    #     query = query.filter(Student.current_year_id == valid_data['year_id'])
 
-    query = query.order_by(
-        Student.first_name.asc(),
-        Student.father_name.asc(),
-        Student.grand_father_name.asc(),
-        User.identification.asc()
-    ).all()
+    # query = query.order_by(
+    #     Student.first_name.asc(),
+    #     Student.father_name.asc(),
+    #     Student.grand_father_name.asc(),
+    #     User.identification.asc()
+    # ).all()
 
-    # Check if any students are found
-    if not query:
-        return jsonify({"message": "No student found"}), 404
+    # # Check if any students are found
+    # if not query:
+    #     return jsonify({"message": "No student found"}), 404
 
-    # Convert list of tuples to list of dicts
-    data_to_serialize = [
-        {"student": student.to_dict(), "user": user.to_dict()}
-        for student, user in query
-    ]
+    # # Convert list of tuples to list of dicts
+    # data_to_serialize = [
+    #     {"student": student.to_dict(), "user": user.to_dict()}
+    #     for student, user in query
+    # ]
 
-    schema = AllStudentsSchema(many=True)
-    result = schema.dump(data_to_serialize)
-    print(json.dumps(result, indent=4, sort_keys=True))
+    # schema = AllStudentsSchema(many=True)
+    # result = schema.dump(data_to_serialize)
+    # print(json.dumps(result, indent=4, sort_keys=True))
 
-    return jsonify({"data": result, "page_count": 1}), 200
+    # return jsonify({"data": result, "page_count": 1}), 200
 
-    # return jsonify(
-    #     {
-    #         "data": [{
-    #             "id": "1",
-    #             "name": "Emma Johnson",
-    #             "parentPhone": "emma.j@example.com",
-    #             "grade": 10,
-    #             "section": "A",
-    #             "status": "active",
-    #             "attendance": 95,
-    #             "averageGrade": 88,
-    #             "parentName": "Michael Johnson",
-    #         }],
-    #         "pageCount": 1,
-    #         "tableId": {
-    #             "id": uuid.uuid4(),
-    #             "name": uuid.uuid4(),
-    #             "parentPhone": uuid.uuid4(),
-    #             "grade": "10fc035b-ac80-4fad-baca-c3cdea64cf98",
-    #             "section": uuid.uuid4(),
-    #             "status": uuid.uuid4(),
-    #             "attendance": uuid.uuid4(),
-    #             "averageGrade": uuid.uuid4(),
-    #             "parentName": uuid.uuid4(),
-    #         }
-    #     }
-    # ), 200
+    return jsonify(
+        {
+            "data": [{
+                "id": "1",
+                "name": "Emma Johnson",
+                "parentPhone": "emma.j@example.com",
+                "grade": 10,
+                "section": "A",
+                "status": "active",
+                "attendance": 95,
+                "averageGrade": 88,
+                "parentName": "Michael Johnson",
+            }],
+            "pageCount": 1,
+            "tableId": {
+                "id": uuid.uuid4(),
+                "name": uuid.uuid4(),
+                "parentPhone": uuid.uuid4(),
+                "grade": "10fc035b-ac80-4fad-baca-c3cdea64cf98",
+                "section": uuid.uuid4(),
+                "status": uuid.uuid4(),
+                "attendance": uuid.uuid4(),
+                "averageGrade": uuid.uuid4(),
+                "parentName": uuid.uuid4(),
+            }
+        }
+    ), 200
 
 
 @admin.route('/students/status-count', methods=['GET'])

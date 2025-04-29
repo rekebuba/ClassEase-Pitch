@@ -26,8 +26,8 @@ def test_db_grade_count(client, db_session):
 
 def test_db_grade_values(client, db_session):
     # Query the database
-    grades = db_session.query(Grade.name).order_by(Grade.name).all()
-    grade_values = [grade.name for grade in grades]
+    grades = db_session.query(Grade.grade).order_by(Grade.grade).all()
+    grade_values = [grade.grade for grade in grades]
 
     # Assert that the database has the correct grade values
     assert grade_values == list(range(1, 13))
@@ -53,6 +53,7 @@ def test_db_table_count(client, db_session):
 def test_user_register_success(client, register_users):
     for valid_data in register_users:
         # Send a POST request to the registration endpoint
+        print(valid_data["role"])
         response = client.post(
             f'/api/v1/registration/{valid_data["role"]}', data=valid_data)
 

@@ -157,7 +157,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
   const onSortingChange = React.useCallback(
     (updaterOrValue: Updater<SortingState>) => {
       if (typeof updaterOrValue === "function") {
-        const newSorting = updaterOrValue(sorting);
+        const newSorting = updaterOrValue(sorting)
         setSorting(newSorting as ExtendedColumnSort<TData>[]);
       } else {
         setSorting(updaterOrValue as ExtendedColumnSort<TData>[]);

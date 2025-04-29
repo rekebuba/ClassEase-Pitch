@@ -17,6 +17,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import React from "react";
+import { useQueryState } from "nuqs";
+import { getSortingStateParser } from "@/lib/parsers";
+import { ExtendedColumnSort } from "@/types/data-table";
 
 interface DataTableColumnHeaderProps<TData, TValue>
   extends React.ComponentProps<typeof DropdownMenuTrigger> {
@@ -33,6 +37,19 @@ export function DataTableColumnHeader<TData, TValue>({
   if (!column.getCanSort() && !column.getCanHide()) {
     return <div className={cn(className)}>{title}</div>;
   }
+
+  const [sorting, setSorting] = useQueryState(
+    'sort',
+    getSortingStateParser()
+      .withDefault([]),
+  );
+
+  const onSortAdd = React.useCallback((value: boolean) => {
+    const tableId = column.columnDef.meta?.tableId ?? "";
+    setSorting(() => [
+      { id: column.id, desc: value, tableId: tableId } as ExtendedColumnSort<unknown>,
+    ]);
+  }, [column]);
 
   return (
     <DropdownMenu>
@@ -59,7 +76,7 @@ export function DataTableColumnHeader<TData, TValue>({
             <DropdownMenuCheckboxItem
               className="relative pr-8 pl-2 [&>span:first-child]:right-2 [&>span:first-child]:left-auto [&_svg]:text-muted-foreground"
               checked={column.getIsSorted() === "asc"}
-              onClick={() => column.toggleSorting(false)}
+              onClick={() => onSortAdd(false)}
             >
               <ChevronUp />
               Asc
@@ -67,7 +84,7 @@ export function DataTableColumnHeader<TData, TValue>({
             <DropdownMenuCheckboxItem
               className="relative pr-8 pl-2 [&>span:first-child]:right-2 [&>span:first-child]:left-auto [&_svg]:text-muted-foreground"
               checked={column.getIsSorted() === "desc"}
-              onClick={() => column.toggleSorting(true)}
+              onClick={() => onSortAdd(true)}
             >
               <ChevronDown />
               Desc

@@ -41,6 +41,7 @@ import {
 import { dataTableConfig } from "@/config/data-table";
 import { cn } from "@/lib/utils";
 import { useTableInstanceContext } from "./table-instance-provider";
+import { ExtendedColumnSort } from "@/types/data-table";
 
 const OPEN_MENU_SHORTCUT = "s";
 const REMOVE_SORT_SHORTCUTS = ["backspace", "delete"];
@@ -66,16 +67,17 @@ export function DataTableSortList<TData>({
   const { columnLabels, columns } = React.useMemo(() => {
     const labels = new Map<string, string>();
     const sortingIds = new Set(sorting.map((s) => s.id));
-    const availableColumns: { id: string; label: string }[] = [];
+    const availableColumns: { id: string; label: string, tableId: string }[] = [];
 
     for (const column of table.getAllColumns()) {
       if (!column.getCanSort()) continue;
 
       const label = column.columnDef.meta?.label ?? column.id;
+      const tableId = column.columnDef.meta?.tableId ?? "";
       labels.set(column.id, label);
 
       if (!sortingIds.has(column.id)) {
-        availableColumns.push({ id: column.id, label });
+        availableColumns.push({ id: column.id, label, tableId });
       }
     }
 
@@ -91,7 +93,7 @@ export function DataTableSortList<TData>({
 
     onSortingChange((prevSorting) => [
       ...prevSorting,
-      { id: firstColumn.id, desc: false },
+      { id: firstColumn.id, desc: false, tableId: firstColumn.tableId },
     ]);
   }, [columns, onSortingChange]);
 
@@ -268,7 +270,7 @@ export function DataTableSortList<TData>({
 interface DataTableSortItemProps {
   sort: ColumnSort;
   sortItemId: string;
-  columns: { id: string; label: string }[];
+  columns: { id: string; label: string, tableId: string }[];
   columnLabels: Map<string, string>;
   onSortUpdate: (sortId: string, updates: Partial<ColumnSort>) => void;
   onSortRemove: (sortId: string) => void;
@@ -347,7 +349,7 @@ function DataTableSortItem({
                     <CommandItem
                       key={column.id}
                       value={column.id}
-                      onSelect={(value) => onSortUpdate(sort.id, { id: value })}
+                      onSelect={(value) => onSortUpdate(sort.id, { id: value, tableId: column.tableId })}
                     >
                       <span className="truncate">{column.label}</span>
                     </CommandItem>
@@ -362,7 +364,7 @@ function DataTableSortItem({
           onOpenChange={setShowDirectionSelector}
           value={sort.desc ? "desc" : "asc"}
           onValueChange={(value: SortDirection) =>
-            onSortUpdate(sort.id, { desc: value === "desc" })
+            onSortUpdate(sort.id, { desc: value === "desc", tableId: sort.tableId })
           }
         >
           <SelectTrigger

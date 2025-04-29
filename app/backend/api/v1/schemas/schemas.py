@@ -1,3 +1,4 @@
+import json
 from flask import url_for
 from marshmallow import Schema, ValidationError, post_dump, post_load, pre_dump, pre_load, validates, validates_schema, fields
 from pyethiodate import EthDate
@@ -5,7 +6,7 @@ from datetime import datetime
 import random
 import bcrypt
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
-from api.v1.schemas.base_schema import BaseSchema, get_all_model_classes
+from api.v1.schemas.base_schema import OPERATOR_CONFIG, VALUE_TYPE_RULES, BaseSchema, get_all_model_classes
 from werkzeug.datastructures import FileStorage
 from models.student import Student
 from models.base_model import CustomTypes
@@ -561,7 +562,7 @@ class SubjectSchema(BaseSchema):
         subject_detail = self.get_subject_detail(
             id=data.get('id'), code=data.get('code'))
 
-        data['grade'] = grade_detail.name
+        data['grade'] = grade_detail.grade
         data['subject'] = subject_detail.name
         data['subject_code'] = subject_detail.code
 
@@ -684,7 +685,7 @@ class RegisteredGradesSchema(BaseSchema):
 
 class SortSchema(BaseSchema):
     """Schema for validating sorting parameters."""
-    id = fields.String(required=False)
+    column_name = fields.String(required=False)
     desc = fields.Boolean(required=False)
     table_id = fields.String(required=False)
     table = TableField(required=False)
@@ -692,7 +693,8 @@ class SortSchema(BaseSchema):
     @pre_load
     def set_defaults(self, data, **kwargs):
         # add default values to the data
-        # data['table'] = self.get_table(data.get("table_id", None))
+        data['column_name'] = data.pop('id', None)
+        data['table'] = self.get_table(data.get("table_id", None))
 
         return data
 
@@ -704,79 +706,65 @@ class RangeSchema(BaseSchema):
 
 
 class ValueField(fields.Field):
-    """Custom field for validating value IDs."""
+    """Custom field for validating values."""
 
     def _validate(self, value):
-        if not hasattr(self.parent, 'variant'):
-            raise ValidationError("Missing variant field", field_name="value")
-
-        variant = self.parent.variant
-        table = getattr(self.parent, 'table', None)
-
-        if variant == "text" and not isinstance(value, str):
+        if not isinstance(value, (str, list)):
             raise ValidationError(
-                "Value must be a string when variant is 'text'.", field_name="value")
-        elif variant == "number" and not isinstance(value, (int, float)):
-            raise ValidationError(
-                "Value must be a number when variant is 'number'.", field_name="value")
-        elif variant == "multiSelect":
-            if not isinstance(value, list) or not all(isinstance(v, str) for v in value):
-                raise ValidationError(
-                    "Value must be a list of strings when variant is 'multiSelect'.", field_name="value")
-
+                "value must be either a string or a list", field_name="value"
+            )
         return value
-
-
-class operatorField(fields.Field):
-    """Custom field for validating operator IDs."""
-
-    def _validate(self, operator):
-        if not hasattr(self.parent, 'variant'):
-            raise ValidationError("Missing variant field",
-                                  field_name="operator")
-
-        variant = self.parent.variant
-
-        operator_config = {
-            "text": ["iLike", "notLike", "startsWith", "endWith", "eq"],
-            "number": ["eq", "ne", "lt", "lte", "gt", "gte"],
-            "date": ["eq", "ne", "lt", "lte", "gt", "gte", ],
-            "multiSelect": ["in", "notIn"],
-            "boolean": ['eq', 'ne'],
-        }
-        try:
-            operators = operator_config[variant]
-            if operator not in operators:
-                raise ValidationError(
-                    f"'{variant}' is Invalid operator for {variant} variant.", field_name="operator")
-        except KeyError:
-            raise ValidationError(
-                f"'{variant}' is not a valid variant.", field_name="variant")
-
-        return operator
 
 
 class FilterSchema(BaseSchema):
     """Schema for validating filter parameters."""
-    column_name = fields.String(
-        required=False, data_key="id", attribute="column_name")
+    column_name = fields.String(required=False)
     filter_id = fields.String(required=False)
     table_id = fields.String(required=False)
     table = TableField(required=False)
     range = fields.Nested(RangeSchema, required=False)
-    operator = operatorField(required=False)
     variant = fields.String(validate=lambda x: x in [
                             "text", "number", "multiSelect", "boolean", "dateRange"], required=True)
+    operator = fields.String(required=False)
     value = ValueField(required=False)
 
     @validates_schema
     def validate_value(self, data, **kwargs):
-        pass
+        variant = data.get('variant', None)
+        operator = data.get('operator', None)
+        value = data.get('value', None)
+
+        if not variant:
+            raise ValidationError("Missing variant", field_name="variant")
+
+        if operator is not None:
+            allowed_operators = OPERATOR_CONFIG.get(variant)
+            if not allowed_operators:
+                raise ValidationError(
+                    f"'{variant}' is not a valid variant.", field_name="variant"
+                )
+
+            if operator not in allowed_operators:
+                raise ValidationError(
+                    f"'{operator}' is not valid for variant '{variant}'",
+                    field_name="operator"
+                )
+
+        if value is not None:
+            expected_type = VALUE_TYPE_RULES.get(variant)
+            if expected_type and not isinstance(value, expected_type):
+                raise ValidationError(
+                    f"Value must be of type {expected_type} when variant is '{variant}'.", field_name="value"
+                )
 
     @pre_load
     def set_defaults(self, data, **kwargs):
         # add default values to the data
+        data['column_name'] = data.pop('id', None)
         data['table'] = self.get_table(data.get("table_id", None))
+        if data['value'] is not None and isinstance(data['value'], list):
+            data['value'] = self.update_list_value(
+                data['value'], data['table'], data['column_name'])
 
         return data
 
@@ -790,18 +778,14 @@ class ParamSchema(BaseSchema):
     per_page = fields.Integer(required=False)
 
     sort = fields.List(fields.Nested(SortSchema), required=False)
+    valid_sort = fields.List(fields.Raw(), required=False)
     join_operator = fields.String(required=False)
 
-    # grades = fields.List(fields.Integer)
-    # grade_id = fields.List(fields.String, required=False, load_only=True)
-
-    # year = fields.String()
-    # year_id = fields.String(required=False, load_only=True)
-
-    @pre_load
+    @post_load
     def set_defaults(self, data, **kwargs):
         # add default values to the data
         valid_filters = []
+        valid_sorts = []
         if "filters" in data and data["filters"]:
             for f_item in data["filters"]:
                 if "table" in f_item and f_item["table"] is not None:
@@ -812,14 +796,20 @@ class ParamSchema(BaseSchema):
                         f_item['value']
                     )
                     valid_filters.append(result)
+            data.pop('filters', None)
             data['valid_filters'] = valid_filters
 
-        # if "grades" in data:
-        #     data["grade_id"] = [self.get_grade_id(
-        #         grade) for grade in data["grades"]]
-
-        # if "year" in data:
-        #     data['year_id'] = self.get_year_id(data.pop('year'))
+        if "sort" in data and data["sort"]:
+            for s_item in data["sort"]:
+                if "table" in s_item and s_item["table"] is not None:
+                    result = self.sort_data(
+                        s_item["table"],
+                        s_item['column_name'],
+                        s_item['desc']
+                    )
+                    valid_sorts.append(result)
+            data.pop('sort', None)
+            data['valid_sort'] = valid_sorts
 
         return data
 

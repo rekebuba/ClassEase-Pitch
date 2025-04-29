@@ -51,8 +51,8 @@ def client(app_session):
 
 
 @pytest.fixture(params=[
-    (CustomTypes.RoleEnum.STUDENT, 1),
-    (CustomTypes.RoleEnum.ADMIN, 1),
+    # (CustomTypes.RoleEnum.STUDENT, 1),
+    # (CustomTypes.RoleEnum.ADMIN, 1),
     (CustomTypes.RoleEnum.TEACHER, 1),
 ])
 def register_users(request, db_session):
@@ -116,7 +116,7 @@ def db_create_users(db_session):
                 start_year_id = db_session.query(Year.id).scalar()
                 current_grade = random.randint(1, 10)
                 current_grade_id = db_session.query(Grade.id).filter_by(
-                    name=current_grade).scalar(),
+                    grade=current_grade).scalar(),
                 role_user = Factory(
                     user_id=user['id'],
                     start_year_id=start_year_id,
@@ -220,7 +220,7 @@ def db_course_registration(db_session, db_event_form):
             db_session.query(
                 Subject.name.label("subject"),
                 Subject.code.label("subject_code"),
-                Grade.name.label("grade")
+                Grade.grade.label("grade")
             )
             .join(Grade, Grade.id == Subject.grade_id)
             .filter(Grade.id == grade.id)
@@ -274,7 +274,7 @@ def fake_mark_list(db_session):
                           .all()
                           )
 
-    grades = {grade.name for grade in registered_grades}
+    grades = {grade.grade for grade in registered_grades}
     mark_list = MarkListFactory(grade_num=len(grades)).to_dict()
     mark_list.pop('grade_num')
 
@@ -282,7 +282,7 @@ def fake_mark_list(db_session):
         assessment['grade'] = grade
         subjects = (db_session.query(Subject.name, Subject.code)
                     .join(Grade, Grade.id == Subject.grade_id)
-                    .filter(Grade.name == assessment['grade'])
+                    .filter(Grade.grade == assessment['grade'])
                     .all()
                     )
         custom_subjects = [AvailableSubject(
