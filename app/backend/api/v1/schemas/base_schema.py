@@ -372,18 +372,24 @@ class BaseSchema(Schema):
         return condition
 
     @staticmethod
-    def sort_data(model, column_name, order: bool):
+    def sort_data(model, column_name: str | list[str], order: bool) -> list:
         """
         Dynamically create a SQLAlchemy sort based on order.
         """
-        column = getattr(model, column_name, None)
-        if column is None:
-            raise ValueError(
-                f"Column '{column_name}' not found on {model.__tablename__}.")
+        columns = [column for column in column_name] if isinstance(
+            column_name, list) else [column_name]
+        result = []
+        for column in columns:
+            col = getattr(model, column, None)
+            if col is None:
+                raise ValidationError(
+                    f"Column '{column}' not found on {model.__tablename__}.")
 
-        if order == True:
-            return column.desc()
-        elif order == False:
-            return column.asc()
-        else:
-            raise ValueError(f"Unsupported sort order: {order}")
+            if order == True:
+                result.append(col.desc())
+            elif order == False:
+                result.append(col.asc())
+            else:
+                raise ValidationError(f"Unsupported sort order: {order}")
+
+        return result

@@ -5,7 +5,7 @@ import type { ColumnSort, Row, RowData } from "@tanstack/react-table";
 declare module "@tanstack/react-table" {
   // biome-ignore lint/correctness/noUnusedVariables: <explanation>
   interface ColumnMeta<TData extends RowData, TValue> {
-    tableId?: string;
+    tableId?: string | Record<string, string>;
     label?: string;
     placeholder?: string;
     variant?: FilterVariant;
@@ -16,7 +16,7 @@ declare module "@tanstack/react-table" {
   }
 
   interface ColumnSort {
-    tableId: string;
+    tableId: string | Record<string, string>;
   }
 }
 

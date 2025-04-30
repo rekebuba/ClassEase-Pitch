@@ -127,7 +127,7 @@ export function DataTableSliderFilter<TData>({
         addFilter({
           id: column.id,
           variant: column.columnDef.meta?.variant,
-          tableId: column.columnDef.meta?.tableId,
+          tableId: column.columnDef.meta?.tableId ?? "",
           range: { min: numValue, max: range.max },
         })
       }
@@ -150,7 +150,7 @@ export function DataTableSliderFilter<TData>({
         addFilter({
           id: column.id,
           variant: column.columnDef.meta?.variant,
-          tableId: column.columnDef.meta?.tableId,
+          tableId: column.columnDef.meta?.tableId ?? "",
           range: { min: range.min, max: numValue },
         })
       }
@@ -163,7 +163,7 @@ export function DataTableSliderFilter<TData>({
       addFilter({
         id: column.id,
         variant: column.columnDef.meta?.variant,
-        tableId: column.columnDef.meta?.tableId,
+        tableId: column.columnDef.meta?.tableId ?? "",
         range: value,
       });
     },

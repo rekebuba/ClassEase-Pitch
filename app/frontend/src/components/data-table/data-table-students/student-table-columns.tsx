@@ -98,6 +98,23 @@ export function getStudentsTableColumns({
       enableColumnFilter: true,
     },
     {
+      id: "id",
+      accessorKey: "id",
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Student Id" />,
+      cell: ({ row }) => (
+        <div className="flex items-center">
+          <span>{row.original.id}</span>
+        </div>
+      ),
+      enableColumnFilter: true,
+      meta: {
+        variant: "text",
+        label: "Student Id",
+        tableId: tableId.id,
+      },
+      enableHiding: true,
+    },
+    {
       id: "grade",
       accessorKey: "grade",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Grade" />,

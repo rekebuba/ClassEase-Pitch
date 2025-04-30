@@ -49,7 +49,7 @@ export const StudentSchema = z.object({
 
 export const tableId = z.record(
     StudentSchema.keyof(),
-    z.string()
+    z.union([z.string(), z.record(z.string(), z.string())])
 );
 
 export const StudentsDataSchema = z.object({
@@ -80,11 +80,10 @@ export const GradeCountsSchema = z.record(z.coerce.number(), z.number());
 const SortItemSchema = z.object({
     id: z.string(),
     desc: z.boolean(),
-    tableId: z.string()
+    tableId: z.union([z.string(), z.record(z.string(), z.string())])
 });
 
 export const searchParamsCache = z.object({
-    filterFlag: z.enum(["Advanced filters", ""]).default(""),
     page: z.number().default(1),
     perPage: z.number().default(10),
     // advanced filter
@@ -95,18 +94,9 @@ export const searchParamsCache = z.object({
 
 
 export const searchParamMap = {
-    filterFlag: parseAsStringEnum(["Advanced filters", ""]).withDefault(""),
     page: parseAsInteger.withDefault(1),
     perPage: parseAsInteger.withDefault(10),
     sort: getSortingStateParser(),
-    name: parseAsString.withDefault(""),
-    grade: parseAsArrayOf(z.number()).withDefault([]),
-    section: parseAsArrayOf(z.string()).withDefault([]),
-    attendance: parseAsArrayOf(z.coerce.number()).withDefault([]),
-    averageGrade: parseAsArrayOf(z.coerce.number()).withDefault([]),
-    status: parseAsArrayOf(z.string()).withDefault([]),
-    estimatedHours: parseAsArrayOf(z.coerce.number()).withDefault([]),
-    createdAt: parseAsArrayOf(z.coerce.number()).withDefault([]),
     // advanced filter
     filters: getFiltersStateParser().withDefault([]),
     joinOperator: parseAsStringEnum(["and", "or"]).withDefault("and"),

@@ -67,7 +67,7 @@ export function DataTableSortList<TData>({
   const { columnLabels, columns } = React.useMemo(() => {
     const labels = new Map<string, string>();
     const sortingIds = new Set(sorting.map((s) => s.id));
-    const availableColumns: { id: string; label: string, tableId: string }[] = [];
+    const availableColumns: { id: string; label: string, tableId: string | Record<string, string> }[] = [];
 
     for (const column of table.getAllColumns()) {
       if (!column.getCanSort()) continue;
@@ -270,7 +270,7 @@ export function DataTableSortList<TData>({
 interface DataTableSortItemProps {
   sort: ColumnSort;
   sortItemId: string;
-  columns: { id: string; label: string, tableId: string }[];
+  columns: { id: string; label: string, tableId: string | Record<string, string> }[];
   columnLabels: Map<string, string>;
   onSortUpdate: (sortId: string, updates: Partial<ColumnSort>) => void;
   onSortRemove: (sortId: string) => void;

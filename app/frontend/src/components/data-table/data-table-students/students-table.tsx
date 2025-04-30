@@ -42,6 +42,7 @@ export function StudentsTable() {
   const [rowAction, setRowAction] = React.useState<DataTableRowAction<Student> | null>(null)
   // Search params state with debouncing
   const [debouncedParams, setDebouncedParams] = React.useState<SearchParams | null>(null)
+  const [columnVisibility, setColumnVisibility] = React.useState({});
 
   // Data fetching with the custom hook
   const {
@@ -77,13 +78,16 @@ export function StudentsTable() {
   )
 
   // Table setup
-  const { table, shallow, debounceMs, throttleMs, perPage } = useDataTable({
+  const { table } = useDataTable({
     data,
     columns,
     pageCount,
     initialState: {
       sorting: INITIAL_SORTING as ExtendedColumnSort<Student>[],
       columnPinning: COLUMN_PINNING,
+      columnVisibility: {
+        id: false, // Hide Student Id column
+      },
     },
     getRowId: (originalRow) => originalRow.id,
     shallow: false,

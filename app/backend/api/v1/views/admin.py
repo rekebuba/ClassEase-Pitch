@@ -540,12 +540,14 @@ def admin_student_list(admin_data):
     print("valid data: ")
     print(valid_data)
 
-    # query = (
-    #     storage.session.query(Student, User)
-    #     # .select_from(Student)
-    #     .join(User, User.id == Student.user_id)
-    #     # .join(STUDYearRecord, STUDYearRecord.user_id == Student.user_id)
-    # )
+    query = (
+        storage.session.query(Student, User, Grade, Section, STUDYearRecord)
+        .select_from(Student)
+        .join(User, User.id == Student.user_id)
+        .join(Grade, Grade.id == Student.current_grade_id)
+        .join(Section, Section.semester_id == Student.semester_id)
+        .join(STUDYearRecord, STUDYearRecord.user_id == Student.user_id)
+    )
 
     # Use the paginate_query function to handle pagination
     # paginated_result = paginate_query(query, page, limit)
@@ -597,7 +599,11 @@ def admin_student_list(admin_data):
             "pageCount": 1,
             "tableId": {
                 "id": uuid.uuid4(),
-                "name": uuid.uuid4(),
+                "name": {
+                    "first_name": "9433135e-f7a6-41df-9592-651cdf55e9d4",
+                    "father_name": "9433135e-f7a6-41df-9592-651cdf55e9d4",
+                    "grand_father_name": "9433135e-f7a6-41df-9592-651cdf55e9d4"
+                },
                 "parentPhone": uuid.uuid4(),
                 "grade": "10fc035b-ac80-4fad-baca-c3cdea64cf98",
                 "section": uuid.uuid4(),

@@ -1,6 +1,6 @@
 import json
 from flask import url_for
-from marshmallow import Schema, ValidationError, post_dump, post_load, pre_dump, pre_load, validates, validates_schema, fields
+from marshmallow import Schema, validate, ValidationError, post_dump, post_load, pre_dump, pre_load, validates, validates_schema, fields
 from pyethiodate import EthDate
 from datetime import datetime
 import random
@@ -682,19 +682,51 @@ class AvailableEventsSchema(BaseSchema):
 class RegisteredGradesSchema(BaseSchema):
     grades = fields.List(fields.Integer, required=True)
 
+class ColumnField(fields.Field):
+    """Custom field for validating values."""
+
+    def _validate(self, value):
+        if not isinstance(value, (str, list)):
+            raise ValidationError(
+                "value must be either a string or a list", field_name="value"
+            )
+        return value
+
+class TableIdField(fields.Field):
+    """Custom field for validating values."""
+
+    def _validate(self, value):
+        if not isinstance(value, (str, dict)):
+            raise ValidationError(
+                "value must be either a string or a Dictionary", field_name="value"
+            )
+        return value
+
 
 class SortSchema(BaseSchema):
     """Schema for validating sorting parameters."""
-    column_name = fields.String(required=False)
+    column_name = ColumnField(required=False)
     desc = fields.Boolean(required=False)
-    table_id = fields.String(required=False)
+    table_id = TableIdField(required=False)
     table = TableField(required=False)
 
     @pre_load
     def set_defaults(self, data, **kwargs):
         # add default values to the data
         data['column_name'] = data.pop('id', None)
-        data['table'] = self.get_table(data.get("table_id", None))
+        table_id = data.get('table_id', None)
+        if isinstance(table_id, dict):
+            values = list(table_id.values())
+            first_value = values[0] if values else None
+
+            if all(v == first_value for v in values):
+                data['column_name'] = list(table_id.keys())
+                table_id = first_value
+            else:
+                raise ValidationError(
+                    "Invalid table_id format. It should be a single value or a dictionary with the same value.")
+
+        data['table'] = self.get_table(table_id)
 
         return data
 
@@ -807,7 +839,7 @@ class ParamSchema(BaseSchema):
                         s_item['column_name'],
                         s_item['desc']
                     )
-                    valid_sorts.append(result)
+                    valid_sorts.extend(result)  # Adds all items from result to valid_sorts
             data.pop('sort', None)
             data['valid_sort'] = valid_sorts
 

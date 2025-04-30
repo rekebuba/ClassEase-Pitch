@@ -52,7 +52,7 @@ export function DataTableInputFilter<TData, TValue>({
                     id: column.id,
                     value: value,
                     variant: column.columnDef.meta?.variant,
-                    tableId: column.columnDef.meta?.tableId,
+                    tableId: column.columnDef.meta?.tableId ?? "",
                     operator: selectedOperator,
                 })
             }
@@ -69,7 +69,7 @@ export function DataTableInputFilter<TData, TValue>({
                 addFilter({
                     id: column.id,
                     variant: column.columnDef.meta?.variant,
-                    tableId: column.columnDef.meta?.tableId,
+                    tableId: column.columnDef.meta?.tableId ?? "",
                     value: selectedText,
                     operator: value,
                 })

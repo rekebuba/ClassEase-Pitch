@@ -11,7 +11,7 @@ import type {
 const sortingItemSchema = z.object({
   id: z.string(),
   desc: z.boolean(),
-  tableId: z.string()
+  tableId: z.union([z.string(), z.record(z.string(), z.string())]),
 });
 
 export const getSortingStateParser = <TData>(
@@ -55,7 +55,7 @@ export const getSortingStateParser = <TData>(
 
 const filterItemSchema = z.object({
   id: z.string(),
-  tableId: z.string(),
+  tableId: z.union([z.string(), z.record(z.string(), z.string())]),
   value: z.union([z.number(), z.array(z.number()), z.string(), z.array(z.string())]),
   range: z.object({
     min: z.number(),

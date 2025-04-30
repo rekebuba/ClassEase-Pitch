@@ -91,7 +91,7 @@ export function DataTableFacetedFilter<TData, TValue>({
         addFilter({
           id: column.id,
           variant: column.columnDef.meta?.variant,
-          tableId: column.columnDef.meta?.tableId,
+          tableId: column.columnDef.meta?.tableId ?? "",
           value: filterValues,
           operator: selectedOperator,
         }
@@ -112,7 +112,7 @@ export function DataTableFacetedFilter<TData, TValue>({
       addFilter({
         id: column.id,
         variant: column.columnDef.meta?.variant,
-        tableId: column.columnDef.meta?.tableId,
+        tableId: column.columnDef.meta?.tableId ?? "",
         value: filterValues,
         operator: value,
       });
