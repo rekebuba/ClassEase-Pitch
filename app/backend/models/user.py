@@ -19,4 +19,7 @@ class User(BaseModel):
     image_path: Mapped[str] = mapped_column(String(255), nullable=True)
     national_id: Mapped[str] = mapped_column(String(120), nullable=False)
 
+    # One-to-many relationship
     admin = relationship('Admin', back_populates='user', uselist=False)
+    teacher = relationship('Teacher', back_populates='user', uselist=False)
+    student = relationship("Student", back_populates='user', uselist=False)

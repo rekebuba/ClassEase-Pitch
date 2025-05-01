@@ -6,7 +6,7 @@ import os
 import uuid
 from flask import request, jsonify, url_for
 from marshmallow import ValidationError
-from sqlalchemy import func
+from sqlalchemy import case, func
 from models.base_model import BaseModel
 from models.year import Year
 from models import storage
@@ -533,21 +533,63 @@ def admin_student_list(admin_data):
     # convert to Marshmallow-compatible format
     # data = preprocess_query_params(raw_data)
 
-    print(json.dumps(data, indent=4, sort_keys=True))
     # Check if required fields are present
-    schema = ParamSchema()
-    valid_data = schema.load(data)
-    print("valid data: ")
-    print(valid_data)
+    # schema = ParamSchema()
+    # valid_data = schema.load(data)
 
-    query = (
-        storage.session.query(Student, User, Grade, Section, STUDYearRecord)
-        .select_from(Student)
-        .join(User, User.id == Student.user_id)
-        .join(Grade, Grade.id == Student.current_grade_id)
-        .join(Section, Section.semester_id == Student.semester_id)
-        .join(STUDYearRecord, STUDYearRecord.user_id == Student.user_id)
+    test = (
+        storage.session.query(User).all()
     )
+
+    for t in test:
+        print(t.student)
+
+    # query = (
+    #     storage.session.query(
+    #         Student,
+    #         User,
+    #         Grade,
+    #         func.max(case((Semester.name == '1', Section.section))).label(
+    #             "Section I"),
+    #         func.max(case((Semester.name == '2', Section.section))).label(
+    #             "Section II"),
+    #         STUDYearRecord,
+    #     )
+    #     .select_from(User)
+    #     .join(Student, User.id == Student.user_id)
+    #     .join(Grade, Grade.id == Student.current_grade_id)
+    #     .outerjoin(STUDSemesterRecord, STUDSemesterRecord.user_id == Student.user_id)
+    #     .join(Semester, Semester.id == STUDSemesterRecord.semester_id)
+    #     .outerjoin(Section, Section.id == STUDSemesterRecord.section_id)
+    #     .outerjoin(STUDYearRecord, STUDYearRecord.user_id == Student.user_id)
+    #     .group_by(
+    #         User.id,
+    #         Student.id,
+    #         Grade.id,
+    #         STUDYearRecord.id,
+    #     )
+    # )
+
+    # # Execute the query
+    # results = query.all()
+
+    # # Process results as needed
+    # data_to_serialize = [{
+    #     "student": student.to_dict(),
+    #     "user": user.to_dict(),
+    #     "grade": grade.to_dict(),
+    #     "sectionI": section_I if section_I else "N/A",
+    #     "sectionII": section_II if section_II else "N/A",
+    #     "year_record": year_record.to_dict() if year_record else {}
+    # }
+    #     for student, user, grade, section_I, section_II, year_record in results
+    # ]
+
+    # # print(json.dumps(data_to_serialize, indent=4, sort_keys=True))
+
+    # schema = AllStudentsSchema(many=True)
+    # result = schema.dump(data_to_serialize)
+    # print(json.dumps(result, indent=4, sort_keys=True))
 
     # Use the paginate_query function to handle pagination
     # paginated_result = paginate_query(query, page, limit)
@@ -576,10 +618,6 @@ def admin_student_list(admin_data):
     #     {"student": student.to_dict(), "user": user.to_dict()}
     #     for student, user in query
     # ]
-
-    # schema = AllStudentsSchema(many=True)
-    # result = schema.dump(data_to_serialize)
-    # print(json.dumps(result, indent=4, sort_keys=True))
 
     # return jsonify({"data": result, "page_count": 1}), 200
 
@@ -734,7 +772,7 @@ def all_teachers(admin_data):
         return jsonify({"message": "No teachers found"}), 404
 
     teacher_list = [{key: url_for('static', filename=value, _external=True)
-                     if key == 'image_path' and value is not None else value for key, value in q._asdict().items()} for q in query]
+                    if key == 'image_path' and value is not None else value for key, value in q._asdict().items()} for q in query]
 
     return jsonify({
         "teachers": teacher_list,

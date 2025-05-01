@@ -8,6 +8,9 @@ import bcrypt
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from api.v1.schemas.base_schema import OPERATOR_CONFIG, VALUE_TYPE_RULES, BaseSchema, get_all_model_classes
 from werkzeug.datastructures import FileStorage
+from models.section import Section
+from models.stud_year_record import STUDYearRecord
+from models.grade import Grade
 from models.student import Student
 from models.base_model import CustomTypes
 from models.year import Year
@@ -150,11 +153,6 @@ class UserSchema(BaseSchema):
         if 'image_path' in data and data['image_path'] is not None:
             data['image_path'] = url_for(
                 'static', filename=data['image_path'], _external=True)
-
-        return data
-
-    @pre_dump
-    def add_fields(self, data, **kwargs):
         data['table_id'] = self.get_table_id(User)
 
         return data
@@ -262,15 +260,22 @@ class TeacherSchema(BaseSchema):
         self.validate_phone(value)
 
 
-class StudentSchema(BaseSchema):
-    """Student schema for validating and serializing Student data."""
-    user_id = fields.String(dump_only=True)
+class StudentNameSchema(BaseSchema):
+    """Student name schema for validating and serializing Student data."""
     first_name = fields.String(required=True, validate=[
         fields.validate.Length(min=2, max=25)])
     father_name = fields.String(required=True, validate=[
-                                fields.validate.Length(min=2, max=25)])
+        fields.validate.Length(min=2, max=25)])
     grand_father_name = fields.String(required=True, validate=[
-                                      fields.validate.Length(min=2, max=25)])
+        fields.validate.Length(min=2, max=25)])
+
+    table_id = fields.String(required=False)
+
+
+class StudentSchema(BaseSchema):
+    """Student schema for validating and serializing Student data."""
+    user_id = fields.String(dump_only=True)
+    student_name = fields.Nested(StudentNameSchema, required=True)
     guardian_name = fields.String(required=False, validate=[
                                   fields.validate.Length(min=2, max=25)])
     date_of_birth = fields.Date(required=True, format='iso')
@@ -323,9 +328,20 @@ class StudentSchema(BaseSchema):
 
     user = fields.Nested(UserSchema)
 
+    table_id = fields.String(required=False)
+
     @pre_load
     def set_defaults(self, data, **kwargs):
         # add default values to the data
+
+        # Convert flat fields into a nested 'student_name' dict
+        nested_data = {
+            "first_name": data.get("first_name"),
+            "father_name": data.get("father_name"),
+            "grand_father_name": data.get("grand_father_name"),
+        }
+        data["student_name"] = nested_data
+
         year_id = self.get_year_id(data.pop('academic_year'))
         data['current_grade_id'] = self.get_grade_id(data.pop('current_grade'))
         data['start_year_id'] = year_id
@@ -409,8 +425,32 @@ class StudentSchema(BaseSchema):
                 raise ValidationError('Invalid semester_id.')
 
     @pre_dump
+    def flatten_to_nested(self, data, **kwargs):
+        # Convert flat fields into a nested 'student_name' dict
+        nested_data = {
+            "first_name": data.get("first_name"),
+            "father_name": data.get("father_name"),
+            "grand_father_name": data.get("grand_father_name"),
+        }
+        data["student_name"] = nested_data
+        return data
+
+    @post_dump
     def add_fields(self, data, **kwargs):
         data['table_id'] = self.get_table_id(Student)
+        return data
+
+
+class GradeSchema(BaseSchema):
+    """Schema for validating grade data."""
+    id = fields.String(load_only=True)
+    grade = fields.Integer(validate=[fields.validate.Range(min=1, max=12)])
+
+    table_id = fields.String(required=False)
+
+    @post_dump
+    def add_fields(self, data, **kwargs):
+        data['table_id'] = self.get_table_id(Grade)
 
         return data
 
@@ -682,6 +722,7 @@ class AvailableEventsSchema(BaseSchema):
 class RegisteredGradesSchema(BaseSchema):
     grades = fields.List(fields.Integer, required=True)
 
+
 class ColumnField(fields.Field):
     """Custom field for validating values."""
 
@@ -691,6 +732,7 @@ class ColumnField(fields.Field):
                 "value must be either a string or a list", field_name="value"
             )
         return value
+
 
 class TableIdField(fields.Field):
     """Custom field for validating values."""
@@ -839,7 +881,8 @@ class ParamSchema(BaseSchema):
                         s_item['column_name'],
                         s_item['desc']
                     )
-                    valid_sorts.extend(result)  # Adds all items from result to valid_sorts
+                    # Adds all items from result to valid_sorts
+                    valid_sorts.extend(result)
             data.pop('sort', None)
             data['valid_sort'] = valid_sorts
 
@@ -847,8 +890,18 @@ class ParamSchema(BaseSchema):
 
 
 class SectionSchema(BaseSchema):
-    section = fields.String()
     id = fields.String(data_key='section_id')
+    semester_id = fields.String(required=False)
+    semester = fields.Integer(required=False)
+    section = fields.String()
+
+    table_id = fields.String(required=False)
+
+    @post_dump
+    def add_fields(self, data, **kwargs):
+        """Add table_id to the dumped data."""
+        data['table_id'] = self.get_table_id(Section)
+        return data
 
 
 class STUDYearRecordSchema(BaseSchema):
@@ -858,48 +911,84 @@ class STUDYearRecordSchema(BaseSchema):
     year = fields.String()
     year_id = fields.String()
 
-    final_score = fields.Float()
-    rank = fields.Integer()
+    final_score = fields.Float(dump_default=0.0)
+    rank = fields.Integer(dump_default=0)
 
-    @pre_dump
+    table_id = fields.String(required=False)
+
+    @post_dump
     def add_fields(self, data, **kwargs):
-        data['year'] = self.get_year_detail(id=data.get('year_id'))
+        data['table_id'] = self.get_table_id(STUDYearRecord)
+
+        return data
 
 
 class AllStudentsSchema(BaseSchema):
     user = fields.Nested(UserSchema(only=('identification', 'image_path')))
+    # it will be returned as a string ex: "John Doe Smith"
     student = fields.Nested(StudentSchema(
-        only=('first_name', 'father_name', 'grand_father_name')))
-    # section = fields.Nested(SectionSchema(only=('section', 'id')))
+        only=('student_name', 'guardian_name', 'guardian_phone', 'is_active')))
+    grade = fields.Nested(GradeSchema(only=('grade',)))
+    sections = fields.List(fields.Nested(SectionSchema(only=('section',))))
+    year_record = fields.Nested(
+        STUDYearRecordSchema(only=('final_score', 'rank')))
 
-    # STUDYearRecord = fields.Nested(STUDYearRecordSchema(
-    #     only=('grade_id', 'final_score', 'rank')))
-    # total_students = fields.Integer(dump_only=True)
-    # current_year = fields.String(dump_only=True)
+    @pre_dump
+    def string_to_dict(self, data, **kwargs):
+        # Convert flat fields into a nested 'student_name' dict
+        data["sections"] = [{"section": data.get("sectionI")},
+                            {"section": data.get("sectionII")}]
+        return data
 
     @post_dump(pass_many=True)
-    def merge_nested(self, data, many, **kwargs):
-        table_id = {}
-        user = data[0].get('user', {})
-        user_table_id = user.pop('table_id', None)
-        for key in user.keys():
-            if key not in table_id:
-                table_id[key] = user_table_id
+    def merge_nested(self, data: list, many: bool, **kwargs):
+        merged_data = {}
 
-        student = data[0].get('student', {})
-        student_table_id = student.pop('table_id', None)
-        for key in student.keys():
-            if key not in table_id:
-                table_id[key] = student_table_id
-
-        merged_data = {"table_id": table_id}
-        if many:
-            merged_data['data'] = [self._merge(d) for d in data]
-        merged_data['data'] = self._merge(data)
+        print(json.dumps(data[0], indent=4, sort_keys=True))
+        merged_data['table_id'] = self._extract_table_id(
+            data[0] if many else None)
+        merged_data['data'] = [self._merge(d) for d in data] if many else [
+            self._merge(data)]
 
         return merged_data
 
+    def _extract_table_id(self, item):
+        table_id = {}
+        if not item:
+            return table_id
+
+        for model in item.keys():
+            entries = item[model]
+            if not isinstance(entries, list):
+                entries = [entries]
+
+            for entry in entries:
+                if isinstance(entry, dict):
+                    user_table_id = entry.pop('tableId', None)
+                    for key in entry:
+                        if isinstance(entry[key], dict):
+                            table_id[key] = {}
+                            for k in entry[key]:
+                                table_id[key].setdefault(k, user_table_id)
+                        else:
+                            table_id.setdefault(key, user_table_id)
+
+        return table_id
+
     def _merge(self, item):
-        user = item.pop('user', {})
-        student = item.pop('student', {})
-        return {**user, **student}
+        names = item['student'].pop('studentName')
+        full_name = (
+            f"{names['firstName']} "
+            f"{names['fatherName']} "
+            f"{names['grandFatherName']}"
+        )
+        item["student"]['studentName'] = full_name  # Add as a flat field
+        result = {
+            **item.pop('user', {}),
+            **item.pop('student', {}),
+            **item.pop('grade', {}),
+            **item.pop('yearRecord', {}),
+            # **item.pop('sections', {}),
+            **item}
+        result.pop("tableId", None)
+        return result

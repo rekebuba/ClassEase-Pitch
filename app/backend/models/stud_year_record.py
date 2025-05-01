@@ -13,6 +13,8 @@ class STUDYearRecord(BaseModel):
     __tablename__ = 'student_year_records'
     user_id: Mapped[str] = mapped_column(
         String(120), ForeignKey('users.id'), nullable=False)
+    student_id: Mapped[str] = mapped_column(
+        String(120), ForeignKey('students.id'), nullable=False)
     grade_id: Mapped[str] = mapped_column(
         String(120), ForeignKey('grades.id'), nullable=False)
     year_id: Mapped[str] = mapped_column(
@@ -20,3 +22,6 @@ class STUDYearRecord(BaseModel):
     final_score: Mapped[float] = mapped_column(
         Float, nullable=True, default=None)  # year-end score
     rank: Mapped[int] = mapped_column(Integer, nullable=True, default=None)
+
+    # Relationships
+    student = relationship("Student", back_populates='student_year_record', uselist=False)

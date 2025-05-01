@@ -83,3 +83,12 @@ class Student(BaseModel):
 
     # Whether the student is currently enrolled
     is_active: Mapped[bool] = mapped_column(Boolean, default=False)
+
+    # Relationships
+    user = relationship("User", back_populates='student')
+    student_semester_records = relationship(
+        "STUDSemesterRecord", back_populates="student", cascade="all, delete-orphan")
+    student_year_record = relationship(
+        "STUDYearRecord", back_populates="student", cascade="all, delete-orphan")
+    average_subject = relationship(
+        "AverageSubject", back_populates="student", cascade="all, delete-orphan")
