@@ -38,3 +38,8 @@ class Grade(BaseModel):
     # Database column
     grade: Mapped[int] = mapped_column(
         Integer, unique=True, nullable=False, index=True)
+
+    # Relationships
+    student_year_records = relationship(
+        "STUDYearRecord", back_populates="grades", uselist=False)
+    sections = relationship("Section", back_populates="grade")

@@ -34,21 +34,27 @@ export const userSchema = z.object({
 });
 
 export const StudentSchema = z.object({
-    id: z.string(),
-    name: z.string(),
-    avatarUrl: z.string().optional(),
+    identification: z.string(),
+    imagePath: z.string().optional(),
+    studentName: z.string(),
+    guardianName: z.string(),
+    guardianPhone: z.string(),
     grade: z.number(),
-    section: z.string(),
-    attendance: z.number(),
-    averageGrade: z.number(),
-    status: z.enum(["active", "inactive", "suspended"]),
-    // joinedDate: z.string().transform((val) => new Date(val)),
-    parentName: z.string(),
-    parentPhone: z.string(),
+    sectionI: z.union([z.string(), z.literal("N/A"), z.null()]).transform((val) => val ?? "N/A"),
+    sectionII: z.union([z.string(), z.literal("N/A"), z.null()]).transform((val) => val ?? "N/A"),
+    averageI: z.union([z.number(), z.literal("N/A"), z.null()]).transform((val) => val ?? "N/A"),
+    averageII: z.union([z.number(), z.literal("N/A"), z.null()]).transform((val) => val ?? "N/A"),
+    rankI: z.union([z.number(), z.literal("N/A"), z.null()]).transform((val) => val ?? "N/A"),
+    rankII: z.union([z.number(), z.literal("N/A"), z.null()]).transform((val) => val ?? "N/A"),
+    finalScore: z.union([z.number(), z.literal("N/A"), z.null()]).transform((val) => val ?? "N/A"),
+    rank: z.union([z.number(), z.literal("N/A"), z.null()]).transform((val) => val ?? "N/A"),
+    isActive: z.union([z.boolean(), z.enum(["active", "inactive", "suspended"])]).transform((val) => val ? 'active' : 'inactive'),
+    createdAt: z.string(),
 });
 
 export const tableId = z.record(
     StudentSchema.keyof(),
+    // z.string(),
     z.union([z.string(), z.record(z.string(), z.string())])
 );
 
@@ -58,10 +64,10 @@ export const StudentsDataSchema = z.object({
     tableId: tableId,
 });
 
-const StatusFieldSchema = StudentSchema.pick({ status: true });
+const StatusFieldSchema = StudentSchema.pick({ isActive: true });
 
 export const StatusCountSchema = z.record(
-    StatusFieldSchema.shape.status,
+    StatusFieldSchema.shape.isActive,
     z.number()
 );
 

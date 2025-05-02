@@ -86,7 +86,14 @@ export function StudentsTable() {
       sorting: INITIAL_SORTING as ExtendedColumnSort<Student>[],
       columnPinning: COLUMN_PINNING,
       columnVisibility: {
-        id: false, // Hide Student Id column
+        // Hide Student Id column
+        identification: false,
+        sectionI: false,
+        sectionII: false,
+        averageI: false,
+        averageII: false,
+        rankI: false,
+        rankII: false,
       },
     },
     getRowId: (originalRow) => originalRow.id,

@@ -2,6 +2,7 @@ from datetime import datetime
 import re
 from marshmallow import Schema, ValidationError, post_dump, post_load, pre_load, validates
 from sqlalchemy import and_, or_
+from models.stud_year_record import STUDYearRecord
 from models.base_model import BaseModel
 from models.table import Table
 from models.subject import Subject
@@ -98,8 +99,7 @@ class BaseSchema(Schema):
 
         # Check if the student is already registered
         student = (storage.session.query(Student)
-                   .join(User, User.id == Student.user_id)
-                   .filter(User.identification == student_id)
+                   .filter(Student.id == student_id)
                    .first()
                    )
 
@@ -161,18 +161,18 @@ class BaseSchema(Schema):
         return grade.id
 
     @staticmethod
-    def get_year_records_id(user_id, academic_year):
-        if academic_year is None:
-            raise ValidationError("academic_year is required")
+    def get_student_year_records_id(year_id):
+        if year_id is None:
+            raise ValidationError("year_id is required")
 
         # Fetch the year_records_id from the database
-        year_records = storage.session.query(Year.id).filter_by(
-            ethiopian_year=academic_year
+        year_records = storage.session.query(STUDYearRecord.id).filter_by(
+            year_id=year_id
         ).first()
 
-        if year_records.id is None:
+        if year_records is None:
             raise ValidationError(
-                f"No Year Records found for academic_year: {academic_year}")
+                f"No Year Records found for year_id: {year_id}")
 
         return year_records.id
 

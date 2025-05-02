@@ -119,7 +119,7 @@ def paginate_query(query, page, limit):
         "meta": {
             "total_items": total_items,
             "current_page": page,
-            "limit": limit,
+            "per_page": limit,
             "total_pages": total_pages,
         }
     }

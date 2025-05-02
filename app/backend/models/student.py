@@ -85,10 +85,10 @@ class Student(BaseModel):
     is_active: Mapped[bool] = mapped_column(Boolean, default=False)
 
     # Relationships
-    user = relationship("User", back_populates='student')
-    student_semester_records = relationship(
-        "STUDSemesterRecord", back_populates="student", cascade="all, delete-orphan")
-    student_year_record = relationship(
-        "STUDYearRecord", back_populates="student", cascade="all, delete-orphan")
-    average_subject = relationship(
-        "AverageSubject", back_populates="student", cascade="all, delete-orphan")
+    user = relationship("User", back_populates='students')
+    semester_records = relationship(
+        "STUDSemesterRecord", back_populates="students", cascade="all, delete-orphan", uselist=False)
+    year_records = relationship(
+        "STUDYearRecord", back_populates="students", cascade="all, delete-orphan", uselist=False)
+    average_subjects = relationship(
+        "AVRGSubject", back_populates="students", cascade="all, delete-orphan")

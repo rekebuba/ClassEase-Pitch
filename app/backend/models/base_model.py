@@ -26,6 +26,10 @@ class CustomTypes:
         TEACHER = "teacher"
         STUDENT = "student"
 
+@dataclass
+class AssociationBase(Base):
+    __abstract__ = True
+
 
 @dataclass
 class BaseModel(MappedAsDataclass, Base, CustomTypes):
@@ -70,7 +74,7 @@ class BaseModel(MappedAsDataclass, Base, CustomTypes):
                 if 'time' in key:
                     data[key] = value.strftime('%H:%M:%S')
                 else:
-                    data[key] = value.strftime('%Y-%m-%dT%H:%M:%S.%f')
+                    data[key] = value.strftime('%Y-%m-%d')
             elif isinstance(value, date):
                 data[key] = value.strftime('%Y-%m-%d')
 

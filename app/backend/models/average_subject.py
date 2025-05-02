@@ -23,4 +23,4 @@ class AVRGSubject(BaseModel):
     rank: Mapped[int] = mapped_column(Integer, default=None)
 
     # Relationships
-    student = relationship("Student", back_populates='average_subject')
+    students = relationship("Student", back_populates='average_subjects')

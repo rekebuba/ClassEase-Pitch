@@ -22,7 +22,7 @@ class Admin(BaseModel):
     phone: Mapped[str] = mapped_column(String(25), nullable=False)
     address: Mapped[str] = mapped_column(String(120), nullable=False)
 
-    user = relationship('User', back_populates='admin')
+    user = relationship('User', back_populates='admins')
 
     __table_args__ = (
         CheckConstraint(

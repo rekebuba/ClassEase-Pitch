@@ -28,6 +28,7 @@ from models.event import Event
 from models.semester import Semester
 from datetime import datetime
 from sqlalchemy import update, select, and_
+from sqlalchemy.orm import joinedload
 from urllib.parse import urlparse, parse_qs
 from api.v1.views.utils import admin_required
 from api.v1.views.methods import paginate_query, save_profile, validate_request, preprocess_query_params
@@ -386,10 +387,12 @@ def registered_grades(admin_data):
     try:
         registered_grades = (
             storage.session.query(Grade)
-            .join(STUDSemesterRecord, STUDSemesterRecord.grade_id == Grade.id)
+            .join(Student, Student.current_grade_id == Grade.id)
+            .filter(Student.is_registered == True)
             .group_by(Grade.id)
             .all()
         )
+
         if not registered_grades:
             return errors.handle_not_found_error("No registered grades found")
 
@@ -529,129 +532,83 @@ def admin_student_list(admin_data):
         Response: A JSON response containing the filtered student data, or an error message if any required data is missing or not found.
     """
     data = request.get_json()
-    # raw_data = parse_qs(request.query_string.decode('utf-8'))
-    # convert to Marshmallow-compatible format
-    # data = preprocess_query_params(raw_data)
-
     # Check if required fields are present
-    # schema = ParamSchema()
-    # valid_data = schema.load(data)
+    schema = ParamSchema()
+    valid_data = schema.load(data)
+    print("valid_data: ", valid_data)
 
-    test = (
-        storage.session.query(User).all()
+    query = (
+        storage.session.query(
+            User,
+            Student,
+            STUDYearRecord,
+            Grade,
+            func.max(case((Semester.name == 1, Section.section))
+                     ).label("sectionI"),
+            func.max(case((Semester.name == 2, Section.section))
+                     ).label("sectionII"),
+            func.max(case((Semester.name == 1, STUDSemesterRecord.average))).label(
+                "averageI"),
+            func.max(case((Semester.name == 2, STUDSemesterRecord.average))).label(
+                "averageII"),
+            func.max(case((Semester.name == 1, STUDSemesterRecord.rank))
+                     ).label("rankI"),
+            func.max(case((Semester.name == 2, STUDSemesterRecord.rank))
+                     ).label("rankII"),
+        )
+        .join(User.students)  # User → Student
+        .outerjoin(Student.year_records)  # Student → STUDYearRecord
+        .outerjoin(STUDYearRecord.semester_records)
+        .outerjoin(STUDSemesterRecord.sections)  # SemesterRecord → Section
+        .outerjoin(STUDSemesterRecord.semesters)  # SemesterRecord → Semester
+        .outerjoin(Section.grade)  # Section → Grade
+        .group_by(
+            User.id,
+            Student.id,
+            STUDYearRecord.id,
+            Grade.id,
+        )
+        .options(
+            joinedload(User.students)
+            .joinedload(Student.year_records)
+            .joinedload(STUDYearRecord.semester_records)
+            .joinedload(STUDSemesterRecord.sections)
+            .joinedload(Section.grade)
+        )
     )
-
-    for t in test:
-        print(t.student)
-
-    # query = (
-    #     storage.session.query(
-    #         Student,
-    #         User,
-    #         Grade,
-    #         func.max(case((Semester.name == '1', Section.section))).label(
-    #             "Section I"),
-    #         func.max(case((Semester.name == '2', Section.section))).label(
-    #             "Section II"),
-    #         STUDYearRecord,
-    #     )
-    #     .select_from(User)
-    #     .join(Student, User.id == Student.user_id)
-    #     .join(Grade, Grade.id == Student.current_grade_id)
-    #     .outerjoin(STUDSemesterRecord, STUDSemesterRecord.user_id == Student.user_id)
-    #     .join(Semester, Semester.id == STUDSemesterRecord.semester_id)
-    #     .outerjoin(Section, Section.id == STUDSemesterRecord.section_id)
-    #     .outerjoin(STUDYearRecord, STUDYearRecord.user_id == Student.user_id)
-    #     .group_by(
-    #         User.id,
-    #         Student.id,
-    #         Grade.id,
-    #         STUDYearRecord.id,
-    #     )
-    # )
-
-    # # Execute the query
-    # results = query.all()
-
-    # # Process results as needed
-    # data_to_serialize = [{
-    #     "student": student.to_dict(),
-    #     "user": user.to_dict(),
-    #     "grade": grade.to_dict(),
-    #     "sectionI": section_I if section_I else "N/A",
-    #     "sectionII": section_II if section_II else "N/A",
-    #     "year_record": year_record.to_dict() if year_record else {}
-    # }
-    #     for student, user, grade, section_I, section_II, year_record in results
-    # ]
-
-    # # print(json.dumps(data_to_serialize, indent=4, sort_keys=True))
-
-    # schema = AllStudentsSchema(many=True)
-    # result = schema.dump(data_to_serialize)
-    # print(json.dumps(result, indent=4, sort_keys=True))
+    # Check if any students are found
+    if not query:
+        return jsonify({"message": "No student found"}), 404
 
     # Use the paginate_query function to handle pagination
-    # paginated_result = paginate_query(query, page, limit)
+    paginated_result = paginate_query(
+        query, valid_data['page'], valid_data['per_page'])
 
-    # Apply conditional filters if additional parameters are provided
-    # if 'grade_id' in valid_data:
-    #     query = query.filter(
-    #         Student.current_grade_id.in_(valid_data['grade_id']))
+    # Process results as needed
+    data_to_serialize = [{
+        "user": user.to_dict(),
+        "student": student.to_dict(),
+        "grade": grade.to_dict(),
+        "year_record": year_record.to_dict(),
+        "sectionI": section_I,
+        "sectionII": section_II,
+        "averageI": average_I,
+        "averageII": average_II,
+        "rankI": rank_I,
+        "rankII": rank_II,
+    }
+        for user, student,
+        year_record, grade,
+        section_I, section_II,
+        average_I, average_II,
+        rank_I, rank_II, in paginated_result['items']
+    ]
 
-    # if 'year_id' in valid_data:
-    #     query = query.filter(Student.current_year_id == valid_data['year_id'])
+    schema = AllStudentsSchema(many=True)
+    result = schema.dump(data_to_serialize)
+    print(json.dumps(result, indent=4, sort_keys=True))
 
-    # query = query.order_by(
-    #     Student.first_name.asc(),
-    #     Student.father_name.asc(),
-    #     Student.grand_father_name.asc(),
-    #     User.identification.asc()
-    # ).all()
-
-    # # Check if any students are found
-    # if not query:
-    #     return jsonify({"message": "No student found"}), 404
-
-    # # Convert list of tuples to list of dicts
-    # data_to_serialize = [
-    #     {"student": student.to_dict(), "user": user.to_dict()}
-    #     for student, user in query
-    # ]
-
-    # return jsonify({"data": result, "page_count": 1}), 200
-
-    return jsonify(
-        {
-            "data": [{
-                "id": "1",
-                "name": "Emma Johnson",
-                "parentPhone": "emma.j@example.com",
-                "grade": 10,
-                "section": "A",
-                "status": "active",
-                "attendance": 95,
-                "averageGrade": 88,
-                "parentName": "Michael Johnson",
-            }],
-            "pageCount": 1,
-            "tableId": {
-                "id": uuid.uuid4(),
-                "name": {
-                    "first_name": "9433135e-f7a6-41df-9592-651cdf55e9d4",
-                    "father_name": "9433135e-f7a6-41df-9592-651cdf55e9d4",
-                    "grand_father_name": "9433135e-f7a6-41df-9592-651cdf55e9d4"
-                },
-                "parentPhone": uuid.uuid4(),
-                "grade": "10fc035b-ac80-4fad-baca-c3cdea64cf98",
-                "section": uuid.uuid4(),
-                "status": uuid.uuid4(),
-                "attendance": uuid.uuid4(),
-                "averageGrade": uuid.uuid4(),
-                "parentName": uuid.uuid4(),
-            }
-        }
-    ), 200
+    return jsonify({**result, "pageCount": paginated_result['meta']['total_pages']}), 200
 
 
 @admin.route('/students/status-count', methods=['GET'])

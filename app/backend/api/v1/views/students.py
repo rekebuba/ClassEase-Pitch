@@ -295,29 +295,73 @@ def register_course(user_data):
         data = request.get_json()
         if not data:
             raise ValidationError("Not a JSON")
+        student_data = storage.session.query(
+            Student).filter_by(user_id=user_data.id).first()
         data = {
             **data,
-            "student_id": user_data.identification
+            "student_id": student_data.id
         }
-        print(json.dumps(data, indent=4, sort_keys=True))
 
         course_schema = CourseListSchema()
         valid_data = course_schema.load(data)
 
+        if valid_data.get('semester') == 1:
+            year_record = STUDYearRecord(
+                student_id=valid_data.get('student_id'),
+                grade_id=valid_data.get('grade_id'),
+                year_id=valid_data.get('year_id'),
+                final_score=None,
+                rank=None
+            )
+            storage.add(year_record)
+            storage.session.flush()
+        else:
+            year_record = (
+                storage.session.query(STUDYearRecord)
+                .filter_by(
+                    student_id=valid_data.get('student_id'),
+                    grade_id=valid_data.get('grade_id'),
+                    year_id=valid_data.get('year_id')
+                )
+                .first()
+            )
+
+        # random section of ['A', 'B', 'C', 'D']
+        random_section = random.choice(['A', 'B'])
+        section = (
+            storage.session.query(Section)
+            .join(Section.semester_records)
+            .filter(
+                and_(
+                    Section.grade_id == valid_data.get('grade_id'),
+                    Section.section == random_section
+                )
+            )
+        ).first()
+
+        if section is None:
+            section = Section(
+                grade_id=valid_data.get('grade_id'),
+                section=random_section,
+            )
+            storage.session.add(section)
+            storage.session.flush()
+
         new_semester_record = STUDSemesterRecord(
-            user_id=valid_data.get('user_id'),
+            section_id=section.id,
+            student_id=valid_data.get('student_id'),
             semester_id=valid_data.get('semester_id'),
-            grade_id=valid_data.get('grade_id'),
-            year_record_id=valid_data.get('year_record_id'),
         )
-        storage.add(new_semester_record)
+
+        # Associate via relationship (automatically sets year_record_id)
+        year_record.semester_records.append(new_semester_record)
         storage.session.flush()
 
         new_assessment = []
         for form in valid_data['courses']:
             new_assessment.append(
                 Assessment(
-                    user_id=valid_data.get('user_id'),
+                    student_id=valid_data.get('student_id'),
                     subject_id=form.get('subject_id'),
                     semester_record_id=new_semester_record.id
                 )
@@ -326,7 +370,7 @@ def register_course(user_data):
 
         storage.session.execute(
             update(Student)
-            .where(Student.user_id == valid_data.get('user_id'))
+            .where(Student.id == valid_data.get('student_id'))
             .values(
                 semester_id=valid_data.get('semester_id'),
                 current_grade_id=valid_data.get('grade_id'),

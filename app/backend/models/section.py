@@ -11,9 +11,12 @@ class Section(BaseModel):
     Represents a section within a grade.
     """
     __tablename__ = 'sections'
-    section: Mapped[str] = mapped_column(
-        String(1))  # e.g., A, B, C, D, E, F, G
     grade_id: Mapped[str] = mapped_column(
         String(120), ForeignKey('grades.id'), nullable=False)
-    semester_id: Mapped[str] = mapped_column(String(120), ForeignKey(
-        'semesters.id'), nullable=False)
+    section: Mapped[str] = mapped_column(
+        String(1), nullable=True, default=None)  # e.g., A, B, C, D, E, F, G
+
+    # Relationships
+    grade = relationship("Grade", back_populates='sections')
+    semester_records = relationship(
+        "STUDSemesterRecord", back_populates='sections', uselist=False)

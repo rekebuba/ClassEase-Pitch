@@ -24,7 +24,7 @@ class Teacher(BaseModel):
     year_of_experience: Mapped[int] = mapped_column(Integer, nullable=False)
     qualification: Mapped[str] = mapped_column(String(120), nullable=False)
 
-    user = relationship('User', back_populates='teacher')
+    user = relationship('User', back_populates='teachers')
 
     __table_args__ = (
         CheckConstraint(

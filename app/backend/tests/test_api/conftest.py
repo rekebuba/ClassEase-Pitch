@@ -4,6 +4,7 @@ import time
 import pytest
 import unittest
 from api import create_app
+from models.section import Section
 from models.subject import Subject
 from models.engine.db_storage import DBStorage
 from models.user import User
@@ -25,6 +26,7 @@ from .factories_methods import MakeFactory
 @pytest.fixture(scope="session")
 def app_session():
     """Session-scoped fixture for the Flask app."""
+    # app = create_app("testing")
     app = create_app("development")
 
     yield app
@@ -197,23 +199,63 @@ def db_course_registration(db_session, db_event_form):
                 .filter(User.role == CustomTypes.RoleEnum.STUDENT)
                 .all()
                 )
+    year = db_session.query(Year.id).first()
 
     for student in students:
         grade = (db_session.query(Grade.id)
                  .filter(Grade.id == (student.next_grade_id if student.next_grade_id else student.current_grade_id))
                  .first()
                  )
-        semester = (db_session.query(Semester.id)
+        semester = (db_session.query(Semester.id, Semester.name)
                     .filter_by(name=(1 if not student.next_grade_id else 2))
                     .first()
                     )
+        year_record = (
+            db_session.query(STUDYearRecord).filter_by(
+                student_id=student.id,
+                grade_id=grade.id,
+                year_id=year.id
+            ).first()
+        )
+
+        if year_record is None:
+            year_record = STUDYearRecord(
+                student_id=student.id,
+                grade_id=grade.id,
+                year_id=year.id,
+            )
+            db_session.add(year_record)
+            db_session.flush()
+
+        # random section of ['A', 'B', 'C', 'D']
+        random_section = random.choice(['A', 'B'])
+        section = (
+            db_session.query(Section)
+            .join(Section.semester_records)
+            .filter(
+                and_(
+                    Section.grade_id == grade.id,
+                    Section.section == random_section
+                )
+            )
+        ).first()
+
+        if section is None:
+            section = Section(
+                grade_id=grade.id,
+                section=random_section,
+            )
+            db_session.add(section)
+            db_session.flush()
 
         new_semester_record = STUDSemesterRecord(
-            user_id=student.user_id,
+            section_id=section.id,
+            student_id=student.id,
             semester_id=semester.id,
-            grade_id=grade.id,
         )
-        db_session.add(new_semester_record)
+
+        # Associate via relationship (automatically sets year_record_id)
+        year_record.semester_records.append(new_semester_record)
         db_session.flush()
 
         subjects = (
@@ -234,7 +276,7 @@ def db_course_registration(db_session, db_event_form):
 
             new_assessment.append(
                 Assessment(
-                    user_id=student.user_id,
+                    student_id=student.id,
                     subject_id=subject_id,
                     semester_record_id=new_semester_record.id,
                 )
@@ -244,7 +286,7 @@ def db_course_registration(db_session, db_event_form):
 
             db_session.execute(
                 update(Student)
-                .where(Student.user_id == student.id)
+                .where(Student.id == student.id)
                 .values(
                     semester_id=semester.id,
                     current_grade_id=grade.id,

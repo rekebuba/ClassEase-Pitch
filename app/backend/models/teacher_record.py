@@ -11,8 +11,8 @@ class TeachersRecord(BaseModel):
     This model represents the record of teachers, including their associated subjects, grades, and sections.
     """
     __tablename__ = 'teachers_records'
-    user_id: Mapped[str] = mapped_column(String(120), ForeignKey(
-        'users.id'), nullable=False)
+    teacher_id: Mapped[str] = mapped_column(String(120), ForeignKey(
+        'teachers.id'), nullable=False)
     semester_id: Mapped[str] = mapped_column(String(120), ForeignKey(
         'semesters.id'), nullable=False)
     subject_id: Mapped[str] = mapped_column(String(120), ForeignKey(

@@ -20,6 +20,6 @@ class User(BaseModel):
     national_id: Mapped[str] = mapped_column(String(120), nullable=False)
 
     # One-to-many relationship
-    admin = relationship('Admin', back_populates='user', uselist=False)
-    teacher = relationship('Teacher', back_populates='user', uselist=False)
-    student = relationship("Student", back_populates='user', uselist=False)
+    admins = relationship('Admin', back_populates='user', uselist=False)
+    teachers = relationship('Teacher', back_populates='user', uselist=False)
+    students = relationship("Student", back_populates='user', uselist=False)

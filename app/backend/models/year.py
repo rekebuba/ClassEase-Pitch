@@ -38,3 +38,7 @@ class Year(BaseModel):
         Integer, nullable=False, unique=True)
     gregorian_year: Mapped[str] = mapped_column(
         String(15), default=None, nullable=True, unique=True)
+
+    # Relationships
+    student_year_records = relationship(
+        "STUDYearRecord", back_populates='years', uselist=False)

@@ -12,3 +12,7 @@ class Semester(BaseModel):
     event_id: Mapped[str] = mapped_column(
         String(225), ForeignKey('events.id'), nullable=False)
     name: Mapped[int] = mapped_column(Integer, nullable=False)
+
+    # Relationships
+    semester_records = relationship(
+        "STUDSemesterRecord", back_populates='semesters', uselist=False)

@@ -21,6 +21,7 @@ export async function zodApiHandler<T>(
         const response = await request();
 
         // Validate response data
+        console.log(response.data)
         const parsedData = schema.parse(response.data);
 
         return {
@@ -31,6 +32,7 @@ export async function zodApiHandler<T>(
     } catch (error) {
         // Zod validation error
         if (error instanceof ZodError) {
+            console.dir(error.format(), { depth: null });
             return {
                 success: false,
                 error: {

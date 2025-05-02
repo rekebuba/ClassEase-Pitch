@@ -84,6 +84,7 @@ class UserSchema(BaseSchema):
     role = RoleEnumField()
     national_id = fields.String(required=True, load_only=True)
     image_path = FileField(required=False, allow_none=True)
+    created_at = fields.String(required=False)
     table_id = fields.String(required=False)
 
     @staticmethod
@@ -613,7 +614,6 @@ class CourseListSchema(BaseSchema):
     """Schema for validating a list of Course objects."""
     courses = fields.List(fields.Nested(SubjectSchema), required=True)
     student_id = fields.String(required=True, load_only=True)
-    user_id = fields.String(required=True, load_only=True)
 
     academic_year = fields.Integer(required=True)
     semester = fields.Integer(required=True)
@@ -622,7 +622,7 @@ class CourseListSchema(BaseSchema):
     grade = fields.Integer(required=True)
     grade_id = fields.String(required=False, load_only=True)
 
-    year_record_id = fields.String(required=False, load_only=True)
+    year_id = fields.String(required=False, load_only=True)
 
     section_id = fields.String(required=False, load_only=True)
 
@@ -633,10 +633,10 @@ class CourseListSchema(BaseSchema):
         # add default values to the data
         data['is_registered'] = self.is_student_registered(
             data.get('student_id'))
-        data['user_id'] = self.get_user_id(data.get('student_id'))
         data['grade_id'] = self.get_grade_id(data.get('grade'))
         data['semester_id'] = self.get_semester_id(
             data.get('semester'), data.get('academic_year'))
+        data['year_id'] = self.get_year_id(data.get('academic_year'))
 
         return data
 
@@ -848,8 +848,8 @@ class ParamSchema(BaseSchema):
     filter_flag = fields.String(required=False)
     filters = fields.List(fields.Nested(FilterSchema), required=False)
     valid_filters = fields.List(fields.Raw(), required=False)
-    page = fields.Integer(required=False)
-    per_page = fields.Integer(required=False)
+    page = fields.Integer(required=False, set_defaults=1)
+    per_page = fields.Integer(required=False, set_defaults=10)
 
     sort = fields.List(fields.Nested(SortSchema), required=False)
     valid_sort = fields.List(fields.Raw(), required=False)
@@ -924,28 +924,30 @@ class STUDYearRecordSchema(BaseSchema):
 
 
 class AllStudentsSchema(BaseSchema):
-    user = fields.Nested(UserSchema(only=('identification', 'image_path')))
+    user = fields.Nested(UserSchema(
+        only=('identification', 'image_path', 'created_at')))
     # it will be returned as a string ex: "John Doe Smith"
     student = fields.Nested(StudentSchema(
         only=('student_name', 'guardian_name', 'guardian_phone', 'is_active')))
-    grade = fields.Nested(GradeSchema(only=('grade',)))
-    sections = fields.List(fields.Nested(SectionSchema(only=('section',))))
+    grade = fields.Nested(GradeSchema(only=('grade',)), required=True)
+
+    sectionI = fields.String(required=False, allow_none=True)
+    sectionII = fields.String(required=False, allow_none=True)
+
+    averageI = fields.String(required=False, allow_none=True)
+    averageII = fields.String(required=False, allow_none=True)
+
+    rankI = fields.String(required=False, allow_none=True)
+    rankII = fields.String(required=False, allow_none=True)
+
     year_record = fields.Nested(
         STUDYearRecordSchema(only=('final_score', 'rank')))
-
-    @pre_dump
-    def string_to_dict(self, data, **kwargs):
-        # Convert flat fields into a nested 'student_name' dict
-        data["sections"] = [{"section": data.get("sectionI")},
-                            {"section": data.get("sectionII")}]
-        return data
 
     @post_dump(pass_many=True)
     def merge_nested(self, data: list, many: bool, **kwargs):
         merged_data = {}
 
-        print(json.dumps(data[0], indent=4, sort_keys=True))
-        merged_data['table_id'] = self._extract_table_id(
+        merged_data['tableId'] = self._extract_table_id(
             data[0] if many else None)
         merged_data['data'] = [self._merge(d) for d in data] if many else [
             self._merge(data)]
@@ -988,7 +990,6 @@ class AllStudentsSchema(BaseSchema):
             **item.pop('student', {}),
             **item.pop('grade', {}),
             **item.pop('yearRecord', {}),
-            # **item.pop('sections', {}),
             **item}
         result.pop("tableId", None)
         return result
