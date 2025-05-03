@@ -47,6 +47,10 @@ api.interceptors.response.use(
   response => response,
   error => {
     const status = error.response?.status || 500;
+    const message = error.response?.data?.message ||
+      error.message ||
+      error?.apiErrorMsg ||
+      "API request failed"
 
     // Redirect based on status code
     switch (status) {
@@ -57,6 +61,9 @@ api.interceptors.response.use(
         break;
       case 403:
         window.location.href = `/forbidden?from=${encodeURIComponent(window.location.pathname)}`;;
+        break;
+      case 400:
+        toast.warning(message);
         break;
       default:
         toast.error(error.response?.data.message || "An unexpected error occurred.", {

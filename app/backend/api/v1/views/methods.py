@@ -3,10 +3,12 @@ import os
 import re
 from flask import current_app, request, jsonify
 from math import ceil
+from sqlalchemy import and_, case, func, or_
 from werkzeug.utils import secure_filename
+from models.semester import Semester
 
 
-def paginate_query(query, page, limit):
+def paginate_query(query, page, limit, filters, custom_filters, sort, join=and_):
     """
     Paginate SQLAlchemy queries.
 
@@ -19,6 +21,13 @@ def paginate_query(query, page, limit):
     # Calculate total number of records
     total_items = query.count()
 
+    # Apply filters and sort
+    query = (
+        query.filter(join(*filters))
+        .having(join(*custom_filters))
+        .order_by(*sort)
+    )
+
     # Calculate offset and apply limit and offset to the query
     offset = (page - 1) * limit
     paginated_query = query.limit(limit).offset(offset)
@@ -29,13 +38,12 @@ def paginate_query(query, page, limit):
     # Calculate total pages
     total_pages = ceil(total_items / limit)
 
-    # Return the paginated data and meta information
     return {
         "items": items,
         "meta": {
             "total_items": total_items,
             "current_page": page,
-            "limit": limit,
+            "per_page": limit,
             "total_pages": total_pages,
         }
     }
@@ -91,35 +99,47 @@ def preprocess_query_params(data):
     return processed
 
 
-def paginate_query(query, page, limit):
-    """
-    Paginate SQLAlchemy queries.
+def make_case_lookup(semester_num: int, column, prefix: str):
+    """Helper to generate case expressions with dynamic labels."""
+    label_I = f"{prefix}I"  # Pre-compute the label
+    label_II = f"{prefix}II"
 
-    :param query: SQLAlchemy query object to paginate
-    :param request: Flask request object to get query parameters (page, limit)
-    :param default_limit: Default number of records per page if limit is not provided
-    :return: Dictionary with paginated data and meta information
-    """
-
-    # Calculate total number of records
-    total_items = query.count()
-
-    # Calculate offset and apply limit and offset to the query
-    offset = (page - 1) * limit
-    paginated_query = query.limit(limit).offset(offset)
-
-    # Get the paginated results
-    items = paginated_query.all()
-
-    # Calculate total pages
-    total_pages = ceil(total_items / limit)
+    expr_I = func.max(
+        case((Semester.name == semester_num, column))).label(label_I)
+    expr_II = func.max(
+        case((Semester.name == semester_num + 1, column))).label(label_II)
 
     return {
-        "items": items,
-        "meta": {
-            "total_items": total_items,
-            "current_page": page,
-            "per_page": limit,
-            "total_pages": total_pages,
-        }
+        label_I: expr_I,
+        label_II: expr_II,
+    }
+
+
+def min_max_semester_lookup(semester_num: int, column, prefix: str):
+    """Helper to generate case expressions with dynamic labels."""
+    label_I = f"{prefix}_min"  # Pre-compute the label
+    label_II = f"{prefix}_max"
+
+    expr_I = func.min(
+        case((Semester.name == semester_num, column))).label(label_I)
+    expr_II = func.max(
+        case((Semester.name == semester_num, column))).label(label_II)
+
+    return {
+        label_I: expr_I,
+        label_II: expr_II,
+    }
+
+
+def min_max_year_lookup(column, prefix: str):
+    """Helper to generate case expressions with dynamic labels."""
+    label_I = f"{prefix}_min"  # Pre-compute the label
+    label_II = f"{prefix}_max"
+
+    expr_I = func.min((column)).label(label_I)
+    expr_II = func.max((column)).label(label_II)
+
+    return {
+        label_I: expr_I,
+        label_II: expr_II,
     }

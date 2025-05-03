@@ -2,7 +2,6 @@ import { SearchParams } from '@/types';
 import { api, zodApiHandler } from "@/api";
 import { toast } from 'sonner';
 import {
-    AttendanceRangeSchema,
     AverageRangeSchema,
     GradeCountsSchema,
     StatusCountSchema,
@@ -18,7 +17,6 @@ export const adminApi = {
     getStudents: (validQuery: SearchParams) => api.post('/admin/students', validQuery),
     getStudentsStatusCounts: () => api.get('/admin/students/status-count'),
     getStudentsAverageRange: () => api.get('/admin/students/average-range'),
-    getStudentsAttendanceRange: () => api.get('/admin/students/attendance-range'),
     getGradeCounts: () => api.get('/admin/students/grade-counts'),
     getAllStudentsViews: () => api.get('/admin/students/views'),
     getStudentsByView: (view: string) => api.get(`/admin/students/views/${view}`),
@@ -39,10 +37,6 @@ export const getStudents = async (validQuery: SearchParams) => {
     );
 
     if (!response.success) {
-        toast.error(response.error.message, {
-            style: { color: "red" },
-        });
-        console.error(response.error.details);
         throw new Error("Failed to fetch students data", {
             cause: JSON.stringify(response.error.details),
         });
@@ -78,10 +72,6 @@ export const getStudentsAverageRange = async () => {
     );
 
     if (!response.success) {
-        toast.error(response.error.message, {
-            style: { color: "red" },
-        });
-        console.error(response.error.details);
         throw new Error("Failed to fetch students grade counts", {
             cause: JSON.stringify(response.error.details),
         });
@@ -89,24 +79,7 @@ export const getStudentsAverageRange = async () => {
 
     return response.data;
 }
-export const getStudentsAttendanceRange = async () => {
-    const response = await zodApiHandler(
-        () => adminApi.getStudentsAttendanceRange(),
-        AttendanceRangeSchema,
-    );
 
-    if (!response.success) {
-        toast.error(response.error.message, {
-            style: { color: "red" },
-        });
-        console.error(response.error.details);
-        throw new Error("Failed to fetch students attendance range", {
-            cause: JSON.stringify(response.error.details),
-        });
-    }
-
-    return response.data;
-}
 export const getGradeCounts = async () => {
     const response = await zodApiHandler(
         () => adminApi.getGradeCounts(),

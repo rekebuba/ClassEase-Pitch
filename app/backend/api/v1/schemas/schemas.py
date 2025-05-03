@@ -6,8 +6,9 @@ from datetime import datetime
 import random
 import bcrypt
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
-from api.v1.schemas.base_schema import OPERATOR_CONFIG, VALUE_TYPE_RULES, BaseSchema, get_all_model_classes
-from werkzeug.datastructures import FileStorage
+from api.v1.schemas.base_schema import BaseSchema
+from api.v1.schemas.config_schema import *
+from api.v1.schemas.custom_schema import *
 from models.section import Section
 from models.stud_year_record import STUDYearRecord
 from models.grade import Grade
@@ -25,56 +26,6 @@ from models.admin import Admin
 class InvalidCredentialsError(Exception):
     """Exception raised when invalid credentials are provided."""
     pass
-
-
-class FileField(fields.Field):
-    """Custom field for file validation."""
-
-    def _deserialize(self, value, attr, data, **kwargs):
-        if not isinstance(value, FileStorage):
-            raise ValidationError("Invalid file type. Expected a file upload.")
-
-        # Validate file size (e.g., 5MB limit)
-        if value.content_length > 5 * 1024 * 1024:  # 5MB
-            raise ValidationError("File size exceeds the 5MB limit.")
-
-        # Validate file extension (allow only images)
-        allowed_extensions = {'png', 'jpg', 'jpeg', 'gif'}
-        if not value.filename.lower().endswith(tuple(allowed_extensions)):
-            raise ValidationError(
-                "Invalid file type. Allowed extensions: png, jpg, jpeg, gif.")
-
-        return value
-
-
-class RoleEnumField(fields.Field):
-    """Custom field for RoleEnum."""
-
-    def _serialize(self, value, attr, obj, **kwargs):
-        if value is None:
-            return None
-        return value.value.capitalize()  # Returns "Admin", "Teacher", or "Student"
-
-    def _deserialize(self, value, attr, data, **kwargs):
-        try:
-            if isinstance(value, CustomTypes.RoleEnum):
-                return value
-            return CustomTypes.RoleEnum(value)  # Converts string to enum
-        except ValueError as error:
-            raise ValidationError(
-                "Invalid role. Must be one of: admin, teacher, student") from error
-
-
-class TableField(fields.Field):
-    def _deserialize(self, value, attr, data, **kwargs):
-        table_name = value.__tablename__.lower()
-        table = get_all_model_classes().get(table_name)
-        if not table:
-            raise ValidationError(f"'{value}' is not a valid table.")
-        # if not isinstance(value, table) and type(value) != table:
-        #     raise ValidationError(f"Table {value}, {table} is not valid.")
-
-        return table
 
 
 class UserSchema(BaseSchema):
@@ -723,28 +674,6 @@ class RegisteredGradesSchema(BaseSchema):
     grades = fields.List(fields.Integer, required=True)
 
 
-class ColumnField(fields.Field):
-    """Custom field for validating values."""
-
-    def _validate(self, value):
-        if not isinstance(value, (str, list)):
-            raise ValidationError(
-                "value must be either a string or a list", field_name="value"
-            )
-        return value
-
-
-class TableIdField(fields.Field):
-    """Custom field for validating values."""
-
-    def _validate(self, value):
-        if not isinstance(value, (str, dict)):
-            raise ValidationError(
-                "value must be either a string or a Dictionary", field_name="value"
-            )
-        return value
-
-
 class SortSchema(BaseSchema):
     """Schema for validating sorting parameters."""
     column_name = ColumnField(required=False)
@@ -757,50 +686,43 @@ class SortSchema(BaseSchema):
         # add default values to the data
         data['column_name'] = data.pop('id', None)
         table_id = data.get('table_id', None)
-        if isinstance(table_id, dict):
-            values = list(table_id.values())
-            first_value = values[0] if values else None
+        if isinstance(table_id, list):
+            if not table_id:
+                raise ValidationError("table id list cannot be empty")
 
-            if all(v == first_value for v in values):
-                data['column_name'] = list(table_id.keys())
-                table_id = first_value
+            first_table_value = table_id[0][1]  # value (uuid)
+            if all(v == first_table_value for _, v in table_id):
+                data['column_name'] = [k for k, _ in table_id]
+                data['table_id'] = first_table_value  # overwrite with string
             else:
                 raise ValidationError(
-                    "Invalid table_id format. It should be a single value or a dictionary with the same value.")
+                    "All values in table id must be the same to extract keys."
+                )
 
-        data['table'] = self.get_table(table_id)
+        if data['table_id'] != '':
+            data['table'] = self.get_table(data['table_id'])
 
         return data
 
 
 class RangeSchema(BaseSchema):
     """Schema for validating range parameters."""
-    min = fields.Integer(required=False)
-    max = fields.Integer(required=False)
-
-
-class ValueField(fields.Field):
-    """Custom field for validating values."""
-
-    def _validate(self, value):
-        if not isinstance(value, (str, list)):
-            raise ValidationError(
-                "value must be either a string or a list", field_name="value"
-            )
-        return value
+    min = fields.Float(required=False, missing=None, allow_none=True)
+    max = fields.Float(required=False, missing=None, allow_none=True)
 
 
 class FilterSchema(BaseSchema):
     """Schema for validating filter parameters."""
-    column_name = fields.String(required=False)
-    filter_id = fields.String(required=False)
-    table_id = fields.String(required=False)
-    table = TableField(required=False)
-    range = fields.Nested(RangeSchema, required=False)
+    column_name = ColumnField(required=False, missing=None, allow_none=True)
+    filter_id = fields.String(required=False, missing=None, allow_none=True)
+    table_id = TableIdField(required=False, missing=None, allow_none=True)
+    table = TableField(required=False, missing=None, allow_none=True)
+    range = fields.Nested(RangeSchema, required=False,
+                          missing=None, allow_none=True)
     variant = fields.String(validate=lambda x: x in [
-                            "text", "number", "multiSelect", "boolean", "dateRange"], required=True)
-    operator = fields.String(required=False)
-    value = ValueField(required=False)
+                            "text", "number", "multiSelect", "boolean", "dateRange", "range"], required=True)
+    operator = fields.String(required=False, missing=None, allow_none=True)
+    value = ValueField(required=False, missing=None, allow_none=True)
 
     @validates_schema
     def validate_value(self, data, **kwargs):
@@ -811,7 +733,7 @@ class FilterSchema(BaseSchema):
         if not variant:
             raise ValidationError("Missing variant", field_name="variant")
 
-        if operator is not None:
+        if operator is not None and value is not None:
             allowed_operators = OPERATOR_CONFIG.get(variant)
             if not allowed_operators:
                 raise ValidationError(
@@ -824,7 +746,6 @@ class FilterSchema(BaseSchema):
                     field_name="operator"
                 )
 
-        if value is not None:
             expected_type = VALUE_TYPE_RULES.get(variant)
             if expected_type and not isinstance(value, expected_type):
                 raise ValidationError(
@@ -835,10 +756,27 @@ class FilterSchema(BaseSchema):
     def set_defaults(self, data, **kwargs):
         # add default values to the data
         data['column_name'] = data.pop('id', None)
-        data['table'] = self.get_table(data.get("table_id", None))
-        if data['value'] is not None and isinstance(data['value'], list):
-            data['value'] = self.update_list_value(
-                data['value'], data['table'], data['column_name'])
+        value = data.get('value', None)
+        table_id = data.get('table_id', None)
+        if isinstance(table_id, list):
+            if not table_id:
+                raise ValidationError("table id list cannot be empty")
+
+            first_table_value = table_id[0][1]  # value (uuid)
+            if all(v == first_table_value for _, v in table_id):
+                data['column_name'] = [k for k, _ in table_id]
+                data['table_id'] = first_table_value  # overwrite with string
+            else:
+                raise ValidationError(
+                    "All values in table id must be the same to extract keys."
+                )
+
+        if data['table_id'] != '':
+            data['table'] = self.get_table(data['table_id'])
+
+            if value is not None and isinstance(value, list):
+                data['value'] = self.update_list_value(
+                    value, data['table'], data['column_name'])
 
         return data
 
@@ -846,45 +784,57 @@ class FilterSchema(BaseSchema):
 class ParamSchema(BaseSchema):
     """Schema for validating parameters."""
     filter_flag = fields.String(required=False)
-    filters = fields.List(fields.Nested(FilterSchema), required=False)
+
+    filters = fields.List(fields.Nested(FilterSchema),
+                          required=False, missing=None, allow_none=True)
     valid_filters = fields.List(fields.Raw(), required=False)
+    custom_filters = fields.List(fields.Raw(), required=False)
+    join_operator = JoinOperatorField(required=False)
+
     page = fields.Integer(required=False, set_defaults=1)
     per_page = fields.Integer(required=False, set_defaults=10)
 
     sort = fields.List(fields.Nested(SortSchema), required=False)
-    valid_sort = fields.List(fields.Raw(), required=False)
-    join_operator = fields.String(required=False)
+    valid_sorts = fields.List(fields.Raw(), required=False)
+    custom_sorts = fields.List(fields.Raw(), required=False)
 
     @post_load
     def set_defaults(self, data, **kwargs):
         # add default values to the data
         valid_filters = []
         valid_sorts = []
-        if "filters" in data and data["filters"]:
-            for f_item in data["filters"]:
-                if "table" in f_item and f_item["table"] is not None:
-                    result = self.filter_data(
-                        f_item["table"],
-                        f_item['column_name'],
-                        f_item["operator"],
-                        f_item['value']
-                    )
-                    valid_filters.append(result)
-            data.pop('filters', None)
-            data['valid_filters'] = valid_filters
+        custom_sorts = []
+        custom_filters = []
+        for f_item in data["filters"] if data.get("filters") else []:
+            if "table" in f_item and f_item["table"] is not None:
+                result = self.filter_data(
+                    f_item["table"],
+                    f_item['column_name'],
+                    f_item["operator"],
+                    f_item['value'],
+                    f_item['range']
+                )
+                valid_filters.extend(result)
+            else:
+                custom_filters.append(f_item)
+        data.pop('filters', None)
+        data['valid_filters'] = valid_filters
 
-        if "sort" in data and data["sort"]:
-            for s_item in data["sort"]:
-                if "table" in s_item and s_item["table"] is not None:
-                    result = self.sort_data(
-                        s_item["table"],
-                        s_item['column_name'],
-                        s_item['desc']
-                    )
-                    # Adds all items from result to valid_sorts
-                    valid_sorts.extend(result)
-            data.pop('sort', None)
-            data['valid_sort'] = valid_sorts
+        for s_item in data["sort"] if data.get("sort") else []:
+            if "table" in s_item and s_item["table"] is not None:
+                result = self.sort_data(
+                    s_item["table"],
+                    s_item['column_name'],
+                    s_item['desc']
+                )
+                # Adds all items from result to valid_sorts
+                valid_sorts.extend(result)
+            else:
+                custom_sorts.append(s_item)
+        data.pop('sort', None)
+        data['valid_sorts'] = valid_sorts
+        data['custom_filters'] = custom_filters
+        data['custom_sorts'] = custom_sorts
 
         return data
 
@@ -969,9 +919,8 @@ class AllStudentsSchema(BaseSchema):
                     user_table_id = entry.pop('tableId', None)
                     for key in entry:
                         if isinstance(entry[key], dict):
-                            table_id[key] = {}
-                            for k in entry[key]:
-                                table_id[key].setdefault(k, user_table_id)
+                            table_id[key] = [(k, user_table_id)
+                                             for k in entry[key]]
                         else:
                             table_id.setdefault(key, user_table_id)
 
@@ -993,3 +942,22 @@ class AllStudentsSchema(BaseSchema):
             **item}
         result.pop("tableId", None)
         return result
+
+
+class StudentStatusSchema(BaseSchema):
+    """Schema for validating student status data."""
+    active = fields.Integer(required=True, default=0)
+    inactive = fields.Integer(required=True, default=0)
+    suspended = fields.Integer(required=True, default=0)
+    graduated = fields.Integer(required=False)
+    graduated_with_honors = fields.Integer(required=False)
+
+
+class StudentAverageSchema(BaseSchema):
+    """Schema for validating student average data."""
+    total_average = fields.Nested(RangeSchema, required=True)
+    averageI = fields.Nested(RangeSchema, required=True)
+    averageII = fields.Nested(RangeSchema, required=True)
+    rank = fields.Nested(RangeSchema, required=True)
+    rankI = fields.Nested(RangeSchema, required=True)
+    rankII = fields.Nested(RangeSchema, required=True)

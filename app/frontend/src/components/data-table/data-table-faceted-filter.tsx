@@ -88,6 +88,7 @@ export function DataTableFacetedFilter<TData, TValue>({
           newSelectedValues.add(option.value);
         }
         const filterValues = Array.from(newSelectedValues);
+        if (filterValues.length == 0) return removeFilter(column.id);
         addFilter({
           id: column.id,
           variant: column.columnDef.meta?.variant,

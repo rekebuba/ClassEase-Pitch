@@ -1,6 +1,7 @@
 import { z, ZodError } from "zod";
 import axios from "axios";
 import { ApiHandlerResponse } from "@/lib/types";
+import { toast } from "sonner";
 
 /**
  * Handles API calls with Zod validation and error handling
@@ -21,12 +22,15 @@ export async function zodApiHandler<T>(
         const response = await request();
 
         // Validate response data
-        console.log(response.data)
-        const parsedData = schema.parse(response.data);
+        const parsedResult = schema.safeParse(response.data);
+
+        if (!parsedResult.success) {
+            throw new ZodError(parsedResult.error.errors);
+        }
 
         return {
             success: true,
-            data: parsedData,
+            data: parsedResult.data,
         };
 
     } catch (error) {
@@ -46,16 +50,16 @@ export async function zodApiHandler<T>(
 
         // Axios API error
         if (axios.isAxiosError(error)) {
+            const message = options?.apiErrorMsg ||
+                error.response?.data?.message ||
+                error.message ||
+                "API request failed"
             return {
                 success: false,
                 error: {
                     type: "api",
                     status: error.response?.status || 500,
-                    message:
-                        options?.apiErrorMsg ||
-                        error.response?.data?.message ||
-                        error.message ||
-                        "API request failed",
+                    message: message,
                     details: error.response?.data,
                 },
             };

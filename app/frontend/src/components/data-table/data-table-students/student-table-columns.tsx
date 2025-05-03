@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DataTableColumnHeader } from "@/components/data-table"
 import { Edit, Trash2, Eye, Mail, UserCog, Ellipsis } from "lucide-react"
 import type { DataTableRowAction } from "@/types/data-table"
-import { Student, TableId } from "@/lib/types"
+import { AverageRange, Student, TableId } from "@/lib/types"
 import { MoreHorizontal, Pencil, Trash, User } from "lucide-react"
 
 import {
@@ -30,8 +30,7 @@ interface GetStudentsTableColumnsOptions {
   tableId: TableId
   statusCounts: Record<string, number>
   gradeCounts: Record<string, number>
-  attendanceRange: { min: number, max: number }
-  averageRange: { min: number, max: number }
+  averageRange: AverageRange,
   setRowAction: React.Dispatch<React.SetStateAction<DataTableRowAction<Student> | null>>
 }
 
@@ -39,7 +38,6 @@ export function getStudentsTableColumns({
   tableId,
   statusCounts,
   gradeCounts,
-  attendanceRange,
   averageRange,
   setRowAction,
 }: GetStudentsTableColumnsOptions): ColumnDef<Student>[] {
@@ -96,7 +94,7 @@ export function getStudentsTableColumns({
         variant: "text",
         label: "Student Name",
         placeholder: "Filter by name...",
-        tableId: tableId.studentName,
+        tableId: tableId?.studentName,
       },
       enableColumnFilter: true,
     },
@@ -113,7 +111,7 @@ export function getStudentsTableColumns({
       meta: {
         variant: "text",
         label: "Student Id",
-        tableId: tableId.identification,
+        tableId: tableId?.identification,
       },
       enableHiding: true,
     },
@@ -136,7 +134,7 @@ export function getStudentsTableColumns({
           value: value,
           count,
         })),
-        tableId: tableId.grade,
+        tableId: tableId?.grade,
       },
     },
     {
@@ -146,7 +144,7 @@ export function getStudentsTableColumns({
       cell: ({ row }) => <div>{row.original.sectionI}</div>,
       enableColumnFilter: true,
       meta: {
-        tableId: tableId.sectionI,
+        tableId: tableId?.sectionI,
         variant: "multiSelect",
         label: "Section I",
         options: [
@@ -163,7 +161,7 @@ export function getStudentsTableColumns({
       cell: ({ row }) => <div>{row.original.sectionII}</div>,
       enableColumnFilter: true,
       meta: {
-        tableId: tableId.sectionII,
+        tableId: tableId?.sectionII,
         variant: "multiSelect",
         label: "section II",
         options: [
@@ -194,10 +192,10 @@ export function getStudentsTableColumns({
       },
       enableColumnFilter: true,
       meta: {
-        tableId: tableId.finalScore,
+        tableId: tableId?.finalScore,
         variant: "range",
         label: "Average Grade",
-        range: averageRange,
+        range: averageRange.totalAverage,
         unit: "%",
       },
     },
@@ -220,10 +218,10 @@ export function getStudentsTableColumns({
       },
       enableColumnFilter: true,
       meta: {
-        tableId: tableId.averageI,
+        tableId: tableId?.averageI,
         variant: "range",
         label: "Average I",
-        range: averageRange,
+        range: averageRange.averageI,
         unit: "%",
       },
     },
@@ -246,10 +244,10 @@ export function getStudentsTableColumns({
       },
       enableColumnFilter: true,
       meta: {
-        tableId: tableId.averageII,
+        tableId: tableId?.averageII,
         variant: "range",
         label: "Average II",
-        range: averageRange,
+        range: averageRange.averageII,
         unit: "%",
       },
     },
@@ -274,10 +272,10 @@ export function getStudentsTableColumns({
       },
       enableColumnFilter: true,
       meta: {
-        tableId: tableId.rank,
+        tableId: tableId?.rank,
         variant: "range",
         label: "rank",
-        range: averageRange,
+        range: averageRange.rank,
       },
     },
     {
@@ -299,10 +297,10 @@ export function getStudentsTableColumns({
       },
       enableColumnFilter: true,
       meta: {
-        tableId: tableId.rankI,
+        tableId: tableId?.rankI,
         variant: "range",
         label: "rank I",
-        range: averageRange,
+        range: averageRange.rankI,
       },
     },
     {
@@ -324,10 +322,10 @@ export function getStudentsTableColumns({
       },
       enableColumnFilter: true,
       meta: {
-        tableId: tableId.rankII,
+        tableId: tableId?.rankII,
         variant: "range",
         label: "rank II",
-        range: averageRange,
+        range: averageRange.rankII,
       },
     },
     {
@@ -340,11 +338,28 @@ export function getStudentsTableColumns({
           <span className="text-xs text-muted-foreground">{row.original.guardianPhone}</span>
         </div>
       ),
+      enableColumnFilter: true,
       meta: {
-        tableId: tableId.guardianName,
+        tableId: tableId?.guardianName,
         variant: "text",
         label: "Parent Name",
         placeholder: "Filter by parent name...",
+      },
+    },
+    {
+      id: "guardianPhone",
+      accessorKey: "guardianPhone",
+      header: ({ column }) => <DataTableColumnHeader column={column} title="guardian Phone No." />,
+      cell: ({ row }) => (
+        <div className="flex items-center">
+          <span>{row.original.guardianPhone}</span>
+        </div>
+      ),
+      enableColumnFilter: true,
+      meta: {
+        variant: "text",
+        label: "guardian Phone",
+        tableId: tableId?.guardianPhone,
       },
     },
     {
@@ -352,10 +367,10 @@ export function getStudentsTableColumns({
       accessorKey: "createdAt",
       header: ({ column }) => <DataTableColumnHeader column={column} title="Joined" />,
       cell: ({ row }) => <div>{row.original.createdAt}</div>,
-      enableSorting: true,
-      enableHiding: true,
+      enableColumnFilter: true,
       meta: {
-        variant: "date",
+        tableId: tableId?.createdAt,
+        variant: "dateRange",
         label: "Joined Date",
       },
     },

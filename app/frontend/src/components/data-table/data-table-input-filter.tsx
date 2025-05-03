@@ -34,7 +34,7 @@ export function DataTableInputFilter<TData, TValue>({
     const columnFilter = getFilter(column?.id)
     const textFilterValue = columnFilter?.value as string | undefined
 
-    const comparisonOperators = dataTableConfig.multiSelectOperators
+    const comparisonOperators = dataTableConfig.textOperators
 
     const operator = comparisonOperators.find((operator) => operator.value === columnFilter?.id) ?? comparisonOperators[0]
 

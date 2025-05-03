@@ -124,7 +124,11 @@ export function DataTableFilterList<TData>({
   );
 
   const onFilterAdd = React.useCallback(() => {
-    const column = columns[0];
+    const freshColumns = table
+      .getAllColumns()
+      .filter((column) => column.columnDef.enableColumnFilter);
+
+    const column = freshColumns[0];
 
     if (!column) return;
 

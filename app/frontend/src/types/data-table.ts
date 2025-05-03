@@ -1,22 +1,24 @@
 import type { DataTableConfig } from "@/config/data-table";
 import type { FilterItemSchema } from "@/lib/parsers";
+import { RangeSchema, TableIdValue } from "@/lib/types";
 import type { ColumnSort, Row, RowData } from "@tanstack/react-table";
+
 
 declare module "@tanstack/react-table" {
   // biome-ignore lint/correctness/noUnusedVariables: <explanation>
   interface ColumnMeta<TData extends RowData, TValue> {
-    tableId?: string | Record<string, string>;
+    tableId?: TableIdValue;
     label?: string;
     placeholder?: string;
     variant?: FilterVariant;
     options?: Option[];
-    range?: { min: number, max: number };
+    range?: RangeSchema;
     unit?: string;
     icon?: React.FC<React.SVGProps<SVGSVGElement>>;
   }
 
   interface ColumnSort {
-    tableId: string | Record<string, string>;
+    tableId: TableIdValue;
   }
 }
 

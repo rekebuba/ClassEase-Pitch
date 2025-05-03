@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 
 import type {
-    AttendanceRange,
     AverageRange,
     GradeCounts,
     StatusCount,
@@ -19,7 +18,6 @@ import {
     getStudents,
     getStudentsStatusCounts,
     getGradeCounts,
-    getStudentsAttendanceRange,
     getStudentsAverageRange,
     getAllStudentsViews
 } from "@/api/adminApi";
@@ -31,8 +29,14 @@ export function useStudentsData(validQuery: SearchParams): StudentsDataResult {
     const [tableId, setTableId] = useState<TableId>({})
     const [statusCounts, setStatusCounts] = useState<StatusCount>({})
     const [gradeCounts, setGradeCounts] = useState<GradeCounts>({})
-    const [attendanceRange, setAttendanceRange] = useState<AttendanceRange>({ min: 0, max: 0 })
-    const [averageRange, setAverageRange] = useState<AverageRange>({ min: 0, max: 0 })
+    const [averageRange, setAverageRange] = useState<AverageRange>({
+        totalAverage: { min: "N/A", max: "N/A" },
+        averageI: { min: "N/A", max: "N/A" },
+        averageII: { min: "N/A", max: "N/A" },
+        rank: { min: "N/A", max: "N/A" },
+        rankI: { min: "N/A", max: "N/A" },
+        rankII: { min: "N/A", max: "N/A" },
+    })
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<Error | null>(null)
 
@@ -42,12 +46,11 @@ export function useStudentsData(validQuery: SearchParams): StudentsDataResult {
         setError(null)
 
         // Pass params to API calls if needed
-        const [studentsResult, statusCountsResult, gradeCountsResult, attendanceRangeResult, averageRangeResult] =
+        const [studentsResult, statusCountsResult, gradeCountsResult, averageRangeResult] =
             await Promise.all([
                 getStudents(validQuery),
                 getStudentsStatusCounts(),
                 getGradeCounts(),
-                getStudentsAttendanceRange(),
                 getStudentsAverageRange(),
             ])
 
@@ -56,8 +59,32 @@ export function useStudentsData(validQuery: SearchParams): StudentsDataResult {
         setTableId(studentsResult.tableId)
         setStatusCounts(statusCountsResult)
         setGradeCounts(gradeCountsResult)
-        setAttendanceRange(attendanceRangeResult)
-        setAverageRange(averageRangeResult)
+        setAverageRange({
+            totalAverage: {
+                min: averageRangeResult.totalAverage.min ?? "N/A",
+                max: averageRangeResult.totalAverage.max ?? "N/A",
+            },
+            averageI: {
+                min: averageRangeResult.averageI.min ?? "N/A",
+                max: averageRangeResult.averageI.max ?? "N/A",
+            },
+            averageII: {
+                min: averageRangeResult.averageII.min ?? "N/A",
+                max: averageRangeResult.averageII.max ?? "N/A",
+            },
+            rank: {
+                min: averageRangeResult.rank.min ?? "N/A",
+                max: averageRangeResult.rank.max ?? "N/A",
+            },
+            rankI: {
+                min: averageRangeResult.rankI.min ?? "N/A",
+                max: averageRangeResult.rankI.max ?? "N/A",
+            },
+            rankII: {
+                min: averageRangeResult.rankII.min ?? "N/A",
+                max: averageRangeResult.rankII.max ?? "N/A",
+            },
+        })
 
         setIsLoading(false)
     }
@@ -73,7 +100,6 @@ export function useStudentsData(validQuery: SearchParams): StudentsDataResult {
         tableId,
         statusCounts,
         gradeCounts,
-        attendanceRange,
         averageRange,
         isLoading,
         error,

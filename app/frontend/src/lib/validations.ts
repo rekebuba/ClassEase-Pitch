@@ -33,6 +33,10 @@ export const userSchema = z.object({
     })
 });
 
+const intOrNull = z.union([z.number(), z.literal("N/A"), z.null()]).transform((val) => val ?? "N/A")
+const stringOrNull = z.union([z.string(), z.literal("N/A"), z.null()]).transform((val) => val ?? "N/A")
+
+
 export const StudentSchema = z.object({
     identification: z.string(),
     imagePath: z.string().optional(),
@@ -40,23 +44,27 @@ export const StudentSchema = z.object({
     guardianName: z.string(),
     guardianPhone: z.string(),
     grade: z.number(),
-    sectionI: z.union([z.string(), z.literal("N/A"), z.null()]).transform((val) => val ?? "N/A"),
-    sectionII: z.union([z.string(), z.literal("N/A"), z.null()]).transform((val) => val ?? "N/A"),
-    averageI: z.union([z.number(), z.literal("N/A"), z.null()]).transform((val) => val ?? "N/A"),
-    averageII: z.union([z.number(), z.literal("N/A"), z.null()]).transform((val) => val ?? "N/A"),
-    rankI: z.union([z.number(), z.literal("N/A"), z.null()]).transform((val) => val ?? "N/A"),
-    rankII: z.union([z.number(), z.literal("N/A"), z.null()]).transform((val) => val ?? "N/A"),
-    finalScore: z.union([z.number(), z.literal("N/A"), z.null()]).transform((val) => val ?? "N/A"),
-    rank: z.union([z.number(), z.literal("N/A"), z.null()]).transform((val) => val ?? "N/A"),
+    sectionI: stringOrNull,
+    sectionII: stringOrNull,
+    averageI: intOrNull,
+    averageII: intOrNull,
+    rankI: intOrNull,
+    rankII: intOrNull,
+    finalScore: intOrNull,
+    rank: intOrNull,
     isActive: z.union([z.boolean(), z.enum(["active", "inactive", "suspended"])]).transform((val) => val ? 'active' : 'inactive'),
     createdAt: z.string(),
 });
 
+export const tableIdValue = z.union([
+    z.string(),
+    z.array(z.tuple([z.string(), z.string()])),
+]);
+
 export const tableId = z.record(
     StudentSchema.keyof(),
-    // z.string(),
-    z.union([z.string(), z.record(z.string(), z.string())])
-);
+    tableIdValue
+).optional();
 
 export const StudentsDataSchema = z.object({
     data: z.array(StudentSchema),
@@ -71,14 +79,18 @@ export const StatusCountSchema = z.record(
     z.number()
 );
 
-export const AttendanceRangeSchema = z.object({
-    min: z.number(),
-    max: z.number(),
+export const RangeSchema = z.object({
+    min: intOrNull,
+    max: intOrNull,
 });
 
 export const AverageRangeSchema = z.object({
-    min: z.number(),
-    max: z.number(),
+    totalAverage: RangeSchema,
+    averageI: RangeSchema,
+    averageII: RangeSchema,
+    rank: RangeSchema,
+    rankI: RangeSchema,
+    rankII: RangeSchema,
 });
 
 export const GradeCountsSchema = z.record(z.coerce.number(), z.number());
@@ -86,14 +98,14 @@ export const GradeCountsSchema = z.record(z.coerce.number(), z.number());
 const SortItemSchema = z.object({
     id: z.string(),
     desc: z.boolean(),
-    tableId: z.union([z.string(), z.record(z.string(), z.string())])
+    tableId: tableIdValue
 });
 
 export const searchParamsCache = z.object({
     page: z.number().default(1),
     perPage: z.number().default(10),
     // advanced filter
-    sort: z.array(SortItemSchema).default([]),
+    sort: z.array(SortItemSchema).optional(),
     filters: z.array(z.any()).optional(),
     joinOperator: z.enum(["and", "or"]).default("and"),
 });
@@ -102,10 +114,10 @@ export const searchParamsCache = z.object({
 export const searchParamMap = {
     page: parseAsInteger.withDefault(1),
     perPage: parseAsInteger.withDefault(10),
-    sort: getSortingStateParser(),
-    // advanced filter
+    sort: getSortingStateParser().withDefault([]),
     filters: getFiltersStateParser().withDefault([]),
     joinOperator: parseAsStringEnum(["and", "or"]).withDefault("and"),
+    createdAt: parseAsString.withDefault(""),
     viewId: parseAsString.withDefault(""),
 }
 

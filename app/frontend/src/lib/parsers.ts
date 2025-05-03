@@ -8,10 +8,16 @@ import type {
   ExtendedColumnSort,
 } from "@/types/data-table";
 
+const tableIdValue = z.union([
+    z.string(),
+    z.array(z.tuple([z.string(), z.string()])),
+]);
+
+
 const sortingItemSchema = z.object({
   id: z.string(),
   desc: z.boolean(),
-  tableId: z.union([z.string(), z.record(z.string(), z.string())]),
+  tableId: tableIdValue,
 });
 
 export const getSortingStateParser = <TData>(
@@ -55,7 +61,7 @@ export const getSortingStateParser = <TData>(
 
 const filterItemSchema = z.object({
   id: z.string(),
-  tableId: z.union([z.string(), z.record(z.string(), z.string())]),
+  tableId: tableIdValue,
   value: z.union([z.number(), z.array(z.number()), z.string(), z.array(z.string())]),
   range: z.object({
     min: z.number(),
@@ -81,7 +87,7 @@ export const getFiltersStateParser = <TData>(
     parse: (value) => {
       try {
         const decoded = decodeURIComponent(value);
-        const parsed = JSON.parse(decoded);
+        const parsed = JSON.parse(value);
         const result = z.array(filterItemSchema).safeParse(parsed);
 
         if (!result.success) return null;
@@ -95,7 +101,8 @@ export const getFiltersStateParser = <TData>(
         return null;
       }
     },
-    serialize: (value) => encodeURIComponent(JSON.stringify(value)),
+    // serialize: (value) => encodeURIComponent(JSON.stringify(value)),
+    serialize: (value) => JSON.stringify(value),
     eq: (a, b) =>
       a.length === b.length &&
       a.every(

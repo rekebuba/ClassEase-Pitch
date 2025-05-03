@@ -35,7 +35,6 @@ import { StudentsTableToolbarActions } from "./student-table-toolbar-action"
 
 
 // Constants
-const INITIAL_SORTING = [{ id: "name", desc: true }]
 const COLUMN_PINNING = { right: ["actions"] }
 
 export function StudentsTable() {
@@ -51,7 +50,6 @@ export function StudentsTable() {
     tableId,
     statusCounts,
     gradeCounts,
-    attendanceRange,
     averageRange,
     isLoading,
     error,
@@ -70,11 +68,10 @@ export function StudentsTable() {
         tableId,
         statusCounts,
         gradeCounts,
-        attendanceRange,
         averageRange,
         setRowAction,
       }),
-    [statusCounts, gradeCounts, attendanceRange, averageRange],
+    [statusCounts, gradeCounts, averageRange],
   )
 
   // Table setup
@@ -83,7 +80,6 @@ export function StudentsTable() {
     columns,
     pageCount,
     initialState: {
-      sorting: INITIAL_SORTING as ExtendedColumnSort<Student>[],
       columnPinning: COLUMN_PINNING,
       columnVisibility: {
         // Hide Student Id column
@@ -94,9 +90,10 @@ export function StudentsTable() {
         averageII: false,
         rankI: false,
         rankII: false,
+        guardianPhone: false,
       },
     },
-    getRowId: (originalRow) => originalRow.id,
+    getRowId: (originalRow) => originalRow.identification,
     shallow: false,
     clearOnDefault: true,
   })
@@ -109,16 +106,30 @@ export function StudentsTable() {
       .map((column) => column.id)
   }, [table])
 
-
   // Filter out empty values
-  const filteredParams = Object.fromEntries(
-    Object.entries(searchParams).filter(
-      ([_, value]) =>
-        value !== undefined &&
-        value !== null &&
-        value !== "" &&
-        !(Array.isArray(value) && value.length === 0)
-    )
+  const filteredParams = Object.entries(searchParams || {}).reduce(
+    (acc, [key, value]) => {
+      if (key === "filters" && Array.isArray(value)) {
+        const cleanedFilters = value.filter(
+          (filter) =>
+            !(typeof filter.value === "string" && filter.value === "") &&
+            !(Array.isArray(filter.value) && filter.value.length === 0)
+        );
+        if (cleanedFilters.length > 0) {
+          acc[key] = cleanedFilters;
+        }
+      } else if (
+        !(
+          typeof value === "string" && value === "" ||
+          Array.isArray(value) && value.length === 0
+        )
+      ) {
+        acc[key] = value;
+      }
+
+      return acc;
+    },
+    {} as Record<string, any>
   );
 
   // Effect to update search params with debouncing
@@ -139,7 +150,7 @@ export function StudentsTable() {
       }
     }
     return
-  }, [searchParams])
+  }, [searchParams, refetch])
 
   // Handle sheet/dialog close
   const handleCloseAction = React.useCallback(() => {

@@ -42,6 +42,7 @@ import { dataTableConfig } from "@/config/data-table";
 import { cn } from "@/lib/utils";
 import { useTableInstanceContext } from "./table-instance-provider";
 import { ExtendedColumnSort } from "@/types/data-table";
+import { TableIdValue } from "@/lib/types";
 
 const OPEN_MENU_SHORTCUT = "s";
 const REMOVE_SORT_SHORTCUTS = ["backspace", "delete"];
@@ -67,7 +68,7 @@ export function DataTableSortList<TData>({
   const { columnLabels, columns } = React.useMemo(() => {
     const labels = new Map<string, string>();
     const sortingIds = new Set(sorting.map((s) => s.id));
-    const availableColumns: { id: string; label: string, tableId: string | Record<string, string> }[] = [];
+    const availableColumns: { id: string; label: string, tableId: TableIdValue }[] = [];
 
     for (const column of table.getAllColumns()) {
       if (!column.getCanSort()) continue;
@@ -92,8 +93,12 @@ export function DataTableSortList<TData>({
     if (!firstColumn) return;
 
     onSortingChange((prevSorting) => [
-      ...prevSorting,
-      { id: firstColumn.id, desc: false, tableId: firstColumn.tableId },
+    ...prevSorting,
+      {
+        id: firstColumn.id,
+        desc: false,
+        tableId: firstColumn.tableId
+      },
     ]);
   }, [columns, onSortingChange]);
 
@@ -270,7 +275,7 @@ export function DataTableSortList<TData>({
 interface DataTableSortItemProps {
   sort: ColumnSort;
   sortItemId: string;
-  columns: { id: string; label: string, tableId: string | Record<string, string> }[];
+  columns: { id: string; label: string, tableId: TableIdValue }[];
   columnLabels: Map<string, string>;
   onSortUpdate: (sortId: string, updates: Partial<ColumnSort>) => void;
   onSortRemove: (sortId: string) => void;

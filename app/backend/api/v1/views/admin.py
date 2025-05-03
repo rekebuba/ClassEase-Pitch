@@ -31,7 +31,7 @@ from sqlalchemy import update, select, and_
 from sqlalchemy.orm import joinedload
 from urllib.parse import urlparse, parse_qs
 from api.v1.views.utils import admin_required
-from api.v1.views.methods import paginate_query, save_profile, validate_request, preprocess_query_params
+from api.v1.views.methods import make_case_lookup, min_max_semester_lookup, min_max_year_lookup, paginate_query, save_profile, validate_request, preprocess_query_params
 from api.v1.services.event_service import EventService
 from api.v1.schemas.schemas import *
 from api.v1.services.semester_service import SemesterService
@@ -531,84 +531,135 @@ def admin_student_list(admin_data):
 
         Response: A JSON response containing the filtered student data, or an error message if any required data is missing or not found.
     """
-    data = request.get_json()
-    # Check if required fields are present
-    schema = ParamSchema()
-    valid_data = schema.load(data)
-    print("valid_data: ", valid_data)
+    try:
+        data = request.get_json()
+        # Check if required fields are present
+        schema = ParamSchema()
+        valid_data = schema.load(data)
 
-    query = (
-        storage.session.query(
-            User,
-            Student,
-            STUDYearRecord,
-            Grade,
-            func.max(case((Semester.name == 1, Section.section))
-                     ).label("sectionI"),
-            func.max(case((Semester.name == 2, Section.section))
-                     ).label("sectionII"),
-            func.max(case((Semester.name == 1, STUDSemesterRecord.average))).label(
-                "averageI"),
-            func.max(case((Semester.name == 2, STUDSemesterRecord.average))).label(
-                "averageII"),
-            func.max(case((Semester.name == 1, STUDSemesterRecord.rank))
-                     ).label("rankI"),
-            func.max(case((Semester.name == 2, STUDSemesterRecord.rank))
-                     ).label("rankII"),
+        custom_types = {
+            **make_case_lookup(1, Section.section, "section"),
+            **make_case_lookup(1, STUDSemesterRecord.average, "average"),
+            **make_case_lookup(1, STUDSemesterRecord.rank, "rank"),
+        }
+
+        # custom sort
+        for custom_sort in valid_data['custom_sorts']:
+            column_name = custom_sort['column_name']
+            is_desc = custom_sort.get('desc', False)
+
+            expr = custom_types.get(column_name)
+            if expr is None:
+                raise ValidationError(f"Invalid custom sort: {custom_sort}")
+
+            valid_data['valid_sorts'].append(expr.desc() if is_desc else expr)
+
+        # custom filter
+        result = []
+        for custom_filter in valid_data['custom_filters']:
+            column_name = custom_filter['column_name']
+            operator = custom_filter['operator']
+            value = custom_filter['value']
+
+            expr = custom_types.get(column_name)
+            if expr is None:
+                raise ValidationError(
+                    f"Invalid custom filter: {custom_filter}")
+
+            op_func = OPERATOR_MAPPING.get(operator)
+            if op_func is None:
+                raise ValidationError(f"Unsupported operator: {operator}")
+
+            try:
+                condition = op_func(expr, value)
+            except Exception as e:
+                raise ValidationError(
+                    f"Invalid value for operator '{operator}': {e}")
+
+            result.append(condition)
+
+        valid_data['custom_filters'] = result
+
+        print("valid_data: ", valid_data)
+
+        query = (
+            storage.session.query(
+                User,
+                Student,
+                STUDYearRecord,
+                Grade,
+                custom_types['sectionI'],
+                custom_types['sectionII'],
+                custom_types['averageI'],
+                custom_types['averageII'],
+                custom_types['rankI'],
+                custom_types['rankII'],
+            )
+            .join(User.students)  # User → Student
+            .outerjoin(Student.year_records)  # Student → STUDYearRecord
+            .outerjoin(STUDYearRecord.semester_records)
+            .outerjoin(STUDSemesterRecord.sections)  # SemesterRecord → Section
+            # SemesterRecord → Semester
+            .outerjoin(STUDSemesterRecord.semesters)
+            .outerjoin(Section.grade)  # Section → Grade
+            .group_by(
+                User.id,
+                Student.id,
+                STUDYearRecord.id,
+                Grade.id,
+            )
+            .options(
+                joinedload(User.students)
+                .joinedload(Student.year_records)
+                .joinedload(STUDYearRecord.semester_records)
+                .joinedload(STUDSemesterRecord.sections)
+                .joinedload(Section.grade)
+            )
         )
-        .join(User.students)  # User → Student
-        .outerjoin(Student.year_records)  # Student → STUDYearRecord
-        .outerjoin(STUDYearRecord.semester_records)
-        .outerjoin(STUDSemesterRecord.sections)  # SemesterRecord → Section
-        .outerjoin(STUDSemesterRecord.semesters)  # SemesterRecord → Semester
-        .outerjoin(Section.grade)  # Section → Grade
-        .group_by(
-            User.id,
-            Student.id,
-            STUDYearRecord.id,
-            Grade.id,
+        # Check if any students are found
+        if not query:
+            return jsonify({"data": [], "table_id": {}, "pageCount": 1}), 200
+
+        # Use the paginate_query function to handle pagination
+        paginated_result = paginate_query(
+            query, valid_data['page'],
+            valid_data['per_page'],
+            valid_data['valid_filters'],
+            valid_data['custom_filters'],
+            valid_data['valid_sorts'],
+            valid_data['join_operator']
         )
-        .options(
-            joinedload(User.students)
-            .joinedload(Student.year_records)
-            .joinedload(STUDYearRecord.semester_records)
-            .joinedload(STUDSemesterRecord.sections)
-            .joinedload(Section.grade)
-        )
-    )
-    # Check if any students are found
-    if not query:
-        return jsonify({"message": "No student found"}), 404
 
-    # Use the paginate_query function to handle pagination
-    paginated_result = paginate_query(
-        query, valid_data['page'], valid_data['per_page'])
+        if not paginated_result['items']:
+            return jsonify({"data": [], "table_id": {}, "pageCount": 1}), 200
 
-    # Process results as needed
-    data_to_serialize = [{
-        "user": user.to_dict(),
-        "student": student.to_dict(),
-        "grade": grade.to_dict(),
-        "year_record": year_record.to_dict(),
-        "sectionI": section_I,
-        "sectionII": section_II,
-        "averageI": average_I,
-        "averageII": average_II,
-        "rankI": rank_I,
-        "rankII": rank_II,
-    }
-        for user, student,
-        year_record, grade,
-        section_I, section_II,
-        average_I, average_II,
-        rank_I, rank_II, in paginated_result['items']
-    ]
+        # Process results as needed
+        data_to_serialize = [{
+            "user": user.to_dict(),
+            "student": student.to_dict(),
+            "grade": grade.to_dict(),
+            "year_record": year_record.to_dict(),
+            "sectionI": section_I,
+            "sectionII": section_II,
+            "averageI": average_I,
+            "averageII": average_II,
+            "rankI": rank_I,
+            "rankII": rank_II,
+        }
+            for user, student,
+            year_record, grade,
+            section_I, section_II,
+            average_I, average_II,
+            rank_I, rank_II, in paginated_result['items']
+        ]
 
-    schema = AllStudentsSchema(many=True)
-    result = schema.dump(data_to_serialize)
-    print(json.dumps(result, indent=4, sort_keys=True))
-
-    return jsonify({**result, "pageCount": paginated_result['meta']['total_pages']}), 200
+        schema = AllStudentsSchema(many=True)
+        result = schema.dump(data_to_serialize)
+        return jsonify({**result, "pageCount": paginated_result['meta']['total_pages']}), 200
+    except ValidationError as e:
+        return errors.handle_validation_error(e)
+    # except Exception as e:
+    #     return errors.handle_internal_error(e)
 
 
 @admin.route('/students/status-count', methods=['GET'])
@@ -621,11 +672,31 @@ def student_status_count(admin_data):
         Response: A JSON response containing the count of students based on their status.
                   If no students are found, returns a 404 error with an appropriate message.
     """
-    return jsonify({
-        "active": 10,
-        "inactive": 5,
-        "suspended": 2,
-    }), 200
+    query = (
+        storage.session.query(
+            func.count(case((Student.is_active == True, 1),
+                            else_=None)).label("active"),
+            func.count(case((Student.is_active == False, 1),
+                            else_=None)).label("inactive"),
+            func.count(case((Student.is_active == None, 1),
+                            else_=None)).label("suspended"),
+        )
+        .join(User.students)
+        .outerjoin(Student.year_records)
+    )
+
+    # Process results
+    result = query.one()
+    data_to_serialize = {
+        "active": result.active,
+        "inactive": result.inactive,
+        "suspended": result.suspended,
+    }
+    # Return the serialized data
+    schema = StudentStatusSchema()
+    result = schema.load(data_to_serialize)
+
+    return jsonify(**result), 200
 
 
 @admin.route('/students/average-range', methods=['GET'])
@@ -638,7 +709,73 @@ def student_average_range(admin_data):
         Response: A JSON response containing the average range of students.
                   If no students are found, returns a 404 error with an appropriate message.
     """
-    return jsonify({"min": 0, "max": 50}), 200
+    try:
+        custom_types = {
+            **min_max_year_lookup(STUDYearRecord.final_score, "year"),
+            **min_max_year_lookup(STUDYearRecord.rank, "rank"),
+            **min_max_semester_lookup(1, STUDSemesterRecord.average, "semester_I"),
+            **min_max_semester_lookup(2, STUDSemesterRecord.average, "semester_II"),
+            **min_max_semester_lookup(1, STUDSemesterRecord.rank, "rank_I"),
+            **min_max_semester_lookup(2, STUDSemesterRecord.rank, "rank_II"),
+        }
+        query = (
+            storage.session.query(
+                custom_types['year_min'],
+                custom_types['year_max'],
+                custom_types['semester_I_min'],
+                custom_types['semester_I_max'],
+                custom_types['semester_II_min'],
+                custom_types['semester_II_max'],
+                custom_types['rank_min'],
+                custom_types['rank_max'],
+                custom_types['rank_I_min'],
+                custom_types['rank_I_max'],
+                custom_types['rank_II_min'],
+                custom_types['rank_II_max'],
+            )
+            .join(User.students)
+            .outerjoin(Student.year_records)
+            .outerjoin(STUDYearRecord.semester_records)
+            .outerjoin(STUDSemesterRecord.semesters)
+        )
+
+        result = query.one()
+        data_to_serialize = {
+            "total_average": {
+                "min": result.year_min,
+                "max": result.year_max,
+            },
+            "averageI": {
+                "min": result.semester_I_min,
+                "max": result.semester_I_min,
+            },
+            "averageII": {
+                "min": result.semester_II_min,
+                "max": result.semester_II_min,
+            },
+            "rank": {
+                "min": result.rank_min,
+                "max": result.rank_max,
+            },
+            "rankI": {
+                "min": result.rank_I_min,
+                "max": result.rank_I_max,
+            },
+            "rankII": {
+                "min": result.rank_II_min,
+                "max": result.rank_II_max,
+            },
+        }
+
+        # Return the serialized data
+        schema = StudentAverageSchema()
+        result = schema.dump(data_to_serialize)
+
+        return jsonify(**result), 200
+    except ValidationError as e:
+        return errors.handle_validation_error(e)
+    except Exception as e:
+        return errors.handle_internal_error(e)
 
 
 @admin.route('/students/attendance-range', methods=['GET'])
@@ -729,7 +866,7 @@ def all_teachers(admin_data):
         return jsonify({"message": "No teachers found"}), 404
 
     teacher_list = [{key: url_for('static', filename=value, _external=True)
-                    if key == 'image_path' and value is not None else value for key, value in q._asdict().items()} for q in query]
+                     if key == 'image_path' and value is not None else value for key, value in q._asdict().items()} for q in query]
 
     return jsonify({
         "teachers": teacher_list,

@@ -2,6 +2,7 @@ from datetime import datetime
 import re
 from marshmallow import Schema, ValidationError, post_dump, post_load, pre_load, validates
 from sqlalchemy import and_, or_
+from api.v1.schemas.config_schema import *
 from models.stud_year_record import STUDYearRecord
 from models.base_model import BaseModel
 from models.table import Table
@@ -15,60 +16,6 @@ from models.year import Year
 from models import storage
 import inspect as pyinspect
 from sqlalchemy.orm import DeclarativeMeta
-
-
-def to_snake(data):
-    if isinstance(data, dict):
-        return {to_snake_case_key(k): to_snake(v) for k, v in data.items()}
-    elif isinstance(data, list):
-        return [to_snake(item) for item in data]
-    else:
-        return data
-
-
-def to_camel(data):
-    if isinstance(data, dict):
-        return {to_camel_case_key(k): to_camel(v) for k, v in data.items()}
-    elif isinstance(data, list):
-        return [to_camel(item) for item in data]
-    else:
-        return data
-
-
-def to_snake_case_key(s):
-    return re.sub(r'(?<!^)(?=[A-Z])', '_', s).lower()
-
-
-def to_camel_case_key(s):
-    parts = s.split('_')
-    return parts[0] + ''.join(word.capitalize() for word in parts[1:])
-
-
-# Get all model classes dynamically
-def get_all_model_classes():
-    # Returns dict of {__tablename__: model_class}
-    return {
-        cls.__tablename__: cls
-        for cls in BaseModel.registry._class_registry.values()
-        if hasattr(cls, '__tablename__') and cls is not BaseModel
-    }
-
-
-OPERATOR_CONFIG = {
-    "text": ["iLike", "notLike", "startsWith", "endWith", "eq"],
-    "number": ["eq", "ne", "lt", "lte", "gt", "gte"],
-    "dateRange": ["eq", "ne", "lt", "lte", "gt", "gte"],
-    "multiSelect": ["in", "notIn"],
-    "boolean": ["eq", "ne"],
-}
-
-VALUE_TYPE_RULES = {
-    "text": str,
-    "number": (int, float),
-    "multiSelect": (str, list),
-    "boolean": bool,
-    "dateRange": (str, list),
-}
 
 
 class BaseSchema(Schema):
@@ -302,12 +249,13 @@ class BaseSchema(Schema):
             raise ValidationError(
                 f"Expected a list for {column_name}, got {type(value)}")
 
+        col_name = column_name
         # Find the column and get its Python type
         column_obj = next(
-            (col for col in model.__table__.columns if col.name == column_name), None)
+            (col for col in model.__table__.columns if col.name == col_name), None)
         if column_obj is None:
             raise ValidationError(
-                f"Column '{column_name}' not found on {model.__tablename__}.")
+                f"Column '{col_name}' not found on {model.__tablename__}.")
 
         try:
             expected_type = column_obj.type.python_type
@@ -336,40 +284,50 @@ class BaseSchema(Schema):
                 f"Failed to convert values for column '{column_name}': {e}")
 
     @staticmethod
-    def filter_data(model, column_name, operator, value):
+    def filter_data(model, column_name: str | list[str], operator, value, range):
         """
         Dynamically create a SQLAlchemy filter based on operator.
         """
-        column = getattr(model, column_name, None)
-        if column is None:
-            raise ValueError(
-                f"Column '{column_name}' not found on {model.__tablename__}.")
+        columns = column_name if isinstance(
+            column_name, list) else [column_name]
+        result = []
 
-        OPERATOR_MAPPING = {
-            "eq": lambda col, val: col == val,
-            "neq": lambda col, val: col != val,
-            "lt": lambda col, val: col < val,
-            "lte": lambda col, val: col <= val,
-            "gt": lambda col, val: col > val,
-            "gte": lambda col, val: col >= val,
-            "iLike": lambda col, val: col.ilike(f"{val}%"),
-            "like": lambda col, val: col.like(f"{val}%"),
-            "in": lambda col, val: col.in_(val if isinstance(val, list) else [val]),
-            "not_in": lambda col, val: ~col.in_(val if isinstance(val, list) else [val]),
-            "isEmpty": lambda col, _: or_(col.is_(None), col == ""),
-            "isNotEmpty": lambda col, _: and_(col.isnot(None), col != ""),
-            "isBetween": lambda col, val: col.between(val[0], val[1]) if isinstance(val, (list, tuple)) and len(val) == 2 else ValueError("isBetween expects list/tuple with 2 elements."),
-        }
+        for column in columns:
+            col_name = to_snake_case_key(column)
+            col = getattr(model, col_name, None)
+            if col is None:
+                raise ValidationError(
+                    f"Column '{col_name}' not found on {model.__tablename__}.")
 
-        op_func = OPERATOR_MAPPING.get(operator)
-        if not op_func:
-            raise ValueError(f"Unsupported operator: {operator}")
+            condition = None  # Initialize condition to ensure type is defined
 
-        condition = op_func(column, value)
-        if isinstance(condition, ValueError):
-            raise condition
+            if operator is not None or value is not None:
+                op_func = OPERATOR_MAPPING.get(operator)
+                if not callable(op_func):
+                    raise ValidationError(
+                        f"Operator '{operator}' is not callable or not defined.")
 
-        return condition
+                try:
+                    condition = op_func(col, value)
+                except Exception as e:
+                    raise ValidationError(
+                        f"Invalid value for operator '{operator}': {e}")
+            elif range is not None:
+                op_func = OPERATOR_MAPPING.get("isBetween")
+                if not callable(op_func):
+                    raise ValidationError(
+                        f"Operator '{operator}' is not callable or not defined.")
+
+                condition = op_func(col, range['min'], range['max'])
+
+            if condition is not None:
+                result.append(condition)
+
+        if len(result) > 1:
+            # Combine conditions with or if multiple filters are applied
+            return [or_(*result)]
+
+        return result
 
     @staticmethod
     def sort_data(model, column_name: str | list[str], order: bool) -> list:
@@ -380,10 +338,11 @@ class BaseSchema(Schema):
             column_name, list) else [column_name]
         result = []
         for column in columns:
-            col = getattr(model, column, None)
+            col_name = to_snake_case_key(column)
+            col = getattr(model, col_name, None)
             if col is None:
                 raise ValidationError(
-                    f"Column '{column}' not found on {model.__tablename__}.")
+                    f"Column '{col_name}' not found on {model.__tablename__}.")
 
             if order == True:
                 result.append(col.desc())

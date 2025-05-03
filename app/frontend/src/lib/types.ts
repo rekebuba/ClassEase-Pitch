@@ -4,12 +4,13 @@ import {
     StudentSchema,
     StudentsDataSchema,
     StatusCountSchema,
-    AttendanceRangeSchema,
     AverageRangeSchema,
     GradeCountsSchema,
     searchParamsCache,
     StudentsViewSchema,
     tableId,
+    tableIdValue,
+    RangeSchema,
 } from "./validations";
 
 export type RoleProps = 'admin' | 'teacher' | 'student';
@@ -70,8 +71,9 @@ export type DataProps = {
 export type Student = z.infer<typeof StudentSchema>;
 export type StudentsData = z.infer<typeof StudentsDataSchema>;
 export type TableId = z.infer<typeof tableId>;
+export type TableIdValue = z.infer<typeof tableIdValue>;
 export type StatusCount = z.infer<typeof StatusCountSchema>;
-export type AttendanceRange = z.infer<typeof AttendanceRangeSchema>;
+export type RangeSchema = z.infer<typeof RangeSchema>;
 export type AverageRange = z.infer<typeof AverageRangeSchema>;
 export type GradeCounts = z.infer<typeof GradeCountsSchema>;
 
@@ -81,7 +83,6 @@ export interface StudentsDataResult {
     tableId: TableId
     statusCounts: StatusCount
     gradeCounts: GradeCounts
-    attendanceRange: AttendanceRange
     averageRange: AverageRange
     isLoading: boolean
     error: Error | null
