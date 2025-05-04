@@ -144,7 +144,6 @@ export function getStudentsTableColumns({
       cell: ({ row }) => <div>{row.original.sectionI}</div>,
       enableColumnFilter: true,
       meta: {
-        tableId: tableId?.sectionI,
         variant: "multiSelect",
         label: "Section I",
         options: [
@@ -161,7 +160,6 @@ export function getStudentsTableColumns({
       cell: ({ row }) => <div>{row.original.sectionII}</div>,
       enableColumnFilter: true,
       meta: {
-        tableId: tableId?.sectionII,
         variant: "multiSelect",
         label: "section II",
         options: [
@@ -169,34 +167,6 @@ export function getStudentsTableColumns({
           { label: "Section B", value: "B" },
           { label: "Section C", value: "C" },
         ],
-      },
-    },
-    {
-      id: "finalScore",
-      accessorKey: "finalScore",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Avg. Grade" />,
-      cell: ({ row }) => {
-        const score = row.original.finalScore
-        let color = "text-green-600"
-        if (typeof score === "number") {
-          if (score < 70) color = "text-red-600"
-          else if (score < 80) color = "text-amber-600"
-        }
-
-        return (
-          <div className="flex flex-col">
-            <span className={`font-medium ${color}`}>{score}%</span>
-            <span className="text-xs text-muted-foreground">{row.original.averageI}%-{row.original.averageI}%</span>
-          </div>
-        )
-      },
-      enableColumnFilter: true,
-      meta: {
-        tableId: tableId?.finalScore,
-        variant: "range",
-        label: "Average Grade",
-        range: averageRange.totalAverage,
-        unit: "%",
       },
     },
     {
@@ -252,30 +222,31 @@ export function getStudentsTableColumns({
       },
     },
     {
-      id: "rank",
-      accessorKey: "rank",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Avg. rank" />,
+      id: "finalScore",
+      accessorKey: "finalScore",
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Avg. Grade" />,
       cell: ({ row }) => {
-        const score = row.original.rank
+        const score = row.original.finalScore
         let color = "text-green-600"
         if (typeof score === "number") {
           if (score < 70) color = "text-red-600"
           else if (score < 80) color = "text-amber-600"
         }
+
         return (
           <div className="flex flex-col">
-            <span className={`font-medium ${color}`}>{score}</span>
-            <span className="text-xs text-muted-foreground">{row.original.rankI}-{row.original.rankII}</span>
-
+            <span className={`font-medium ${color}`}>{score}%</span>
+            <span className="text-xs text-muted-foreground">{row.original.averageI}%-{row.original.averageI}%</span>
           </div>
         )
       },
       enableColumnFilter: true,
       meta: {
-        tableId: tableId?.rank,
+        tableId: tableId?.finalScore,
         variant: "range",
-        label: "rank",
-        range: averageRange.rank,
+        label: "Average Grade",
+        range: averageRange.totalAverage,
+        unit: "%",
       },
     },
     {
@@ -326,6 +297,33 @@ export function getStudentsTableColumns({
         variant: "range",
         label: "rank II",
         range: averageRange.rankII,
+      },
+    },
+    {
+      id: "rank",
+      accessorKey: "rank",
+      header: ({ column }) => <DataTableColumnHeader column={column} title="Avg. rank" />,
+      cell: ({ row }) => {
+        const score = row.original.rank
+        let color = "text-green-600"
+        if (typeof score === "number") {
+          if (score < 70) color = "text-red-600"
+          else if (score < 80) color = "text-amber-600"
+        }
+        return (
+          <div className="flex flex-col">
+            <span className={`font-medium ${color}`}>{score}</span>
+            <span className="text-xs text-muted-foreground">{row.original.rankI}-{row.original.rankII}</span>
+
+          </div>
+        )
+      },
+      enableColumnFilter: true,
+      meta: {
+        tableId: tableId?.rank,
+        variant: "range",
+        label: "rank",
+        range: averageRange.rank,
       },
     },
     {

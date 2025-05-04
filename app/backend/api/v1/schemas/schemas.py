@@ -35,7 +35,7 @@ class UserSchema(BaseSchema):
     role = RoleEnumField()
     national_id = fields.String(required=True, load_only=True)
     image_path = FileField(required=False, allow_none=True)
-    created_at = fields.String(required=False)
+    created_at = FormattedDate(required=False)
     table_id = fields.String(required=False)
 
     @staticmethod
@@ -707,8 +707,8 @@ class SortSchema(BaseSchema):
 
 class RangeSchema(BaseSchema):
     """Schema for validating range parameters."""
-    min = fields.Float(required=False, missing=None, allow_none=True)
-    max = fields.Float(required=False, missing=None, allow_none=True)
+    min = FloatOrDateField(required=False, allow_none=True)
+    max = FloatOrDateField(required=False, allow_none=True)
 
 
 class FilterSchema(BaseSchema):
@@ -720,7 +720,7 @@ class FilterSchema(BaseSchema):
     range = fields.Nested(RangeSchema, required=False,
                           missing=None, allow_none=True)
     variant = fields.String(validate=lambda x: x in [
-                            "text", "number", "multiSelect", "boolean", "dateRange", "range"], required=True)
+                            "text", "number", "multiSelect", "boolean", "date", "dateRange", "range"], required=True)
     operator = fields.String(required=False, missing=None, allow_none=True)
     value = ValueField(required=False, missing=None, allow_none=True)
 
@@ -733,7 +733,7 @@ class FilterSchema(BaseSchema):
         if not variant:
             raise ValidationError("Missing variant", field_name="variant")
 
-        if operator is not None and value is not None:
+        if operator is not None:
             allowed_operators = OPERATOR_CONFIG.get(variant)
             if not allowed_operators:
                 raise ValidationError(
@@ -746,6 +746,7 @@ class FilterSchema(BaseSchema):
                     field_name="operator"
                 )
 
+        if value is not None:
             expected_type = VALUE_TYPE_RULES.get(variant)
             if expected_type and not isinstance(value, expected_type):
                 raise ValidationError(

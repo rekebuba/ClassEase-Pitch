@@ -290,7 +290,7 @@ class BaseSchema(Schema):
         """
         columns = column_name if isinstance(
             column_name, list) else [column_name]
-        result = []
+        result: list = []
 
         for column in columns:
             col_name = to_snake_case_key(column)
@@ -301,24 +301,18 @@ class BaseSchema(Schema):
 
             condition = None  # Initialize condition to ensure type is defined
 
-            if operator is not None or value is not None:
+            if operator is not None:
                 op_func = OPERATOR_MAPPING.get(operator)
                 if not callable(op_func):
                     raise ValidationError(
                         f"Operator '{operator}' is not callable or not defined.")
 
                 try:
-                    condition = op_func(col, value)
+                    condition = op_func(
+                        col, value if value is not None else range)
                 except Exception as e:
                     raise ValidationError(
                         f"Invalid value for operator '{operator}': {e}")
-            elif range is not None:
-                op_func = OPERATOR_MAPPING.get("isBetween")
-                if not callable(op_func):
-                    raise ValidationError(
-                        f"Operator '{operator}' is not callable or not defined.")
-
-                condition = op_func(col, range['min'], range['max'])
 
             if condition is not None:
                 result.append(condition)

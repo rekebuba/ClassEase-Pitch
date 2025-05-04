@@ -10,6 +10,8 @@ import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Separator } from "@/components/ui/separator"
+import { useFilters } from "@/utils/filter-context"
+import { DataTableFilterOption } from "@/types"
 
 type DateSelection = Date[] | DateRange
 
@@ -24,69 +26,64 @@ function parseAsDate(timestamp: number | string | undefined): Date | undefined {
   return !Number.isNaN(date.getTime()) ? date : undefined
 }
 
-function parseColumnFilterValue(value: unknown) {
-  if (value === null || value === undefined) {
-    return []
-  }
-
-  if (Array.isArray(value)) {
-    return value.map((item) => {
-      if (typeof item === "number" || typeof item === "string") {
-        return item
-      }
-      return undefined
-    })
-  }
-
-  if (typeof value === "string" || typeof value === "number") {
-    return [value]
-  }
-
-  return []
-}
-
 interface DataTableDateFilterProps<TData> {
   column: Column<TData, unknown>
   title?: string
+  setSelectedOptions: React.Dispatch<
+    React.SetStateAction<DataTableFilterOption<TData>[]>
+  >
   multiple?: boolean
 }
 
-export function DataTableDateFilter<TData>({ column, title, multiple = true }: DataTableDateFilterProps<TData>) {
-  const columnFilterValue = column.getFilterValue()
-  const [open, setOpen] = React.useState(true)
+export function DataTableDateFilter<TData>({ column, title, setSelectedOptions, multiple = true }: DataTableDateFilterProps<TData>) {
+  const { removeFilter, getFilter, debouncedAddFilter } = useFilters()
 
+  const columnFilterValue = getFilter(column?.id);
+  const [open, setOpen] = React.useState(true)
 
   const selectedDates = React.useMemo<DateSelection>(() => {
     if (!columnFilterValue) {
       return multiple ? { from: undefined, to: undefined } : []
     }
 
-    if (multiple) {
-      const timestamps = parseColumnFilterValue(columnFilterValue)
+    if (multiple && columnFilterValue.range) {
       return {
-        from: parseAsDate(timestamps[0]),
-        to: parseAsDate(timestamps[1]),
+        from: parseAsDate(columnFilterValue.range.min),
+        to: parseAsDate(columnFilterValue.range.max),
       }
     }
 
-    const timestamps = parseColumnFilterValue(columnFilterValue)
-    const date = parseAsDate(timestamps[0])
+    const date = parseAsDate(columnFilterValue.value as number)
     return date ? [date] : []
   }, [columnFilterValue, multiple])
 
   const onSelect = React.useCallback(
     (date: Date | DateRange | undefined) => {
       if (!date) {
-        column.setFilterValue(undefined)
+        removeFilter(column.id);
         return
       }
 
       if (multiple && !("getTime" in date)) {
         const from = date.from?.getTime()
         const to = date.to?.getTime()
-        column.setFilterValue(from || to ? [from, to] : undefined)
+        debouncedAddFilter({
+          id: column.id,
+          variant: column.columnDef.meta?.variant,
+          tableId: column.columnDef.meta?.tableId ?? getFilter(column.id)?.tableId ?? "",
+          operator: "isBetween",
+          range: {
+            min: from && from !== to ? from : undefined,
+            max: to && to !== from ? to : undefined,
+          },
+        })
       } else if (!multiple && "getTime" in date) {
-        column.setFilterValue(date.getTime())
+        debouncedAddFilter({
+          id: column.id,
+          variant: column.columnDef.meta?.variant,
+          tableId: column.columnDef.meta?.tableId ?? "",
+          value: date.getTime(),
+        })
       }
     },
     [column, multiple],
@@ -95,7 +92,11 @@ export function DataTableDateFilter<TData>({ column, title, multiple = true }: D
   const onReset = React.useCallback(
     (event: React.MouseEvent) => {
       event.stopPropagation()
-      column.setFilterValue(undefined)
+      removeFilter(column.id);
+      setOpen(false);
+      setSelectedOptions((prev) =>
+        prev.filter((item) => item.value !== column?.id)
+      );
     },
     [column],
   )

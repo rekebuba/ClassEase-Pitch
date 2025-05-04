@@ -9,8 +9,8 @@ import type {
 } from "@/types/data-table";
 
 const tableIdValue = z.union([
-    z.string(),
-    z.array(z.tuple([z.string(), z.string()])),
+  z.string(),
+  z.array(z.tuple([z.string(), z.string()])),
 ]);
 
 
@@ -64,8 +64,8 @@ const filterItemSchema = z.object({
   tableId: tableIdValue,
   value: z.union([z.number(), z.array(z.number()), z.string(), z.array(z.string())]),
   range: z.object({
-    min: z.number(),
-    max: z.number()
+    min: z.union([z.number(), z.undefined()]),
+    max: z.union([z.number(), z.undefined()]),
   }).optional(),
   variant: z.enum(dataTableConfig.filterVariants),
   operator: z.enum(dataTableConfig.operators),
@@ -112,7 +112,8 @@ export const getFiltersStateParser = <TData>(
           filter.value === b[index]?.value &&
           filter.range === b[index]?.range &&
           filter.variant === b[index]?.variant &&
-          filter.operator === b[index]?.operator,
+          filter.operator === b[index]?.operator &&
+          filter.filterId === b[index]?.filterId,
       ),
   });
 };

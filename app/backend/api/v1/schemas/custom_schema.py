@@ -1,9 +1,50 @@
+from datetime import date, datetime
 from marshmallow import fields, ValidationError
 from sqlalchemy import and_, or_
 
 from api.v1.schemas.base_schema import get_all_model_classes
 from models.base_model import CustomTypes
 from werkzeug.datastructures import FileStorage
+
+
+class FormattedDate(fields.Field):
+    def __init__(self, format_str="%b %d, %Y", *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.format_str = format_str
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        if isinstance(value, datetime):
+            return value.strftime(self.format_str)
+        elif isinstance(value, str):
+            try:
+                dt = datetime.fromisoformat(value)
+                return dt.strftime(self.format_str)
+            except ValueError:
+                return value  # fallback to original if parsing fails
+        return None
+
+
+class FloatOrDateField(fields.Field):
+    def _deserialize(self, value, attr, data, **kwargs):
+        if value is None:
+            return None
+
+        try:
+            # Convert float (timestamp) to date if it's likely a date
+            if isinstance(value, (int, float)) and value > 1e12:
+                return datetime.fromtimestamp(value / 1000.0).date()
+            # Otherwise treat as float
+            return float(value)
+        except (ValueError, TypeError):
+            raise ValidationError("Invalid number or timestamp")
+
+    def _serialize(self, value, attr, obj, **kwargs):
+        if isinstance(value, date):
+            # Convert back to timestamp in milliseconds
+            return int(datetime.combine(value, datetime.min.time()).timestamp() * 1000)
+        elif isinstance(value, (int, float)):
+            return value
+        return None
 
 
 class FileField(fields.Field):
@@ -98,11 +139,29 @@ class JoinOperatorField(fields.Field):
 
 
 class ValueField(fields.Field):
-    """Custom field for validating values."""
+    """Custom field for validating and deserializing various types of values."""
 
-    def _validate(self, value):
-        if not isinstance(value, (str, list)):
-            raise ValidationError(
-                "value must be either a string or a list", field_name="value"
-            )
-        return value
+    # def _validate(self, value):
+    #     if not isinstance(value, (str, list, datetime, int, float)):
+    #         raise ValidationError(
+    #             "Value must be a string, list, datetime, int, or float.", field_name="value"
+    #         )
+
+    def _deserialize(self, value, attr, data, **kwargs):
+        if value is None:
+            return None
+
+        # If it's already a number, use it directly
+        try:
+            timestamp = float(value)
+        except (ValueError, TypeError):
+            return value  # Keep string or other types as-is
+
+        try:
+            # Consider values larger than 1e12 as millisecond timestamps
+            if timestamp > 1e12:
+                return datetime.fromtimestamp(timestamp / 1000.0).date()
+            # If it's a regular float/int, return it
+            return timestamp
+        except (ValueError, OSError):
+            raise ValidationError("Invalid numeric value or timestamp.")

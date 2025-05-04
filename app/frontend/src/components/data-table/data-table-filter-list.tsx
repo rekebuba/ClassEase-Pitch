@@ -101,7 +101,7 @@ export function DataTableFilterList<TData>({
     return table
       .getAllColumns()
       .filter((column) => column.columnDef.enableColumnFilter);
-  }, [table]);
+  }, [table, table.getAllColumns()]);
 
   const [filters, setFilters] = useQueryState(
     FILTERS_KEY,
@@ -124,11 +124,7 @@ export function DataTableFilterList<TData>({
   );
 
   const onFilterAdd = React.useCallback(() => {
-    const freshColumns = table
-      .getAllColumns()
-      .filter((column) => column.columnDef.enableColumnFilter);
-
-    const column = freshColumns[0];
+    const column = columns[0];
 
     if (!column) return;
 
@@ -475,6 +471,7 @@ function DataTableFilterItem<TData>({
                           operator: getDefaultFilterOperator(
                             column.columnDef.meta?.variant ?? "text",
                           ),
+                          tableId: column.columnDef.meta?.tableId ?? "",
                           value: "",
                         });
 
@@ -648,7 +645,7 @@ function onFilterInputRender<TData>({
         <Select
           open={showValueSelector}
           onOpenChange={setShowValueSelector}
-          value={filter.value}
+          value={filter.value as string}
           onValueChange={(value) =>
             onFilterUpdate(filter.filterId, {
               value,
@@ -688,7 +685,7 @@ function onFilterInputRender<TData>({
         <Faceted
           open={showValueSelector}
           onOpenChange={setShowValueSelector}
-          value={selectedValues}
+          value={selectedValues as string | string[]}
           onValueChange={(value) => {
             onFilterUpdate(filter.filterId, {
               value,
@@ -747,17 +744,19 @@ function onFilterInputRender<TData>({
     case "dateRange": {
       const inputListboxId = `${inputId}-listbox`;
 
-      const dateValue = Array.isArray(filter.value)
-        ? filter.value.filter(Boolean)
-        : [filter.value, filter.value].filter(Boolean);
+      // const dateValue = Array.isArray(filter.value)
+      //   ? filter.value.filter(Boolean)
+      //   : [filter.value, filter.value].filter(Boolean);
+
+      const dateValue = filter;
 
       const displayValue =
-        filter.operator === "isBetween" && dateValue.length === 2
-          ? `${formatDate(new Date(Number(dateValue[0])))} - ${formatDate(
-            new Date(Number(dateValue[1])),
+        filter.operator === "isBetween"
+          ? `${formatDate(new Date(Number(dateValue?.range?.min)))} - ${formatDate(
+            new Date(Number(dateValue?.range?.max)),
           )}`
-          : dateValue[0]
-            ? formatDate(new Date(Number(dateValue[0])))
+          : dateValue?.value
+            ? formatDate(new Date(Number(dateValue?.value)))
             : "Pick a date";
 
       return (
@@ -788,25 +787,24 @@ function onFilterInputRender<TData>({
                 aria-label={`Select ${columnMeta?.label} date range`}
                 mode="range"
                 initialFocus
+                numberOfMonths={2}
                 selected={
-                  dateValue.length === 2
+                  dateValue?.range?.min || dateValue?.range?.max
                     ? {
-                      from: new Date(Number(dateValue[0])),
-                      to: new Date(Number(dateValue[1])),
+                      from: dateValue?.range?.min ? new Date(Number(dateValue.range.min)) : undefined,
+                      to: dateValue?.range?.max ? new Date(Number(dateValue.range.max)) : undefined,
                     }
-                    : {
-                      from: new Date(),
-                      to: new Date(),
-                    }
+                    : undefined
                 }
                 onSelect={(date) => {
+                  const from = date?.from?.getTime()
+                  const to = date?.to?.getTime()
                   onFilterUpdate(filter.filterId, {
-                    value: date
-                      ? [
-                        (date.from?.getTime() ?? "").toString(),
-                        (date.to?.getTime() ?? "").toString(),
-                      ]
-                      : [],
+                    value: undefined,
+                    range: {
+                      min: from,
+                      max: to,
+                    }
                   });
                 }}
               />
@@ -816,7 +814,7 @@ function onFilterInputRender<TData>({
                 mode="single"
                 initialFocus
                 selected={
-                  dateValue[0] ? new Date(Number(dateValue[0])) : undefined
+                  dateValue?.value ? new Date(Number(dateValue?.value)) : undefined
                 }
                 onSelect={(date) => {
                   onFilterUpdate(filter.filterId, {

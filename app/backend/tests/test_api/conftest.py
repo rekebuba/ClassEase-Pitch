@@ -102,7 +102,7 @@ def db_create_users(db_session):
         (MakeFactory(TeacherFactory, db_session).factory,
          CustomTypes.RoleEnum.TEACHER, 1),
         (MakeFactory(StudentFactory, db_session).factory,
-         CustomTypes.RoleEnum.STUDENT, 5)
+         CustomTypes.RoleEnum.STUDENT, 50)
     ]
 
     users = {

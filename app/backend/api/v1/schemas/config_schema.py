@@ -1,30 +1,60 @@
+from datetime import date, datetime, timedelta
 import re
-from sqlalchemy import and_, or_
+from sqlalchemy import and_, func, or_
 
 from models.base_model import BaseModel
 
 
+def is_date(val):
+    return isinstance(val, (date, datetime))
+
+
+def normalize_date_col(col, val):
+    return func.date(col) if is_date(val) else col
+
+
 OPERATOR_MAPPING = {
-    "eq": lambda col, val: col == val,
-    "neq": lambda col, val: col != val,
-    "lt": lambda col, val: col < val,
-    "lte": lambda col, val: col <= val,
-    "gt": lambda col, val: col > val,
-    "gte": lambda col, val: col >= val,
-    "iLike": lambda col, val: col.ilike(f"{val}%"),
-    "like": lambda col, val: col.like(f"{val}%"),
-    "in": lambda col, val: col.in_(val if isinstance(val, list) else [val]),
-    "not_in": lambda col, val: ~col.in_(val if isinstance(val, list) else [val]),
+    "eq": lambda col, val: normalize_date_col(col, val) == val,
+    "ne": lambda col, val: normalize_date_col(col, val) != val,
+    "lt": lambda col, val: normalize_date_col(col, val) < val,
+    "lte": lambda col, val: normalize_date_col(col, val) <= val,
+    "gt": lambda col, val: normalize_date_col(col, val) > val,
+    "gte": lambda col, val: normalize_date_col(col, val) >= val,
+    "iLike": lambda col, val: col.ilike(f"%{val}%"),
+    "like": lambda col, val: col.like(f"%{val}%"),
+    "notLike": lambda col, val: ~col.like(f"%{val}%"),
+    "startsWith": lambda col, val: col.like(f"{val}%"),
+    "endWith": lambda col, val: col.like(f"%{val}"),
+    "in": lambda col, val: normalize_date_col(col, val[0])
+    .in_(val if isinstance(val, list) else [val]) if val else False,
+    "notIn": lambda col, val: ~normalize_date_col(col, val[0])
+    .in_(val if isinstance(val, list) else [val]) if val else True,
     "isEmpty": lambda col, _: or_(col.is_(None), col == ""),
     "isNotEmpty": lambda col, _: and_(col.isnot(None), col != ""),
-    "isBetween": lambda col, min, max: col.between(min, max),
+    "isBetween": lambda col, range: (
+        normalize_date_col(col, range.get("min") or range.get(
+            "max")).between(range.get("min"), range.get("max"))
+        if range.get("min") is not None and range.get("max") is not None
+        else normalize_date_col(col, range.get("min")) >= range.get("min")
+        if range.get("min") is not None
+        else normalize_date_col(col, range.get("max")) <= range.get("max")
+        if range.get("max") is not None
+        else None
+    ),
+    "isRelativeToToday": lambda col, days: (
+        func.date(col) >= (datetime.utcnow().date() + timedelta(days=days))
+        if isinstance(days, int)
+        else None
+    )
 }
 
 OPERATOR_CONFIG = {
     "text": ["iLike", "notLike", "startsWith", "endWith", "eq"],
     "number": ["eq", "ne", "lt", "lte", "gt", "gte"],
-    "dateRange": ["eq", "ne", "lt", "lte", "gt", "gte"],
-    "multiSelect": ["in", "notIn"],
+    "select": ["eq", "ne", "isEmpty", "isNotEmpty"],
+    "multiSelect": ["in", "notIn", "isEmpty", "isNotEmpty"],
+    "date": ["eq", "ne", "lt", "lte", "gt", "gte", "isBetween", "isRelativeToToday", "isEmpty", "isNotEmpty"],
+    "dateRange": ["eq", "ne", "lt", "lte", "gt", "gte", "isBetween", "isRelativeToToday", "isEmpty", "isNotEmpty"],
     "boolean": ["eq", "ne"],
 }
 
@@ -33,7 +63,7 @@ VALUE_TYPE_RULES = {
     "number": (int, float),
     "multiSelect": (str, list),
     "boolean": bool,
-    "dateRange": (str, list),
+    "dateRange": (datetime, date),
 }
 
 

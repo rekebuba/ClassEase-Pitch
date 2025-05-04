@@ -134,22 +134,16 @@ export function StudentsTable() {
 
   // Effect to update search params with debouncing
   React.useEffect(() => {
-    try {
-      const validQuery = searchParamsCache.parse(filteredParams)
-      console.log("validQuery", validQuery)
-
-      setDebouncedParams((prev) => (JSON.stringify(prev) !== JSON.stringify(validQuery) ? validQuery : prev))
-    } catch (error) {
-      // Zod validation error
-      if (error instanceof ZodError) {
-        console.error("Validation error:", error.flatten()) // Log the error instead of returning it
-        toast.error("Validation error", {
-          description: "Invalid search parameters",
-          style: { color: 'red' }
-        });
-      }
+    const validQuery = searchParamsCache.safeParse(filteredParams)
+    if (!validQuery.success) {
+      toast.warning("Invalid search", {
+        description: "Please check your search parameters",
+      });
+      console.error("Invalid search params", validQuery.error)
+      return
     }
-    return
+    console.log("validQuery", validQuery.data)
+    setDebouncedParams((prev) => (JSON.stringify(prev) !== JSON.stringify(validQuery.data) ? validQuery.data : prev))
   }, [searchParams, refetch])
 
   // Handle sheet/dialog close

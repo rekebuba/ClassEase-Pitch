@@ -62,7 +62,7 @@ export const dataTableConfig = {
     "multiSelect",
   ] as const,
   operators: [
-    "ilike",
+    "iLike",
     "notLike",
     "startsWith",
     "endWith",

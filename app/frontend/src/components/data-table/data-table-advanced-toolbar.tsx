@@ -3,7 +3,7 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
-import { View } from "@/lib/validations";
+// import { View } from "@/lib/validations";
 import { PlusIcon } from "@radix-ui/react-icons"
 import UpdateViewForm from "./views/update-view-form";
 
@@ -121,11 +121,13 @@ export function DataTableAdvancedToolbar<TData>({
               .map((selectedOption) => {
                 const column = table.getColumn(selectedOption.value);
                 return (
-                  <DataTableToolbarFilter
-                    key={String(selectedOption.value)}
-                    setSelectedOptions={setSelectedOptions}
-                    column={column}
-                  />
+                  column && (
+                    <DataTableToolbarFilter
+                      key={String(selectedOption.value)}
+                      setSelectedOptions={setSelectedOptions}
+                      column={column}
+                    />
+                  )
                 );
               })}
           </div>
@@ -234,6 +236,7 @@ export function DataTableToolbarFilter<TData>({
             <DataTableDateFilter
               column={column}
               title={columnMeta.label ?? column.id}
+              setSelectedOptions={setSelectedOptions}
               multiple={columnMeta.variant === "dateRange"}
             />
           );

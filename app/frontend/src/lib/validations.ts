@@ -7,6 +7,8 @@ import {
     parseAsStringEnum,
 } from "nuqs";
 import { flagConfig } from "@/config/flag";
+import { dataTableConfig } from "@/config/data-table";
+import { generateId } from "./id";
 
 
 export const logoutSchema = z.object({
@@ -101,13 +103,27 @@ const SortItemSchema = z.object({
     tableId: tableIdValue
 });
 
+export const filterItemSchema = z.object({
+    id: z.string().optional(),
+    tableId: tableIdValue.optional(),
+    value: z.union([z.number(), z.array(z.number()), z.string(), z.array(z.string())]).optional(),
+    range: z.object({
+        min: z.union([z.number(), z.undefined()]),
+        max: z.union([z.number(), z.undefined()]),
+    }).optional(),
+    variant: z.enum(dataTableConfig.filterVariants).optional(),
+    operator: z.enum(dataTableConfig.operators).optional(),
+    filterId: z.string().optional(),
+});
+
+
 export const searchParamsCache = z.object({
-    page: z.number().default(1),
-    perPage: z.number().default(10),
+    page: z.number().optional().default(1),
+    perPage: z.number().optional().default(10),
     // advanced filter
     sort: z.array(SortItemSchema).optional(),
-    filters: z.array(z.any()).optional(),
-    joinOperator: z.enum(["and", "or"]).default("and"),
+    filters: z.array(filterItemSchema).optional(),
+    joinOperator: z.enum(["and", "or"]).optional().default("and"),
 });
 
 
