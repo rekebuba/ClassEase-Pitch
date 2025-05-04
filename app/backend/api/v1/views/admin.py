@@ -31,7 +31,15 @@ from sqlalchemy import update, select, and_
 from sqlalchemy.orm import joinedload
 from urllib.parse import urlparse, parse_qs
 from api.v1.views.utils import admin_required
-from api.v1.views.methods import make_case_lookup, min_max_semester_lookup, min_max_year_lookup, paginate_query, save_profile, validate_request, preprocess_query_params
+from api.v1.views.methods import (
+    make_case_lookup,
+    min_max_semester_lookup,
+    min_max_year_lookup,
+    paginate_query,
+    save_profile,
+    validate_request,
+    preprocess_query_params,
+)
 from api.v1.services.event_service import EventService
 from api.v1.schemas.schemas import *
 from api.v1.services.semester_service import SemesterService
@@ -40,10 +48,10 @@ from api.v1.services.user_service import UserService
 from api.v1.views import errors
 
 
-admin = Blueprint('admin', __name__, url_prefix='/api/v1/admin')
+admin = Blueprint("admin", __name__, url_prefix="/api/v1/admin")
 
 
-@admin.route('/profile', methods=['PUT'])
+@admin.route("/profile", methods=["PUT"])
 @admin_required
 def update_admin_profile(admin_data):
     """
@@ -54,32 +62,14 @@ def update_admin_profile(admin_data):
 
     Returns:
         Response: A JSON response indicating the result of the update operation.
-
-    The function expects a JSON payload in the request with the following fields:
-        - name (str): The new name of the admin.
-        - email (str): The new email of the admin.
-        - current_password (str, optional): The current password of the admin, required if updating the password.
-        - new_password (str, optional): The new password for the admin.
-
-    The function performs the following checks:
-        - Ensures the request payload is a valid JSON.
-        - Ensures the required fields ('name' and 'email') are present in the payload.
-        - If updating the password, ensures both 'current_password' and 'new_password' are provided.
-        - Verifies the current password before updating to the new password.
-
-    Returns:
-        - 400: If the request payload is not a valid JSON or if required fields are missing.
-        - 404: If the admin user is not found.
-        - 400: If the current password is incorrect.
-        - 200: If the profile is updated successfully.
     """
     data = request.get_json()
     if not data:
         return jsonify({"message": "Not a JSON"}), 400
 
     required_data = {
-        'name',
-        'email',
+        "name",
+        "email",
         # 'phone',
     }
 
@@ -87,26 +77,26 @@ def update_admin_profile(admin_data):
         if field not in data:
             return jsonify({"message": f"Missing {field}"}), 400
 
-    admin_data.name = data['name']
-    admin_data.email = data['email']
+    admin_data.name = data["name"]
+    admin_data.email = data["email"]
     # admin_data.phone = data['phone']
 
-    if 'new_password' in data:
-        if 'current_password' not in data:
+    if "new_password" in data:
+        if "current_password" not in data:
             return jsonify({"message": "Missing old password"}), 400
         user = storage.get_first(User, id=admin_data.id)
         if not user:
             return jsonify({"message": "User not found"}), 404
-        if not user.check_password(data['current_password']):
+        if not user.check_password(data["current_password"]):
             return jsonify({"message": "Incorrect password"}), 400
 
-        user.hash_password(data['new_password'])
+        user.hash_password(data["new_password"])
     storage.save()
 
     return jsonify({"message": "Profile Updated Successfully"}), 200
 
 
-@admin.route('/overview', methods=['GET'])
+@admin.route("/overview", methods=["GET"])
 @admin_required
 def school_overview(admin_data):
     """
@@ -115,50 +105,42 @@ def school_overview(admin_data):
 
     Args:
         admin_data (dict): Data related to the admin requesting the overview.
-
-    Returns:
-        Response: A JSON response containing the following keys:
-            - total_teachers (int): The total number of teachers.
-            - total_students (int): The total number of students.
-            - enrollment_by_grade (list): A list of dictionaries, each containing:
-                - grade (str): The grade level.
-                - student_count (int): The number of students enrolled in that grade.
-            - performance_by_subject (list): A list of dictionaries, each containing:
-                - subject (str): The name of the subject.
-                - average_percentage (float): The average percentage score for that subject.
-        HTTP Status Code: 200
     """
     total_teachers = storage.get_all(Teacher)
     total_students = storage.get_all(Student)
-    enrollment_by_grade = storage.session.query(
-        Grade.grade,
-        func.count(STUDYearRecord.student_id)
-    ).join(Grade, STUDYearRecord.grade_id == Grade.id).group_by(
-        STUDYearRecord.grade_id,
-    ).all()
+    enrollment_by_grade = (
+        storage.session.query(Grade.grade, func.count(STUDYearRecord.student_id))
+        .join(Grade, STUDYearRecord.grade_id == Grade.id)
+        .group_by(
+            STUDYearRecord.grade_id,
+        )
+        .all()
+    )
 
-    performance_by_subject = storage.session.query(
-        Subject.name,
-        func.avg(MarkList.score)
-    ).join(Subject, MarkList.subject_id == Subject.id).group_by(
-        Subject.name
-    ).all()
+    performance_by_subject = (
+        storage.session.query(Subject.name, func.avg(MarkList.score))
+        .join(Subject, MarkList.subject_id == Subject.id)
+        .group_by(Subject.name)
+        .all()
+    )
 
-    return jsonify({
-        "total_teachers": len(total_teachers),
-        "total_students": len(total_students),
-        "enrollment_by_grade": [
-            {"grade": grade, "student_count": student_count}
-            for grade, student_count in enrollment_by_grade
-        ],
-        "performance_by_subject": [
-            {"subject": subject, "average_percentage": average_percentage}
-            for subject, average_percentage in performance_by_subject
-        ]
-    }), 200
+    return jsonify(
+        {
+            "total_teachers": len(total_teachers),
+            "total_students": len(total_students),
+            "enrollment_by_grade": [
+                {"grade": grade, "student_count": student_count}
+                for grade, student_count in enrollment_by_grade
+            ],
+            "performance_by_subject": [
+                {"subject": subject, "average_percentage": average_percentage}
+                for subject, average_percentage in performance_by_subject
+            ],
+        }
+    ), 200
 
 
-@admin.route('/assign-teacher', methods=['PUT'])
+@admin.route("/assign-teacher", methods=["PUT"])
 @admin_required
 def assign_class(admin_data):
     """
@@ -169,34 +151,18 @@ def assign_class(admin_data):
 
     Returns:
         Response: JSON response indicating success or failure of the operation.
-
-    The function performs the following steps:
-    1. Parses the JSON request data.
-    2. Validates the presence of required fields.
-    3. Retrieves the teacher by ID.
-    4. Retrieves the grade ID from the Grade table.
-    5. Retrieves the subject IDs based on the subjects taught.
-    6. Retrieves the section IDs based on the grade and section.
-    7. Checks if the teacher is already assigned to the subject and section.
-    8. Updates the teacher record if not already assigned.
-    9. Updates the MarkList table with the teacher's record ID.
-    10. Commits the changes to the database.
-
-    Returns:
-        JSON response with a success message and status code 201 if the operation is successful.
-        JSON response with an error message and appropriate status code if any validation or database operation fails.
     """
     data = request.get_json()
     if not data:
         return jsonify({"message": "Not a JSON"}), 400
 
     required_data = [
-        'teacher_id',
-        'grade',
-        'section',
-        'subjects_taught',
-        'semester',
-        'mark_list_year',
+        "teacher_id",
+        "grade",
+        "section",
+        "subjects_taught",
+        "semester",
+        "mark_list_year",
     ]
     # Check if required fields are present
     for field in required_data:
@@ -204,40 +170,56 @@ def assign_class(admin_data):
             return jsonify({"message": f"Missing {field}"}), 400
 
     # Get the teacher by ID
-    teacher = storage.get_first(Teacher, id=data['teacher_id'])
+    teacher = storage.get_first(Teacher, id=data["teacher_id"])
     if not teacher:
         return jsonify({"message": "Teacher not found"}), 404
 
     # Get the grade_id from the Grade table
-    grade_id = storage.session.execute(
-        select(Grade.id).where(Grade.grade == data['grade'])
-    ).scalars().first()
+    grade_id = (
+        storage.session.execute(select(Grade.id).where(Grade.grade == data["grade"]))
+        .scalars()
+        .first()
+    )
     if not grade_id:
         return jsonify({"message": "No grade found for the teacher"}), 404
 
     # get the subject_id
-    subjects_taught = storage.session.query(Subject).filter(
-        Subject.grade_id == grade_id,
-        Subject.name.in_(data['subjects_taught'])
-    ).all()
+    subjects_taught = (
+        storage.session.query(Subject)
+        .filter(Subject.grade_id == grade_id, Subject.name.in_(data["subjects_taught"]))
+        .all()
+    )
     if not subjects_taught:
         return jsonify({"message": "Subject not found"}), 404
 
     try:
         for subject in subjects_taught:
             # get the section_id
-            section_ids = [id[0] for id in storage.session.query(Section.id).filter(
-                Section.grade_id == grade_id,
-                Section.section.in_(data['section'])
-            ).all()]
+            section_ids = [
+                id[0]
+                for id in storage.session.query(Section.id)
+                .filter(
+                    Section.grade_id == grade_id, Section.section.in_(data["section"])
+                )
+                .all()
+            ]
 
             if not section_ids:
-                return jsonify({"message": f"Section not found, Mark List was not created for the grade {data['grade']}"}), 404
+                return jsonify(
+                    {
+                        "message": f"Section not found, Mark List was not created for the grade {data['grade']}"
+                    }
+                ), 404
 
             for section_id in section_ids:
                 # check if the another teacher is already assigned to the subject
                 teacher_record = storage.get_first(
-                    TeachersRecord, grade_id=grade_id, section_id=section_id, subject_id=subject.id, semester=data['semester'])
+                    TeachersRecord,
+                    grade_id=grade_id,
+                    section_id=section_id,
+                    subject_id=subject.id,
+                    semester=data["semester"],
+                )
                 # update the teacher record
                 if teacher_record:
                     return jsonify({"message": "Teacher already assigned"}), 409
@@ -246,7 +228,7 @@ def assign_class(admin_data):
                     grade_id=grade_id,
                     section_id=section_id,
                     subject_id=subject.id,
-                    semester=data['semester']
+                    semester=data["semester"],
                 )
 
                 storage.add(teacher_record)
@@ -254,36 +236,42 @@ def assign_class(admin_data):
                 # Update the MarkList table
                 storage.session.execute(
                     update(MarkList)
-                    .where(and_(
-                        MarkList.grade_id == grade_id,
-                        MarkList.section_id == section_id,
-                        MarkList.subject_id == subject.id,
-                        MarkList.semester == data['semester'],
-                        MarkList.year == data['mark_list_year']
-                    ))
+                    .where(
+                        and_(
+                            MarkList.grade_id == grade_id,
+                            MarkList.section_id == section_id,
+                            MarkList.subject_id == subject.id,
+                            MarkList.semester == data["semester"],
+                            MarkList.year == data["mark_list_year"],
+                        )
+                    )
                     .values(teachers_record_id=teacher_record.id)
                 )
 
                 # Update the Assessment table
                 storage.session.execute(
                     update(Assessment)
-                    .where(and_(
-                        Assessment.grade_id == grade_id,
-                        Assessment.subject_id == subject.id,
-                        Assessment.semester == data['semester'],
-                        Assessment.year == data['mark_list_year']
-                    ))
+                    .where(
+                        and_(
+                            Assessment.grade_id == grade_id,
+                            Assessment.subject_id == subject.id,
+                            Assessment.semester == data["semester"],
+                            Assessment.year == data["mark_list_year"],
+                        )
+                    )
                     .values(teachers_record_id=teacher_record.id)
                 )
 
                 # Update the AVRGSubject table
                 storage.session.execute(
                     update(AVRGSubject)
-                    .where(and_(
-                        AVRGSubject.grade_id == grade_id,
-                        AVRGSubject.subject_id == subject.id,
-                        AVRGSubject.year == data['mark_list_year']
-                    ))
+                    .where(
+                        and_(
+                            AVRGSubject.grade_id == grade_id,
+                            AVRGSubject.subject_id == subject.id,
+                            AVRGSubject.year == data["mark_list_year"],
+                        )
+                    )
                     .values(teachers_record_id=teacher_record.id)
                 )
 
@@ -296,7 +284,7 @@ def assign_class(admin_data):
     return jsonify({"message": "Teacher assigned successfully!"}), 201
 
 
-@admin.route('/events', methods=['GET'])
+@admin.route("/events", methods=["GET"])
 @admin_required
 def available_events(admin_data):
     """
@@ -315,9 +303,7 @@ def available_events(admin_data):
             return errors.handle_not_found_error("No event found")
 
         schema = AvailableEventsSchema()
-        result = schema.dump({
-            "events": events
-        })
+        result = schema.dump({"events": events})
 
         return jsonify(result), 200
     except ValidationError as e:
@@ -326,7 +312,7 @@ def available_events(admin_data):
         return errors.handle_internal_error(e)
 
 
-@admin.route('/event/new', methods=['POST'])
+@admin.route("/event/new", methods=["POST"])
 @admin_required
 def create_events(admin_data):
     try:
@@ -335,13 +321,13 @@ def create_events(admin_data):
         validated_data = event_schema.load(data)
 
         # extract any nested felids
-        semester = validated_data.pop('semester', None)
+        semester = validated_data.pop("semester", None)
 
         new_event = Event(**validated_data)
         storage.add(new_event)
         storage.session.flush()
 
-        if new_event.purpose == 'New Semester':
+        if new_event.purpose == "New Semester":
             semester_data = {
                 **semester,
                 "event_id": new_event.id,
@@ -352,10 +338,12 @@ def create_events(admin_data):
                 storage.session.query(Event, Semester, Year)
                 .join(Semester, Semester.event_id == Event.id)
                 .join(Year, Year.id == Event.year_id)
-                .filter(and_(
-                    Event.purpose == new_event.purpose,
-                    Event.organizer == new_event.organizer
-                ))
+                .filter(
+                    and_(
+                        Event.purpose == new_event.purpose,
+                        Event.organizer == new_event.organizer,
+                    )
+                )
             )
 
             new_semester = Semester(**semester_data)
@@ -372,7 +360,7 @@ def create_events(admin_data):
         return errors.handle_internal_error(e)
 
 
-@admin.route('/registered_grades', methods=['GET'])
+@admin.route("/registered_grades", methods=["GET"])
 @admin_required
 def registered_grades(admin_data):
     """
@@ -397,9 +385,9 @@ def registered_grades(admin_data):
             return errors.handle_not_found_error("No registered grades found")
 
         schema = RegisteredGradesSchema()
-        result = schema.dump({
-            "grades": [grade.to_dict()['grade'] for grade in registered_grades]
-        })
+        result = schema.dump(
+            {"grades": [grade.to_dict()["grade"] for grade in registered_grades]}
+        )
 
         return jsonify(result), 200
     except ValidationError as e:
@@ -408,7 +396,7 @@ def registered_grades(admin_data):
         return errors.handle_internal_error(e)
 
 
-@admin.route('/mark-list/new', methods=['POST'])
+@admin.route("/mark-list/new", methods=["POST"])
 @admin_required
 def create_mark_list(admin_data):
     """
@@ -428,18 +416,21 @@ def create_mark_list(admin_data):
         mark_list_schema = CreateMarkListSchema()
         validated_data = mark_list_schema.load(data)
         mark_list = []
-        for assessment in validated_data['mark_assessment']:
+        for assessment in validated_data["mark_assessment"]:
             registered_students = storage.get_all(
-                STUDSemesterRecord, grade_id=assessment['grade_id'], semester_id=validated_data['semester_id'])
+                STUDSemesterRecord,
+                grade_id=assessment["grade_id"],
+                semester_id=validated_data["semester_id"],
+            )
             for student in registered_students:
-                for subject in assessment['subjects']:
-                    for assessment_type in assessment['assessment_type']:
+                for subject in assessment["subjects"]:
+                    for assessment_type in assessment["assessment_type"]:
                         new_mark_list = MarkList(
                             user_id=student.user_id,
                             semester_record_id=student.id,
-                            subject_id=subject['subject_id'],
-                            type=assessment_type['type'],
-                            percentage=assessment_type['percentage']
+                            subject_id=subject["subject_id"],
+                            type=assessment_type["type"],
+                            percentage=assessment_type["percentage"],
                         )
 
                         mark_list.append(new_mark_list)
@@ -454,7 +445,7 @@ def create_mark_list(admin_data):
         return errors.handle_internal_error(e)
 
 
-@admin.route('/students/mark_list', methods=['GET'])
+@admin.route("/students/mark_list", methods=["GET"])
 @admin_required
 def show_mark_list(admin_data):
     """
@@ -465,54 +456,46 @@ def show_mark_list(admin_data):
 
     Returns:
         Response: A JSON response containing the list of student marks or an error message with the appropriate HTTP status code.
-
-    Query Parameters:
-        grade (str): The grade level.
-        sections (str): The section within the grade.
-        subject (str): The subject for which marks are being requested.
-        assessment_type (str): The type of assessment.
-        semester (str): The semester for which marks are being requested.
-        year (str): The academic year.
-
-    Responses:
-        200: A JSON list of student marks.
-        400: A JSON error message indicating a missing required field.
-        404: A JSON error message indicating that the grade, section, subject, or students were not found.
     """
     url = request.url
     parsed_url = urlparse(url)
     data = parse_qs(parsed_url.query)
 
     required_data = [
-        'grade',
-        'sections',
-        'subject',
-        'assessment_type',
-        'semester',
-        'year'
+        "grade",
+        "sections",
+        "subject",
+        "assessment_type",
+        "semester",
+        "year",
     ]
     # Check if required fields are present
     for field in required_data:
         if field not in data:
             return jsonify({"message": f"Missing {field}"}), 400
 
-    grade = storage.get_first(Grade, grade=data['grade'][0])
+    grade = storage.get_first(Grade, grade=data["grade"][0])
     if not grade:
         return jsonify({"message": "Grade not found"}), 404
 
     section = storage.get_first(
-        Section, grade_id=grade.id, section=data['section'][0], year=data['year'][0])
+        Section, grade_id=grade.id, section=data["section"][0], year=data["year"][0]
+    )
     if not section:
         return jsonify({"message": "Section not found"}), 404
 
-    subject = storage.get_first(
-        Subject, grade_id=grade.id, name=data['subject'][0])
+    subject = storage.get_first(Subject, grade_id=grade.id, name=data["subject"][0])
     if not subject:
         return jsonify({"message": "Subject not found"}), 404
 
-    students = storage.get_all(MarkList, grade_id=grade.id, section_id=section.id,
-                               subject_id=subject.id, semester=data['semester'][0],
-                               year=data['year'][0])
+    students = storage.get_all(
+        MarkList,
+        grade_id=grade.id,
+        section_id=section.id,
+        subject_id=subject.id,
+        semester=data["semester"][0],
+        year=data["year"][0],
+    )
     if not students:
         return jsonify({"message": "Student not found"}), 404
 
@@ -523,7 +506,7 @@ def show_mark_list(admin_data):
     return jsonify(student_list), 200
 
 
-@admin.route('/students', methods=['POST'])
+@admin.route("/students", methods=["POST"])
 @admin_required
 def admin_student_list(admin_data):
     """
@@ -544,27 +527,26 @@ def admin_student_list(admin_data):
         }
 
         # custom sort
-        for custom_sort in valid_data['custom_sorts']:
-            column_name = custom_sort['column_name']
-            is_desc = custom_sort.get('desc', False)
+        for custom_sort in valid_data["custom_sorts"]:
+            column_name = custom_sort["column_name"]
+            is_desc = custom_sort.get("desc", False)
 
             expr = custom_types.get(column_name)
             if expr is None:
                 raise ValidationError(f"Invalid custom sort: {custom_sort}")
 
-            valid_data['valid_sorts'].append(expr.desc() if is_desc else expr)
+            valid_data["valid_sorts"].append(expr.desc() if is_desc else expr)
 
         # custom filter
         result = []
-        for custom_filter in valid_data['custom_filters']:
-            column_name = custom_filter['column_name']
-            operator = custom_filter['operator']
-            value = custom_filter['value']
+        for custom_filter in valid_data["custom_filters"]:
+            column_name = custom_filter["column_name"]
+            operator = custom_filter["operator"]
+            value = custom_filter["value"]
 
             expr = custom_types.get(column_name)
             if expr is None:
-                raise ValidationError(
-                    f"Invalid custom filter: {custom_filter}")
+                raise ValidationError(f"Invalid custom filter: {custom_filter}")
 
             op_func = OPERATOR_MAPPING.get(operator)
             if op_func is None:
@@ -573,12 +555,11 @@ def admin_student_list(admin_data):
             try:
                 condition = op_func(expr, value)
             except Exception as e:
-                raise ValidationError(
-                    f"Invalid value for operator '{operator}': {e}")
+                raise ValidationError(f"Invalid value for operator '{operator}': {e}")
 
             result.append(condition)
 
-        valid_data['custom_filters'] = result
+        valid_data["custom_filters"] = result
 
         print("valid_data: ", valid_data)
 
@@ -588,12 +569,12 @@ def admin_student_list(admin_data):
                 Student,
                 STUDYearRecord,
                 Grade,
-                custom_types['sectionI'],
-                custom_types['sectionII'],
-                custom_types['averageI'],
-                custom_types['averageII'],
-                custom_types['rankI'],
-                custom_types['rankII'],
+                custom_types["sectionI"],
+                custom_types["sectionII"],
+                custom_types["averageI"],
+                custom_types["averageII"],
+                custom_types["rankI"],
+                custom_types["rankII"],
             )
             .join(User.students)  # User → Student
             .outerjoin(Student.year_records)  # Student → STUDYearRecord
@@ -622,47 +603,49 @@ def admin_student_list(admin_data):
 
         # Use the paginate_query function to handle pagination
         paginated_result = paginate_query(
-            query, valid_data['page'],
-            valid_data['per_page'],
-            valid_data['valid_filters'],
-            valid_data['custom_filters'],
-            valid_data['valid_sorts'],
-            valid_data['join_operator']
+            query,
+            valid_data["page"],
+            valid_data["per_page"],
+            valid_data["valid_filters"],
+            valid_data["custom_filters"],
+            valid_data["valid_sorts"],
+            valid_data["join_operator"],
         )
 
-        if not paginated_result['items']:
+        if not paginated_result["items"]:
             return jsonify({"data": [], "table_id": {}, "pageCount": 1}), 200
 
         # Process results as needed
-        data_to_serialize = [{
-            "user": user.to_dict(),
-            "student": student.to_dict(),
-            "grade": grade.to_dict(),
-            "year_record": year_record.to_dict(),
-            "sectionI": section_I,
-            "sectionII": section_II,
-            "averageI": average_I,
-            "averageII": average_II,
-            "rankI": rank_I,
-            "rankII": rank_II,
-        }
-            for user, student,
-            year_record, grade,
-            section_I, section_II,
-            average_I, average_II,
-            rank_I, rank_II, in paginated_result['items']
+        data_to_serialize = [
+            {
+                "user": user.to_dict(),
+                "student": student.to_dict(),
+                "grade": grade.to_dict(),
+                "year_record": year_record.to_dict(),
+                "sectionI": section_I,
+                "sectionII": section_II,
+                "averageI": average_I,
+                "averageII": average_II,
+                "rankI": rank_I,
+                "rankII": rank_II,
+            }
+            for user, student, year_record, grade, section_I, section_II, average_I, average_II, rank_I, rank_II in paginated_result[
+                "items"
+            ]
         ]
 
         schema = AllStudentsSchema(many=True)
         result = schema.dump(data_to_serialize)
-        return jsonify({**result, "pageCount": paginated_result['meta']['total_pages']}), 200
+        return jsonify(
+            {**result, "pageCount": paginated_result["meta"]["total_pages"]}
+        ), 200
     except ValidationError as e:
         return errors.handle_validation_error(e)
-    # except Exception as e:
-    #     return errors.handle_internal_error(e)
+    except Exception as e:
+        return errors.handle_internal_error(e)
 
 
-@admin.route('/students/status-count', methods=['GET'])
+@admin.route("/students/status-count", methods=["GET"])
 @admin_required
 def student_status_count(admin_data):
     """
@@ -674,12 +657,15 @@ def student_status_count(admin_data):
     """
     query = (
         storage.session.query(
-            func.count(case((Student.is_active == True, 1),
-                            else_=None)).label("active"),
-            func.count(case((Student.is_active == False, 1),
-                            else_=None)).label("inactive"),
-            func.count(case((Student.is_active == None, 1),
-                            else_=None)).label("suspended"),
+            func.count(case((Student.is_active == True, 1), else_=None)).label(
+                "active"
+            ),
+            func.count(case((Student.is_active == False, 1), else_=None)).label(
+                "inactive"
+            ),
+            func.count(case((Student.is_active == None, 1), else_=None)).label(
+                "suspended"
+            ),
         )
         .join(User.students)
         .outerjoin(Student.year_records)
@@ -699,7 +685,7 @@ def student_status_count(admin_data):
     return jsonify(**result), 200
 
 
-@admin.route('/students/average-range', methods=['GET'])
+@admin.route("/students/average-range", methods=["GET"])
 @admin_required
 def student_average_range(admin_data):
     """
@@ -720,18 +706,18 @@ def student_average_range(admin_data):
         }
         query = (
             storage.session.query(
-                custom_types['year_min'],
-                custom_types['year_max'],
-                custom_types['semester_I_min'],
-                custom_types['semester_I_max'],
-                custom_types['semester_II_min'],
-                custom_types['semester_II_max'],
-                custom_types['rank_min'],
-                custom_types['rank_max'],
-                custom_types['rank_I_min'],
-                custom_types['rank_I_max'],
-                custom_types['rank_II_min'],
-                custom_types['rank_II_max'],
+                custom_types["year_min"],
+                custom_types["year_max"],
+                custom_types["semester_I_min"],
+                custom_types["semester_I_max"],
+                custom_types["semester_II_min"],
+                custom_types["semester_II_max"],
+                custom_types["rank_min"],
+                custom_types["rank_max"],
+                custom_types["rank_I_min"],
+                custom_types["rank_I_max"],
+                custom_types["rank_II_min"],
+                custom_types["rank_II_max"],
             )
             .join(User.students)
             .outerjoin(Student.year_records)
@@ -778,20 +764,7 @@ def student_average_range(admin_data):
         return errors.handle_internal_error(e)
 
 
-@admin.route('/students/attendance-range', methods=['GET'])
-@admin_required
-def student_attendance_range(admin_data):
-    """
-    Retrieve and return the attendance range of students.
-
-    Returns:
-        Response: A JSON response containing the attendance range of students.
-                  If no students are found, returns a 404 error with an appropriate message.
-    """
-    return jsonify({"min": 0, "max": 100}), 200
-
-
-@admin.route('/students/grade-counts', methods=['GET'])
+@admin.route("/students/grade-counts", methods=["GET"])
 @admin_required
 def student_grade_counts(admin_data):
     """
@@ -801,12 +774,68 @@ def student_grade_counts(admin_data):
         Response: A JSON response containing the count of students in each grade.
                   If no students are found, returns a 404 error with an appropriate message.
     """
-    return jsonify({
-        "1": 10,
-    }), 200
+    query = (
+        storage.session.query(
+            Grade.grade, func.count(STUDYearRecord.grade_id).label("grade_count")
+        )
+        .join(STUDYearRecord.grades)
+        .group_by(Grade.id)
+        .order_by(Grade.grade)
+    )
+    # Process results
+    result = query.all()
+
+    data_to_serialize = [
+        {"grade": grade, "total": grade_count} for grade, grade_count in result
+    ]
+
+    # Return the serialized data
+    schema = StudentGradeCountsSchema(many=True)
+    result = schema.dump(data_to_serialize)
+
+    return jsonify(result), 200
 
 
-@admin.route('/students/views', methods=['GET'])
+@admin.route("/students/section-counts", methods=["GET"])
+@admin_required
+def student_section_counts(admin_data):
+    """
+    Retrieve and return the count of students in each section.
+
+    Returns:
+        Response: A JSON response containing the count of students in each section.
+                  If no students are found, returns a 404 error with an appropriate message.
+    """
+    query = (
+        storage.session.query(
+            Section.section,
+            func.count(case((Semester.name == 1, 1), else_=None)).label("section_I"),
+            func.count(case((Semester.name == 2, 1), else_=None)).label("section_II"),
+        )
+        .join(STUDSemesterRecord.sections)
+        .join(STUDSemesterRecord.semesters)
+        .group_by(Section.section)
+        .order_by(Section.section)
+    )
+    # Process results
+    result = query.all()
+
+    data_to_serialize = [
+        {
+            "sectionI": {"section": section, "total": section_I},
+            "sectionII": {"section": section, "total": section_II},
+        }
+        for section, section_I, section_II in result
+    ]
+
+    # Return the serialized data
+    schema = StudentSectionCountsSchema(many=True)
+    result = schema.dump(data_to_serialize)
+
+    return jsonify(**result), 200
+
+
+@admin.route("/students/views", methods=["GET"])
 @admin_required
 def student_views(admin_data):
     """
@@ -816,16 +845,20 @@ def student_views(admin_data):
         Response: A JSON response containing the views of students.
                   If no students are found, returns a 404 error with an appropriate message.
     """
-    return jsonify([{
-        "id": uuid.uuid4(),
-        "name": "new View",
-        "columns": [''],
-        "created_at": datetime.now(),
-        "updated_at": datetime.now(),
-    }]), 200
+    return jsonify(
+        [
+            {
+                "id": uuid.uuid4(),
+                "name": "new View",
+                "columns": [""],
+                "created_at": datetime.now(),
+                "updated_at": datetime.now(),
+            }
+        ]
+    ), 200
 
 
-@admin.route('/teachers', methods=['GET'])
+@admin.route("/teachers", methods=["GET"])
 @admin_required
 def all_teachers(admin_data):
     """
@@ -833,31 +866,20 @@ def all_teachers(admin_data):
 
     Args:
         admin_data (dict): Data related to the admin making the request.
-
-    Returns:
-        Response: A JSON response containing a list of teachers and pagination metadata.
-                  If no teachers are found, returns a 404 error with an appropriate message.
-
-    Query Parameters:
-        page (int, optional): The page number for pagination. Defaults to 1.
-        limit (int, optional): The number of items per page for pagination. Defaults to 10.
-        search (str, optional): A search term to filter teachers by id, first name, last name, email, or phone.
-
-    Raises:
-        404: If no teachers are found or if no teachers match the search criteria.
     """
     url = request.url
     parsed_url = urlparse(url)
     data = parse_qs(parsed_url.query)
 
     query = (
-        storage.session.query(Teacher.id,
-                              Teacher.first_name.label('firstName'),
-                              Teacher.last_name.label('lastName'),
-                              Teacher.email,
-                              Teacher.no_of_mark_list.label('markList'),
-                              User.image_path
-                              )
+        storage.session.query(
+            Teacher.id,
+            Teacher.first_name.label("firstName"),
+            Teacher.last_name.label("lastName"),
+            Teacher.email,
+            Teacher.no_of_mark_list.label("markList"),
+            User.image_path,
+        )
         .join(User, User.id == Teacher.id)
         .group_by(Teacher.id)
     )
@@ -865,9 +887,18 @@ def all_teachers(admin_data):
     if not query:
         return jsonify({"message": "No teachers found"}), 404
 
-    teacher_list = [{key: url_for('static', filename=value, _external=True)
-                     if key == 'image_path' and value is not None else value for key, value in q._asdict().items()} for q in query]
+    teacher_list = [
+        {
+            key: url_for("static", filename=value, _external=True)
+            if key == "image_path" and value is not None
+            else value
+            for key, value in q._asdict().items()
+        }
+        for q in query
+    ]
 
-    return jsonify({
-        "teachers": teacher_list,
-    }), 200
+    return jsonify(
+        {
+            "teachers": teacher_list,
+        }
+    ), 200

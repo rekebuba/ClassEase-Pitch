@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import {
     AverageRangeSchema,
     GradeCountsSchema,
+    SectionCountSchema,
     StatusCountSchema,
     StudentsDataSchema,
     StudentsViewSchema
@@ -18,6 +19,7 @@ export const adminApi = {
     getStudentsStatusCounts: () => api.get('/admin/students/status-count'),
     getStudentsAverageRange: () => api.get('/admin/students/average-range'),
     getGradeCounts: () => api.get('/admin/students/grade-counts'),
+    getSectionCounts: () => api.get('/admin/students/section-counts'),
     getAllStudentsViews: () => api.get('/admin/students/views'),
     getStudentsByView: (view: string) => api.get(`/admin/students/views/${view}`),
     getTeachers: () => api.get('/admin/teachers'),
@@ -52,10 +54,6 @@ export const getStudentsStatusCounts = async () => {
     );
 
     if (!response.success) {
-        toast.error(response.error.message, {
-            description: JSON.stringify(response.error.details),
-            style: { color: "red" },
-        });
         console.error(response.error.details);
         throw new Error("Failed to fetch students status counts", {
             cause: JSON.stringify(response.error.details),
@@ -87,11 +85,24 @@ export const getGradeCounts = async () => {
     );
 
     if (!response.success) {
-        toast.error(response.error.message, {
-            style: { color: "red" },
-        });
         console.error(response.error.details);
         throw new Error("Failed to fetch students grade counts", {
+            cause: JSON.stringify(response.error.details),
+        });
+    }
+
+    return response.data;
+}
+
+export const getSectionCounts = async () => {
+    const response = await zodApiHandler(
+        () => adminApi.getSectionCounts(),
+        SectionCountSchema,
+    );
+
+    if (!response.success) {
+        console.error(response.error.details);
+        throw new Error("Failed to fetch students section counts", {
             cause: JSON.stringify(response.error.details),
         });
     }

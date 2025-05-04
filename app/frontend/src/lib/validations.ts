@@ -95,7 +95,12 @@ export const AverageRangeSchema = z.object({
     rankII: RangeSchema,
 });
 
-export const GradeCountsSchema = z.record(z.coerce.number(), z.number());
+export const GradeCountsSchema = z.record(z.string(), z.number());
+
+export const SectionCountSchema = z.object({
+    sectionI: z.record(z.string(), z.number()),
+    sectionII: z.record(z.string(), z.number())
+});
 
 const SortItemSchema = z.object({
     id: z.string(),

@@ -744,10 +744,6 @@ function onFilterInputRender<TData>({
     case "dateRange": {
       const inputListboxId = `${inputId}-listbox`;
 
-      // const dateValue = Array.isArray(filter.value)
-      //   ? filter.value.filter(Boolean)
-      //   : [filter.value, filter.value].filter(Boolean);
-
       const dateValue = filter;
 
       const displayValue =

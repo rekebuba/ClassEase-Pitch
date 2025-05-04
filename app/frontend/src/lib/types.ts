@@ -11,6 +11,7 @@ import {
     tableId,
     tableIdValue,
     RangeSchema,
+    SectionCountSchema,
 } from "./validations";
 
 export type RoleProps = 'admin' | 'teacher' | 'student';
@@ -76,13 +77,14 @@ export type StatusCount = z.infer<typeof StatusCountSchema>;
 export type RangeSchema = z.infer<typeof RangeSchema>;
 export type AverageRange = z.infer<typeof AverageRangeSchema>;
 export type GradeCounts = z.infer<typeof GradeCountsSchema>;
-
+export type SectionCounts = z.infer<typeof SectionCountSchema>;
 export interface StudentsDataResult {
     data: Student[]
     pageCount: number
     tableId: TableId
     statusCounts: StatusCount
     gradeCounts: GradeCounts
+    sectionCounts: SectionCounts;
     averageRange: AverageRange
     isLoading: boolean
     error: Error | null

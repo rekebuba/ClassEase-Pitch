@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DataTableColumnHeader } from "@/components/data-table"
 import { Edit, Trash2, Eye, Mail, UserCog, Ellipsis } from "lucide-react"
 import type { DataTableRowAction } from "@/types/data-table"
-import { AverageRange, Student, TableId } from "@/lib/types"
+import { AverageRange, SectionCounts, Student, TableId } from "@/lib/types"
 import { MoreHorizontal, Pencil, Trash, User } from "lucide-react"
 
 import {
@@ -23,13 +23,14 @@ import {
 import { Button } from "@/components/ui/button"
 import { useTransition } from "react"
 import { types } from "util"
-import { number } from "zod"
+import { number, object } from "zod"
 
 
 interface GetStudentsTableColumnsOptions {
   tableId: TableId
   statusCounts: Record<string, number>
   gradeCounts: Record<string, number>
+  sectionCounts: SectionCounts;
   averageRange: AverageRange,
   setRowAction: React.Dispatch<React.SetStateAction<DataTableRowAction<Student> | null>>
 }
@@ -37,6 +38,7 @@ interface GetStudentsTableColumnsOptions {
 export function getStudentsTableColumns({
   tableId,
   statusCounts,
+  sectionCounts,
   gradeCounts,
   averageRange,
   setRowAction,
@@ -132,7 +134,7 @@ export function getStudentsTableColumns({
         options: Object.entries(gradeCounts).map(([value, count]) => ({
           label: `Grade ${value}`,
           value: value,
-          count,
+          count: count,
         })),
         tableId: tableId?.grade,
       },
@@ -146,11 +148,13 @@ export function getStudentsTableColumns({
       meta: {
         variant: "multiSelect",
         label: "Section I",
-        options: [
-          { label: "Section A", value: "A" },
-          { label: "Section B", value: "B" },
-          { label: "Section C", value: "C" },
-        ],
+        options: Object.entries(sectionCounts?.sectionI || {})
+          .filter(([_, count]) => count > 0)
+          .map(([value, count]) => ({
+            label: `Section ${value}`,
+            value: value,
+            count: count,
+          })),
       },
     },
     {
@@ -162,11 +166,13 @@ export function getStudentsTableColumns({
       meta: {
         variant: "multiSelect",
         label: "section II",
-        options: [
-          { label: "Section A", value: "A" },
-          { label: "Section B", value: "B" },
-          { label: "Section C", value: "C" },
-        ],
+        options: Object.entries(sectionCounts?.sectionII || {})
+          .filter(([_, count]) => count > 0)
+          .map(([value, count]) => ({
+            label: `Section ${value}`,
+            value: value,
+            count: count,
+          })),
       },
     },
     {

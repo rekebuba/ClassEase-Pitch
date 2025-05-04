@@ -10,7 +10,8 @@ import type {
     StudentsDataResult,
     SearchParams,
     StudentsViews,
-    TableId
+    TableId,
+    SectionCounts
 } from "@/lib/types"
 
 import { toast } from "sonner"
@@ -19,7 +20,8 @@ import {
     getStudentsStatusCounts,
     getGradeCounts,
     getStudentsAverageRange,
-    getAllStudentsViews
+    getAllStudentsViews,
+    getSectionCounts
 } from "@/api/adminApi";
 
 
@@ -29,6 +31,7 @@ export function useStudentsData(validQuery: SearchParams): StudentsDataResult {
     const [tableId, setTableId] = useState<TableId>({})
     const [statusCounts, setStatusCounts] = useState<StatusCount>({})
     const [gradeCounts, setGradeCounts] = useState<GradeCounts>({})
+    const [sectionCounts, setSectionCounts] = useState<SectionCounts>({})
     const [averageRange, setAverageRange] = useState<AverageRange>({
         totalAverage: { min: "N/A", max: "N/A" },
         averageI: { min: "N/A", max: "N/A" },
@@ -46,11 +49,12 @@ export function useStudentsData(validQuery: SearchParams): StudentsDataResult {
         setError(null)
 
         // Pass params to API calls if needed
-        const [studentsResult, statusCountsResult, gradeCountsResult, averageRangeResult] =
+        const [studentsResult, statusCountsResult, gradeCountsResult, sectionCounts, averageRangeResult] =
             await Promise.all([
                 getStudents(validQuery),
                 getStudentsStatusCounts(),
                 getGradeCounts(),
+                getSectionCounts(),
                 getStudentsAverageRange(),
             ])
 
@@ -59,6 +63,7 @@ export function useStudentsData(validQuery: SearchParams): StudentsDataResult {
         setTableId(studentsResult.tableId)
         setStatusCounts(statusCountsResult)
         setGradeCounts(gradeCountsResult)
+        setSectionCounts(sectionCounts)
         setAverageRange({
             totalAverage: {
                 min: averageRangeResult.totalAverage.min ?? "N/A",
@@ -100,6 +105,7 @@ export function useStudentsData(validQuery: SearchParams): StudentsDataResult {
         tableId,
         statusCounts,
         gradeCounts,
+        sectionCounts,
         averageRange,
         isLoading,
         error,
