@@ -18,12 +18,11 @@ class UserService:
         pass
 
     def create_user(self, data):
-
         # Save the profile picture if exists
         filepath = None
-        if 'image_path' in data and data['image_path']:
-            filepath = save_profile(data['image_path'])
-            data['image_path'] = filepath
+        if "image_path" in data and data["image_path"]:
+            filepath = save_profile(data["image_path"])
+            data["image_path"] = filepath
 
         # Create the user
         new_user = User(**data)
@@ -65,7 +64,12 @@ class UserService:
 
     @staticmethod
     def get_user_by_national_id(national_id):
-        return storage.session.query(User).filter_by(national_id=national_id).first().to_dict()
+        return (
+            storage.session.query(User)
+            .filter_by(national_id=national_id)
+            .first()
+            .to_dict()
+        )
 
     @staticmethod
     def get_user_by_email(email):

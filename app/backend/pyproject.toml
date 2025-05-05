@@ -1,0 +1,30 @@
+[tool.mypy]
+strict = false                    # Enables all strictness flags below
+disallow_untyped_defs = true     # Functions must have type annotations
+disallow_incomplete_defs = true  # No partial annotations (e.g., `def foo(x) -> int`)
+warn_return_any = true           # Warn if a function returns `Any`
+warn_unused_configs = true       # Warn about unused mypy configs
+
+# Imports and modules
+ignore_missing_imports = false    # Fail if imports are missing
+follow_imports = "silent"        # Follow imports but don't spam output
+namespace_packages = true        # Support modern Python namespace packages
+
+# Performance optimizations (critical for large projects)
+cache_dir = ".mypy_cache"        # Speeds up incremental checks
+show_error_codes = true          # Show error codes (e.g., `[no-untyped-def]`)
+warn_redundant_casts = true      # Warn if casting is unnecessary
+warn_unused_ignores = true       # Warn if `# type: ignore` is unused
+
+# Platform-specific settings (if needed)
+python_version = "3.12"          # Set your target Python version
+platform = "linux"              # Optional: enforce OS-specific checks
+
+# Per-module overrides (example: relax rules for tests/legacy code)
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_defs = false
+
+[[tool.mypy.overrides]]
+module = "legacy.*"
+ignore_errors = true

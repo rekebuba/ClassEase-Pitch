@@ -12,10 +12,10 @@ from api.v1.schemas.schemas import AuthSchema, InvalidCredentialsError
 from api.v1.views import errors
 from api.v1.services.user_service import UserService
 
-auth = Blueprint('auth', __name__, url_prefix='/api/v1')
+auth = Blueprint("auth", __name__, url_prefix="/api/v1")
 
 
-@auth.route('auth/login', methods=['POST'])
+@auth.route("auth/login", methods=["POST"])
 def login():
     """
     Handle user login by validating credentials and generating an access token.
@@ -26,9 +26,16 @@ def login():
 
         # Generate an api_key token based on the user's role
         api_key = UserService.generate_api_key(
-            valid_user['role'], valid_user['identification'])
+            valid_user["role"], valid_user["identification"]
+        )
 
-        return auth_schema.dump({"message": "logged in successfully.", "api_key": api_key, "role": valid_user['role']}), 200
+        return auth_schema.dump(
+            {
+                "message": "logged in successfully.",
+                "api_key": api_key,
+                "role": valid_user["role"],
+            }
+        ), 200
     except ValidationError as e:
         return errors.handle_validation_error(e)
     except InvalidCredentialsError as e:
@@ -40,7 +47,7 @@ def login():
 @auth.route("/auth/logout", methods=["POST"])
 @student_teacher_or_admin_required
 def logout(user):
-    token = request.headers['apiKey'].split()[1]  # Extract the token
+    token = request.headers["apiKey"].split()[1]  # Extract the token
     try:
         # Decode the token to get the JTI
         payload = jwt.decode(token, options={"verify_signature": False})
@@ -50,6 +57,6 @@ def logout(user):
         black_list = BlacklistToken(jti=jti)
         storage.add(black_list)
 
-        return jsonify({'message': 'Successfully logged out'}), 200
+        return jsonify({"message": "Successfully logged out"}), 200
     except Exception as e:
-        return jsonify({'message': 'Logout failed', 'error': str(e)}), 500
+        return jsonify({"message": "Logout failed", "error": str(e)}), 500

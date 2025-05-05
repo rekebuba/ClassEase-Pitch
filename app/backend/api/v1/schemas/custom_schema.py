@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from typing import Any
 from marshmallow import fields, ValidationError
 from sqlalchemy import and_, or_
 
@@ -8,11 +9,13 @@ from werkzeug.datastructures import FileStorage
 
 
 class FormattedDate(fields.Field):
-    def __init__(self, format_str="%b %d, %Y", *args, **kwargs):
+    def __init__(
+        self, format_str: str = "%b %d, %Y", *args: Any, **kwargs: Any
+    ) -> None:
         super().__init__(*args, **kwargs)
         self.format_str = format_str
 
-    def _serialize(self, value, attr, obj, **kwargs):
+    def _serialize(self, value, **kwargs: Any):
         if isinstance(value, datetime):
             return value.strftime(self.format_str)
         elif isinstance(value, str):
@@ -25,7 +28,7 @@ class FormattedDate(fields.Field):
 
 
 class FloatOrDateField(fields.Field):
-    def _deserialize(self, value, attr, data, **kwargs):
+    def _deserialize(self, value, attr, data, **kwargs: Any):
         if value is None:
             return None
 
@@ -38,7 +41,7 @@ class FloatOrDateField(fields.Field):
         except (ValueError, TypeError):
             raise ValidationError("Invalid number or timestamp")
 
-    def _serialize(self, value, attr, obj, **kwargs):
+    def _serialize(self, value, attr, obj, **kwargs: Any):
         if isinstance(value, date):
             # Convert back to timestamp in milliseconds
             return int(datetime.combine(value, datetime.min.time()).timestamp() * 1000)
@@ -50,7 +53,7 @@ class FloatOrDateField(fields.Field):
 class FileField(fields.Field):
     """Custom field for file validation."""
 
-    def _deserialize(self, value, attr, data, **kwargs):
+    def _deserialize(self, value, attr, data, **kwargs: Any):
         if not isinstance(value, FileStorage):
             raise ValidationError("Invalid file type. Expected a file upload.")
 
@@ -59,10 +62,11 @@ class FileField(fields.Field):
             raise ValidationError("File size exceeds the 5MB limit.")
 
         # Validate file extension (allow only images)
-        allowed_extensions = {'png', 'jpg', 'jpeg', 'gif'}
+        allowed_extensions = {"png", "jpg", "jpeg", "gif"}
         if not value.filename.lower().endswith(tuple(allowed_extensions)):
             raise ValidationError(
-                "Invalid file type. Allowed extensions: png, jpg, jpeg, gif.")
+                "Invalid file type. Allowed extensions: png, jpg, jpeg, gif."
+            )
 
         return value
 
@@ -70,23 +74,24 @@ class FileField(fields.Field):
 class RoleEnumField(fields.Field):
     """Custom field for RoleEnum."""
 
-    def _serialize(self, value, attr, obj, **kwargs):
+    def _serialize(self, value, attr, obj, **kwargs: Any):
         if value is None:
             return None
         return value.value.capitalize()  # Returns "Admin", "Teacher", or "Student"
 
-    def _deserialize(self, value, attr, data, **kwargs):
+    def _deserialize(self, value, attr, data, **kwargs: Any):
         try:
             if isinstance(value, CustomTypes.RoleEnum):
                 return value
             return CustomTypes.RoleEnum(value)  # Converts string to enum
         except ValueError as error:
             raise ValidationError(
-                "Invalid role. Must be one of: admin, teacher, student") from error
+                "Invalid role. Must be one of: admin, teacher, student"
+            ) from error
 
 
 class TableField(fields.Field):
-    def _deserialize(self, value, attr, data, **kwargs):
+    def _deserialize(self, value, attr, data, **kwargs: Any):
         table_name = value.__tablename__.lower()
         table = get_all_model_classes().get(table_name)
         if not table:
@@ -104,15 +109,19 @@ class TableIdField(fields.Field):
 
         if isinstance(value, list):
             for item in value:
-                if not (isinstance(item, list) and len(item) == 2 and all(isinstance(i, str) for i in item)):
+                if not (
+                    isinstance(item, list)
+                    and len(item) == 2
+                    and all(isinstance(i, str) for i in item)
+                ):
                     raise ValidationError(
                         "Each item in the list must be a list of two strings (like a tuple)",
-                        field_name="value"
+                        field_name="value",
                     )
         else:
             raise ValidationError(
                 "Value must be either a string or a list of two-item string lists.",
-                field_name="value"
+                field_name="value",
             )
 
 
@@ -128,12 +137,12 @@ class ColumnField(fields.Field):
 
 
 class JoinOperatorField(fields.Field):
-    def _deserialize(self, value, attr, data, **kwargs):
+    def _deserialize(self, value, attr, data, **kwargs: Any):
         if isinstance(value, str):
             lowered = value.lower()
-            if lowered == 'and':
+            if lowered == "and":
                 return and_
-            elif lowered == 'or':
+            elif lowered == "or":
                 return or_
         raise ValidationError("join_operator must be 'and' or 'or'")
 
@@ -147,7 +156,7 @@ class ValueField(fields.Field):
     #             "Value must be a string, list, datetime, int, or float.", field_name="value"
     #         )
 
-    def _deserialize(self, value, attr, data, **kwargs):
+    def _deserialize(self, value, attr, data, **kwargs: Any):
         if value is None:
             return None
 

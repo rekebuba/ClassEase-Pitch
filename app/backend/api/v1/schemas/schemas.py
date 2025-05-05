@@ -1,9 +1,7 @@
 from collections import defaultdict
-import json
+from typing import Any, Union
 from flask import url_for
 from marshmallow import (
-    Schema,
-    validate,
     ValidationError,
     post_dump,
     post_load,
@@ -13,14 +11,23 @@ from marshmallow import (
     validates_schema,
     fields,
 )
-from pyethiodate import EthDate
+from pyethiodate import EthDate  # type: ignore
 from datetime import datetime
 import random
 import bcrypt
-from marshmallow_sqlalchemy import SQLAlchemyAutoSchema
 from api.v1.schemas.base_schema import BaseSchema
-from api.v1.schemas.config_schema import *
-from api.v1.schemas.custom_schema import *
+from api.v1.schemas.custom_schema import (
+    ColumnField,
+    FileField,
+    FloatOrDateField,
+    FormattedDate,
+    JoinOperatorField,
+    RoleEnumField,
+    TableField,
+    TableIdField,
+    ValueField,
+)
+from api.v1.schemas.config_schema import OPERATOR_CONFIG, VALUE_TYPE_RULES
 from models.section import Section
 from models.stud_year_record import STUDYearRecord
 from models.grade import Grade
@@ -53,11 +60,11 @@ class UserSchema(BaseSchema):
     table_id = fields.String(required=False)
 
     @staticmethod
-    def _hash_password(password):
+    def _hash_password(password: str) -> str:
         return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
     @staticmethod
-    def _generate_id(role):
+    def _generate_id(role: Union[CustomTypes.RoleEnum]) -> str:
         """
         Generates a custom ID based on the role (Admin, Student, Teacher).
 
@@ -100,7 +107,7 @@ class UserSchema(BaseSchema):
         return identification
 
     @validates_schema
-    def validate_data(self, data, **kwargs):
+    def validate_data(self, data, **kwargs: Any):
         if data["role"] not in [member.value for member in CustomTypes.RoleEnum]:
             raise ValidationError("Invalid role type.")
         if (
@@ -111,13 +118,13 @@ class UserSchema(BaseSchema):
             raise ValidationError("User already exists.")
 
     @pre_load
-    def assign_id_and_password(self, data, **kwargs):
+    def assign_id_and_password(self, data, **kwargs: Any):
         data["identification"] = UserSchema._generate_id(data["role"])
         data["password"] = UserSchema._hash_password(data["identification"])
         return data
 
     @post_dump
-    def update_fields(self, data, **kwargs):
+    def update_fields(self, data, **kwargs: Any):
         # Add the full URL for the image_path if it exists
         if "image_path" in data and data["image_path"] is not None:
             data["image_path"] = url_for(
@@ -145,7 +152,7 @@ class AuthSchema(BaseSchema):
         )
 
     @validates_schema
-    def validate_data(self, data, **kwargs):
+    def validate_data(self, data, **kwargs: Any):
         user = storage.session.query(User).filter_by(identification=data["id"]).first()
 
         if user is None or not AuthSchema._check_password(
@@ -154,7 +161,7 @@ class AuthSchema(BaseSchema):
             raise InvalidCredentialsError("Invalid credentials.")
 
     @post_load
-    def load_user(self, data, **kwargs):
+    def load_user(self, data, **kwargs: Any):
         return (
             storage.session.query(User)
             .filter_by(identification=data["id"])
@@ -191,7 +198,7 @@ class AdminSchema(BaseSchema):
     user = fields.Nested(UserSchema)
 
     @pre_load
-    def set_defaults(self, data, **kwargs):
+    def set_defaults(self, data, **kwargs: Any):
         # add default values
         nested_data = {
             "first_name": data.get("first_name"),
@@ -207,7 +214,7 @@ class AdminSchema(BaseSchema):
         return data
 
     @validates_schema
-    def validate_data(self, data, **kwargs):
+    def validate_data(self, data, **kwargs: Any):
         if storage.session.query(Admin).filter_by(email=data["email"]).first():
             raise ValidationError("Email already exists.")
 
@@ -216,7 +223,7 @@ class AdminSchema(BaseSchema):
         self.validate_phone(value)
 
     @pre_dump
-    def flatten_to_nested(self, data, **kwargs):
+    def flatten_to_nested(self, data, **kwargs: Any):
         # Convert flat fields into a nested 'student_name' dict
         nested_data = {
             "first_name": data.get("first_name"),
@@ -245,7 +252,7 @@ class TeacherSchema(BaseSchema):
     user = fields.Nested(UserSchema)
 
     @pre_load
-    def set_defaults(self, data, **kwargs):
+    def set_defaults(self, data, **kwargs: Any):
         # add default values
         # Convert flat fields into a nested 'student_name' dict
         nested_data = {
@@ -260,7 +267,7 @@ class TeacherSchema(BaseSchema):
         return data
 
     @validates_schema
-    def validate_data(self, data, **kwargs):
+    def validate_data(self, data, **kwargs: Any):
         if storage.session.query(Teacher).filter_by(email=data["email"]).first():
             raise ValidationError("Email already exists.")
 
@@ -269,7 +276,7 @@ class TeacherSchema(BaseSchema):
         self.validate_phone(value)
 
     @pre_dump
-    def flatten_to_nested(self, data, **kwargs):
+    def flatten_to_nested(self, data, **kwargs: Any):
         # Convert flat fields into a nested 'student_name' dict
         nested_data = {
             "first_name": data.get("first_name"),
@@ -349,7 +356,7 @@ class StudentSchema(BaseSchema):
     table_id = fields.String(required=False)
 
     @pre_load
-    def set_defaults(self, data, **kwargs):
+    def set_defaults(self, data, **kwargs: Any):
         # add default values to the data
 
         # Convert flat fields into a nested 'student_name' dict
@@ -400,7 +407,7 @@ class StudentSchema(BaseSchema):
         return data
 
     @validates_schema
-    def validate_data(self, data, **kwargs):
+    def validate_data(self, data, **kwargs: Any):
         if not data.get("father_phone") and not data.get("mother_phone"):
             raise ValidationError(
                 "Either father_phone or mother_phone must be provided."
@@ -468,7 +475,7 @@ class StudentSchema(BaseSchema):
                 raise ValidationError("Invalid semester_id.")
 
     @pre_dump
-    def flatten_to_nested(self, data, **kwargs):
+    def flatten_to_nested(self, data, **kwargs: Any):
         # Convert flat fields into a nested 'student_name' dict
         nested_data = {
             "first_name": data.get("first_name"),
@@ -479,7 +486,7 @@ class StudentSchema(BaseSchema):
         return data
 
     @post_dump
-    def add_fields(self, data, **kwargs):
+    def add_fields(self, data, **kwargs: Any):
         data["table_id"] = self.get_table_id(Student)
         return data
 
@@ -493,7 +500,7 @@ class GradeSchema(BaseSchema):
     table_id = fields.String(required=False)
 
     @post_dump
-    def add_fields(self, data, **kwargs):
+    def add_fields(self, data, **kwargs: Any):
         data["table_id"] = self.get_table_id(Grade)
 
         return data
@@ -570,14 +577,14 @@ class EventSchema(BaseSchema):
     message = fields.String(dump_only=True)
 
     @pre_load
-    def set_defaults(self, data, **kwargs):
+    def set_defaults(self, data, **kwargs: Any):
         # add default values to the data
         data["year_id"] = self.get_year_id(data.pop("academic_year", None))
 
         return data
 
     @validates_schema
-    def validate_dates_and_times(self, data, **kwargs):
+    def validate_dates_and_times(self, data, **kwargs: Any):
         """Ensure start_date is before end_date and start_time is before end_time."""
         try:
             if data["start_date"] and data["end_date"]:
@@ -632,7 +639,7 @@ class EventSchema(BaseSchema):
             raise e
 
     @post_dump
-    def add_academic_year(self, data, **kwargs):
+    def add_academic_year(self, data, **kwargs: Any):
         year = (
             storage.session.query(Year.ethiopian_year, Year.gregorian_year)
             .filter(Year.id == data.get("year_id"))
@@ -658,7 +665,7 @@ class SubjectSchema(BaseSchema):
     grade_id = fields.String(required=True, load_only=True)
 
     @pre_load
-    def set_defaults(self, data, **kwargs):
+    def set_defaults(self, data, **kwargs: Any):
         # add default values to the data
         data["grade_id"] = self.get_grade_id(data.pop("grade"))
         data["subject_id"] = self.get_subject_id(
@@ -668,7 +675,7 @@ class SubjectSchema(BaseSchema):
         return data
 
     @pre_dump
-    def add_fields(self, data, **kwargs):
+    def add_fields(self, data, **kwargs: Any):
         grade_detail = self.get_grade_detail(id=data.get("grade_id"))
         subject_detail = self.get_subject_detail(
             id=data.get("id"), code=data.get("code")
@@ -701,7 +708,7 @@ class CourseListSchema(BaseSchema):
     is_registered = fields.Boolean(required=False, load_only=True)
 
     @pre_load
-    def set_defaults(self, data, **kwargs):
+    def set_defaults(self, data, **kwargs: Any):
         # add default values to the data
         data["is_registered"] = self.is_student_registered(data.get("student_id"))
         data["grade_id"] = self.get_grade_id(data.get("grade"))
@@ -735,7 +742,7 @@ class MarkAssessmentSchema(BaseSchema):
     assessment_type = fields.List(fields.Nested(MarkListTypeSchema), required=True)
 
     @pre_load
-    def set_defaults(self, data, **kwargs):
+    def set_defaults(self, data, **kwargs: Any):
         # add default values to the data
         data["grade_id"] = self.get_grade_id(data.pop("grade"))
         data["section_id"] = self.generate_section(
@@ -752,7 +759,7 @@ class CreateMarkListSchema(BaseSchema):
     semester_id = fields.String(required=True, load_only=True)
 
     @pre_load
-    def set_defaults(self, data, **kwargs):
+    def set_defaults(self, data, **kwargs: Any):
         # add default values to the data
         data["semester_id"] = self.get_semester_id(
             data.pop("semester"), data.pop("academic_year")
@@ -823,7 +830,7 @@ class SortSchema(BaseSchema):
     table = TableField(required=False)
 
     @pre_load
-    def set_defaults(self, data, **kwargs):
+    def set_defaults(self, data, **kwargs: Any):
         # add default values to the data
         data["column_name"] = data.pop("id", None)
         table_id = data.get("table_id", None)
@@ -870,7 +877,7 @@ class FilterSchema(BaseSchema):
     value = ValueField(required=False, missing=None, allow_none=True)
 
     @validates_schema
-    def validate_value(self, data, **kwargs):
+    def validate_value(self, data, **kwargs: Any):
         variant = data.get("variant", None)
         operator = data.get("operator", None)
         value = data.get("value", None)
@@ -900,7 +907,7 @@ class FilterSchema(BaseSchema):
                 )
 
     @pre_load
-    def set_defaults(self, data, **kwargs):
+    def set_defaults(self, data, **kwargs: Any):
         # add default values to the data
         data["column_name"] = data.pop("id", None)
         value = data.get("value", None)
@@ -949,7 +956,7 @@ class ParamSchema(BaseSchema):
     custom_sorts = fields.List(fields.Raw(), required=False)
 
     @post_load
-    def set_defaults(self, data, **kwargs):
+    def set_defaults(self, data, **kwargs: Any):
         # add default values to the data
         valid_filters = []
         valid_sorts = []
@@ -996,7 +1003,7 @@ class SectionSchema(BaseSchema):
     table_id = fields.String(required=False)
 
     @post_dump
-    def add_fields(self, data, **kwargs):
+    def add_fields(self, data, **kwargs: Any):
         """Add table_id to the dumped data."""
         data["table_id"] = self.get_table_id(Section)
         return data
@@ -1015,7 +1022,7 @@ class STUDYearRecordSchema(BaseSchema):
     table_id = fields.String(required=False)
 
     @post_dump
-    def add_fields(self, data, **kwargs):
+    def add_fields(self, data, **kwargs: Any):
         data["table_id"] = self.get_table_id(STUDYearRecord)
 
         return data
@@ -1045,7 +1052,7 @@ class AllStudentsSchema(BaseSchema):
     year_record = fields.Nested(STUDYearRecordSchema(only=("final_score", "rank")))
 
     @post_dump(pass_many=True)
-    def merge_nested(self, data: list, many: bool, **kwargs):
+    def merge_nested(self, data: list, many: bool, **kwargs: Any):
         merged_data = {}
 
         merged_data["tableId"] = self._extract_table_id(data[0] if many else None)
@@ -1121,7 +1128,7 @@ class StudentGradeCountsSchema(BaseSchema):
     total = fields.Integer(required=False, missing=0, default=0)
 
     @post_dump(pass_many=True)
-    def merge_nested(self, data: list[dict], **kwargs) -> dict:
+    def merge_nested(self, data: list[dict], **kwargs: Any) -> dict:
         # Default for grade keys 1–12
         result = {str(i): 0 for i in range(1, 13)}
 
@@ -1145,7 +1152,7 @@ class StudentSectionCountsSchema(BaseSchema):
     sectionII = fields.Nested(StudentSectionSchema)
 
     @post_dump(pass_many=True)
-    def merge_nested(self, data: list[dict], **kwargs) -> dict:
+    def merge_nested(self, data: list[dict], **kwargs: Any) -> dict:
         # Initialize all sections to 0
         result: defaultdict[str, defaultdict[str, int]] = defaultdict(
             lambda: defaultdict(int)

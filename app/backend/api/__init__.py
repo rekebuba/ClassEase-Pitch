@@ -1,10 +1,10 @@
 import os
 from flask import Flask
 from flask_cors import CORS
-from models.engine.db_storage import DBStorage
 from models import storage
 
-def create_app(config_name):
+
+def create_app(config_name: str) -> Flask:
     """
     Create a Flask application.
 
@@ -23,23 +23,20 @@ def create_app(config_name):
     """
     """ Create a Flask application """
     base_dir = os.path.abspath(os.path.dirname(__file__))
-    static_dir = os.path.join(base_dir, 'v1/static')
-    app = Flask(__name__, static_folder=static_dir, static_url_path='/static')
+    static_dir = os.path.join(base_dir, "v1/static")
+    app: Flask = Flask(__name__, static_folder=static_dir, static_url_path="/static")
 
     # Load configuration
-    if config_name == 'testing':
-        app.config.from_object('config.TestingConfig')
-    elif config_name == 'development':
-        app.config.from_object('config.DevelopmentConfig')
+    if config_name == "testing":
+        app.config.from_object("config.TestingConfig")
+    elif config_name == "development":
+        app.config.from_object("config.DevelopmentConfig")
     else:
-        app.config.from_object('config.ProductionConfig')
+        app.config.from_object("config.ProductionConfig")
 
-
-    db_uri = app.config['SQLALCHEMY_DATABASE_URI']
+    db_uri = app.config["SQLALCHEMY_DATABASE_URI"]
     app.logger.info(f"Using database at {db_uri}")
 
-    # Initialize database
-    # storage = DBStorage()
     storage.init_app(app)
 
     # Enable CORS

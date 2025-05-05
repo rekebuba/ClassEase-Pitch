@@ -23,7 +23,10 @@ from models.stud_year_record import STUDYearRecord
 from urllib.parse import urlparse, parse_qs
 from sqlalchemy import update, and_
 from flask import Blueprint
-from api.v1.views.utils import admin_or_student_required, student_teacher_or_admin_required
+from api.v1.views.utils import (
+    admin_or_student_required,
+    student_teacher_or_admin_required,
+)
 from api.v1.services.user_service import UserService
 from api.v1.views.methods import paginate_query
 from api.v1.views import errors
@@ -33,10 +36,10 @@ from api.v1.views.methods import save_profile
 from werkzeug.utils import secure_filename
 
 
-shared = Blueprint('shared', __name__, url_prefix='/api/v1')
+shared = Blueprint("shared", __name__, url_prefix="/api/v1")
 
 
-@shared.route('/registration/<role>', methods=['POST'])
+@shared.route("/registration/<role>", methods=["POST"])
 def register_new_user(role):
     """
     Registers a new user (Admin, Student, Teacher) in the system.
@@ -48,7 +51,7 @@ def register_new_user(role):
         Response: A JSON response indicating the success or failure of the registration process.
     """
     role = role.lower()
-    if role not in ['admin', 'student', 'teacher']:
+    if role not in ["admin", "student", "teacher"]:
         return jsonify({"message": "Invalid role"}), 400
 
     try:
@@ -56,11 +59,11 @@ def register_new_user(role):
         if not data:
             raise Exception("No data provided")
 
-        data['user'] = {
-            'national_id': data.pop('national_id', None),
-            'identification': data.pop('identification', None),
-            'role': data.pop('role', None),
-            'image_path': request.files.get('image_path'),
+        data["user"] = {
+            "national_id": data.pop("national_id", None),
+            "identification": data.pop("identification", None),
+            "role": data.pop("role", None),
+            "image_path": request.files.get("image_path"),
         }
 
         result = UserService().create_role_based_user(role, data)
@@ -76,7 +79,7 @@ def register_new_user(role):
         return errors.handle_internal_error(e)
 
 
-@shared.route('/student/assessment', methods=['GET'])
+@shared.route("/student/assessment", methods=["GET"])
 @admin_or_student_required
 def student_assessment(admin_data, student_data):
     """
@@ -102,44 +105,46 @@ def student_assessment(admin_data, student_data):
     parsed_url = urlparse(url)
     data = parse_qs(parsed_url.query)
 
-    required_data = {
-        'student_id',
-        'grade_id',
-        'year'
-    }
+    required_data = {"student_id", "grade_id", "year"}
 
-    student_id = data['student_id'][0]
-    grade_id = data['grade_id'][0]
-    year = data['year'][0]
+    student_id = data["student_id"][0]
+    grade_id = data["grade_id"][0]
+    year = data["year"][0]
     # Check if required fields are present
     for field in required_data:
         if field not in data:
             return jsonify({"message": f"Missing {field}"}), 400
 
     query = (
-        storage.session.query(Assessment.student_id,
-                              Subject.code,
-                              Subject.name,
-                              Assessment.subject_id,
-                              Assessment.grade_id,
-                              Assessment.semester,
-                              Assessment.total,
-                              Assessment.rank,
-                              AVRGSubject.average,
-                              AVRGSubject.rank,
-                              Assessment.year
-                              )
+        storage.session.query(
+            Assessment.student_id,
+            Subject.code,
+            Subject.name,
+            Assessment.subject_id,
+            Assessment.grade_id,
+            Assessment.semester,
+            Assessment.total,
+            Assessment.rank,
+            AVRGSubject.average,
+            AVRGSubject.rank,
+            Assessment.year,
+        )
         .select_from(Assessment)
         .join(TeachersRecord, TeachersRecord.id == Assessment.teachers_record_id)
         .join(Subject, Assessment.subject_id == Subject.id)
-        .join(AVRGSubject, and_(AVRGSubject.student_id == Assessment.student_id,
-                                AVRGSubject.grade_id == Assessment.grade_id,
-                                AVRGSubject.subject_id == Assessment.subject_id,
-                                AVRGSubject.year == Assessment.year))
+        .join(
+            AVRGSubject,
+            and_(
+                AVRGSubject.student_id == Assessment.student_id,
+                AVRGSubject.grade_id == Assessment.grade_id,
+                AVRGSubject.subject_id == Assessment.subject_id,
+                AVRGSubject.year == Assessment.year,
+            ),
+        )
         .filter(
             Assessment.student_id == student_id,
             Assessment.grade_id == grade_id,
-            Assessment.year == year
+            Assessment.year == year,
         )
         .order_by(Subject.name)
     ).all()
@@ -148,7 +153,19 @@ def student_assessment(admin_data, student_data):
         return jsonify({"message": "Student not found"}), 404
 
     student_assessment = {}
-    for student_id, code, name, subject_id, grade_id, semester, total, rank, avg_total, avg_rank, year in query:
+    for (
+        student_id,
+        code,
+        name,
+        subject_id,
+        grade_id,
+        semester,
+        total,
+        rank,
+        avg_total,
+        avg_rank,
+        year,
+    ) in query:
         if code not in student_assessment:
             # Initialize with placeholders for semesters
             student_assessment[code] = {
@@ -168,16 +185,22 @@ def student_assessment(admin_data, student_data):
             student_assessment[code]["semII"] = {"total": total, "rank": rank}
 
     summary = (
-        storage.session.query(STUDSemesterRecord.semester,
-                              STUDSemesterRecord.average,
-                              STUDSemesterRecord.rank,
-                              STUDYearRecord.final_score,
-                              STUDYearRecord.rank
-                              )
+        storage.session.query(
+            STUDSemesterRecord.semester,
+            STUDSemesterRecord.average,
+            STUDSemesterRecord.rank,
+            STUDYearRecord.final_score,
+            STUDYearRecord.rank,
+        )
         .select_from(STUDSemesterRecord)
-        .join(STUDYearRecord, and_(STUDYearRecord.student_id == STUDSemesterRecord.student_id,
-                                   STUDYearRecord.grade_id == STUDSemesterRecord.grade_id,
-                                   STUDYearRecord.year == STUDSemesterRecord.year))
+        .join(
+            STUDYearRecord,
+            and_(
+                STUDYearRecord.student_id == STUDSemesterRecord.student_id,
+                STUDYearRecord.grade_id == STUDSemesterRecord.grade_id,
+                STUDYearRecord.year == STUDSemesterRecord.year,
+            ),
+        )
         .filter(STUDSemesterRecord.student_id == student_id)
         .order_by(STUDSemesterRecord.semester)
     ).all()
@@ -188,54 +211,52 @@ def student_assessment(admin_data, student_data):
     summary_result = {
         "final_score": summary[0][3],
         "final_rank": summary[0][4],
-        "semesters": []
+        "semesters": [],
     }
 
     for semester, semester_average, semester_rank, _, _ in summary:
-        summary_result['semesters'].append({
-            "semester": semester,
-            "semester_average": semester_average,
-            "semester_rank": semester_rank,
-        })
+        summary_result["semesters"].append(
+            {
+                "semester": semester,
+                "semester_average": semester_average,
+                "semester_rank": semester_rank,
+            }
+        )
 
-    return jsonify({"assessment": list(student_assessment.values()), "summary": summary_result}), 200
+    return jsonify(
+        {"assessment": list(student_assessment.values()), "summary": summary_result}
+    ), 200
 
 
-@shared.route('/student/assessment/detail', methods=['GET'])
+@shared.route("/student/assessment/detail", methods=["GET"])
 @admin_or_student_required
 def student_assessment_detail(admin_data, student_data):
     url = request.url
     parsed_url = urlparse(url)
     data = parse_qs(parsed_url.query)
 
-    required_data = {
-        'student_id',
-        'grade_id',
-        'subject_id',
-        'year'
-    }
+    required_data = {"student_id", "grade_id", "subject_id", "year"}
 
     for field in required_data:
         if field not in data:
             return jsonify({"message": f"Missing {field}"}), 400
 
-    student_id = data['student_id'][0]
-    grade_id = data['grade_id'][0]
-    subject_id = data['subject_id'][0]
-    year = data['year'][0]
+    student_id = data["student_id"][0]
+    grade_id = data["grade_id"][0]
+    subject_id = data["subject_id"][0]
+    year = data["year"][0]
 
     try:
         query = (
-            storage.session.query(MarkList.type,
-                                  MarkList.score,
-                                  MarkList.percentage,
-                                  MarkList.semester
-                                  )
-            .filter(MarkList.student_id == student_id,
-                    MarkList.grade_id == grade_id,
-                    MarkList.subject_id == subject_id,
-                    MarkList.year == year,
-                    )
+            storage.session.query(
+                MarkList.type, MarkList.score, MarkList.percentage, MarkList.semester
+            )
+            .filter(
+                MarkList.student_id == student_id,
+                MarkList.grade_id == grade_id,
+                MarkList.subject_id == subject_id,
+                MarkList.year == year,
+            )
             .order_by(MarkList.percentage.asc(), MarkList.type.asc())
         ).all()
 
@@ -243,29 +264,31 @@ def student_assessment_detail(admin_data, student_data):
         for type, score, percentage, semester in query:
             if semester not in assessment:
                 assessment[semester] = []
-            assessment[semester].append({
-                "assessment_type": type,
-                "score": score,
-                "percentage": percentage,
-            })
+            assessment[semester].append(
+                {
+                    "assessment_type": type,
+                    "score": score,
+                    "percentage": percentage,
+                }
+            )
     except Exception as e:
         return jsonify({"message": f"Failed to retrieve student assessment"}), 500
 
     return jsonify(assessment), 200
 
 
-@shared.route('/upload/profile', methods=['POST'])
+@shared.route("/upload/profile", methods=["POST"])
 @student_teacher_or_admin_required
 def upload_profile(student_data, teacher_data, admin_data):
     user = student_data or teacher_data or admin_data
     # Check if the request contains a file
-    if 'profilePicture' not in request.files:
+    if "profilePicture" not in request.files:
         return jsonify({"message": "No file part"}), 400
 
-    file = request.files['profilePicture']
+    file = request.files["profilePicture"]
 
     # Check if a file is selected
-    if file.filename == '':
+    if file.filename == "":
         return jsonify({"message": "No selected file"}), 400
 
     # Validate file type and save it
@@ -277,14 +300,16 @@ def upload_profile(student_data, teacher_data, admin_data):
         query.image_path = filepath
         storage.save()
 
-        return jsonify({
-            "message": "File uploaded successfully",
-        }), 200
+        return jsonify(
+            {
+                "message": "File uploaded successfully",
+            }
+        ), 200
     else:
         return jsonify({"message": "File type not allowed"}), 400
 
 
-@shared.route('/', methods=['GET'])
+@shared.route("/", methods=["GET"])
 @student_teacher_or_admin_required
 def user(user):
     try:
@@ -315,10 +340,7 @@ def user(user):
         user, detail = query
         # Serialize the data using the schema
         schema = UserDetailSchema()
-        result = schema.dump({
-            "user": user,
-            "detail": detail
-        })
+        result = schema.dump({"user": user, "detail": detail})
 
         return jsonify(result), 200
 

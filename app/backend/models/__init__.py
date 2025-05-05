@@ -1,10 +1,13 @@
 #!/usr/bin/python3
 """This module initializes the storage system for ClassEase"""
+
+from flask import Flask
 from models.engine.db_storage import DBStorage
 
 storage = DBStorage()
 
-def init_app(app):
+
+def init_app(app: Flask) -> None:
     """
     Initialize the storage with the Flask app.
 

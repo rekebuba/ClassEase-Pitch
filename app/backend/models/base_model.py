@@ -1,22 +1,26 @@
 #!/usr/bin/python3
-""" Module for BaseModel class """
+"""Module for BaseModel class"""
 
-from dataclasses import InitVar, asdict, dataclass, field
+from dataclasses import asdict, dataclass
 from datetime import date, datetime
 import models
 from enum import Enum
 from sqlalchemy import String, DateTime
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Mapped, mapped_column, declarative_base, DeclarativeBase, DeclarativeMeta, MappedAsDataclass, Mapped, mapped_column
+from sqlalchemy.orm import (
+    Mapped,
+    mapped_column,
+    DeclarativeBase,
+    MappedAsDataclass,
+)
 import uuid
-import bcrypt
 from sqlalchemy.sql import func
-from typing import Type
+from typing import Any, Optional
 from enum import Enum as PythonEnum
 
 
 class Base(DeclarativeBase):
     """Base class for all SQLAlchemy models."""
+
     pass
 
 
@@ -25,6 +29,7 @@ class CustomTypes:
         ADMIN = "admin"
         TEACHER = "teacher"
         STUDENT = "student"
+
 
 @dataclass
 class AssociationBase(Base):
@@ -42,27 +47,25 @@ class BaseModel(MappedAsDataclass, Base, CustomTypes):
         String(36),  # UUIDs are 36 characters long
         default_factory=lambda: str(uuid.uuid4()),
         primary_key=True,
-        init=False
+        init=False,
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
-        default_factory=datetime.utcnow,
-        init=False
+        DateTime(timezone=True), default_factory=datetime.utcnow, init=False
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default_factory=datetime.utcnow,
         onupdate=func.now(),  # Automatically update on modification
-        init=False
+        init=False,
     )
 
-    def save(self):
+    def save(self) -> None:
         """Saves the current instance to the storage."""
         self.updated_at = datetime.utcnow()
         models.storage.new(self)
         models.storage.save()
 
-    def to_dict(self, **kwargs):
+    def to_dict(self, **kwargs: Optional[dict]) -> dict[str, Any]:
         """Converts the instance to a dictionary representation."""
         data = asdict(self)
 
@@ -71,19 +74,19 @@ class BaseModel(MappedAsDataclass, Base, CustomTypes):
             if isinstance(value, Enum):
                 data[key] = value.value
             if isinstance(value, datetime):
-                if 'time' in key:
-                    data[key] = value.strftime('%H:%M:%S')
+                if "time" in key:
+                    data[key] = value.strftime("%H:%M:%S")
                 else:
-                    data[key] = value.strftime('%Y-%m-%d')
+                    data[key] = value.strftime("%Y-%m-%d")
             elif isinstance(value, date):
-                data[key] = value.strftime('%Y-%m-%d')
+                data[key] = value.strftime("%Y-%m-%d")
 
         return data
 
-    def delete(self):
+    def delete(self) -> None:
         """Delete the current instance from storage."""
         models.storage.delete(self)
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Returns a string representation of the instance."""
         return f"[{self.__class__.__name__}] ({self.id}) {self.to_dict()}"

@@ -34,7 +34,7 @@ class TestTeachers(unittest.TestCase):
         initializes a test client for making HTTP requests, and pushes the application
         context to make the app's resources available during the tests.
         """
-        self.app = create_app('testing')
+        self.app = create_app("testing")
         self.client = self.app.test_client()
         self.app.app_context().push()
         self.session = storage.session
@@ -65,21 +65,24 @@ class TestTeachers(unittest.TestCase):
         """
         role = CustomTypes.RoleEnum.TEACHER
         user = MakeFactory(UserFactory, self.session, built=True).factory(
-            role=role, keep={'id'})
+            role=role, keep={"id"}
+        )
 
-        if 'image_path' in user:
-            local_path = user.pop('image_path')
-            user['image_path'] = open(local_path, 'rb')
+        if "image_path" in user:
+            local_path = user.pop("image_path")
+            user["image_path"] = open(local_path, "rb")
             os.remove(local_path)  # remove the file
 
         teacher = MakeFactory(TeacherFactory, self.session, built=True).factory(
-            user_id=user.pop('id'))
+            user_id=user.pop("id")
+        )
 
-        response = self.client.post(f'/api/v1/registration/{role.value}',
-                                    data={**user, **teacher})
+        response = self.client.post(
+            f"/api/v1/registration/{role.value}", data={**user, **teacher}
+        )
 
         assert response.status_code == 201
-        assert response.json['message'] == 'teacher registered successfully!'
+        assert response.json["message"] == "teacher registered successfully!"
 
     def test_teacher_login_success(self):
         """
@@ -101,24 +104,28 @@ class TestTeachers(unittest.TestCase):
         - The response status code should be 200.
         - The response should contain an 'ApiKey' key.
         """
-        register_user(self.client, 'teacher')
-        id = storage.session.query(User).filter_by(
-            role='teacher').first().identification
+        register_user(self.client, "teacher")
+        id = (
+            storage.session.query(User).filter_by(role="teacher").first().identification
+        )
 
         print(id)
         # Test that a valid login returns a token
         response = self.client.post(
-            f'/api/v1/auth/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
+            f"/api/v1/auth/login",
+            data=json.dumps({"id": id, "password": id}),
+            content_type="application/json",
+        )
 
         self.assertEqual(response.status_code, 200)
         json_data = response.get_json()
-        self.assertIn('apiKey', json_data)
+        self.assertIn("apiKey", json_data)
 
     def test_teacher_login_wrong_id(self):
         """
         Test that an invalid teacher ID returns an error during login.
 
-        This test simulates a login attempt with an invalid teacher ID and 
+        This test simulates a login attempt with an invalid teacher ID and
         verifies that the response status code is 401 (Unauthorized).
 
         Steps:
@@ -130,11 +137,14 @@ class TestTeachers(unittest.TestCase):
         - The login attempt should fail, returning a 401 status code.
         """
         # Test that an invalid id returns an error
-        id = 'fake'
+        id = "fake"
 
         # Test that a valid login returns a token
         response = self.client.post(
-            f'/api/v1/auth/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
+            f"/api/v1/auth/login",
+            data=json.dumps({"id": id, "password": id}),
+            content_type="application/json",
+        )
         self.assertEqual(response.status_code, 401)
 
     def test_admin_login_wrong_password(self):
@@ -153,10 +163,13 @@ class TestTeachers(unittest.TestCase):
         Expected Result:
         - The login attempt with an incorrect password should return a 401 Unauthorized status code.
         """
-        register_user(self.client, 'teacher')
+        register_user(self.client, "teacher")
         id = storage.get_random(Teacher).id
         response = self.client.post(
-            f'/api/v1/login', data=json.dumps({"id": id, "password": "wrong"}), content_type='application/json')
+            f"/api/v1/login",
+            data=json.dumps({"id": id, "password": "wrong"}),
+            content_type="application/json",
+        )
 
         self.assertEqual(response.status_code, 401)
 
@@ -164,7 +177,7 @@ class TestTeachers(unittest.TestCase):
         """
         Test the teacher dashboard endpoint for successful access.
 
-        This test verifies that a valid login returns a token and that the 
+        This test verifies that a valid login returns a token and that the
         token can be used to access the teacher dashboard endpoint successfully.
 
         Steps:
@@ -174,20 +187,20 @@ class TestTeachers(unittest.TestCase):
         4. Verify that the response status code is 200, indicating success.
 
         Raises:
-            AssertionError: If the token is not generated or the response status 
+            AssertionError: If the token is not generated or the response status
                             code is not 200.
         """
         # Test that a valid login returns a token
         token = get_teacher_api_key(self.client)
 
         if not token:
-            self.fail(
-                "Token not generated. Test failed. Check the login endpoint.")
+            self.fail("Token not generated. Test failed. Check the login endpoint.")
 
-        response = self.client.get('/api/v1/teacher/dashboard',
-                                   headers={
-                                       'apiKey': f'Bearer {token}'},
-                                   content_type='application/json')
+        response = self.client.get(
+            "/api/v1/teacher/dashboard",
+            headers={"apiKey": f"Bearer {token}"},
+            content_type="application/json",
+        )
 
         self.assertEqual(response.status_code, 200)
 
@@ -210,13 +223,13 @@ class TestTeachers(unittest.TestCase):
         token = get_teacher_api_key(self.client)
 
         if not token:
-            self.fail(
-                "Token not generated. Test failed. Check the login endpoint.")
+            self.fail("Token not generated. Test failed. Check the login endpoint.")
 
-        response = self.client.get('/api/v1/teacher/dashboard',
-                                   headers={
-                                       'apiKey': f'Bearer {token}invalid'},
-                                   content_type='application/json')
+        response = self.client.get(
+            "/api/v1/teacher/dashboard",
+            headers={"apiKey": f"Bearer {token}invalid"},
+            content_type="application/json",
+        )
 
         self.assertEqual(response.status_code, 401)
 
@@ -239,16 +252,17 @@ class TestTeachers(unittest.TestCase):
         if not teacher_token:
             self.fail("Admin course assignment failed. Test failed")
 
-        response = self.client.get('/api/v1/teacher/students/assigned_grade',
-                                   headers={
-                                       'apiKey': f'Bearer {teacher_token}'},
-                                   content_type='application/json')
+        response = self.client.get(
+            "/api/v1/teacher/students/assigned_grade",
+            headers={"apiKey": f"Bearer {teacher_token}"},
+            content_type="application/json",
+        )
 
         self.assertEqual(response.status_code, 200)
         json_data = response.get_json()
-        self.assertIn('grade', json_data)
-        self.assertIsInstance(json_data['grade'], list)
-        self.assertGreater(len(json_data['grade']), 0)
+        self.assertIn("grade", json_data)
+        self.assertIsInstance(json_data["grade"], list)
+        self.assertGreater(len(json_data["grade"]), 0)
 
     def test_get_teacher_assigned_grade_no_grades(self):
         """
@@ -268,15 +282,15 @@ class TestTeachers(unittest.TestCase):
         token = get_teacher_api_key(self.client)
 
         if not token:
-            self.fail(
-                "Token not generated. Test failed. Check the login endpoint.")
+            self.fail("Token not generated. Test failed. Check the login endpoint.")
 
-        response = self.client.get('/api/v1/teacher/students/assigned_grade',
-                                   headers={
-                                       'apiKey': f'Bearer {token}'},
-                                   content_type='application/json')
+        response = self.client.get(
+            "/api/v1/teacher/students/assigned_grade",
+            headers={"apiKey": f"Bearer {token}"},
+            content_type="application/json",
+        )
 
         self.assertEqual(response.status_code, 404)
         json_data = response.get_json()
-        self.assertIn('error', json_data)
-        self.assertEqual(json_data['error'], "No grades were assigned")
+        self.assertIn("error", json_data)
+        self.assertEqual(json_data["error"], "No grades were assigned")

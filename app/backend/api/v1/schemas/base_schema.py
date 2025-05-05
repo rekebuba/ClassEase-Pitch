@@ -1,10 +1,21 @@
 from datetime import datetime
 import re
-from marshmallow import Schema, ValidationError, post_dump, post_load, pre_load, validates
-from sqlalchemy import and_, or_
-from api.v1.schemas.config_schema import *
+from typing import Any, Dict, Optional, Union
+from marshmallow import (
+    Schema,
+    ValidationError,
+    post_dump,
+    pre_load,
+)
+from sqlalchemy import or_
+from api.v1.schemas.config_schema import (
+    OPERATOR_MAPPING,
+    get_all_model_classes,
+    to_camel,
+    to_snake,
+    to_snake_case_key,
+)
 from models.stud_year_record import STUDYearRecord
-from models.base_model import BaseModel
 from models.table import Table
 from models.subject import Subject
 from models.user import User
@@ -14,124 +25,130 @@ from models.event import Event
 from models.grade import Grade
 from models.year import Year
 from models import storage
-import inspect as pyinspect
-from sqlalchemy.orm import DeclarativeMeta
 
 
 class BaseSchema(Schema):
     """Base schema with global Case conversion."""
 
     @post_dump
-    def convert_to_camel_case(self, data, **kwargs):
+    def convert_to_camel_case(self, data: Any, **kwargs: Any) -> Any:
         """Convert keys to camelCase when serializing (dumping)."""
         return to_camel(data)
 
     @pre_load
-    def convert_to_snake_case(self, data, **kwargs):
+    def convert_to_snake_case(self, data: Any, **kwargs: Any) -> Any:
         """Convert keys to snake_case when deserializing (loading)."""
         return to_snake(data)
 
     @staticmethod
-    def validate_phone(value):
-        pattern = r'^\+?[0-9]{1,3}[-.\s]?\(?[0-9]{1,4}\)?[-.\s]?[0-9]{1,4}[-.\s]?[0-9]{1,9}$'
+    def validate_phone(value: str) -> None:
+        """Validate phone number format."""
+        pattern = (
+            r"^\+?[0-9]{1,3}[-.\s]?\(?[0-9]{1,4}\)?[-.\s]?[0-9]{1,4}[-.\s]?[0-9]{1,9}$"
+        )
 
         # Check if the phone number matches the pattern
         if not re.match(pattern, value):
             raise ValidationError("Invalid phone number format.")
 
     @staticmethod
-    def is_student_registered(student_id):
+    def is_student_registered(student_id: str) -> bool:
+        """Check if the student is registered. returns True if registered."""
         if student_id is None:
             raise ValidationError("student id is required")
 
-        # Check if the student is already registered
-        student = (storage.session.query(Student)
-                   .filter(Student.id == student_id)
-                   .first()
-                   )
+        is_registered: bool = (
+            storage.session.query(Student.is_registered)
+            .filter(Student.id == student_id)
+            .scalar()
+        )
 
-        if student is None or student.id is None:
-            raise ValidationError(
-                f"No Student found for student_id: {student_id}")
+        if not is_registered:
+            raise ValidationError(f"No Student found for student_id: {student_id}")
 
-        return student.is_registered
+        return is_registered
 
     @staticmethod
-    def generate_section(grade_id, semester_id):
+    def generate_section(grade_id: str, semester_id: str) -> None:
         pass  # TODO: new sections to generate
 
     @staticmethod
-    def get_user_id(user_identification):
+    def get_user_id(user_identification: str) -> str:
+        """Get the user_id based on the user_identification."""
         if user_identification is None:
             raise ValidationError("user is required")
 
         # Fetch the user_id from the database
-        user = storage.session.query(User.id).filter_by(
-            identification=user_identification
-        ).first()
+        user_id: Optional[str] = (
+            storage.session.query(User.id)
+            .filter_by(identification=user_identification)
+            .scalar()
+        )
 
-        if user.id is None:
-            raise ValidationError(
-                f"No User found for user: {user_identification}")
+        if user_id is None:
+            raise ValidationError(f"No User found for user: {user_identification}")
 
-        return user.id
+        return user_id
 
     @staticmethod
-    def get_year_id(academic_year):
+    def get_year_id(academic_year: str) -> str:
+        """Get the year_id based on the academic_year."""
         if academic_year is None:
             raise ValidationError("academic year is required")
 
         # Fetch the year_id from the database
-        year = storage.session.query(Year.id).filter_by(
-            ethiopian_year=academic_year
-        ).first()
+        year_id: Optional[str] = (
+            storage.session.query(Year.id)
+            .filter_by(ethiopian_year=academic_year)
+            .scalar()
+        )
 
-        if year is None:
-            raise ValidationError(
-                f"No Year found for academic_year: {academic_year}")
+        if year_id is None:
+            raise ValidationError(f"No Year found for academic_year: {academic_year}")
 
-        return year.id
+        return year_id
 
     @staticmethod
-    def get_grade_id(grade_name):
+    def get_grade_id(grade_name: str) -> str:
+        """Get the grade_id based on the grade_name."""
         if grade_name is None:
             raise ValidationError("grade is required")
 
         # Fetch the grade_id from the database
-        grade = storage.session.query(Grade.id).filter_by(
-            grade=grade_name
-        ).first()
+        grade_id: Optional[str] = (
+            storage.session.query(Grade.id).filter_by(grade=grade_name).scalar()
+        )
 
-        if grade.id is None:
-            raise ValidationError(f"No Grade found for grade: {grade}")
+        if grade_id is None:
+            raise ValidationError(f"No Grade found for grade: {grade_id}")
 
-        return grade.id
+        return grade_id
 
     @staticmethod
-    def get_student_year_records_id(year_id):
+    def get_student_year_records_id(year_id: str) -> str:
+        """Get the student_year_records_id based on the year_id."""
         if year_id is None:
             raise ValidationError("year_id is required")
 
         # Fetch the year_records_id from the database
-        year_records = storage.session.query(STUDYearRecord.id).filter_by(
-            year_id=year_id
-        ).first()
+        year_record_id: Optional[str] = (
+            storage.session.query(STUDYearRecord.id).filter_by(year_id=year_id).scalar()
+        )
 
-        if year_records is None:
-            raise ValidationError(
-                f"No Year Records found for year_id: {year_id}")
+        if year_record_id is None:
+            raise ValidationError(f"No Year Records found for year_id: {year_id}")
 
-        return year_records.id
+        return year_record_id
 
     @staticmethod
-    def get_semester_id(semester_name, academic_year):
+    def get_semester_id(semester_name: str, academic_year: str) -> str:
         if semester_name is None:
             raise ValidationError("semester is required")
         if academic_year is None:
             raise ValidationError("academic year is required")
 
         # Fetch the semester_id from the database
-        semester = (
+        semester_id: Optional[str] = (
             storage.session.query(Semester.id)
             .join(Event, Semester.event_id == Event.id)  # Fix join condition
             .join(Year, Event.year_id == Year.id)
@@ -139,17 +156,18 @@ class BaseSchema(Schema):
                 Semester.name == semester_name,
                 Year.ethiopian_year == academic_year,
             )
-            .first()
+            .scalar()
         )
 
-        if semester.id is None:
+        if semester_id is None:
             raise ValidationError(
-                f"No Semester found for academic_year: {academic_year}")
+                f"No Semester found for academic_year: {academic_year}"
+            )
 
-        return semester.id
+        return semester_id
 
     @staticmethod
-    def get_subject_id(subject_name, subject_code, grade_id):
+    def get_subject_id(subject_name: str, subject_code: str, grade_id: str) -> str:
         if subject_name is None:
             raise ValidationError("subject name is required")
         if subject_code is None:
@@ -158,20 +176,19 @@ class BaseSchema(Schema):
             raise ValidationError("grade_id is required")
 
         # Fetch the subject_id from the database
-        subject = storage.session.query(Subject.id).filter_by(
-            name=subject_name,
-            code=subject_code,
-            grade_id=grade_id
-        ).first()
+        subject_id: Optional[str] = (
+            storage.session.query(Subject.id)
+            .filter_by(name=subject_name, code=subject_code, grade_id=grade_id)
+            .scalar()
+        )
 
-        if subject is None or subject.id is None:
-            raise ValidationError(
-                f"No Subject found for subject_code: {subject_code}")
+        if subject_id is None:
+            raise ValidationError(f"No Subject found for subject_code: {subject_code}")
 
-        return subject.id
+        return subject_id
 
     @staticmethod
-    def get_grade_detail(**kwargs) -> Grade:
+    def get_grade_detail(**kwargs: Any) -> Grade:
         if kwargs is None:
             raise ValidationError("grade details are required")
 
@@ -180,17 +197,15 @@ class BaseSchema(Schema):
                 raise ValidationError(f"Grade {key} is required")
 
         # Fetch the grade details from the database
-        grade = storage.session.query(Grade).filter_by(
-            **kwargs).first()
+        grade = storage.session.query(Grade).filter_by(**kwargs).first()
 
         if grade is None:
-            raise ValidationError(
-                f"No Grade found for grade details: {kwargs}")
+            raise ValidationError(f"No Grade found for grade details: {kwargs}")
 
         return grade
 
     @staticmethod
-    def get_subject_detail(**kwargs) -> Subject:
+    def get_subject_detail(**kwargs: Any) -> Subject:
         if kwargs is None:
             raise ValidationError("subject details are required")
 
@@ -199,31 +214,28 @@ class BaseSchema(Schema):
                 raise ValidationError(f"Subject {key} is required")
 
         # Fetch the subject details from the database
-        subject = storage.session.query(Subject).filter_by(
-            **kwargs).first()
+        subject = storage.session.query(Subject).filter_by(**kwargs).first()
 
         if subject is None:
-            raise ValidationError(
-                f"No Subject found for subject details: {kwargs}")
+            raise ValidationError(f"No Subject found for subject details: {kwargs}")
 
         return subject
 
     @staticmethod
-    def get_table(table_id):
+    def get_table(table_id: str):
         if table_id is None:
             raise ValidationError("table_id is required")
 
-        table_name = storage.session.query(Table.name).filter_by(
-            id=table_id
-        ).first()
+        table_name: Optional[str] = (
+            storage.session.query(Table.name).filter_by(id=table_id).scalar()
+        )
         if table_name is None:
             raise ValidationError(f"No Table found for table_id: {table_id}")
 
         table_models = get_all_model_classes()
-        model = table_models.get(table_name[0])
+        model = table_models.get(table_name)
         if model is None:
-            raise ValidationError(
-                f"No model class found for table name: {table_name}")
+            raise ValidationError(f"No model class found for table name: {table_name}")
 
         return model
 
@@ -234,9 +246,7 @@ class BaseSchema(Schema):
 
         # Fetch the table_id from the database
         table_name = table.__tablename__
-        table = storage.session.query(Table).filter_by(
-            name=table_name
-        ).first()
+        table = storage.session.query(Table).filter_by(name=table_name).first()
 
         return table.id if table else None
 
@@ -247,21 +257,23 @@ class BaseSchema(Schema):
         """
         if not isinstance(value, list):
             raise ValidationError(
-                f"Expected a list for {column_name}, got {type(value)}")
+                f"Expected a list for {column_name}, got {type(value)}"
+            )
 
         col_name = column_name
         # Find the column and get its Python type
         column_obj = next(
-            (col for col in model.__table__.columns if col.name == col_name), None)
+            (col for col in model.__table__.columns if col.name == col_name), None
+        )
         if column_obj is None:
             raise ValidationError(
-                f"Column '{col_name}' not found on {model.__tablename__}.")
+                f"Column '{col_name}' not found on {model.__tablename__}."
+            )
 
         try:
             expected_type = column_obj.type.python_type
         except NotImplementedError:
-            raise ValidationError(
-                f"Unsupported type for column '{column_name}'.")
+            raise ValidationError(f"Unsupported type for column '{column_name}'.")
 
         # Type conversion logic
         converters = {
@@ -269,27 +281,27 @@ class BaseSchema(Schema):
             int: lambda v: int(v),
             float: lambda v: float(v),
             bool: lambda v: bool(v),
-            datetime: lambda v: datetime.fromisoformat(
-                v) if isinstance(v, str) else v
+            datetime: lambda v: datetime.fromisoformat(v) if isinstance(v, str) else v,
         }
 
         if expected_type not in converters:
             raise ValidationError(
-                f"No conversion rule for type '{expected_type}' on column '{column_name}'.")
+                f"No conversion rule for type '{expected_type}' on column '{column_name}'."
+            )
 
         try:
             return [converters[expected_type](item) for item in value]
         except Exception as e:
             raise ValueError(
-                f"Failed to convert values for column '{column_name}': {e}")
+                f"Failed to convert values for column '{column_name}': {e}"
+            )
 
     @staticmethod
     def filter_data(model, column_name: str | list[str], operator, value, range):
         """
         Dynamically create a SQLAlchemy filter based on operator.
         """
-        columns = column_name if isinstance(
-            column_name, list) else [column_name]
+        columns = column_name if isinstance(column_name, list) else [column_name]
         result: list = []
 
         for column in columns:
@@ -297,7 +309,8 @@ class BaseSchema(Schema):
             col = getattr(model, col_name, None)
             if col is None:
                 raise ValidationError(
-                    f"Column '{col_name}' not found on {model.__tablename__}.")
+                    f"Column '{col_name}' not found on {model.__tablename__}."
+                )
 
             condition = None  # Initialize condition to ensure type is defined
 
@@ -305,14 +318,15 @@ class BaseSchema(Schema):
                 op_func = OPERATOR_MAPPING.get(operator)
                 if not callable(op_func):
                     raise ValidationError(
-                        f"Operator '{operator}' is not callable or not defined.")
+                        f"Operator '{operator}' is not callable or not defined."
+                    )
 
                 try:
-                    condition = op_func(
-                        col, value if value is not None else range)
+                    condition = op_func(col, value if value is not None else range)
                 except Exception as e:
                     raise ValidationError(
-                        f"Invalid value for operator '{operator}': {e}")
+                        f"Invalid value for operator '{operator}': {e}"
+                    )
 
             if condition is not None:
                 result.append(condition)
@@ -328,19 +342,23 @@ class BaseSchema(Schema):
         """
         Dynamically create a SQLAlchemy sort based on order.
         """
-        columns = [column for column in column_name] if isinstance(
-            column_name, list) else [column_name]
+        columns = (
+            [column for column in column_name]
+            if isinstance(column_name, list)
+            else [column_name]
+        )
         result = []
         for column in columns:
             col_name = to_snake_case_key(column)
             col = getattr(model, col_name, None)
             if col is None:
                 raise ValidationError(
-                    f"Column '{col_name}' not found on {model.__tablename__}.")
+                    f"Column '{col_name}' not found on {model.__tablename__}."
+                )
 
-            if order == True:
+            if order:
                 result.append(col.desc())
-            elif order == False:
+            elif not order:
                 result.append(col.asc())
             else:
                 raise ValidationError(f"Unsupported sort order: {order}")

@@ -11,6 +11,7 @@ from models.event import Event
 
 class EventService:
     """Service class for Event model"""
+
     @staticmethod
     def create_event(**kwarg) -> Event:
         return Event(**kwarg)

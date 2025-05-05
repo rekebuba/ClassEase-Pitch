@@ -23,9 +23,10 @@ class TestStudents(unittest.TestCase):
     - `test_student_dashboard_success`: Verifies that accessing the student dashboard with a valid token is successful.
     - `test_student_dashboard_failure`: Ensures that accessing the student dashboard with an invalid token returns an error.
 
-    The tests use a test client to simulate API requests and responses. The `setUp` method initializes the test app and client, 
+    The tests use a test client to simulate API requests and responses. The `setUp` method initializes the test app and client,
     while the `tearDown` method cleans up the database after each test.
     """
+
     """Test the student login endpoint."""
 
     def setUp(self):
@@ -36,7 +37,7 @@ class TestStudents(unittest.TestCase):
         to simulate requests to the application. It also pushes the application
         context to make the app's resources available during the tests.
         """
-        self.app = create_app('testing')
+        self.app = create_app("testing")
         self.client = self.app.test_client()
         self.app.app_context().push()
         self.session = storage.session
@@ -61,27 +62,28 @@ class TestStudents(unittest.TestCase):
         """
         role = CustomTypes.RoleEnum.STUDENT
         user = MakeFactory(UserFactory, self.session, built=True).factory(
-            role=role, keep={'id'})
+            role=role, keep={"id"}
+        )
 
-        if 'image_path' in user:
-            local_path = user.pop('image_path')
-            user['image_path'] = open(local_path, 'rb')
+        if "image_path" in user:
+            local_path = user.pop("image_path")
+            user["image_path"] = open(local_path, "rb")
             os.remove(local_path)  # remove the file
 
         current_grade = random.randint(1, 10)
         academic_year = DefaultFelids.current_EC_year()
 
         student = MakeFactory(StudentFactory, self.session, built=True).factory(
-            user_id=user.pop('id'),
-            add={"current_grade": current_grade,
-                 "academic_year": academic_year}
+            user_id=user.pop("id"),
+            add={"current_grade": current_grade, "academic_year": academic_year},
         )
 
-        response = self.client.post(f'/api/v1/registration/{role.value}',
-                                    data={**user, **student})
+        response = self.client.post(
+            f"/api/v1/registration/{role.value}", data={**user, **student}
+        )
 
         assert response.status_code == 201
-        assert response.json['message'] == 'student registered successfully!'
+        assert response.json["message"] == "student registered successfully!"
 
     def test_student_login_success(self):
         """
@@ -100,18 +102,22 @@ class TestStudents(unittest.TestCase):
         - The response status code should be 200.
         - The response JSON should contain an 'access_token' key.
         """
-        register_user(self.client, 'student')
-        id = storage.session.query(User).filter_by(
-            role='student').first().identification
+        register_user(self.client, "student")
+        id = (
+            storage.session.query(User).filter_by(role="student").first().identification
+        )
 
         print(id)
         # Test that a valid login returns a token
         response = self.client.post(
-            f'/api/v1/auth/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
+            f"/api/v1/auth/login",
+            data=json.dumps({"id": id, "password": id}),
+            content_type="application/json",
+        )
 
         self.assertEqual(response.status_code, 200)
         json_data = response.get_json()
-        self.assertIn('apiKey', json_data)
+        self.assertIn("apiKey", json_data)
 
     def test_student_login_wrong_id(self):
         """
@@ -129,11 +135,14 @@ class TestStudents(unittest.TestCase):
         The response status code should be 401, indicating that the login attempt
         with an invalid ID is unauthorized.
         """
-        id = 'fake'
+        id = "fake"
 
         # Test that a valid login returns a token
         response = self.client.post(
-            f'/api/v1/auth/login', data=json.dumps({"id": id, "password": id}), content_type='application/json')
+            f"/api/v1/auth/login",
+            data=json.dumps({"id": id, "password": id}),
+            content_type="application/json",
+        )
         self.assertEqual(response.status_code, 401)
 
     def test_student_login_wrong_password(self):
@@ -152,11 +161,14 @@ class TestStudents(unittest.TestCase):
         Expected Result:
         - The login attempt with an incorrect password should return a 401 status code.
         """
-        register_user(self.client, 'student')
+        register_user(self.client, "student")
         id = storage.get_random(Student).id
 
         response = self.client.post(
-            f'/api/v1/login', data=json.dumps({"id": id, "password": 'wrong'}), content_type='application/json')
+            f"/api/v1/login",
+            data=json.dumps({"id": id, "password": "wrong"}),
+            content_type="application/json",
+        )
 
         self.assertEqual(response.status_code, 401)
 
@@ -179,13 +191,13 @@ class TestStudents(unittest.TestCase):
         token = get_student_api_key(self.client)
 
         if not token:
-            self.fail(
-                "Token not generated. Test failed. Check the login endpoint.")
+            self.fail("Token not generated. Test failed. Check the login endpoint.")
 
-        response = self.client.get('/api/v1/student/dashboard',
-                                   headers={
-                                       'apiKey': f'Bearer {token}'},
-                                   content_type='application/json')
+        response = self.client.get(
+            "/api/v1/student/dashboard",
+            headers={"apiKey": f"Bearer {token}"},
+            content_type="application/json",
+        )
 
         self.assertEqual(response.status_code, 200)
 
@@ -193,7 +205,7 @@ class TestStudents(unittest.TestCase):
         """
         Test the student dashboard access with an invalid token.
 
-        This test ensures that accessing the student dashboard with an invalid 
+        This test ensures that accessing the student dashboard with an invalid
         token results in a 401 Unauthorized status code.
 
         Steps:
@@ -208,12 +220,12 @@ class TestStudents(unittest.TestCase):
         token = get_student_api_key(self.client)
 
         if not token:
-            self.fail(
-                "Token not generated. Test failed. Check the login endpoint.")
+            self.fail("Token not generated. Test failed. Check the login endpoint.")
 
-        response = self.client.get('/api/v1/student/dashboard',
-                                   headers={
-                                       'apiKey': f'Bearer {token}invalid'},
-                                   content_type='application/json')
+        response = self.client.get(
+            "/api/v1/student/dashboard",
+            headers={"apiKey": f"Bearer {token}invalid"},
+            content_type="application/json",
+        )
 
         self.assertEqual(response.status_code, 401)

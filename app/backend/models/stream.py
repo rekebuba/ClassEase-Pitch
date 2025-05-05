@@ -1,13 +1,12 @@
 #!/usr/bin/python3
-""" Module for Subject class """
+"""Module for Subject class"""
 
-from sqlalchemy import CheckConstraint, Integer, String, ForeignKey
-from models.grade import Grade
+from sqlalchemy import CheckConstraint, String
 from models.base_model import BaseModel
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, scoped_session
 
 
-def seed_streams(session):
+def seed_streams(session: scoped_session) -> None:
     """
     Populate the Stream table with default data.
 
@@ -23,7 +22,7 @@ def seed_streams(session):
     if session.query(Stream).count() > 0:
         return
 
-    streams = ['natural', 'social']
+    streams = ["natural", "social"]
     for stream in streams:
         stream_instance = Stream(name=stream)
         session.add(stream_instance)
@@ -31,13 +30,10 @@ def seed_streams(session):
 
 
 class Stream(BaseModel):
-    __tablename__ = 'streams'
+    __tablename__ = "streams"
 
     name: Mapped[str] = mapped_column(String(10), nullable=False)
 
     __table_args__ = (
-        CheckConstraint(
-            "name IN ('natural', 'social')",
-            name="check_stream"
-        ),
+        CheckConstraint("name IN ('natural', 'social')", name="check_stream"),
     )

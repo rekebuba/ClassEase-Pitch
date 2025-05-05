@@ -1,10 +1,15 @@
 #!/usr/bin/python3
-""" Module for Student class """
+"""Module for Student class"""
 
-from sqlalchemy import Date, Integer, String, ForeignKey, CheckConstraint, Float, Boolean, Text, DateTime, case
+from sqlalchemy import (
+    Date,
+    String,
+    ForeignKey,
+    Boolean,
+    Text,
+)
 from models.base_model import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.sql import text
 
 
 class Student(BaseModel):
@@ -28,9 +33,11 @@ class Student(BaseModel):
     Methods:
         __init__(*args, **kwargs): Initializes a new instance of the Student class.
     """
-    __tablename__ = 'students'
-    user_id: Mapped[str] = mapped_column(String(120), ForeignKey(
-        'users.id'), unique=True, nullable=False)
+
+    __tablename__ = "students"
+    user_id: Mapped[str] = mapped_column(
+        String(120), ForeignKey("users.id"), unique=True, nullable=False
+    )
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
     father_name: Mapped[str] = mapped_column(String(50), nullable=False)
     grand_father_name: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -41,54 +48,69 @@ class Student(BaseModel):
     father_phone: Mapped[str] = mapped_column(String(25))
     mother_phone: Mapped[str] = mapped_column(String(25))
     guardian_name: Mapped[str] = mapped_column(
-        String(50))  # If student lives with someone else
+        String(50)
+    )  # If student lives with someone else
     guardian_phone: Mapped[str] = mapped_column(String(25))
 
     # Academic Info
     start_year_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey('years.id'), nullable=False)
+        String(120), ForeignKey("years.id"), nullable=False
+    )
     current_year_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey('years.id'), nullable=False)
+        String(120), ForeignKey("years.id"), nullable=False
+    )
     current_grade_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey('grades.id'), nullable=False)
-    next_grade_id: Mapped[str] = mapped_column(String(120), ForeignKey(
-        'grades.id'), nullable=True, default=None)
+        String(120), ForeignKey("grades.id"), nullable=False
+    )
+    next_grade_id: Mapped[str] = mapped_column(
+        String(120), ForeignKey("grades.id"), nullable=True, default=None
+    )
     semester_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey('semesters.id'), nullable=True, default=None)
+        String(120), ForeignKey("semesters.id"), nullable=True, default=None
+    )
     has_passed: Mapped[bool] = mapped_column(Boolean, default=False)
     is_registered: Mapped[bool] = mapped_column(Boolean, default=False)
 
     # If transferring from another school
     is_transfer: Mapped[bool] = mapped_column(Boolean, default=False)
     previous_school_name: Mapped[str] = mapped_column(
-        String(100), nullable=True, default=None)
+        String(100), nullable=True, default=None
+    )
 
     # Identification & Legal Docs
     birth_certificate: Mapped[str] = mapped_column(
-        String(255), nullable=True, default=None)  # Path to uploaded file
+        String(255), nullable=True, default=None
+    )  # Path to uploaded file
 
     # Health & Special Needs
     has_medical_condition: Mapped[bool] = mapped_column(Boolean, default=False)
     # Explanation of medical conditions
-    medical_details: Mapped[str] = mapped_column(
-        Text, nullable=True, default=None)
+    medical_details: Mapped[str] = mapped_column(Text, nullable=True, default=None)
     has_disability: Mapped[bool] = mapped_column(Boolean, default=False)
     # Explanation of disabilities
-    disability_details: Mapped[str] = mapped_column(
-        Text, nullable=True, default=None)
-    requires_special_accommodation: Mapped[bool] = mapped_column(
-        Boolean, default=False)
+    disability_details: Mapped[str] = mapped_column(Text, nullable=True, default=None)
+    requires_special_accommodation: Mapped[bool] = mapped_column(Boolean, default=False)
     special_accommodation_details: Mapped[str] = mapped_column(
-        Text, nullable=True, default=None)  # Any special support needed
+        Text, nullable=True, default=None
+    )  # Any special support needed
 
     # Whether the student is currently enrolled
     is_active: Mapped[bool] = mapped_column(Boolean, default=False)
 
     # Relationships
-    user = relationship("User", back_populates='students')
+    user = relationship("User", back_populates="students")
     semester_records = relationship(
-        "STUDSemesterRecord", back_populates="students", cascade="all, delete-orphan", uselist=False)
+        "STUDSemesterRecord",
+        back_populates="students",
+        cascade="all, delete-orphan",
+        uselist=False,
+    )
     year_records = relationship(
-        "STUDYearRecord", back_populates="students", cascade="all, delete-orphan", uselist=False)
+        "STUDYearRecord",
+        back_populates="students",
+        cascade="all, delete-orphan",
+        uselist=False,
+    )
     average_subjects = relationship(
-        "AVRGSubject", back_populates="students", cascade="all, delete-orphan")
+        "AVRGSubject", back_populates="students", cascade="all, delete-orphan"
+    )

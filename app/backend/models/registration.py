@@ -1,17 +1,19 @@
 #!/usr/bin/python3
-""" Module for Section class """
+"""Module for Section class"""
 
-from sqlalchemy import String, Integer, ForeignKey, DateTime
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import String, ForeignKey, DateTime
+from sqlalchemy.orm import Mapped, mapped_column
 from models.base_model import BaseModel
 
 
 class Registration(BaseModel):
     """docstring for Registration."""
-    __tablename__ = 'registrations'
+
+    __tablename__ = "registrations"
     student_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey('students.id'), nullable=False)
+        String(120), ForeignKey("students.id"), nullable=False
+    )
     subject_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey('subjects.id'), nullable=False)
-    registration_date: Mapped[DateTime] = mapped_column(
-        DateTime, nullable=False)
+        String(120), ForeignKey("subjects.id"), nullable=False
+    )
+    registration_date: Mapped[DateTime] = mapped_column(DateTime, nullable=False)

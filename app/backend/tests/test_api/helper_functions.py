@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-""" Module for helper functions for testing the API """
+"""Module for helper functions for testing the API"""
 
 import json
 import os
@@ -33,19 +33,23 @@ def generate_students(num=1):
     """
     f = Faker()
 
-    rows = [{
-        'first_name': f.first_name(),
-        'father_name': f.last_name_male(),
-        'grand_father_name': f.last_name_male(),
-        'date_of_birth': str(f.date_of_birth(minimum_age=3, maximum_age=20).strftime('%Y-%m-%d')),
-        "father_phone": '+2656255123',
-        "mother_phone": '+2656255123',
-        "gender": random.choice(["M", "F"]),
-        'current_grade': 1,
-        'national_id': str(uuid.uuid4()),
-        'image_path': get_ai_profile_picture(),  # Store the file path,
-    }
-        for _ in range(num)]
+    rows = [
+        {
+            "first_name": f.first_name(),
+            "father_name": f.last_name_male(),
+            "grand_father_name": f.last_name_male(),
+            "date_of_birth": str(
+                f.date_of_birth(minimum_age=3, maximum_age=20).strftime("%Y-%m-%d")
+            ),
+            "father_phone": "+2656255123",
+            "mother_phone": "+2656255123",
+            "gender": random.choice(["M", "F"]),
+            "current_grade": 1,
+            "national_id": str(uuid.uuid4()),
+            "image_path": get_ai_profile_picture(),  # Store the file path,
+        }
+        for _ in range(num)
+    ]
     return rows
 
 
@@ -70,22 +74,26 @@ def generate_teachers(num=1):
             - subject_taught (str): The subject taught by the teacher, randomly chosen from a predefined list of subjects.
     """
     f = Faker()
-    rows = [{
-        'first_name': f.first_name(),
-        'father_name': f.last_name(),
-        'grand_father_name': f.first_name(),
-        'date_of_birth': str(f.date_of_birth(minimum_age=20, maximum_age=60).strftime('%Y-%m-%d')),
-        'email': f.email(),
-        'gender': random.choice(["M", "F"]),
-        'phone': '095564135',
-        'address': f.address(),
-        'image_path': get_ai_profile_picture(),  # Store the file path,
-        'national_id': str(uuid.uuid4()),
-        "year_of_experience": random.randint(0, 5),
-        "qualification": random.choice(["Certified Teacher"]),
-        'image_path': get_ai_profile_picture(),  # Store the file path,
-    }
-        for _ in range(num)]
+    rows = [
+        {
+            "first_name": f.first_name(),
+            "father_name": f.last_name(),
+            "grand_father_name": f.first_name(),
+            "date_of_birth": str(
+                f.date_of_birth(minimum_age=20, maximum_age=60).strftime("%Y-%m-%d")
+            ),
+            "email": f.email(),
+            "gender": random.choice(["M", "F"]),
+            "phone": "095564135",
+            "address": f.address(),
+            "image_path": get_ai_profile_picture(),  # Store the file path,
+            "national_id": str(uuid.uuid4()),
+            "year_of_experience": random.randint(0, 5),
+            "qualification": random.choice(["Certified Teacher"]),
+            "image_path": get_ai_profile_picture(),  # Store the file path,
+        }
+        for _ in range(num)
+    ]
     return rows
 
 
@@ -100,19 +108,23 @@ def generate_admin(num=1):
         list: A list of dictionaries, each containing 'name' and 'email' keys with fake data.
     """
     f = Faker()
-    rows = [{
-        'first_name': f.first_name(),
-        'father_name': f.last_name(),
-        'grand_father_name': f.first_name(),
-        'date_of_birth': str(f.date_of_birth(minimum_age=20, maximum_age=60).strftime('%Y-%m-%d')),
-        'email': f.email(),
-        'gender': random.choice(["M", "F"]),
-        'phone': '095564135',
-        'address': f.address(),
-        'image_path': get_ai_profile_picture(),  # Store the file path,
-        'national_id': str(uuid.uuid4()),
-    }
-        for _ in range(num)]
+    rows = [
+        {
+            "first_name": f.first_name(),
+            "father_name": f.last_name(),
+            "grand_father_name": f.first_name(),
+            "date_of_birth": str(
+                f.date_of_birth(minimum_age=20, maximum_age=60).strftime("%Y-%m-%d")
+            ),
+            "email": f.email(),
+            "gender": random.choice(["M", "F"]),
+            "phone": "095564135",
+            "address": f.address(),
+            "image_path": get_ai_profile_picture(),  # Store the file path,
+            "national_id": str(uuid.uuid4()),
+        }
+        for _ in range(num)
+    ]
     return rows
 
 
@@ -148,37 +160,45 @@ def generate_mark_list_data():
         "grade": 1,
         "sections": ["A", "B"],
         "subjects": [
-            "Math", "English", "Physics", "Chemistry", "Biology", "History", "Geography", "Art", "Music", "Physical Education", "Science"
+            "Math",
+            "English",
+            "Physics",
+            "Chemistry",
+            "Biology",
+            "History",
+            "Geography",
+            "Art",
+            "Music",
+            "Physical Education",
+            "Science",
         ],
         "assessment_type": [
             {"type": "midterm", "percentage": random.randint(10, 50)},
             {"type": "final", "percentage": random.randint(50, 90)},
-            {"type": "quiz", "percentage": random.randint(5, 20)}
+            {"type": "quiz", "percentage": random.randint(5, 20)},
         ],
         "semester": random.randint(1, 2),
-        "year": "2024/25"
+        "year": "2024/25",
     }
 
 
 def register_user(client, role):
-    if role == 'admin':
+    if role == "admin":
         user = generate_admin(1)[0]
-    elif role == 'teacher':
+    elif role == "teacher":
         user = generate_teachers(1)[0]
-    elif role == 'student':
+    elif role == "student":
         user = generate_students(1)[0]
 
     local_path = None
-    if user.get('image_path'):
-        local_path = user.get('image_path')
+    if user.get("image_path"):
+        local_path = user.get("image_path")
 
-    data = {
-        **user,
-        'image_path': open(user.pop('image_path'), 'rb')
-    }
+    data = {**user, "image_path": open(user.pop("image_path"), "rb")}
 
     response = client.post(
-        f"/api/v1/registration/{role}", data=data, content_type='multipart/form-data')
+        f"/api/v1/registration/{role}", data=data, content_type="multipart/form-data"
+    )
 
     # remove the file
     if os.path.exists(local_path):
@@ -191,42 +211,51 @@ def register_user(client, role):
 
 def get_admin_api_key(client):
     """Get the access token for the admin."""
-    register_user(client, 'admin')
+    register_user(client, "admin")
 
     id = storage.get_random(Admin).id
 
     # Test that a valid login returns a token
-    response = client.post('/api/v1/login', data=json.dumps(
-        {"id": id, "password": id}), content_type='application/json')
+    response = client.post(
+        "/api/v1/login",
+        data=json.dumps({"id": id, "password": id}),
+        content_type="application/json",
+    )
 
     json_data = response.get_json()
-    return json_data['ApiKey']
+    return json_data["ApiKey"]
 
 
 def get_teacher_api_key(client):
     """Get the access token for the teacher."""
-    register_user(client, 'teacher')
+    register_user(client, "teacher")
     id = storage.get_random(Teacher).id
 
     # Test that a valid login returns a token
-    response = client.post('/api/v1/login', data=json.dumps(
-        {"id": id, "password": id}), content_type='application/json')
+    response = client.post(
+        "/api/v1/login",
+        data=json.dumps({"id": id, "password": id}),
+        content_type="application/json",
+    )
 
     json_data = response.get_json()
-    return json_data['ApiKey']
+    return json_data["ApiKey"]
 
 
 def get_student_api_key(client):
     """Get the access token for the student."""
-    register_user(client, 'student')
+    register_user(client, "student")
     id = storage.get_random(Student).id
 
     # Test that a valid login returns a token
-    response = client.post('/api/v1/login', data=json.dumps(
-        {"id": id, "password": id}), content_type='application/json')
+    response = client.post(
+        "/api/v1/login",
+        data=json.dumps({"id": id, "password": id}),
+        content_type="application/json",
+    )
 
     json_data = response.get_json()
-    return json_data['ApiKey']
+    return json_data["ApiKey"]
 
 
 def create_mark_list(client):
@@ -238,15 +267,16 @@ def create_mark_list(client):
             raise Exception
 
         for _ in range(5):
-            response = register_user(client, 'student')
+            response = register_user(client, "student")
             if response.status_code != 201:
                 raise Exception
 
-        response = client.put('/api/v1/admin/students/mark_list',
-                              data=json.dumps(generate_mark_list_data()),
-                              headers={
-                                  'apiKey': f'Bearer {token}'},
-                              content_type='application/json')
+        response = client.put(
+            "/api/v1/admin/students/mark_list",
+            data=json.dumps(generate_mark_list_data()),
+            headers={"apiKey": f"Bearer {token}"},
+            content_type="application/json",
+        )
 
         if response.status_code != 201:
             raise Exception
@@ -265,34 +295,35 @@ def admin_course_assign_to_teacher(client):
     teacher_token = get_teacher_api_key(client)
 
     if not teacher_token:
-        client.fail(
-            "Token not generated. Test failed. Check the login endpoint.")
+        client.fail("Token not generated. Test failed. Check the login endpoint.")
 
-    response = client.get('/api/v1/admin/teachers',
-                          headers={
-                              'apiKey': f'Bearer {token}'},
-                          content_type='application/json')
+    response = client.get(
+        "/api/v1/admin/teachers",
+        headers={"apiKey": f"Bearer {token}"},
+        content_type="application/json",
+    )
 
     if response.status_code != 200:
         client.fail("Teacher data not found. Test failed.")
 
     teachers_data = response.json
 
-    random_entry = random.choice(teachers_data['teachers'])
-    teacher_id = random_entry.get('id')
+    random_entry = random.choice(teachers_data["teachers"])
+    teacher_id = random_entry.get("id")
 
-    response = client.put(f'/api/v1/admin/assign-teacher',
-                          data=json.dumps(
-                              {
-                                  "teacher_id": teacher_id,
-                                  "grade": 1,
-                                  "section": ["A", "B"],
-                                  "subjects_taught": teachers_data['teachers'][0]['subjects'],
-                                  "mark_list_year": "2024/25"
-                              }
-                          ),
-                          headers={
-                              'apiKey': f'Bearer {token}'},
-                          content_type='application/json')
+    response = client.put(
+        f"/api/v1/admin/assign-teacher",
+        data=json.dumps(
+            {
+                "teacher_id": teacher_id,
+                "grade": 1,
+                "section": ["A", "B"],
+                "subjects_taught": teachers_data["teachers"][0]["subjects"],
+                "mark_list_year": "2024/25",
+            }
+        ),
+        headers={"apiKey": f"Bearer {token}"},
+        content_type="application/json",
+    )
 
     return teacher_token

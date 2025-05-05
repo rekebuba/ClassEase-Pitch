@@ -1,8 +1,10 @@
+from collections.abc import Callable
 from datetime import date, datetime, timedelta
 import re
 from sqlalchemy import and_, func, or_
 
 from models.base_model import BaseModel
+from typing import Any, Dict, Union
 
 
 def is_date(val):
@@ -25,15 +27,22 @@ OPERATOR_MAPPING = {
     "notLike": lambda col, val: ~col.like(f"%{val}%"),
     "startsWith": lambda col, val: col.like(f"{val}%"),
     "endWith": lambda col, val: col.like(f"%{val}"),
-    "in": lambda col, val: normalize_date_col(col, val[0])
-    .in_(val if isinstance(val, list) else [val]) if val else False,
-    "notIn": lambda col, val: ~normalize_date_col(col, val[0])
-    .in_(val if isinstance(val, list) else [val]) if val else True,
+    "in": lambda col, val: normalize_date_col(col, val[0]).in_(
+        val if isinstance(val, list) else [val]
+    )
+    if val
+    else False,
+    "notIn": lambda col, val: ~normalize_date_col(col, val[0]).in_(
+        val if isinstance(val, list) else [val]
+    )
+    if val
+    else True,
     "isEmpty": lambda col, _: or_(col.is_(None), col == ""),
     "isNotEmpty": lambda col, _: and_(col.isnot(None), col != ""),
     "isBetween": lambda col, range: (
-        normalize_date_col(col, range.get("min") or range.get(
-            "max")).between(range.get("min"), range.get("max"))
+        normalize_date_col(col, range.get("min") or range.get("max")).between(
+            range.get("min"), range.get("max")
+        )
         if range.get("min") is not None and range.get("max") is not None
         else normalize_date_col(col, range.get("min")) >= range.get("min")
         if range.get("min") is not None
@@ -45,7 +54,7 @@ OPERATOR_MAPPING = {
         func.date(col) >= (datetime.utcnow().date() + timedelta(days=days))
         if isinstance(days, int)
         else None
-    )
+    ),
 }
 
 OPERATOR_CONFIG = {
@@ -53,8 +62,30 @@ OPERATOR_CONFIG = {
     "number": ["eq", "ne", "lt", "lte", "gt", "gte"],
     "select": ["eq", "ne", "isEmpty", "isNotEmpty"],
     "multiSelect": ["in", "notIn", "isEmpty", "isNotEmpty"],
-    "date": ["eq", "ne", "lt", "lte", "gt", "gte", "isBetween", "isRelativeToToday", "isEmpty", "isNotEmpty"],
-    "dateRange": ["eq", "ne", "lt", "lte", "gt", "gte", "isBetween", "isRelativeToToday", "isEmpty", "isNotEmpty"],
+    "date": [
+        "eq",
+        "ne",
+        "lt",
+        "lte",
+        "gt",
+        "gte",
+        "isBetween",
+        "isRelativeToToday",
+        "isEmpty",
+        "isNotEmpty",
+    ],
+    "dateRange": [
+        "eq",
+        "ne",
+        "lt",
+        "lte",
+        "gt",
+        "gte",
+        "isBetween",
+        "isRelativeToToday",
+        "isEmpty",
+        "isNotEmpty",
+    ],
     "boolean": ["eq", "ne"],
 }
 
@@ -67,7 +98,7 @@ VALUE_TYPE_RULES = {
 }
 
 
-def to_snake(data):
+def to_snake(data: Any) -> Any:
     if isinstance(data, dict):
         return {to_snake_case_key(k): to_snake(v) for k, v in data.items()}
     elif isinstance(data, list):
@@ -76,22 +107,26 @@ def to_snake(data):
         return data
 
 
-def to_camel(data):
+def to_camel(data: Any) -> Any:
+    """
+    Recursively convert all dictionary keys to camelCase.
+
+    Supports nested dictionaries and lists. Non-dict/list values are returned as-is.
+    """
     if isinstance(data, dict):
-        return {to_camel_case_key(k): to_camel(v) for k, v in data.items()}
-    elif isinstance(data, list):
+        return {to_camel_case_key(str(k)): to_camel(v) for k, v in data.items()}
+    if isinstance(data, list):
         return [to_camel(item) for item in data]
-    else:
-        return data
+    return data
 
 
 def to_snake_case_key(s):
-    return re.sub(r'(?<!^)(?=[A-Z])', '_', s).lower()
+    return re.sub(r"(?<!^)(?=[A-Z])", "_", s).lower()
 
 
-def to_camel_case_key(s):
-    parts = s.split('_')
-    return parts[0] + ''.join(word.capitalize() for word in parts[1:])
+def to_camel_case_key(s: str) -> str:
+    parts = s.split("_")
+    return parts[0] + "".join(word.capitalize() for word in parts[1:])
 
 
 # Get all model classes dynamically
@@ -100,5 +135,5 @@ def get_all_model_classes():
     return {
         cls.__tablename__: cls
         for cls in BaseModel.registry._class_registry.values()
-        if hasattr(cls, '__tablename__') and cls is not BaseModel
+        if hasattr(cls, "__tablename__") and cls is not BaseModel
     }

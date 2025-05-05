@@ -1,13 +1,12 @@
 #!/usr/bin/python3
-""" Module for Grade class """
+"""Module for Grade class"""
 
-from dataclasses import dataclass, field
-from sqlalchemy import String, Integer, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship, MappedAsDataclass
+from sqlalchemy import Integer
+from sqlalchemy.orm import Mapped, mapped_column, relationship, scoped_session
 from models.base_model import BaseModel
 
 
-def seed_grades(session):
+def seed_grades(session: scoped_session) -> None:
     """
     Populate the Grade table with default data (grades 1 to 12).
 
@@ -36,10 +35,10 @@ class Grade(BaseModel):
     __tablename__ = "grades"
 
     # Database column
-    grade: Mapped[int] = mapped_column(
-        Integer, unique=True, nullable=False, index=True)
+    grade: Mapped[int] = mapped_column(Integer, unique=True, nullable=False, index=True)
 
     # Relationships
     student_year_records = relationship(
-        "STUDYearRecord", back_populates="grades", uselist=False)
+        "STUDYearRecord", back_populates="grades", uselist=False
+    )
     sections = relationship("Section", back_populates="grade")

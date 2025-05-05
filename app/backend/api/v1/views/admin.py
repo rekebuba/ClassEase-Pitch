@@ -1,18 +1,16 @@
 #!/usr/bin/python3
 """Admin views module for the API"""
 
-import json
-import os
+from typing import Tuple
 import uuid
-from flask import request, jsonify, url_for
+from flask import Response, request, jsonify, url_for
 from marshmallow import ValidationError
 from sqlalchemy import case, func
-from models.base_model import BaseModel
+from api.v1.utils.typing import UserT
 from models.year import Year
 from models import storage
 from flask import Blueprint
 from models.user import User
-from models.admin import Admin
 from models.subject import Subject
 from models.teacher import Teacher
 from models.grade import Grade
@@ -36,15 +34,8 @@ from api.v1.views.methods import (
     min_max_semester_lookup,
     min_max_year_lookup,
     paginate_query,
-    save_profile,
-    validate_request,
-    preprocess_query_params,
 )
-from api.v1.services.event_service import EventService
-from api.v1.schemas.schemas import *
-from api.v1.services.semester_service import SemesterService
-from api.v1.services.admin_service import AdminService
-from api.v1.services.user_service import UserService
+from api.v1.schemas.schemas import *  # noqa: F401
 from api.v1.views import errors
 
 
@@ -53,7 +44,7 @@ admin = Blueprint("admin", __name__, url_prefix="/api/v1/admin")
 
 @admin.route("/profile", methods=["PUT"])
 @admin_required
-def update_admin_profile(admin_data):
+def update_admin_profile(admin_data: UserT) -> Tuple[Response, int]:
     """
     Update the profile of an admin user.
 
@@ -66,39 +57,12 @@ def update_admin_profile(admin_data):
     data = request.get_json()
     if not data:
         return jsonify({"message": "Not a JSON"}), 400
-
-    required_data = {
-        "name",
-        "email",
-        # 'phone',
-    }
-
-    for field in required_data:
-        if field not in data:
-            return jsonify({"message": f"Missing {field}"}), 400
-
-    admin_data.name = data["name"]
-    admin_data.email = data["email"]
-    # admin_data.phone = data['phone']
-
-    if "new_password" in data:
-        if "current_password" not in data:
-            return jsonify({"message": "Missing old password"}), 400
-        user = storage.get_first(User, id=admin_data.id)
-        if not user:
-            return jsonify({"message": "User not found"}), 404
-        if not user.check_password(data["current_password"]):
-            return jsonify({"message": "Incorrect password"}), 400
-
-        user.hash_password(data["new_password"])
-    storage.save()
-
     return jsonify({"message": "Profile Updated Successfully"}), 200
 
 
 @admin.route("/overview", methods=["GET"])
 @admin_required
-def school_overview(admin_data):
+def school_overview(admin_data: UserT) -> Tuple[Response, int]:
     """
     Provides an overview of the school including total number of teachers, total number of students,
     enrollment statistics by grade, and performance statistics by subject.
@@ -142,7 +106,7 @@ def school_overview(admin_data):
 
 @admin.route("/assign-teacher", methods=["PUT"])
 @admin_required
-def assign_class(admin_data):
+def assign_class(admin_data: UserT) -> Tuple[Response, int]:
     """
     Assigns a teacher to a class based on the provided data.
 
@@ -286,7 +250,7 @@ def assign_class(admin_data):
 
 @admin.route("/events", methods=["GET"])
 @admin_required
-def available_events(admin_data):
+def available_events(admin_data: UserT) -> Tuple[Response, int]:
     """
     Handle retrieval of events.
 
@@ -314,7 +278,7 @@ def available_events(admin_data):
 
 @admin.route("/event/new", methods=["POST"])
 @admin_required
-def create_events(admin_data):
+def create_events(admin_data: UserT) -> Tuple[Response, int]:
     try:
         data = request.get_json()
         event_schema = EventSchema()
@@ -362,7 +326,7 @@ def create_events(admin_data):
 
 @admin.route("/registered_grades", methods=["GET"])
 @admin_required
-def registered_grades(admin_data):
+def registered_grades(admin_data: UserT) -> Tuple[Response, int]:
     """
     Retrieve and return a list of registered grades.
 
@@ -398,7 +362,7 @@ def registered_grades(admin_data):
 
 @admin.route("/mark-list/new", methods=["POST"])
 @admin_required
-def create_mark_list(admin_data):
+def create_mark_list(admin_data: UserT) -> Tuple[Response, int]:
     """
     Create a mark list for students based on the provided data.
 
@@ -447,7 +411,7 @@ def create_mark_list(admin_data):
 
 @admin.route("/students/mark_list", methods=["GET"])
 @admin_required
-def show_mark_list(admin_data):
+def show_mark_list(admin_data: UserT) -> Tuple[Response, int]:
     """
     Retrieve and display a list of marks for students based on the provided query parameters.
 
@@ -508,7 +472,7 @@ def show_mark_list(admin_data):
 
 @admin.route("/students", methods=["POST"])
 @admin_required
-def admin_student_list(admin_data):
+def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
     """
     Retrieve and filter student data based on the provided admin data.
 
@@ -647,7 +611,7 @@ def admin_student_list(admin_data):
 
 @admin.route("/students/status-count", methods=["GET"])
 @admin_required
-def student_status_count(admin_data):
+def student_status_count(admin_data: UserT) -> Tuple[Response, int]:
     """
     Retrieve and return the count of students based on their status.
 
@@ -687,7 +651,7 @@ def student_status_count(admin_data):
 
 @admin.route("/students/average-range", methods=["GET"])
 @admin_required
-def student_average_range(admin_data):
+def student_average_range(admin_data: UserT) -> Tuple[Response, int]:
     """
     Retrieve and return the average range of students.
 
@@ -766,7 +730,7 @@ def student_average_range(admin_data):
 
 @admin.route("/students/grade-counts", methods=["GET"])
 @admin_required
-def student_grade_counts(admin_data):
+def student_grade_counts(admin_data: UserT) -> Tuple[Response, int]:
     """
     Retrieve and return the count of students in each grade.
 
@@ -798,7 +762,7 @@ def student_grade_counts(admin_data):
 
 @admin.route("/students/section-counts", methods=["GET"])
 @admin_required
-def student_section_counts(admin_data):
+def student_section_counts(admin_data: UserT) -> Tuple[Response, int]:
     """
     Retrieve and return the count of students in each section.
 
@@ -837,7 +801,7 @@ def student_section_counts(admin_data):
 
 @admin.route("/students/views", methods=["GET"])
 @admin_required
-def student_views(admin_data):
+def student_views(admin_data: UserT) -> Tuple[Response, int]:
     """
     Retrieve and return the views of students.
 
@@ -860,7 +824,7 @@ def student_views(admin_data):
 
 @admin.route("/teachers", methods=["GET"])
 @admin_required
-def all_teachers(admin_data):
+def all_teachers(admin_data: UserT) -> Tuple[Response, int]:
     """
     Retrieve and return a list of teachers with pagination and optional search functionality.
 

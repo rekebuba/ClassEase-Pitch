@@ -11,6 +11,7 @@ from models import storage
 
 class AdminService:
     """Service class for Admin model"""
+
     @staticmethod
     def get_admin_by_user_id(user_id: str) -> Admin:
         return Admin.query.filter_by(user_id=user_id).first()
