@@ -1,11 +1,13 @@
 import json
 import os
 import re
+from typing import Any, Dict
 from flask import current_app, request, jsonify
 from math import ceil
 from sqlalchemy import and_, case, func, or_
 from werkzeug.utils import secure_filename
 from models.semester import Semester
+from sqlalchemy.sql.elements import ColumnElement
 
 
 def paginate_query(query, page, limit, filters, custom_filters, sort, join=and_):
@@ -75,7 +77,7 @@ def validate_request(required_fields, file_fields=[]):
     return None  # No errors
 
 
-def preprocess_query_params(data):
+def preprocess_query_params(data: Dict[str, Any]) -> Dict[str, Any]:
     """Convert parse_qs output and handle comma-separated values."""
     processed = {}
     for key, value in data.items():
@@ -94,7 +96,9 @@ def preprocess_query_params(data):
     return processed
 
 
-def make_case_lookup(semester_num: int, column, prefix: str):
+def make_case_lookup(
+    semester_num: int, column: ColumnElement[Any], prefix: str
+) -> Dict[str, ColumnElement[Any]]:
     """Helper to generate case expressions with dynamic labels."""
     label_I = f"{prefix}I"  # Pre-compute the label
     label_II = f"{prefix}II"
@@ -110,7 +114,9 @@ def make_case_lookup(semester_num: int, column, prefix: str):
     }
 
 
-def min_max_semester_lookup(semester_num: int, column, prefix: str):
+def min_max_semester_lookup(
+    semester_num: int, column: ColumnElement[Any], prefix: str
+) -> Dict[str, ColumnElement[Any]]:
     """Helper to generate case expressions with dynamic labels."""
     label_I = f"{prefix}_min"  # Pre-compute the label
     label_II = f"{prefix}_max"
@@ -124,7 +130,9 @@ def min_max_semester_lookup(semester_num: int, column, prefix: str):
     }
 
 
-def min_max_year_lookup(column, prefix: str):
+def min_max_year_lookup(
+    column: ColumnElement[Any], prefix: str
+) -> Dict[str, ColumnElement[Any]]:
     """Helper to generate case expressions with dynamic labels."""
     label_I = f"{prefix}_min"  # Pre-compute the label
     label_II = f"{prefix}_max"

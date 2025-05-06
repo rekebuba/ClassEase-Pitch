@@ -14,7 +14,7 @@ from models.admin import Admin
 class UserService:
     """Base service for user-related operations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     def create_user(self, data):

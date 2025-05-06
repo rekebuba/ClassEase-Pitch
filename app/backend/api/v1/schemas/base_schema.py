@@ -1,13 +1,14 @@
 from datetime import datetime
 import re
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, List, Optional, Type, Union
 from marshmallow import (
     Schema,
     ValidationError,
     post_dump,
     pre_load,
 )
-from sqlalchemy import or_
+from sqlalchemy import UnaryExpression, or_
+from sqlalchemy.orm.attributes import InstrumentedAttribute
 from api.v1.schemas.config_schema import (
     OPERATOR_MAPPING,
     get_all_model_classes,
@@ -15,6 +16,7 @@ from api.v1.schemas.config_schema import (
     to_snake,
     to_snake_case_key,
 )
+from models.base_model import Base
 from models.stud_year_record import STUDYearRecord
 from models.table import Table
 from models.subject import Subject
@@ -52,7 +54,7 @@ class BaseSchema(Schema):
             raise ValidationError("Invalid phone number format.")
 
     @staticmethod
-    def is_student_registered(student_id: str) -> bool:
+    def is_student_registered(student_id: Optional[str]) -> bool:
         """Check if the student is registered. returns True if registered."""
         if student_id is None:
             raise ValidationError("student id is required")
@@ -69,11 +71,11 @@ class BaseSchema(Schema):
         return is_registered
 
     @staticmethod
-    def generate_section(grade_id: str, semester_id: str) -> None:
+    def generate_section(grade_id: Optional[str], semester_id: Optional[str]) -> None:
         pass  # TODO: new sections to generate
 
     @staticmethod
-    def get_user_id(user_identification: str) -> str:
+    def get_user_id(user_identification: Optional[str]) -> str:
         """Get the user_id based on the user_identification."""
         if user_identification is None:
             raise ValidationError("user is required")
@@ -91,7 +93,7 @@ class BaseSchema(Schema):
         return user_id
 
     @staticmethod
-    def get_year_id(academic_year: str) -> str:
+    def get_year_id(academic_year: Optional[str]) -> str:
         """Get the year_id based on the academic_year."""
         if academic_year is None:
             raise ValidationError("academic year is required")
@@ -109,7 +111,7 @@ class BaseSchema(Schema):
         return year_id
 
     @staticmethod
-    def get_grade_id(grade_name: str) -> str:
+    def get_grade_id(grade_name: Optional[str]) -> str:
         """Get the grade_id based on the grade_name."""
         if grade_name is None:
             raise ValidationError("grade is required")
@@ -125,7 +127,7 @@ class BaseSchema(Schema):
         return grade_id
 
     @staticmethod
-    def get_student_year_records_id(year_id: str) -> str:
+    def get_student_year_records_id(year_id: Optional[str]) -> str:
         """Get the student_year_records_id based on the year_id."""
         if year_id is None:
             raise ValidationError("year_id is required")
@@ -141,7 +143,9 @@ class BaseSchema(Schema):
         return year_record_id
 
     @staticmethod
-    def get_semester_id(semester_name: str, academic_year: str) -> str:
+    def get_semester_id(
+        semester_name: Optional[str], academic_year: Optional[str]
+    ) -> str:
         if semester_name is None:
             raise ValidationError("semester is required")
         if academic_year is None:
@@ -167,7 +171,11 @@ class BaseSchema(Schema):
         return semester_id
 
     @staticmethod
-    def get_subject_id(subject_name: str, subject_code: str, grade_id: str) -> str:
+    def get_subject_id(
+        subject_name: Optional[str],
+        subject_code: Optional[str],
+        grade_id: Optional[str],
+    ) -> str:
         if subject_name is None:
             raise ValidationError("subject name is required")
         if subject_code is None:
@@ -222,7 +230,7 @@ class BaseSchema(Schema):
         return subject
 
     @staticmethod
-    def get_table(table_id: str):
+    def get_table(table_id: Optional[str]) -> Type[Base]:
         if table_id is None:
             raise ValidationError("table_id is required")
 
@@ -240,18 +248,20 @@ class BaseSchema(Schema):
         return model
 
     @staticmethod
-    def get_table_id(table):
+    def get_table_id(table: Optional[Base]) -> str | None:
         if table is None:
             raise ValidationError("table is required")
 
         # Fetch the table_id from the database
         table_name = table.__tablename__
-        table = storage.session.query(Table).filter_by(name=table_name).first()
+        table_id = storage.session.query(Table.id).filter_by(name=table_name).scalar()
 
-        return table.id if table else None
+        return table_id if table_id else None
 
     @staticmethod
-    def update_list_value(value: list[str | int], model, column_name: str) -> list:
+    def update_list_value(
+        value: list[str | int], model: Type[Base], column_name: str
+    ) -> list:
         """
         Update the list value to match the model's column type.
         """
@@ -297,7 +307,13 @@ class BaseSchema(Schema):
             )
 
     @staticmethod
-    def filter_data(model, column_name: str | list[str], operator, value, range):
+    def filter_data(
+        model: Type[Base],
+        column_name: str | list[str],
+        operator: Optional[str],
+        value: Union[str],
+        range: Optional[Dict[str, Any]] = None,
+    ) -> list:
         """
         Dynamically create a SQLAlchemy filter based on operator.
         """
@@ -306,7 +322,7 @@ class BaseSchema(Schema):
 
         for column in columns:
             col_name = to_snake_case_key(column)
-            col = getattr(model, col_name, None)
+            col: Optional[InstrumentedAttribute] = getattr(model, col_name, None)
             if col is None:
                 raise ValidationError(
                     f"Column '{col_name}' not found on {model.__tablename__}."
@@ -338,7 +354,9 @@ class BaseSchema(Schema):
         return result
 
     @staticmethod
-    def sort_data(model, column_name: str | list[str], order: bool) -> list:
+    def sort_data(
+        model: Type[Base], column_name: str | List[str], order: bool
+    ) -> list[UnaryExpression]:
         """
         Dynamically create a SQLAlchemy sort based on order.
         """
@@ -347,10 +365,10 @@ class BaseSchema(Schema):
             if isinstance(column_name, list)
             else [column_name]
         )
-        result = []
+        result: List[UnaryExpression] = []
         for column in columns:
             col_name = to_snake_case_key(column)
-            col = getattr(model, col_name, None)
+            col: Optional[InstrumentedAttribute] = getattr(model, col_name, None)
             if col is None:
                 raise ValidationError(
                     f"Column '{col_name}' not found on {model.__tablename__}."

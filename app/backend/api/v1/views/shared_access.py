@@ -2,9 +2,11 @@
 """Teacher views module for the API"""
 
 import os
-from flask import request, jsonify, current_app, url_for
+from typing import Callable, Dict, Optional, Tuple, Union
+from flask import Response, request, jsonify, current_app, url_for
 from marshmallow import ValidationError
-from sqlalchemy import func
+from sqlalchemy import Row, func
+from api.v1.utils.typing import UserT
 from models import storage
 from datetime import datetime
 from models.user import User
@@ -31,7 +33,7 @@ from api.v1.services.user_service import UserService
 from api.v1.views.methods import paginate_query
 from api.v1.views import errors
 from api.v1.schemas.schemas import UserDetailSchema
-from models.base_model import BaseModel, CustomTypes
+from models.base_model import Base, BaseModel, CustomTypes
 from api.v1.views.methods import save_profile
 from werkzeug.utils import secure_filename
 
@@ -40,7 +42,7 @@ shared = Blueprint("shared", __name__, url_prefix="/api/v1")
 
 
 @shared.route("/registration/<role>", methods=["POST"])
-def register_new_user(role):
+def register_new_user(role: str) -> Tuple[Response, int]:
     """
     Registers a new user (Admin, Student, Teacher) in the system.
 
@@ -70,7 +72,7 @@ def register_new_user(role):
         if not result:
             raise Exception("Failed to register user")
 
-        return {"message": f"{role} registered successfully!"}, 201
+        return jsonify({"message": f"{role} registered successfully!"}), 201
     except ValidationError as e:
         storage.rollback()
         return errors.handle_validation_error(e)
@@ -81,25 +83,9 @@ def register_new_user(role):
 
 @shared.route("/student/assessment", methods=["GET"])
 @admin_or_student_required
-def student_assessment(admin_data, student_data):
+def student_assessment(user_data: UserT) -> Tuple[Response, int]:
     """
     Retrieve and display a list of assessments for students based on the provided query parameters.
-
-    Args:
-        admin_data (dict): Data related to the admin making the request.
-
-    Returns:
-        Response: A JSON response containing the list of student assessments or an error message with the appropriate HTTP status code.
-
-    Query Parameters:
-        grade (str): The grade level.
-        section (str): The section within the grade.
-        year (str): The academic year.
-
-    Responses:
-        200: A JSON list of student assessments.
-        400: A JSON error message indicating a missing required field.
-        404: A JSON error message indicating that the grade, section, subject, or students were not found.
     """
     url = request.url
     parsed_url = urlparse(url)
@@ -230,7 +216,7 @@ def student_assessment(admin_data, student_data):
 
 @shared.route("/student/assessment/detail", methods=["GET"])
 @admin_or_student_required
-def student_assessment_detail(admin_data, student_data):
+def student_assessment_detail(user_data: UserT) -> Tuple[Response, int]:
     url = request.url
     parsed_url = urlparse(url)
     data = parse_qs(parsed_url.query)
@@ -272,15 +258,14 @@ def student_assessment_detail(admin_data, student_data):
                 }
             )
     except Exception as e:
-        return jsonify({"message": f"Failed to retrieve student assessment"}), 500
+        return jsonify({"message": "Failed to retrieve student assessment"}), 500
 
     return jsonify(assessment), 200
 
 
 @shared.route("/upload/profile", methods=["POST"])
 @student_teacher_or_admin_required
-def upload_profile(student_data, teacher_data, admin_data):
-    user = student_data or teacher_data or admin_data
+def upload_profile(user_data: UserT) -> Tuple[Response, int]:
     # Check if the request contains a file
     if "profilePicture" not in request.files:
         return jsonify({"message": "No file part"}), 400
@@ -296,51 +281,62 @@ def upload_profile(student_data, teacher_data, admin_data):
 
     if filepath:
         # Save the file path to the database
-        query = storage.session.query(User).filter(User.id == user.id).first()
-        query.image_path = filepath
+        storage.session.execute(
+            update(User)
+            .where(User.id == user_data.id)
+            .values(image_path=filepath, updated_at=datetime.utcnow())
+        )
         storage.save()
 
-        return jsonify(
-            {
-                "message": "File uploaded successfully",
-            }
-        ), 200
+        return jsonify({"message": "File uploaded successfully"}), 200
     else:
         return jsonify({"message": "File type not allowed"}), 400
 
 
+# Define a type alias for the query result
+QueryResult = Optional[
+    Union[Row[Tuple[User, Admin]], Row[Tuple[User, Teacher]], Row[Tuple[User, Student]]]
+]
+
+# Define the query dictionary type
+QueryDict = Dict[CustomTypes.RoleEnum, Callable[[], QueryResult]]
+
+
 @shared.route("/", methods=["GET"])
 @student_teacher_or_admin_required
-def user(user):
+def user(user: UserT) -> Tuple[Response, int]:
+    query: QueryDict = {
+        CustomTypes.RoleEnum.ADMIN: lambda: (
+            storage.session.query(User, Admin)
+            .join(User.admins)
+            .filter(User.id == user.id)
+            .first()
+        ),
+        CustomTypes.RoleEnum.TEACHER: lambda: (
+            storage.session.query(User, Teacher)
+            .join(User.teachers)
+            .filter(User.id == user.id)
+            .first()
+        ),
+        CustomTypes.RoleEnum.STUDENT: lambda: (
+            storage.session.query(User, Student)
+            .join(User.students)
+            .filter(User.id == user.id)
+            .first()
+        ),
+    }
     try:
-        if user.role == CustomTypes.RoleEnum.ADMIN:
-            query = (
-                storage.session.query(User, Admin)
-                .join(Admin, Admin.user_id == User.id)
-                .filter(User.identification == user.identification)
-                .first()
-            )
-        elif user.role == CustomTypes.RoleEnum.TEACHER:
-            query = (
-                storage.session.query(User, Teacher)
-                .join(Teacher, Teacher.user_id == User.id)
-                .filter(User.identification == user.identification)
-                .first()
-            )
-        elif user.role == CustomTypes.RoleEnum.STUDENT:
-            query = (
-                storage.session.query(User, Student)
-                .join(Student, Student.user_id == User.id)
-                .filter(User.identification == user.identification)
-                .first()
-            )
         if not query:
             return errors.handle_not_found_error("User Not Found")
 
-        user, detail = query
+        user_query = query[user.role]()
+        if user_query is None:
+            return errors.handle_not_found_error("User Not Found")
+
+        user_data, detail = user_query
         # Serialize the data using the schema
         schema = UserDetailSchema()
-        result = schema.dump({"user": user, "detail": detail})
+        result = schema.dump({"user": user_data, "detail": detail})
 
         return jsonify(result), 200
 

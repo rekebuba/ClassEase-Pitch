@@ -1,3 +1,4 @@
+from typing import Union
 from flask import Blueprint, Response, jsonify
 from marshmallow import ValidationError
 import logging
@@ -22,18 +23,18 @@ def handle_validation_error(error: ValidationError) -> tuple[Response, int]:
 
 
 @errors.app_errorhandler(500)
-def handle_internal_error(error: Exception) -> tuple[Response, int]:
+def handle_internal_error(error: Union[Exception, str]) -> tuple[Response, int]:
     logging.error(f"Internal Server Error: {error}")
     return jsonify({"message": "Internal server error", "error": str(error)}), 500
 
 
 @errors.app_errorhandler(404)
-def handle_not_found_error(error: Exception) -> tuple[Response, int]:
+def handle_not_found_error(error: Union[Exception, str]) -> tuple[Response, int]:
     logging.error(f"Not Found Error: {error}")
     return jsonify({"message": "Resource not found", "error": str(error)}), 404
 
 
 @errors.app_errorhandler(401)
-def handle_invalid_credentials_error(error: Exception) -> tuple[Response, int]:
+def handle_invalid_credentials_error(error: Union[Exception, str]) -> tuple[Response, int]:
     logging.error(f"Invalid Credentials Error: {error}")
     return jsonify({"message": "Invalid credentials", "error": str(error)}), 401

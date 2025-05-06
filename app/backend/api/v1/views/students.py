@@ -2,8 +2,10 @@
 """Student views module for the API"""
 
 import json
-from flask import Blueprint, request, jsonify, url_for
+from typing import Tuple
+from flask import Blueprint, Response, request, jsonify, url_for
 from marshmallow import ValidationError
+from api.v1.utils.typing import UserT
 from models.year import Year
 from models.semester import Semester
 from models.event import Event
@@ -142,7 +144,7 @@ def get_student_grade(student_data):
 
 @stud.route("/score", methods=["GET"])
 @admin_or_student_required
-def get_student_score(student_data, admin_data):
+def get_student_score(student_data: UserT) -> Tuple[Response, int]:
     """
     Retrieve and return the score details of a student for a specific grade and semester.
 
@@ -166,7 +168,7 @@ def get_student_score(student_data, admin_data):
 
     if not student_data:
         if "student_id" not in data:
-            return jsonify({"message": f"Missing student id"}), 400
+            return jsonify({"message": "Missing student id"}), 400
         student_data = storage.get_first(STUDYearRecord, student_id=data["student_id"])
 
     required_data = {

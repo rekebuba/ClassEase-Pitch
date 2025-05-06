@@ -264,14 +264,14 @@ def admin_or_student_required(
             token, current_app.config["ADMIN_SECRET_KEY"]
         )
         if admin_data:
-            return f(admin_data, None, *args, **kwargs)
+            return f(admin_data, *args, **kwargs)
 
         # Try decoding as a student token
         student_data = decode_and_retrieve_user(
             token, current_app.config["STUDENT_SECRET_KEY"]
         )
         if student_data:
-            return f(None, student_data, *args, **kwargs)
+            return f(student_data, *args, **kwargs)
 
         return jsonify({"message": "Unauthorized Access. Please Login Again."}), 401
 

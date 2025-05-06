@@ -1,59 +1,92 @@
-from collections.abc import Callable
 from datetime import date, datetime, timedelta
 import re
-from sqlalchemy import and_, func, or_
+from sqlalchemy import and_, func, or_, true
+from sqlalchemy.sql.elements import ColumnElement
+from sqlalchemy.orm.attributes import InstrumentedAttribute
+from models.base_model import Base, BaseModel
+from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
 
-from models.base_model import BaseModel
-from typing import Any, Dict, Union
 
-
-def is_date(val):
+def is_date(val: Union[List[str], str]) -> bool:
+    """
+    Check if the value is a date or datetime object.
+    """
+    if isinstance(val, list):
+        return all(isinstance(v, (date, datetime)) for v in val)
     return isinstance(val, (date, datetime))
 
 
-def normalize_date_col(col, val):
-    return func.date(col) if is_date(val) else col
+def normalize_date_col(
+    col: InstrumentedAttribute, val: Union[List[str], str]
+) -> Union[ColumnElement, InstrumentedAttribute]:
+    return cast(ColumnElement, func.date(col)) if is_date(val) else col
 
 
-OPERATOR_MAPPING = {
-    "eq": lambda col, val: normalize_date_col(col, val) == val,
-    "ne": lambda col, val: normalize_date_col(col, val) != val,
-    "lt": lambda col, val: normalize_date_col(col, val) < val,
-    "lte": lambda col, val: normalize_date_col(col, val) <= val,
-    "gt": lambda col, val: normalize_date_col(col, val) > val,
-    "gte": lambda col, val: normalize_date_col(col, val) >= val,
+OPERATOR_MAPPING: Dict[
+    str,
+    Callable[
+        [InstrumentedAttribute, Union[str, List[str], Dict[str, Any]]],
+        ColumnElement[Any],
+    ],
+] = {
+    # Equals operators (string only)
+    "eq": lambda col, val: (
+        normalize_date_col(col, val) == val if isinstance(val, str) else true()
+    ),
+    "ne": lambda col, val: (
+        normalize_date_col(col, val) != val if isinstance(val, str) else true()
+    ),
+    "lt": lambda col, val: (
+        normalize_date_col(col, val) < val if isinstance(val, str) else true()
+    ),
+    "lte": lambda col, val: (
+        normalize_date_col(col, val) <= val if isinstance(val, str) else true()
+    ),
+    "gt": lambda col, val: (
+        normalize_date_col(col, val) > val if isinstance(val, str) else true()
+    ),
+    "gte": lambda col, val: (
+        normalize_date_col(col, val) >= val if isinstance(val, str) else true()
+    ),
     "iLike": lambda col, val: col.ilike(f"%{val}%"),
     "like": lambda col, val: col.like(f"%{val}%"),
     "notLike": lambda col, val: ~col.like(f"%{val}%"),
     "startsWith": lambda col, val: col.like(f"{val}%"),
     "endWith": lambda col, val: col.like(f"%{val}"),
-    "in": lambda col, val: normalize_date_col(col, val[0]).in_(
-        val if isinstance(val, list) else [val]
-    )
-    if val
-    else False,
-    "notIn": lambda col, val: ~normalize_date_col(col, val[0]).in_(
-        val if isinstance(val, list) else [val]
-    )
-    if val
-    else True,
+    # IN operator (list of values)
+    "in": lambda col, val: (
+        normalize_date_col(col, val[0]).in_(val)
+        if isinstance(val, list) and val
+        else normalize_date_col(col, val).in_([val])
+        if isinstance(val, str)
+        else true()
+    ),
+    "notIn": lambda col, val: (
+        ~normalize_date_col(col, val[0]).in_(val)
+        if isinstance(val, list) and val
+        else ~normalize_date_col(col, val).in_([val])
+        if isinstance(val, str)
+        else true()
+    ),
     "isEmpty": lambda col, _: or_(col.is_(None), col == ""),
     "isNotEmpty": lambda col, _: and_(col.isnot(None), col != ""),
     "isBetween": lambda col, range: (
         normalize_date_col(col, range.get("min") or range.get("max")).between(
             range.get("min"), range.get("max")
         )
-        if range.get("min") is not None and range.get("max") is not None
+        if isinstance(range, dict)
+        and range.get("min") is not None
+        and range.get("max") is not None
         else normalize_date_col(col, range.get("min")) >= range.get("min")
-        if range.get("min") is not None
+        if isinstance(range, dict) and range.get("min") is not None
         else normalize_date_col(col, range.get("max")) <= range.get("max")
-        if range.get("max") is not None
-        else None
+        if isinstance(range, dict) and range.get("max") is not None
+        else true()
     ),
     "isRelativeToToday": lambda col, days: (
         func.date(col) >= (datetime.utcnow().date() + timedelta(days=days))
         if isinstance(days, int)
-        else None
+        else true()
     ),
 }
 
@@ -100,7 +133,7 @@ VALUE_TYPE_RULES = {
 
 def to_snake(data: Any) -> Any:
     if isinstance(data, dict):
-        return {to_snake_case_key(k): to_snake(v) for k, v in data.items()}
+        return {to_snake_case_key(str(k)): to_snake(v) for k, v in data.items()}
     elif isinstance(data, list):
         return [to_snake(item) for item in data]
     else:
@@ -120,7 +153,7 @@ def to_camel(data: Any) -> Any:
     return data
 
 
-def to_snake_case_key(s):
+def to_snake_case_key(s: str) -> str:
     return re.sub(r"(?<!^)(?=[A-Z])", "_", s).lower()
 
 
@@ -130,10 +163,12 @@ def to_camel_case_key(s: str) -> str:
 
 
 # Get all model classes dynamically
-def get_all_model_classes():
+def get_all_model_classes() -> Dict[str, Type[Base]]:
     # Returns dict of {__tablename__: model_class}
     return {
         cls.__tablename__: cls
         for cls in BaseModel.registry._class_registry.values()
-        if hasattr(cls, "__tablename__") and cls is not BaseModel
+        if isinstance(cls, type)
+        and hasattr(cls, "__tablename__")
+        and cls is not BaseModel
     }

@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Any, Union
+from typing import Any, Dict, Union
 from flask import url_for
 from marshmallow import (
     ValidationError,
@@ -107,7 +107,7 @@ class UserSchema(BaseSchema):
         return identification
 
     @validates_schema
-    def validate_data(self, data, **kwargs: Any):
+    def validate_data(self, data: Dict[str, Any], **kwargs: Any) -> None:
         if data["role"] not in [member.value for member in CustomTypes.RoleEnum]:
             raise ValidationError("Invalid role type.")
         if (
@@ -118,7 +118,7 @@ class UserSchema(BaseSchema):
             raise ValidationError("User already exists.")
 
     @pre_load
-    def assign_id_and_password(self, data, **kwargs: Any):
+    def set_defaults(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
         data["identification"] = UserSchema._generate_id(data["role"])
         data["password"] = UserSchema._hash_password(data["identification"])
         return data
@@ -145,14 +145,14 @@ class AuthSchema(BaseSchema):
     message = fields.String(dump_only=True)
 
     @staticmethod
-    def _check_password(stored_password, provided_password):
+    def _check_password(stored_password: str, provided_password: str) -> bool:
         """Check if the provided password matches the stored hashed password."""
         return bcrypt.checkpw(
             provided_password.encode("utf-8"), stored_password.encode("utf-8")
         )
 
     @validates_schema
-    def validate_data(self, data, **kwargs: Any):
+    def validate_data(self, data: Dict[str, Any], **kwargs: Any) -> None:
         user = storage.session.query(User).filter_by(identification=data["id"]).first()
 
         if user is None or not AuthSchema._check_password(
@@ -198,7 +198,7 @@ class AdminSchema(BaseSchema):
     user = fields.Nested(UserSchema)
 
     @pre_load
-    def set_defaults(self, data, **kwargs: Any):
+    def set_defaults(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
         # add default values
         nested_data = {
             "first_name": data.get("first_name"),
@@ -214,12 +214,12 @@ class AdminSchema(BaseSchema):
         return data
 
     @validates_schema
-    def validate_data(self, data, **kwargs: Any):
+    def validate_data(self, data: Dict[str, Any], **kwargs: Any) -> None:
         if storage.session.query(Admin).filter_by(email=data["email"]).first():
             raise ValidationError("Email already exists.")
 
     @validates("phone")
-    def validate_teacher_phone(self, value):
+    def validate_teacher_phone(self, value: str) -> None:
         self.validate_phone(value)
 
     @pre_dump
@@ -252,7 +252,7 @@ class TeacherSchema(BaseSchema):
     user = fields.Nested(UserSchema)
 
     @pre_load
-    def set_defaults(self, data, **kwargs: Any):
+    def set_defaults(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
         # add default values
         # Convert flat fields into a nested 'student_name' dict
         nested_data = {
@@ -267,12 +267,12 @@ class TeacherSchema(BaseSchema):
         return data
 
     @validates_schema
-    def validate_data(self, data, **kwargs: Any):
+    def validate_data(self, data: Dict[str, Any], **kwargs: Any) -> None:
         if storage.session.query(Teacher).filter_by(email=data["email"]).first():
             raise ValidationError("Email already exists.")
 
     @validates("phone")
-    def validate_teacher_phone(self, value):
+    def validate_teacher_phone(self, value: str) -> None:
         self.validate_phone(value)
 
     @pre_dump
@@ -356,7 +356,7 @@ class StudentSchema(BaseSchema):
     table_id = fields.String(required=False)
 
     @pre_load
-    def set_defaults(self, data, **kwargs: Any):
+    def set_defaults(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
         # add default values to the data
 
         # Convert flat fields into a nested 'student_name' dict
@@ -407,7 +407,7 @@ class StudentSchema(BaseSchema):
         return data
 
     @validates_schema
-    def validate_data(self, data, **kwargs: Any):
+    def validate_data(self, data: Dict[str, Any], **kwargs: Any) -> None:
         if not data.get("father_phone") and not data.get("mother_phone"):
             raise ValidationError(
                 "Either father_phone or mother_phone must be provided."
@@ -416,7 +416,7 @@ class StudentSchema(BaseSchema):
             raise ValidationError(
                 "previous_school_name must be provided if is_transfer is True."
             )
-        if data.get("is_transfer") == False and data.get("previous_school_name"):
+        if not data.get("is_transfer") and data.get("previous_school_name"):
             raise ValidationError(
                 "previous_school_name must be None if is_transfer is False."
             )
@@ -424,7 +424,7 @@ class StudentSchema(BaseSchema):
             raise ValidationError(
                 "medical_details must be provided if has_medical_condition is True."
             )
-        if data.get("has_medical_condition") == False and data.get("medical_details"):
+        if not data.get("has_medical_condition") and data.get("medical_details"):
             raise ValidationError(
                 "medical_details must be None if has_medical_condition is False."
             )
@@ -432,17 +432,17 @@ class StudentSchema(BaseSchema):
             raise ValidationError(
                 "disability_details must be provided if has_disability is True."
             )
-        if data.get("has_disability") == False and data.get("disability_details"):
+        if not data.get("has_disability") and data.get("disability_details"):
             raise ValidationError(
                 "disability_details must be None if has_disability is False."
             )
-        if data.get("requires_special_accommodation") == True and not data.get(
+        if data.get("requires_special_accommodation") and not data.get(
             "special_accommodation_details"
         ):
             raise ValidationError(
                 "special_accommodation_details must be provided if requires_special_accommodation is True."
             )
-        if data.get("requires_special_accommodation") == False and data.get(
+        if not data.get("requires_special_accommodation") and data.get(
             "special_accommodation_details"
         ):
             raise ValidationError(
@@ -450,28 +450,30 @@ class StudentSchema(BaseSchema):
             )
 
     @validates("date_of_birth")
-    def validate_date_of_birth(self, value):
+    def validate_date_of_birth(self, value: datetime) -> None:
         if value > datetime.now().date():
             raise ValidationError("Date of birth cannot be in the future.")
 
     @validates("father_phone")
-    def validate_father_phone(self, value):
+    def validate_father_phone(self, value: str) -> None:
         self.validate_phone(value)
 
     @validates("mother_phone")
-    def validate_mother_phone(self, value):
+    def validate_mother_phone(self, value: str) -> None:
         self.validate_phone(value)
 
     @validates("guardian_phone")
-    def validate_guardian_phone(self, value):
+    def validate_guardian_phone(self, value: str) -> None:
         if value:  # Optional field, only validate if provided
             self.validate_phone(value)
 
     @validates("semester_id")
-    def validate_semester_id(self, value):
+    def validate_semester_id(self, value: str) -> None:
         if value:
-            semester = storage.get_first(Semester, id=value)
-            if not semester:
+            semester_id = (
+                storage.session.query(Semester.id).filter_by(id=value).scalar()
+            )
+            if not semester_id:
                 raise ValidationError("Invalid semester_id.")
 
     @pre_dump
@@ -515,8 +517,8 @@ class SemesterCreationSchema(BaseSchema):
     )
 
     @validates("event_id")
-    def valid_event_id(self, event_id):
-        if not storage.session.query(Event).filter_by(id=event_id).first():
+    def valid_event_id(self, event_id: str) -> None:
+        if not storage.session.query(Event.id).filter_by(id=event_id).scalar():
             raise ValidationError("Event Was Not Created Successfully.")
 
 
@@ -577,14 +579,14 @@ class EventSchema(BaseSchema):
     message = fields.String(dump_only=True)
 
     @pre_load
-    def set_defaults(self, data, **kwargs: Any):
+    def set_defaults(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
         # add default values to the data
         data["year_id"] = self.get_year_id(data.pop("academic_year", None))
 
         return data
 
     @validates_schema
-    def validate_dates_and_times(self, data, **kwargs: Any):
+    def validate_dates_and_times(self, data: Dict[str, Any], **kwargs: Any) -> None:
         """Ensure start_date is before end_date and start_time is before end_time."""
         try:
             if data["start_date"] and data["end_date"]:
@@ -665,7 +667,7 @@ class SubjectSchema(BaseSchema):
     grade_id = fields.String(required=True, load_only=True)
 
     @pre_load
-    def set_defaults(self, data, **kwargs: Any):
+    def set_defaults(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
         # add default values to the data
         data["grade_id"] = self.get_grade_id(data.pop("grade"))
         data["subject_id"] = self.get_subject_id(
@@ -708,7 +710,7 @@ class CourseListSchema(BaseSchema):
     is_registered = fields.Boolean(required=False, load_only=True)
 
     @pre_load
-    def set_defaults(self, data, **kwargs: Any):
+    def set_defaults(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
         # add default values to the data
         data["is_registered"] = self.is_student_registered(data.get("student_id"))
         data["grade_id"] = self.get_grade_id(data.get("grade"))
@@ -718,11 +720,6 @@ class CourseListSchema(BaseSchema):
         data["year_id"] = self.get_year_id(data.get("academic_year"))
 
         return data
-
-    @validates("is_registered")
-    def validate_is_registered(self, value):
-        if value:
-            raise ValidationError("Student is already registered.")
 
 
 class MarkListTypeSchema(BaseSchema):
@@ -742,12 +739,9 @@ class MarkAssessmentSchema(BaseSchema):
     assessment_type = fields.List(fields.Nested(MarkListTypeSchema), required=True)
 
     @pre_load
-    def set_defaults(self, data, **kwargs: Any):
+    def set_defaults(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
         # add default values to the data
         data["grade_id"] = self.get_grade_id(data.pop("grade"))
-        data["section_id"] = self.generate_section(
-            data.get("grade_id"), data.get("semester_id")
-        )
         return data
 
 
@@ -759,7 +753,7 @@ class CreateMarkListSchema(BaseSchema):
     semester_id = fields.String(required=True, load_only=True)
 
     @pre_load
-    def set_defaults(self, data, **kwargs: Any):
+    def set_defaults(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
         # add default values to the data
         data["semester_id"] = self.get_semester_id(
             data.pop("semester"), data.pop("academic_year")
@@ -830,7 +824,7 @@ class SortSchema(BaseSchema):
     table = TableField(required=False)
 
     @pre_load
-    def set_defaults(self, data, **kwargs: Any):
+    def set_defaults(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
         # add default values to the data
         data["column_name"] = data.pop("id", None)
         table_id = data.get("table_id", None)
@@ -877,7 +871,7 @@ class FilterSchema(BaseSchema):
     value = ValueField(required=False, missing=None, allow_none=True)
 
     @validates_schema
-    def validate_value(self, data, **kwargs: Any):
+    def validate_value(self, data: Dict[str, Any], **kwargs: Any) -> None:
         variant = data.get("variant", None)
         operator = data.get("operator", None)
         value = data.get("value", None)
@@ -907,7 +901,7 @@ class FilterSchema(BaseSchema):
                 )
 
     @pre_load
-    def set_defaults(self, data, **kwargs: Any):
+    def set_defaults(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
         # add default values to the data
         data["column_name"] = data.pop("id", None)
         value = data.get("value", None)

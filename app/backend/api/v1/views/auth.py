@@ -1,12 +1,13 @@
 #!/usr/bin/python3
 """Public views module for the API"""
 
+from typing import Tuple, Optional
 import jwt
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, Response, request, jsonify
 from api.v1.views.utils import student_teacher_or_admin_required
 from marshmallow import ValidationError
+from api.v1.utils.typing import UserT
 from models import storage
-from models.user import User
 from models.blacklist_token import BlacklistToken
 from api.v1.schemas.schemas import AuthSchema, InvalidCredentialsError
 from api.v1.views import errors
@@ -16,7 +17,7 @@ auth = Blueprint("auth", __name__, url_prefix="/api/v1")
 
 
 @auth.route("auth/login", methods=["POST"])
-def login():
+def login() -> Tuple[Response, int]:
     """
     Handle user login by validating credentials and generating an access token.
     """
@@ -46,12 +47,15 @@ def login():
 
 @auth.route("/auth/logout", methods=["POST"])
 @student_teacher_or_admin_required
-def logout(user):
-    token = request.headers["apiKey"].split()[1]  # Extract the token
+def logout(user: UserT) -> Tuple[Response, int]:
+    token: str = request.headers["apiKey"].split()[1]  # Extract the token
     try:
         # Decode the token to get the JTI
         payload = jwt.decode(token, options={"verify_signature": False})
-        jti = payload.get("jti")
+        jti: Optional[str] = payload.get("jti")
+
+        if not jti:
+            raise Exception
 
         # Add the JTI to the blacklist table
         black_list = BlacklistToken(jti=jti)
@@ -59,4 +63,4 @@ def logout(user):
 
         return jsonify({"message": "Successfully logged out"}), 200
     except Exception as e:
-        return jsonify({"message": "Logout failed", "error": str(e)}), 500
+        return errors.handle_internal_error(e)
