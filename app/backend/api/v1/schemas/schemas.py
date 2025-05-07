@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Any, Dict, Union
+from typing import Any, Dict, Optional, TypedDict, Union
 from flask import url_for
 from marshmallow import (
     ValidationError,
@@ -28,6 +28,8 @@ from api.v1.schemas.custom_schema import (
     ValueField,
 )
 from api.v1.schemas.config_schema import OPERATOR_CONFIG, VALUE_TYPE_RULES
+from api.v1.views.utils import create_token
+from api.v1.utils.typing import AuthType, PostLoadUser
 from models.section import Section
 from models.stud_year_record import STUDYearRecord
 from models.grade import Grade
@@ -124,7 +126,7 @@ class UserSchema(BaseSchema):
         return data
 
     @post_dump
-    def update_fields(self, data, **kwargs: Any):
+    def update_fields(self, data: PostLoadUser, **kwargs: Any) -> PostLoadUser:
         # Add the full URL for the image_path if it exists
         if "image_path" in data and data["image_path"] is not None:
             data["image_path"] = url_for(
@@ -138,10 +140,10 @@ class UserSchema(BaseSchema):
 class AuthSchema(BaseSchema):
     """Schema for validating user authentication data."""
 
-    id = fields.String(required=True, load_only=True)
+    identification = fields.String(required=True, load_only=True, data_key="id")
     password = fields.String(required=True, load_only=True)
-    role = fields.String(required=False, dump_only=True)
-    api_key = fields.String(dump_only=True)
+    role = RoleEnumField()
+    api_key = fields.String()
     message = fields.String(dump_only=True)
 
     @staticmethod
@@ -153,7 +155,11 @@ class AuthSchema(BaseSchema):
 
     @validates_schema
     def validate_data(self, data: Dict[str, Any], **kwargs: Any) -> None:
-        user = storage.session.query(User).filter_by(identification=data["id"]).first()
+        user = (
+            storage.session.query(User)
+            .filter_by(identification=data["identification"])
+            .first()
+        )
 
         if user is None or not AuthSchema._check_password(
             user.password, data["password"]
@@ -161,13 +167,13 @@ class AuthSchema(BaseSchema):
             raise InvalidCredentialsError("Invalid credentials.")
 
     @post_load
-    def load_user(self, data, **kwargs: Any):
-        return (
-            storage.session.query(User)
-            .filter_by(identification=data["id"])
-            .first()
-            .to_dict()
+    def load_user(self, data: AuthType, **kwargs: Any) -> AuthType:
+        user_role = (
+            storage.session.query(User.role)
+            .filter_by(identification=data["identification"])
+            .scalar()
         )
+        return {"role": user_role, "identification": data["identification"]}
 
 
 class FullNameSchema(BaseSchema):
@@ -357,138 +363,113 @@ class StudentSchema(BaseSchema):
 
     @pre_load
     def set_defaults(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
-        # add default values to the data
-
-        # Convert flat fields into a nested 'student_name' dict
-        nested_data = {
-            "first_name": data.get("first_name"),
-            "father_name": data.get("father_name"),
-            "grand_father_name": data.get("grand_father_name"),
+        """Normalize and transform input data before validation."""
+        data["student_name"] = {
+            "first_name": data.pop("first_name", ""),
+            "father_name": data.pop("father_name", ""),
+            "grand_father_name": data.pop("grand_father_name", ""),
         }
-        data["student_name"] = nested_data
 
-        year_id = self.get_year_id(data.pop("academic_year"))
-        data["current_grade_id"] = self.get_grade_id(data.pop("current_grade"))
-        data["start_year_id"] = year_id
-        data["current_year_id"] = year_id
-        data["gender"] = data.get("gender").upper()
+        # Set year and grade IDs
+        if "academic_year" in data:
+            year_id = self.get_year_id(data.pop("academic_year"))
+            data.update({"start_year_id": year_id, "current_year_id": year_id})
 
-        data["is_transfer"] = data.get("is_transfer") == "True"
-        data["has_disability"] = data.get("has_disability") == "True"
-        data["has_medical_condition"] = data.get("has_medical_condition") == "True"
-        data["requires_special_accommodation"] = (
-            data.get("requires_special_accommodation") == "True"
-        )
+        if "current_grade" in data:
+            data["current_grade_id"] = self.get_grade_id(data.pop("current_grade"))
 
-        if (
-            not data.get("is_transfer")
-            and not data.get("previous_school_name", "").strip()
-        ):
-            data["previous_school_name"] = None
+        # Normalize gender
+        if "gender" in data:
+            data["gender"] = data["gender"].upper()
 
-        if (
-            not data.get("has_medical_condition")
-            and not data.get("medical_details", "").strip()
-        ):
-            data["medical_details"] = None
+        # Convert string booleans to actual booleans
+        bool_fields = [
+            "is_transfer",
+            "has_disability",
+            "has_medical_condition",
+            "requires_special_accommodation",
+        ]
+        for field in bool_fields:
+            if field in data and isinstance(data[field], str):
+                data[field] = data[field].lower() == "true"
 
-        if (
-            not data.get("has_disability")
-            and not data.get("disability_details", "").strip()
-        ):
-            data["disability_details"] = None
+        # Clean empty optional fields
+        optional_fields = [
+            ("previous_school_name", "is_transfer"),
+            ("medical_details", "has_medical_condition"),
+            ("disability_details", "has_disability"),
+            ("special_accommodation_details", "requires_special_accommodation"),
+        ]
 
-        if (
-            not data.get("requires_special_accommodation")
-            and not data.get("special_accommodation_details", "").strip()
-        ):
-            data["special_accommodation_details"] = None
+        for detail_field, condition_field in optional_fields:
+            if not data.get(condition_field) and not data.get(detail_field, "").strip():
+                data[detail_field] = None
 
         return data
 
     @validates_schema
     def validate_data(self, data: Dict[str, Any], **kwargs: Any) -> None:
-        if not data.get("father_phone") and not data.get("mother_phone"):
-            raise ValidationError(
-                "Either father_phone or mother_phone must be provided."
-            )
-        if data.get("is_transfer") and not data.get("previous_school_name"):
-            raise ValidationError(
-                "previous_school_name must be provided if is_transfer is True."
-            )
-        if not data.get("is_transfer") and data.get("previous_school_name"):
-            raise ValidationError(
-                "previous_school_name must be None if is_transfer is False."
-            )
-        if data.get("has_medical_condition") and not data.get("medical_details"):
-            raise ValidationError(
-                "medical_details must be provided if has_medical_condition is True."
-            )
-        if not data.get("has_medical_condition") and data.get("medical_details"):
-            raise ValidationError(
-                "medical_details must be None if has_medical_condition is False."
-            )
-        if data.get("has_disability") and not data.get("disability_details"):
-            raise ValidationError(
-                "disability_details must be provided if has_disability is True."
-            )
-        if not data.get("has_disability") and data.get("disability_details"):
-            raise ValidationError(
-                "disability_details must be None if has_disability is False."
-            )
-        if data.get("requires_special_accommodation") and not data.get(
-            "special_accommodation_details"
-        ):
-            raise ValidationError(
-                "special_accommodation_details must be provided if requires_special_accommodation is True."
-            )
-        if not data.get("requires_special_accommodation") and data.get(
-            "special_accommodation_details"
-        ):
-            raise ValidationError(
-                "special_accommodation_details must be None if requires_special_accommodation is False."
-            )
+        # Phone number validation
+        if not any([data.get("father_phone"), data.get("mother_phone")]):
+            raise ValidationError("At least one parent phone number must be provided")
+
+        # Conditional field validation
+        conditions = [
+            ("previous_school_name", "is_transfer"),
+            ("medical_details", "has_medical_condition"),
+            ("disability_details", "has_disability"),
+            ("special_accommodation_details", "requires_special_accommodation"),
+        ]
+
+        for field, condition in conditions:
+            if data.get(condition) and not data.get(field):
+                raise ValidationError(
+                    f"{field!r} is required when {condition!r} is True"
+                )
+            if not data.get(condition) and data.get(field):
+                raise ValidationError(
+                    f"{field!r} must be null when {condition!r} is False"
+                )
 
     @validates("date_of_birth")
-    def validate_date_of_birth(self, value: datetime) -> None:
+    def validate_dob(self, value: datetime) -> None:
         if value > datetime.now().date():
-            raise ValidationError("Date of birth cannot be in the future.")
+            raise ValidationError("Date of birth cannot be in the future")
+        if (datetime.now().date() - value).days < 365 * 5:  # Minimum 5 years old
+            raise ValidationError("Student must be at least 5 years old")
 
     @validates("father_phone")
-    def validate_father_phone(self, value: str) -> None:
-        self.validate_phone(value)
+    def validate_father_phone(self, value: Optional[str]) -> None:
+        if value:
+            self.validate_phone(value)
 
     @validates("mother_phone")
-    def validate_mother_phone(self, value: str) -> None:
-        self.validate_phone(value)
+    def validate_mother_phone(self, value: Optional[str]) -> None:
+        if value:
+            self.validate_phone(value)
 
     @validates("guardian_phone")
-    def validate_guardian_phone(self, value: str) -> None:
-        if value:  # Optional field, only validate if provided
+    def validate_guardian_phone(self, value: Optional[str]) -> None:
+        if value:
             self.validate_phone(value)
 
     @validates("semester_id")
-    def validate_semester_id(self, value: str) -> None:
-        if value:
-            semester_id = (
-                storage.session.query(Semester.id).filter_by(id=value).scalar()
-            )
-            if not semester_id:
-                raise ValidationError("Invalid semester_id.")
+    def validate_semester_id(self, value: Optional[str]) -> None:
+        if value and not storage.session.query(Semester).get(value):
+            raise ValidationError("Invalid semester_id.")
 
     @pre_dump
-    def flatten_to_nested(self, data, **kwargs: Any):
+    def flatten_to_nested(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
         # Convert flat fields into a nested 'student_name' dict
-        nested_data = {
-            "first_name": data.get("first_name"),
-            "father_name": data.get("father_name"),
-            "grand_father_name": data.get("grand_father_name"),
+        data["student_name"] = {
+            "first_name": data.pop("first_name", ""),
+            "father_name": data.get("father_name", ""),
+            "grand_father_name": data.get("grand_father_name", ""),
         }
-        data["student_name"] = nested_data
         return data
 
     @post_dump
-    def add_fields(self, data, **kwargs: Any):
+    def add_fields(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
         data["table_id"] = self.get_table_id(Student)
         return data
 

@@ -14,8 +14,7 @@ from sqlalchemy.orm import (
 )
 import uuid
 from sqlalchemy.sql import func
-from typing import Any, Optional
-from enum import Enum as PythonEnum
+from typing import Any, Optional, Type, TypeVar
 
 
 class Base(DeclarativeBase):
@@ -24,11 +23,25 @@ class Base(DeclarativeBase):
     pass
 
 
+EnumT = TypeVar("EnumT", bound=Enum)
+
+
 class CustomTypes:
-    class RoleEnum(PythonEnum):
+    class RoleEnum(Enum):
         ADMIN = "admin"
         TEACHER = "teacher"
         STUDENT = "student"
+
+        @classmethod
+        def enum_value(cls: Type[EnumT], value: str) -> EnumT:
+            """Convert a string value to the corresponding Enum member."""
+            if not isinstance(value, str):
+                raise TypeError(f"Expected a string, got {type(value).__name__}")
+
+            for member in cls:
+                if member.value == value:
+                    return member
+            raise ValueError(f"{value!r} is not a valid {cls.__name__}")
 
 
 @dataclass

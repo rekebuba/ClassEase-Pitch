@@ -6,7 +6,7 @@ import jwt
 from flask import Blueprint, Response, request, jsonify
 from api.v1.views.utils import student_teacher_or_admin_required
 from marshmallow import ValidationError
-from api.v1.utils.typing import UserT
+from api.v1.utils.typing import AuthType, UserT
 from models import storage
 from models.blacklist_token import BlacklistToken
 from api.v1.schemas.schemas import AuthSchema, InvalidCredentialsError
@@ -23,7 +23,7 @@ def login() -> Tuple[Response, int]:
     """
     try:
         auth_schema = AuthSchema()
-        valid_user = auth_schema.load(request.get_json())
+        valid_user: AuthType = auth_schema.load(request.get_json())
 
         # Generate an api_key token based on the user's role
         api_key = UserService.generate_api_key(

@@ -1,5 +1,5 @@
 from datetime import date, datetime
-from typing import Any
+from typing import Any, Optional
 from marshmallow import fields, ValidationError
 from sqlalchemy import and_, or_
 
@@ -15,7 +15,13 @@ class FormattedDate(fields.Field):
         super().__init__(*args, **kwargs)
         self.format_str = format_str
 
-    def _serialize(self, value, **kwargs: Any):
+    def _serialize(
+        self,
+        value: Any,
+        attr: Optional[str],
+        obj: Any,
+        **kwargs: Any,
+    ) -> str:
         if isinstance(value, datetime):
             return value.strftime(self.format_str)
         elif isinstance(value, str):
@@ -28,7 +34,9 @@ class FormattedDate(fields.Field):
 
 
 class FloatOrDateField(fields.Field):
-    def _deserialize(self, value, attr, data, **kwargs: Any):
+    def _deserialize(
+        self, value: Any, attr: Optional[str], data: Any, **kwargs: Any
+    ) -> Any:
         if value is None:
             return None
 
@@ -41,7 +49,13 @@ class FloatOrDateField(fields.Field):
         except (ValueError, TypeError):
             raise ValidationError("Invalid number or timestamp")
 
-    def _serialize(self, value, attr, obj, **kwargs: Any):
+    def _serialize(
+        self,
+        value: Any,
+        attr: Optional[str],
+        obj: Any,
+        **kwargs: Any,
+    ) -> str:
         if isinstance(value, date):
             # Convert back to timestamp in milliseconds
             return int(datetime.combine(value, datetime.min.time()).timestamp() * 1000)
@@ -53,7 +67,9 @@ class FloatOrDateField(fields.Field):
 class FileField(fields.Field):
     """Custom field for file validation."""
 
-    def _deserialize(self, value, attr, data, **kwargs: Any):
+    def _deserialize(
+        self, value: Any, attr: Optional[str], data: Any, **kwargs: Any
+    ) -> Any:
         if not isinstance(value, FileStorage):
             raise ValidationError("Invalid file type. Expected a file upload.")
 
@@ -74,24 +90,37 @@ class FileField(fields.Field):
 class RoleEnumField(fields.Field):
     """Custom field for RoleEnum."""
 
-    def _serialize(self, value, attr, obj, **kwargs: Any):
-        if value is None:
-            return None
-        return value.value.capitalize()  # Returns "Admin", "Teacher", or "Student"
+    def _serialize(
+        self,
+        value: Optional[CustomTypes.RoleEnum],
+        attr: Optional[str],
+        obj: Any,
+        **kwargs: Any,
+    ) -> str:
+        """Custom serialization for RoleEnum."""
+        if isinstance(value, CustomTypes.RoleEnum):
+            return value.value.capitalize()  # Returns "Admin", "Teacher", or "Student"
+        raise ValidationError("Expected RoleEnum instance")
 
-    def _deserialize(self, value, attr, data, **kwargs: Any):
+    # runs when you call .load()
+    def _deserialize(
+        self, value: Any, attr: Optional[str], data: Any, **kwargs: Any
+    ) -> Any:
+        """Custom deserialization for RoleEnum."""
         try:
             if isinstance(value, CustomTypes.RoleEnum):
                 return value
-            return CustomTypes.RoleEnum(value)  # Converts string to enum
+            return CustomTypes.RoleEnum(value.lower())  # Converts string to enum
         except ValueError as error:
             raise ValidationError(
-                "Invalid role. Must be one of: admin, teacher, student"
+                f"Invalid role. Must be one of: {[role.value for role in CustomTypes.RoleEnum]}"
             ) from error
 
 
 class TableField(fields.Field):
-    def _deserialize(self, value, attr, data, **kwargs: Any):
+    def _deserialize(
+        self, value: Any, attr: Optional[str], data: Any, **kwargs: Any
+    ) -> Any:
         table_name = value.__tablename__.lower()
         table = get_all_model_classes().get(table_name)
         if not table:
@@ -103,7 +132,7 @@ class TableField(fields.Field):
 class TableIdField(fields.Field):
     """Custom field for validating values."""
 
-    def _validate(self, value):
+    def _validate(self, value: Any) -> None:
         if isinstance(value, str):
             return
 
@@ -128,7 +157,7 @@ class TableIdField(fields.Field):
 class ColumnField(fields.Field):
     """Custom field for validating values."""
 
-    def _validate(self, value):
+    def _validate(self, value: Any) -> None:
         if not isinstance(value, (str, list)):
             raise ValidationError(
                 "value must be either a string or a list", field_name="value"
@@ -137,7 +166,9 @@ class ColumnField(fields.Field):
 
 
 class JoinOperatorField(fields.Field):
-    def _deserialize(self, value, attr, data, **kwargs: Any):
+    def _deserialize(
+        self, value: Any, attr: Optional[str], data: Any, **kwargs: Any
+    ) -> Any:
         if isinstance(value, str):
             lowered = value.lower()
             if lowered == "and":
@@ -150,13 +181,15 @@ class JoinOperatorField(fields.Field):
 class ValueField(fields.Field):
     """Custom field for validating and deserializing various types of values."""
 
-    # def _validate(self, value):
+    # def _validate(self, value: Any) -> None:
     #     if not isinstance(value, (str, list, datetime, int, float)):
     #         raise ValidationError(
     #             "Value must be a string, list, datetime, int, or float.", field_name="value"
     #         )
 
-    def _deserialize(self, value, attr, data, **kwargs: Any):
+    def _deserialize(
+        self, value: Any, attr: Optional[str], data: Any, **kwargs: Any
+    ) -> Any:
         if value is None:
             return None
 

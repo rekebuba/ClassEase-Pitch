@@ -1,4 +1,5 @@
 from datetime import date, datetime, timedelta
+from functools import lru_cache
 import re
 from sqlalchemy import and_, func, or_, true
 from sqlalchemy.sql.elements import ColumnElement
@@ -132,8 +133,9 @@ VALUE_TYPE_RULES = {
 
 
 def to_snake(data: Any) -> Any:
+    """Recursively convert all dictionary keys to snake_case."""
     if isinstance(data, dict):
-        return {to_snake_case_key(str(k)): to_snake(v) for k, v in data.items()}
+        return {to_snake_case_key(k): to_snake(v) for k, v in data.items()}
     elif isinstance(data, list):
         return [to_snake(item) for item in data]
     else:
@@ -141,11 +143,7 @@ def to_snake(data: Any) -> Any:
 
 
 def to_camel(data: Any) -> Any:
-    """
-    Recursively convert all dictionary keys to camelCase.
-
-    Supports nested dictionaries and lists. Non-dict/list values are returned as-is.
-    """
+    """Recursively convert all dictionary keys to camelCase."""
     if isinstance(data, dict):
         return {to_camel_case_key(str(k)): to_camel(v) for k, v in data.items()}
     if isinstance(data, list):

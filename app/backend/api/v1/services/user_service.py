@@ -4,11 +4,13 @@ from marshmallow import ValidationError
 from api.v1.schemas.schemas import *
 from api.v1.views.methods import save_profile
 from api.v1.views.utils import create_token
+from api.v1.utils.typing import UserT
 from models.teacher import Teacher
 from models.student import Student
 from models.user import User
 from models import storage
 from models.admin import Admin
+from models.base_model import CustomTypes
 
 
 class UserService:
@@ -17,7 +19,7 @@ class UserService:
     def __init__(self) -> None:
         pass
 
-    def create_user(self, data):
+    def create_user(self, data: User) -> User | None:
         # Save the profile picture if exists
         filepath = None
         if "image_path" in data and data["image_path"]:
@@ -72,10 +74,11 @@ class UserService:
         )
 
     @staticmethod
-    def get_user_by_email(email):
+    def get_user_by_email(email: str):
+        """Get user by email"""
         return storage.session.query(User).filter_by(email=email).first().to_dict()
 
     @staticmethod
-    def generate_api_key(role, user_id):
+    def generate_api_key(role: CustomTypes.RoleEnum, user_id: str) -> str:
         """Generate an api_key token based on the user's role"""
         return create_token(user_id, role)

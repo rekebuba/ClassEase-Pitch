@@ -248,7 +248,7 @@ class BaseSchema(Schema):
         return model
 
     @staticmethod
-    def get_table_id(table: Optional[Base]) -> str | None:
+    def get_table_id(table: Optional[Union[Base, Type[Base]]]) -> str | None:
         if table is None:
             raise ValidationError("table is required")
 
