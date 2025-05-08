@@ -1,8 +1,14 @@
 # Use an official Python runtime
-FROM python:3.10
+FROM python:3.10-bookworm
 
 # Set the working directory
 WORKDIR /app
+
+# Install system dependencies + dev tools
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy only the requirements.txt file first (to leverage Docker cache)
 COPY backend/requirements.txt .

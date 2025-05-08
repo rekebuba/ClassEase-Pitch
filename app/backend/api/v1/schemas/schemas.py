@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Any, Dict, Optional, TypedDict, Union
+from typing import Any, Dict, Optional, Union
 from flask import url_for
 from marshmallow import (
     ValidationError,
@@ -28,7 +28,6 @@ from api.v1.schemas.custom_schema import (
     ValueField,
 )
 from api.v1.schemas.config_schema import OPERATOR_CONFIG, VALUE_TYPE_RULES
-from api.v1.views.utils import create_token
 from api.v1.utils.typing import AuthType, PostLoadUser
 from models.section import Section
 from models.stud_year_record import STUDYearRecord
@@ -66,7 +65,7 @@ class UserSchema(BaseSchema):
         return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
     @staticmethod
-    def _generate_id(role: Union[CustomTypes.RoleEnum]) -> str:
+    def _generate_id(role: CustomTypes.RoleEnum) -> str:
         """
         Generates a custom ID based on the role (Admin, Student, Teacher).
 
@@ -778,17 +777,19 @@ class UserDetailSchema(BaseSchema):
 
 class AvailableEventsSchema(BaseSchema):
     events = fields.List(
-        fields.Nested(EventSchema),
-        required=True,
-        exclude=(
-            "start_time",
-            "end_time",
-            "registration_start",
-            "registration_end",
-            "fee_amount",
-            "description",
-            "message",
+        fields.Nested(
+            EventSchema,
+            exclude=(
+                "start_time",
+                "end_time",
+                "registration_start",
+                "registration_end",
+                "fee_amount",
+                "description",
+                "message",
+            ),
         ),
+        required=True,
     )
 
 
@@ -838,18 +839,20 @@ class RangeSchema(BaseSchema):
 class FilterSchema(BaseSchema):
     """Schema for validating filter parameters."""
 
-    column_name = ColumnField(required=False, missing=None, allow_none=True)
-    filter_id = fields.String(required=False, missing=None, allow_none=True)
-    table_id = TableIdField(required=False, missing=None, allow_none=True)
-    table = TableField(required=False, missing=None, allow_none=True)
-    range = fields.Nested(RangeSchema, required=False, missing=None, allow_none=True)
+    column_name = ColumnField(required=False, load_default=None, allow_none=True)
+    filter_id = fields.String(required=False, load_default=None, allow_none=True)
+    table_id = TableIdField(required=False, load_default=None, allow_none=True)
+    table = TableField(required=False, load_default=None, allow_none=True)
+    range = fields.Nested(
+        RangeSchema, required=False, load_default=None, allow_none=True
+    )
     variant = fields.String(
         validate=lambda x: x
         in ["text", "number", "multiSelect", "boolean", "date", "dateRange", "range"],
         required=True,
     )
-    operator = fields.String(required=False, missing=None, allow_none=True)
-    value = ValueField(required=False, missing=None, allow_none=True)
+    operator = fields.String(required=False, load_default=None, allow_none=True)
+    value = ValueField(required=False, load_default=None, allow_none=True)
 
     @validates_schema
     def validate_value(self, data: Dict[str, Any], **kwargs: Any) -> None:
@@ -917,14 +920,14 @@ class ParamSchema(BaseSchema):
     filter_flag = fields.String(required=False)
 
     filters = fields.List(
-        fields.Nested(FilterSchema), required=False, missing=None, allow_none=True
+        fields.Nested(FilterSchema), required=False, load_default=None, allow_none=True
     )
     valid_filters = fields.List(fields.Raw(), required=False)
     custom_filters = fields.List(fields.Raw(), required=False)
     join_operator = JoinOperatorField(required=False)
 
-    page = fields.Integer(required=False, set_defaults=1)
-    per_page = fields.Integer(required=False, set_defaults=10)
+    page = fields.Integer(required=False, load_default=1)
+    per_page = fields.Integer(required=False, load_default=10)
 
     sort = fields.List(fields.Nested(SortSchema), required=False)
     valid_sorts = fields.List(fields.Raw(), required=False)
@@ -1026,7 +1029,7 @@ class AllStudentsSchema(BaseSchema):
 
     year_record = fields.Nested(STUDYearRecordSchema(only=("final_score", "rank")))
 
-    @post_dump(pass_many=True)
+    @post_dump
     def merge_nested(self, data: list, many: bool, **kwargs: Any):
         merged_data = {}
 
@@ -1078,9 +1081,9 @@ class AllStudentsSchema(BaseSchema):
 class StudentStatusSchema(BaseSchema):
     """Schema for validating student status data."""
 
-    active = fields.Integer(required=True, default=0)
-    inactive = fields.Integer(required=True, default=0)
-    suspended = fields.Integer(required=True, default=0)
+    active = fields.Integer(required=True, dump_default=0)
+    inactive = fields.Integer(required=True, dump_default=0)
+    suspended = fields.Integer(required=True, dump_default=0)
     graduated = fields.Integer(required=False)
     graduated_with_honors = fields.Integer(required=False)
 
@@ -1099,25 +1102,28 @@ class StudentAverageSchema(BaseSchema):
 class StudentGradeCountsSchema(BaseSchema):
     """Schema for validating and merging student grade or section count data."""
 
-    grade = fields.String(required=False, missing=None)
-    total = fields.Integer(required=False, missing=0, default=0)
+    grade = fields.String(required=False, load_default=None)
+    total = fields.Integer(required=False, load_default=0, dump_default=0)
 
-    @post_dump(pass_many=True)
-    def merge_nested(self, data: list[dict], **kwargs: Any) -> dict:
-        # Default for grade keys 1–12
-        result = {str(i): 0 for i in range(1, 13)}
+    def merge_nested(
+        self, data: Union[list, dict], many: bool, **kwargs: Any
+    ) -> Dict[str, int]:
+        if many:
+            # Default for grade keys 1–12
+            result: Dict[str, int] = {str(i): 0 for i in range(1, 13)}
 
-        for item in data:
-            result[item["grade"]] = item["total"]
+            for item in data:
+                result[item["grade"]] = item["total"]
 
-        return result
+            return result
+        return {}
 
 
 class StudentSectionSchema(BaseSchema):
     """Schema for validating student section data."""
 
-    section = fields.String(required=False, missing=None)
-    total = fields.Integer(required=False, missing=0, default=0)
+    section = fields.String(required=False, load_default=None)
+    total = fields.Integer(required=False, load_default=0, dump_default=0)
 
 
 class StudentSectionCountsSchema(BaseSchema):
@@ -1126,20 +1132,25 @@ class StudentSectionCountsSchema(BaseSchema):
     sectionI = fields.Nested(StudentSectionSchema)
     sectionII = fields.Nested(StudentSectionSchema)
 
-    @post_dump(pass_many=True)
-    def merge_nested(self, data: list[dict], **kwargs: Any) -> dict:
-        # Initialize all sections to 0
-        result: defaultdict[str, defaultdict[str, int]] = defaultdict(
-            lambda: defaultdict(int)
-        )
+    def merge_nested(
+        self, data: Union[list, dict], many: bool, **kwargs: Any
+    ) -> Dict[str, Dict[str, int]]:
+        if many:
+            result: defaultdict[str, defaultdict[str, int]] = defaultdict(
+                lambda: defaultdict(int)
+            )
 
-        for item in data:
-            for section, values in item.items():
-                name = values["section"]
-                total = values["total"]
-                result[section][name] += total
+            for item in data:
+                for section, values in item.items():
+                    name = values["section"]
+                    total = values["total"]
+                    result[section][name] += total
 
-        # Convert defaultdicts to regular dicts
-        final_result = {sec: dict(names) for sec, names in result.items()}
+            # Convert defaultdicts to regular dicts
+            final_result: Dict[str, Dict[str, int]] = {
+                sec: dict(names) for sec, names in result.items()
+            }
 
-        return final_result
+            return final_result
+
+        return {}

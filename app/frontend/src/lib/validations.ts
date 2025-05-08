@@ -15,17 +15,22 @@ export const logoutSchema = z.object({
     message: z.string(),
 });
 
+const roleSchema = z.preprocess(
+    (val) => typeof val === "string" ? val.toLowerCase() : val,
+    z.enum(["admin", "teacher", "student"])
+);
+
 export const loginSchema = z.object({
     id: z.string(),
     password: z.string(),
     apiKey: z.string(),
-    role: z.enum(["admin", "teacher", "student"]),
+    role: roleSchema,
 });
 
 export const userSchema = z.object({
     user: z.object({
         imagePath: z.string().optional(),
-        role: z.enum(["Admin", "Teacher", "Student"]),
+        role: roleSchema,
         identification: z.string(),
     }),
     detail: z.object({

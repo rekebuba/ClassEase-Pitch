@@ -1,11 +1,10 @@
 from datetime import date, datetime, timedelta
-from functools import lru_cache
 import re
 from sqlalchemy import and_, func, or_, true
 from sqlalchemy.sql.elements import ColumnElement
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from models.base_model import Base, BaseModel
-from typing import Any, Callable, Dict, List, Optional, Type, Union, cast
+from typing import Any, Callable, Dict, List, Type, Union, cast
 
 
 def is_date(val: Union[List[str], str]) -> bool:
