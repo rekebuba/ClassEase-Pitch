@@ -9,3 +9,4 @@ fake_data
 **/uploads
 test.db
 **/*.sql
+requirements.txt
