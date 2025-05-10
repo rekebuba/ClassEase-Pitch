@@ -1,4 +1,3 @@
-node_modules/
 .git/
 .cache/
 dist/
@@ -10,3 +9,9 @@ npm-debug.log
 .pytest_cache/
 .ruff_cache/
 .venv/
+profiles/
+*.pyc
+__pycache__/
+fake_data/
+requirements.txt
+setup_mysql_test.sql

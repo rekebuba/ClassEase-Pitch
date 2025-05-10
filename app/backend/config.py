@@ -24,6 +24,8 @@ class DevelopmentConfig(Config):
     password = os.getenv("KEY_MYSQL_PWD")
     host = os.getenv("KEY_MYSQL_HOST")
     db = os.getenv("KEY_MYSQL_DB")
+    if not all([user, password, host, db]):
+        raise ValueError("Missing required environment variables for db connection")
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = f"mysql://{user}:{password}@{host}/{db}"
 
