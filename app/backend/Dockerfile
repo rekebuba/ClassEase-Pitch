@@ -1,18 +1,32 @@
-# Use an official Python runtime
-FROM python:3.10-bookworm
+# Stage 1: Builder
+FROM python:3.10-bookworm AS builder
 
 # Install uv globally
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# Set working directory
-COPY . ./app
+# Set working directory for building dependencies
+WORKDIR /build
 
-# Sync the project into a new environment, asserting the lockfile is up to date
-WORKDIR /app
-RUN uv sync --locked
+# Copy only dependency files (to leverage Docker cache)
+COPY pyproject.toml .
 
-# Activate venv on container start
-ENV PATH="/app/.venv/bin:$PATH"
+# Sync dependencies (this creates `.venv` in /build/.venv)
+RUN uv sync
+
+# Stage 2: Runtime
+FROM python:3.10-bookworm
+
+# Set working directory for the app
+WORKDIR /ClassEase-Pitch/app/backend
+
+# Copy only the `.venv` from builder to a hidden directory outside source
+COPY --from=builder /build/.venv /opt/venv
+
+# Copy the actual app source
+COPY . .
+
+# Activate venv globally for this container
+ENV PATH="/opt/venv/bin:$PATH"
 
 # Expose Flask port
 EXPOSE 5000

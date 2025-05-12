@@ -1,46 +1,32 @@
 services:
-  # frontend:
-  #   build:
-  #     context: .
-  #     dockerfile: frontend/Dockerfile
-  #   ports:
-  #     - "5173:5173"
-  #   environment:
-  #     - CHOKIDAR_USEPOLLING=true
-  #   volumes:
-  #     - ./frontend:/app
-  #     - /app/node_modules
-  #   depends_on:
-  #     - backend
-  #   networks:
-  #     - app-network
+  frontend:
+    build:
+      context: ./app/frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./app/frontend/src:/ClassEase-Pitch/app/frontend/src:cached
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    stdin_open: true
+    tty: true
 
   backend:
+    container_name: backend_container
     build:
-      context: ./app/backend # Updated path to the correct backend directory
+      context: ./app/backend # host directory
       dockerfile: Dockerfile
-    develop:
-      # Create a `watch` configuration to update the app
-      watch:
-        # Sync the working directory with the `/app` directory in the container
-        - action: sync
-          path: ./app/backend
-          target: /app
-          # Exclude the project virtual environment
-          ignore:
-            - .venv/
-        # Rebuild the image on changes to the `pyproject.toml`
-        - action: rebuild
-          path: ./pyproject.toml
     ports:
       - "5000:5000"
     env_file:
       - .env
     volumes:
-      # Mount the backend directory but exclude `.venv`
-      - ./app/backend:/app:cached
-      # Use a named volume for `.venv` to isolate it from the host
-      - backend_venv:/app/.venv
+      - ./app/backend:/ClassEase-Pitch/app/backend:cached
     depends_on:
       db:
         condition: service_healthy
@@ -52,14 +38,14 @@ services:
     container_name: mysql_container
     restart: always
     env_file:
-      - .env  # Shares the same file
+      - .env
     ports:
       - "3307:3306"
     networks:
       - app-network
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./backend/setup_mysql_dev.sql:/docker-entrypoint-initdb.d/setup_mysql_dev.sql
+      - ./app/backend/setup_mysql_dev.sql:/docker-entrypoint-initdb.d/setup_mysql_dev.sql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "mysql_container"]
       interval: 5s
@@ -68,8 +54,6 @@ services:
 
 volumes:
   mysql_data:
-  backend_venv:
-    driver: local
 
 networks:
   app-network:

@@ -1,30 +1,41 @@
-# Use an official Node.js runtime as the base
-FROM node:18-alpine AS build
+# --- Stage 1: Builder ---
+FROM node:18-alpine AS builder
 
-# Set the working directory
-WORKDIR /frontend
+# Install git and other build tools
+RUN apk add --no-cache git
 
-# Copy package.json and package-lock.json
-COPY frontend/package*.json ./
+# Set working directory
+WORKDIR /app
 
-# Install dependencies (this will be cached unless package.json changes)
-RUN npm ci --frozen-lockfile
+# Copy only the necessary files for dependency resolution
+COPY package.json pnpm-lock.yaml ./
+
+# Install pnpm globally
+RUN npm install -g pnpm
+
+# Install dependencies
+RUN pnpm install
 
 # Copy the rest of the frontend source code
-COPY frontend/ .
+COPY . ./
 
-# Build the React app
-RUN npm run build
+# Build the app
+RUN pnpm run build
 
-# Expose port 5173
+# --- Stage 2: Runtime ---
+FROM node:18-alpine
+
+# Set working directory
+WORKDIR /ClassEase-Pitch/app/frontend
+
+# Install pnpm globally again (for runtime usage like `pnpm run dev`)
+RUN npm install -g pnpm
+
+# Copy only the built output from the builder
+COPY --from=builder /app/ ./
+
+# Expose Vite default port
 EXPOSE 5173
 
-# # Serve the built files with Nginx
-# FROM nginx:alpine
-# # Copy built files
-# COPY --from=build /frontend/dist /usr/share/nginx/html
-# # Open port 80 for HTTP traffic
-# EXPOSE 80
-
-# Start Nginx server
-CMD ["npm", "run", "dev"]
+# Start development server
+CMD ["pnpm", "run", "dev"]

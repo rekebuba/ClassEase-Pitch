@@ -3,7 +3,6 @@ name = "classEase-Pitch"
 version = "0.1.0"
 dependencies = [
     "bcrypt>=4.3.0",
-    "dotenv-python>=0.0.1",
     "ethiopian-date>=1.0",
     "factory-boy>=3.3.3",
     "flask-apscheduler>=1.13.1",

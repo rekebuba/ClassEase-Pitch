@@ -20,9 +20,11 @@ class Config:
 
 
 class DevelopmentConfig(Config):
+    IS_DOCKER = os.environ.get("IS_DOCKER", "false").lower() == "true"
+
     user = os.getenv("KEY_MYSQL_USER")
     password = os.getenv("KEY_MYSQL_PWD")
-    host = os.getenv("KEY_MYSQL_HOST")
+    host = "mysql_container" if IS_DOCKER else "localhost"
     db = os.getenv("KEY_MYSQL_DB")
     if not all([user, password, host, db]):
         raise ValueError("Missing required environment variables for db connection")
@@ -44,8 +46,6 @@ class TestingConfig(Config):
     host = os.getenv("TEST_MYSQL_HOST")
     db = os.getenv("TEST_MYSQL_DB")
     SQLALCHEMY_DATABASE_URI = f"mysql://{user}:{password}@{host}/{db}"
-    # SQLALCHEMY_DATABASE_URI = 'sqlite:///test_db'  # Using SQLite for testing
-    # SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Overriding the JWT secret keys for testing

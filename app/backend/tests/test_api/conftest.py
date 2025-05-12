@@ -35,8 +35,8 @@ from .factories_methods import MakeFactory
 @pytest.fixture(scope="session")
 def app_session():
     """Session-scoped fixture for the Flask app."""
-    app = create_app("testing")
-    # app = create_app("development")
+    # app = create_app("testing")
+    app = create_app("development")
 
     yield app
 
