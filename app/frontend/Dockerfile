@@ -26,7 +26,7 @@ RUN pnpm run build
 FROM node:18-alpine
 
 # Set working directory
-WORKDIR /ClassEase-Pitch/app/frontend
+WORKDIR /frontend
 
 # Install pnpm globally again (for runtime usage like `pnpm run dev`)
 RUN npm install -g pnpm

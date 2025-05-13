@@ -1,5 +1,6 @@
 services:
   frontend:
+    container_name: frontend_container
     build:
       context: ./app/frontend
       dockerfile: Dockerfile
@@ -7,8 +8,9 @@ services:
       - "5173:5173"
     environment:
       - CHOKIDAR_USEPOLLING=true
+      - IS_DOCKER=true
     volumes:
-      - ./app/frontend/src:/ClassEase-Pitch/app/frontend/src:cached
+      - ./app/frontend/src:/frontend/src:cached
     depends_on:
       - backend
     networks:
@@ -25,8 +27,10 @@ services:
       - "5000:5000"
     env_file:
       - .env
+    environment:
+      - IS_DOCKER=true
     volumes:
-      - ./app/backend:/ClassEase-Pitch/app/backend:cached
+      - ./app/backend:/backend:cached
     depends_on:
       db:
         condition: service_healthy
