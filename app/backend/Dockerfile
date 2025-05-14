@@ -5,7 +5,7 @@ FROM python:3.10-bookworm AS builder
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # Set working directory for building dependencies
-WORKDIR /build
+WORKDIR /opt
 
 # Copy only dependency files (to leverage Docker cache)
 COPY pyproject.toml .
@@ -20,13 +20,13 @@ FROM python:3.10-bookworm
 WORKDIR /backend
 
 # Copy only the `.venv` from builder to a hidden directory outside source
-COPY --from=builder /build/.venv /opt/venv
+COPY --from=builder /opt/.venv /opt/.venv
 
 # Copy the actual app source
 COPY . .
 
 # Activate venv globally for this container
-ENV PATH="/opt/venv/bin:$PATH"
+ENV PATH="/opt/.venv/bin:$PATH"
 
 # Expose Flask port
 EXPOSE 5000
