@@ -7,7 +7,7 @@ from marshmallow import (
     post_dump,
     pre_load,
 )
-from sqlalchemy import UnaryExpression, or_
+from sqlalchemy import ColumnElement, UnaryExpression, or_
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from api.v1.schemas.config_schema import (
     OPERATOR_MAPPING,
@@ -260,8 +260,8 @@ class BaseSchema(Schema):
 
     @staticmethod
     def update_list_value(
-        value: list[str | int], model: Type[Base], column_name: str
-    ) -> list:
+        value: List[str | int], model: Type[Base], column_name: str
+    ) -> List[Type[Any]]:
         """
         Update the list value to match the model's column type.
         """
@@ -313,16 +313,16 @@ class BaseSchema(Schema):
         operator: Optional[str],
         value: Union[str],
         range: Optional[Dict[str, Any]] = None,
-    ) -> list:
+    ) -> List[ColumnElement[Any]]:
         """
         Dynamically create a SQLAlchemy filter based on operator.
         """
         columns = column_name if isinstance(column_name, list) else [column_name]
-        result: list = []
+        result: List[ColumnElement[Any]] = []
 
         for column in columns:
             col_name = to_snake_case_key(column)
-            col: Optional[InstrumentedAttribute] = getattr(model, col_name, None)
+            col: Optional[InstrumentedAttribute[Any]] = getattr(model, col_name, None)
             if col is None:
                 raise ValidationError(
                     f"Column '{col_name}' not found on {model.__tablename__}."
@@ -356,7 +356,7 @@ class BaseSchema(Schema):
     @staticmethod
     def sort_data(
         model: Type[Base], column_name: str | List[str], order: bool
-    ) -> list[UnaryExpression]:
+    ) -> list[UnaryExpression[Any]]:
         """
         Dynamically create a SQLAlchemy sort based on order.
         """
@@ -365,10 +365,10 @@ class BaseSchema(Schema):
             if isinstance(column_name, list)
             else [column_name]
         )
-        result: List[UnaryExpression] = []
+        result: List[UnaryExpression[Any]] = []
         for column in columns:
             col_name = to_snake_case_key(column)
-            col: Optional[InstrumentedAttribute] = getattr(model, col_name, None)
+            col: Optional[InstrumentedAttribute[Any]] = getattr(model, col_name, None)
             if col is None:
                 raise ValidationError(
                     f"Column '{col_name}' not found on {model.__tablename__}."

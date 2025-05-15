@@ -1,4 +1,4 @@
-from typing import Optional, TypeVar, TypedDict
+from typing import Optional, TypeVar, TypedDict, Union
 from models.user import User
 from models.base_model import Base, CustomTypes
 
@@ -24,3 +24,8 @@ class PostLoadUser(TypedDict):
     image_path: Optional[str]
     created_at: Optional[str]
     table_id: Optional[str]
+
+
+class RangeDict(TypedDict):
+    min: Union[str, int, float]
+    max: Union[str, int, float]

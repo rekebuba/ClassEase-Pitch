@@ -7,6 +7,7 @@ from flask import Response, request, jsonify, url_for
 from marshmallow import ValidationError
 from sqlalchemy import case, func
 from api.v1.utils.typing import UserT
+from api.v1.schemas.config_schema import OPERATOR_MAPPING
 from models.year import Year
 from models import storage
 from flask import Blueprint
@@ -35,7 +36,19 @@ from api.v1.views.methods import (
     min_max_year_lookup,
     paginate_query,
 )
-from api.v1.schemas.schemas import *  # noqa: F401
+
+from api.v1.schemas.schemas import (
+    RegisteredGradesSchema,
+    CreateMarkListSchema,
+    AllStudentsSchema,
+    StudentStatusSchema,
+    StudentAverageSchema,
+    StudentGradeCountsSchema,
+    StudentSectionCountsSchema,
+    AvailableEventsSchema,
+    EventSchema,
+    ParamSchema,
+)
 from api.v1.views import errors
 
 

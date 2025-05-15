@@ -1,5 +1,5 @@
 from collections import defaultdict
-from typing import Any, Dict, Optional, Union
+from typing import Any, Callable, Dict, Optional, Union
 from flask import url_for
 from marshmallow import (
     ValidationError,
@@ -84,14 +84,12 @@ class UserSchema(BaseSchema):
         section = ""
 
         # Assign prefix based on role
-        if role == CustomTypes.RoleEnum.STUDENT.value:
-            section = "MAS"
-        elif role == CustomTypes.RoleEnum.TEACHER.value:
-            section = "MAT"
-        elif role == CustomTypes.RoleEnum.ADMIN.value:
-            section = "MAA"
-        else:
-            raise ValidationError("Invalid Role")
+        role_prefix_map: Dict[CustomTypes.RoleEnum, str] = {
+            CustomTypes.RoleEnum.STUDENT: "MAS",
+            CustomTypes.RoleEnum.TEACHER: "MAT",
+            CustomTypes.RoleEnum.ADMIN: "MAA",
+        }
+        section = role_prefix_map[role]
 
         unique = True
         while unique:
@@ -109,12 +107,11 @@ class UserSchema(BaseSchema):
 
     @validates_schema
     def validate_data(self, data: Dict[str, Any], **kwargs: Any) -> None:
-        if data["role"] not in [member.value for member in CustomTypes.RoleEnum]:
-            raise ValidationError("Invalid role type.")
+        print(data)
         if (
-            storage.session.query(User)
+            storage.session.query(User.id)
             .filter_by(national_id=data["national_id"])
-            .first()
+            .scalar()
         ):
             raise ValidationError("User already exists.")
 
@@ -205,16 +202,29 @@ class AdminSchema(BaseSchema):
     @pre_load
     def set_defaults(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
         # add default values
-        nested_data = {
-            "first_name": data.get("first_name"),
-            "father_name": data.get("father_name"),
-            "grand_father_name": data.get("grand_father_name"),
+        # Convert flat fields into a nested dict
+        data["admin_name"] = {
+            "first_name": data.pop("first_name", ""),
+            "father_name": data.pop("father_name", ""),
+            "grand_father_name": data.pop("grand_father_name", ""),
         }
-        data["admin_name"] = nested_data
 
-        self.validate_phone(data["phone"])
+        data["user"] = {
+            "national_id": data.pop("national_id", ""),
+            "identification": data.pop("identification", ""),
+            "role": data.pop("role", ""),
+            "image_path": data.pop("image_path", None),
+        }
+
         if data.get("gender"):
             data["gender"] = data["gender"].upper()
+
+        return data
+
+    @post_load
+    def merge_data(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
+        # Merge the nested 'admin_name' dict into the main data dict
+        data.update(data.pop("admin_name", {}))
 
         return data
 
@@ -222,10 +232,7 @@ class AdminSchema(BaseSchema):
     def validate_data(self, data: Dict[str, Any], **kwargs: Any) -> None:
         if storage.session.query(Admin).filter_by(email=data["email"]).first():
             raise ValidationError("Email already exists.")
-
-    @validates("phone")
-    def validate_teacher_phone(self, value: str) -> None:
-        self.validate_phone(value)
+        self.validate_phone(data["phone"])
 
     @pre_dump
     def flatten_to_nested(self, data, **kwargs: Any):
@@ -260,14 +267,28 @@ class TeacherSchema(BaseSchema):
     def set_defaults(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
         # add default values
         # Convert flat fields into a nested 'student_name' dict
-        nested_data = {
-            "first_name": data.get("first_name"),
-            "father_name": data.get("father_name"),
-            "grand_father_name": data.get("grand_father_name"),
+        data["teacher_name"] = {
+            "first_name": data.pop("first_name"),
+            "father_name": data.pop("father_name"),
+            "grand_father_name": data.pop("grand_father_name"),
         }
-        data["teacher_name"] = nested_data
+
+        data["user"] = {
+            "national_id": data.pop("national_id", ""),
+            "identification": data.pop("identification", ""),
+            "role": data.pop("role", ""),
+            "image_path": data.pop("image_path", None),
+        }
+
         if data.get("gender"):
             data["gender"] = data["gender"].upper()
+
+        return data
+
+    @post_load
+    def merge_data(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
+        # Merge the nested 'teacher_name' dict into the main data dict
+        data.update(data.pop("teacher_name", {}))
 
         return data
 
@@ -275,10 +296,7 @@ class TeacherSchema(BaseSchema):
     def validate_data(self, data: Dict[str, Any], **kwargs: Any) -> None:
         if storage.session.query(Teacher).filter_by(email=data["email"]).first():
             raise ValidationError("Email already exists.")
-
-    @validates("phone")
-    def validate_teacher_phone(self, value: str) -> None:
-        self.validate_phone(value)
+        self.validate_phone(data["phone"])
 
     @pre_dump
     def flatten_to_nested(self, data, **kwargs: Any):
@@ -369,6 +387,13 @@ class StudentSchema(BaseSchema):
             "grand_father_name": data.pop("grand_father_name", ""),
         }
 
+        data["user"] = {
+            "national_id": data.pop("national_id", ""),
+            "identification": data.pop("identification", ""),
+            "role": data.pop("role", ""),
+            "image_path": data.pop("image_path", None),
+        }
+
         # Set year and grade IDs
         if "academic_year" in data:
             year_id = self.get_year_id(data.pop("academic_year"))
@@ -406,6 +431,13 @@ class StudentSchema(BaseSchema):
 
         return data
 
+    @post_load
+    def merge_data(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
+        # Merge the nested 'student_name' dict into the main data dict
+        data.update(data.pop("student_name", {}))
+
+        return data
+
     @validates_schema
     def validate_data(self, data: Dict[str, Any], **kwargs: Any) -> None:
         # Phone number validation
@@ -431,29 +463,29 @@ class StudentSchema(BaseSchema):
                 )
 
     @validates("date_of_birth")
-    def validate_dob(self, value: datetime) -> None:
+    def validate_dob(self, value: datetime, **kwargs: Any) -> None:
         if value > datetime.now().date():
             raise ValidationError("Date of birth cannot be in the future")
         if (datetime.now().date() - value).days < 365 * 5:  # Minimum 5 years old
             raise ValidationError("Student must be at least 5 years old")
 
     @validates("father_phone")
-    def validate_father_phone(self, value: Optional[str]) -> None:
+    def validate_father_phone(self, value: Optional[str], **kwargs: Any) -> None:
         if value:
             self.validate_phone(value)
 
     @validates("mother_phone")
-    def validate_mother_phone(self, value: Optional[str]) -> None:
+    def validate_mother_phone(self, value: Optional[str], **kwargs: Any) -> None:
         if value:
             self.validate_phone(value)
 
     @validates("guardian_phone")
-    def validate_guardian_phone(self, value: Optional[str]) -> None:
+    def validate_guardian_phone(self, value: Optional[str], **kwargs: Any) -> None:
         if value:
             self.validate_phone(value)
 
     @validates("semester_id")
-    def validate_semester_id(self, value: Optional[str]) -> None:
+    def validate_semester_id(self, value: Optional[str], **kwargs: Any) -> None:
         if value and not storage.session.query(Semester).get(value):
             raise ValidationError("Invalid semester_id.")
 
@@ -934,7 +966,7 @@ class ParamSchema(BaseSchema):
     custom_sorts = fields.List(fields.Raw(), required=False)
 
     @post_load
-    def set_defaults(self, data, **kwargs: Any):
+    def set_defaults(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
         # add default values to the data
         valid_filters = []
         valid_sorts = []
@@ -942,14 +974,14 @@ class ParamSchema(BaseSchema):
         custom_filters = []
         for f_item in data["filters"] if data.get("filters") else []:
             if "table" in f_item and f_item["table"] is not None:
-                result = self.filter_data(
+                filter = self.filter_data(
                     f_item["table"],
                     f_item["column_name"],
                     f_item["operator"],
                     f_item["value"],
                     f_item["range"],
                 )
-                valid_filters.extend(result)
+                valid_filters.extend(filter)
             else:
                 custom_filters.append(f_item)
         data.pop("filters", None)
@@ -957,13 +989,14 @@ class ParamSchema(BaseSchema):
 
         for s_item in data["sort"] if data.get("sort") else []:
             if "table" in s_item and s_item["table"] is not None:
-                result = self.sort_data(
+                sort = self.sort_data(
                     s_item["table"], s_item["column_name"], s_item["desc"]
                 )
                 # Adds all items from result to valid_sorts
-                valid_sorts.extend(result)
+                valid_sorts.extend(sort)
             else:
                 custom_sorts.append(s_item)
+
         data.pop("sort", None)
         data["valid_sorts"] = valid_sorts
         data["custom_filters"] = custom_filters

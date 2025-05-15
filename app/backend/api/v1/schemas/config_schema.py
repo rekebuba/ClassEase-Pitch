@@ -3,11 +3,12 @@ import re
 from sqlalchemy import and_, func, or_, true
 from sqlalchemy.sql.elements import ColumnElement
 from sqlalchemy.orm.attributes import InstrumentedAttribute
+from api.v1.utils.typing import RangeDict
 from models.base_model import Base, BaseModel
 from typing import Any, Callable, Dict, List, Type, Union, cast
 
 
-def is_date(val: Union[List[str], str]) -> bool:
+def is_date(val: Any) -> bool:
     """
     Check if the value is a date or datetime object.
     """
@@ -17,15 +18,15 @@ def is_date(val: Union[List[str], str]) -> bool:
 
 
 def normalize_date_col(
-    col: InstrumentedAttribute, val: Union[List[str], str]
-) -> Union[ColumnElement, InstrumentedAttribute]:
-    return cast(ColumnElement, func.date(col)) if is_date(val) else col
+    col: InstrumentedAttribute[Any], val: Any
+) -> InstrumentedAttribute[Any]:
+    return cast(InstrumentedAttribute[Any], func.date(col)) if is_date(val) else col
 
 
 OPERATOR_MAPPING: Dict[
     str,
     Callable[
-        [InstrumentedAttribute, Union[str, List[str], Dict[str, Any]]],
+        [InstrumentedAttribute[Any], Union[str, List[str], RangeDict]],
         ColumnElement[Any],
     ],
 ] = {

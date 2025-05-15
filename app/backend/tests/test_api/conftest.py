@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 from datetime import datetime
+from typing import Any, Dict, List
 import pytest
 from api import create_app
 from models.assessment import Assessment
@@ -63,8 +64,8 @@ def client(app_session):
 
 @pytest.fixture(
     params=[
-        # (CustomTypes.RoleEnum.STUDENT, 1),
-        # (CustomTypes.RoleEnum.ADMIN, 1),
+        (CustomTypes.RoleEnum.STUDENT, 1),
+        (CustomTypes.RoleEnum.ADMIN, 1),
         (CustomTypes.RoleEnum.TEACHER, 1),
     ]
 )
@@ -72,7 +73,7 @@ def register_users(request, db_session):
     role, count = request.param if request.param else (None, 0)
 
     data = []
-    role_user = None
+    role_user = {}
     for _ in range(count):
         user = MakeFactory(UserFactory, db_session, built=True).factory(role=role)
         if role == CustomTypes.RoleEnum.STUDENT:
@@ -114,7 +115,7 @@ def db_create_users(db_session):
         ),
     ]
 
-    users = {
+    users: Dict[CustomTypes.RoleEnum, List[Any]] = {
         CustomTypes.RoleEnum.ADMIN: [],
         CustomTypes.RoleEnum.TEACHER: [],
         CustomTypes.RoleEnum.STUDENT: [],

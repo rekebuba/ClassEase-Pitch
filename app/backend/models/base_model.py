@@ -2,7 +2,7 @@
 """Module for BaseModel class"""
 
 from dataclasses import asdict, dataclass
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 import models
 from enum import Enum
 from sqlalchemy import String, DateTime
@@ -14,7 +14,7 @@ from sqlalchemy.orm import (
 )
 import uuid
 from sqlalchemy.sql import func
-from typing import Any, Optional, Type, TypeVar
+from typing import Any, Dict, Optional, Type, TypeVar
 
 
 class Base(DeclarativeBase):
@@ -63,22 +63,24 @@ class BaseModel(MappedAsDataclass, Base, CustomTypes):
         init=False,
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), default_factory=datetime.utcnow, init=False
+        DateTime(timezone=True),
+        default_factory=lambda: datetime.now(timezone.utc),
+        init=False,
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
-        default_factory=datetime.utcnow,
+        default_factory=lambda: datetime.now(timezone.utc),
         onupdate=func.now(),  # Automatically update on modification
         init=False,
     )
 
     def save(self) -> None:
         """Saves the current instance to the storage."""
-        self.updated_at = datetime.utcnow()
+        self.updated_at = datetime.now(timezone.utc)
         models.storage.new(self)
         models.storage.save()
 
-    def to_dict(self, **kwargs: Optional[dict]) -> dict[str, Any]:
+    def to_dict(self, **kwargs: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         """Converts the instance to a dictionary representation."""
         data = asdict(self)
 

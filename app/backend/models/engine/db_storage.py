@@ -4,7 +4,7 @@
 from typing import Any, List, Optional, Type, Union, overload
 from sqlalchemy import create_engine, Engine
 from sqlalchemy.sql.expression import func
-from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.orm import sessionmaker, scoped_session, Session
 from flask import Flask
 from api.v1.utils.typing import BaseT
 from models.base_model import Base
@@ -43,8 +43,8 @@ class DBStorage:
     """
 
     __engine: Optional[Engine] = None
-    __session: Optional[scoped_session] = None
-    __session_factory: Optional[sessionmaker] = None
+    __session: Optional[scoped_session[Session]] = None
+    __session_factory: Optional[sessionmaker[Session]] = None
 
     def __init__(self) -> None:
         """
@@ -55,7 +55,7 @@ class DBStorage:
         self.__session = None
 
     @property
-    def session(self) -> scoped_session:
+    def session(self) -> scoped_session[Session]:
         """
         Retrieves the current database session.
 
@@ -94,7 +94,7 @@ class DBStorage:
         """
         return Base.metadata
 
-    def create_scoped_session(self, **kwargs: Any) -> scoped_session:
+    def create_scoped_session(self, **kwargs: Any) -> scoped_session[Session]:
         """
         Create a scoped session for the database.
 

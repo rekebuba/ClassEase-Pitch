@@ -169,6 +169,7 @@ class JoinOperatorField(fields.Field):
     def _deserialize(
         self, value: Any, attr: Optional[str], data: Any, **kwargs: Any
     ) -> Any:
+        """Custom deserialization for join operator."""
         if isinstance(value, str):
             lowered = value.lower()
             if lowered == "and":

@@ -1,19 +1,16 @@
 #!/usr/bin/python3
 """Teacher views module for the API"""
 
-import os
 from typing import Callable, Dict, Optional, Tuple, Union
-from flask import Response, request, jsonify, current_app, url_for
+from flask import Response, request, jsonify
 from marshmallow import ValidationError
-from sqlalchemy import Row, func
+from sqlalchemy import Row
 from api.v1.utils.typing import UserT
 from models import storage
 from datetime import datetime
 from models.user import User
 from models.admin import Admin
-from models.grade import Grade
 from models.student import Student
-from models.section import Section
 from models.subject import Subject
 from models.assessment import Assessment
 from models.mark_list import MarkList
@@ -29,13 +26,10 @@ from api.v1.views.utils import (
     admin_or_student_required,
     student_teacher_or_admin_required,
 )
-from api.v1.services.user_service import UserService
-from api.v1.views.methods import paginate_query
 from api.v1.views import errors
 from api.v1.schemas.schemas import UserDetailSchema
-from models.base_model import Base, BaseModel, CustomTypes
-from api.v1.views.methods import save_profile
-from werkzeug.utils import secure_filename
+from models.base_model import CustomTypes
+from api.v1.views.methods import create_role_based_user, save_profile
 
 
 shared = Blueprint("shared", __name__, url_prefix="/api/v1")
@@ -52,23 +46,20 @@ def register_new_user(role: str) -> Tuple[Response, int]:
     Returns:
         Response: A JSON response indicating the success or failure of the registration process.
     """
-    role = role.lower()
-    if role not in ["admin", "student", "teacher"]:
-        return jsonify({"message": "Invalid role"}), 400
 
     try:
-        data = request.form.to_dict()  # Get form data as a dictionary
-        if not data:
-            raise Exception("No data provided")
+        role_enum = CustomTypes.RoleEnum.enum_value(role.lower())
 
-        data["user"] = {
-            "national_id": data.pop("national_id", None),
-            "identification": data.pop("identification", None),
-            "role": data.pop("role", None),
+        data = {
+            **request.form.to_dict(),
+            "role": role_enum,
             "image_path": request.files.get("image_path"),
         }
 
-        result = UserService().create_role_based_user(role, data)
+        if not data:
+            raise Exception("No data provided")
+
+        result = create_role_based_user(role_enum, data)
         if not result:
             raise Exception("Failed to register user")
 

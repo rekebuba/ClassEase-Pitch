@@ -1,22 +1,88 @@
 import json
 import os
-import re
-from typing import Any, Dict
+from models import storage
+from typing import Any, Callable, Dict, List, Tuple, Type, Union
 from flask import current_app, request, jsonify
 from math import ceil
-from sqlalchemy import and_, case, func, or_
+from marshmallow import Schema
+from sqlalchemy import and_, case, func
 from werkzeug.utils import secure_filename
+from werkzeug.datastructures import FileStorage
+from api.v1.schemas.schemas import AdminSchema, StudentSchema, TeacherSchema
+from models.admin import Admin
+from models.base_model import CustomTypes
+from models.student import Student
+from models.teacher import Teacher
+from models.user import User
 from models.semester import Semester
 from sqlalchemy.sql.elements import ColumnElement
+from sqlalchemy.orm.attributes import InstrumentedAttribute
+from sqlalchemy.orm import Query
+from sqlalchemy.sql.expression import BinaryExpression
 
 
-def paginate_query(query, page, limit, filters, custom_filters, sort, join=and_):
+def create_user(data: Dict[str, Any]) -> User:
+    # Save the profile picture if exists
+    filepath = None
+    if "image_path" in data and isinstance(data["image_path"], FileStorage):
+        filepath = save_profile(data["image_path"])
+        data["image_path"] = filepath
+
+    # Create the user
+    new_user = User(**data)
+
+    storage.add(new_user)
+    storage.session.flush()  # Flush to get the new_user.id
+
+    return new_user
+
+
+def create_role_based_user(
+    role_enum: CustomTypes.RoleEnum, data: Dict[str, Any]
+) -> Admin | Student | Teacher | None:
+    role_mapping: Dict[
+        CustomTypes.RoleEnum,
+        Tuple[Type[Schema], Union[Type[Admin], Type[Student], Type[Teacher]]],
+    ] = {
+        CustomTypes.RoleEnum.ADMIN: (AdminSchema, Admin),
+        CustomTypes.RoleEnum.STUDENT: (StudentSchema, Student),
+        CustomTypes.RoleEnum.TEACHER: (TeacherSchema, Teacher),
+    }
+
+    if role_enum in role_mapping:
+        schema_class, model_class = role_mapping[role_enum]
+        schema = schema_class()
+        validated_data = schema.load(data)
+
+        new_user = create_user(validated_data.pop("user"))
+
+        new_instance = model_class(user_id=new_user.id, **validated_data)
+        storage.add(new_instance)
+        storage.save()
+        return new_instance
+
+    return None
+
+
+def paginate_query(
+    query: Query[Any],
+    page: int,
+    limit: int,
+    filters: List[Any],
+    custom_filters: List[Any],
+    sort: List[Any],
+    join: Callable[..., Any] = and_,
+) -> Dict[str, Any]:
     """
     Paginate SQLAlchemy queries.
 
     :param query: SQLAlchemy query object to paginate
-    :param request: Flask request object to get query parameters (page, limit)
-    :param default_limit: Default number of records per page if limit is not provided
+    :param page: Current page number
+    :param limit: Number of records per page
+    :param filters: List of filter conditions
+    :param custom_filters: List of custom filter conditions
+    :param sort: List of sort conditions
+    :param join: Function to join filters (default: and_)
     :return: Dictionary with paginated data and meta information
     """
 
@@ -47,7 +113,7 @@ def paginate_query(query, page, limit, filters, custom_filters, sort, join=and_)
     }
 
 
-def save_profile(file):
+def save_profile(file: FileStorage) -> str:
     """Save the uploaded file to the server and return the file path."""
     filename = secure_filename(file.filename)
     base_dir = os.path.abspath(os.path.dirname("static"))
@@ -97,8 +163,8 @@ def preprocess_query_params(data: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def make_case_lookup(
-    semester_num: int, column: ColumnElement[Any], prefix: str
-) -> Dict[str, ColumnElement[Any]]:
+    semester_num: int, column: InstrumentedAttribute[Any], prefix: str
+) -> Dict[str, InstrumentedAttribute[Any]]:
     """Helper to generate case expressions with dynamic labels."""
     label_I = f"{prefix}I"  # Pre-compute the label
     label_II = f"{prefix}II"
