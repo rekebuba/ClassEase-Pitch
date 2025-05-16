@@ -28,7 +28,7 @@ from api.v1.schemas.custom_schema import (
     ValueField,
 )
 from api.v1.schemas.config_schema import OPERATOR_CONFIG, VALUE_TYPE_RULES
-from api.v1.utils.typing import AuthType, PostLoadUser
+from api.v1.utils.typing import AuthType, PostLoadParam, PostLoadUser
 from models.section import Section
 from models.stud_year_record import STUDYearRecord
 from models.grade import Grade
@@ -890,7 +890,6 @@ class FilterSchema(BaseSchema):
     def validate_value(self, data: Dict[str, Any], **kwargs: Any) -> None:
         variant = data.get("variant", None)
         operator = data.get("operator", None)
-        value = data.get("value", None)
 
         if not variant:
             raise ValidationError("Missing variant", field_name="variant")
@@ -906,14 +905,6 @@ class FilterSchema(BaseSchema):
                 raise ValidationError(
                     f"'{operator}' is not valid for variant '{variant}'",
                     field_name="operator",
-                )
-
-        if value is not None:
-            expected_type = VALUE_TYPE_RULES.get(variant)
-            if expected_type and not isinstance(value, expected_type):
-                raise ValidationError(
-                    f"Value must be of type {expected_type} when variant is '{variant}'.",
-                    field_name="value",
                 )
 
     @pre_load
@@ -937,13 +928,12 @@ class FilterSchema(BaseSchema):
 
         if data["table_id"] != "":
             data["table"] = self.get_table(data["table_id"])
-
-            if value is not None and isinstance(value, list):
-                data["value"] = self.update_list_value(
-                    value, data["table"], data["column_name"]
-                )
+            data["value"] = self.update_list_value(
+                value, data["table"], data["column_name"]
+            )
 
         return data
+
 
 
 class ParamSchema(BaseSchema):
@@ -966,7 +956,7 @@ class ParamSchema(BaseSchema):
     custom_sorts = fields.List(fields.Raw(), required=False)
 
     @post_load
-    def set_defaults(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
+    def set_defaults(self, data: PostLoadParam, **kwargs: Any) -> Dict[str, Any]:
         # add default values to the data
         valid_filters = []
         valid_sorts = []

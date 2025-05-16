@@ -1,4 +1,7 @@
-from typing import Optional, TypeVar, TypedDict, Union
+from datetime import datetime
+from typing import Any, List, Optional, Type, TypeVar, TypedDict, Union
+
+from sqlalchemy import ColumnElement
 from models.user import User
 from models.base_model import Base, CustomTypes
 
@@ -29,3 +32,38 @@ class PostLoadUser(TypedDict):
 class RangeDict(TypedDict):
     min: Union[str, int, float]
     max: Union[str, int, float]
+    
+
+class FilterDict(TypedDict):
+    """for filter data."""
+
+    column_name: str
+    filter_id: str
+    table_id: str
+    table: Optional[Type[Base]]
+    range: RangeDict
+    variant: str
+    operator: str
+    value: Union[str, int, float, datetime, RangeDict]
+
+class SortDict(TypedDict):
+    """for sort data."""
+
+    column_name: str
+    desc: bool
+    table_id: str
+    table: Optional[Type[Base]]
+
+class PostLoadParam(TypedDict):
+    """for user data after post load."""
+
+    filter_flag: str
+    filters: Optional[List[FilterDict]]
+    valid_filters: List[ColumnElement[Any]]
+    custom_filters: Optional[List[str]]
+    join_operator: str
+    page: int
+    per_page: int
+    sort: Optional[List[SortDict]]
+    valid_sort: List[str]
+    custom_sort: Optional[List[str]]

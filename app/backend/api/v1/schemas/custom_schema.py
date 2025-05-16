@@ -162,7 +162,6 @@ class ColumnField(fields.Field):
             raise ValidationError(
                 "value must be either a string or a list", field_name="value"
             )
-        return value
 
 
 class JoinOperatorField(fields.Field):

@@ -1,6 +1,6 @@
 from datetime import datetime
 import re
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 from marshmallow import (
     Schema,
     ValidationError,
@@ -16,6 +16,7 @@ from api.v1.schemas.config_schema import (
     to_snake,
     to_snake_case_key,
 )
+from api.v1.utils.typing import RangeDict
 from models.base_model import Base
 from models.stud_year_record import STUDYearRecord
 from models.table import Table
@@ -260,24 +261,21 @@ class BaseSchema(Schema):
 
     @staticmethod
     def update_list_value(
-        value: List[str | int], model: Type[Base], column_name: str
-    ) -> List[Type[Any]]:
+        value: Any, model: Type[Base], column_name: str
+    ) -> Any:
         """
         Update the list value to match the model's column type.
         """
-        if not isinstance(value, list):
-            raise ValidationError(
-                f"Expected a list for {column_name}, got {type(value)}"
-            )
+        if value is None:
+            return None
 
-        col_name = column_name
         # Find the column and get its Python type
         column_obj = next(
-            (col for col in model.__table__.columns if col.name == col_name), None
+            (col for col in model.__table__.columns if col.name == column_name), None
         )
         if column_obj is None:
             raise ValidationError(
-                f"Column '{col_name}' not found on {model.__tablename__}."
+                f"Column '{column_name}' not found on {model.__tablename__}."
             )
 
         try:
@@ -286,7 +284,7 @@ class BaseSchema(Schema):
             raise ValidationError(f"Unsupported type for column '{column_name}'.")
 
         # Type conversion logic
-        converters = {
+        converters: Dict[Type[Any], Callable[[Any], Any]] = {
             str: lambda v: str(v),
             int: lambda v: int(v),
             float: lambda v: float(v),
@@ -294,15 +292,18 @@ class BaseSchema(Schema):
             datetime: lambda v: datetime.fromisoformat(v) if isinstance(v, str) else v,
         }
 
-        if expected_type not in converters:
-            raise ValidationError(
-                f"No conversion rule for type '{expected_type}' on column '{column_name}'."
-            )
+        converter = converters.get(expected_type)
+        if converter is None:
+            raise ValueError(f"No converter available for type: {expected_type}")
 
         try:
-            return [converters[expected_type](item) for item in value]
+            return (
+                [converter(item) for item in value if item is not None]
+                if isinstance(value, list)
+                else converter(value)
+            )
         except Exception as e:
-            raise ValueError(
+            raise ValidationError(
                 f"Failed to convert values for column '{column_name}': {e}"
             )
 
@@ -311,8 +312,8 @@ class BaseSchema(Schema):
         model: Type[Base],
         column_name: str | list[str],
         operator: Optional[str],
-        value: Union[str],
-        range: Optional[Dict[str, Any]] = None,
+        value: Any,
+        range: Optional[RangeDict] = None,
     ) -> List[ColumnElement[Any]]:
         """
         Dynamically create a SQLAlchemy filter based on operator.

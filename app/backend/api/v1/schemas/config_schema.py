@@ -26,7 +26,7 @@ def normalize_date_col(
 OPERATOR_MAPPING: Dict[
     str,
     Callable[
-        [InstrumentedAttribute[Any], Union[str, List[str], RangeDict]],
+        [InstrumentedAttribute[Any], Union[Any, RangeDict]],
         ColumnElement[Any],
     ],
 ] = {
