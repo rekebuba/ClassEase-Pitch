@@ -99,7 +99,7 @@ def register_users(request, db_session):
     return data
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def db_create_users(db_session):
     factories = [
         (MakeFactory(AdminFactory, db_session).factory, CustomTypes.RoleEnum.ADMIN, 1),
@@ -186,7 +186,7 @@ def event_form(db_session):
     return semester_form
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def db_event_form(db_session):
     event = MakeFactory(EventFactory, db_session).factory(
         year_id=db_session.query(Year.id).scalar(),
@@ -198,7 +198,7 @@ def db_event_form(db_session):
     return form
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def db_course_registration(db_session, db_event_form):
     students = (
         db_session.query(Student)
@@ -315,12 +315,13 @@ def db_course_registration(db_session, db_event_form):
             db_session.commit()
 
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def fake_mark_list(db_session):
     # generate fake mark list for each grade
     registered_grades = (
         storage.session.query(Grade)
-        .join(STUDSemesterRecord, STUDSemesterRecord.grade_id == Grade.id)
+        .join(Student, Student.current_grade_id == Grade.id)
+        .filter(Student.is_registered)
         .group_by(Grade.id)
         .all()
     )

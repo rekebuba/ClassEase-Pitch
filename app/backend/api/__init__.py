@@ -43,15 +43,15 @@ def create_app(config_name: str) -> Flask:
     CORS(app, resources={r"/api/v1/*": {"origins": "*"}})
 
     # Import and register blueprints
-    from api.v1.views.auth import auth
-    from api.v1.views.admin import admin
-    from api.v1.views.students import stud
+    from api.v1.views.shared import auths
+    from api.v1.views.admin import admins as admins
+    from api.v1.views.student import stud
     from api.v1.views.teachers import teach
     from api.v1.views.shared_access import shared
     from api.v1.views.errors import errors
 
-    app.register_blueprint(auth)
-    app.register_blueprint(admin)
+    app.register_blueprint(auths)
+    app.register_blueprint(admins)
     app.register_blueprint(stud)
     app.register_blueprint(teach)
     app.register_blueprint(shared)

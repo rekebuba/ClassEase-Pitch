@@ -3,6 +3,7 @@ name = "classEase-Pitch"
 version = "0.1.0"
 dependencies = [
     "bcrypt>=4.3.0",
+    "debugpy>=1.8.14",
     "ethiopian-date>=1.0",
     "factory-boy>=3.3.3",
     "flask-apscheduler>=1.13.1",
@@ -30,6 +31,8 @@ disallow_untyped_defs = true     # Functions must have type annotations
 disallow_incomplete_defs = true  # No partial annotations (e.g., `def foo(x) -> int`)
 warn_return_any = true           # Warn if a function returns `Any`
 warn_unused_configs = true       # Warn about unused mypy configs
+
+# plugins = sqlalchemy.ext.mypy.plugin
 
 # Imports and modules
 ignore_missing_imports = false    # Fail if imports are missing

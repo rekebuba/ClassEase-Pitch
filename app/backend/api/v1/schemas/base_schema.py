@@ -66,9 +66,6 @@ class BaseSchema(Schema):
             .scalar()
         )
 
-        if not is_registered:
-            raise ValidationError(f"No Student found for student_id: {student_id}")
-
         return is_registered
 
     @staticmethod
@@ -153,6 +150,8 @@ class BaseSchema(Schema):
             raise ValidationError("academic year is required")
 
         # Fetch the semester_id from the database
+        semester = storage.session.query(Semester).all()
+        print("semester: ", semester)
         semester_id: Optional[str] = (
             storage.session.query(Semester.id)
             .join(Event, Semester.event_id == Event.id)  # Fix join condition
@@ -260,9 +259,7 @@ class BaseSchema(Schema):
         return table_id if table_id else None
 
     @staticmethod
-    def update_list_value(
-        value: Any, model: Type[Base], column_name: str
-    ) -> Any:
+    def update_list_value(value: Any, model: Type[Base], column_name: str) -> Any:
         """
         Update the list value to match the model's column type.
         """

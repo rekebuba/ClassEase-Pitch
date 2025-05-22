@@ -107,26 +107,9 @@ def get_list_of_students(teacher_data):
     """
     Retrieves a list of students based on the provided teacher data and query parameters.
 
-    Args:
-        teacher_data (object): The teacher data object containing the teacher's information.
-
     Returns:
         Response: A JSON response containing the list of students and relevant header information,
                   or an error message with the appropriate HTTP status code.
-
-    Query Parameters:
-        grade (str): The grade to filter students by.
-        sections (str): Comma-separated list of sections to filter students by.
-        semester (str): The semester to filter students by.
-        year (str): The year to filter students by.
-
-    Response JSON Structure
-
-    Error Responses:
-        400: {"error": "Bad Request"} - If required query parameters are missing.
-        400: {"error": "Missing <field>"} - If a specific required field is missing.
-        404: {"error": "Grade not found"} - If the specified grade does not exist.
-        404: {"error": "Section not found"} - If the specified section does not exist.
     """
     url = request.url
     parsed_url = urlparse(url)

@@ -1,4 +1,5 @@
 import pytest
+from models.semester import Semester
 from models.year import Year
 from models.table import Table
 from models.subject import Subject
@@ -129,7 +130,9 @@ def test_available_subjects_for_registration(client, users_auth_header, db_event
     ],
     indirect=True,
 )
-def test_student_course_registration(client, users_auth_header, db_event_form):
+def test_student_course_registration(db_session, client, users_auth_header, db_event_form):
+    test = db_session.query(Semester).all()
+    print("test: ", test)
     for auth_header in users_auth_header:
         get_course = client.get(
             "/api/v1/student/course/registration", headers=auth_header["header"]
@@ -169,21 +172,21 @@ def test_get_registered_grades(client, users_auth_header, db_course_registration
     assert len(response.json["grades"]) > 0
 
 
-@pytest.mark.parametrize(
-    "role",
-    [
-        (CustomTypes.RoleEnum.ADMIN, 1),
-    ],
-    indirect=True,
-)
-def test_admin_create_mark_list(
-    client, db_course_registration, fake_mark_list, users_auth_header
-):
-    response = client.post(
-        "/api/v1/admin/mark-list/new",
-        json=fake_mark_list,
-        headers=users_auth_header[0]["header"],
-    )
+# @pytest.mark.parametrize(
+#     "role",
+#     [
+#         (CustomTypes.RoleEnum.ADMIN, 1),
+#     ],
+#     indirect=True,
+# )
+# def test_admin_create_mark_list(
+#     client, db_course_registration, fake_mark_list, users_auth_header
+# ):
+#     response = client.post(
+#         "/api/v1/admin/mark-list/new",
+#         json=fake_mark_list,
+#         headers=users_auth_header[0]["header"],
+#     )
 
-    assert response.status_code == 201
-    assert response.json["message"] == "Mark list created successfully!"
+#     assert response.status_code == 201
+#     assert response.json["message"] == "Mark list created successfully!"

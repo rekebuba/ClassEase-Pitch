@@ -18,15 +18,15 @@ def is_date(val: Any) -> bool:
 
 
 def normalize_date_col(
-    col: InstrumentedAttribute[Any], val: Any
-) -> InstrumentedAttribute[Any]:
-    return cast(InstrumentedAttribute[Any], func.date(col)) if is_date(val) else col
+    col: ColumnElement[Any], val: Any
+) -> ColumnElement[Any]:
+    return cast(ColumnElement[Any], func.date(col)) if is_date(val) else col
 
 
 OPERATOR_MAPPING: Dict[
     str,
     Callable[
-        [InstrumentedAttribute[Any], Union[Any, RangeDict]],
+        [ColumnElement[Any], Union[Any, RangeDict]],
         ColumnElement[Any],
     ],
 ] = {

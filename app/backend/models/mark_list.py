@@ -16,9 +16,6 @@ class MarkList(BaseModel):
     user_id: Mapped[str] = mapped_column(
         String(120), ForeignKey("users.id"), nullable=False
     )
-    student_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("students.id"), nullable=False
-    )
     subject_id: Mapped[str] = mapped_column(
         String(120), ForeignKey("subjects.id"), nullable=False
     )

@@ -164,7 +164,7 @@ def preprocess_query_params(data: Dict[str, Any]) -> Dict[str, Any]:
 
 def make_case_lookup(
     semester_num: int, column: InstrumentedAttribute[Any], prefix: str
-) -> Dict[str, InstrumentedAttribute[Any]]:
+) -> Dict[str, ColumnElement[Any]]:
     """Helper to generate case expressions with dynamic labels."""
     label_I = f"{prefix}I"  # Pre-compute the label
     label_II = f"{prefix}II"
@@ -181,7 +181,7 @@ def make_case_lookup(
 
 
 def min_max_semester_lookup(
-    semester_num: int, column: ColumnElement[Any], prefix: str
+    semester_num: int, column: InstrumentedAttribute[Any], prefix: str
 ) -> Dict[str, ColumnElement[Any]]:
     """Helper to generate case expressions with dynamic labels."""
     label_I = f"{prefix}_min"  # Pre-compute the label
@@ -197,7 +197,7 @@ def min_max_semester_lookup(
 
 
 def min_max_year_lookup(
-    column: ColumnElement[Any], prefix: str
+    column: InstrumentedAttribute[Any], prefix: str
 ) -> Dict[str, ColumnElement[Any]]:
     """Helper to generate case expressions with dynamic labels."""
     label_I = f"{prefix}_min"  # Pre-compute the label
