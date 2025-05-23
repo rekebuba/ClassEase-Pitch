@@ -13,7 +13,7 @@ from models.blacklist_token import BlacklistToken
 from api.v1.views.shared.auth.schema import AuthSchema, InvalidCredentialsError
 from api.v1.views import errors
 
-@auth.route("login", methods=["POST"])
+@auth.route("auth/login", methods=["POST"])
 def login() -> Tuple[Response, int]:
     """
     Handle user login by validating credentials and generating an access token.
@@ -40,7 +40,7 @@ def login() -> Tuple[Response, int]:
         return errors.handle_internal_error(e)
 
 
-@auth.route("logout", methods=["POST"])
+@auth.route("auth/logout", methods=["POST"])
 @student_teacher_or_admin_required
 def logout(user: UserT) -> Tuple[Response, int]:
     token: str = request.headers["apiKey"].split()[1]  # Extract the token

@@ -131,7 +131,7 @@ class StudentFactory(factory.alchemy.SQLAlchemyModelFactory):
     first_name = factory.LazyAttribute(lambda x: fake.first_name())
     father_name = factory.LazyAttribute(lambda x: fake.last_name())
     grand_father_name = factory.LazyAttribute(lambda x: fake.first_name())
-    date_of_birth = factory.LazyAttribute(lambda x: fake.date_of_birth())
+    date_of_birth = factory.LazyAttribute(lambda x: fake.date_of_birth(minimum_age=6))
     gender = factory.LazyAttribute(lambda x: fake.random_element(elements=("M", "F")))
     father_phone = factory.LazyAttribute(lambda x: "091234567")
     mother_phone = factory.LazyAttribute(lambda x: "091234567")

@@ -151,7 +151,6 @@ class BaseSchema(Schema):
 
         # Fetch the semester_id from the database
         semester = storage.session.query(Semester).all()
-        print("semester: ", semester)
         semester_id: Optional[str] = (
             storage.session.query(Semester.id)
             .join(Event, Semester.event_id == Event.id)  # Fix join condition

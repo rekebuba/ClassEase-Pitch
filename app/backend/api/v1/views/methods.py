@@ -39,7 +39,7 @@ def create_user(data: Dict[str, Any]) -> User:
 
 def create_role_based_user(
     role_enum: CustomTypes.RoleEnum, data: Dict[str, Any]
-) -> Admin | Student | Teacher | None:
+) -> User | None:
     role_mapping: Dict[
         CustomTypes.RoleEnum,
         Tuple[Type[Schema], Union[Type[Admin], Type[Student], Type[Teacher]]],
@@ -59,7 +59,7 @@ def create_role_based_user(
         new_instance = model_class(user_id=new_user.id, **validated_data)
         storage.add(new_instance)
         storage.save()
-        return new_instance
+        return new_user
 
     return None
 

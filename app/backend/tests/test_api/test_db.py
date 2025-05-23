@@ -1,10 +1,7 @@
-import pytest
-from models.semester import Semester
 from models.year import Year
 from models.table import Table
 from models.subject import Subject
 from models.grade import Grade
-from models.base_model import CustomTypes
 
 
 def test_db_grade_count(client, db_session):
@@ -42,129 +39,44 @@ def test_db_table_count(client, db_session):
     assert table > 0
 
 
-def test_user_register_success(client, register_users):
-    for valid_data in register_users:
-        # Send a POST request to the registration endpoint
-        print(valid_data["role"])
-        response = client.post(
-            f"/api/v1/registration/{valid_data['role']}", data=valid_data
-        )
+def test_each_users_registration(client, register_user_temp):
+    pass
 
-        # Assert that the registration was successful
-        assert response.status_code == 201
-        assert (
-            response.json["message"] == f"{valid_data['role']} registered successfully!"
-        )
+def test_all_users_registration(client, register_user):
+    pass
+
+def test_users_log_in_success(client, users_auth_header):
+    pass
 
 
-def test_users_log_in_success(client, db_create_users):
-    for role in db_create_users.keys():
-        user = db_create_users[role]
-        response = client.post(
-            "/api/v1/auth/login",
-            json={
-                "id": user[0]["identification"],
-                "password": user[0]["identification"],
-            },
-        )
-
-        assert response.status_code == 200
-        assert "apiKey" in response.json
-        assert response.json["message"] == "logged in successfully."
-
-
-@pytest.mark.parametrize(
-    "role",
-    [
-        (CustomTypes.RoleEnum.TEACHER, "all"),
-    ],
-    indirect=True,
-)
-def test_teacher_dashboard(client, users_auth_header):
-    for auth_header in users_auth_header:
-        response = client.get(
-            "/api/v1/teacher/dashboard", headers=auth_header["header"]
-        )
-
-        assert response.status_code == 200
-
-
-@pytest.mark.parametrize(
-    "role",
-    [
-        (CustomTypes.RoleEnum.ADMIN, 1),
-    ],
-    indirect=True,
-)
-def test_admin_create_semester(client, users_auth_header, event_form):
-    response = client.post(
-        "/api/v1/admin/event/new",
-        json=event_form,
-        headers=users_auth_header[0]["header"],
+def test_teacher_dashboard(client, teacher_auth_header):
+    response = client.get(
+        "/api/v1/teacher/dashboard", headers=teacher_auth_header["header"]
     )
 
-    assert response.status_code == 201
-    assert response.json["message"] == "Event Created Successfully"
+    assert response.status_code == 200
 
 
-@pytest.mark.parametrize(
-    "role",
-    [
-        (CustomTypes.RoleEnum.STUDENT, 1),
-    ],
-    indirect=True,
-)
-def test_available_subjects_for_registration(client, users_auth_header, db_event_form):
+def test_semester_creation(create_semester):
+    pass
+
+
+def test_available_subjects_for_registration(client, create_semester, stud_auth_header):
     response = client.get(
-        "/api/v1/student/course/registration", headers=users_auth_header[0]["header"]
+        "/api/v1/student/course/registration", headers=stud_auth_header["header"]
     )
     assert response.status_code == 200
     assert isinstance(response.json, dict)
     assert len(response.json) > 0
 
 
-@pytest.mark.parametrize(
-    "role",
-    [
-        ("student", "all"),
-    ],
-    indirect=True,
-)
-def test_student_course_registration(db_session, client, users_auth_header, db_event_form):
-    test = db_session.query(Semester).all()
-    print("test: ", test)
-    for auth_header in users_auth_header:
-        get_course = client.get(
-            "/api/v1/student/course/registration", headers=auth_header["header"]
-        )
-        assert get_course.status_code == 200
-        courses = get_course.json
-
-        response = client.post(
-            "/api/v1/student/course/registration",
-            json=courses,
-            headers=auth_header["header"],
-        )
-
-        # Debugging failed cases
-        if response.status_code != 201:
-            print(f"Failed for: {courses}")
-            print(f"Response: {response.json}")
-
-        assert response.status_code == 201
-        assert response.json["message"] == "Course registration successful!"
+def test_student_course_registration(stud_course_register):
+    pass
 
 
-@pytest.mark.parametrize(
-    "role",
-    [
-        (CustomTypes.RoleEnum.ADMIN, 1),
-    ],
-    indirect=True,
-)
-def test_get_registered_grades(client, users_auth_header, db_course_registration):
+def test_get_registered_grades(client, admin_auth_header, stud_course_register):
     response = client.get(
-        "/api/v1/admin/registered_grades", headers=users_auth_header[0]["header"]
+        "/api/v1/admin/registered_grades", headers=admin_auth_header["header"]
     )
     assert response.status_code == 200
     assert "grades" in response.json
@@ -172,21 +84,14 @@ def test_get_registered_grades(client, users_auth_header, db_course_registration
     assert len(response.json["grades"]) > 0
 
 
-# @pytest.mark.parametrize(
-#     "role",
-#     [
-#         (CustomTypes.RoleEnum.ADMIN, 1),
-#     ],
-#     indirect=True,
-# )
-# def test_admin_create_mark_list(
-#     client, db_course_registration, fake_mark_list, users_auth_header
-# ):
-#     response = client.post(
-#         "/api/v1/admin/mark-list/new",
-#         json=fake_mark_list,
-#         headers=users_auth_header[0]["header"],
-#     )
+def test_admin_create_mark_list(
+    client, stud_course_register, fake_mark_list, admin_auth_header
+):
+    response = client.post(
+        "/api/v1/admin/mark-list/new",
+        json=fake_mark_list,
+        headers=admin_auth_header["header"],
+    )
 
-#     assert response.status_code == 201
-#     assert response.json["message"] == "Mark list created successfully!"
+    assert response.status_code == 201
+    assert response.json["message"] == "Mark list created successfully!"

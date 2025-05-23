@@ -98,6 +98,7 @@ class RoleEnumField(fields.Field):
         **kwargs: Any,
     ) -> str:
         """Custom serialization for RoleEnum."""
+        print(type(value))
         if isinstance(value, CustomTypes.RoleEnum):
             return value.value.capitalize()  # Returns "Admin", "Teacher", or "Student"
         raise ValidationError("Expected RoleEnum instance")

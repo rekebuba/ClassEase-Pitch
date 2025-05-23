@@ -29,47 +29,10 @@ from api.v1.views.utils import (
 from api.v1.views import errors
 from api.v1.schemas.schemas import UserDetailSchema
 from models.base_model import CustomTypes
-from api.v1.views.methods import create_role_based_user, save_profile
+from api.v1.views.methods import save_profile
 
 
 shared = Blueprint("shared", __name__, url_prefix="/api/v1")
-
-
-@shared.route("/registration/<role>", methods=["POST"])
-def register_new_user(role: str) -> Tuple[Response, int]:
-    """
-    Registers a new user (Admin, Student, Teacher) in the system.
-
-    Args:
-        role (str): The role of the user to be registered. It should be one of 'Admin', 'Student', or 'Teacher'.
-
-    Returns:
-        Response: A JSON response indicating the success or failure of the registration process.
-    """
-
-    try:
-        role_enum = CustomTypes.RoleEnum.enum_value(role.lower())
-
-        data = {
-            **request.form.to_dict(),
-            "role": role_enum,
-            "image_path": request.files.get("image_path"),
-        }
-
-        if not data:
-            raise Exception("No data provided")
-
-        result = create_role_based_user(role_enum, data)
-        if not result:
-            raise Exception("Failed to register user")
-
-        return jsonify({"message": f"{role} registered successfully!"}), 201
-    except ValidationError as e:
-        storage.rollback()
-        return errors.handle_validation_error(e)
-    except Exception as e:
-        storage.rollback()
-        return errors.handle_internal_error(e)
 
 
 @shared.route("/student/assessment", methods=["GET"])
