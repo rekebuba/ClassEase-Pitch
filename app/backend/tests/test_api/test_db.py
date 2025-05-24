@@ -42,8 +42,10 @@ def test_db_table_count(client, db_session):
 def test_each_users_registration(client, register_user_temp):
     pass
 
+
 def test_all_users_registration(client, register_user):
     pass
+
 
 def test_users_log_in_success(client, users_auth_header):
     pass
@@ -84,14 +86,5 @@ def test_get_registered_grades(client, admin_auth_header, stud_course_register):
     assert len(response.json["grades"]) > 0
 
 
-def test_admin_create_mark_list(
-    client, stud_course_register, fake_mark_list, admin_auth_header
-):
-    response = client.post(
-        "/api/v1/admin/mark-list/new",
-        json=fake_mark_list,
-        headers=admin_auth_header["header"],
-    )
-
-    assert response.status_code == 201
-    assert response.json["message"] == "Mark list created successfully!"
+def test_admin_create_mark_list(create_mark_list):
+    pass

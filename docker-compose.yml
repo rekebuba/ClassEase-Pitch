@@ -30,6 +30,9 @@ services:
       - .env
     environment:
       - IS_DOCKER=true
+      - FLASK_APP=api.v1.app
+      - FLASK_ENV=development
+      - PYTHONUNBUFFERED=1 
     volumes:
       - ./app/backend:/backend:cached
     depends_on:

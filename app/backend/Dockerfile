@@ -11,7 +11,7 @@ WORKDIR /opt
 COPY pyproject.toml .
 
 # Sync dependencies (this creates `.venv` in /build/.venv)
-RUN uv sync
+RUN uv sync -v
 
 # Stage 2: Runtime
 FROM python:3.10-bookworm
@@ -32,4 +32,4 @@ ENV PATH="/opt/.venv/bin:$PATH"
 EXPOSE 5000
 
 # Run the Flask app
-CMD ["python3", "-m", "api.v1.app"]
+CMD ["flask", "run", "--host=0.0.0.0", "--reload"]
