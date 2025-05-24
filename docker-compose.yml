@@ -20,6 +20,7 @@ services:
 
   backend:
     container_name: backend_container
+    working_dir: /backend
     build:
       context: ./app/backend # host directory
       dockerfile: Dockerfile
@@ -30,11 +31,8 @@ services:
       - .env
     environment:
       - IS_DOCKER=true
-      - FLASK_APP=api.v1.app
-      - FLASK_ENV=development
-      - PYTHONUNBUFFERED=1 
     volumes:
-      - ./app/backend:/backend:cached
+      - backend_volume:/backend:cached
     depends_on:
       db:
         condition: service_healthy
@@ -47,21 +45,28 @@ services:
     restart: always
     env_file:
       - .env
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
     ports:
       - "3307:3306"
+    external_links:
+      - mysql_container:db  # Maps the existing container to 'db'
     networks:
       - app-network
     volumes:
       - mysql_data:/var/lib/mysql
       - ./app/backend/setup_mysql_dev.sql:/docker-entrypoint-initdb.d/setup_mysql_dev.sql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "mysql_container"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "mysql_container" ]
       interval: 5s
       timeout: 10s
       retries: 5
 
 volumes:
+  backend_volume:
   mysql_data:
 
 networks:
   app-network:
+    name: app-network
+    driver: bridge
