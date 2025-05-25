@@ -17,7 +17,7 @@ RUN uv sync -v
 FROM python:3.10-bookworm
 
 # Set working directory for the app
-WORKDIR /backend
+WORKDIR /ClassEase-Pitch
 
 # Copy only the `.venv` from builder to a hidden directory outside source
 COPY --from=builder /opt/.venv /opt/.venv

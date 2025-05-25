@@ -1,25 +1,23 @@
 {
-	"name": "Existing Docker Compose (Extend)",
+	"name": "app_devcontainer",
 	"dockerComposeFile": [
 		"../docker-compose.yml"
 	],
-	"service": "devcontiner",
-	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-	"features": {
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {}
-	},
+	"service": "devcontainer",
+	"workspaceFolder": "/${localWorkspaceFolderBasename}",
+	"remoteUser": "vscode",
+	"containerUser": "vscode",
 	"customizations": {
 		"vscode": {
 			"extensions": [
 				"ms-python.python",
 				"esbenp.prettier-vscode",
-				"ms-azuretools.vscode-containers",
-				"dbaeumer.vscode-eslint",
 				"cweijan.vscode-mysql-client2",
+				"ms-azuretools.vscode-containers",
 				"WakaTime.vscode-wakatime",
+				"streetsidesoftware.code-spell-checker",
 				"matangover.mypy",
-				"charliermarsh.ruff",
-				"hbenl.vscode-test-explorer"
+				"charliermarsh.ruff"
 				// Add more extensions here
 			]
 		}

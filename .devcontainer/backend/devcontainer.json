@@ -4,6 +4,25 @@
         "../../docker-compose.yml"
     ],
     "service": "backend",
-    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}/app/backend",
-    "shutdownAction": "none"
+    "workspaceFolder": "/${localWorkspaceFolderBasename}/app/backend",
+    "shutdownAction": "none",
+    "remoteUser": "root",
+	"containerUser": "root",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "esbenp.prettier-vscode",
+                "cweijan.vscode-mysql-client2",
+                "ms-azuretools.vscode-containers",
+                "WakaTime.vscode-wakatime",
+                "matangover.mypy",
+                "charliermarsh.ruff",
+                "hbenl.vscode-test-explorer",
+                "oderwat.indent-rainbow",
+                "streetsidesoftware.code-spell-checker"
+                // Add more extensions here
+            ]
+        }
+    }
 }

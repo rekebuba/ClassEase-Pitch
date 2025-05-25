@@ -20,25 +20,14 @@ class Config:
 
 
 class DevelopmentConfig(Config):
-    IS_DOCKER = os.environ.get("IS_DOCKER", "false").lower() == "true"
-
     user = os.getenv("DEV_MYSQL_USER")
     password = os.getenv("DEV_MYSQL_PWD")
-    host = (
-        os.getenv("MYSQL_DOCKER_HOST")
-        if IS_DOCKER
-        else os.getenv("MYSQL_LOCAL_HOST")
-    )
-    port = (
-        os.getenv("MYSQL_DOCKER_PORT")
-        if IS_DOCKER
-        else os.getenv("MYSQL_LOCAL_PORT")
-    )
+    host = os.getenv("MYSQL_DOCKER_HOST", "localhost")
     db = os.getenv("DEV_MYSQL_DB")
-    if not all([user, password, host, port, db]):
+    if not all([user, password, host, db]):
         raise ValueError("Missing required environment variables for db connection")
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = f"mysql://{user}:{password}@{host}:{port}/{db}"
+    SQLALCHEMY_DATABASE_URI = f"mysql://{user}:{password}@{host}/{db}"
 
 
 class ProductionConfig(Config):
@@ -47,29 +36,18 @@ class ProductionConfig(Config):
 
 class TestingConfig(Config):
     """Testing configuration."""
-
-    IS_DOCKER = os.environ.get("IS_DOCKER", "false").lower() == "true"
-
     TESTING = True
     DEBUG = True
     user = os.getenv("TEST_MYSQL_USER")
     password = os.getenv("TEST_MYSQL_PWD")
-    host = (
-        os.getenv("MYSQL_DOCKER_HOST")
-        if IS_DOCKER
-        else os.getenv("MYSQL_LOCAL_HOST")
-    )
-    port = (
-        os.getenv("MYSQL_DOCKER_PORT")
-        if IS_DOCKER
-        else os.getenv("MYSQL_LOCAL_PORT")
-    )
+    host = os.getenv("MYSQL_DOCKER_HOST", "localhost")
+
     db = os.getenv("TEST_MYSQL_DB")
 
-    if not all([user, password, host, port, db]):
+    if not all([user, password, host, db]):
         raise ValueError("Missing required environment variables for db connection")
 
-    SQLALCHEMY_DATABASE_URI = f"mysql://{user}:{password}@{host}:{port}/{db}"
+    SQLALCHEMY_DATABASE_URI = f"mysql://{user}:{password}@{host}/{db}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Overriding the JWT secret keys for testing

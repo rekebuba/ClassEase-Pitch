@@ -4,6 +4,22 @@
         "../../docker-compose.yml"
     ],
     "service": "frontend",
-    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}/app/frontend",
-    "shutdownAction": "none"
+    "workspaceFolder": "/${localWorkspaceFolderBasename}/app/frontend",
+    "shutdownAction": "none",
+    "remoteUser": "vscode",
+	"containerUser": "vscode",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "esbenp.prettier-vscode",
+                "cweijan.vscode-mysql-client2",
+                "ms-azuretools.vscode-containers",
+                "dbaeumer.vscode-eslint",
+                "WakaTime.vscode-wakatime",
+                "oderwat.indent-rainbow",
+				"streetsidesoftware.code-spell-checker"
+                // Add more extensions here
+            ]
+        }
+    }
 }
