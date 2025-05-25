@@ -36,18 +36,12 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # 4. (Optional) Add non-root user to Docker group (replace "vscode" with your user)
-ARG USERNAME=vscode
+ARG USERNAME=rekebuba
+RUN useradd -ms /bin/bash $USERNAME
 RUN usermod -aG docker $USERNAME
-
-# ===== INSTALL UV (UltraFast Vi for Python) =====
-RUN curl -fsSL https://astral.sh/uv/install.sh -o /tmp/uv-installer.sh \
-    && chmod +x /tmp/uv-installer.sh \
-    && /tmp/uv-installer.sh \
-    && rm /tmp/uv-installer.sh
 
 # Add to PATH (system-wide)
 ENV PATH="/root/.local/bin:$PATH"
 
 # ===== VERIFY INSTALLATIONS =====
-RUN docker --version && \
-    uv --version
+RUN docker --version

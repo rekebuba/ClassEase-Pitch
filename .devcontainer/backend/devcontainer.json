@@ -1,0 +1,9 @@
+{
+    "name": "backend-devcontainer",
+    "dockerComposeFile": [
+        "../../docker-compose.yml"
+    ],
+    "service": "backend",
+    "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}/app/backend",
+    "shutdownAction": "none"
+}

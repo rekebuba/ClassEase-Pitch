@@ -1,4 +1,22 @@
+version: '3.8'
+
 services:
+  devcontiner:
+    container_name: classease_devcontainer
+    build:
+      context: .
+      dockerfile: .devcontainer/Dockerfile
+    user: "rekebuba"
+    privileged: true  # Required for Docker-in-Docker
+    volumes:
+      - ..:/workspaces:cached
+      - /var/run/docker.sock:/var/run/docker.sock  # Optional (alternative to DinD)
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    networks:
+      - app-network
+    command: sleep infinity
+
   frontend:
     container_name: frontend_container
     build:
@@ -10,7 +28,7 @@ services:
       - CHOKIDAR_USEPOLLING=true
       - IS_DOCKER=true
     volumes:
-      - ./app/frontend/src:/frontend/src:cached
+      - .:/frontend:cached
     depends_on:
       - backend
     networks:
@@ -32,7 +50,7 @@ services:
     environment:
       - IS_DOCKER=true
     volumes:
-      - backend_volume:/backend:cached
+      - .:/backend:cached
     depends_on:
       db:
         condition: service_healthy
@@ -63,10 +81,9 @@ services:
       retries: 5
 
 volumes:
-  backend_volume:
+  # backend_volume:
+  # frontend_volume:
   mysql_data:
 
 networks:
   app-network:
-    name: app-network
-    driver: bridge
