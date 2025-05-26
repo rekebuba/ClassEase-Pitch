@@ -14,9 +14,8 @@
 				"esbenp.prettier-vscode",
 				"cweijan.vscode-mysql-client2",
 				"ms-azuretools.vscode-containers",
-				"WakaTime.vscode-wakatime",
 				"streetsidesoftware.code-spell-checker",
-				"matangover.mypy",
+				"ms-python.mypy-type-checker",
 				"charliermarsh.ruff"
 				// Add more extensions here
 			]

@@ -13,9 +13,6 @@
             "extensions": [
                 "esbenp.prettier-vscode",
                 "cweijan.vscode-mysql-client2",
-                "ms-azuretools.vscode-containers",
-                "dbaeumer.vscode-eslint",
-                "WakaTime.vscode-wakatime",
                 "oderwat.indent-rainbow",
 				"streetsidesoftware.code-spell-checker"
                 // Add more extensions here

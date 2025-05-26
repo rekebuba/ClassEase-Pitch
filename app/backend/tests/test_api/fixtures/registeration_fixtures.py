@@ -14,11 +14,8 @@ import random
 from models.base_model import CustomTypes
 
 
-@pytest.fixture(
-    params=[(CustomTypes.RoleEnum.ADMIN, 1)], ids=["admin<1>"], scope="module"
-)
-def admin_registration_form(request, db_session):
-    role, count = request.param
+def admin_registration_form(db_session):
+    role, count = (CustomTypes.RoleEnum.ADMIN, 1)
     data = []
     for _ in range(count):
         user = MakeFactory(UserFactory, db_session, built=True).factory(role=role)
@@ -35,11 +32,8 @@ def admin_registration_form(request, db_session):
     return data
 
 
-@pytest.fixture(
-    params=[(CustomTypes.RoleEnum.TEACHER, 1)], ids=["teacher<1>"], scope="module"
-)
-def teacher_registration_form(request, db_session):
-    role, count = request.param
+def teacher_registration_form(db_session):
+    role, count = (CustomTypes.RoleEnum.TEACHER, 1)
     data = []
     for _ in range(count):
         user = MakeFactory(UserFactory, db_session, built=True).factory(role=role)
@@ -56,11 +50,8 @@ def teacher_registration_form(request, db_session):
     return data
 
 
-@pytest.fixture(
-    params=[(CustomTypes.RoleEnum.STUDENT, 1)], ids=["student<1>"], scope="module"
-)
-def stud_registration_form(request, db_session):
-    role, count = request.param
+def stud_registration_form(db_session):
+    role, count = (CustomTypes.RoleEnum.STUDENT, 1)
     data = []
     for _ in range(count):
         user = MakeFactory(UserFactory, db_session, built=True).factory(role=role)
@@ -89,7 +80,7 @@ def stud_registration_form(request, db_session):
         (CustomTypes.RoleEnum.TEACHER, 1),
         (CustomTypes.RoleEnum.STUDENT, 2),
     ],
-    ids=["admin<1>", "teacher<1>", "student<2>"],
+    ids=["admin_1", "teacher_1", "student_2"],
     scope="module",
 )
 def registration_form(request, db_session):
@@ -123,14 +114,11 @@ def registration_form(request, db_session):
 
 
 @pytest.fixture(scope="module")
-def register_user(
-    client,
-    admin_registration_form,
-    teacher_registration_form,
-    stud_registration_form,
-):
+def register_user(client, db_session):
     registration_form = (
-        admin_registration_form + teacher_registration_form + stud_registration_form
+        admin_registration_form(db_session)
+        + teacher_registration_form(db_session)
+        + stud_registration_form(db_session)
     )
     for valid_data in registration_form:
         # Send a POST request to the registration endpoint
@@ -159,8 +147,7 @@ def register_user_temp(
         # Assert that the registration was successful
         assert response.status_code == 201
         assert (
-            response.json["message"]
-            == f"{valid_data['role']} registered successfully!"
+            response.json["message"] == f"{valid_data['role']} registered successfully!"
         )
 
     yield None

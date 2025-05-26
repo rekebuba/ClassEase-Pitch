@@ -14,3 +14,5 @@ RUN apt-get update && \
 
 # Install uv globally
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+
+ENV PATH="/ClassEase-Pitch/app/backend/.venv/bin:${PATH}"

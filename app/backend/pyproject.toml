@@ -22,6 +22,7 @@ dependencies = [
     "pytest-xdist>=3.6.1",
     "python-dotenv>=1.1.0",
     "sqlalchemy>=2.0.40",
+    "types-flask-cors>=6.0.0.20250520",
 ]
 
 [tool.mypy]
