@@ -13,6 +13,7 @@ from models.event import Event
 from models import storage
 from api.v1.views import errors
 
+
 @admin.route("/events", methods=["GET"])
 @admin_required
 def available_events(admin_data: UserT) -> Tuple[Response, int]:

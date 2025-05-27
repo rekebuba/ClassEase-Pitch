@@ -18,7 +18,6 @@ from models.semester import Semester
 from sqlalchemy.sql.elements import ColumnElement
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.orm import Query
-from sqlalchemy.sql.expression import BinaryExpression
 
 
 def create_user(data: Dict[str, Any]) -> User:

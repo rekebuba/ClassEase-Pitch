@@ -1,25 +1,28 @@
 #!/usr/bin/python
 
+from typing import Any, Callable, Dict, Iterator, List, Optional, Type
+from flask.testing import FlaskClient
 import pytest
-from tests.test_api.factories_methods import MakeFactory
 from tests.test_api.factories import (
     AdminFactory,
-    DefaultFelids,
     StudentFactory,
     TeacherFactory,
     UserFactory,
 )
 import os
-import random
 from models.base_model import CustomTypes
+from sqlalchemy.orm import scoped_session, Session
 
 
-def admin_registration_form(db_session):
-    role, count = (CustomTypes.RoleEnum.ADMIN, 1)
+def admin_registration_form(
+    db_session: scoped_session[Session],
+) -> List[Dict[str, Any]]:
+    role: CustomTypes.RoleEnum = CustomTypes.RoleEnum.ADMIN
+    count = 1
     data = []
     for _ in range(count):
-        user = MakeFactory(UserFactory, db_session, built=True).factory(role=role)
-        admin = MakeFactory(AdminFactory, db_session, built=True).factory()
+        user = UserFactory(role=role.value)
+        admin = AdminFactory()
 
         valid_data = {**user, **admin}
         if "image_path" in valid_data and valid_data["image_path"]:
@@ -32,12 +35,16 @@ def admin_registration_form(db_session):
     return data
 
 
-def teacher_registration_form(db_session):
-    role, count = (CustomTypes.RoleEnum.TEACHER, 1)
+def teacher_registration_form(
+    db_session: scoped_session[Session],
+) -> List[Dict[str, Any]]:
+    """Generate a registration form for teachers."""
+    role: CustomTypes.RoleEnum = CustomTypes.RoleEnum.TEACHER
+    count = 1
     data = []
     for _ in range(count):
-        user = MakeFactory(UserFactory, db_session, built=True).factory(role=role)
-        teacher = MakeFactory(TeacherFactory, db_session, built=True).factory()
+        user = UserFactory(role=role.value)
+        teacher = TeacherFactory()
 
         valid_data = {**user, **teacher}
         if "image_path" in valid_data and valid_data["image_path"]:
@@ -50,18 +57,13 @@ def teacher_registration_form(db_session):
     return data
 
 
-def stud_registration_form(db_session):
-    role, count = (CustomTypes.RoleEnum.STUDENT, 1)
+def stud_registration_form(db_session: scoped_session[Session]) -> List[Dict[str, Any]]:
+    role: CustomTypes.RoleEnum = CustomTypes.RoleEnum.STUDENT
+    count: int = 1
     data = []
     for _ in range(count):
-        user = MakeFactory(UserFactory, db_session, built=True).factory(role=role)
-
-        current_grade = random.randint(1, 10)
-        academic_year = DefaultFelids.current_EC_year()
-
-        student = MakeFactory(StudentFactory, db_session, built=True).factory(
-            add={"current_grade": current_grade, "academic_year": academic_year}
-        )
+        user = UserFactory(role=role.value)
+        student = StudentFactory()
 
         valid_data = {**user, **student}
         if "image_path" in valid_data and valid_data["image_path"]:
@@ -83,25 +85,29 @@ def stud_registration_form(db_session):
     ids=["admin_1", "teacher_1", "student_2"],
     scope="module",
 )
-def registration_form(request, db_session):
-    role, count = request.param if request.param else (None, 0)
+def registration_form(request, db_session: scoped_session[Session]) -> List[Dict[str, Any]]:
+    """Fixture to generate registration forms for different roles."""
+    try:
+        role: CustomTypes.RoleEnum = request.param[0]
+        count: int = request.param[1]
+    except (IndexError, TypeError):
+        pytest.skip("No role provided for registration form")
 
     data = []
-    role_user = {}
-    for _ in range(count):
-        user = MakeFactory(UserFactory, db_session, built=True).factory(role=role)
-        if role == CustomTypes.RoleEnum.STUDENT:
-            current_grade = random.randint(1, 10)
-            academic_year = DefaultFelids.current_EC_year()
-            role_user = MakeFactory(StudentFactory, db_session, built=True).factory(
-                add={"current_grade": current_grade, "academic_year": academic_year}
-            )
-        elif role == CustomTypes.RoleEnum.TEACHER:
-            role_user = MakeFactory(TeacherFactory, db_session, built=True).factory()
-        elif role == CustomTypes.RoleEnum.ADMIN:
-            role_user = MakeFactory(AdminFactory, db_session, built=True).factory()
+    factory_map = {
+        CustomTypes.RoleEnum.ADMIN: AdminFactory,
+        CustomTypes.RoleEnum.TEACHER: TeacherFactory,
+        CustomTypes.RoleEnum.STUDENT: StudentFactory,
+    }
 
-        valid_data = {**user, **role_user}
+    for _ in range(count):
+        user = UserFactory(role=role.value)
+        role_data = factory_map[role]()
+
+        if not user or not role_data:
+            pytest.skip(f"No data found for role: {role}")
+
+        valid_data = {**user, **role_data}
 
         if "image_path" in valid_data and valid_data["image_path"]:
             local_path = valid_data.pop("image_path")
@@ -114,7 +120,7 @@ def registration_form(request, db_session):
 
 
 @pytest.fixture(scope="module")
-def register_user(client, db_session):
+def register_user(client: FlaskClient, db_session: scoped_session[Session]) -> None:
     registration_form = (
         admin_registration_form(db_session)
         + teacher_registration_form(db_session)
@@ -135,7 +141,7 @@ def register_user(client, db_session):
 
 @pytest.fixture(scope="function")
 def register_user_temp(
-    client,
+    client: FlaskClient,
     registration_form,
 ):
     for valid_data in registration_form:

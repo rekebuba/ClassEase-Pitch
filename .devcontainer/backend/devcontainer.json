@@ -6,8 +6,6 @@
     "service": "backend",
     "workspaceFolder": "/${localWorkspaceFolderBasename}/app/backend",
     "shutdownAction": "none",
-    "remoteUser": "root",
-	"containerUser": "root",
     "customizations": {
         "vscode": {
             "extensions": [

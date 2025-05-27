@@ -35,6 +35,8 @@ def handle_not_found_error(error: Union[Exception, str]) -> tuple[Response, int]
 
 
 @errors.app_errorhandler(401)
-def handle_invalid_credentials_error(error: Union[Exception, str]) -> tuple[Response, int]:
+def handle_invalid_credentials_error(
+    error: Union[Exception, str],
+) -> tuple[Response, int]:
     logging.error(f"Invalid Credentials Error: {error}")
     return jsonify({"message": "Invalid credentials", "error": str(error)}), 401

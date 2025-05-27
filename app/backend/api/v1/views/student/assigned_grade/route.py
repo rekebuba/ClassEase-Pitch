@@ -6,6 +6,7 @@ from api.v1.views.student import stud
 from models.grade import Grade
 from models import storage
 
+
 @stud.route("/assigned_grade", methods=["GET"])
 @student_required
 def get_student_grade(student_data: UserT) -> Tuple[Response, int]:

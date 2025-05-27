@@ -42,7 +42,7 @@ def list_of_course_available(user_data: UserT) -> Tuple[Response, int]:
         if not student_data:
             return jsonify({"message": "Student not found"}), 404
 
-        if not student_data.is_active:
+        if student_data.is_active:
             return jsonify({"message": "Student is not active"}), 400
 
         available_semester = (

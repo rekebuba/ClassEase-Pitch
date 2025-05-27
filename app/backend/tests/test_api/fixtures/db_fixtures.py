@@ -1,17 +1,18 @@
 #!/usr/bin/python
 
+from sqlalchemy.orm import scoped_session, Session
+from flask import Flask
+from flask.testing import FlaskClient
 import pytest
-from api import create_app
 from models import storage
-
+from typing import Iterator
+from tests import test_app
 
 @pytest.fixture(scope="session")
-def app_session():
+def app_session() -> Iterator[Flask]:
     """Session-scoped fixture for the Flask app."""
-    app = create_app("testing")
-    # app = create_app("development")
 
-    yield app
+    yield test_app
 
     storage.rollback()
     storage.session.remove()
@@ -19,16 +20,15 @@ def app_session():
 
 
 @pytest.fixture(scope="session")
-def db_session(app_session):
+def db_session(app_session: Flask) -> Iterator[scoped_session[Session]]:
     """Function-scoped fixture for database transactions."""
-    storage.init_app(app_session)
     yield storage.session
 
     storage.rollback()  # Roll back the transaction after the test
 
 
 @pytest.fixture(scope="session")
-def client(app_session):
+def client(app_session: Flask) -> Iterator[FlaskClient]:
     """Session-scoped fixture for the Flask test client."""
     with app_session.test_client() as client:
         yield client

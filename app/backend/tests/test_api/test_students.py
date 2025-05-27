@@ -2,13 +2,12 @@
 
 import unittest
 from models.user import User
-from models.grade import Grade
 from models import storage
 from api import create_app
 from models.student import Student
 from tests.test_api.helper_functions import *
 from tests.test_api.factories import *
-from tests.test_api.factories_methods import MakeFactory
+from flask.testing import FlaskClient
 
 
 class TestStudents(unittest.TestCase):
@@ -23,7 +22,7 @@ class TestStudents(unittest.TestCase):
     - `test_student_dashboard_success`: Verifies that accessing the student dashboard with a valid token is successful.
     - `test_student_dashboard_failure`: Ensures that accessing the student dashboard with an invalid token returns an error.
 
-    The tests use a test client to simulate API requests and responses. The `setUp` method initializes the test app and client,
+    The tests use a test client to simulate API requests and responses. The `setUp` method initializes the test app and client: FlaskClient,
     while the `tearDown` method cleans up the database after each test.
     """
 
@@ -61,22 +60,14 @@ class TestStudents(unittest.TestCase):
         response JSON contains the success message 'Student registered successfully!'.
         """
         role = CustomTypes.RoleEnum.STUDENT
-        user = MakeFactory(UserFactory, self.session, built=True).factory(
-            role=role, keep={"id"}
-        )
+        user = UserFactory(role=role.value)
 
         if "image_path" in user:
             local_path = user.pop("image_path")
             user["image_path"] = open(local_path, "rb")
             os.remove(local_path)  # remove the file
 
-        current_grade = random.randint(1, 10)
-        academic_year = DefaultFelids.current_EC_year()
-
-        student = MakeFactory(StudentFactory, self.session, built=True).factory(
-            user_id=user.pop("id"),
-            add={"current_grade": current_grade, "academic_year": academic_year},
-        )
+        student = StudentFactory()
 
         response = self.client.post(
             f"/api/v1/registration/{role.value}", data={**user, **student}
@@ -102,7 +93,7 @@ class TestStudents(unittest.TestCase):
         - The response status code should be 200.
         - The response JSON should contain an 'access_token' key.
         """
-        register_user(self.client, "student")
+        register_user(self.client: FlaskClient, "student")
         id = (
             storage.session.query(User).filter_by(role="student").first().identification
         )
@@ -110,7 +101,7 @@ class TestStudents(unittest.TestCase):
         print(id)
         # Test that a valid login returns a token
         response = self.client.post(
-            f"/api/v1/auth/login",
+            "/api/v1/auth/login",
             data=json.dumps({"id": id, "password": id}),
             content_type="application/json",
         )
@@ -139,7 +130,7 @@ class TestStudents(unittest.TestCase):
 
         # Test that a valid login returns a token
         response = self.client.post(
-            f"/api/v1/auth/login",
+            "/api/v1/auth/login",
             data=json.dumps({"id": id, "password": id}),
             content_type="application/json",
         )
@@ -161,11 +152,11 @@ class TestStudents(unittest.TestCase):
         Expected Result:
         - The login attempt with an incorrect password should return a 401 status code.
         """
-        register_user(self.client, "student")
+        register_user(self.client: FlaskClient, "student")
         id = storage.get_random(Student).id
 
         response = self.client.post(
-            f"/api/v1/login",
+            "/api/v1/login",
             data=json.dumps({"id": id, "password": "wrong"}),
             content_type="application/json",
         )

@@ -11,6 +11,7 @@ from models import storage
 from models.admin import Admin
 from models.teacher import Teacher
 from models.student import Student
+from flask.testing import FlaskClient
 
 
 def generate_students(num=1):
@@ -182,7 +183,7 @@ def generate_mark_list_data():
     }
 
 
-def register_user(client, role):
+def register_user(client: FlaskClient, role):
     if role == "admin":
         user = generate_admin(1)[0]
     elif role == "teacher":
@@ -211,7 +212,7 @@ def register_user(client, role):
 
 def get_admin_api_key(client):
     """Get the access token for the admin."""
-    register_user(client, "admin")
+    register_user(client: FlaskClient, "admin")
 
     id = storage.get_random(Admin).id
 
@@ -228,7 +229,7 @@ def get_admin_api_key(client):
 
 def get_teacher_api_key(client):
     """Get the access token for the teacher."""
-    register_user(client, "teacher")
+    register_user(client: FlaskClient, "teacher")
     id = storage.get_random(Teacher).id
 
     # Test that a valid login returns a token
@@ -244,7 +245,7 @@ def get_teacher_api_key(client):
 
 def get_student_api_key(client):
     """Get the access token for the student."""
-    register_user(client, "student")
+    register_user(client: FlaskClient, "student")
     id = storage.get_random(Student).id
 
     # Test that a valid login returns a token
@@ -267,7 +268,7 @@ def create_mark_list(client):
             raise Exception
 
         for _ in range(5):
-            response = register_user(client, "student")
+            response = register_user(client: FlaskClient, "student")
             if response.status_code != 201:
                 raise Exception
 
@@ -280,7 +281,7 @@ def create_mark_list(client):
 
         if response.status_code != 201:
             raise Exception
-    except Exception as e:
+    except Exception:
         return None
     return token
 
@@ -312,7 +313,7 @@ def admin_course_assign_to_teacher(client):
     teacher_id = random_entry.get("id")
 
     response = client.put(
-        f"/api/v1/admin/assign-teacher",
+        "/api/v1/admin/assign-teacher",
         data=json.dumps(
             {
                 "teacher_id": teacher_id,

@@ -15,7 +15,6 @@ from models.stud_year_record import STUDYearRecord
 admin = Blueprint("admin", __name__, url_prefix="/api/v1/admin")
 
 
-
 @admin.route("/overview", methods=["GET"])
 @admin_required
 def school_overview(admin_data: UserT) -> Tuple[Response, int]:

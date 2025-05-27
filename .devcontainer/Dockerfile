@@ -6,9 +6,9 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     default-mysql-client \
     default-libmysqlclient-dev \
-    build-essential \
     pkg-config \
     python3-dev \
+    docker.io \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
@@ -16,3 +16,10 @@ RUN apt-get update && \
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 ENV PATH="/ClassEase-Pitch/app/backend/.venv/bin:${PATH}"
+ENV PYTHONPATH=/ClassEase-Pitch/app/backend:$PYTHONPATH
+
+# Add 'vscode' to the 'docker' group and allow passwordless sudo
+RUN usermod -aG docker vscode && \
+    echo 'vscode ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+
+USER vscode

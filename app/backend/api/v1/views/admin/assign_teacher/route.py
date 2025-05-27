@@ -15,6 +15,7 @@ from models.teacher_record import TeachersRecord
 from api.v1.views.admin import admins as admin
 from models import storage
 
+
 @admin.route("/assign-teacher", methods=["PUT"])
 @admin_required
 def assign_class(admin_data: UserT) -> Tuple[Response, int]:

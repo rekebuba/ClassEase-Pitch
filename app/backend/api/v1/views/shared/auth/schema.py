@@ -11,9 +11,12 @@ from marshmallow import (
 from models import storage
 from models.user import User
 
+
 class InvalidCredentialsError(Exception):
     """Exception raised when invalid credentials are provided."""
+
     pass
+
 
 class AuthSchema(BaseSchema):
     """Schema for validating user authentication data."""

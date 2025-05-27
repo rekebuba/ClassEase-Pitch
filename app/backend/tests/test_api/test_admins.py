@@ -2,15 +2,14 @@
 
 import unittest
 from tests.test_api.factories import *
-from tests.test_api.factories_methods import MakeFactory
 from models.user import User
 from models import storage
 from api import create_app
 import json
 import random
-from models.admin import Admin
 from tests.test_api.helper_functions import *
 from models.base_model import CustomTypes
+from flask.testing import FlaskClient
 
 
 class TestAdmin(unittest.TestCase):
@@ -69,18 +68,14 @@ class TestAdmin(unittest.TestCase):
         3. Checking that the response JSON contains the success message 'Admin registered successfully!'.
         """
         role = CustomTypes.RoleEnum.ADMIN
-        user = MakeFactory(UserFactory, self.session, built=True).factory(
-            role=role, keep={"id"}
-        )
+        user = UserFactory(role=role.value)
 
         if "image_path" in user:
             local_path = user.pop("image_path")
             user["image_path"] = open(local_path, "rb")
             os.remove(local_path)  # remove the file
 
-        admin = MakeFactory(AdminFactory, self.session, built=True).factory(
-            user_id=user.pop("id")
-        )
+        admin = AdminFactory()
 
         response = self.client.post(
             f"/api/v1/registration/{role.value}", data={**user, **admin}
@@ -104,13 +99,13 @@ class TestAdmin(unittest.TestCase):
         The test ensures that a valid login returns an access token.
         """
         """Test that the admin login endpoint works."""
-        register_user(self.client, "admin")
+        register_user(self.client: FlaskClient, "admin")
         id = storage.session.query(User).filter_by(role="admin").first().identification
 
         print(id)
         # Test that a valid login returns a token
         response = self.client.post(
-            f"/api/v1/auth/login",
+            "/api/v1/auth/login",
             data=json.dumps({"id": id, "password": id}),
             content_type="application/json",
         )
@@ -138,7 +133,7 @@ class TestAdmin(unittest.TestCase):
 
         # Test that a valid login returns a token
         response = self.client.post(
-            f"/api/v1/auth/login",
+            "/api/v1/auth/login",
             data=json.dumps({"id": id, "password": id}),
             content_type="application/json",
         )
@@ -162,10 +157,10 @@ class TestAdmin(unittest.TestCase):
         - The response status code should be 401, indicating that the login attempt
             with the wrong password is unauthorized.
         """
-        register_user(self.client, "admin")
+        register_user(self.client: FlaskClient, "admin")
         id = storage.session.query(User).filter_by(role="admin").first().identification
         response = self.client.post(
-            f"/api/v1/auth/login",
+            "/api/v1/auth/login",
             data=json.dumps({"id": id, "password": "wrong"}),
             content_type="application/json",
         )
@@ -251,7 +246,7 @@ class TestAdmin(unittest.TestCase):
         if not token:
             self.fail("Token not generated. Test failed. Check the login endpoint.")
 
-        response = register_user(self.client, "student")
+        response = register_user(self.client: FlaskClient, "student")
         if response.status_code != 201:
             self.fail(
                 "Student can not be registered. Test failed. Check the student registration endpoint"
@@ -338,7 +333,7 @@ class TestAdmin(unittest.TestCase):
         5. Asserts that the response status code is 200, indicating successful access to teacher data.
         """
         token = get_admin_api_key(self.client)
-        register_user(self.client, "teacher")
+        register_user(self.client: FlaskClient, "teacher")
 
         if not token:
             self.fail("Token not generated. Test failed. Check the login endpoint.")
@@ -423,7 +418,7 @@ class TestAdmin(unittest.TestCase):
         teacher_id = random_entry.get("id")
 
         response = self.client.put(
-            f"/api/v1/admin/assign-teacher",
+            "/api/v1/admin/assign-teacher",
             data=json.dumps(
                 {
                     "teacher_id": teacher_id,
@@ -485,7 +480,7 @@ class TestAdmin(unittest.TestCase):
         teacher_id = random_entry.get("id")
 
         response = self.client.put(
-            f"/api/v1/admin/assign-teacher",
+            "/api/v1/admin/assign-teacher",
             data=json.dumps(
                 {
                     "teacher_id": teacher_id,

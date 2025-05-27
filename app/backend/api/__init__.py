@@ -34,7 +34,7 @@ def create_app(config_name: str) -> Flask:
     else:
         app.config.from_object("config.ProductionConfig")
 
-    db_uri = app.config["SQLALCHEMY_DATABASE_URI"]
+    db_uri: str = app.config["SQLALCHEMY_DATABASE_URI"]
     app.logger.info(f"Using database at {db_uri}")
 
     storage.init_app(app)

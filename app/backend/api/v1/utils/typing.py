@@ -32,7 +32,7 @@ class PostLoadUser(TypedDict):
 class RangeDict(TypedDict):
     min: Union[str, int, float]
     max: Union[str, int, float]
-    
+
 
 class FilterDict(TypedDict):
     """for filter data."""
@@ -46,6 +46,7 @@ class FilterDict(TypedDict):
     operator: str
     value: Union[str, int, float, datetime, RangeDict]
 
+
 class SortDict(TypedDict):
     """for sort data."""
 
@@ -53,6 +54,7 @@ class SortDict(TypedDict):
     desc: bool
     table_id: str
     table: Optional[Type[Base]]
+
 
 class PostLoadParam(TypedDict):
     """for user data after post load."""

@@ -1,10 +1,8 @@
 #!/usr/bin/python3
 
 import unittest
-from models.user import User
 from models import storage
 from api import create_app
-from models.student import Student
 from tests.test_api.helper_functions import *
 
 
@@ -14,7 +12,7 @@ class TestEvents(unittest.TestCase):
 
     This test suite includes the following tests:
 
-    The tests use a test client to simulate API requests and responses. The `setUp` method initializes the test app and client,
+    The tests use a test client to simulate API requests and responses. The `setUp` method initializes the test app and client: FlaskClient,
     while the `tearDown` method cleans up the database after each test.
     """
 

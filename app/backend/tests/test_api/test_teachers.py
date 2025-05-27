@@ -6,7 +6,7 @@ import json
 from models.teacher import Teacher
 from tests.test_api.helper_functions import *
 from tests.test_api.factories import *
-from tests.test_api.factories_methods import MakeFactory
+from flask.testing import FlaskClient
 
 
 class TestTeachers(unittest.TestCase):
@@ -64,18 +64,14 @@ class TestTeachers(unittest.TestCase):
 
         """
         role = CustomTypes.RoleEnum.TEACHER
-        user = MakeFactory(UserFactory, self.session, built=True).factory(
-            role=role, keep={"id"}
-        )
+        user = UserFactory()
 
         if "image_path" in user:
             local_path = user.pop("image_path")
             user["image_path"] = open(local_path, "rb")
             os.remove(local_path)  # remove the file
 
-        teacher = MakeFactory(TeacherFactory, self.session, built=True).factory(
-            user_id=user.pop("id")
-        )
+        teacher = TeacherFactory()
 
         response = self.client.post(
             f"/api/v1/registration/{role.value}", data={**user, **teacher}
@@ -104,7 +100,7 @@ class TestTeachers(unittest.TestCase):
         - The response status code should be 200.
         - The response should contain an 'ApiKey' key.
         """
-        register_user(self.client, "teacher")
+        register_user(self.client: FlaskClient, "teacher")
         id = (
             storage.session.query(User).filter_by(role="teacher").first().identification
         )
@@ -112,7 +108,7 @@ class TestTeachers(unittest.TestCase):
         print(id)
         # Test that a valid login returns a token
         response = self.client.post(
-            f"/api/v1/auth/login",
+            "/api/v1/auth/login",
             data=json.dumps({"id": id, "password": id}),
             content_type="application/json",
         )
@@ -141,7 +137,7 @@ class TestTeachers(unittest.TestCase):
 
         # Test that a valid login returns a token
         response = self.client.post(
-            f"/api/v1/auth/login",
+            "/api/v1/auth/login",
             data=json.dumps({"id": id, "password": id}),
             content_type="application/json",
         )
@@ -163,10 +159,10 @@ class TestTeachers(unittest.TestCase):
         Expected Result:
         - The login attempt with an incorrect password should return a 401 Unauthorized status code.
         """
-        register_user(self.client, "teacher")
+        register_user(self.client: FlaskClient, "teacher")
         id = storage.get_random(Teacher).id
         response = self.client.post(
-            f"/api/v1/login",
+            "/api/v1/login",
             data=json.dumps({"id": id, "password": "wrong"}),
             content_type="application/json",
         )

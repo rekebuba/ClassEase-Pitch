@@ -11,6 +11,7 @@ from models.student import Student
 from api.v1.views import errors
 from models import storage
 
+
 @admin.route("/registered_grades", methods=["GET"])
 @admin_required
 def registered_grades(admin_data: UserT) -> Tuple[Response, int]:

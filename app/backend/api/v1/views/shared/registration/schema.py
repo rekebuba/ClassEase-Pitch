@@ -3,7 +3,6 @@ from api.v1.schemas.custom_schema import RoleEnumField
 from marshmallow import fields
 
 
-
 class UserSchema(BaseSchema):
     """
     Schema for user details.

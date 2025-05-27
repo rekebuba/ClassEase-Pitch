@@ -13,3 +13,4 @@ fake_data
 test.db
 **/*.sql
 requirements.txt
+**/.gitignore

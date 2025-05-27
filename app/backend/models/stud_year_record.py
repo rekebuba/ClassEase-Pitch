@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """Module for STUDYearRecord class"""
 
-from sqlalchemy import Integer, String, ForeignKey, CheckConstraint, Float, DateTime
+from sqlalchemy import Integer, String, ForeignKey, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from models.base_model import BaseModel
 

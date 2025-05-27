@@ -9,6 +9,7 @@ from models.teacher import Teacher
 from models.user import User
 from models import storage
 
+
 @admin.route("/teachers", methods=["GET"])
 @admin_required
 def all_teachers(admin_data: UserT) -> Tuple[Response, int]:

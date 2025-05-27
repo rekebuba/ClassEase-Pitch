@@ -13,6 +13,7 @@ from models.blacklist_token import BlacklistToken
 from api.v1.views.shared.auth.schema import AuthSchema, InvalidCredentialsError
 from api.v1.views import errors
 
+
 @auth.route("auth/login", methods=["POST"])
 def login() -> Tuple[Response, int]:
     """

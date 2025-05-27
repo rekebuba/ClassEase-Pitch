@@ -36,6 +36,7 @@ class ProductionConfig(Config):
 
 class TestingConfig(Config):
     """Testing configuration."""
+
     TESTING = True
     DEBUG = True
     user = os.getenv("TEST_MYSQL_USER")

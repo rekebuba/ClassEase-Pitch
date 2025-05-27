@@ -1,8 +1,11 @@
+from flask.testing import FlaskClient
 import pytest
+
+from tests.typing import Credential
 
 
 @pytest.fixture(scope="module")
-def create_semester(client, admin_auth_header, event_form):  # auth_header -> Admin
+def create_semester(client: FlaskClient, admin_auth_header: Credential, event_form):  # auth_header -> Admin
     response = client.post(
         "/api/v1/admin/event/new",
         json=event_form,
@@ -12,8 +15,9 @@ def create_semester(client, admin_auth_header, event_form):  # auth_header -> Ad
     assert response.status_code == 201
     assert response.json["message"] == "Event Created Successfully"
 
+
 @pytest.fixture(scope="module")
-def create_mark_list(client, stud_course_register, fake_mark_list, admin_auth_header):
+def create_mark_list(client: FlaskClient, stud_course_register, fake_mark_list, admin_auth_header):
     response = client.post(
         "/api/v1/admin/mark-list/new",
         json=fake_mark_list,

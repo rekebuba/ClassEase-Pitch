@@ -5,7 +5,6 @@ from marshmallow import fields, pre_load
 from api.v1.schemas.schemas import SubjectSchema
 
 
-
 class MarkListTypeSchema(BaseSchema):
     type = fields.String(required=True)
     percentage = fields.Integer(required=True)

@@ -1,5 +1,4 @@
-from collections import defaultdict
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Dict, Optional
 from flask import url_for
 from marshmallow import (
     ValidationError,
@@ -17,24 +16,17 @@ import random
 import bcrypt
 from api.v1.schemas.base_schema import BaseSchema
 from api.v1.schemas.custom_schema import (
-    ColumnField,
     FileField,
     FloatOrDateField,
     FormattedDate,
-    JoinOperatorField,
     RoleEnumField,
-    TableField,
-    TableIdField,
-    ValueField,
 )
-from api.v1.schemas.config_schema import OPERATOR_CONFIG, VALUE_TYPE_RULES
-from api.v1.utils.typing import AuthType, PostLoadParam, PostLoadUser
+from api.v1.utils.typing import PostLoadUser
 from models.section import Section
 from models.stud_year_record import STUDYearRecord
 from models.grade import Grade
 from models.student import Student
 from models.base_model import CustomTypes
-from models.year import Year
 from models import storage
 from models.user import User
 from models.semester import Semester

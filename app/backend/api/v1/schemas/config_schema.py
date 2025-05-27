@@ -2,10 +2,9 @@ from datetime import date, datetime, timedelta
 import re
 from sqlalchemy import and_, func, or_, true
 from sqlalchemy.sql.elements import ColumnElement
-from sqlalchemy.orm.attributes import InstrumentedAttribute
 from api.v1.utils.typing import RangeDict
 from models.base_model import Base, BaseModel
-from typing import Any, Callable, Dict, List, Type, Union, cast
+from typing import Any, Callable, Dict, Type, Union, cast
 
 
 def is_date(val: Any) -> bool:
@@ -17,9 +16,7 @@ def is_date(val: Any) -> bool:
     return isinstance(val, (date, datetime))
 
 
-def normalize_date_col(
-    col: ColumnElement[Any], val: Any
-) -> ColumnElement[Any]:
+def normalize_date_col(col: ColumnElement[Any], val: Any) -> ColumnElement[Any]:
     return cast(ColumnElement[Any], func.date(col)) if is_date(val) else col
 
 

@@ -6,9 +6,11 @@ services:
     build:
       context: .
       dockerfile: .devcontainer/Dockerfile
+    privileged: true
     working_dir: /ClassEase-Pitch
     volumes:
       - .:/ClassEase-Pitch:cached
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - app-network
     depends_on:

@@ -1,9 +1,7 @@
 import pytest
-from tests.test_api.factories_methods import MakeFactory
 from models.student import Student
 from tests.test_api.factories import (
     AvailableSubject,
-    DefaultFelids,
     EventFactory,
     MarkListFactory,
     SemesterFactory,
@@ -11,14 +9,12 @@ from tests.test_api.factories import (
 from models.subject import Subject
 from models.grade import Grade
 from models import storage
-
+from sqlalchemy.orm import scoped_session, Session
 
 @pytest.fixture(scope="module")
-def event_form(db_session):
-    event = MakeFactory(EventFactory, db_session, built=True).factory(
-        purpose="New Semester", add={"academic_year": DefaultFelids.current_EC_year()}
-    )
-    form = MakeFactory(SemesterFactory, db_session, built=True).factory()
+def event_form(db_session: scoped_session[Session]):
+    event = EventFactory(purpose="New Semester")
+    form = SemesterFactory()
 
     semester_form = {
         **event,
@@ -29,7 +25,7 @@ def event_form(db_session):
 
 
 @pytest.fixture(scope="module")
-def fake_mark_list(db_session):
+def fake_mark_list(db_session: scoped_session[Session]):
     # generate fake mark list for each grade
     registered_grades = (
         storage.session.query(Grade)

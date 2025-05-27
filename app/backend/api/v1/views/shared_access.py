@@ -120,7 +120,7 @@ def student_assessment(user_data: UserT) -> Tuple[Response, int]:
                 "semII": {"total": None, "rank": None},
             }
         if semester == 1:
-            student_assessment[code][f"semI"] = {"total": total, "rank": rank}
+            student_assessment[code]["semI"] = {"total": total, "rank": rank}
         elif semester == 2:
             student_assessment[code]["semII"] = {"total": total, "rank": rank}
 
@@ -211,7 +211,7 @@ def student_assessment_detail(user_data: UserT) -> Tuple[Response, int]:
                     "percentage": percentage,
                 }
             )
-    except Exception as e:
+    except Exception:
         return jsonify({"message": "Failed to retrieve student assessment"}), 500
 
     return jsonify(assessment), 200

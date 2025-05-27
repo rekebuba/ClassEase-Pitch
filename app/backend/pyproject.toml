@@ -16,17 +16,19 @@ dependencies = [
     "mysql-connector-python>=9.3.0",
     "mysqlclient>=2.2.7",
     "pillow>=11.2.1",
+    "pre-commit>=4.2.0",
     "pyethiodate>=1.0.6",
     "pyinspect>=0.1.0",
     "pytest>=8.3.5",
     "pytest-xdist>=3.6.1",
     "python-dotenv>=1.1.0",
     "sqlalchemy>=2.0.40",
+    "types-factory-boy>=0.4.1",
     "types-flask-cors>=6.0.0.20250520",
 ]
 
 [tool.mypy]
-files = ["app/backend"]
+files = ["/ClassEase-Pitch/app/backend"]
 strict = true                    # Enables all strictness flags below
 disallow_untyped_defs = true     # Functions must have type annotations
 disallow_incomplete_defs = true  # No partial annotations (e.g., `def foo(x) -> int`)
@@ -62,4 +64,4 @@ ignore_errors = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]       # Replaces pytestArgs
 pythonpath = ["."]       # Ensures correct import resolution
-addopts = "-v"           # Optional: Add verbose flag
+addopts = "-ravs"           # Optional: Add verbose flag

@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 """Teacher views module for the API"""
 
-from flask import request, jsonify, url_for
-from marshmallow import ValidationError
+from flask import request, jsonify
 from sqlalchemy import func
 from models import storage
 from datetime import datetime
@@ -15,7 +14,6 @@ from models.assessment import Assessment
 from models.mark_list import MarkList
 from models.stud_semester_record import STUDSemesterRecord
 from models.average_subject import AVRGSubject
-from models.teacher import Teacher
 from models.teacher_record import TeachersRecord
 from models.stud_year_record import STUDYearRecord
 from urllib.parse import urlparse, parse_qs
@@ -23,9 +21,6 @@ from sqlalchemy import update, and_
 from flask import Blueprint
 from api.v1.schemas.schemas import *
 from api.v1.views.utils import teacher_required
-from api.v1.views.methods import paginate_query, save_profile
-from models.base_model import BaseModel
-from api.v1.views import errors
 
 
 teach = Blueprint("teach", __name__, url_prefix="/api/v1/teacher")
@@ -234,8 +229,8 @@ def get_student_assessment(teacher_data):
                     "percentage": percentage,
                 }
             )
-    except Exception as e:
-        return jsonify({"message": f"Failed to retrieve student assessment"}), 500
+    except Exception:
+        return jsonify({"message": "Failed to retrieve student assessment"}), 500
 
     return jsonify({"assessment": assessment}), 200
 
@@ -371,7 +366,7 @@ def update_student_assessment(teacher_data):
     except Exception as e:
         print(e)
         return jsonify(
-            {"message": f"Unexpected error occurred Failed to update score"}
+            {"message": "Unexpected error occurred Failed to update score"}
         ), 500
 
     return jsonify({"message": "Student Score Updated Successfully."}), 201

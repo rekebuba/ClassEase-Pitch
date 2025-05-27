@@ -7,6 +7,12 @@
 	"workspaceFolder": "/${localWorkspaceFolderBasename}",
 	"remoteUser": "vscode",
 	"containerUser": "vscode",
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker:1": {
+			"version": "latest"
+		}
+	},
+	"postCreateCommand": "sudo usermod -aG docker $(whoami)",
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -16,7 +22,8 @@
 				"ms-azuretools.vscode-containers",
 				"streetsidesoftware.code-spell-checker",
 				"ms-python.mypy-type-checker",
-				"charliermarsh.ruff"
+				"charliermarsh.ruff",
+				"tamasfe.even-better-toml"
 				// Add more extensions here
 			]
 		}
