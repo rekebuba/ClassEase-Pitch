@@ -5,7 +5,8 @@ from flask import Response, request, jsonify
 from marshmallow import ValidationError
 from typing import Tuple
 from api.v1.views.shared import auths as auth
-from api.v1.views.methods import create_role_based_user
+from api.v1.views.methods import parse_nested_form
+from api.v1.views.shared.registration.methods import create_role_based_user
 from api.v1.views.shared.registration.schema import DumpResultSchema
 from models.base_model import CustomTypes
 from models import storage
@@ -16,22 +17,12 @@ from api.v1.views import errors
 def register_new_user(role: str) -> Tuple[Response, int]:
     """
     Registers a new user (Admin, Student, Teacher) in the system.
-
-    Args:
-        role (str): The role of the user to be registered. It should be one of 'Admin', 'Student', or 'Teacher'.
-
-    Returns:
-        Response: A JSON response indicating the success or failure of the registration process.
     """
 
     try:
+        data_to_parse = {**request.form.to_dict(), **request.files.to_dict()}
+        data = parse_nested_form(data_to_parse)
         role_enum = CustomTypes.RoleEnum.enum_value(role.lower())
-
-        data = {
-            **request.form.to_dict(),
-            "role": role_enum,
-            "image_path": request.files.get("image_path"),
-        }
 
         if not data:
             raise Exception("No data provided")
@@ -43,7 +34,7 @@ def register_new_user(role: str) -> Tuple[Response, int]:
         validate_data = {
             "message": f"{role} registered successfully!",
             "user": {
-                "id": result.identification,
+                "identification": result.identification,
                 "role": result.role,
             },
         }

@@ -1,31 +1,18 @@
+from typing import Any, Dict
 import pytest
 from models.student import Student
 from tests.test_api.factories import (
     AvailableSubject,
-    EventFactory,
     MarkListFactory,
-    SemesterFactory,
 )
 from models.subject import Subject
 from models.grade import Grade
 from models import storage
 from sqlalchemy.orm import scoped_session, Session
 
-@pytest.fixture(scope="module")
-def event_form(db_session: scoped_session[Session]):
-    event = EventFactory(purpose="New Semester")
-    form = SemesterFactory()
-
-    semester_form = {
-        **event,
-        "semester": {**form},
-    }
-
-    return semester_form
-
 
 @pytest.fixture(scope="module")
-def fake_mark_list(db_session: scoped_session[Session]):
+def fake_mark_list(db_session: scoped_session[Session]) -> Dict[str, Any]:
     # generate fake mark list for each grade
     registered_grades = (
         storage.session.query(Grade)

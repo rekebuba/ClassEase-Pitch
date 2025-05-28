@@ -6,7 +6,7 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy import ColumnElement
 from api.v1.utils.typing import UserT
 from api.v1.views.admin import admins as admin
-from api.v1.views.admin.students.schema import AllStudentsSchema, ParamSchema
+from api.v1.views.admin.students.query.schema import AllStudentsSchema, ParamSchema
 from api.v1.views.methods import make_case_lookup, paginate_query
 from api.v1.views.utils import admin_required
 from api.v1.schemas.config_schema import OPERATOR_MAPPING

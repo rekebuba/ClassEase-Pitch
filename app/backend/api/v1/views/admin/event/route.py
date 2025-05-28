@@ -19,12 +19,6 @@ from api.v1.views import errors
 def available_events(admin_data: UserT) -> Tuple[Response, int]:
     """
     Handle retrieval of events.
-
-    Args:
-        admin_data (object): The admin data object.
-
-    Returns:
-        Response: A JSON response list of events or an error message.
     """
     try:
         events = storage.session.query(Event).all()

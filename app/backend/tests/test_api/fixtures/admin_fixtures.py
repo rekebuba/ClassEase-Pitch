@@ -1,11 +1,16 @@
+from typing import Any, Dict
 from flask.testing import FlaskClient
 import pytest
 
+from tests.test_api.factories import EventFactory
 from tests.typing import Credential
 
 
 @pytest.fixture(scope="module")
-def create_semester(client: FlaskClient, admin_auth_header: Credential, event_form):  # auth_header -> Admin
+def create_semester(
+    client: FlaskClient, admin_auth_header: Credential
+) -> None:  # auth_header -> Admin
+    event_form = EventFactory(purpose="New Semester")
     response = client.post(
         "/api/v1/admin/event/new",
         json=event_form,
@@ -13,11 +18,22 @@ def create_semester(client: FlaskClient, admin_auth_header: Credential, event_fo
     )
 
     assert response.status_code == 201
+    assert response.json is not None
+    assert "message" in response.json
     assert response.json["message"] == "Event Created Successfully"
 
 
 @pytest.fixture(scope="module")
-def create_mark_list(client: FlaskClient, stud_course_register, fake_mark_list, admin_auth_header):
+def create_mark_list(
+    client: FlaskClient,
+    stud_course_register: None,
+    fake_mark_list: Dict[str, Any],
+    admin_auth_header: Credential,
+) -> None:
+    """
+    Fixture to create a mark list for testing purposes.
+    This fixture assumes that the student has already registered for courses.
+    """
     response = client.post(
         "/api/v1/admin/mark-list/new",
         json=fake_mark_list,
@@ -25,4 +41,6 @@ def create_mark_list(client: FlaskClient, stud_course_register, fake_mark_list, 
     )
 
     assert response.status_code == 201
+    assert response.json is not None
+    assert "message" in response.json
     assert response.json["message"] == "Mark list created successfully!"

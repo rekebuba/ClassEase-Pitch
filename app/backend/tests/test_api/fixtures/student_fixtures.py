@@ -3,7 +3,9 @@ from flask.testing import FlaskClient
 
 
 @pytest.fixture(scope="module")
-def stud_course_register(client: FlaskClient, all_stud_auth_header, create_semester):
+def stud_course_register(
+    client: FlaskClient, all_stud_auth_header, create_semester
+) -> None:
     for auth_header in all_stud_auth_header:
         get_course = client.get(
             "/api/v1/student/course/registration", headers=auth_header["header"]

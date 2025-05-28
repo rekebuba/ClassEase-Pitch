@@ -1,22 +1,17 @@
 #!/usr/bin/python3
 """Teacher views module for the API"""
 
-from typing import Callable, Dict, Optional, Tuple, Union
+from typing import Tuple
 from flask import Response, request, jsonify
-from marshmallow import ValidationError
-from sqlalchemy import Row
 from api.v1.utils.typing import UserT
 from models import storage
 from datetime import datetime
 from models.user import User
-from models.admin import Admin
-from models.student import Student
 from models.subject import Subject
 from models.assessment import Assessment
 from models.mark_list import MarkList
 from models.stud_semester_record import STUDSemesterRecord
 from models.average_subject import AVRGSubject
-from models.teacher import Teacher
 from models.teacher_record import TeachersRecord
 from models.stud_year_record import STUDYearRecord
 from urllib.parse import urlparse, parse_qs
@@ -26,9 +21,6 @@ from api.v1.views.utils import (
     admin_or_student_required,
     student_teacher_or_admin_required,
 )
-from api.v1.views import errors
-from api.v1.schemas.schemas import UserDetailSchema
-from models.base_model import CustomTypes
 from api.v1.views.methods import save_profile
 
 
@@ -245,56 +237,3 @@ def upload_profile(user_data: UserT) -> Tuple[Response, int]:
         return jsonify({"message": "File uploaded successfully"}), 200
     else:
         return jsonify({"message": "File type not allowed"}), 400
-
-
-# Define a type alias for the query result
-QueryResult = Optional[
-    Union[Row[Tuple[User, Admin]], Row[Tuple[User, Teacher]], Row[Tuple[User, Student]]]
-]
-
-# Define the query dictionary type
-QueryDict = Dict[CustomTypes.RoleEnum, Callable[[], QueryResult]]
-
-
-@shared.route("/", methods=["GET"])
-@student_teacher_or_admin_required
-def user(user: UserT) -> Tuple[Response, int]:
-    query: QueryDict = {
-        CustomTypes.RoleEnum.ADMIN: lambda: (
-            storage.session.query(User, Admin)
-            .join(User.admins)
-            .filter(User.id == user.id)
-            .first()
-        ),
-        CustomTypes.RoleEnum.TEACHER: lambda: (
-            storage.session.query(User, Teacher)
-            .join(User.teachers)
-            .filter(User.id == user.id)
-            .first()
-        ),
-        CustomTypes.RoleEnum.STUDENT: lambda: (
-            storage.session.query(User, Student)
-            .join(User.students)
-            .filter(User.id == user.id)
-            .first()
-        ),
-    }
-    try:
-        if not query:
-            return errors.handle_not_found_error("User Not Found")
-
-        user_query = query[user.role]()
-        if user_query is None:
-            return errors.handle_not_found_error("User Not Found")
-
-        user_data, detail = user_query
-        # Serialize the data using the schema
-        schema = UserDetailSchema()
-        result = schema.dump({"user": user_data, "detail": detail})
-
-        return jsonify(result), 200
-
-    except ValidationError as e:
-        return errors.handle_validation_error(e)
-    except Exception as e:
-        return errors.handle_internal_error(e)

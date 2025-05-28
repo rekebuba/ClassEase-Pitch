@@ -11,6 +11,7 @@ from api.v1.schemas.custom_schema import (
     ValueField,
 )
 from marshmallow import (
+    validate,
     post_load,
     pre_load,
     validates_schema,
@@ -18,7 +19,7 @@ from marshmallow import (
 )
 
 from api.v1.utils.typing import PostLoadParam
-from api.v1.schemas.schemas import StudentSchema, UserSchema
+from api.v1.views.shared.registration.schema import StudentSchema, UserSchema
 from models.grade import Grade
 from models.stud_year_record import STUDYearRecord
 
@@ -211,7 +212,7 @@ class GradeSchema(BaseSchema):
     """Schema for validating grade data."""
 
     id = fields.String(load_only=True)
-    grade = fields.Integer(validate=[fields.validate.Range(min=1, max=12)])
+    grade = fields.Integer(validate=[validate.Range(min=1, max=12)])
 
     table_id = fields.String(required=False)
 

@@ -2,6 +2,7 @@ from typing import Any, Dict
 from api.v1.schemas.base_schema import BaseSchema
 from marshmallow import (
     ValidationError,
+    validate,
     post_dump,
     pre_load,
     validates,
@@ -18,7 +19,7 @@ class SemesterCreationSchema(BaseSchema):
 
     event_id = fields.String(required=True, load_only=True)
     name = fields.Integer(
-        required=True, load_only=True, validate=[fields.validate.Range(min=1, max=2)]
+        required=True, load_only=True, validate=[validate.Range(min=1, max=2)]
     )
 
     @validates("event_id")
@@ -30,9 +31,7 @@ class SemesterCreationSchema(BaseSchema):
 class EventSchema(BaseSchema):
     """Schema for validating event creation data."""
 
-    title = fields.String(
-        required=True, validate=[fields.validate.Length(min=3, max=100)]
-    )
+    title = fields.String(required=True, validate=[validate.Length(min=3, max=100)])
     purpose = fields.String(
         required=True,
         validate=lambda x: x
@@ -44,7 +43,7 @@ class EventSchema(BaseSchema):
         in ["School Administration", "School", "Student Club", "External Organizer"],
     )
 
-    academic_year = fields.Integer(validate=[fields.validate.Range(min=2000, max=2100)])
+    academic_year = fields.Integer(validate=[validate.Range(min=2000, max=2100)])
 
     year_id = fields.String(required=False, load_default=None)
 
@@ -71,9 +70,7 @@ class EventSchema(BaseSchema):
         in ["All", "Students Only", "Faculty Only", "Invitation Only"],
     )
     has_fee = fields.Boolean(load_default=False)
-    fee_amount = fields.Float(
-        load_default=None, validate=[fields.validate.Range(min=0)]
-    )
+    fee_amount = fields.Float(load_default=None, validate=[validate.Range(min=0)])
 
     description = fields.String(load_default=None)
 

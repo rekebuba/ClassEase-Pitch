@@ -1,4 +1,4 @@
-from typing import Any, Dict, Iterator, TypedDict
+from typing import List
 from flask.testing import FlaskClient
 import pytest
 from tests.typing import Credential
@@ -8,24 +8,34 @@ from sqlalchemy.orm import scoped_session, Session
 
 
 @pytest.fixture
-def users_auth_header(client: FlaskClient, register_user, role):
-    auth_headers = []
+def users_auth_header(
+    client: FlaskClient, register_user: None, role: List[User]
+) -> List[Credential]:
+    auth_headers: List[Credential] = []
     for user in role:
         response = client.post(
             "/api/v1/auth/login",
             json={"id": user.identification, "password": user.identification},
         )
+
+        assert response.status_code == 200
+        assert response.json is not None
+        assert "apiKey" in response.json
+        assert isinstance(response.json["apiKey"], str)
+        assert len(response.json["apiKey"]) > 0
+
+        # Extract the token from the response
         token = response.json["apiKey"]
-        auth_headers.append({"header": {"apiKey": f"Bearer {token}"}, "user": user})
+        auth_headers.append({"header": {"apiKey": f"Bearer {token}"}})
 
     return auth_headers
 
 
 @pytest.fixture(scope="module")
 def all_admin_auth_header(
-    db_session: scoped_session[Session], client: FlaskClient, register_user
-):
-    auth_headers = []
+    db_session: scoped_session[Session], client: FlaskClient, register_user: None
+) -> List[Credential]:
+    auth_headers: List[Credential] = []
     role = CustomTypes.RoleEnum.ADMIN
     admins = db_session.query(User).filter(User.role == role).all()
 
@@ -34,17 +44,24 @@ def all_admin_auth_header(
             "/api/v1/auth/login",
             json={"id": user.identification, "password": user.identification},
         )
+        assert response.status_code == 200
+        assert response.json is not None
+        assert "apiKey" in response.json
+        assert isinstance(response.json["apiKey"], str)
+        assert len(response.json["apiKey"]) > 0
+
+        # Extract the token from the response
         token = response.json["apiKey"]
-        auth_headers.append({"header": {"apiKey": f"Bearer {token}"}, "user": user})
+        auth_headers.append({"header": {"apiKey": f"Bearer {token}"}})
 
     return auth_headers
 
 
 @pytest.fixture(scope="module")
 def all_teacher_auth_header(
-    db_session: scoped_session[Session], client: FlaskClient, register_user
-):
-    auth_headers = []
+    db_session: scoped_session[Session], client: FlaskClient, register_user: None
+) -> List[Credential]:
+    auth_headers: List[Credential] = []
     role = CustomTypes.RoleEnum.TEACHER
     teachers = db_session.query(User).filter(User.role == role).all()
 
@@ -53,17 +70,23 @@ def all_teacher_auth_header(
             "/api/v1/auth/login",
             json={"id": user.identification, "password": user.identification},
         )
+        assert response.status_code == 200
+        assert response.json is not None
+        assert "apiKey" in response.json
+        assert isinstance(response.json["apiKey"], str)
+        assert len(response.json["apiKey"]) > 0
+
         token = response.json["apiKey"]
-        auth_headers.append({"header": {"apiKey": f"Bearer {token}"}, "user": user})
+        auth_headers.append({"header": {"apiKey": f"Bearer {token}"}})
 
     return auth_headers
 
 
 @pytest.fixture(scope="module")
 def all_stud_auth_header(
-    db_session: scoped_session[Session], client: FlaskClient, register_user
-):
-    auth_headers = []
+    db_session: scoped_session[Session], client: FlaskClient, register_user: None
+) -> List[Credential]:
+    auth_headers: List[Credential] = []
     role = CustomTypes.RoleEnum.STUDENT
     students = db_session.query(User).filter(User.role == role).all()
 
@@ -72,8 +95,14 @@ def all_stud_auth_header(
             "/api/v1/auth/login",
             json={"id": user.identification, "password": user.identification},
         )
+        assert response.status_code == 200
+        assert response.json is not None
+        assert "apiKey" in response.json
+        assert isinstance(response.json["apiKey"], str)
+        assert len(response.json["apiKey"]) > 0
+
         token = response.json["apiKey"]
-        auth_headers.append({"header": {"apiKey": f"Bearer {token}"}, "user": user})
+        auth_headers.append({"header": {"apiKey": f"Bearer {token}"}})
 
     return auth_headers
 
@@ -102,11 +131,13 @@ def admin_auth_header(
 
 @pytest.fixture(scope="module")
 def stud_auth_header(
-    db_session: scoped_session[Session], client: FlaskClient, register_user
-):
+    db_session: scoped_session[Session], client: FlaskClient, register_user: None
+) -> Credential:
     role = CustomTypes.RoleEnum.STUDENT
 
     user = db_session.query(User).filter(User.role == role).first()
+    if not user:
+        pytest.skip("No student user found in the database for authentication.")
 
     response = client.post(
         "/api/v1/auth/login",
@@ -114,19 +145,22 @@ def stud_auth_header(
     )
 
     assert response.status_code == 200
+    assert response.json is not None
     assert "apiKey" in response.json
 
     token = response.json["apiKey"]
-    return {"header": {"apiKey": f"Bearer {token}"}, "user": user}
+    return {"header": {"apiKey": f"Bearer {token}"}}
 
 
 @pytest.fixture(scope="module")
 def teacher_auth_header(
-    db_session: scoped_session[Session], client: FlaskClient, register_user
-):
+    db_session: scoped_session[Session], client: FlaskClient, register_user: None
+) -> Credential:
     role = CustomTypes.RoleEnum.TEACHER
 
     user = db_session.query(User).filter(User.role == role).first()
+    if not user:
+        pytest.skip("No teacher user found in the database for authentication.")
 
     response = client.post(
         "/api/v1/auth/login",
@@ -134,7 +168,8 @@ def teacher_auth_header(
     )
 
     assert response.status_code == 200
+    assert response.json is not None
     assert "apiKey" in response.json
 
     token = response.json["apiKey"]
-    return {"header": {"apiKey": f"Bearer {token}"}, "user": user}
+    return {"header": {"apiKey": f"Bearer {token}"}}

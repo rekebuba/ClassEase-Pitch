@@ -8,7 +8,7 @@ from models import storage
 from typing import Iterator
 from tests import test_app
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def app_session() -> Iterator[Flask]:
     """Session-scoped fixture for the Flask app."""
 
@@ -20,7 +20,7 @@ def app_session() -> Iterator[Flask]:
 
 
 @pytest.fixture(scope="session")
-def db_session(app_session: Flask) -> Iterator[scoped_session[Session]]:
+def db_session() -> Iterator[scoped_session[Session]]:
     """Function-scoped fixture for database transactions."""
     yield storage.session
 

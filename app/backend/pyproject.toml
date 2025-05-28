@@ -17,6 +17,7 @@ dependencies = [
     "mysqlclient>=2.2.7",
     "pillow>=11.2.1",
     "pre-commit>=4.2.0",
+    "pydantic>=2.11.5",
     "pyethiodate>=1.0.6",
     "pyinspect>=0.1.0",
     "pytest>=8.3.5",
