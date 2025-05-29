@@ -1,10 +1,14 @@
 import os
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict
 from flask import current_app
 from math import ceil
-from sqlalchemy import and_, case, func
+from sqlalchemy import and_, case, func, true
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
+from api.v1.utils.typing import (
+    BuiltValidFilterDict,
+    BuiltValidSortDict,
+)
 from models.semester import Semester
 from sqlalchemy.sql.elements import ColumnElement
 from sqlalchemy.orm.attributes import InstrumentedAttribute
@@ -15,10 +19,9 @@ def paginate_query(
     query: Query[Any],
     page: int,
     limit: int,
-    filters: List[Any],
-    custom_filters: List[Any],
-    sort: List[Any],
-    join: Callable[..., Any] = and_,
+    filters: BuiltValidFilterDict,
+    sort: BuiltValidSortDict,
+    join_: Callable[..., ColumnElement[Any]] = and_,
 ) -> Dict[str, Any]:
     """
     Paginate SQLAlchemy queries.
@@ -35,9 +38,14 @@ def paginate_query(
 
     # Calculate total number of records
     total_items = query.count()
-
     # Apply filters and sort
-    query = query.filter(join(*filters)).having(join(*custom_filters)).order_by(*sort)
+    if filters:
+        query = query.filter(and_(true(), *filters["valid_filters"])).having(
+            and_(true(), *filters["custom_filters"])
+        )
+
+    if sort:
+        query = query.order_by(true(), *sort["valid_sorts"])
 
     # Calculate offset and apply limit and offset to the query
     offset = (page - 1) * limit

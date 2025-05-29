@@ -66,8 +66,8 @@ OPERATOR_MAPPING: Dict[
         if isinstance(val, str)
         else true()
     ),
-    "isEmpty": lambda col, _: or_(col.is_(None), col == ""),
-    "isNotEmpty": lambda col, _: and_(col.isnot(None), col != ""),
+    "isEmpty": lambda col, _: or_(true(), col.is_(None), col == ""),
+    "isNotEmpty": lambda col, _: and_(true(), col.isnot(None), col != ""),
     "isBetween": lambda col, range: (
         normalize_date_col(col, range.get("min") or range.get("max")).between(
             range.get("min"), range.get("max")

@@ -2,13 +2,15 @@ from datetime import date, datetime
 from typing import Any, Optional
 from marshmallow import fields, ValidationError
 from sqlalchemy import and_, or_
+from marshmallow.fields import Field
 
 from api.v1.schemas.base_schema import get_all_model_classes
 from models.base_model import CustomTypes
 from werkzeug.datastructures import FileStorage
 
 
-class FormattedDate(fields.Field):
+class FormattedDate(Field):
+    """Custom field for formatting dates."""
     def __init__(
         self, format_str: str = "%b %d, %Y", *args: Any, **kwargs: Any
     ) -> None:

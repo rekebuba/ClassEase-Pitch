@@ -1,6 +1,6 @@
 from datetime import datetime
-from typing import Any, List, Optional, Type, TypeVar, TypedDict, Union
-
+from typing import Any, Callable, List, Optional, Type, TypeVar, TypedDict, Union
+from sqlalchemy.sql.expression import ClauseElement
 from sqlalchemy import ColumnElement
 from models.user import User
 from models.base_model import Base, CustomTypes
@@ -56,16 +56,39 @@ class SortDict(TypedDict):
     table: Optional[Type[Base]]
 
 
+class PostFilterDict(TypedDict):
+    """for filter data after post load."""
+
+    valid_filters: List[ColumnElement[Any]]
+    custom_filters: FilterDict
+
+
+class PostSortDict(TypedDict):
+    """for sort data after post load."""
+
+    valid_sorts: List[ColumnElement[Any]]
+    custom_sorts: SortDict
+
+
+class BuiltValidFilterDict(TypedDict):
+    """for filter data after building."""
+
+    valid_filters: List[ColumnElement[Any]]
+    custom_filters: List[ColumnElement[Any]]
+
+
+class BuiltValidSortDict(TypedDict):
+    """for sort data after building."""
+
+    valid_sorts: List[ColumnElement[Any]]
+    custom_sorts: List[ColumnElement[Any]]
+
+
 class PostLoadParam(TypedDict):
     """for user data after post load."""
 
-    filter_flag: str
-    filters: Optional[List[FilterDict]]
-    valid_filters: List[ColumnElement[Any]]
-    custom_filters: Optional[List[str]]
-    join_operator: str
+    filters: List[PostFilterDict]
+    sorts: List[PostSortDict]
+    join_operator: Callable[..., ColumnElement[bool]]
     page: int
     per_page: int
-    sort: Optional[List[SortDict]]
-    valid_sort: List[str]
-    custom_sort: Optional[List[str]]

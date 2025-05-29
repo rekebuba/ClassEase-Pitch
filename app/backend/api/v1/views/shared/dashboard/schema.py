@@ -5,5 +5,5 @@ from marshmallow import fields
 
 
 class UserDetailSchema(BaseSchema):
-    user = fields.Nested(UserSchema(only=("identification", "imagePath", "role")))
+    user = fields.Nested(UserSchema(only=("identification", "image_path", "role")))
     detail = fields.Nested(FullNameSchema)

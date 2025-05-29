@@ -130,3 +130,50 @@ def test_get_registered_grades(
 
 def test_admin_create_mark_list(create_mark_list: None) -> None:
     pass
+
+
+def test_admin_query_students(
+    client: FlaskClient, create_mark_list: None, admin_auth_header: Credential
+) -> None:
+    response = client.post(
+        "/api/v1/admin/students", json={}, headers=admin_auth_header["header"]
+    )
+    assert response.status_code == 200
+    assert response.json is not None
+
+    search_params = {
+        "join_operator": "or",
+        "filters": [
+            {
+                "tableId": response.json["tableId"]["grade"],
+                "id": "grade",
+                "variant": "multiSelect",
+                "operator": "in",
+                "value": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+            },
+            {
+                "tableId": response.json["tableId"]["identification"],
+                "id": "identification",
+                "variant": "text",
+                "operator": "iLike",
+                "value": "MAS/1234/56",
+            },
+            {
+                "id": "sectionI",
+                "variant": "multiSelect",
+                "operator": "in",
+                "value": ["A", "B"],
+            },
+        ],
+        "sorts": [],
+        "page": 1,
+        "per_page": 10,
+    }
+
+
+    response = client.post(
+        "/api/v1/admin/students",
+        json=search_params,
+        headers=admin_auth_header["header"],
+    )
+    assert response.status_code == 200

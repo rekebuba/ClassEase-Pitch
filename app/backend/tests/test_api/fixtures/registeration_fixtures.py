@@ -16,7 +16,7 @@ from tests.test_api.fixtures.methods import prepare_form_data
 def register_user(client: FlaskClient, db_session: scoped_session[Session]) -> None:
     registration_form = [
         AdminFactory(),
-        StudentFactory(),
+        *StudentFactory.create_batch(2),
         TeacherFactory(),
     ]
     for valid_data in registration_form:
@@ -60,3 +60,5 @@ def register_user_temp(
         response.json["message"]
         == f"{valid_data['user']['role']} registered successfully!"
     )
+
+    yield None

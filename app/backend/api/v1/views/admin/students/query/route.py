@@ -1,15 +1,25 @@
-from typing import Any, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 from flask import Response, jsonify, request
 from marshmallow import ValidationError
 from sqlalchemy.orm import joinedload
 from sqlalchemy import ColumnElement
-from api.v1.utils.typing import UserT
+from api.v1.utils.typing import (
+    BuiltValidFilterDict,
+    BuiltValidSortDict,
+    PostLoadParam,
+    UserT,
+)
 from api.v1.views.admin import admins as admin
+from api.v1.views.admin.students.query.methods import (
+    build_valid_filter,
+    build_valid_sort,
+    extract_table_id,
+    flatten_keys,
+)
 from api.v1.views.admin.students.query.schema import AllStudentsSchema, ParamSchema
 from api.v1.views.methods import make_case_lookup, paginate_query
 from api.v1.views.utils import admin_required
-from api.v1.schemas.config_schema import OPERATOR_MAPPING
 from models.grade import Grade
 from models.section import Section
 from models.stud_semester_record import STUDSemesterRecord
@@ -31,51 +41,23 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
     try:
         data = request.get_json()
         # Check if required fields are present
-        schema = ParamSchema()
-        valid_data = schema.load(data)
+        load_schema = ParamSchema()
+        valid_data: PostLoadParam = load_schema.load(data)
 
-        custom_types = {
+        custom_types: Dict[str, ColumnElement[Any]] = {
             **make_case_lookup(1, Section.section, "section"),
             **make_case_lookup(1, STUDSemesterRecord.average, "average"),
             **make_case_lookup(1, STUDSemesterRecord.rank, "rank"),
         }
 
         # custom sort
-        for custom_sort in valid_data["custom_sorts"]:
-            column_name = custom_sort["column_name"]
-            is_desc = custom_sort.get("desc", False)
-
-            expr = custom_types.get(column_name)
-            if expr is None:
-                raise ValidationError(f"Invalid custom sort: {custom_sort}")
-
-            valid_data["valid_sorts"].append(expr.desc() if is_desc else expr)
-
+        valid_sort: BuiltValidSortDict = build_valid_sort(
+            valid_data["sorts"], custom_types
+        )
         # custom filter
-        result: List[ColumnElement[Any]] = []
-        for custom_filter in valid_data["custom_filters"]:
-            column_name = custom_filter["column_name"]
-            operator = custom_filter["operator"]
-            value = custom_filter["value"]
-
-            expr = custom_types.get(column_name)
-            if expr is None:
-                raise ValidationError(f"Invalid custom filter: {custom_filter}")
-
-            op_func = OPERATOR_MAPPING.get(operator)
-            if op_func is None:
-                raise ValidationError(f"Unsupported operator: {operator}")
-
-            try:
-                condition = op_func(expr, value)
-            except Exception as e:
-                raise ValidationError(f"Invalid value for operator '{operator}': {e}")
-
-            result.append(condition)
-
-        valid_data["custom_filters"] = result
-
-        print("valid_data: ", valid_data)
+        valid_filters: BuiltValidFilterDict = build_valid_filter(
+            valid_data["filters"], custom_types
+        )
 
         query = (
             storage.session.query(
@@ -120,9 +102,8 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
             query,
             valid_data["page"],
             valid_data["per_page"],
-            valid_data["valid_filters"],
-            valid_data["custom_filters"],
-            valid_data["valid_sorts"],
+            valid_filters,
+            valid_sort,
             valid_data["join_operator"],
         )
 
@@ -148,10 +129,16 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
             ]
         ]
 
-        schema = AllStudentsSchema(many=True)
-        result = schema.dump(data_to_serialize)
+        dump_schema = AllStudentsSchema(many=True)
+        result = dump_schema.dump(data_to_serialize)
+
+        modified_result: Dict[str, Any] = {
+            "tableId": extract_table_id(result[0]) if result else {},
+            "data": [flatten_keys(item) for item in result],
+        }
+
         return jsonify(
-            {**result, "pageCount": paginated_result["meta"]["total_pages"]}
+            {**modified_result, "pageCount": paginated_result["meta"]["total_pages"]}
         ), 200
     except ValidationError as e:
         return errors.handle_validation_error(e)

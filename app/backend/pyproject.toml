@@ -33,6 +33,7 @@ files = ["/ClassEase-Pitch/app/backend"]
 strict = true                    # Enables all strictness flags below
 disallow_untyped_defs = true     # Functions must have type annotations
 disallow_incomplete_defs = true  # No partial annotations (e.g., `def foo(x) -> int`)
+disallow_any_generics=true       # No `Any` in generic types
 warn_return_any = true           # Warn if a function returns `Any`
 warn_unused_configs = true       # Warn about unused mypy configs
 
