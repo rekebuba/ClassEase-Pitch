@@ -2,15 +2,15 @@ from datetime import date, datetime
 from typing import Any, Optional
 from marshmallow import fields, ValidationError
 from sqlalchemy import and_, or_
-from marshmallow.fields import Field
 
 from api.v1.schemas.base_schema import get_all_model_classes
 from models.base_model import CustomTypes
 from werkzeug.datastructures import FileStorage
 
 
-class FormattedDate(Field):
+class FormattedDate(fields.Field):  # type: ignore[type-arg]
     """Custom field for formatting dates."""
+
     def __init__(
         self, format_str: str = "%b %d, %Y", *args: Any, **kwargs: Any
     ) -> None:
@@ -35,7 +35,7 @@ class FormattedDate(Field):
         return None
 
 
-class FloatOrDateField(fields.Field):
+class FloatOrDateField(fields.Field):  # type: ignore[type-arg]
     def _deserialize(
         self, value: Any, attr: Optional[str], data: Any, **kwargs: Any
     ) -> Any:
@@ -66,7 +66,7 @@ class FloatOrDateField(fields.Field):
         return None
 
 
-class FileField(fields.Field):
+class FileField(fields.Field):  # type: ignore[type-arg]
     """Custom field for file validation."""
 
     def _deserialize(
@@ -89,7 +89,7 @@ class FileField(fields.Field):
         return value
 
 
-class RoleEnumField(fields.Field):
+class RoleEnumField(fields.Field):  # type: ignore[type-arg]
     """Custom field for RoleEnum."""
 
     def _serialize(
@@ -100,7 +100,6 @@ class RoleEnumField(fields.Field):
         **kwargs: Any,
     ) -> str:
         """Custom serialization for RoleEnum."""
-        print(type(value))
         if isinstance(value, CustomTypes.RoleEnum):
             return value.value.capitalize()  # Returns "Admin", "Teacher", or "Student"
         raise ValidationError("Expected RoleEnum instance")
@@ -120,7 +119,7 @@ class RoleEnumField(fields.Field):
             ) from error
 
 
-class TableField(fields.Field):
+class TableField(fields.Field):  # type: ignore[type-arg]
     def _deserialize(
         self, value: Any, attr: Optional[str], data: Any, **kwargs: Any
     ) -> Any:
@@ -132,7 +131,7 @@ class TableField(fields.Field):
         return table
 
 
-class TableIdField(fields.Field):
+class TableIdField(fields.Field):  # type: ignore[type-arg]
     """Custom field for validating values."""
 
     def _validate(self, value: Any) -> None:
@@ -157,7 +156,7 @@ class TableIdField(fields.Field):
             )
 
 
-class ColumnField(fields.Field):
+class ColumnField(fields.Field):  # type: ignore[type-arg]
     """Custom field for validating values."""
 
     def _validate(self, value: Any) -> None:
@@ -167,7 +166,7 @@ class ColumnField(fields.Field):
             )
 
 
-class JoinOperatorField(fields.Field):
+class JoinOperatorField(fields.Field):  # type: ignore[type-arg]
     def _deserialize(
         self, value: Any, attr: Optional[str], data: Any, **kwargs: Any
     ) -> Any:
@@ -181,7 +180,7 @@ class JoinOperatorField(fields.Field):
         raise ValidationError("join_operator must be 'and' or 'or'")
 
 
-class ValueField(fields.Field):
+class ValueField(fields.Field):  # type: ignore[type-arg]
     """Custom field for validating and deserializing various types of values."""
 
     # def _validate(self, value: Any) -> None:

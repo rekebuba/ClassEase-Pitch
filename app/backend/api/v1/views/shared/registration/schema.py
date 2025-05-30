@@ -180,9 +180,7 @@ class TeacherSchema(BaseSchema):
     gender = fields.String(required=True, validate=[validate.OneOf(["M", "F"])])
     phone = fields.String(required=True)
     address = fields.String(required=True)
-    year_of_experience = fields.Integer(
-        required=True, validate=[validate.Range(min=0)]
-    )
+    year_of_experience = fields.Integer(required=True, validate=[validate.Range(min=0)])
     qualification = fields.String(required=True)
 
     user = fields.Nested(UserSchema)
@@ -320,6 +318,8 @@ class StudentSchema(BaseSchema):
         bool_fields = [
             "is_transfer",
             "has_disability",
+            "has_passed",
+            "is_registered",
             "has_medical_condition",
             "requires_special_accommodation",
         ]
@@ -336,7 +336,11 @@ class StudentSchema(BaseSchema):
         ]
 
         for detail_field, condition_field in optional_fields:
-            if not data.get(condition_field) and not data.get(detail_field, "").strip():
+            if (
+                not data.get(condition_field)
+                and not data.get(detail_field, "").strip()
+                or data.get(detail_field, "").lower() == "none"
+            ):
                 data[detail_field] = None
 
         return data

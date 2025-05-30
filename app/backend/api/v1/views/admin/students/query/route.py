@@ -8,6 +8,7 @@ from api.v1.utils.typing import (
     BuiltValidFilterDict,
     BuiltValidSortDict,
     PostLoadParam,
+    SendAllStudents,
     UserT,
 )
 from api.v1.views.admin import admins as admin
@@ -115,8 +116,8 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
             {
                 "user": user.to_dict(),
                 "student": student.to_dict(),
-                "grade": grade.to_dict(),
-                "year_record": year_record.to_dict(),
+                "grade": grade.to_dict() if grade else {},
+                "year_record": year_record.to_dict() if year_record else {},
                 "sectionI": section_I,
                 "sectionII": section_II,
                 "averageI": average_I,
@@ -132,7 +133,7 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
         dump_schema = AllStudentsSchema(many=True)
         result = dump_schema.dump(data_to_serialize)
 
-        modified_result: Dict[str, Any] = {
+        modified_result: SendAllStudents = {
             "tableId": extract_table_id(result[0]) if result else {},
             "data": [flatten_keys(item) for item in result],
         }

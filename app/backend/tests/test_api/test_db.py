@@ -5,6 +5,7 @@ from models.subject import Subject
 from models.grade import Grade
 from flask.testing import FlaskClient
 from sqlalchemy.orm import scoped_session, Session
+from tests.test_api.factories import AdminFactory, StudentFactory, UserFactory
 from tests.typing import Credential
 
 
@@ -57,7 +58,12 @@ def test_each_user_registration(client: FlaskClient, register_user_temp: None) -
     pass
 
 
-def test_all_users_registration(client: FlaskClient, register_user: None) -> None:
+def test_all_users_registration(
+    client: FlaskClient,
+    register_admin: None,
+    register_teacher: None,
+    register_student: None,
+) -> None:
     pass
 
 
@@ -165,11 +171,17 @@ def test_admin_query_students(
                 "value": ["A", "B"],
             },
         ],
-        "sorts": [],
+        "sorts": [
+            {
+                "id": "grade",
+                "desc": False,
+                "tableId": response.json["tableId"]["grade"],
+            },
+            {"id": "sectionI", "desc": True},
+        ],
         "page": 1,
         "per_page": 10,
     }
-
 
     response = client.post(
         "/api/v1/admin/students",

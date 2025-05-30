@@ -39,12 +39,12 @@ def paginate_query(
     # Calculate total number of records
     total_items = query.count()
     # Apply filters and sort
-    if filters:
+    if filters["valid_filters"] or filters["custom_filters"]:
         query = query.filter(and_(true(), *filters["valid_filters"])).having(
             and_(true(), *filters["custom_filters"])
         )
 
-    if sort:
+    if sort["custom_sorts"] or sort["valid_sorts"]:
         query = query.order_by(true(), *sort["valid_sorts"])
 
     # Calculate offset and apply limit and offset to the query

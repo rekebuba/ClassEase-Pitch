@@ -1,10 +1,13 @@
+from typing import List
 import pytest
 from flask.testing import FlaskClient
 
+from tests.typing import Credential
 
-@pytest.fixture(scope="module")
+
+@pytest.fixture(scope="session")
 def stud_course_register(
-    client: FlaskClient, all_stud_auth_header, create_semester
+    client: FlaskClient, create_semester: None, all_stud_auth_header: List[Credential]
 ) -> None:
     for auth_header in all_stud_auth_header:
         get_course = client.get(
@@ -25,4 +28,6 @@ def stud_course_register(
             print(f"Response: {response.json}")
 
         assert response.status_code == 201
+        assert response.json is not None
+        assert "message" in response.json
         assert response.json["message"] == "Course registration successful!"

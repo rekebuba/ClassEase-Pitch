@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Callable, List, Optional, Type, TypeVar, TypedDict, Union
+from typing import Any, Callable, List, Optional, Tuple, Type, TypeVar, TypedDict, Union
 from sqlalchemy.sql.expression import ClauseElement
 from sqlalchemy import ColumnElement
 from models.user import User
@@ -92,3 +92,40 @@ class PostLoadParam(TypedDict):
     join_operator: Callable[..., ColumnElement[bool]]
     page: int
     per_page: int
+
+
+class QueryStudentsData(TypedDict):
+    """for all students data after post dump."""
+
+    identification: str
+    imagePath: str
+    createdAt: str
+    guardianName: str
+    guardianPhone: str
+    isActive: bool
+    studentName: str
+    grade: str
+    finalScore: Optional[float]
+    rank: Optional[int]
+    sectionI: Optional[str]
+    sectionII: Optional[str]
+    averageI: Optional[float]
+    averageII: Optional[float]
+    rankI: Optional[int]
+    rankII: Optional[int]
+
+
+class QueryStudentTableId(TypedDict):
+    identification: str
+    imagePath: str
+    createdAt: str
+    guardianName: str
+    guardianPhone: str
+    isActive: bool
+    studentName: Tuple[str, str]
+    grade: str
+
+
+class SendAllStudents(TypedDict):
+    tableId: QueryStudentTableId
+    data: QueryStudentsData

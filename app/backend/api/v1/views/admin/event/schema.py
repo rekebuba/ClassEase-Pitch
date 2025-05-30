@@ -120,6 +120,10 @@ class EventSchema(BaseSchema):
                 )
             if data["is_hybrid"] and data["online_link"] is None:
                 raise ValidationError("Online link is required for hybrid events.")
+            if data["purpose"] == "New Semester" and not data.get("semester", None):
+                raise ValidationError(
+                    "New semester events must include semester information."
+                )
             if (
                 data["purpose"] == "New Semester"
                 and data["organizer"] != "School Administration"

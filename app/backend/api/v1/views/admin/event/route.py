@@ -79,6 +79,6 @@ def create_events(admin_data: UserT) -> Tuple[Response, int]:
     except ValidationError as e:
         storage.rollback()
         return errors.handle_validation_error(e)
-    except Exception as e:
-        storage.rollback()
-        return errors.handle_internal_error(e)
+    # except Exception as e:
+    #     storage.rollback()
+    #     return errors.handle_internal_error(e)

@@ -9,7 +9,11 @@ from sqlalchemy.orm import scoped_session, Session
 
 @pytest.fixture
 def users_auth_header(
-    client: FlaskClient, register_user: None, role: List[User]
+    client: FlaskClient,
+    register_admin: None,
+    register_teacher: None,
+    register_student: None,
+    role: List[User],
 ) -> List[Credential]:
     auth_headers: List[Credential] = []
     for user in role:
@@ -31,9 +35,11 @@ def users_auth_header(
     return auth_headers
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def all_admin_auth_header(
-    db_session: scoped_session[Session], client: FlaskClient, register_user: None
+    db_session: scoped_session[Session],
+    client: FlaskClient,
+    register_admin: None,
 ) -> List[Credential]:
     auth_headers: List[Credential] = []
     role = CustomTypes.RoleEnum.ADMIN
@@ -57,9 +63,11 @@ def all_admin_auth_header(
     return auth_headers
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def all_teacher_auth_header(
-    db_session: scoped_session[Session], client: FlaskClient, register_user: None
+    db_session: scoped_session[Session],
+    client: FlaskClient,
+    register_student: None,
 ) -> List[Credential]:
     auth_headers: List[Credential] = []
     role = CustomTypes.RoleEnum.TEACHER
@@ -82,9 +90,11 @@ def all_teacher_auth_header(
     return auth_headers
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def all_stud_auth_header(
-    db_session: scoped_session[Session], client: FlaskClient, register_user: None
+    db_session: scoped_session[Session],
+    client: FlaskClient,
+    register_student: None,
 ) -> List[Credential]:
     auth_headers: List[Credential] = []
     role = CustomTypes.RoleEnum.STUDENT
@@ -107,9 +117,11 @@ def all_stud_auth_header(
     return auth_headers
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def admin_auth_header(
-    db_session: scoped_session[Session], client: FlaskClient, register_user: None
+    db_session: scoped_session[Session],
+    client: FlaskClient,
+    register_admin: None,
 ) -> Credential:
     role = CustomTypes.RoleEnum.ADMIN
 
@@ -129,9 +141,13 @@ def admin_auth_header(
     return {"header": {"apiKey": f"Bearer {token}"}}
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def stud_auth_header(
-    db_session: scoped_session[Session], client: FlaskClient, register_user: None
+    db_session: scoped_session[Session],
+    client: FlaskClient,
+    register_admin: None,
+    register_teacher: None,
+    register_student: None,
 ) -> Credential:
     role = CustomTypes.RoleEnum.STUDENT
 
@@ -152,9 +168,13 @@ def stud_auth_header(
     return {"header": {"apiKey": f"Bearer {token}"}}
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def teacher_auth_header(
-    db_session: scoped_session[Session], client: FlaskClient, register_user: None
+    db_session: scoped_session[Session],
+    client: FlaskClient,
+    register_admin: None,
+    register_teacher: None,
+    register_student: None,
 ) -> Credential:
     role = CustomTypes.RoleEnum.TEACHER
 

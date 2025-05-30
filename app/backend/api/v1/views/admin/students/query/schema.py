@@ -64,7 +64,7 @@ class SortSchema(BaseSchema):
                     "All values in table id must be the same to extract keys."
                 )
 
-        if data["table_id"] != "":
+        if data.get("table_id", None) is not None and data["table_id"] != "":
             data["table"] = self.get_table(data["table_id"])
 
         return data
@@ -208,7 +208,12 @@ class GradeSchema(BaseSchema):
     """Schema for validating grade data."""
 
     id = fields.String(load_only=True)
-    grade = fields.Integer(validate=[validate.Range(min=1, max=12)])
+    grade = fields.Integer(
+        validate=[validate.Range(min=1, max=12)],
+        required=False,
+        allow_none=True,
+        dump_default=None,
+    )
 
     table_id = fields.String(required=False)
 
@@ -229,7 +234,9 @@ class AllStudentsSchema(BaseSchema):
             only=("student_name", "guardian_name", "guardian_phone", "is_active")
         )
     )
-    grade = fields.Nested(GradeSchema(only=("grade",)), required=True)
+    grade = fields.Nested(
+        GradeSchema(only=("grade",)), required=False, allow_none=False
+    )
 
     sectionI = fields.String(required=False, allow_none=True)
     sectionII = fields.String(required=False, allow_none=True)
@@ -240,4 +247,8 @@ class AllStudentsSchema(BaseSchema):
     rankI = fields.String(required=False, allow_none=True)
     rankII = fields.String(required=False, allow_none=True)
 
-    year_record = fields.Nested(STUDYearRecordSchema(only=("final_score", "rank")))
+    year_record = fields.Nested(
+        STUDYearRecordSchema(only=("final_score", "rank")),
+        required=False,
+        allow_none=False,
+    )

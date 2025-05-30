@@ -2,15 +2,15 @@ from typing import Any, Dict
 from flask.testing import FlaskClient
 import pytest
 
-from tests.test_api.factories import EventFactory
+from tests.test_api.factories import EventFactory, SemesterFactory
 from tests.typing import Credential
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def create_semester(
     client: FlaskClient, admin_auth_header: Credential
 ) -> None:  # auth_header -> Admin
-    event_form = EventFactory(purpose="New Semester")
+    event_form = EventFactory.build(purpose="New Semester")
     response = client.post(
         "/api/v1/admin/event/new",
         json=event_form,
@@ -23,7 +23,7 @@ def create_semester(
     assert response.json["message"] == "Event Created Successfully"
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def create_mark_list(
     client: FlaskClient,
     stud_course_register: None,

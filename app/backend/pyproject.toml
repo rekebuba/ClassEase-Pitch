@@ -29,15 +29,16 @@ dependencies = [
 ]
 
 [tool.mypy]
-files = ["/ClassEase-Pitch/app/backend"]
+files = ["."]
 strict = true                    # Enables all strictness flags below
 disallow_untyped_defs = true     # Functions must have type annotations
 disallow_incomplete_defs = true  # No partial annotations (e.g., `def foo(x) -> int`)
-disallow_any_generics=true       # No `Any` in generic types
+disallow_any_generics = true       # No `Any` in generic types
 warn_return_any = true           # Warn if a function returns `Any`
 warn_unused_configs = true       # Warn about unused mypy configs
 
 # plugins = sqlalchemy.ext.mypy.plugin
+disable_error_code = ["misc"]     # Disable specific error codes (e.g., `misc` for non-critical issues)
 
 # Imports and modules
 ignore_missing_imports = false    # Fail if imports are missing

@@ -1,3 +1,4 @@
+from dataclasses import asdict
 from typing import Any, Dict, List
 
 from marshmallow import ValidationError
@@ -10,11 +11,13 @@ from api.v1.utils.typing import (
     PostFilterDict,
     PostLoadParam,
     PostSortDict,
+    QueryStudentTableId,
+    QueryStudentsData,
 )
 
 
-def extract_table_id(item: Dict[str, Any]) -> Dict[str, Any]:
-    table_id: Dict[str, Any] = {}
+def extract_table_id(item: Dict[str, Any]) -> QueryStudentTableId:
+    table_id: QueryStudentTableId = {}
     if not item:
         return table_id
 
@@ -35,7 +38,7 @@ def extract_table_id(item: Dict[str, Any]) -> Dict[str, Any]:
     return table_id
 
 
-def flatten_keys(item: Dict[str, Any]) -> Dict[str, Any]:
+def flatten_keys(item: Dict[str, Any]) -> QueryStudentsData:
     """
     Flatten nested keys in the given item dictionary.
     """
@@ -46,16 +49,14 @@ def flatten_keys(item: Dict[str, Any]) -> Dict[str, Any]:
     ).strip()
     item["student"]["studentName"] = full_name
 
-    # Keys to flatten
-    merge_keys = ["user", "student", "grade", "yearRecord"]
-
     # Flatten all specified keys into the result
-    result = {}
-    for key in merge_keys:
-        result.update(item.pop(key, {}))  # pop returns {} if key is missing
+    result: Dict[str, Any] = {}
 
-    # Add remaining keys
-    result.update(item)
+    for key, value in item.items():
+        if isinstance(value, dict):
+            result.update(value)  # Flatten one level of nesting
+        else:
+            result[key] = value
 
     # Remove unwanted key
     result.pop("tableId", None)

@@ -11,7 +11,7 @@ from models import storage
 from sqlalchemy.orm import scoped_session, Session
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def fake_mark_list(db_session: scoped_session[Session]) -> Dict[str, Any]:
     # generate fake mark list for each grade
     registered_grades = (
