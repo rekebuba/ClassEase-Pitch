@@ -1,8 +1,10 @@
-from typing import Tuple
+from typing import Dict, Tuple
 
 from flask import Response, jsonify
+from marshmallow import ValidationError
 from sqlalchemy import func
 from api.v1.utils.typing import UserT
+from api.v1.views import errors
 from api.v1.views.admin import admins as admin
 from api.v1.views.admin.students.grade_count.schema import (
     StudentGradeCountsSchema,
@@ -24,23 +26,28 @@ def student_grade_counts(admin_data: UserT) -> Tuple[Response, int]:
         Response: A JSON response containing the count of students in each grade.
                   If no students are found, returns a 404 error with an appropriate message.
     """
-    query = (
-        storage.session.query(
-            Grade.grade, func.count(STUDYearRecord.grade_id).label("grade_count")
-        )
-        .join(STUDYearRecord.grades)
-        .group_by(Grade.id)
-        .order_by(Grade.grade)
-    )
-    # Process results
-    result = query.all()
+    try:
+        query = (
+            storage.session.query(
+                Grade.grade, func.count(STUDYearRecord.grade_id).label("grade_count")
+            )
+            .join(STUDYearRecord.grades)
+            .group_by(Grade.id)
+            .order_by(Grade.grade)
+        ).all()
 
-    data_to_serialize = [
-        {"grade": grade, "total": grade_count} for grade, grade_count in result
-    ]
+        # Process results
+        serialize: Dict[str, int] = {str(i): 0 for i in range(1, 13)}
+        for grade, grade_count in query:
+            if grade is not None:
+                serialize[str(grade)] = grade_count
 
-    # Return the serialized data
-    schema = StudentGradeCountsSchema(many=True)
-    result = schema.dump(data_to_serialize)
+        # Return the serialized data
+        schema = StudentGradeCountsSchema()
+        result = schema.dump({"data": serialize})
 
-    return jsonify(result), 200
+        return jsonify(**result["data"]), 200
+    except ValidationError as e:
+        return errors.handle_validation_error(e)
+    except Exception as e:
+        return errors.handle_internal_error(e)

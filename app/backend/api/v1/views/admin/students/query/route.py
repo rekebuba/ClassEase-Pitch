@@ -1,3 +1,4 @@
+import json
 from typing import Any, Dict, List, Tuple
 
 from flask import Response, jsonify, request
@@ -137,6 +138,8 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
             "tableId": extract_table_id(result[0]) if result else {},
             "data": [flatten_keys(item) for item in result],
         }
+
+        print(json.dumps(modified_result, indent=4, sort_keys=True))
 
         return jsonify(
             {**modified_result, "pageCount": paginated_result["meta"]["total_pages"]}

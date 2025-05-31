@@ -189,3 +189,31 @@ def test_admin_query_students(
         headers=admin_auth_header["header"],
     )
     assert response.status_code == 200
+
+
+def test_admin_student_section_counts(
+    db_session: scoped_session[Session],
+    client: FlaskClient,
+    admin_auth_header: Credential,
+) -> None:
+    response = client.get(
+        "/api/v1/admin/students/section-counts",
+        headers=admin_auth_header["header"],
+    )
+    assert response.status_code == 200
+    assert response.json is not None
+    assert "sectionI" in response.json
+    assert "sectionII" in response.json
+
+
+def test_admin_student_grade_counts(
+    db_session: scoped_session[Session],
+    client: FlaskClient,
+    admin_auth_header: Credential,
+) -> None:
+    response = client.get(
+        "/api/v1/admin/students/grade-counts",
+        headers=admin_auth_header["header"],
+    )
+    assert response.status_code == 200
+    assert response.json is not None

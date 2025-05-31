@@ -241,11 +241,11 @@ class AllStudentsSchema(BaseSchema):
     sectionI = fields.String(required=False, allow_none=True)
     sectionII = fields.String(required=False, allow_none=True)
 
-    averageI = fields.String(required=False, allow_none=True)
-    averageII = fields.String(required=False, allow_none=True)
+    averageI = fields.Float(required=False, allow_none=True)
+    averageII = fields.Float(required=False, allow_none=True)
 
-    rankI = fields.String(required=False, allow_none=True)
-    rankII = fields.String(required=False, allow_none=True)
+    rankI = fields.Integer(required=False, allow_none=True)
+    rankII = fields.Integer(required=False, allow_none=True)
 
     year_record = fields.Nested(
         STUDYearRecordSchema(only=("final_score", "rank")),

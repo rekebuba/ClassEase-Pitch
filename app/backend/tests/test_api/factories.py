@@ -18,6 +18,11 @@ from io import BufferedReader
 from factory import LazyAttribute
 from faker import Faker
 from pyethiodate import EthDate  # type: ignore
+from models.assessment import Assessment
+from models.section import Section
+from models.stud_semester_record import STUDSemesterRecord
+from models.stud_year_record import STUDYearRecord
+from models.subject import Subject
 from models.year import Year
 from models.semester import Semester
 from models.teacher import Teacher
@@ -56,7 +61,7 @@ class BaseFactory(SQLAlchemyModelFactory, Generic[T]):  # type: ignore[type-arg]
     class Meta:
         abstract = True
         sqlalchemy_session = storage.session
-        sqlalchemy_session_persistence = None
+        sqlalchemy_session_persistence = "commit"
 
     @classmethod
     def get_or_create(cls: Type["BaseFactory[T]"], **kwargs: Any) -> T:
@@ -86,7 +91,7 @@ class BaseFactory(SQLAlchemyModelFactory, Generic[T]):  # type: ignore[type-arg]
         cls: Type["BaseFactory[T]"], model_class: Type[T], *arg: Any, **kwargs: Any
     ) -> T:
         """
-        Override creation to skip specific fields marked in _skip_for_session
+        Override creation to add specific fields marked in _add_for_session
         """
         add_fields = getattr(cls, "_add_for_session", {})
 
@@ -98,6 +103,11 @@ class BaseFactory(SQLAlchemyModelFactory, Generic[T]):  # type: ignore[type-arg]
             for v in all_args[1:]:
                 args[v] = kwargs.get(v, None)
             kwargs[key] = value(**args)
+
+        # Skip fields that are not needed for the session
+        skip_fields = getattr(cls, "_skip_fields", [])
+        for field in skip_fields:
+            kwargs.pop(field, None)
 
         return super()._create(model_class, *arg, **kwargs)  # type: ignore[no-any-return]
 
@@ -118,6 +128,11 @@ class BaseFactory(SQLAlchemyModelFactory, Generic[T]):  # type: ignore[type-arg]
             for v in all_args[1:]:
                 args[v] = kwargs.get(v, None)
             kwargs[key] = value(**args)
+
+        # Skip fields that are not needed for the test
+        skip_fields = getattr(cls, "_skip_fields", [])
+        for field in skip_fields:
+            kwargs.pop(field, None)
 
         for key, value in kwargs.items():
             if isinstance(value, datetime):
@@ -273,11 +288,14 @@ class UserFactory(BaseFactory[User]):
 
     _add_for_test: Dict[str, Any] = {}
     _add_for_session: Dict[str, Any] = {
-        "identification.role": lambda **kwarg: UserFactory._generate_id(kwarg["role"]),
+        "identification.role.count": lambda **kwarg: UserFactory._generate_id(
+            kwarg["role"], kwarg["count"]
+        ),
         "password.identification": lambda **kwarg: UserFactory._hash_password(
             kwarg["identification"]
         ),
     }
+    _skip_fields: List[str] = ["count"]
 
     @staticmethod
     def generate_fake_profile_picture() -> BufferedReader:
@@ -302,7 +320,7 @@ class UserFactory(BaseFactory[User]):
             return open(tmp.name, "rb")
 
     @staticmethod
-    def _generate_id(role: CustomTypes.RoleEnum) -> str:
+    def _generate_id(role: CustomTypes.RoleEnum, count: int) -> str:
         """
         Generates a custom ID based on the role (Admin, Student, Teacher).
 
@@ -324,17 +342,18 @@ class UserFactory(BaseFactory[User]):
         else:
             raise ValueError(f"Invalid role: {role}")
 
-        num = random.randint(1000, 9999)
         starting_year = (
             EthDate.date_to_ethiopian(datetime.now()).year % 100
         )  # Get last 2 digits of the year
-        identification = f"{section}/{num}/{starting_year}"
+        identification = f"{section}/{count}/{starting_year}"
 
         return identification
 
     @staticmethod
     def _hash_password(password: str) -> str:
         return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+    count: Any = factory.Sequence(lambda n: n)  # Unique identifier for each user
 
     image_path: Any = LazyAttribute(
         lambda x: UserFactory.generate_fake_profile_picture()
@@ -381,8 +400,8 @@ class StudentFactory(BaseFactory[Student]):
         ).id,
         "start_year_id": lambda **kwarg: YearModelFactory.get_existing_id(),
         "current_year_id": lambda **kwarg: YearModelFactory.get_existing_id(),
-        "current_grade_id": lambda **kwarg: GradeModelFactory.get_existing_id(
-            random.randint(1, 12)
+        "current_grade_id.grade_id": lambda **kwarg: kwarg.get(
+            "grade_id", GradeModelFactory.get_existing_id(random.randint(1, 12))
         ),
         "next_grade_id": lambda **kwarg: None,
         "semester_id": lambda **kwarg: SemesterFactory.get_or_create(
@@ -398,6 +417,9 @@ class StudentFactory(BaseFactory[Student]):
         "current_grade": lambda **kwarg: random.randint(1, 10),
         "academic_year": lambda **kwarg: EthDate.date_to_ethiopian(datetime.now()).year,
     }
+    _skip_fields: List[str] = ["grade_id"]
+
+    grade_id = None
 
     # Add additional fields for Admin
     first_name: Any = LazyAttribute(lambda x: fake.first_name())
@@ -470,6 +492,101 @@ class TeacherFactory(BaseFactory[Teacher]):
             )
         )
     )
+
+
+class SubjectFactory(BaseFactory[Subject]):
+    class Meta:
+        model = Subject
+
+    # Preload existing subject IDs
+    _query_subject = storage.session.query(Subject.id)
+
+    @classmethod
+    def get_existing_id(cls, student_grade_id: str, offset: int) -> str:
+        """
+        Returns an existing subject ID if available, otherwise raise ValueError.
+        """
+        subject_id: Optional[str] = (
+            cls._query_subject.join(Grade, Grade.id == Subject.grade_id)
+            .filter(Grade.id == student_grade_id)
+            .order_by(Subject.id)
+            .offset(offset)
+            .limit(1)
+            .scalar()
+        )
+        if subject_id is None:
+            raise ValueError(
+                f"No subject found for grade ID {student_grade_id} at offset {offset}"
+            )
+
+        return subject_id
+
+
+class SectionFactory(BaseFactory[Section]):
+    class Meta:
+        model = Section
+
+    grade_id: Any = LazyAttribute(
+        lambda _: GradeModelFactory.get_existing_id(random.randint(1, 12))
+    )
+    section: Any = LazyAttribute(lambda _: random.choice(["A", "B", "C"]))
+
+
+class STUDSemesterRecordFactory(BaseFactory[STUDSemesterRecord]):
+    class Meta:
+        model = STUDSemesterRecord
+
+    student_id: Any = LazyAttribute(lambda _: StudentFactory.get_or_create().id)
+    semester_id: Any = LazyAttribute(lambda _: SemesterFactory.get_or_create().id)
+    section_id: Any = LazyAttribute(
+        lambda _: SectionFactory.get_or_create(
+            grade_id=GradeModelFactory.get_existing_id(random.randint(1, 12)),
+            section=random.choice(["A", "B", "C"]),
+        ).id
+    )
+    year_record_id: Any = LazyAttribute(
+        lambda obj: YearRecordFactory.get_or_create(student_id=obj.student_id).id
+    )
+    average: Any = LazyAttribute(lambda _: random.uniform(40.0, 100.0))
+    rank: Any = LazyAttribute(lambda _: random.randint(1, 50))
+
+
+class YearRecordFactory(BaseFactory[STUDYearRecord]):
+    class Meta:
+        model = STUDYearRecord
+
+    student_id: Any = LazyAttribute(lambda _: StudentFactory.get_or_create().id)
+    grade_id: Any = LazyAttribute(
+        lambda _: GradeModelFactory.get_existing_id(random.randint(1, 12))
+    )
+    year_id: Any = LazyAttribute(lambda _: YearModelFactory.get_existing_id())
+    final_score: Any = LazyAttribute(lambda _: random.uniform(40.0, 100.0))
+    rank: Any = LazyAttribute(lambda _: random.randint(1, 50))
+
+
+class AssessmentFactory(BaseFactory[Assessment]):
+    class Meta:
+        model = Assessment
+
+    _skip_fields: List[str] = ["offset"]
+
+    offset = factory.Sequence(lambda n: n)
+
+    student_id: Any = LazyAttribute(lambda _: StudentFactory.get_or_create().id)
+    subject_id: Any = LazyAttribute(
+        lambda obj: SubjectFactory.get_existing_id(
+            student_grade_id=StudentFactory.get_or_create(
+                id=obj.student_id
+            ).current_grade_id,
+            offset=obj.offset,
+        )
+    )  # Placeholder
+    semester_record_id: Any = LazyAttribute(
+        lambda obj: STUDSemesterRecordFactory.get_or_create(
+            student_id=obj.student_id
+        ).id
+    )
+    teachers_record_id: Any = None  # Placeholder, can be set later
 
 
 @dataclass(kw_only=True)
