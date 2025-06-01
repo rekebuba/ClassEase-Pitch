@@ -1,7 +1,7 @@
 from typing import Tuple
 
 from flask import Response, jsonify, request
-from sqlalchemy import and_, select, update
+from sqlalchemy import and_, select, true, update
 from api.v1.utils.typing import UserT
 from api.v1.views.utils import admin_required
 from models.assessment import Assessment
@@ -129,6 +129,7 @@ def assign_class(admin_data: UserT) -> Tuple[Response, int]:
                     update(Assessment)
                     .where(
                         and_(
+                            true(),
                             Assessment.grade_id == grade_id,
                             Assessment.subject_id == subject.id,
                             Assessment.semester == data["semester"],

@@ -2,13 +2,12 @@ from typing import Any, Dict, List
 from marshmallow import ValidationError, post_dump
 from sqlalchemy import ColumnElement, and_
 from api.v1.schemas.base_schema import BaseSchema
-from api.v1.schemas.config_schema import OPERATOR_CONFIG
+from api.v1.schemas.config_schema import OPERATOR_CONFIG, to_snake_case_key
 from api.v1.schemas.custom_schema import (
     ColumnField,
     FloatOrDateField,
     JoinOperatorField,
     TableField,
-    TableIdField,
     ValueField,
 )
 from marshmallow import (
@@ -43,28 +42,24 @@ class SortSchema(BaseSchema):
 
     column_name = ColumnField(required=False)
     desc = fields.Boolean(required=False)
-    table_id = TableIdField(required=False)
+    table_id = fields.String(required=False)
     table = TableField(required=False)
 
     @pre_load
     def pre_load_data(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
         # add default values to the data
-        data["column_name"] = data.pop("id", None)
+        c_names = data.pop("id", "").split("_")
+
+        if len(c_names) > 1:
+            data["column_name"] = [
+                to_snake_case_key(name.strip()) for name in c_names if name.strip()
+            ]
+        else:
+            data["column_name"] = to_snake_case_key(c_names[0].strip())
+
         table_id = data.get("table_id", None)
-        if isinstance(table_id, list):
-            if not table_id:
-                raise ValidationError("table id list cannot be empty")
 
-            first_table_value = table_id[0][1]  # value (uuid)
-            if all(v == first_table_value for _, v in table_id):
-                data["column_name"] = [k for k, _ in table_id]
-                data["table_id"] = first_table_value  # overwrite with string
-            else:
-                raise ValidationError(
-                    "All values in table id must be the same to extract keys."
-                )
-
-        if data.get("table_id", None) is not None and data["table_id"] != "":
+        if table_id is not None and table_id != "":
             data["table"] = self.get_table(data["table_id"])
 
         return data
@@ -89,7 +84,7 @@ class FilterSchema(BaseSchema):
 
     column_name = ColumnField(required=False, load_default=None, allow_none=True)
     filter_id = fields.String(required=False, load_default=None, allow_none=True)
-    table_id = TableIdField(required=False, load_default=None, allow_none=True)
+    table_id = fields.String(required=False, load_default=None, allow_none=True)
     table = TableField(required=False, load_default=None, allow_none=True)
     range = fields.Nested(
         RangeSchema, required=False, load_default=None, allow_none=True
@@ -126,25 +121,21 @@ class FilterSchema(BaseSchema):
     @pre_load
     def pre_load_data(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
         # add default values to the data
-        data["column_name"] = data.pop("id", None)
+        c_names = data.pop("id", "").split("_")
+
+        if len(c_names) > 1:
+            data["column_name"] = [
+                to_snake_case_key(name.strip()) for name in c_names if name.strip()
+            ]
+        else:
+            data["column_name"] = to_snake_case_key(c_names[0].strip())
+
         value = data.get("value", None)
         table_id = data.get("table_id", None)
-        if isinstance(table_id, list):
-            if not table_id:
-                raise ValidationError("table id list cannot be empty")
 
-            first_table_value = table_id[0][1]  # value (uuid)
-            if all(v == first_table_value for _, v in table_id):
-                data["column_name"] = [k for k, _ in table_id]
-                data["table_id"] = first_table_value  # overwrite with string
-            else:
-                raise ValidationError(
-                    "All values in table id must be the same to extract keys."
-                )
-
-        if data.get("table_id", None) is not None and data["table_id"] != "":
+        if table_id is not None and table_id != "":
             """If table_id is provided, fetch the table."""
-            data["table"] = self.get_table(data["table_id"])
+            data["table"] = self.get_table(table_id)
             data["value"] = self.update_list_value(
                 value, data["table"], data["column_name"]
             )
@@ -178,7 +169,7 @@ class ParamSchema(BaseSchema):
     filters = fields.List(
         fields.Nested(FilterSchema), required=False, load_default=[], allow_none=True
     )
-    sorts = fields.List(fields.Nested(SortSchema), required=False, load_default=[])
+    sort = fields.List(fields.Nested(SortSchema), required=False, load_default=[])
     join_operator = JoinOperatorField(required=False, load_default=and_)
 
     page = fields.Integer(required=False, load_default=1)

@@ -539,8 +539,8 @@ class STUDSemesterRecordFactory(BaseFactory[STUDSemesterRecord]):
     student_id: Any = LazyAttribute(lambda _: StudentFactory.get_or_create().id)
     semester_id: Any = LazyAttribute(lambda _: SemesterFactory.get_or_create().id)
     section_id: Any = LazyAttribute(
-        lambda _: SectionFactory.get_or_create(
-            grade_id=GradeModelFactory.get_existing_id(random.randint(1, 12)),
+        lambda obj: SectionFactory.get_or_create(
+            grade_id=StudentFactory.get_or_create(id=obj.student_id).current_grade_id,
             section=random.choice(["A", "B", "C"]),
         ).id
     )
@@ -557,7 +557,7 @@ class YearRecordFactory(BaseFactory[STUDYearRecord]):
 
     student_id: Any = LazyAttribute(lambda _: StudentFactory.get_or_create().id)
     grade_id: Any = LazyAttribute(
-        lambda _: GradeModelFactory.get_existing_id(random.randint(1, 12))
+        lambda obj: StudentFactory.get_or_create(id=obj.student_id).current_grade_id
     )
     year_id: Any = LazyAttribute(lambda _: YearModelFactory.get_existing_id())
     final_score: Any = LazyAttribute(lambda _: random.uniform(40.0, 100.0))

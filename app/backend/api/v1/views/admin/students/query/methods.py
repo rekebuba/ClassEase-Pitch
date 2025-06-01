@@ -21,19 +21,15 @@ def extract_table_id(item: Dict[str, Any]) -> QueryStudentTableId:
     if not item:
         return table_id
 
-    for model in item.keys():
-        entries = item[model]
-        if not isinstance(entries, list):
-            entries = [entries]
-
-        for entry in entries:
-            if isinstance(entry, dict):
-                user_table_id = entry.pop("tableId", None)
-                for key in entry:
-                    if isinstance(entry[key], dict):
-                        table_id[key] = [(k, user_table_id) for k in entry[key]]
-                    else:
-                        table_id.setdefault(key, user_table_id)
+    for k, entry in item.items():
+        if isinstance(entry, dict):
+            user_table_id = entry.pop("tableId", None)
+            for key in entry:
+                if isinstance(entry[key], dict):
+                    custom_key = "_".join(entry[key].keys())
+                    table_id.setdefault(custom_key, user_table_id)
+                else:
+                    table_id.setdefault(key, user_table_id)
 
     return table_id
 
@@ -44,10 +40,11 @@ def flatten_keys(item: Dict[str, Any]) -> QueryStudentsData:
     """
     # Safely build full name from nested fields
     name_parts = item.get("student", {}).pop("studentName", {})
+    custom_key = "_".join(name_parts.keys())
     full_name = " ".join(
         name_parts.get(k, "") for k in ("firstName", "fatherName", "grandFatherName")
     ).strip()
-    item["student"]["studentName"] = full_name
+    item["student"][custom_key] = full_name
 
     # Flatten all specified keys into the result
     result: Dict[str, Any] = {}
@@ -77,11 +74,12 @@ def build_valid_sort(
             column_name = sorts["custom_sorts"]["column_name"]
             is_desc = sorts["custom_sorts"].get("desc", False)
 
-            expr = custom_types.get(column_name)
-            if expr is None:
+            c_name = column_name[0] if isinstance(column_name, list) else column_name
+            col = custom_types.get(c_name, None)
+            if col is None:
                 raise ValidationError(f"Invalid custom sort: {column_name}")
 
-            valid_sorts["custom_sorts"].append(expr.desc() if is_desc else expr)
+            valid_sorts["custom_sorts"].append(col.desc() if is_desc else col.asc())
         else:
             # If no custom sort is provided, use a default sort to avoid empty queries
             valid_sorts["valid_sorts"].extend(sorts["valid_sorts"])
@@ -104,8 +102,9 @@ def build_valid_filter(
             operator = filters["custom_filters"]["operator"]
             value = filters["custom_filters"]["value"]
 
-            expr = custom_types.get(column_name)
-            if expr is None:
+            c_name = column_name[0] if isinstance(column_name, list) else column_name
+            col = custom_types.get(c_name, None)
+            if col is None:
                 raise ValidationError(f"Invalid custom filter: {column_name}")
 
             op_func = OPERATOR_MAPPING.get(operator)
@@ -113,7 +112,7 @@ def build_valid_filter(
                 raise ValidationError(f"Unsupported operator: {operator}")
 
             try:
-                condition = op_func(expr, value)
+                condition = op_func(col, value)
             except Exception as e:
                 raise ValidationError(f"Invalid value for operator '{operator}': {e}")
             valid_filters["custom_filters"].append(condition)

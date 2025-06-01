@@ -37,7 +37,7 @@ class RangeDict(TypedDict):
 class FilterDict(TypedDict):
     """for filter data."""
 
-    column_name: str
+    column_name: Union[str, List[str]]
     filter_id: str
     table_id: str
     table: Optional[Type[Base]]
@@ -50,7 +50,7 @@ class FilterDict(TypedDict):
 class SortDict(TypedDict):
     """for sort data."""
 
-    column_name: str
+    column_name: List[str]
     desc: bool
     table_id: str
     table: Optional[Type[Base]]
@@ -88,7 +88,7 @@ class PostLoadParam(TypedDict):
     """for user data after post load."""
 
     filters: List[PostFilterDict]
-    sorts: List[PostSortDict]
+    sort: List[PostSortDict]
     join_operator: Callable[..., ColumnElement[bool]]
     page: int
     per_page: int
@@ -104,7 +104,7 @@ class QueryStudentsData(TypedDict):
     guardianPhone: str
     isActive: bool
     studentName: str
-    grade: str
+    grade: Optional[int]
     finalScore: Optional[float]
     rank: Optional[int]
     sectionI: Optional[str]
@@ -116,13 +116,15 @@ class QueryStudentsData(TypedDict):
 
 
 class QueryStudentTableId(TypedDict):
+    finalScore: str
+    rank: str
     identification: str
     imagePath: str
     createdAt: str
     guardianName: str
     guardianPhone: str
-    isActive: bool
-    studentName: Tuple[str, str]
+    isActive: str
+    _firstName__fatherName_grandFatherName: str
     grade: str
 
 

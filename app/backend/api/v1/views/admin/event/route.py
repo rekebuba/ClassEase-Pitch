@@ -2,7 +2,7 @@ from typing import Tuple
 
 from flask import Response, jsonify, request
 from marshmallow import ValidationError
-from sqlalchemy import and_
+from sqlalchemy import and_, true
 from api.v1.utils.typing import UserT
 from api.v1.views.admin import admins as admin
 from api.v1.views.utils import admin_required
@@ -64,6 +64,7 @@ def create_events(admin_data: UserT) -> Tuple[Response, int]:
                 .join(Year, Year.id == Event.year_id)
                 .filter(
                     and_(
+                        true(),
                         Event.purpose == new_event.purpose,
                         Event.organizer == new_event.organizer,
                     )

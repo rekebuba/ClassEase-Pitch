@@ -23,7 +23,7 @@ class ResponseData(BaseModel):
     guardianName: str
     guardianPhone: str
     isActive: bool
-    studentName: str
+    firstName_fatherName_grandFatherName: str
     grade: Optional[int]
     finalScore: Optional[float]
     rank: Optional[int]
@@ -44,7 +44,7 @@ class ResponseTableId(BaseModel):
     guardianName: str
     guardianPhone: str
     isActive: str
-    studentName: List[Tuple[str, str]]
+    firstName_fatherName_grandFatherName: str
     grade: str
 
 
@@ -152,18 +152,20 @@ class TestAdminStudentQueries:
     @pytest.mark.parametrize(
         "grades,expected_count",
         [
+            ([11], 0),  # No student registered for corse in grade 11
+            ([12], 0),  # No student registered for corse in grade 12
+            ([11, 12], 0),
             ([1], 3),
-            ([2], 3),
             ([3], 3),
-            ([4], 3),
-            ([5], 3),
-            ([6], 3),
-            ([7], 3),
             ([8], 3),
-            ([9], 3),
-            ([10], 3),
-            ([11], 0),
-            ([12], 0),
+            ([9, 10], 6),
+            ([10, 11], 3),
+            ([10, 11, 12], 3),
+            ([10, 9, 12], 6),
+            ([1, 2, 3], 9),
+            ([5, 6, 7, 8], 12),
+            ([1, 3, 9, 2, 4], 15),
+            ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], 30),
             ([], 36),  # No grade filter should return all
         ],
     )

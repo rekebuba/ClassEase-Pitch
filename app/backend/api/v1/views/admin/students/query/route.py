@@ -54,7 +54,7 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
 
         # custom sort
         valid_sort: BuiltValidSortDict = build_valid_sort(
-            valid_data["sorts"], custom_types
+            valid_data["sort"], custom_types
         )
         # custom filter
         valid_filters: BuiltValidFilterDict = build_valid_filter(
@@ -138,8 +138,6 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
             "tableId": extract_table_id(result[0]) if result else {},
             "data": [flatten_keys(item) for item in result],
         }
-
-        print(json.dumps(modified_result, indent=4, sort_keys=True))
 
         return jsonify(
             {**modified_result, "pageCount": paginated_result["meta"]["total_pages"]}

@@ -7,7 +7,7 @@ from marshmallow import (
     post_dump,
     pre_load,
 )
-from sqlalchemy import ColumnElement, UnaryExpression, or_
+from sqlalchemy import ColumnElement, UnaryExpression, and_, or_, true
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from api.v1.schemas.config_schema import (
     OPERATOR_MAPPING,
@@ -258,26 +258,29 @@ class BaseSchema(Schema):
         return table_id if table_id else None
 
     @staticmethod
-    def update_list_value(value: Any, model: Type[Base], column_name: str) -> Any:
+    def update_list_value(
+        value: Any, model: Type[Base], column_name: Union[List[str], str]
+    ) -> Any:
         """
         Update the list value to match the model's column type.
         """
         if value is None:
             return None
+        col_name = column_name if isinstance(column_name, str) else column_name[0]
 
         # Find the column and get its Python type
         column_obj = next(
-            (col for col in model.__table__.columns if col.name == column_name), None
+            (col for col in model.__table__.columns if col.name == col_name), None
         )
         if column_obj is None:
             raise ValidationError(
-                f"Column '{column_name}' not found on {model.__tablename__}."
+                f"Column '{col_name}' not found on {model.__tablename__}."
             )
 
         try:
             expected_type = column_obj.type.python_type
         except NotImplementedError:
-            raise ValidationError(f"Unsupported type for column '{column_name}'.")
+            raise ValidationError(f"Unsupported type for column '{col_name}'.")
 
         # Type conversion logic
         converters: Dict[Type[Any], Callable[[Any], Any]] = {
@@ -298,15 +301,92 @@ class BaseSchema(Schema):
                 if isinstance(value, list)
                 else converter(value)
             )
-        except Exception as e:
+        except Exception:
+            raise ValidationError(f"Failed to convert values for column '{col_name}'")
+
+    @staticmethod
+    def filter_multiple_columns(
+        model: Type[Base],
+        column_name: List[str],
+        operator: str,
+        value: str,
+    ) -> List[ColumnElement[Any]]:
+        """
+        Filter multiple columns based on the operator and value.
+        """
+        result: List[ColumnElement[Any]] = []
+        if not column_name:
+            return result
+
+        # Validate operator early
+        if operator not in OPERATOR_MAPPING:
+            raise ValueError(f"Unsupported operator: {operator}")
+
+        # Tokenize input value
+        tokens = value.split()
+        if not tokens:
+            return []
+
+        # Reverse tokens for endWith operator
+        if operator == "endWith":
+            tokens = tokens[::-1]
+            column_name = column_name[::-1]
+
+        if operator in {"iLike", "notLike"}:
+            for col_name in column_name:
+                for token in tokens:
+                    condition = BaseSchema.build_operator_condition(
+                        model, col_name, operator, token
+                    )
+
+                    if condition is not None:
+                        result.append(condition)
+
+            if operator == "notLike":
+                # Combine conditions with and for notLike
+                return [and_(*result)] if result else []
+
+            return [or_(*result)] if result else []
+
+        else:
+            for token, col_name in zip(tokens, column_name):
+                condition = BaseSchema.build_operator_condition(
+                    model, col_name, operator, token
+                )
+
+                if condition is not None:
+                    result.append(condition)
+
+            # Combine conditions with and for eq/ne
+            return [and_(*result)] if result else []
+
+    @staticmethod
+    def build_operator_condition(
+        model: Type[Base],
+        column_name: str,
+        operator: str,
+        token: Any,
+    ) -> Optional[ColumnElement[Any]]:
+        col = getattr(model, column_name, None)
+        if col is None:
             raise ValidationError(
-                f"Failed to convert values for column '{column_name}': {e}"
+                f"Column '{column_name}' not found on {model.__tablename__}."
             )
+
+        op_func = OPERATOR_MAPPING.get(operator)
+        if not callable(op_func):
+            raise ValidationError(
+                f"Operator '{operator}' is not callable or not defined."
+            )
+        try:
+            return op_func(col, token)
+        except Exception as e:
+            raise ValidationError(f"Invalid value for operator '{operator}': {e}")
 
     @staticmethod
     def filter_data(
         model: Type[Base],
-        column_name: str | list[str],
+        column_name: Union[str, List[str]],
         operator: Optional[str],
         value: Any,
         range: Optional[RangeDict] = None,
@@ -314,61 +394,56 @@ class BaseSchema(Schema):
         """
         Dynamically create a SQLAlchemy filter based on operator.
         """
-        columns = column_name if isinstance(column_name, list) else [column_name]
         result: List[ColumnElement[Any]] = []
-
-        for column in columns:
-            col_name = to_snake_case_key(column)
-            col: Optional[InstrumentedAttribute[Any]] = getattr(model, col_name, None)
-            if col is None:
-                raise ValidationError(
-                    f"Column '{col_name}' not found on {model.__tablename__}."
-                )
-
-            condition = None  # Initialize condition to ensure type is defined
-
-            if operator is not None:
-                op_func = OPERATOR_MAPPING.get(operator)
-                if not callable(op_func):
-                    raise ValidationError(
-                        f"Operator '{operator}' is not callable or not defined."
-                    )
-
-                try:
-                    condition = op_func(col, value if value is not None else range)
-                except Exception as e:
-                    raise ValidationError(
-                        f"Invalid value for operator '{operator}': {e}"
-                    )
-
-            if condition is not None:
-                result.append(condition)
-
-        if len(result) > 1:
-            # Combine conditions with or if multiple filters are applied
-            return [or_(*result)]
+        if isinstance(column_name, list) and operator and isinstance(value, str):
+            return BaseSchema.filter_multiple_columns(
+                model, column_name, operator, value
+            )
+        elif isinstance(column_name, str) and operator:
+            condition = BaseSchema.build_operator_condition(
+                model, column_name, operator, value
+            )
+        if condition is not None:
+            result.append(condition)
 
         return result
 
     @staticmethod
     def sort_data(
-        model: Type[Base], column_name: str | List[str], order: bool
+        model: Type[Base], column_name: Union[str, List[str]], order: bool
     ) -> list[UnaryExpression[Any]]:
         """
         Dynamically create a SQLAlchemy sort based on order.
         """
-        columns = (
-            [column for column in column_name]
-            if isinstance(column_name, list)
-            else [column_name]
-        )
+        if isinstance(column_name, list):
+            return BaseSchema.sort_multiple_columns(model, column_name, order)
+
+        col: Optional[InstrumentedAttribute[Any]] = getattr(model, column_name, None)
+        if col is None:
+            raise ValidationError(
+                f"Column '{column_name}' not found on {model.__tablename__}."
+            )
+
+        if order:
+            return [col.desc()]
+        elif not order:
+            return [col.asc()]
+        else:
+            raise ValidationError(f"Unsupported sort order: {order}")
+
+    @staticmethod
+    def sort_multiple_columns(
+        model: Type[Base], column_names: List[str], order: bool
+    ) -> list[UnaryExpression[Any]]:
+        """
+        Sort multiple columns based on the order.
+        """
         result: List[UnaryExpression[Any]] = []
-        for column in columns:
-            col_name = to_snake_case_key(column)
-            col: Optional[InstrumentedAttribute[Any]] = getattr(model, col_name, None)
+        for column in column_names:
+            col: Optional[InstrumentedAttribute[Any]] = getattr(model, column, None)
             if col is None:
                 raise ValidationError(
-                    f"Column '{col_name}' not found on {model.__tablename__}."
+                    f"Column '{column}' not found on {model.__tablename__}."
                 )
 
             if order:

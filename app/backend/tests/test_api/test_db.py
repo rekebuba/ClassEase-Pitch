@@ -5,7 +5,6 @@ from models.subject import Subject
 from models.grade import Grade
 from flask.testing import FlaskClient
 from sqlalchemy.orm import scoped_session, Session
-from tests.test_api.factories import AdminFactory, StudentFactory, UserFactory
 from tests.typing import Credential
 
 
@@ -170,8 +169,17 @@ def test_admin_query_students(
                 "operator": "in",
                 "value": ["A", "B"],
             },
+            {
+                "tableId": response.json["tableId"][
+                    "firstName_fatherName_grandFatherName"
+                ],
+                "id": "firstName_fatherName_grandFatherName",
+                "variant": "text",
+                "operator": "iLike",
+                "value": "asdfdsfsdfs",
+            },
         ],
-        "sorts": [
+        "sort": [
             {
                 "id": "grade",
                 "desc": False,
@@ -189,6 +197,10 @@ def test_admin_query_students(
         headers=admin_auth_header["header"],
     )
     assert response.status_code == 200
+    assert response.json is not None
+    assert "data" in response.json
+    assert isinstance(response.json["data"], list)
+    assert len(response.json["data"]) == 0
 
 
 def test_admin_student_section_counts(

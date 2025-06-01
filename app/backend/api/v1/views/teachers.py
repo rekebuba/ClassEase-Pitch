@@ -2,7 +2,7 @@
 """Teacher views module for the API"""
 
 from flask import request, jsonify
-from sqlalchemy import func
+from sqlalchemy import func, true
 from models import storage
 from datetime import datetime
 from models.user import User
@@ -145,6 +145,7 @@ def get_list_of_students(teacher_data):
         .join(Section, Section.id == Assessment.section_id)
         .filter(
             and_(
+                true(),
                 TeachersRecord.teacher_id == teacher_data.id,
                 Assessment.subject_id == subject.id,
                 Assessment.semester == data["semester"][0],
