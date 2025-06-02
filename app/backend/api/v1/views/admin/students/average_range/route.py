@@ -35,25 +35,25 @@ def student_average_range(admin_data: UserT) -> Tuple[Response, int]:
         custom_types = {
             **min_max_year_lookup(STUDYearRecord.final_score, "year"),
             **min_max_year_lookup(STUDYearRecord.rank, "rank"),
-            **min_max_semester_lookup(1, STUDSemesterRecord.average, "semester_I"),
-            **min_max_semester_lookup(2, STUDSemesterRecord.average, "semester_II"),
-            **min_max_semester_lookup(1, STUDSemesterRecord.rank, "rank_I"),
-            **min_max_semester_lookup(2, STUDSemesterRecord.rank, "rank_II"),
+            **min_max_semester_lookup(1, STUDSemesterRecord.average, "semester_one"),
+            **min_max_semester_lookup(2, STUDSemesterRecord.average, "semester_two"),
+            **min_max_semester_lookup(1, STUDSemesterRecord.rank, "rank_semester_one"),
+            **min_max_semester_lookup(2, STUDSemesterRecord.rank, "rank_semester_two"),
         }
         query = (
             storage.session.query(
                 custom_types["year_min"],
                 custom_types["year_max"],
-                custom_types["semester_I_min"],
-                custom_types["semester_I_max"],
-                custom_types["semester_II_min"],
-                custom_types["semester_II_max"],
+                custom_types["semester_one_min"],
+                custom_types["semester_one_max"],
+                custom_types["semester_two_min"],
+                custom_types["semester_two_max"],
                 custom_types["rank_min"],
                 custom_types["rank_max"],
-                custom_types["rank_I_min"],
-                custom_types["rank_I_max"],
-                custom_types["rank_II_min"],
-                custom_types["rank_II_max"],
+                custom_types["rank_semester_one_min"],
+                custom_types["rank_semester_one_max"],
+                custom_types["rank_semester_two_min"],
+                custom_types["rank_semester_two_max"],
             )
             .join(User.students)
             .outerjoin(Student.year_records)
@@ -67,25 +67,25 @@ def student_average_range(admin_data: UserT) -> Tuple[Response, int]:
                 "min": result.year_min,
                 "max": result.year_max,
             },
-            "averageI": {
-                "min": result.semester_I_min,
-                "max": result.semester_I_min,
+            "average_semester_one": {
+                "min": result.semester_one_min,
+                "max": result.semester_one_max,
             },
-            "averageII": {
-                "min": result.semester_II_min,
-                "max": result.semester_II_min,
+            "average_semester_two": {
+                "min": result.semester_two_min,
+                "max": result.semester_two_max,
             },
             "rank": {
                 "min": result.rank_min,
                 "max": result.rank_max,
             },
-            "rankI": {
-                "min": result.rank_I_min,
-                "max": result.rank_I_max,
+            "rank_semester_one": {
+                "min": result.rank_semester_one_min,
+                "max": result.rank_semester_one_max,
             },
-            "rankII": {
-                "min": result.rank_II_min,
-                "max": result.rank_II_max,
+            "rank_semester_two": {
+                "min": result.rank_semester_two_min,
+                "max": result.rank_semester_two_max,
             },
         }
 

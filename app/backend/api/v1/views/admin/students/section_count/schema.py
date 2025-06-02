@@ -16,5 +16,5 @@ class TotalSectionSchema(BaseSchema):
 class SectionCountsSchema(BaseSchema):
     """Schema for validating student section counts data."""
 
-    sectionI = fields.Nested(TotalSectionSchema)
-    sectionII = fields.Nested(TotalSectionSchema)
+    section_semester_one = fields.Nested(TotalSectionSchema)
+    section_semester_two = fields.Nested(TotalSectionSchema)

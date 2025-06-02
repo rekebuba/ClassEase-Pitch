@@ -164,7 +164,7 @@ def test_admin_query_students(
                 "value": "MAS/1234/56",
             },
             {
-                "id": "sectionI",
+                "id": "sectionSemesterOne",
                 "variant": "multiSelect",
                 "operator": "in",
                 "value": ["A", "B"],
@@ -185,7 +185,7 @@ def test_admin_query_students(
                 "desc": False,
                 "tableId": response.json["tableId"]["grade"],
             },
-            {"id": "sectionI", "desc": True},
+            {"id": "sectionSemesterOne", "desc": True},
         ],
         "page": 1,
         "per_page": 10,
@@ -214,8 +214,10 @@ def test_admin_student_section_counts(
     )
     assert response.status_code == 200
     assert response.json is not None
-    assert "sectionI" in response.json
-    assert "sectionII" in response.json
+    assert "sectionSemesterOne" in response.json
+    assert "sectionSemesterTwo" in response.json
+    assert isinstance(response.json["sectionSemesterOne"], dict)
+    assert isinstance(response.json["sectionSemesterTwo"], dict)
 
 
 def test_admin_student_grade_counts(

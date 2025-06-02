@@ -34,11 +34,11 @@ export function useStudentsData(validQuery: SearchParams): StudentsDataResult {
     const [sectionCounts, setSectionCounts] = useState<SectionCounts>({})
     const [averageRange, setAverageRange] = useState<AverageRange>({
         totalAverage: { min: "N/A", max: "N/A" },
-        averageI: { min: "N/A", max: "N/A" },
-        averageII: { min: "N/A", max: "N/A" },
+        averageSemesterOne: { min: "N/A", max: "N/A" },
+        averageSemesterTwo: { min: "N/A", max: "N/A" },
         rank: { min: "N/A", max: "N/A" },
-        rankI: { min: "N/A", max: "N/A" },
-        rankII: { min: "N/A", max: "N/A" },
+        rankSemesterOne: { min: "N/A", max: "N/A" },
+        rankSemesterTwo: { min: "N/A", max: "N/A" },
     })
     const [isLoading, setIsLoading] = useState(true)
     const [error, setError] = useState<Error | null>(null)
@@ -69,25 +69,25 @@ export function useStudentsData(validQuery: SearchParams): StudentsDataResult {
                 min: averageRangeResult.totalAverage.min ?? "N/A",
                 max: averageRangeResult.totalAverage.max ?? "N/A",
             },
-            averageI: {
-                min: averageRangeResult.averageI.min ?? "N/A",
-                max: averageRangeResult.averageI.max ?? "N/A",
+            averageSemesterOne: {
+                min: averageRangeResult.averageSemesterOne.min ?? "N/A",
+                max: averageRangeResult.averageSemesterOne.max ?? "N/A",
             },
-            averageII: {
-                min: averageRangeResult.averageII.min ?? "N/A",
-                max: averageRangeResult.averageII.max ?? "N/A",
+            averageSemesterTwo: {
+                min: averageRangeResult.averageSemesterTwo.min ?? "N/A",
+                max: averageRangeResult.averageSemesterTwo.max ?? "N/A",
             },
             rank: {
                 min: averageRangeResult.rank.min ?? "N/A",
                 max: averageRangeResult.rank.max ?? "N/A",
             },
-            rankI: {
-                min: averageRangeResult.rankI.min ?? "N/A",
-                max: averageRangeResult.rankI.max ?? "N/A",
+            rankSemesterOne: {
+                min: averageRangeResult.rankSemesterOne.min ?? "N/A",
+                max: averageRangeResult.rankSemesterOne.max ?? "N/A",
             },
-            rankII: {
-                min: averageRangeResult.rankII.min ?? "N/A",
-                max: averageRangeResult.rankII.max ?? "N/A",
+            rankSemesterTwo: {
+                min: averageRangeResult.rankSemesterTwo.min ?? "N/A",
+                max: averageRangeResult.rankSemesterTwo.max ?? "N/A",
             },
         })
 

@@ -5,6 +5,8 @@ from pydantic import BaseModel, validator
 from sqlalchemy import func
 from sqlalchemy.orm import scoped_session, Session
 import pytest
+from pyethiodate import EthDate  # type: ignore
+from datetime import datetime
 
 from models.grade import Grade
 from models.student import Student
@@ -27,12 +29,12 @@ class ResponseData(BaseModel):
     grade: Optional[int]
     finalScore: Optional[float]
     rank: Optional[int]
-    sectionI: Optional[str]
-    sectionII: Optional[str]
-    averageI: Optional[float]
-    averageII: Optional[float]
-    rankI: Optional[int]
-    rankII: Optional[int]
+    sectionSemesterOne: Optional[str]
+    sectionSemesterTwo: Optional[str]
+    averageSemesterOne: Optional[float]
+    averageSemesterTwo: Optional[float]
+    rankSemesterOne: Optional[int]
+    rankSemesterTwo: Optional[int]
 
 
 class ResponseTableId(BaseModel):
@@ -51,6 +53,9 @@ class ResponseTableId(BaseModel):
 class StudentQueryResponse(BaseModel):
     tableId: ResponseTableId
     data: List[ResponseData]
+
+
+current_year = int(EthDate.date_to_ethiopian(datetime.now()).year)
 
 
 # --- Test Data Generation ---
@@ -215,9 +220,15 @@ class TestAdminStudentQueries:
     @pytest.mark.parametrize(
         "search_term,expected_matches",
         [
-            ("MAS/12", 5),  # Matching pattern
-            ("XYZ/99", 0),  # No matches
-            ("", 50),  # Empty search returns all
+            (f"MAS/1015/{current_year % 100}", 1),
+            ("MAS/1011/", 1),
+            ("MAS/1011/11", 0),
+            ("XYZ/1011/12", 0),
+            ("aldsflkdf", 0),
+            ("MAA/", 0),
+            ("MAT/", 0),
+            ("MAS/101", 10),  # Multiple matches
+            ("", 36),  # Empty search returns all
         ],
     )
     def test_identification_search(
@@ -263,7 +274,7 @@ class TestAdminStudentQueries:
     def test_complex_query_with_sorting(
         self,
         client: FlaskClient,
-        student_data: List[Dict[str, Any]],
+        register_all_students: List[Dict[str, Any]],
         admin_auth_header: Credential,
     ) -> None:
         table_resp = client.post(
@@ -289,7 +300,7 @@ class TestAdminStudentQueries:
                     "id": "identification",
                     "variant": "text",
                     "operator": "iLike",
-                    "value": "MAS/12",
+                    "value": "MAS/101",
                 },
                 {
                     "id": "section",
@@ -320,6 +331,8 @@ class TestAdminStudentQueries:
         assert "data" in response.json
 
         results = response.json["data"]
+
+        assert len(results) == 10  # same as per_page
 
         # Verify sorting - grades should be ascending
         grades = [r["grade"] for r in results]

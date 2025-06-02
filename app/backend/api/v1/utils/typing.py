@@ -103,16 +103,16 @@ class QueryStudentsData(TypedDict):
     guardianName: str
     guardianPhone: str
     isActive: bool
-    studentName: str
+    firstName_fatherName_grandFatherName: str
     grade: Optional[int]
     finalScore: Optional[float]
     rank: Optional[int]
-    sectionI: Optional[str]
-    sectionII: Optional[str]
-    averageI: Optional[float]
-    averageII: Optional[float]
-    rankI: Optional[int]
-    rankII: Optional[int]
+    section_semester_one: Optional[str]
+    section_semester_two: Optional[str]
+    average_semester_one: Optional[float]
+    average_semester_two: Optional[float]
+    rank_semester_one: Optional[int]
+    rank_semester_two: Optional[int]
 
 
 class QueryStudentTableId(TypedDict):
@@ -124,7 +124,7 @@ class QueryStudentTableId(TypedDict):
     guardianName: str
     guardianPhone: str
     isActive: str
-    _firstName__fatherName_grandFatherName: str
+    firstName_fatherName_grandFatherName: str
     grade: str
 
 

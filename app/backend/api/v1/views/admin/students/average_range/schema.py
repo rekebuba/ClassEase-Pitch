@@ -8,8 +8,8 @@ class StudentAverageSchema(BaseSchema):
     """Schema for validating student average data."""
 
     total_average = fields.Nested(RangeSchema, required=True)
-    averageI = fields.Nested(RangeSchema, required=True)
-    averageII = fields.Nested(RangeSchema, required=True)
+    average_semester_one = fields.Nested(RangeSchema, required=True)
+    average_semester_two = fields.Nested(RangeSchema, required=True)
     rank = fields.Nested(RangeSchema, required=True)
-    rankI = fields.Nested(RangeSchema, required=True)
-    rankII = fields.Nested(RangeSchema, required=True)
+    rank_semester_one = fields.Nested(RangeSchema, required=True)
+    rank_semester_two = fields.Nested(RangeSchema, required=True)

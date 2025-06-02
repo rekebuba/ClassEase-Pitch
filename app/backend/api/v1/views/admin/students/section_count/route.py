@@ -32,10 +32,10 @@ def student_section_counts(admin_data: UserT) -> Tuple[Response, int]:
             storage.session.query(
                 Section.section,
                 func.count(case((Semester.name == 1, 1), else_=None)).label(
-                    "section_I"
+                    "section_semester_one"
                 ),
                 func.count(case((Semester.name == 2, 1), else_=None)).label(
-                    "section_II"
+                    "section_semester_two"
                 ),
             )
             .join(STUDSemesterRecord.sections)
@@ -45,10 +45,13 @@ def student_section_counts(admin_data: UserT) -> Tuple[Response, int]:
         ).all()
 
         # Process results
-        result: Dict[str, Dict[str, Any]] = {"sectionI": {}, "sectionII": {}}
+        result: Dict[str, Dict[str, Any]] = {
+            "section_semester_one": {},
+            "section_semester_two": {},
+        }
         for section, section_I, section_II in query:
-            result["sectionI"][section] = section_I
-            result["sectionII"][section] = section_II
+            result["section_semester_one"][section] = section_I
+            result["section_semester_two"][section] = section_II
 
         # Return the serialized data
         schema = SectionCountsSchema()

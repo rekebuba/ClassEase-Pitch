@@ -47,16 +47,16 @@ const stringOrNull = z.union([z.string(), z.literal("N/A"), z.null()]).transform
 export const StudentSchema = z.object({
     identification: z.string(),
     imagePath: z.string().optional(),
-    studentName: z.string(),
+    firstName_fatherName_grandFatherName: z.string(),
     guardianName: z.string(),
     guardianPhone: z.string(),
-    grade: z.number(),
-    sectionI: stringOrNull,
-    sectionII: stringOrNull,
-    averageI: intOrNull,
-    averageII: intOrNull,
-    rankI: intOrNull,
-    rankII: intOrNull,
+    grade: intOrNull,
+    sectionSemesterOne: stringOrNull,
+    sectionSemesterTwo: stringOrNull,
+    averageSemesterOne: intOrNull,
+    averageSemesterTwo: intOrNull,
+    rankSemesterOne: intOrNull,
+    rankSemesterTwo: intOrNull,
     finalScore: intOrNull,
     rank: intOrNull,
     isActive: z.union([z.boolean(), z.enum(["active", "inactive", "suspended"])]).transform((val) => val ? 'active' : 'inactive'),
@@ -93,18 +93,18 @@ export const RangeSchema = z.object({
 
 export const AverageRangeSchema = z.object({
     totalAverage: RangeSchema,
-    averageI: RangeSchema,
-    averageII: RangeSchema,
+    averageSemesterOne: RangeSchema,
+    averageSemesterTwo: RangeSchema,
     rank: RangeSchema,
-    rankI: RangeSchema,
-    rankII: RangeSchema,
+    rankSemesterOne: RangeSchema,
+    rankSemesterTwo: RangeSchema,
 });
 
 export const GradeCountsSchema = z.record(z.string(), z.number());
 
 export const SectionCountSchema = z.object({
-    sectionI: z.record(z.string(), z.number()),
-    sectionII: z.record(z.string(), z.number())
+    sectionSemesterOne: z.record(z.string(), z.number()),
+    sectionSemesterTwo: z.record(z.string(), z.number())
 });
 
 const SortItemSchema = z.object({

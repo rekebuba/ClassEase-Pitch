@@ -229,14 +229,14 @@ class AllStudentsSchema(BaseSchema):
         GradeSchema(only=("grade",)), required=False, allow_none=False
     )
 
-    sectionI = fields.String(required=False, allow_none=True)
-    sectionII = fields.String(required=False, allow_none=True)
+    section_semester_one = fields.String(required=False, allow_none=True)
+    section_semester_two = fields.String(required=False, allow_none=True)
 
-    averageI = fields.Float(required=False, allow_none=True)
-    averageII = fields.Float(required=False, allow_none=True)
+    average_semester_one = fields.Float(required=False, allow_none=True)
+    average_semester_two = fields.Float(required=False, allow_none=True)
 
-    rankI = fields.Integer(required=False, allow_none=True)
-    rankII = fields.Integer(required=False, allow_none=True)
+    rank_semester_one = fields.Integer(required=False, allow_none=True)
+    rank_semester_two = fields.Integer(required=False, allow_none=True)
 
     year_record = fields.Nested(
         STUDYearRecordSchema(only=("final_score", "rank")),

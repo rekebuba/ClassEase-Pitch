@@ -89,8 +89,8 @@ def make_case_lookup(
     semester_num: int, column: InstrumentedAttribute[Any], prefix: str
 ) -> Dict[str, ColumnElement[Any]]:
     """Helper to generate case expressions with dynamic labels."""
-    label_I = f"{prefix}I"  # Pre-compute the label
-    label_II = f"{prefix}II"
+    label_I = f"{prefix}_semester_one"  # Pre-compute the label
+    label_II = f"{prefix}_semester_two"
 
     expr_I = func.max(case((Semester.name == semester_num, column))).label(label_I)
     expr_II = func.max(case((Semester.name == semester_num + 1, column))).label(

@@ -67,12 +67,12 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
                 Student,
                 STUDYearRecord,
                 Grade,
-                custom_types["sectionI"],
-                custom_types["sectionII"],
-                custom_types["averageI"],
-                custom_types["averageII"],
-                custom_types["rankI"],
-                custom_types["rankII"],
+                custom_types["section_semester_one"],
+                custom_types["section_semester_two"],
+                custom_types["average_semester_one"],
+                custom_types["average_semester_two"],
+                custom_types["rank_semester_one"],
+                custom_types["rank_semester_two"],
             )
             .join(User.students)  # User → Student
             .outerjoin(Student.year_records)  # Student → STUDYearRecord
@@ -110,7 +110,7 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
         )
 
         if not paginated_result["items"]:
-            return jsonify({"data": [], "table_id": {}, "pageCount": 1}), 200
+            return jsonify({"data": [], "tableId": {}, "pageCount": 1}), 200
 
         # Process results as needed
         data_to_serialize = [
@@ -119,12 +119,12 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
                 "student": student.to_dict(),
                 "grade": grade.to_dict() if grade else {},
                 "year_record": year_record.to_dict() if year_record else {},
-                "sectionI": section_I,
-                "sectionII": section_II,
-                "averageI": average_I,
-                "averageII": average_II,
-                "rankI": rank_I,
-                "rankII": rank_II,
+                "section_semester_one": section_I,
+                "section_semester_two": section_II,
+                "average_semester_one": average_I,
+                "average_semester_two": average_II,
+                "rank_semester_one": rank_I,
+                "rank_semester_two": rank_II,
             }
             for user, student, year_record, grade, section_I, section_II, average_I, average_II, rank_I, rank_II in paginated_result[
                 "items"

@@ -353,7 +353,9 @@ class UserFactory(BaseFactory[User]):
     def _hash_password(password: str) -> str:
         return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
-    count: Any = factory.Sequence(lambda n: n)  # Unique identifier for each user
+    count: Any = factory.Sequence(
+        lambda n: n + 1000
+    )  # Unique identifier for each user, starting at 1000
 
     image_path: Any = LazyAttribute(
         lambda x: UserFactory.generate_fake_profile_picture()

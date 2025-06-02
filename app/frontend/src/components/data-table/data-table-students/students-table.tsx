@@ -86,12 +86,12 @@ export function StudentsTable() {
       columnVisibility: {
         // Hide Student Id column
         identification: false,
-        sectionI: false,
-        sectionII: false,
-        averageI: false,
-        averageII: false,
-        rankI: false,
-        rankII: false,
+        sectionSemesterOne: false,
+        sectionSemesterTwo: false,
+        averageSemesterOne: false,
+        averageSemesterTwo: false,
+        rankSemesterOne: false,
+        rankSemesterTwo: false,
         guardianPhone: false,
       },
     },
