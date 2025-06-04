@@ -3,7 +3,7 @@ import factory
 from flask.testing import FlaskClient
 from pydantic import BaseModel, validator
 from sqlalchemy import func
-from sqlalchemy.orm import scoped_session, Session
+from sqlalchemy.orm import scoped_session, Session, Query
 import pytest
 from pyethiodate import EthDate  # type: ignore
 from datetime import datetime
@@ -11,7 +11,7 @@ from datetime import datetime
 from models.grade import Grade
 from models.student import Student
 from models.subject import Subject
-from tests.test_api.factories import AssessmentFactory, StudentFactory
+from tests.test_api.factories import AssessmentFactory, SemesterFactory, StudentFactory
 from tests.typing import Credential
 
 
@@ -73,10 +73,10 @@ def student_data(db_session: scoped_session[Session]) -> Iterator[Student]:
 
 
 @pytest.fixture(scope="module")
-def register_all_students(
-    db_session: scoped_session[Session], student_data: Iterator[Student]
-) -> Iterator[Student]:
-    """Fixture to register all students in the database."""
+def all_subjects(
+    db_session: scoped_session[Session],
+) -> Iterator[Query[Tuple[int, int]]]:
+    """Fixture to create and return available subjects."""
     query = (
         db_session.query(func.count().label("row_count"), Grade.grade)
         .select_from(Subject)
@@ -85,9 +85,19 @@ def register_all_students(
         .group_by(Subject.grade_id)
         .order_by(Grade.grade)
     )
+    yield query
+
+
+@pytest.fixture(scope="module")
+def register_all_students(
+    db_session: scoped_session[Session],
+    student_data: Iterator[Student],
+    all_subjects: Query[Tuple[int, int]],
+) -> None:
+    """Fixture to register all students in the database."""
     for student in student_data:
         # For each student, create assessments based on the grade
-        subjects_for_registration = query.filter(
+        subjects_for_registration = all_subjects.filter(
             Grade.id == student.current_grade_id
         ).all()
         for row_count, grade in subjects_for_registration:
@@ -95,7 +105,28 @@ def register_all_students(
             AssessmentFactory.reset_sequence()
             AssessmentFactory.create_batch(row_count, student_id=student.id)
 
-    yield db_session.query(Student).all()
+
+@pytest.fixture(scope="module")
+def register_all_students_second_semester(
+    db_session: scoped_session[Session],
+    student_data: Iterator[Student],
+    all_subjects: Query[Tuple[int, int]],
+) -> None:
+    """Fixture to register all students in the second semester."""
+    second_semester = SemesterFactory.create(
+        name=2
+    )  # Create second semester (overrides default)
+    for student in student_data:
+        # For each student, create assessments based on the grade
+        subjects_for_registration = all_subjects.filter(
+            Grade.id == student.current_grade_id
+        ).all()
+        for row_count, grade in subjects_for_registration:
+            # Reset the sequence counter
+            AssessmentFactory.reset_sequence()
+            AssessmentFactory.create_batch(
+                row_count, student_id=student.id, semester_id=second_semester.id
+            )
 
 
 # --- Test Cases ---
@@ -177,7 +208,8 @@ class TestAdminStudentQueries:
     def test_grade_filtering_when_all_registered(
         self,
         client: FlaskClient,
-        register_all_students: List[Dict[str, Any]],
+        register_all_students: None,
+        register_all_students_second_semester: None,
         admin_auth_header: Credential,
         grades: List[int],
         expected_count: int,

@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Tuple
 from flask import Response, jsonify, request
 from marshmallow import ValidationError
 from sqlalchemy.orm import joinedload
-from sqlalchemy import ColumnElement
+from sqlalchemy import ColumnElement, func
 from api.v1.utils.typing import (
     BuiltValidFilterDict,
     BuiltValidSortDict,
@@ -24,6 +24,7 @@ from api.v1.views.methods import make_case_lookup, paginate_query
 from api.v1.views.utils import admin_required
 from models.grade import Grade
 from models.section import Section
+from models.semester import Semester
 from models.stud_semester_record import STUDSemesterRecord
 from models.stud_year_record import STUDYearRecord
 from models.student import Student
@@ -73,13 +74,18 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
                 custom_types["average_semester_two"],
                 custom_types["rank_semester_one"],
                 custom_types["rank_semester_two"],
+                func.group_concat(
+                    Section.section.op("ORDER BY")(Section.section)
+                ).label("section"),
+                func.group_concat(Semester.name.op("ORDER BY")(Semester.name)).label(
+                    "semesters"
+                ),
             )
             .join(User.students)  # User → Student
             .outerjoin(Student.year_records)  # Student → STUDYearRecord
             .outerjoin(STUDYearRecord.semester_records)
             .outerjoin(STUDSemesterRecord.sections)  # SemesterRecord → Section
-            # SemesterRecord → Semester
-            .outerjoin(STUDSemesterRecord.semesters)
+            .outerjoin(STUDSemesterRecord.semesters)  # SemesterRecord → Semester
             .outerjoin(Section.grade)  # Section → Grade
             .group_by(
                 User.id,
@@ -125,8 +131,10 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
                 "average_semester_two": average_II,
                 "rank_semester_one": rank_I,
                 "rank_semester_two": rank_II,
+                "sections": sections.split(",") if sections else [],
+                "semesters": semesters.split(",") if semesters else [],
             }
-            for user, student, year_record, grade, section_I, section_II, average_I, average_II, rank_I, rank_II in paginated_result[
+            for user, student, year_record, grade, section_I, section_II, average_I, average_II, rank_I, rank_II, sections, semesters in paginated_result[
                 "items"
             ]
         ]

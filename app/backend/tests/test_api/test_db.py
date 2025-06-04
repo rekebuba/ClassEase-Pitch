@@ -116,12 +116,16 @@ def test_available_subjects_for_registration(
     assert len(response.json) > 0
 
 
-def test_student_course_registration(stud_course_register: None) -> None:
+def test_student_course_registration(
+    client: FlaskClient, stud_course_register: None
+) -> None:
     pass
 
 
 def test_get_registered_grades(
-    client: FlaskClient, admin_auth_header: Credential, stud_course_register: None
+    client: FlaskClient,
+    stud_course_register: None,
+    admin_auth_header: Credential,
 ) -> None:
     response = client.get(
         "/api/v1/admin/registered_grades", headers=admin_auth_header["header"]

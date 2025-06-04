@@ -2,7 +2,7 @@ from typing import Any, Dict
 from flask.testing import FlaskClient
 import pytest
 
-from tests.test_api.factories import EventFactory, SemesterFactory
+from tests.test_api.factories import EventFactory
 from tests.typing import Credential
 
 
@@ -10,6 +10,7 @@ from tests.typing import Credential
 def create_semester(
     client: FlaskClient, admin_auth_header: Credential
 ) -> None:  # auth_header -> Admin
+    print("Creating semester fixture...")
     event_form = EventFactory.build(purpose="New Semester")
     response = client.post(
         "/api/v1/admin/event/new",

@@ -72,19 +72,34 @@ class BaseFactory(SQLAlchemyModelFactory, Generic[T]):  # type: ignore[type-arg]
                 "Model and session must be defined in the factory's Meta class."
             )
 
-        # Use Meta.get_or_create_fields if specified
-        lookup_fields = getattr(cls._meta, "get_or_create_fields", None)
-        lookup_kwargs = {
-            k: v
-            for k, v in kwargs.items()
-            if lookup_fields is None or k in lookup_fields
-        }
+        lookup_kwargs = {k: v for k, v in kwargs.items()}
 
         existing = session.query(model).filter_by(**lookup_kwargs).first()
         if existing:
             return existing  # type: ignore[no-any-return]
 
         return cls.create(**kwargs)
+
+    @classmethod
+    def get(
+        cls: Type["BaseFactory[T]"], **kwargs: Any
+    ) -> Optional[scoped_session[Session]]:
+        model = getattr(cls._meta, "model", None)
+        session: Optional[scoped_session[Session]] = getattr(
+            cls._meta, "sqlalchemy_session", None
+        )
+        if model is None or session is None:
+            raise ValueError(
+                "Model and session must be defined in the factory's Meta class."
+            )
+
+        lookup_kwargs = {k: v for k, v in kwargs.items()}
+
+        existing = session.query(model).filter_by(**lookup_kwargs).first()
+        if existing:
+            return existing  # type: ignore[no-any-return]
+
+        return None
 
     @classmethod
     def _create(
@@ -276,9 +291,23 @@ class SemesterFactory(BaseFactory[Semester]):
             purpose="New Semester", requires_registration=True, is_hybrid=False
         ).id,
     }
-    _add_for_test: Dict[str, Any] = {}
+    # _add_for_test: Dict[str, Any] = {}
 
     name: int = 1
+
+    def __init__(self, *args, **kwargs):
+        name = kwargs.get("name", self.name)
+        if name not in [1, 2]:
+            raise ValueError(f"Invalid semester name: {name}. Only 1 or 2 are allowed.")
+
+        # check if semester 1 was created before creating semester 2
+        if name == 2:
+            semester_1 = SemesterFactory.get(name=1)
+            if semester_1 is None:
+                raise ValueError("Semester 1 must be created before Semester 2.")
+
+        # Call the parent constructor
+        super().__init__(*args, **kwargs)
 
 
 class UserFactory(BaseFactory[User]):
@@ -570,9 +599,12 @@ class AssessmentFactory(BaseFactory[Assessment]):
     class Meta:
         model = Assessment
 
-    _skip_fields: List[str] = ["offset"]
+    _skip_fields: List[str] = ["offset", "semester_id"]
 
     offset = factory.Sequence(lambda n: n)
+    semester_id: str = SemesterFactory.get_or_create(
+        name=1
+    ).id  # Default to first semester
 
     student_id: Any = LazyAttribute(lambda _: StudentFactory.get_or_create().id)
     subject_id: Any = LazyAttribute(
@@ -585,7 +617,7 @@ class AssessmentFactory(BaseFactory[Assessment]):
     )  # Placeholder
     semester_record_id: Any = LazyAttribute(
         lambda obj: STUDSemesterRecordFactory.get_or_create(
-            student_id=obj.student_id
+            student_id=obj.student_id, semester_id=obj.semester_id
         ).id
     )
     teachers_record_id: Any = None  # Placeholder, can be set later
