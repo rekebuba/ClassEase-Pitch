@@ -1,8 +1,8 @@
 import os
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, List
 from flask import current_app
 from math import ceil
-from sqlalchemy import and_, case, func, true
+from sqlalchemy import UnaryExpression, and_, case, func, true
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
 from api.v1.utils.typing import (
@@ -19,8 +19,8 @@ def paginate_query(
     query: Query[Any],
     page: int,
     limit: int,
-    filters: BuiltValidFilterDict,
-    sort: BuiltValidSortDict,
+    filters: List[ColumnElement[Any]],
+    sort: List[UnaryExpression[Any]],
     join_: Callable[..., ColumnElement[Any]] = and_,
 ) -> Dict[str, Any]:
     """
@@ -39,13 +39,11 @@ def paginate_query(
     # Calculate total number of records
     total_items = query.count()
     # Apply filters and sort
-    if filters["valid_filters"] or filters["custom_filters"]:
-        query = query.filter(and_(true(), *filters["valid_filters"])).having(
-            and_(true(), *filters["custom_filters"])
-        )
+    if filters:
+        query = query.filter(and_(true(), *filters))
 
-    if sort["custom_sorts"] or sort["valid_sorts"]:
-        query = query.order_by(true(), *sort["valid_sorts"])
+    if sort:
+        query = query.order_by(true(), *sort)
 
     # Calculate offset and apply limit and offset to the query
     offset = (page - 1) * limit

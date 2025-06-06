@@ -155,6 +155,7 @@ export function getStudentsTableColumns({
             value: value,
             count: count,
           })),
+        tableId: tableId?.sectionSemesterOne,
       },
     },
     {
@@ -173,6 +174,7 @@ export function getStudentsTableColumns({
             value: value,
             count: count,
           })),
+        tableId: tableId?.sectionSemesterTwo,
       },
     },
     {

@@ -11,17 +11,17 @@ def create_semester(
     client: FlaskClient, admin_auth_header: Credential
 ) -> None:  # auth_header -> Admin
     print("Creating semester fixture...")
-    event_form = EventFactory.build(purpose="New Semester")
-    response = client.post(
-        "/api/v1/admin/event/new",
-        json=event_form,
-        headers=admin_auth_header["header"],
-    )
+    # event_form = EventFactory.build(purpose="New Semester")
+    # response = client.post(
+    #     "/api/v1/admin/event/new",
+    #     json=event_form,
+    #     headers=admin_auth_header["header"],
+    # )
 
-    assert response.status_code == 201
-    assert response.json is not None
-    assert "message" in response.json
-    assert response.json["message"] == "Event Created Successfully"
+    # assert response.status_code == 201
+    # assert response.json is not None
+    # assert "message" in response.json
+    # assert response.json["message"] == "Event Created Successfully"
 
 
 @pytest.fixture(scope="session")

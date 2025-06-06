@@ -1,10 +1,11 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 from marshmallow import ValidationError, post_dump
-from sqlalchemy import ColumnElement, and_
+from sqlalchemy import ColumnElement, True_, UnaryExpression, and_, true
 from api.v1.schemas.base_schema import BaseSchema
 from api.v1.schemas.config_schema import OPERATOR_CONFIG, to_snake_case_key
 from api.v1.schemas.custom_schema import (
     ColumnField,
+    DecimalEncoder,
     FloatOrDateField,
     JoinOperatorField,
     TableField,
@@ -18,6 +19,7 @@ from marshmallow import (
     fields,
 )
 
+from api.v1.schemas.schemas import SectionSchema, SemesterSchema
 from api.v1.utils.typing import (
     FilterDict,
     PostFilterDict,
@@ -27,6 +29,9 @@ from api.v1.utils.typing import (
 )
 from api.v1.views.shared.registration.schema import StudentSchema, UserSchema
 from models.grade import Grade
+from models.section import Section
+from models.semester import Semester
+from models.stud_semester_record import STUDSemesterRecord
 from models.stud_year_record import STUDYearRecord
 
 
@@ -65,18 +70,15 @@ class SortSchema(BaseSchema):
         return data
 
     @post_load
-    def post_load_data(self, data: SortDict, **kwargs: Any) -> PostSortDict:
+    def post_load_data(
+        self, data: SortDict, **kwargs: Any
+    ) -> Union[True_, UnaryExpression[Any], List[UnaryExpression[Any]]]:
         # add default values to the data
-        sorts: PostSortDict = {
-            "valid_sorts": [],
-            "custom_sorts": data,
-        }
-
+        sort: Union[True_, UnaryExpression[Any], List[UnaryExpression[Any]]] = true()
         if "table" in data and data["table"] is not None:
             sort = self.sort_data(data["table"], data["column_name"], data["desc"])
-            sorts["valid_sorts"].extend(sort)
 
-        return sorts
+        return sort
 
 
 class FilterSchema(BaseSchema):
@@ -143,11 +145,13 @@ class FilterSchema(BaseSchema):
         return data
 
     @post_load
-    def post_load_data(self, data: FilterDict, **kwargs: Any) -> PostFilterDict:
-        filters: PostFilterDict = {
-            "valid_filters": [],
-            "custom_filters": data,
-        }
+    def post_load_data(
+        self, data: FilterDict, **kwargs: Any
+    ) -> Union[True_, ColumnElement[Any], List[ColumnElement[Any]]]:
+        filter: Union[True_, ColumnElement[Any], List[ColumnElement[Any]]] = (
+            true()
+        )  # Default filter to true (no filter)
+
         if "table" in data and data["table"] is not None:
             filter = self.filter_data(
                 data["table"],
@@ -156,9 +160,8 @@ class FilterSchema(BaseSchema):
                 data["value"],
                 data["range"],
             )
-            filters["valid_filters"].extend(filter)
 
-        return filters
+        return filter
 
 
 class ParamSchema(BaseSchema):
@@ -167,13 +170,22 @@ class ParamSchema(BaseSchema):
     filter_flag = fields.String(required=False)
 
     filters = fields.List(
-        fields.Nested(FilterSchema), required=False, load_default=[], allow_none=True
+        fields.Nested(FilterSchema),
+        required=False,
+        load_default=[],
+        allow_none=True,
     )
     sort = fields.List(fields.Nested(SortSchema), required=False, load_default=[])
     join_operator = JoinOperatorField(required=False, load_default=and_)
 
     page = fields.Integer(required=False, load_default=1)
     per_page = fields.Integer(required=False, load_default=10)
+
+    # @post_load
+    # def flatten_nested_list(self, data: PostLoadParam, **kwargs: Any) -> PostLoadParam:
+    #     # Flatten list of lists
+    #     data["sort"] = [item for sublist in data["sort"] for item in sublist]
+    #     return data
 
 
 class STUDYearRecordSchema(BaseSchema):
@@ -183,8 +195,8 @@ class STUDYearRecordSchema(BaseSchema):
     year = fields.String()
     year_id = fields.String()
 
-    final_score = fields.Float(dump_default=0.0)
-    rank = fields.Integer(dump_default=0)
+    final_score = DecimalEncoder(dump_default=None, allow_none=True)
+    rank = fields.Integer(dump_default=None, allow_none=True)
 
     table_id = fields.String(required=False)
 
@@ -215,6 +227,58 @@ class GradeSchema(BaseSchema):
         return data
 
 
+class SectionPerSemesterSchema(BaseSchema):
+    section_semester_one = fields.String(dump_default=None, allow_none=True)
+    section_semester_two = fields.String(dump_default=None, allow_none=True)
+
+    table_id = fields.String(required=False)
+
+    @post_dump
+    def add_fields(self, data, **kwargs: Any):
+        """Add table_id to the dumped data."""
+        data["table_id"] = self.get_table_id(Section)
+        return data
+
+
+class AveragePerSemesterSchema(BaseSchema):
+    average_semester_one = DecimalEncoder(dump_default=None, allow_none=True)
+    average_semester_two = DecimalEncoder(dump_default=None, allow_none=True)
+
+    table_id = fields.String(required=False)
+
+    @post_dump
+    def add_fields(self, data, **kwargs: Any):
+        """Add table_id to the dumped data."""
+        data["table_id"] = self.get_table_id(STUDSemesterRecord)
+        return data
+
+
+class RankPerSemesterSchema(BaseSchema):
+    rank_semester_one = fields.Integer(dump_default=None, allow_none=True)
+    rank_semester_two = fields.Integer(dump_default=None, allow_none=True)
+
+    table_id = fields.String(required=False)
+
+    @post_dump
+    def add_fields(self, data, **kwargs: Any):
+        """Add table_id to the dumped data."""
+        data["table_id"] = self.get_table_id(STUDSemesterRecord)
+        return data
+
+
+class PerSemesterSchema(BaseSchema):
+    semester_one = fields.Integer(dump_default=None, allow_none=True)
+    semester_two = fields.Integer(dump_default=None, allow_none=True)
+
+    table_id = fields.String(required=False)
+
+    @post_dump
+    def add_fields(self, data, **kwargs: Any):
+        """Add table_id to the dumped data."""
+        data["table_id"] = self.get_table_id(Semester)
+        return data
+
+
 class AllStudentsSchema(BaseSchema):
     user = fields.Nested(
         UserSchema(only=("identification", "image_path", "created_at"))
@@ -228,15 +292,11 @@ class AllStudentsSchema(BaseSchema):
     grade = fields.Nested(
         GradeSchema(only=("grade",)), required=False, allow_none=False
     )
+    sections = fields.Nested(SectionPerSemesterSchema, required=False, allow_none=True)
+    averages = fields.Nested(AveragePerSemesterSchema, required=False, allow_none=True)
+    ranks = fields.Nested(RankPerSemesterSchema, required=False, allow_none=True)
 
-    section_semester_one = fields.String(required=False, allow_none=True)
-    section_semester_two = fields.String(required=False, allow_none=True)
-
-    average_semester_one = fields.Float(required=False, allow_none=True)
-    average_semester_two = fields.Float(required=False, allow_none=True)
-
-    rank_semester_one = fields.Integer(required=False, allow_none=True)
-    rank_semester_two = fields.Integer(required=False, allow_none=True)
+    semesters = fields.Nested(PerSemesterSchema, required=False, allow_none=True)
 
     year_record = fields.Nested(
         STUDYearRecordSchema(only=("final_score", "rank")),

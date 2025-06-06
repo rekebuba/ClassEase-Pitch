@@ -51,6 +51,8 @@ export const StudentSchema = z.object({
     guardianName: z.string(),
     guardianPhone: z.string(),
     grade: intOrNull,
+    semesterOne: intOrNull,
+    semesterTwo: intOrNull,
     sectionSemesterOne: stringOrNull,
     sectionSemesterTwo: stringOrNull,
     averageSemesterOne: intOrNull,

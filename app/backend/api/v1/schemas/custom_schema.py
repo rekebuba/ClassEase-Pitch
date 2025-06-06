@@ -1,4 +1,5 @@
 from datetime import date, datetime
+from decimal import Decimal
 from typing import Any, Optional
 from marshmallow import fields, ValidationError
 from sqlalchemy import and_, or_
@@ -209,3 +210,11 @@ class ValueField(fields.Field):  # type: ignore[type-arg]
             return timestamp
         except (ValueError, OSError):
             raise ValidationError("Invalid numeric value or timestamp.")
+
+
+class DecimalEncoder(fields.Field):
+    def _serialize(self, value, attr, obj, **kwargs):
+        if value is None:
+            return None
+        # Ensure value is Decimal, round to 2 places, then convert to float
+        return float(Decimal(str(value)).quantize(Decimal("0.00")))

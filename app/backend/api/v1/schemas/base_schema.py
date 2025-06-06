@@ -7,7 +7,7 @@ from marshmallow import (
     post_dump,
     pre_load,
 )
-from sqlalchemy import ColumnElement, UnaryExpression, and_, or_, true
+from sqlalchemy import ColumnElement, True_, UnaryExpression, and_, or_, true
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from api.v1.schemas.config_schema import (
     OPERATOR_MAPPING,
@@ -366,7 +366,7 @@ class BaseSchema(Schema):
         column_name: str,
         operator: str,
         token: Any,
-    ) -> Optional[ColumnElement[Any]]:
+    ) -> ColumnElement[Any]:
         col = getattr(model, column_name, None)
         if col is None:
             raise ValidationError(
@@ -387,31 +387,29 @@ class BaseSchema(Schema):
     def filter_data(
         model: Type[Base],
         column_name: Union[str, List[str]],
-        operator: Optional[str],
+        operator: str,
         value: Any,
         range: Optional[RangeDict] = None,
-    ) -> List[ColumnElement[Any]]:
+    ) -> Union[True_, List[ColumnElement[Any]], ColumnElement[Any]]:
         """
         Dynamically create a SQLAlchemy filter based on operator.
         """
-        result: List[ColumnElement[Any]] = []
+        result: Union[True_, List[ColumnElement[Any]], ColumnElement[Any]] = true()
         if isinstance(column_name, list) and operator and isinstance(value, str):
             return BaseSchema.filter_multiple_columns(
                 model, column_name, operator, value
             )
         elif isinstance(column_name, str) and operator:
-            condition = BaseSchema.build_operator_condition(
+            result = BaseSchema.build_operator_condition(
                 model, column_name, operator, value
             )
-        if condition is not None:
-            result.append(condition)
 
         return result
 
     @staticmethod
     def sort_data(
         model: Type[Base], column_name: Union[str, List[str]], order: bool
-    ) -> list[UnaryExpression[Any]]:
+    ) -> Union[UnaryExpression[Any], List[UnaryExpression[Any]]]:
         """
         Dynamically create a SQLAlchemy sort based on order.
         """
@@ -425,9 +423,9 @@ class BaseSchema(Schema):
             )
 
         if order:
-            return [col.desc()]
+            return col.desc()
         elif not order:
-            return [col.asc()]
+            return col.asc()
         else:
             raise ValidationError(f"Unsupported sort order: {order}")
 

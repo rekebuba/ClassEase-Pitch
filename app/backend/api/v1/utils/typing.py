@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Callable, List, Optional, Tuple, Type, TypeVar, TypedDict, Union
 from sqlalchemy.sql.expression import ClauseElement
-from sqlalchemy import ColumnElement
+from sqlalchemy import ColumnElement, UnaryExpression
 from models.user import User
 from models.base_model import Base, CustomTypes
 
@@ -87,8 +87,8 @@ class BuiltValidSortDict(TypedDict):
 class PostLoadParam(TypedDict):
     """for user data after post load."""
 
-    filters: List[PostFilterDict]
-    sort: List[PostSortDict]
+    filters: List[ColumnElement[Any]]
+    sort: List[UnaryExpression[Any]]
     join_operator: Callable[..., ColumnElement[bool]]
     page: int
     per_page: int
@@ -107,12 +107,14 @@ class QueryStudentsData(TypedDict):
     grade: Optional[int]
     finalScore: Optional[float]
     rank: Optional[int]
-    section_semester_one: Optional[str]
-    section_semester_two: Optional[str]
-    average_semester_one: Optional[float]
-    average_semester_two: Optional[float]
-    rank_semester_one: Optional[int]
-    rank_semester_two: Optional[int]
+    semesterOne: Optional[int]
+    semesterTwo: Optional[int]
+    sectionSemesterOne: Optional[str]
+    sectionSemesterTwo: Optional[str]
+    averageSemesterOne: Optional[float]
+    averageSemesterTwo: Optional[float]
+    rankSemesterOne: Optional[int]
+    rankSemesterTwo: Optional[int]
 
 
 class QueryStudentTableId(TypedDict):
@@ -126,8 +128,14 @@ class QueryStudentTableId(TypedDict):
     isActive: str
     firstName_fatherName_grandFatherName: str
     grade: str
+    sectionSemesterOne: str
+    sectionSemesterTwo: str
+    averageSemesterOne: str
+    averageSemesterTwo: str
+    rankSemesterOne: str
+    rankSemesterTwo: str
 
 
 class SendAllStudents(TypedDict):
     tableId: QueryStudentTableId
-    data: QueryStudentsData
+    data: List[QueryStudentsData]

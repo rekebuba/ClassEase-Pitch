@@ -10,6 +10,7 @@ from api.v1.schemas.custom_schema import (
     FloatOrDateField,
 )
 from models.section import Section
+from models.semester import Semester
 from models.stud_year_record import STUDYearRecord
 from models.grade import Grade
 
@@ -85,6 +86,17 @@ class SectionSchema(BaseSchema):
     def add_fields(self, data, **kwargs: Any):
         """Add table_id to the dumped data."""
         data["table_id"] = self.get_table_id(Section)
+        return data
+
+
+class SemesterSchema(BaseSchema):
+    event_id = fields.String(required=False)
+    name = fields.Integer(required=False)
+
+    @post_dump
+    def add_fields(self, data, **kwargs: Any):
+        """Add table_id to the dumped data."""
+        data["table_id"] = self.get_table_id(Semester)
         return data
 
 

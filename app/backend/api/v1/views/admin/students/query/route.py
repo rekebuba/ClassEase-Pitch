@@ -1,6 +1,8 @@
 import json
 from typing import Any, Dict, List, Tuple
 
+from num2words import num2words
+
 from flask import Response, jsonify, request
 from marshmallow import ValidationError
 from sqlalchemy.orm import joinedload
@@ -47,20 +49,20 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
         load_schema = ParamSchema()
         valid_data: PostLoadParam = load_schema.load(data)
 
-        custom_types: Dict[str, ColumnElement[Any]] = {
-            **make_case_lookup(1, Section.section, "section"),
-            **make_case_lookup(1, STUDSemesterRecord.average, "average"),
-            **make_case_lookup(1, STUDSemesterRecord.rank, "rank"),
-        }
+        # custom_types: Dict[str, ColumnElement[Any]] = {
+        #     **make_case_lookup(1, Section.section, "section"),
+        #     **make_case_lookup(1, STUDSemesterRecord.average, "average"),
+        #     **make_case_lookup(1, STUDSemesterRecord.rank, "rank"),
+        # }
 
-        # custom sort
-        valid_sort: BuiltValidSortDict = build_valid_sort(
-            valid_data["sort"], custom_types
-        )
-        # custom filter
-        valid_filters: BuiltValidFilterDict = build_valid_filter(
-            valid_data["filters"], custom_types
-        )
+        # # custom sort
+        # valid_sort: BuiltValidSortDict = build_valid_sort(
+        #     valid_data["sort"], custom_types
+        # )
+        # # custom filter
+        # valid_filters: BuiltValidFilterDict = build_valid_filter(
+        #     valid_data["filters"], custom_types
+        # )
 
         query = (
             storage.session.query(
@@ -68,15 +70,15 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
                 Student,
                 STUDYearRecord,
                 Grade,
-                custom_types["section_semester_one"],
-                custom_types["section_semester_two"],
-                custom_types["average_semester_one"],
-                custom_types["average_semester_two"],
-                custom_types["rank_semester_one"],
-                custom_types["rank_semester_two"],
                 func.group_concat(
-                    Section.section.op("ORDER BY")(Section.section)
-                ).label("section"),
+                    STUDSemesterRecord.average.op("ORDER BY")(Semester.name)
+                ).label("average"),
+                func.group_concat(
+                    STUDSemesterRecord.rank.op("ORDER BY")(Semester.name)
+                ).label("rank"),
+                func.group_concat(Section.section.op("ORDER BY")(Semester.name)).label(
+                    "section"
+                ),
                 func.group_concat(Semester.name.op("ORDER BY")(Semester.name)).label(
                     "semesters"
                 ),
@@ -110,8 +112,8 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
             query,
             valid_data["page"],
             valid_data["per_page"],
-            valid_filters,
-            valid_sort,
+            valid_data["filters"],
+            valid_data["sort"],
             valid_data["join_operator"],
         )
 
@@ -125,16 +127,32 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
                 "student": student.to_dict(),
                 "grade": grade.to_dict() if grade else {},
                 "year_record": year_record.to_dict() if year_record else {},
-                "section_semester_one": section_I,
-                "section_semester_two": section_II,
-                "average_semester_one": average_I,
-                "average_semester_two": average_II,
-                "rank_semester_one": rank_I,
-                "rank_semester_two": rank_II,
-                "sections": sections.split(",") if sections else [],
-                "semesters": semesters.split(",") if semesters else [],
+                "averages": {
+                    f"average_semester_{num2words(i)}": v
+                    for i, v in enumerate(averages.split(","), start=1)
+                }
+                if averages
+                else {},
+                "ranks": {
+                    f"rank_semester_{num2words(i)}": v
+                    for i, v in enumerate(ranks.split(","), start=1)
+                }
+                if ranks
+                else {},
+                "sections": {
+                    f"section_semester_{num2words(i)}": v
+                    for i, v in enumerate(sections.split(","), start=1)
+                }
+                if sections
+                else {},
+                "semesters": {
+                    f"semester_{num2words(i)}": v
+                    for i, v in enumerate(semesters.split(","), start=1)
+                }
+                if semesters
+                else {},
             }
-            for user, student, year_record, grade, section_I, section_II, average_I, average_II, rank_I, rank_II, sections, semesters in paginated_result[
+            for user, student, year_record, grade, averages, ranks, sections, semesters in paginated_result[
                 "items"
             ]
         ]
@@ -147,10 +165,12 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
             "data": [flatten_keys(item) for item in result],
         }
 
+        # print(json.dumps(modified_result, indent=4, sort_keys=True))
+
         return jsonify(
             {**modified_result, "pageCount": paginated_result["meta"]["total_pages"]}
         ), 200
     except ValidationError as e:
         return errors.handle_validation_error(e)
-    except Exception as e:
-        return errors.handle_internal_error(e)
+    # except Exception as e:
+    #     return errors.handle_internal_error(e)

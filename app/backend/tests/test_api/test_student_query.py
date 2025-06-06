@@ -29,6 +29,8 @@ class ResponseData(BaseModel):
     grade: Optional[int]
     finalScore: Optional[float]
     rank: Optional[int]
+    semesterOne: Optional[int]
+    semesterTwo: Optional[int]
     sectionSemesterOne: Optional[str]
     sectionSemesterTwo: Optional[str]
     averageSemesterOne: Optional[float]
@@ -38,16 +40,24 @@ class ResponseData(BaseModel):
 
 
 class ResponseTableId(BaseModel):
-    finalScore: str
-    rank: str
     identification: str
     imagePath: str
     createdAt: str
+    firstName_fatherName_grandFatherName: str
     guardianName: str
     guardianPhone: str
     isActive: str
-    firstName_fatherName_grandFatherName: str
     grade: str
+    sectionSemesterOne: str
+    sectionSemesterTwo: str
+    averageSemesterOne: str
+    averageSemesterTwo: str
+    rankSemesterOne: str
+    rankSemesterTwo: str
+    semesterOne: str
+    semesterTwo: str
+    finalScore: str
+    rank: str
 
 
 class StudentQueryResponse(BaseModel):
