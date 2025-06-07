@@ -1,28 +1,23 @@
-import json
-from typing import Any, Dict, List, Tuple
+from typing import Tuple
 
 from num2words import num2words
 
 from flask import Response, jsonify, request
 from marshmallow import ValidationError
 from sqlalchemy.orm import joinedload
-from sqlalchemy import ColumnElement, func
+from sqlalchemy import func
 from api.v1.utils.typing import (
-    BuiltValidFilterDict,
-    BuiltValidSortDict,
     PostLoadParam,
     SendAllStudents,
     UserT,
 )
 from api.v1.views.admin import admins as admin
 from api.v1.views.admin.students.query.methods import (
-    build_valid_filter,
-    build_valid_sort,
     extract_table_id,
     flatten_keys,
 )
 from api.v1.views.admin.students.query.schema import AllStudentsSchema, ParamSchema
-from api.v1.views.methods import make_case_lookup, paginate_query
+from api.v1.views.methods import paginate_query
 from api.v1.views.utils import admin_required
 from models.grade import Grade
 from models.section import Section
@@ -48,21 +43,6 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
         # Check if required fields are present
         load_schema = ParamSchema()
         valid_data: PostLoadParam = load_schema.load(data)
-
-        # custom_types: Dict[str, ColumnElement[Any]] = {
-        #     **make_case_lookup(1, Section.section, "section"),
-        #     **make_case_lookup(1, STUDSemesterRecord.average, "average"),
-        #     **make_case_lookup(1, STUDSemesterRecord.rank, "rank"),
-        # }
-
-        # # custom sort
-        # valid_sort: BuiltValidSortDict = build_valid_sort(
-        #     valid_data["sort"], custom_types
-        # )
-        # # custom filter
-        # valid_filters: BuiltValidFilterDict = build_valid_filter(
-        #     valid_data["filters"], custom_types
-        # )
 
         query = (
             storage.session.query(
@@ -172,5 +152,5 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
         ), 200
     except ValidationError as e:
         return errors.handle_validation_error(e)
-    # except Exception as e:
-    #     return errors.handle_internal_error(e)
+    except Exception as e:
+        return errors.handle_internal_error(e)

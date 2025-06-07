@@ -5,10 +5,6 @@ from math import ceil
 from sqlalchemy import UnaryExpression, and_, case, func, true
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
-from api.v1.utils.typing import (
-    BuiltValidFilterDict,
-    BuiltValidSortDict,
-)
 from models.semester import Semester
 from sqlalchemy.sql.elements import ColumnElement
 from sqlalchemy.orm.attributes import InstrumentedAttribute
@@ -40,7 +36,7 @@ def paginate_query(
     total_items = query.count()
     # Apply filters and sort
     if filters:
-        query = query.filter(and_(true(), *filters))
+        query = query.having(and_(true(), *filters))
 
     if sort:
         query = query.order_by(true(), *sort)
@@ -81,24 +77,6 @@ def save_profile(file: FileStorage) -> str:
 
     # Return the relative file path
     return os.path.join(current_app.config["UPLOAD_FOLDER"], filename)
-
-
-def make_case_lookup(
-    semester_num: int, column: InstrumentedAttribute[Any], prefix: str
-) -> Dict[str, ColumnElement[Any]]:
-    """Helper to generate case expressions with dynamic labels."""
-    label_I = f"{prefix}_semester_one"  # Pre-compute the label
-    label_II = f"{prefix}_semester_two"
-
-    expr_I = func.max(case((Semester.name == semester_num, column))).label(label_I)
-    expr_II = func.max(case((Semester.name == semester_num + 1, column))).label(
-        label_II
-    )
-
-    return {
-        label_I: expr_I,
-        label_II: expr_II,
-    }
 
 
 def min_max_semester_lookup(

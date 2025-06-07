@@ -7,7 +7,19 @@ from marshmallow import (
     post_dump,
     pre_load,
 )
-from sqlalchemy import ColumnElement, True_, UnaryExpression, and_, or_, true
+from sqlalchemy import (
+    ColumnElement,
+    Float,
+    Function,
+    Integer,
+    True_,
+    UnaryExpression,
+    and_,
+    cast,
+    func,
+    or_,
+    true,
+)
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from api.v1.schemas.config_schema import (
     OPERATOR_MAPPING,
@@ -366,8 +378,11 @@ class BaseSchema(Schema):
         column_name: str,
         operator: str,
         token: Any,
+        defalut_filter: Optional[int] = None,
     ) -> ColumnElement[Any]:
-        col = getattr(model, column_name, None)
+        col: Optional[Union[ColumnElement[Any], Function[Any]]] = getattr(
+            model, column_name, None
+        )
         if col is None:
             raise ValidationError(
                 f"Column '{column_name}' not found on {model.__tablename__}."
@@ -378,6 +393,22 @@ class BaseSchema(Schema):
             raise ValidationError(
                 f"Operator '{operator}' is not callable or not defined."
             )
+
+        if defalut_filter is not None:
+            # column get its Python type
+            type = col.type.python_type
+
+            col = func.substring_index(
+                func.group_concat(col.op("ORDER BY")(Semester.name)),
+                ",",
+                defalut_filter,
+            )
+
+            if type == int:
+                col = cast(col, Integer)
+            elif type == float:
+                col = cast(col, Float)
+
         try:
             return op_func(col, token)
         except Exception as e:
@@ -390,6 +421,7 @@ class BaseSchema(Schema):
         operator: str,
         value: Any,
         range: Optional[RangeDict] = None,
+        defalut_filter: Optional[int] = None,
     ) -> Union[True_, List[ColumnElement[Any]], ColumnElement[Any]]:
         """
         Dynamically create a SQLAlchemy filter based on operator.
@@ -401,14 +433,17 @@ class BaseSchema(Schema):
             )
         elif isinstance(column_name, str) and operator:
             result = BaseSchema.build_operator_condition(
-                model, column_name, operator, value
+                model, column_name, operator, value, defalut_filter
             )
 
         return result
 
     @staticmethod
     def sort_data(
-        model: Type[Base], column_name: Union[str, List[str]], order: bool
+        model: Type[Base],
+        column_name: Union[str, List[str]],
+        order: bool,
+        defalut_sort: Optional[int] = None,
     ) -> Union[UnaryExpression[Any], List[UnaryExpression[Any]]]:
         """
         Dynamically create a SQLAlchemy sort based on order.
@@ -416,11 +451,26 @@ class BaseSchema(Schema):
         if isinstance(column_name, list):
             return BaseSchema.sort_multiple_columns(model, column_name, order)
 
-        col: Optional[InstrumentedAttribute[Any]] = getattr(model, column_name, None)
+        col: Optional[Union[ColumnElement[Any], Function[Any]]] = getattr(
+            model, column_name, None
+        )
         if col is None:
             raise ValidationError(
                 f"Column '{column_name}' not found on {model.__tablename__}."
             )
+
+        if defalut_sort is not None:
+            # column get its Python type
+            type = col.type.python_type
+
+            col = func.substring_index(
+                func.group_concat(col.op("ORDER BY")(Semester.name)), ",", defalut_sort
+            )
+
+            if type == int:
+                col = cast(col, Integer)
+            elif type == float:
+                col = cast(col, Float)
 
         if order:
             return col.desc()

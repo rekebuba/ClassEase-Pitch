@@ -1,6 +1,6 @@
 from datetime import date, datetime, timedelta
 import re
-from sqlalchemy import and_, func, or_, true
+from sqlalchemy import Function, and_, func, or_, true
 from sqlalchemy.sql.elements import ColumnElement
 from api.v1.utils.typing import RangeDict
 from models.base_model import Base, BaseModel
@@ -23,7 +23,7 @@ def normalize_date_col(col: ColumnElement[Any], val: Any) -> ColumnElement[Any]:
 OPERATOR_MAPPING: Dict[
     str,
     Callable[
-        [ColumnElement[Any], Union[Any, RangeDict]],
+        [Union[Function[Any], ColumnElement[Any]], Union[Any, RangeDict]],
         ColumnElement[Any],
     ],
 ] = {
@@ -126,6 +126,17 @@ VALUE_TYPE_RULES = {
     "multiSelect": (str, list),
     "boolean": bool,
     "dateRange": (datetime, date),
+}
+
+ALISA_NAME: Dict[str, Dict[str, Union[str, int, None]]] = {
+    "section_semester_one": {"key": "section", "default": 1},
+    "section_semester_two": {"key": "section", "default": -1},
+    "average_semester_one": {"key": "average", "default": 1},
+    "average_semester_two": {"key": "average", "default": -1},
+    "rank_semester_one": {"key": "rank", "default": 1},
+    "rank_semester_two": {"key": "rank", "default": -1},
+    "semester_one": {"key": "name", "default": None},
+    "semester_two": {"key": "name", "default": None},
 }
 
 

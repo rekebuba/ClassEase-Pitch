@@ -38,6 +38,7 @@ class FilterDict(TypedDict):
     """for filter data."""
 
     column_name: Union[str, List[str]]
+    defalut_filter: Optional[int]
     filter_id: str
     table_id: str
     table: Optional[Type[Base]]
@@ -51,6 +52,7 @@ class SortDict(TypedDict):
     """for sort data."""
 
     column_name: List[str]
+    default_sort: Optional[int]
     desc: bool
     table_id: str
     table: Optional[Type[Base]]

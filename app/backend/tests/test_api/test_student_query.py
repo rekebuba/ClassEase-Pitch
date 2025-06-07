@@ -1,142 +1,14 @@
-from typing import Iterator, List, Dict, Any, Optional, Tuple
-import factory
+from typing import List, Dict, Any
 from flask.testing import FlaskClient
-from pydantic import BaseModel, validator
-from sqlalchemy import func
-from sqlalchemy.orm import scoped_session, Session, Query
 import pytest
 from pyethiodate import EthDate  # type: ignore
 from datetime import datetime
 
-from models.grade import Grade
-from models.student import Student
-from models.subject import Subject
-from tests.test_api.factories import AssessmentFactory, SemesterFactory, StudentFactory
+from tests.test_api.fixtures.student_fixtures import StudentQueryResponse
 from tests.typing import Credential
 
 
-# --- Pydantic Models for Response Validation ---
-class ResponseData(BaseModel):
-    """for all students data after post dump."""
-
-    identification: str
-    imagePath: str
-    createdAt: str
-    guardianName: str
-    guardianPhone: str
-    isActive: bool
-    firstName_fatherName_grandFatherName: str
-    grade: Optional[int]
-    finalScore: Optional[float]
-    rank: Optional[int]
-    semesterOne: Optional[int]
-    semesterTwo: Optional[int]
-    sectionSemesterOne: Optional[str]
-    sectionSemesterTwo: Optional[str]
-    averageSemesterOne: Optional[float]
-    averageSemesterTwo: Optional[float]
-    rankSemesterOne: Optional[int]
-    rankSemesterTwo: Optional[int]
-
-
-class ResponseTableId(BaseModel):
-    identification: str
-    imagePath: str
-    createdAt: str
-    firstName_fatherName_grandFatherName: str
-    guardianName: str
-    guardianPhone: str
-    isActive: str
-    grade: str
-    sectionSemesterOne: str
-    sectionSemesterTwo: str
-    averageSemesterOne: str
-    averageSemesterTwo: str
-    rankSemesterOne: str
-    rankSemesterTwo: str
-    semesterOne: str
-    semesterTwo: str
-    finalScore: str
-    rank: str
-
-
-class StudentQueryResponse(BaseModel):
-    tableId: ResponseTableId
-    data: List[ResponseData]
-
-
 current_year = int(EthDate.date_to_ethiopian(datetime.now()).year)
-
-
-# --- Test Data Generation ---
-@pytest.fixture(scope="module")
-def student_data(db_session: scoped_session[Session]) -> Iterator[Student]:
-    """Fixture to create test student data."""
-    grade_ids = db_session.query(Grade.id).order_by(Grade.grade).all()
-    for grade_id in grade_ids:
-        # Create 10 students for each grade
-        StudentFactory.create_batch(3, grade_id=grade_id[0])
-
-    db_session.commit()
-
-    yield db_session.query(Student).all()
-
-
-@pytest.fixture(scope="module")
-def all_subjects(
-    db_session: scoped_session[Session],
-) -> Iterator[Query[Tuple[int, int]]]:
-    """Fixture to create and return available subjects."""
-    query = (
-        db_session.query(func.count().label("row_count"), Grade.grade)
-        .select_from(Subject)
-        .join(Grade, Subject.grade_id == Grade.id)
-        .filter(Grade.grade <= 10)
-        .group_by(Subject.grade_id)
-        .order_by(Grade.grade)
-    )
-    yield query
-
-
-@pytest.fixture(scope="module")
-def register_all_students(
-    db_session: scoped_session[Session],
-    student_data: Iterator[Student],
-    all_subjects: Query[Tuple[int, int]],
-) -> None:
-    """Fixture to register all students in the database."""
-    for student in student_data:
-        # For each student, create assessments based on the grade
-        subjects_for_registration = all_subjects.filter(
-            Grade.id == student.current_grade_id
-        ).all()
-        for row_count, grade in subjects_for_registration:
-            # Reset the sequence counter
-            AssessmentFactory.reset_sequence()
-            AssessmentFactory.create_batch(row_count, student_id=student.id)
-
-
-@pytest.fixture(scope="module")
-def register_all_students_second_semester(
-    db_session: scoped_session[Session],
-    student_data: Iterator[Student],
-    all_subjects: Query[Tuple[int, int]],
-) -> None:
-    """Fixture to register all students in the second semester."""
-    second_semester = SemesterFactory.create(
-        name=2
-    )  # Create second semester (overrides default)
-    for student in student_data:
-        # For each student, create assessments based on the grade
-        subjects_for_registration = all_subjects.filter(
-            Grade.id == student.current_grade_id
-        ).all()
-        for row_count, grade in subjects_for_registration:
-            # Reset the sequence counter
-            AssessmentFactory.reset_sequence()
-            AssessmentFactory.create_batch(
-                row_count, student_id=student.id, semester_id=second_semester.id
-            )
 
 
 # --- Test Cases ---
@@ -157,23 +29,15 @@ class TestAdminStudentQueries:
         client: FlaskClient,
         student_data: List[Dict[str, Any]],
         admin_auth_header: Credential,
+        student_query_table_data: StudentQueryResponse,
         grades: List[int],
         expected_count: int,
     ) -> None:
-        # Get table IDs first
-        table_resp = client.post(
-            "/api/v1/admin/students", json={}, headers=admin_auth_header["header"]
-        )
-        assert table_resp.status_code == 200
-        assert table_resp.json is not None
-
-        table_data = StudentQueryResponse(**table_resp.json)
-
         # Build query
         search_params = {
             "filters": [
                 {
-                    "tableId": table_data.tableId.grade,
+                    "tableId": student_query_table_data.tableId.grade,
                     "id": "grade",
                     "variant": "multiSelect",
                     "operator": "in",
@@ -221,27 +85,104 @@ class TestAdminStudentQueries:
         register_all_students: None,
         register_all_students_second_semester: None,
         admin_auth_header: Credential,
+        student_query_table_data: StudentQueryResponse,
         grades: List[int],
         expected_count: int,
     ) -> None:
-        # Get table IDs first
-        table_resp = client.post(
-            "/api/v1/admin/students", json={}, headers=admin_auth_header["header"]
-        )
-        assert table_resp.status_code == 200
-        assert table_resp.json is not None
-
-        table_data = StudentQueryResponse(**table_resp.json)
-
         # Build query
         search_params = {
             "filters": [
                 {
-                    "tableId": table_data.tableId.grade,
+                    "tableId": student_query_table_data.tableId.grade,
                     "id": "grade",
                     "variant": "multiSelect",
                     "operator": "in",
                     "value": grades,
+                }
+            ],
+            "page": 1,
+            "perPage": 50,
+        }
+
+        response = client.post(
+            "/api/v1/admin/students",
+            json=search_params,
+            headers=admin_auth_header["header"],
+        )
+        assert response.status_code == 200
+        assert response.json is not None
+        assert "data" in response.json
+        assert isinstance(response.json["data"], list)
+        assert len(response.json["data"]) == expected_count
+
+    @pytest.mark.parametrize(
+        "sections_semester_one,expected_count",
+        [
+            (["A", "B", "C"], 30),  # All students who registered in semester one
+            (["A", "B", "C", "F", "G"], 30),
+        ],
+    )
+    def test_section_one_filtering(
+        self,
+        client: FlaskClient,
+        register_all_students: None,
+        admin_auth_header: Credential,
+        student_query_table_data: StudentQueryResponse,
+        sections_semester_one: List[str],
+        expected_count: int,
+    ) -> None:
+        # Build query
+        search_params = {
+            "filters": [
+                {
+                    "tableId": student_query_table_data.tableId.sectionSemesterOne,
+                    "id": "sectionSemesterOne",
+                    "variant": "multiSelect",
+                    "operator": "in",
+                    "value": sections_semester_one,
+                }
+            ],
+            "page": 1,
+            "perPage": 50,
+        }
+
+        response = client.post(
+            "/api/v1/admin/students",
+            json=search_params,
+            headers=admin_auth_header["header"],
+        )
+        assert response.status_code == 200
+        assert response.json is not None
+        assert "data" in response.json
+        assert isinstance(response.json["data"], list)
+        assert len(response.json["data"]) == expected_count
+
+    @pytest.mark.parametrize(
+        "sections_semester_two,expected_count",
+        [
+            (["A", "B", "C"], 30),  # All students who registered in semester one
+            (["A", "B", "C", "F", "G"], 30),
+        ],
+    )
+    def test_section_two_filtering(
+        self,
+        client: FlaskClient,
+        register_all_students: None,
+        register_all_students_second_semester: None,
+        admin_auth_header: Credential,
+        student_query_table_data: StudentQueryResponse,
+        sections_semester_two: List[str],
+        expected_count: int,
+    ) -> None:
+        # Build query
+        search_params = {
+            "filters": [
+                {
+                    "tableId": student_query_table_data.tableId.sectionSemesterTwo,
+                    "id": "sectionSemesterTwo",
+                    "variant": "multiSelect",
+                    "operator": "in",
+                    "value": sections_semester_two,
                 }
             ],
             "page": 1,
@@ -277,22 +218,16 @@ class TestAdminStudentQueries:
         self,
         client: FlaskClient,
         student_data: List[Dict[str, Any]],
+        register_all_students_second_semester: None,
         admin_auth_header: Credential,
+        student_query_table_data: StudentQueryResponse,
         search_term: str,
         expected_matches: int,
     ) -> None:
-        table_resp = client.post(
-            "/api/v1/admin/students", json={}, headers=admin_auth_header["header"]
-        )
-        assert table_resp.status_code == 200
-        assert table_resp.json is not None
-
-        table_data = StudentQueryResponse(**table_resp.json)
-
         search_params = {
             "filters": [
                 {
-                    "tableId": table_data.tableId.identification,
+                    "tableId": student_query_table_data.tableId.identification,
                     "id": "identification",
                     "variant": "text",
                     "operator": "iLike",
@@ -317,35 +252,29 @@ class TestAdminStudentQueries:
         self,
         client: FlaskClient,
         register_all_students: List[Dict[str, Any]],
+        student_query_table_data: StudentQueryResponse,
         admin_auth_header: Credential,
     ) -> None:
-        table_resp = client.post(
-            "/api/v1/admin/students", json={}, headers=admin_auth_header["header"]
-        )
-        assert table_resp.status_code == 200
-        assert table_resp.json is not None
-
-        table_data = StudentQueryResponse(**table_resp.json)
-
         search_params = {
             "join_operator": "or",
             "filters": [
                 {
-                    "tableId": table_data.tableId.grade,
+                    "tableId": student_query_table_data.tableId.grade,
                     "id": "grade",
                     "variant": "multiSelect",
                     "operator": "in",
                     "value": [1, 2, 3],
                 },
                 {
-                    "tableId": table_data.tableId.identification,
+                    "tableId": student_query_table_data.tableId.identification,
                     "id": "identification",
                     "variant": "text",
                     "operator": "iLike",
                     "value": "MAS/101",
                 },
                 {
-                    "id": "section",
+                    "tableId": student_query_table_data.tableId.sectionSemesterOne,
+                    "id": "sectionSemesterOne",
                     "variant": "multiSelect",
                     "operator": "in",
                     "value": ["A", "B"],
@@ -355,7 +284,7 @@ class TestAdminStudentQueries:
                 {
                     "id": "grade",
                     "desc": False,
-                    "tableId": table_data.tableId.grade,
+                    "tableId": student_query_table_data.tableId.grade,
                 },
                 {"id": "section", "desc": True},
             ],

@@ -142,7 +142,9 @@ def test_admin_create_mark_list(create_mark_list: None) -> None:
 
 
 def test_admin_query_students(
-    client: FlaskClient, create_mark_list: None, admin_auth_header: Credential
+    client: FlaskClient,
+    # create_mark_list: None,
+    admin_auth_header: Credential,
 ) -> None:
     response = client.post(
         "/api/v1/admin/students", json={}, headers=admin_auth_header["header"]
@@ -168,6 +170,7 @@ def test_admin_query_students(
                 "value": "MAS/1234/56",
             },
             {
+                "tableId": response.json["tableId"]["sectionSemesterOne"],
                 "id": "sectionSemesterOne",
                 "variant": "multiSelect",
                 "operator": "in",
