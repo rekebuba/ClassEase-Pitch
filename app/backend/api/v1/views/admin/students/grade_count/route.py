@@ -14,6 +14,7 @@ from models.grade import Grade
 from models.stud_year_record import STUDYearRecord
 
 from models import storage
+from models.student import Student
 
 
 @admin.route("/students/grade-counts", methods=["GET"])
@@ -28,18 +29,20 @@ def student_grade_counts(admin_data: UserT) -> Tuple[Response, int]:
     """
     try:
         query = (
-            storage.session.query(
-                Grade.grade, func.count(STUDYearRecord.grade_id).label("grade_count")
-            )
-            .join(STUDYearRecord.grades)
+            storage.session.query(Grade.grade, func.count(Student.id))
+            .select_from(Student)
+            .outerjoin(STUDYearRecord, STUDYearRecord.student_id == Student.id)
+            .outerjoin(Grade, STUDYearRecord.grade_id == Grade.id)
             .group_by(Grade.id)
             .order_by(Grade.grade)
         ).all()
 
         # Process results
-        serialize: Dict[str, int] = {str(i): 0 for i in range(1, 13)}
+        serialize: Dict[str, int] = {"N/A": 0, **{str(i): 0 for i in range(1, 13)}}
         for grade, grade_count in query:
-            if grade is not None:
+            if grade is None:
+                serialize["N/A"] = grade_count
+            else:
                 serialize[str(grade)] = grade_count
 
         # Return the serialized data

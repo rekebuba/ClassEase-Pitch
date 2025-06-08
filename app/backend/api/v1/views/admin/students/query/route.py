@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from num2words import num2words
+from num2words import num2words  # noqa: F401
 
 from flask import Response, jsonify, request
 from marshmallow import ValidationError

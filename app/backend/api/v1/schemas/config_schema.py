@@ -1,10 +1,10 @@
 from datetime import date, datetime, timedelta
 import re
-from sqlalchemy import Function, and_, func, or_, true
+from sqlalchemy import Function, and_, false, func, or_, true
 from sqlalchemy.sql.elements import ColumnElement
 from api.v1.utils.typing import RangeDict
 from models.base_model import Base, BaseModel
-from typing import Any, Callable, Dict, Type, Union, cast
+from typing import Any, Callable, Dict, List, Type, Union, cast
 
 
 def is_date(val: Any) -> bool:
@@ -18,6 +18,28 @@ def is_date(val: Any) -> bool:
 
 def normalize_date_col(col: ColumnElement[Any], val: Any) -> ColumnElement[Any]:
     return cast(ColumnElement[Any], func.date(col)) if is_date(val) else col
+
+
+def notIn(
+    col: Union[Function[Any], ColumnElement[Any]], val: List[Any]
+) -> ColumnElement[Any]:
+    non_null_vals = [v for v in val if v is not None]
+    null_vlaue = None in val  # keep nulls if None is not in val
+
+    conditions = []
+
+    if non_null_vals:
+        conditions.append(~col.in_(non_null_vals))
+
+    if null_vlaue:
+        conditions.append(col.isnot(None))
+    else:
+        conditions.append(col.is_(None))
+
+    if not conditions:
+        return true()  # no values passed, return a no-op filter
+
+    return and_(*conditions) if null_vlaue else or_(*conditions)
 
 
 OPERATOR_MAPPING: Dict[
@@ -53,21 +75,27 @@ OPERATOR_MAPPING: Dict[
     "endWith": lambda col, val: col.like(f"%{val}"),
     # IN operator (list of values)
     "in": lambda col, val: (
-        normalize_date_col(col, val[0]).in_(val)
+        or_(
+            normalize_date_col(col, val[0]).in_([v for v in val if v is not None]),
+            normalize_date_col(col, val[0]).is_(None) if None in val else false(),
+        )
         if isinstance(val, list) and val
-        else normalize_date_col(col, val).in_([val])
+        else or_(
+            normalize_date_col(col, val).in_([val]),
+            normalize_date_col(col, val).is_(None) if val is not None else false(),
+        )
         if isinstance(val, str)
         else true()
     ),
     "notIn": lambda col, val: (
-        ~normalize_date_col(col, val[0]).in_(val)
+        notIn(normalize_date_col(col, val[0]), val)
         if isinstance(val, list) and val
-        else ~normalize_date_col(col, val).in_([val])
+        else notIn(normalize_date_col(col, val), [val])
         if isinstance(val, str)
         else true()
     ),
-    "isEmpty": lambda col, _: or_(true(), col.is_(None), col == ""),
-    "isNotEmpty": lambda col, _: and_(true(), col.isnot(None), col != ""),
+    "isEmpty": lambda col, _: or_(col.is_(None), col == ""),
+    "isNotEmpty": lambda col, _: and_(col.isnot(None), col != ""),
     "isBetween": lambda col, range: (
         normalize_date_col(col, range.get("min") or range.get("max")).between(
             range.get("min"), range.get("max")
@@ -78,6 +106,22 @@ OPERATOR_MAPPING: Dict[
         else normalize_date_col(col, range.get("min")) >= range.get("min")
         if isinstance(range, dict) and range.get("min") is not None
         else normalize_date_col(col, range.get("max")) <= range.get("max")
+        if isinstance(range, dict) and range.get("max") is not None
+        else true()
+    ),
+    "isNotBetween": lambda col, range: (
+        and_(
+            normalize_date_col(col, range.get("min") or range.get("max"))
+            < range.get("min"),
+            normalize_date_col(col, range.get("min") or range.get("max"))
+            > range.get("max"),
+        )
+        if isinstance(range, dict)
+        and range.get("min") is not None
+        and range.get("max") is not None
+        else ~normalize_date_col(col, range.get("min")) > range.get("min")
+        if isinstance(range, dict) and range.get("min") is not None
+        else ~normalize_date_col(col, range.get("max")) < range.get("max")
         if isinstance(range, dict) and range.get("max") is not None
         else true()
     ),
@@ -93,6 +137,7 @@ OPERATOR_CONFIG = {
     "number": ["eq", "ne", "lt", "lte", "gt", "gte"],
     "select": ["eq", "ne", "isEmpty", "isNotEmpty"],
     "multiSelect": ["in", "notIn", "isEmpty", "isNotEmpty"],
+    "range": ["isBetween", "isNotBetween"],
     "date": [
         "eq",
         "ne",

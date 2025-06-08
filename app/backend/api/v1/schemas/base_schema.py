@@ -307,12 +307,25 @@ class BaseSchema(Schema):
         if converter is None:
             raise ValueError(f"No converter available for type: {expected_type}")
 
+        def process_single_item(item: Any) -> Any:
+            """Process a single item according to conversion rules"""
+            if item is None or item == "N/A":
+                return None
+            try:
+                return converter(item)
+            except (ValueError, TypeError) as e:
+                raise ValueError(f"Failed to convert value '{item}': {str(e)}")
+
         try:
-            return (
-                [converter(item) for item in value if item is not None]
-                if isinstance(value, list)
-                else converter(value)
-            )
+            # Handle list case
+            if isinstance(value, list):
+                return [process_single_item(item) for item in value]
+
+            if isinstance(value, dict):
+                return {k: process_single_item(v) for k, v in value.items()}
+
+            # Handle single value case
+            return process_single_item(value)
         except Exception:
             raise ValidationError(f"Failed to convert values for column '{col_name}'")
 
@@ -404,9 +417,9 @@ class BaseSchema(Schema):
                 defalut_filter,
             )
 
-            if type == int:
+            if type is int:
                 col = cast(col, Integer)
-            elif type == float:
+            elif type is float:
                 col = cast(col, Float)
 
         try:
@@ -420,7 +433,6 @@ class BaseSchema(Schema):
         column_name: Union[str, List[str]],
         operator: str,
         value: Any,
-        range: Optional[RangeDict] = None,
         defalut_filter: Optional[int] = None,
     ) -> Union[True_, List[ColumnElement[Any]], ColumnElement[Any]]:
         """

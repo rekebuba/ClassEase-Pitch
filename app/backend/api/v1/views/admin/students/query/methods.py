@@ -1,16 +1,6 @@
-from dataclasses import asdict
-from typing import Any, Dict, List
+from typing import Any, Dict
 
-from marshmallow import ValidationError
-from sqlalchemy import ColumnElement
-
-from api.v1.schemas.config_schema import OPERATOR_MAPPING
 from api.v1.utils.typing import (
-    BuiltValidFilterDict,
-    BuiltValidSortDict,
-    PostFilterDict,
-    PostLoadParam,
-    PostSortDict,
     QueryStudentTableId,
     QueryStudentsData,
 )
@@ -47,7 +37,7 @@ def flatten_keys(item: Dict[str, Any]) -> QueryStudentsData:
     item["student"][custom_key] = full_name
 
     # Flatten all specified keys into the result
-    result: Dict[str, Any] = {}
+    result = {}
 
     for key, value in item.items():
         if isinstance(value, dict):
@@ -59,4 +49,3 @@ def flatten_keys(item: Dict[str, Any]) -> QueryStudentsData:
     result.pop("tableId", None)
 
     return result
-

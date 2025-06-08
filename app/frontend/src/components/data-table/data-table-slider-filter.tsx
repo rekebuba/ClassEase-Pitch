@@ -11,6 +11,14 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
@@ -18,6 +26,7 @@ import { FormInput, PlusCircle, XCircle } from "lucide-react";
 import { TrashIcon } from "@radix-ui/react-icons"
 import { useFilters } from "@/utils/filter-context";
 import { DataTableFilterOption } from "@/types";
+import { dataTableConfig } from "@/config/data-table";
 
 interface Range {
   min: number;
@@ -61,6 +70,17 @@ export function DataTableSliderFilter<TData>({
   const columnFilterValue = getIsValidRange(columnFilter?.range)
     ? (columnFilter?.range as RangeValue)
     : undefined;
+
+  const comparisonOperators = dataTableConfig.rangeOperators;
+  const operator = React.useMemo(
+    () =>
+      comparisonOperators.find(
+        (op) => op.value === columnFilter?.toString()
+      ) ?? comparisonOperators[0],
+    [column, comparisonOperators]
+  );
+
+  const [selectedOperator, setSelectedOperator] = React.useState<string>(operator.value);
 
   const defaultRange = column.columnDef.meta?.range;
   const unit = column.columnDef.meta?.unit;
@@ -111,6 +131,14 @@ export function DataTableSliderFilter<TData>({
     setFromInput({ min: range.min.toString(), max: range.max.toString() });
   }, [range.min, range.max]);
 
+  const onOperatorSelect = React.useCallback(
+    (value: string) => {
+      if (!column) return;
+      setSelectedOperator(value);
+    },
+    [column],
+  );
+
   const onFromInputChange = React.useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const value = event.target.value;
@@ -128,11 +156,12 @@ export function DataTableSliderFilter<TData>({
           id: column.id,
           variant: column.columnDef.meta?.variant,
           tableId: column.columnDef.meta?.tableId ?? "",
+          operator: selectedOperator,
           range: { min: numValue, max: range.max },
         })
       }
     },
-    [column, min, range],
+    [column, min, range, selectedOperator],
   );
 
   const onToInputChange = React.useCallback(
@@ -151,11 +180,12 @@ export function DataTableSliderFilter<TData>({
           id: column.id,
           variant: column.columnDef.meta?.variant,
           tableId: column.columnDef.meta?.tableId ?? "",
+          operator: selectedOperator,
           range: { min: range.min, max: numValue },
         })
       }
     },
-    [column, max, range],
+    [column, max, range, selectedOperator],
   );
 
   const onSliderValueChange = React.useCallback(
@@ -164,10 +194,11 @@ export function DataTableSliderFilter<TData>({
         id: column.id,
         variant: column.columnDef.meta?.variant,
         tableId: column.columnDef.meta?.tableId ?? "",
+        operator: selectedOperator,
         range: value,
       });
     },
-    [column]
+    [column, selectedOperator]
   );
 
   const onReset = React.useCallback(
@@ -218,7 +249,7 @@ export function DataTableSliderFilter<TData>({
       </PopoverTrigger>
       <PopoverContent align="start" className="flex w-auto flex-col gap-4">
         <div className="flex flex-col gap-3">
-          <div className="flex items-center space-x-1 pl-1 pr-0.5">
+          {/* <div className="flex items-center space-x-1 pl-1 pr-0.5">
             <div className="flex flex-1 items-center space-x-1">
               <div className="text-xs capitalize text-muted-foreground">
                 {title}
@@ -227,7 +258,15 @@ export function DataTableSliderFilter<TData>({
             <Button aria-label="Remove filter" variant="ghost" size="icon" className="size-7 text-muted-foreground" onClick={() => onReset(undefined, true)}>
               <TrashIcon className="size-4" aria-hidden="true" />
             </Button>
-          </div>
+          </div> */}
+          <FilterHeader
+            title={title || "Range Filter"}
+            comparisonOperators={comparisonOperators}
+            selectedOperator={selectedOperator}
+            onOperatorSelect={onOperatorSelect}
+            onReset={onReset}
+          />
+
           <div className="flex items-center gap-4">
             <Label htmlFor={`${id}-from`} className="sr-only">
               From
@@ -304,5 +343,46 @@ export function DataTableSliderFilter<TData>({
         </Button>
       </PopoverContent>
     </Popover>
+  );
+}
+
+
+interface FilterHeaderProps {
+  title: string;
+  selectedOperator: string;
+  onOperatorSelect: (value: string) => void;
+  onReset: (event: React.MouseEvent | undefined, remove: boolean) => void;
+  comparisonOperators: {
+    value: string;
+    label: string;
+  }[];
+}
+function FilterHeader({ title, selectedOperator, onOperatorSelect, onReset, comparisonOperators }: FilterHeaderProps) {
+  return (
+    <div className="flex items-center space-x-1 pl-1 pr-0.5 mt-1">
+      <div className="flex flex-1 items-center space-x-1">
+        <div className="text-xs capitalize text-muted-foreground">
+          {title}
+        </div>
+        <Select value={selectedOperator} onValueChange={value => onOperatorSelect(value)}>
+          <SelectTrigger className="h-auto w-fit truncate border-none px-2 py-0.5 text-xs hover:bg-muted/50">
+            <SelectValue placeholder={comparisonOperators.find(op => op.value === selectedOperator)?.label || "Select operator"} />
+          </SelectTrigger>
+          <SelectContent className="dark:bg-background/95 dark:backdrop-blur-md dark:supports-[backdrop-filter]:bg-background/40">
+            <SelectGroup>
+              {comparisonOperators.map(({
+                value,
+                label
+              }) => <SelectItem key={value} value={value} className="py-1">
+                  {label}
+                </SelectItem>)}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </div>
+      <Button aria-label="Remove filter" variant="ghost" size="icon" className="size-7 text-muted-foreground" onClick={() => onReset(undefined, true)}>
+        <TrashIcon className="size-4" aria-hidden="true" />
+      </Button>
+    </div>
   );
 }

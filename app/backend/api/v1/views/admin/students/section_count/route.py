@@ -3,7 +3,8 @@ from typing import Any, Dict, Tuple
 
 from flask import Response, jsonify
 from marshmallow import ValidationError
-from sqlalchemy import case, func
+from sqlalchemy import case, func, select
+from sqlalchemy.orm import aliased
 from api.v1.utils.typing import UserT
 from api.v1.views import errors
 from api.v1.views.admin import admins as admin
@@ -16,6 +17,7 @@ from models.section import Section
 from models.semester import Semester
 from models.stud_semester_record import STUDSemesterRecord
 from models import storage
+from models.student import Student
 
 
 @admin.route("/students/section-counts", methods=["GET"])
@@ -29,30 +31,52 @@ def student_section_counts(admin_data: UserT) -> Tuple[Response, int]:
                   If no students are found, returns a 404 error with an appropriate message.
     """
     try:
-        query = (
-            storage.session.query(
-                Section.section,
-                func.count(case((Semester.name == 1, 1), else_=None)).label(
-                    "section_semester_one"
-                ),
-                func.count(case((Semester.name == 2, 1), else_=None)).label(
-                    "section_semester_two"
-                ),
+        section_counts = (
+            select(
+                Section.section.label("section"),
+                Semester.name.label("semester"),
+                func.count(Student.id.distinct()).label("student_count"),
             )
-            .join(STUDSemesterRecord.sections)
-            .join(STUDSemesterRecord.semesters)
-            .group_by(Section.section)
-            .order_by(Section.section)
-        ).all()
+            .select_from(Student)
+            .outerjoin(STUDSemesterRecord, STUDSemesterRecord.student_id == Student.id)
+            .outerjoin(Section, Section.id == STUDSemesterRecord.section_id)
+            .outerjoin(Semester, Semester.id == STUDSemesterRecord.semester_id)
+            .group_by(Section.section, Semester.name)
+        ).subquery()
+
+        sc = aliased(section_counts)
+
+        main_query = (
+            select(
+                sc.c.section,
+                func.group_concat(sc.c.semester.op("ORDER BY")(sc.c.semester)).label(
+                    "semester_list"
+                ),
+                func.group_concat(
+                    sc.c.student_count.op("ORDER BY")(sc.c.semester)
+                ).label("student_counts"),
+            )
+            .select_from(sc)
+            .group_by(sc.c.section)
+            # .order_by(sc.c.section)
+        )
+
+        query = storage.session.execute(main_query).all()
 
         # Process results
         result: Dict[str, Dict[str, Any]] = {
             "section_semester_one": {},
             "section_semester_two": {},
         }
-        for section, section_I, section_II in query:
-            result["section_semester_one"][section] = section_I
-            result["section_semester_two"][section] = section_II
+        for section, semester, student_counts in query:
+            count = student_counts.split(",") if student_counts else [0, 0]
+            if len(count) == 1:
+                count.append(count[0])
+            if section is None:
+                section = "N/A"
+
+            result["section_semester_one"][section] = int(count[0])
+            result["section_semester_two"][section] = int(count[1])
 
         # Return the serialized data
         schema = SectionCountsSchema()

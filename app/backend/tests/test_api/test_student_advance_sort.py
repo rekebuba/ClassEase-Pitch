@@ -1,5 +1,8 @@
 from itertools import groupby
+import json
 from operator import itemgetter
+from pathlib import Path
+from typing import Any, Dict
 from flask.testing import FlaskClient
 import pytest
 
@@ -7,38 +10,45 @@ from tests.test_api.fixtures.student_fixtures import StudentQueryResponse
 from tests.typing import Credential
 
 
+# Read and prepare data at module level
+file_path = (Path(__name__).parent / "app/backend/tests/test_file.json").resolve()
+with file_path.open() as f:
+    raw_data = json.load(f)["advance_sort"]
+
+# Create a list of tuples for parametrize
+test_param = [tuple(case["sort"]) for case in raw_data]
+test_ids = [case["id"] for case in raw_data]
+
+
 # --- Test Cases ---
 class TestAdminStudentAdvanceSort:
-    @pytest.mark.parametrize(
-        "sort_by, ",
-        [(True), (False)],
-        ids=["Descending", "Ascending"],
-    )
+    @pytest.mark.parametrize("sort", test_param, ids=test_ids)
     def test_name_with_id_sorting(
         self,
         client: FlaskClient,
         # register_all_students: None,
+        # register_all_students_second_semester: None,
         student_query_table_data: StudentQueryResponse,
         admin_auth_header: Credential,
-        sort_by: bool,
+        sort: tuple[Dict[str, Any], Dict[str, Any]],
     ) -> None:
         # Build query with sorting
+        first_id = sort[0]["id"]
+        sort_first = sort[0]["desc"]
+
+        second_id = sort[1]["id"]
+        sort_second = sort[1]["desc"]
+
+        table_ids = student_query_table_data.tableId
+
+        sort[0]["tableId"] = getattr(table_ids, first_id)
+        sort[1]["tableId"] = getattr(table_ids, second_id)
+
         search_params = {
+            "sort": [sort[0], sort[1]],
             "filters": [],
-            "sort": [
-                {
-                    "id": "identification",
-                    "desc": sort_by,
-                    "tableId": student_query_table_data.tableId.identification,
-                },
-                {
-                    "id": "grade",
-                    "desc": sort_by,
-                    "tableId": student_query_table_data.tableId.grade,
-                },
-            ],
             "page": 1,
-            "perPage": 50,
+            "per_page": 10,
         }
 
         response = client.post(
@@ -51,23 +61,26 @@ class TestAdminStudentAdvanceSort:
         assert "data" in response.json
 
         results = response.json["data"]
-        assert len(results) > 0
+        assert len(results) == 10  # same as per_page
 
         # Verify sorting
-        names = [r["identification"] for r in results]
-        assert names == sorted(names, reverse=sort_by)
-
-        # for the same first sort, # verify the second sort
-        # Group by identification
-        grouped = groupby(
-            sorted(results, key=itemgetter("identification")),
-            key=itemgetter("identification"),
+        names = [r[first_id] for r in results]
+        assert names == sorted(
+            names, key=lambda x: (x is not None, x), reverse=sort_first
         )
 
-        # Within each group, check if second column is sorted
+        # Group by identification (primary key)
+        grouped = groupby(
+            sorted(results, key=lambda r: (r[first_id] is not None, r[first_id])),
+            key=itemgetter(first_id),
+        )
+
+        # Within each group, check if the second column is sorted (with null-safe sort)
         for _, group in grouped:
             group_list = list(group)
-            second_column = [r["grade"] for r in group_list]
-            assert second_column == sorted(second_column), (
-                f"Secondary sort failed for group: {group_list}"
-            )
+            second_column = [r[second_id] for r in group_list]
+            assert second_column == sorted(
+                second_column,
+                key=lambda x: (x is not None, x),
+                reverse=sort_second,
+            ), f"Secondary sort failed for group: {group_list}"

@@ -22,9 +22,7 @@ from marshmallow import (
 from api.v1.schemas.schemas import SectionSchema, SemesterSchema
 from api.v1.utils.typing import (
     FilterDict,
-    PostFilterDict,
     PostLoadParam,
-    PostSortDict,
     SortDict,
 )
 from api.v1.views.shared.registration.schema import StudentSchema, UserSchema
@@ -104,9 +102,6 @@ class FilterSchema(BaseSchema):
     filter_id = fields.String(required=False, load_default=None, allow_none=True)
     table_id = fields.String(required=True)
     table = TableField(required=True)
-    range = fields.Nested(
-        RangeSchema, required=False, load_default=None, allow_none=True
-    )
     variant = fields.String(
         validate=lambda x: x
         in ["text", "number", "multiSelect", "boolean", "date", "dateRange", "range"],
@@ -165,7 +160,9 @@ class FilterSchema(BaseSchema):
                 data["column_name"] = alias_column["key"]
                 data["defalut_filter"] = alias_column["default"]
 
-        value = data.get("value", None)
+        value = data.get("value")
+        if value is None:
+            value = data.pop("range")
 
         data["value"] = self.update_list_value(
             value, data["table"], data["column_name"]
@@ -187,8 +184,7 @@ class FilterSchema(BaseSchema):
                 data["column_name"],
                 data["operator"],
                 data["value"],
-                data["range"],
-                data["defalut_filter"],
+                data["defalut_filter"]
             )
 
         return filter

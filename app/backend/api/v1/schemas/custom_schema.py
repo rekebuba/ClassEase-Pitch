@@ -184,32 +184,29 @@ class JoinOperatorField(fields.Field):  # type: ignore[type-arg]
 class ValueField(fields.Field):  # type: ignore[type-arg]
     """Custom field for validating and deserializing various types of values."""
 
-    # def _validate(self, value: Any) -> None:
-    #     if not isinstance(value, (str, list, datetime, int, float)):
-    #         raise ValidationError(
-    #             "Value must be a string, list, datetime, int, or float.", field_name="value"
-    #         )
-
     def _deserialize(
         self, value: Any, attr: Optional[str], data: Any, **kwargs: Any
     ) -> Any:
         if value is None:
             return None
 
-        # If it's already a number, use it directly
-        try:
-            timestamp = float(value)
-        except (ValueError, TypeError):
-            return value  # Keep string or other types as-is
+        def convert(v: Any) -> Any:
+            try:
+                timestamp = float(v)
+                if timestamp > 1e12:
+                    return datetime.fromtimestamp(timestamp / 1000.0).date()
+                return timestamp
+            except (ValueError, TypeError, OSError):
+                return v
 
-        try:
-            # Consider values larger than 1e12 as millisecond timestamps
-            if timestamp > 1e12:
-                return datetime.fromtimestamp(timestamp / 1000.0).date()
-            # If it's a regular float/int, return it
-            return timestamp
-        except (ValueError, OSError):
-            raise ValidationError("Invalid numeric value or timestamp.")
+        if isinstance(value, dict):
+            result = {}
+            for key in ("min", "max"):
+                if key in value:
+                    result[key] = convert(value[key])
+            return result
+
+        return convert(value)
 
 
 class DecimalEncoder(fields.Field):

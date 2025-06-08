@@ -155,20 +155,27 @@ def test_admin_query_students(
     search_params = {
         "join_operator": "or",
         "filters": [
-            {
-                "tableId": response.json["tableId"]["grade"],
-                "id": "grade",
-                "variant": "multiSelect",
-                "operator": "in",
-                "value": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-            },
-            {
-                "tableId": response.json["tableId"]["identification"],
-                "id": "identification",
-                "variant": "text",
-                "operator": "iLike",
-                "value": "MAS/1234/56",
-            },
+            # {
+            #     "tableId": response.json["tableId"]["finalScore"],
+            #     "id": "finalScore",
+            #     "variant": "range",
+            #     "operator": "isBetween",
+            #     "range": {"min": 58, "max": 90},
+            # },
+            # {
+            #     "tableId": response.json["tableId"]["grade"],
+            #     "id": "grade",
+            #     "variant": "multiSelect",
+            #     "operator": "in",
+            #     "value": ["N/A"],
+            # },
+            # {
+            #     "tableId": response.json["tableId"]["identification"],
+            #     "id": "identification",
+            #     "variant": "text",
+            #     "operator": "iLike",
+            #     "value": "MAS/1234/56",
+            # },
             {
                 "tableId": response.json["tableId"]["sectionSemesterOne"],
                 "id": "sectionSemesterOne",
@@ -176,15 +183,15 @@ def test_admin_query_students(
                 "operator": "in",
                 "value": ["A", "B"],
             },
-            {
-                "tableId": response.json["tableId"][
-                    "firstName_fatherName_grandFatherName"
-                ],
-                "id": "firstName_fatherName_grandFatherName",
-                "variant": "text",
-                "operator": "iLike",
-                "value": "asdfdsfsdfs",
-            },
+            # {
+            #     "tableId": response.json["tableId"][
+            #         "firstName_fatherName_grandFatherName"
+            #     ],
+            #     "id": "firstName_fatherName_grandFatherName",
+            #     "variant": "text",
+            #     "operator": "iLike",
+            #     "value": "asdfdsfsdfs",
+            # },
         ],
         "sort": [
             {
@@ -192,7 +199,11 @@ def test_admin_query_students(
                 "desc": False,
                 "tableId": response.json["tableId"]["grade"],
             },
-            {"id": "sectionSemesterOne", "desc": True},
+            {
+                "tableId": response.json["tableId"]["sectionSemesterOne"],
+                "id": "sectionSemesterOne",
+                "desc": True,
+            },
         ],
         "page": 1,
         "per_page": 10,

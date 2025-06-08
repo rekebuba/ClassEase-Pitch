@@ -58,32 +58,6 @@ class SortDict(TypedDict):
     table: Optional[Type[Base]]
 
 
-class PostFilterDict(TypedDict):
-    """for filter data after post load."""
-
-    valid_filters: List[ColumnElement[Any]]
-    custom_filters: FilterDict
-
-
-class PostSortDict(TypedDict):
-    """for sort data after post load."""
-
-    valid_sorts: List[ColumnElement[Any]]
-    custom_sorts: SortDict
-
-
-class BuiltValidFilterDict(TypedDict):
-    """for filter data after building."""
-
-    valid_filters: List[ColumnElement[Any]]
-    custom_filters: List[ColumnElement[Any]]
-
-
-class BuiltValidSortDict(TypedDict):
-    """for sort data after building."""
-
-    valid_sorts: List[ColumnElement[Any]]
-    custom_sorts: List[ColumnElement[Any]]
 
 
 class PostLoadParam(TypedDict):

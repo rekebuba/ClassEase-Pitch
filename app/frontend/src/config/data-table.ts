@@ -19,6 +19,10 @@ export const dataTableConfig = {
     { label: "Is empty", value: "isEmpty" as const },
     { label: "Is not empty", value: "isNotEmpty" as const },
   ],
+  rangeOperators: [
+    { label: "Is between", value: "isBetween" as const },
+    { label: "Not between", value: "isNotBetween" as const },
+  ],
   dateOperators: [
     { label: "Is", value: "eq" as const },
     { label: "Is not", value: "ne" as const },
@@ -77,6 +81,7 @@ export const dataTableConfig = {
     "gt",
     "gte",
     "isBetween",
+    "isNotBetween",
     "isRelativeToToday",
   ] as const,
   joinOperators: ["and", "or"] as const,
