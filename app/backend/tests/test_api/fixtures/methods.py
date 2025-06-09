@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import pytest
 from models.base_model import CustomTypes
@@ -63,6 +63,54 @@ def role(
     user = db_session.query(User).filter(User.role == role).limit(count).all()
 
     return user
+
+
+@pytest.fixture
+def random_admin(db_session: scoped_session[Session]) -> User:
+    """
+    Fixture to get a user based on role and count.
+    """
+    admin = (
+        db_session.query(User).filter(User.role == CustomTypes.RoleEnum.ADMIN).first()
+    )
+
+    # Ensure the admin is not None
+    if not admin:
+        pytest.skip("No admin user found in the database for authentication.")
+
+    return admin
+
+
+@pytest.fixture
+def random_student(db_session: scoped_session[Session]) -> User:
+    """
+    Fixture to get a user based on role and count.
+    """
+    student = (
+        db_session.query(User).filter(User.role == CustomTypes.RoleEnum.STUDENT).first()
+    )
+
+    # Ensure the student is not None
+    if not student:
+        pytest.skip("No student user found in the database for authentication.")
+
+    return student
+
+
+@pytest.fixture
+def random_teacher(db_session: scoped_session[Session]) -> User:
+    """
+    Fixture to get a user based on role and count.
+    """
+    teacher = (
+        db_session.query(User).filter(User.role == CustomTypes.RoleEnum.TEACHER).first()
+    )
+
+    # Ensure the teacher is not None
+    if not teacher:
+        pytest.skip("No teacher user found in the database for authentication.")
+
+    return teacher
 
 
 def prepare_form_data(data: Dict[str, Any]) -> Dict[str, Any]:

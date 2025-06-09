@@ -249,3 +249,15 @@ def test_admin_student_grade_counts(
     )
     assert response.status_code == 200
     assert response.json is not None
+
+def test_admin_student_avrage_range(
+    db_session: scoped_session[Session],
+    client: FlaskClient,
+    admin_auth_header: Credential,
+) -> None:
+    response = client.get(
+        "/api/v1/admin/students/average-range",
+        headers=admin_auth_header["header"],
+    )
+    assert response.status_code == 200
+    assert response.json is not None

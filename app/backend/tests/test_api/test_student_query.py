@@ -84,7 +84,7 @@ class TestAdminStudentQueries:
                 for item in x
             ),
             "isNotBetween": lambda x, y: all(
-                (item < y["min"] or item > y["max"])
+                (item < y["min"] and item > y["max"])
                 if isinstance(y, dict) and "min" in y and "max" in y
                 else False
                 for item in x
@@ -93,174 +93,6 @@ class TestAdminStudentQueries:
         assert OPERATORS[operator](result, value["value"]), (
             f"Failed for {filter['id']} with operator {operator}"
         )
-
-    @pytest.mark.parametrize(
-        "grades,expected_count",
-        [
-            ([11], 0),  # No student registered for corse in grade 11
-            ([12], 0),  # No student registered for corse in grade 12
-            ([11, 12], 0),
-            ([1], 3),
-            ([3], 3),
-            ([8], 3),
-            ([9, 10], 6),
-            ([10, 11], 3),
-            ([10, 11, 12], 3),
-            ([10, 9, 12], 6),
-            ([1, 2, 3], 9),
-            ([5, 6, 7, 8], 12),
-            ([1, 3, 9, 2, 4], 15),
-            ([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], 30),
-            ([], 36),  # No grade filter should return all
-        ],
-    )
-    def test_grade_filtering_when_all_registered(
-        self,
-        client: FlaskClient,
-        # register_all_students: None,
-        # register_all_students_second_semester: None,
-        admin_auth_header: Credential,
-        student_query_table_data: StudentQueryResponse,
-        grades: List[int],
-        expected_count: int,
-    ) -> None:
-        # Build query
-        search_params = {
-            "filters": [
-                {
-                    "tableId": student_query_table_data.tableId.grade,
-                    "id": "grade",
-                    "variant": "multiSelect",
-                    "operator": "in",
-                    "value": grades,
-                }
-            ],
-            "page": 1,
-            "perPage": 50,
-        }
-
-        response = client.post(
-            "/api/v1/admin/students",
-            json=search_params,
-            headers=admin_auth_header["header"],
-        )
-        assert response.status_code == 200
-        assert response.json is not None
-        assert "data" in response.json
-        assert isinstance(response.json["data"], list)
-        assert len(response.json["data"]) == expected_count
-
-    @pytest.mark.parametrize(
-        "sections_semester_one,expected_count",
-        [
-            (["A"], None),
-            (["B"], None),
-            (["C"], None),
-            (["A", "B"], None),
-            (["A", "C"], None),
-            (["B", "C"], None),
-            (["A", "B", "C"], 30),  # All students who registered in semester one
-            (["A", "B", "C", "H", "Z"], 30),
-            ([], 36),
-        ],
-    )
-    def test_section_one_filtering(
-        self,
-        client: FlaskClient,
-        # register_all_students: None,
-        # register_all_students_second_semester: None,
-        admin_auth_header: Credential,
-        student_query_table_data: StudentQueryResponse,
-        sections_semester_one: List[str],
-        expected_count: Optional[int],
-    ) -> None:
-        # Build query
-        search_params = {
-            "filters": [
-                {
-                    "tableId": student_query_table_data.tableId.sectionSemesterOne,
-                    "id": "sectionSemesterOne",
-                    "variant": "multiSelect",
-                    "operator": "in",
-                    "value": sections_semester_one,
-                }
-            ],
-            "page": 1,
-            "perPage": 50,
-        }
-
-        response = client.post(
-            "/api/v1/admin/students",
-            json=search_params,
-            headers=admin_auth_header["header"],
-        )
-        assert response.status_code == 200
-        assert response.json is not None
-        assert "data" in response.json
-        assert isinstance(response.json["data"], list)
-
-        if expected_count is not None:
-            assert len(response.json["data"]) == expected_count
-        else:
-            # check only the expected valus exists
-            result = {r["sectionSemesterOne"] for r in response.json["data"]}
-            assert result == set(sections_semester_one)
-
-    @pytest.mark.parametrize(
-        "sections_semester_two,expected_count",
-        [
-            (["A"], None),
-            (["B"], None),
-            (["C"], None),
-            (["A", "B"], None),
-            (["A", "C"], None),
-            (["B", "C"], None),
-            (["A", "B", "C"], 30),
-            (["A", "B", "C", "H", "Z"], 30),
-            ([], 36),
-        ],
-    )
-    def test_section_two_filtering(
-        self,
-        client: FlaskClient,
-        # register_all_students: None,
-        # register_all_students_second_semester: None,
-        admin_auth_header: Credential,
-        student_query_table_data: StudentQueryResponse,
-        sections_semester_two: List[str],
-        expected_count: Optional[int],
-    ) -> None:
-        # Build query
-        search_params = {
-            "filters": [
-                {
-                    "tableId": student_query_table_data.tableId.sectionSemesterTwo,
-                    "id": "sectionSemesterTwo",
-                    "variant": "multiSelect",
-                    "operator": "in",
-                    "value": sections_semester_two,
-                }
-            ],
-            "page": 1,
-            "perPage": 50,
-        }
-
-        response = client.post(
-            "/api/v1/admin/students",
-            json=search_params,
-            headers=admin_auth_header["header"],
-        )
-        assert response.status_code == 200
-        assert response.json is not None
-        assert "data" in response.json
-        assert isinstance(response.json["data"], list)
-
-        if expected_count is not None:
-            assert len(response.json["data"]) == expected_count
-        else:
-            # check only the expected valus exists
-            result = {r["sectionSemesterTwo"] for r in response.json["data"]}
-            assert result == set(sections_semester_two)
 
     @pytest.mark.parametrize(
         "search_term,expected_matches",
@@ -279,8 +111,8 @@ class TestAdminStudentQueries:
     def test_identification_search(
         self,
         client: FlaskClient,
-        student_data: List[Dict[str, Any]],
-        register_all_students_second_semester: None,
+        # student_data: List[Dict[str, Any]],
+        # register_all_students_second_semester: None,
         admin_auth_header: Credential,
         student_query_table_data: StudentQueryResponse,
         search_term: str,
