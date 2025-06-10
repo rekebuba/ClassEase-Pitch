@@ -1,47 +1,47 @@
-from typing import Any, Dict
+from typing import Any, Dict, Iterator
 from flask.testing import FlaskClient
 import pytest
+from sqlalchemy.orm import scoped_session, Session
 
-from tests.test_api.factories import EventFactory
+from models.semester import Semester
+from tests.test_api.factories import SemesterFactory
 from tests.typing import Credential
 
 
 @pytest.fixture(scope="session")
-def create_semester(
-    client: FlaskClient, admin_auth_header: Credential
-) -> None:  # auth_header -> Admin
-    print("Creating semester fixture...")
-    # event_form = EventFactory.build(purpose="New Semester")
-    # response = client.post(
-    #     "/api/v1/admin/event/new",
-    #     json=event_form,
-    #     headers=admin_auth_header["header"],
-    # )
-
-    # assert response.status_code == 201
-    # assert response.json is not None
-    # assert "message" in response.json
-    # assert response.json["message"] == "Event Created Successfully"
+def semester_one_created(
+    db_session: scoped_session[Session],
+    client: FlaskClient,
+) -> Iterator[Semester]:
+    """
+    Fixture to create the first semester for testing purposes.
+    """
+    yield SemesterFactory.get_or_create(name=1)
 
 
 @pytest.fixture(scope="session")
-def create_mark_list(
+def semester_two_created(
+    db_session: scoped_session[Session],
     client: FlaskClient,
-    stud_course_register: None,
-    fake_mark_list: Dict[str, Any],
+) -> Iterator[Semester]:
+    """
+    Fixture to create the second semester for testing purposes.
+    """
+    yield SemesterFactory.get_or_create(name=2)
+
+
+@pytest.fixture(scope="session")
+def admin_student_avrage_range(
+    db_session: scoped_session[Session],
+    client: FlaskClient,
     admin_auth_header: Credential,
-) -> None:
-    """
-    Fixture to create a mark list for testing purposes.
-    This fixture assumes that the student has already registered for courses.
-    """
-    response = client.post(
-        "/api/v1/admin/mark-list/new",
-        json=fake_mark_list,
+) -> Iterator[Dict[str, Any]]:
+    response = client.get(
+        "/api/v1/admin/students/average-range",
         headers=admin_auth_header["header"],
     )
 
-    assert response.status_code == 201
+    assert response.status_code == 200
     assert response.json is not None
-    assert "message" in response.json
-    assert response.json["message"] == "Mark list created successfully!"
+
+    yield response.json

@@ -26,8 +26,8 @@ class TestAdminStudentAdvanceSort:
     def test_name_with_id_sorting(
         self,
         client: FlaskClient,
-        # register_all_students: None,
-        # register_all_students_second_semester: None,
+        register_all_students: None,
+        stud_registerd_for_semester_two_course: None,
         student_query_table_data: StudentQueryResponse,
         admin_auth_header: Credential,
         sort: tuple[Dict[str, Any], Dict[str, Any]],

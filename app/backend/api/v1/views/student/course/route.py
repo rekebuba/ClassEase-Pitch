@@ -27,13 +27,6 @@ from api.v1.views import errors
 def list_of_course_available(user_data: UserT) -> Tuple[Response, int]:
     """
     Retrieve the course registration status of a student.
-
-    Args:
-        student_data (object): An object containing student information,
-                               specifically the student_id attribute.
-
-    Returns:
-        Response: A JSON response containing the course registration status of the student.
     """
     try:
         student_data = (

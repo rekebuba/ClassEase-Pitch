@@ -1,45 +1,19 @@
-from typing import Iterator, List, Dict, Any, Optional, Tuple
+from datetime import datetime
+from typing import Iterator, List, Optional, Tuple
 from pydantic import BaseModel
 import pytest
 from flask.testing import FlaskClient
 
 from models.grade import Grade
+from models.semester import Semester
 from models.student import Student
-from tests.test_api.factories import AssessmentFactory, SemesterFactory, StudentFactory
+from tests.test_api.factories import AssessmentFactory, StudentFactory
 from tests.typing import Credential
 
 from sqlalchemy import func
 from sqlalchemy.orm import scoped_session, Session, Query
 
 from models.subject import Subject
-
-
-@pytest.fixture(scope="session")
-def stud_course_register(
-    client: FlaskClient, create_semester: None, all_stud_auth_header: List[Credential]
-) -> None:
-    for auth_header in all_stud_auth_header:
-        get_course = client.get(
-            "/api/v1/student/course/registration", headers=auth_header["header"]
-        )
-        assert get_course.status_code == 200
-        courses = get_course.json
-
-        response = client.post(
-            "/api/v1/student/course/registration",
-            json=courses,
-            headers=auth_header["header"],
-        )
-
-        # Debugging failed cases
-        if response.status_code != 201:
-            print(f"Failed for: {courses}")
-            print(f"Response: {response.json}")
-
-        assert response.status_code == 201
-        assert response.json is not None
-        assert "message" in response.json
-        assert response.json["message"] == "Course registration successful!"
 
 
 # --- Pydantic Models for Response Validation ---
@@ -93,8 +67,8 @@ class StudentQueryResponse(BaseModel):
 
 
 # --- Test Data Generation ---
-@pytest.fixture(scope="module")
-def student_data(db_session: scoped_session[Session]) -> Iterator[Student]:
+@pytest.fixture(scope="session")
+def student_data(db_session: scoped_session[Session]) -> Iterator[List[Student]]:
     """Fixture to create test student data."""
     grade_ids = db_session.query(Grade.id).order_by(Grade.grade).all()
     for grade_id in grade_ids:
@@ -106,7 +80,7 @@ def student_data(db_session: scoped_session[Session]) -> Iterator[Student]:
     yield db_session.query(Student).all()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def all_subjects(
     db_session: scoped_session[Session],
 ) -> Iterator[Query[Tuple[int, int]]]:
@@ -122,7 +96,7 @@ def all_subjects(
     yield query
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def register_all_students(
     db_session: scoped_session[Session],
     student_data: Iterator[Student],
@@ -140,16 +114,14 @@ def register_all_students(
             AssessmentFactory.create_batch(row_count, student_id=student.id)
 
 
-@pytest.fixture(scope="module")
-def register_all_students_second_semester(
+@pytest.fixture(scope="session")
+def stud_registerd_for_semester_one_course(
     db_session: scoped_session[Session],
+    semester_one_created: Semester,
     student_data: Iterator[Student],
     all_subjects: Query[Tuple[int, int]],
 ) -> None:
     """Fixture to register all students in the second semester."""
-    second_semester = SemesterFactory.create(
-        name=2
-    )  # Create second semester (overrides default)
     for student in student_data:
         # For each student, create assessments based on the grade
         subjects_for_registration = all_subjects.filter(
@@ -159,8 +131,42 @@ def register_all_students_second_semester(
             # Reset the sequence counter
             AssessmentFactory.reset_sequence()
             AssessmentFactory.create_batch(
-                row_count, student_id=student.id, semester_id=second_semester.id
+                row_count, student_id=student.id, semester_id=semester_one_created.id
             )
+
+        student.is_registered = True
+        student.is_active = True
+        student.semester_id = semester_one_created.id
+        student.updated_at = datetime.utcnow()
+
+    # Commit all updates to the database
+    db_session.commit()
+
+
+@pytest.fixture(scope="session")
+def stud_registerd_for_semester_two_course(
+    db_session: scoped_session[Session],
+    semester_two_created: Semester,
+    student_data: Iterator[Student],
+    all_subjects: Query[Tuple[int, int]],
+) -> None:
+    """Fixture to register all students in the second semester."""
+    for student in student_data:
+        # For each student, create assessments based on the grade
+        subjects_for_registration = all_subjects.filter(
+            Grade.id == student.current_grade_id
+        ).all()
+        for row_count, grade in subjects_for_registration:
+            # Reset the sequence counter
+            AssessmentFactory.reset_sequence()
+            AssessmentFactory.create_batch(
+                row_count, student_id=student.id, semester_id=semester_two_created.id
+            )
+
+        student.is_registered = True
+
+    # Commit all updates to the database
+    db_session.commit()
 
 
 @pytest.fixture(scope="module")

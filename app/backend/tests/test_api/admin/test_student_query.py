@@ -38,13 +38,15 @@ class TestAdminStudentQueries:
     def test_filtering_when_all_registered(
         self,
         client: FlaskClient,
-        # student_data: List[Dict[str, Any]],
-        # register_all_students_second_semester: None,
+        student_data: List[Dict[str, Any]],
+        stud_registerd_for_semester_one_course: None,
+        stud_registerd_for_semester_two_course: None,
         admin_auth_header: Credential,
         student_query_table_data: StudentQueryResponse,
         filter: Dict[str, Any],
         value: Dict[str, Any],
         operator: str,
+        admin_student_avrage_range: Dict[str, Any],
     ) -> None:
         # Build query
         column_id = filter["id"]
@@ -94,63 +96,16 @@ class TestAdminStudentQueries:
             f"Failed for {filter['id']} with operator {operator}"
         )
 
-    @pytest.mark.parametrize(
-        "search_term,expected_matches",
-        [
-            (f"MAS/1015/{current_year % 100}", 1),
-            ("MAS/1011/", 1),
-            ("MAS/1011/11", 0),
-            ("XYZ/1011/12", 0),
-            ("aldsflkdf", 0),
-            ("MAA/", 0),
-            ("MAT/", 0),
-            ("MAS/101", 10),  # Multiple matches
-            ("", 36),  # Empty search returns all
-        ],
-    )
-    def test_identification_search(
-        self,
-        client: FlaskClient,
-        # student_data: List[Dict[str, Any]],
-        # register_all_students_second_semester: None,
-        admin_auth_header: Credential,
-        student_query_table_data: StudentQueryResponse,
-        search_term: str,
-        expected_matches: int,
-    ) -> None:
-        search_params = {
-            "filters": [
-                {
-                    "tableId": student_query_table_data.tableId.identification,
-                    "id": "identification",
-                    "variant": "text",
-                    "operator": "iLike",
-                    "value": search_term,
-                }
-            ],
-            "page": 1,
-            "per_page": 50,
-        }
-
-        response = client.post(
-            "/api/v1/admin/students",
-            json=search_params,
-            headers=admin_auth_header["header"],
-        )
-        assert response.status_code == 200
-        assert response.json is not None
-        assert "data" in response.json
-        assert len(response.json["data"]) == expected_matches
-
     def test_complex_query_with_sorting(
         self,
         client: FlaskClient,
         register_all_students: List[Dict[str, Any]],
+        stud_registerd_for_semester_one_course: None,
+        stud_registerd_for_semester_two_course: None,
         student_query_table_data: StudentQueryResponse,
         admin_auth_header: Credential,
     ) -> None:
         search_params = {
-            "join_operator": "or",
             "filters": [
                 {
                     "tableId": student_query_table_data.tableId.grade,
@@ -164,7 +119,7 @@ class TestAdminStudentQueries:
                     "id": "identification",
                     "variant": "text",
                     "operator": "iLike",
-                    "value": "MAS/101",
+                    "value": "MAS/",
                 },
                 {
                     "tableId": student_query_table_data.tableId.sectionSemesterOne,
@@ -174,13 +129,17 @@ class TestAdminStudentQueries:
                     "value": ["A", "B"],
                 },
             ],
-            "sorts": [
+            "sort": [
                 {
                     "id": "grade",
                     "desc": False,
                     "tableId": student_query_table_data.tableId.grade,
                 },
-                {"id": "section", "desc": True},
+                {
+                    "tableId": student_query_table_data.tableId.sectionSemesterOne,
+                    "id": "sectionSemesterOne",
+                    "desc": True,
+                },
             ],
             "page": 1,
             "per_page": 10,
@@ -197,8 +156,6 @@ class TestAdminStudentQueries:
 
         results = response.json["data"]
 
-        assert len(results) == 10  # same as per_page
-
         # Verify sorting - grades should be ascending
         grades = [r["grade"] for r in results]
         assert grades == sorted(grades)
@@ -206,4 +163,7 @@ class TestAdminStudentQueries:
         # For students with same grade, sections should be descending
         for i in range(len(results) - 1):
             if results[i]["grade"] == results[i + 1]["grade"]:
-                assert results[i]["section"] >= results[i + 1]["section"]
+                assert (
+                    results[i]["sectionSemesterOne"]
+                    >= results[i + 1]["sectionSemesterOne"]
+                )

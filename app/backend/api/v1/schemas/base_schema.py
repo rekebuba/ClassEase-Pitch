@@ -26,9 +26,7 @@ from api.v1.schemas.config_schema import (
     get_all_model_classes,
     to_camel,
     to_snake,
-    to_snake_case_key,
 )
-from api.v1.utils.typing import RangeDict
 from models.base_model import Base
 from models.stud_year_record import STUDYearRecord
 from models.table import Table
@@ -350,7 +348,7 @@ class BaseSchema(Schema):
         # Tokenize input value
         tokens = value.split()
         if not tokens:
-            return []
+            return [true()]
 
         # Reverse tokens for endWith operator
         if operator == "endWith":
@@ -369,9 +367,9 @@ class BaseSchema(Schema):
 
             if operator == "notLike":
                 # Combine conditions with and for notLike
-                return [and_(*result)] if result else []
+                return [and_(*result)] if result else [and_(true())]
 
-            return [or_(*result)] if result else []
+            return [or_(*result)] if result else [or_(true())]
 
         else:
             for token, col_name in zip(tokens, column_name):
@@ -383,7 +381,7 @@ class BaseSchema(Schema):
                     result.append(condition)
 
             # Combine conditions with and for eq/ne
-            return [and_(*result)] if result else []
+            return [and_(*result)] if result else [and_(true())]
 
     @staticmethod
     def build_operator_condition(
@@ -479,9 +477,9 @@ class BaseSchema(Schema):
                 func.group_concat(col.op("ORDER BY")(Semester.name)), ",", defalut_sort
             )
 
-            if type == int:
+            if type is int:
                 col = cast(col, Integer)
-            elif type == float:
+            elif type is float:
                 col = cast(col, Float)
 
         if order:

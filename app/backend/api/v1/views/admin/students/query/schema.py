@@ -19,7 +19,6 @@ from marshmallow import (
     fields,
 )
 
-from api.v1.schemas.schemas import SectionSchema, SemesterSchema
 from api.v1.utils.typing import (
     FilterDict,
     PostLoadParam,
@@ -184,7 +183,7 @@ class FilterSchema(BaseSchema):
                 data["column_name"],
                 data["operator"],
                 data["value"],
-                data["defalut_filter"]
+                data["defalut_filter"],
             )
 
         return filter
@@ -202,7 +201,7 @@ class ParamSchema(BaseSchema):
         allow_none=True,
     )
     sort = fields.List(fields.Nested(SortSchema), required=False, load_default=[])
-    join_operator = JoinOperatorField(required=False, load_default=and_)
+    join_operator = JoinOperatorField(required=False, load_default=lambda: and_)
 
     page = fields.Integer(required=False, load_default=1)
     per_page = fields.Integer(required=False, load_default=10)

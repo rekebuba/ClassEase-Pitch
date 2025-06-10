@@ -15,9 +15,9 @@ def app_session() -> Iterator[Flask]:
 
     yield test_app
 
-    # storage.rollback()
-    # storage.session.remove()
-    # storage.drop_all()
+    storage.rollback()
+    storage.session.remove()
+    storage.drop_all()
 
 
 @pytest.fixture(scope="session")

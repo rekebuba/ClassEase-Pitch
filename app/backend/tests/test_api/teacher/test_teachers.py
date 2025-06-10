@@ -1,7 +1,11 @@
-from models.user import User
+import pytest
+from models.teacher import Teacher
 from tests.test_api.factories import TeacherFactory
 from tests.test_api.fixtures.methods import prepare_form_data
 from flask.testing import FlaskClient
+
+from tests.test_api.schemas.base_schema import DashboardUserInfoResponseModel
+from tests.typing import Credential
 
 
 class TestTeachers:
@@ -28,7 +32,7 @@ class TestTeachers:
         assert response.json["message"] == "teacher registered successfully!"
 
     def test_teacher_login_success(
-        self, client: FlaskClient, register_teacher: None, random_teacher: User
+        self, client: FlaskClient, create_teacher: Teacher
     ) -> None:
         """
         Test the teacher login endpoint for successful login.
@@ -36,8 +40,8 @@ class TestTeachers:
         response = client.post(
             "/api/v1/auth/login",
             json={
-                "id": random_teacher.identification,
-                "password": random_teacher.identification,
+                "id": create_teacher.user.identification,
+                "password": create_teacher.user.identification,
             },
         )
 
@@ -48,7 +52,7 @@ class TestTeachers:
         assert len(response.json["apiKey"]) > 0
 
     def test_teacher_login_wrong_id(
-        self, client: FlaskClient, register_teacher: None, random_teacher: User
+        self, client: FlaskClient, create_teacher: Teacher
     ) -> None:
         """
         Test that an invalid teacher ID returns an error during login.
@@ -57,14 +61,14 @@ class TestTeachers:
             "/api/v1/auth/login",
             json={
                 "id": "wrong_id",
-                "password": random_teacher.identification,
+                "password": create_teacher.user.identification,
             },
         )
 
         assert response.status_code, 401
 
     def test_admin_login_wrong_password(
-        self, client: FlaskClient, register_teacher: None, random_teacher: User
+        self, client: FlaskClient, create_teacher: Teacher
     ) -> None:
         """
         Test that an invalid password returns an error during admin login.
@@ -72,18 +76,29 @@ class TestTeachers:
         response = client.post(
             "/api/v1/auth/login",
             json={
-                "id": random_teacher.identification,
+                "id": create_teacher.user.identification,
                 "password": "wrong_password",
             },
         )
 
         assert response.status_code, 401
 
-    def test_teacher_dashboard_success(self):
+    def test_teacher_dashboard_success(
+        self, client: FlaskClient, teacher_auth_header: Credential
+    ) -> None:
         """
         Test the teacher dashboard endpoint for successful access.
         """
-        pass
+        response = client.get("/api/v1/", headers=teacher_auth_header["header"])
+
+        assert response.status_code == 200
+        assert response.json is not None
+
+        # Validate the entire response structure
+        try:
+            DashboardUserInfoResponseModel(**response.json)
+        except Exception as e:
+            pytest.fail(f"Response validation failed: {str(e)}")
 
     def test_get_teacher_assigned_grade_success(self):
         """

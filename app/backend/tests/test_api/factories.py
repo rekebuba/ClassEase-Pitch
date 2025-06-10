@@ -66,7 +66,9 @@ class BaseFactory(SQLAlchemyModelFactory, Generic[T]):  # type: ignore[type-arg]
     @classmethod
     def get_or_create(cls: Type["BaseFactory[T]"], **kwargs: Any) -> T:
         model = getattr(cls._meta, "model", None)
-        session = getattr(cls._meta, "sqlalchemy_session", None)
+        session: Optional[scoped_session[Session]] = getattr(
+            cls._meta, "sqlalchemy_session", None
+        )
         if model is None or session is None:
             raise ValueError(
                 "Model and session must be defined in the factory's Meta class."
@@ -349,7 +351,7 @@ class UserFactory(BaseFactory[User]):
             return open(tmp.name, "rb")
 
     @staticmethod
-    def _generate_id(role: CustomTypes.RoleEnum, count: int) -> str:
+    def _generate_id(role: "CustomTypes.RoleEnum", count: int) -> str:
         """
         Generates a custom ID based on the role (Admin, Student, Teacher).
 
@@ -358,8 +360,8 @@ class UserFactory(BaseFactory[User]):
         - Random number: A 4-digit number between 1000 and 9999
         - Year suffix: Last 2 digits of the current Ethiopian year
         """
-        identification = ""
-        section = ""
+        identification: str = ""
+        section: str = ""
 
         # Assign prefix based on role
         if role == CustomTypes.RoleEnum.STUDENT:
@@ -371,7 +373,7 @@ class UserFactory(BaseFactory[User]):
         else:
             raise ValueError(f"Invalid role: {role}")
 
-        starting_year = (
+        starting_year: int = (
             EthDate.date_to_ethiopian(datetime.now()).year % 100
         )  # Get last 2 digits of the year
         identification = f"{section}/{count}/{starting_year}"
@@ -431,15 +433,9 @@ class StudentFactory(BaseFactory[Student]):
         ).id,
         "start_year_id": lambda **kwarg: YearModelFactory.get_existing_id(),
         "current_year_id": lambda **kwarg: YearModelFactory.get_existing_id(),
-        "current_grade_id.grade_id": lambda **kwarg: kwarg.get(
-            "grade_id", GradeModelFactory.get_existing_id(random.randint(1, 12))
-        ),
+        "current_grade_id.grade_id": lambda **kwarg: kwarg.get("grade_id"),
         "next_grade_id": lambda **kwarg: None,
-        "semester_id": lambda **kwarg: SemesterFactory.get_or_create(
-            event_id=EventFactory.get_or_create(
-                purpose="New Semester", requires_registration=True, is_hybrid=False
-            ).id
-        ).id,
+        "semester_id": lambda **kwarg: None,
     }
     _add_for_test: Dict[str, Any] = {
         "user": lambda **kwarg: UserFactory.build(
@@ -450,7 +446,9 @@ class StudentFactory(BaseFactory[Student]):
     }
     _skip_fields: List[str] = ["grade_id"]
 
-    grade_id = None
+    grade_id: Any = LazyAttribute(
+        lambda _: GradeModelFactory.get_existing_id(random.randint(1, 12))
+    )
 
     # Add additional fields for Admin
     first_name: Any = LazyAttribute(lambda x: fake.first_name())
@@ -602,9 +600,9 @@ class AssessmentFactory(BaseFactory[Assessment]):
     _skip_fields: List[str] = ["offset", "semester_id"]
 
     offset = factory.Sequence(lambda n: n)
-    semester_id: str = SemesterFactory.get_or_create(
-        name=1
-    ).id  # Default to first semester
+    semester_id: Any = LazyAttribute(
+        lambda _: SemesterFactory.get_or_create(name=1).id
+    )  # Default to first semester
 
     student_id: Any = LazyAttribute(lambda _: StudentFactory.get_or_create().id)
     subject_id: Any = LazyAttribute(
