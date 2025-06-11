@@ -135,27 +135,27 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    cleanup:
-      needs: build-and-push
-      if: github.event_name == 'schedule'
-      runs-on: ubuntu-latest
-  
-      permissions:
-        packages: write
-      concurrency:
-        group: cleanup-${{ github.ref }}
-  
-      steps:
-        - name: Cleanup old images
-          uses: dataaxiom/ghcr-cleanup-action@v1
-          with:
-            token: ${{ secrets.GITHUB_TOKEN }}
-            name: ${{ env.IMAGE_NAMESPACE }}/${{ matrix.image_config.name }}
-            type: container
-            keep-n-tagged: ${{ env.KEEP_RECENT_VERSIONS }}
-            exclude-tags: latest,dev,main
-            older-than: ${{ env.IMAGE_RETENTION_DAYS }} days
-            delete-untagged: true
-            delete-partial-images: true
-            dry-run: true
-            log-level: info
+  cleanup:
+    needs: build-and-push
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: write
+    concurrency:
+      group: cleanup-${{ github.ref }}
+
+    steps:
+      - name: Cleanup old images
+        uses: dataaxiom/ghcr-cleanup-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          name: ${{ env.IMAGE_NAMESPACE }}/${{ matrix.image_config.name }}
+          type: container
+          keep-n-tagged: ${{ env.KEEP_RECENT_VERSIONS }}
+          exclude-tags: latest,dev,main
+          older-than: ${{ env.IMAGE_RETENTION_DAYS }} days
+          delete-untagged: true
+          delete-partial-images: true
+          dry-run: true
+          log-level: info
