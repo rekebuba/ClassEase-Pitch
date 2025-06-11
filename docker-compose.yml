@@ -61,13 +61,14 @@ services:
       - app-network
 
   db:
-    image: mysql:8.0
     container_name: mysql_container
+    working_dir: /ClassEase-Pitch/app/db
+    build:
+      context: ./app/db # host directory
+      dockerfile: Dockerfile
     restart: always
     env_file:
       - .env
-    environment:
-      - MYSQL_ROOT_PASSWORD=root
     ports:
       - "3307:3306"
     external_links:
@@ -76,16 +77,9 @@ services:
       - app-network
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./app/backend/setup_mysql_dev.sql:/docker-entrypoint-initdb.d/setup_mysql_dev.sql
-    healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "mysql_container" ]
-      interval: 5s
-      timeout: 10s
-      retries: 5
+      - ./app/db/init-db.sh:/docker-entrypoint-initdb.d/init-db.sh
 
 volumes:
-  # backend_volume:
-  # frontend_volume:
   mysql_data:
 
 networks:
