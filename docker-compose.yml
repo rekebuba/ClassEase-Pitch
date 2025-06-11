@@ -8,6 +8,9 @@ services:
       dockerfile: .devcontainer/Dockerfile
     privileged: true
     working_dir: /ClassEase-Pitch
+    environment:
+      - PATH: "/ClassEase-Pitch/app/backend/.venv/bin:${PATH}"
+      - PYTHONPATH: "/ClassEase-Pitch/app/backend"
     volumes:
       - .:/ClassEase-Pitch:cached
       - /var/run/docker.sock:/var/run/docker.sock
@@ -51,7 +54,7 @@ services:
     env_file:
       - .env
     environment:
-      - IS_DOCKER=true
+      - IS_DOCKER: true
     volumes:
       - .:/ClassEase-Pitch:cached
     depends_on:
