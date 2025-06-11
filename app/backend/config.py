@@ -20,14 +20,18 @@ class Config:
 
 
 class DevelopmentConfig(Config):
-    user = os.getenv("DEV_MYSQL_USER")
-    password = os.getenv("DEV_MYSQL_PWD")
-    host = os.getenv("DB_HOST", "localhost")
-    db = os.getenv("DEV_MYSQL_DB")
-    if not all([user, password, host, db]):
-        raise ValueError("Missing required environment variables for db connection")
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = f"mysql://{user}:{password}@{host}/{db}"
+
+    @staticmethod
+    def init_app(app):
+        user = os.getenv("DEV_MYSQL_USER")
+        password = os.getenv("DEV_MYSQL_PWD")
+        host = os.getenv("DB_HOST", "localhost")
+        db = os.getenv("DEV_MYSQL_DB")
+        if not all([user, password, host, db]):
+            raise ValueError("Missing required environment variables for db connection")
+
+        app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql://{user}:{password}@{host}/{db}"
 
 
 class ProductionConfig(Config):
@@ -39,19 +43,22 @@ class TestingConfig(Config):
 
     TESTING = True
     DEBUG = True
-    user = os.getenv("TEST_MYSQL_USER")
-    password = os.getenv("TEST_MYSQL_PWD")
-    host = os.getenv("DB_HOST", "localhost")
 
-    db = os.getenv("TEST_MYSQL_DB")
+    @staticmethod
+    def init_app(app):
+        user = os.getenv("TEST_MYSQL_USER")
+        password = os.getenv("TEST_MYSQL_PWD")
+        host = os.getenv("DB_HOST", "localhost")
 
-    if not all([user, password, host, db]):
-        raise ValueError("Missing required environment variables for db connection")
+        db = os.getenv("TEST_MYSQL_DB")
 
-    SQLALCHEMY_DATABASE_URI = f"mysql://{user}:{password}@{host}/{db}"
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
+        if not all([user, password, host, db]):
+            raise ValueError("Missing required environment variables for db connection")
 
-    # Overriding the JWT secret keys for testing
-    ADMIN_SECRET_KEY = os.getenv("TEST_ADMIN_JWT_SECRET")
-    TEACHER_SECRET_KEY = os.getenv("TEST_TEACHER_JWT_SECRET")
-    STUDENT_SECRET_KEY = os.getenv("TEST_STUDENT_JWT_SECRET")
+        app.config["SQLALCHEMY_DATABASE_URI"] = f"mysql://{user}:{password}@{host}/{db}"
+        app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
+        # Overriding the JWT secret keys for testing
+        app.config["ADMIN_SECRET_KEY"] = os.getenv("TEST_ADMIN_JWT_SECRET")
+        app.config["TEACHER_SECRET_KEY"] = os.getenv("TEST_TEACHER_JWT_SECRET")
+        app.config["STUDENT_SECRET_KEY"] = os.getenv("TEST_STUDENT_JWT_SECRET")

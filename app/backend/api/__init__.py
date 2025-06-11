@@ -26,13 +26,19 @@ def create_app(config_name: str) -> Flask:
     static_dir = os.path.join(base_dir, "v1/static")
     app: Flask = Flask(__name__, static_folder=static_dir, static_url_path="/static")
 
-    # Load configuration
+    # Determine config class
     if config_name == "testing":
-        app.config.from_object("config.TestingConfig")
+        from config import TestingConfig as config_class
     elif config_name == "development":
-        app.config.from_object("config.DevelopmentConfig")
+        from config import DevelopmentConfig as config_class
     else:
-        app.config.from_object("config.ProductionConfig")
+        from config import ProductionConfig as config_class
+
+    # Load configuration
+    app.config.from_object(config_class)
+
+    # Call init_app to handle dynamic env loading
+    config_class.init_app(app)
 
     db_uri: str = app.config["SQLALCHEMY_DATABASE_URI"]
     app.logger.info(f"Using database at {db_uri}")
