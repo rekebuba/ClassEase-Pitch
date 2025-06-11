@@ -22,4 +22,4 @@ services:
       TEST_MYSQL_DB: $TEST_MYSQL_DB
 
     command: >
-      bash -c "pytest --junitxml=test-reports/results.xml --cov=your_module --cov-report=xml"
+      bash -c "pytest --junitxml=test-reports/results.xml --cov=. --cov-report=xml"
