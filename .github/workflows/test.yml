@@ -42,6 +42,7 @@ jobs:
 
       - name: Run tests
         env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
           TEST_ADMIN_JWT_SECRET: ${{ secrets.TEST_ADMIN_JWT_SECRET }}
           TEST_TEACHER_JWT_SECRET: ${{ secrets.TEST_TEACHER_JWT_SECRET }}
           TEST_STUDENT_JWT_SECRET: ${{ secrets.TEST_STUDENT_JWT_SECRET }}
