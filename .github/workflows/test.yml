@@ -5,6 +5,7 @@ on:
     workflows: ["docker-multi-build"]
     types:
       - completed
+  workflow_dispatch:
 
 jobs:
   test:
