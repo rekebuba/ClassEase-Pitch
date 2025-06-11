@@ -16,6 +16,7 @@ env:
   PLATFORMS: linux/amd64,linux/arm64
   # Retention days for untagged images
   IMAGE_RETENTION_DAYS: 30
+  KEEP_RECENT_VERSIONS: 5 # Keep the 5 most recent tagged versions
 
 jobs:
   build-and-push:
@@ -69,6 +70,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
             type=sha
+            latest
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.created=${{ steps.meta.outputs.created }}
@@ -155,7 +157,7 @@ jobs:
           name: ${{ env.IMAGE_NAMESPACE }}/${{ matrix.image_config.name }}
           type: container
           keep-n-tagged: ${{ env.KEEP_RECENT_VERSIONS }}
-          exclude-tags: latest,dev,main
+          exclude-tags: dev,main
           older-than: ${{ env.IMAGE_RETENTION_DAYS }} days
           delete-untagged: true
           delete-partial-images: true

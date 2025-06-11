@@ -3,9 +3,9 @@ version: '3.8'
 services:
   devcontainer:
     container_name: classease_devcontainer
-    build:
-      context: .
-      dockerfile: .devcontainer/Dockerfile
+        build:
+          context: .
+          dockerfile: .devcontainer/Dockerfile
     privileged: true
     working_dir: /ClassEase-Pitch
     environment:
