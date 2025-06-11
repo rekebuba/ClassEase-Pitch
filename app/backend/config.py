@@ -22,7 +22,7 @@ class Config:
 class DevelopmentConfig(Config):
     user = os.getenv("DEV_MYSQL_USER")
     password = os.getenv("DEV_MYSQL_PWD")
-    host = os.getenv("MYSQL_DOCKER_HOST", "localhost")
+    host = os.getenv("DB_HOST", "localhost")
     db = os.getenv("DEV_MYSQL_DB")
     if not all([user, password, host, db]):
         raise ValueError("Missing required environment variables for db connection")
@@ -41,7 +41,7 @@ class TestingConfig(Config):
     DEBUG = True
     user = os.getenv("TEST_MYSQL_USER")
     password = os.getenv("TEST_MYSQL_PWD")
-    host = os.getenv("MYSQL_DOCKER_HOST", "localhost")
+    host = os.getenv("DB_HOST", "localhost")
 
     db = os.getenv("TEST_MYSQL_DB")
 

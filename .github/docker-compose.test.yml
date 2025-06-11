@@ -1,27 +1,35 @@
-version: "3.8"
-
 services:
   db:
-    image: ghcr.io/rekebuba/db:latest
-    ports:
-      - "3306:3306"
+    image: ghcr.io/rekebuba/db:${IMAGE_TAG:-latest}
     environment:
-      MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
 
   backend:
-    image: ghcr.io/rekebuba/backend:latest
+    image: ghcr.io/rekebuba/backend:${IMAGE_TAG:-latest}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     environment:
-      MYSQL_DOCKER_HOST: $MYSQL_DOCKER_HOST
+      DB_HOST: db
+      DB_PORT: 3306
 
-      TEST_ADMIN_JWT_SECRET: $TEST_ADMIN_JWT_SECRET
-      TEST_TEACHER_JWT_SECRET: $TEST_TEACHER_JWT_SECRET
-      TEST_STUDENT_JWT_SECRET: $TEST_STUDENT_JWT_SECRET
+      TEST_MYSQL_USER: ${TEST_MYSQL_USER}
+      TEST_MYSQL_PWD: ${TEST_MYSQL_PWD}
+      TEST_MYSQL_DB: ${TEST_MYSQL_DB}
 
-      TEST_MYSQL_USER: $TEST_MYSQL_USER
-      TEST_MYSQL_PWD: $TEST_MYSQL_PWD
-      TEST_MYSQL_DB: $TEST_MYSQL_DB
-
+      ADMIN_JWT_SECRET: ${TEST_ADMIN_JWT_SECRET}
+      TEACHER_JWT_SECRET: ${TEST_TEACHER_JWT_SECRET}
+      STUDENT_JWT_SECRET: ${TEST_STUDENT_JWT_SECRET}
+    volumes:
+      - ./:/app
+      - ./test-reports:/test-reports
+    working_dir: /app
     command: >
-      bash -c "pytest --junitxml=test-reports/results.xml --cov=. --cov-report=xml"
+      bash -c "pytest --junitxml=/test-reports/results.xml 
+                   --cov=. 
+                   --cov-report=xml:/test-reports/coverage.xml"
