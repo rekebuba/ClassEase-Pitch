@@ -4,15 +4,9 @@
 		"../docker-compose.yml"
 	],
 	"service": "devcontainer",
-	"workspaceFolder": "/${localWorkspaceFolderBasename}",
+	"workspaceFolder": "/ClassEase-Pitch",
 	"remoteUser": "vscode",
 	"containerUser": "vscode",
-	"features": {
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {
-			"version": "latest"
-		}
-	},
-	"postCreateCommand": "sudo usermod -aG docker $(whoami)",
 	"customizations": {
 		"vscode": {
 			"extensions": [

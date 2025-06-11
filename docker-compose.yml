@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   devcontainer:
     container_name: classease_devcontainer

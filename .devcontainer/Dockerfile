@@ -1,26 +1,28 @@
-# Use the official Ubuntu-based devcontainer
+# Use the official Ubuntu base image
 FROM ubuntu:22.04
 
-# Install essential tools (git, curl, Python, etc.)
+# Install essential tools and bash
 RUN apt-get update --fix-missing && \
     apt-get install -y --no-install-recommends \
+    bash \
+    sudo \
+    git \
+    curl \
+    docker.io \
     default-mysql-client \
     default-libmysqlclient-dev \
     pkg-config \
     python3-dev \
-    docker.io \
-    sudo \
-    git \
-    curl \
+    python3-pip \
+    ca-certificates \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
-
-
-# Add 'vscode' to the 'docker' group and allow passwordless sudo
-RUN useradd -m vscode && \
-    usermod -aG docker vscode && \
-    echo 'vscode ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 # Install uv globally
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
-USER vscode
+# Set bash as default shell and set working dir
+ENV SHELL=/bin/bash
+WORKDIR /ClassEase-Pitch
+
+# Ensure correct prompt and environment
+CMD [ "bash" ]
