@@ -1,24 +1,18 @@
-import json
-from pathlib import Path
-from typing import Callable, List, Dict, Any, Optional, Set, Union
+from typing import Callable, List, Dict, Any, Set, Union
 from flask.testing import FlaskClient
 import pytest
 from pyethiodate import EthDate  # type: ignore
 from datetime import datetime
 
+from tests import json_test_data
 from tests.test_api.fixtures.student_fixtures import StudentQueryResponse
 from tests.typing import Credential, RangeDict
 
 
 current_year = int(EthDate.date_to_ethiopian(datetime.now()).year)
 
-# Read and prepare data at module level
-file_path = (Path(__name__).parent / "app/backend/tests/test_file.json").resolve()
-with file_path.open() as f:
-    raw_data = json.load(f)
-
-templates = raw_data["filter_templates"]
-filters = raw_data["simple_filter"]
+templates = json_test_data["filter_templates"]
+filters = json_test_data["simple_filter"]
 
 test_ids = []
 test_param = []

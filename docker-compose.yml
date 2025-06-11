@@ -1,16 +1,13 @@
-version: '3.8'
+version: "3.8"
 
 services:
   devcontainer:
     container_name: classease_devcontainer
-        build:
-          context: .
-          dockerfile: .devcontainer/Dockerfile
+    image: ghcr.io/rekebuba/devcontainer:latest
     privileged: true
     working_dir: /ClassEase-Pitch
     environment:
-      - PATH: "/ClassEase-Pitch/app/backend/.venv/bin:${PATH}"
-      - PYTHONPATH: "/ClassEase-Pitch/app/backend"
+      - PYTHONPATH=/ClassEase-Pitch/app/backend
     volumes:
       - .:/ClassEase-Pitch:cached
       - /var/run/docker.sock:/var/run/docker.sock
@@ -24,9 +21,7 @@ services:
 
   frontend:
     container_name: frontend_container
-    build:
-      context: ./app/frontend
-      dockerfile: Dockerfile
+    image: ghcr.io/rekebuba/frontend:latest
     working_dir: /ClassEase-Pitch/app/frontend
     ports:
       - "5173:5173"
@@ -44,17 +39,15 @@ services:
 
   backend:
     container_name: backend_container
+    image: ghcr.io/rekebuba/backend:latest
     working_dir: /ClassEase-Pitch/app/backend
-    build:
-      context: ./app/backend # host directory
-      dockerfile: Dockerfile
     ports:
       - "5000:5000"
       - "5678:5678"
     env_file:
       - .env
     environment:
-      - IS_DOCKER: true
+      - IS_DOCKER=true
     volumes:
       - .:/ClassEase-Pitch:cached
     depends_on:
@@ -65,17 +58,15 @@ services:
 
   db:
     container_name: mysql_container
+    image: ghcr.io/rekebuba/db:latest
     working_dir: /ClassEase-Pitch/app/db
-    build:
-      context: ./app/db # host directory
-      dockerfile: Dockerfile
     restart: always
     env_file:
       - .env
     ports:
       - "3307:3306"
     external_links:
-      - mysql_container:db  # Maps the existing container to 'db'
+      - mysql_container:db # Maps the existing container to 'db'
     networks:
       - app-network
     volumes:

@@ -1,16 +1,13 @@
-import json
-from pathlib import Path
 from typing import Any, Dict
 from flask.testing import FlaskClient
 import pytest
 
+from tests import json_test_data
 from tests.test_api.fixtures.student_fixtures import StudentQueryResponse
 from tests.typing import Credential
 
 # Read and prepare data at module level
-file_path = (Path(__name__).parent / "app/backend/tests/test_file.json").resolve()
-with file_path.open() as f:
-    raw_data = json.load(f)["simple_sort"]
+raw_data = json_test_data["simple_sort"]
 
 # Create a list of tuples for parametrize
 test_param = [tuple(case["sort"]) for case in raw_data]

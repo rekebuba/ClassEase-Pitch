@@ -1,0 +1,50 @@
+name: Run Tests via Docker Compose
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull prebuilt images
+        run: |
+          docker pull ghcr.io/rekebuba/backend:latest
+          docker pull ghcr.io/rekebuba/db:latest
+
+      - name: Run tests using docker-compose
+        env:
+          MYSQL_DOCKER_HOST: ${{ secrets.MYSQL_DOCKER_HOST }}
+
+          TEST_ADMIN_JWT_SECRET: ${{ secrets.TEST_ADMIN_JWT_SECRET }}
+          TEST_TEACHER_JWT_SECRET: ${{ secrets.TEST_TEACHER_JWT_SECRET }}
+          TEST_STUDENT_JWT_SECRET: ${{ secrets.TEST_STUDENT_JWT_SECRET }}
+
+          TEST_MYSQL_USER: ${{ secrets.TEST_MYSQL_USER }}
+          TEST_MYSQL_PWD: ${{ secrets.TEST_MYSQL_PWD }}
+          TEST_MYSQL_DB: ${{ secrets.TEST_MYSQL_DB }}
+        run: |
+          docker-compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from backend
+
+      - name: Save test results
+        uses: actions/upload-artifact@v3
+        if: always()
+        with:
+          name: test-results
+          path: |
+            test-reports/
+            coverage.xml

@@ -1,19 +1,15 @@
 from itertools import groupby
-import json
 from operator import itemgetter
-from pathlib import Path
 from typing import Any, Dict
 from flask.testing import FlaskClient
 import pytest
 
 from tests.test_api.fixtures.student_fixtures import StudentQueryResponse
 from tests.typing import Credential
-
+from tests import json_test_data
 
 # Read and prepare data at module level
-file_path = (Path(__name__).parent / "app/backend/tests/test_file.json").resolve()
-with file_path.open() as f:
-    raw_data = json.load(f)["advance_sort"]
+raw_data = json_test_data["advance_sort"]
 
 # Create a list of tuples for parametrize
 test_param = [tuple(case["sort"]) for case in raw_data]

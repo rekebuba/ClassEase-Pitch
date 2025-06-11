@@ -87,27 +87,27 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          # Enable build secrets for security
-          secrets: |
-            MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
-            MYSQL_DOCKER_HOST=${{ secrets.MYSQL_DOCKER_HOST }}
+          # # Enable build secrets for security
+          # secrets: |
+          #   MYSQL_ROOT_PASSWORD=${{ secrets.MYSQL_ROOT_PASSWORD }}
+          #   MYSQL_DOCKER_HOST=${{ secrets.MYSQL_DOCKER_HOST }}
 
-            DEV_MYSQL_USER=${{ secrets.DEV_MYSQL_USER }}
-            DEV_MYSQL_PWD=${{ secrets.DEV_MYSQL_PWD }}
-            DEV_MYSQL_DB=${{ secrets.DEV_MYSQL_DB }}
+          #   DEV_MYSQL_USER=${{ secrets.DEV_MYSQL_USER }}
+          #   DEV_MYSQL_PWD=${{ secrets.DEV_MYSQL_PWD }}
+          #   DEV_MYSQL_DB=${{ secrets.DEV_MYSQL_DB }}
 
-            SECRET_KEY=${{ secrets.SECRET_KEY }}
-            ADMIN_JWT_SECRET=${{ secrets.ADMIN_JWT_SECRET }}
-            TEACHER_JWT_SECRET=${{ secrets.TEACHER_JWT_SECRET }}
-            STUDENT_JWT_SECRET=${{ secrets.STUDENT_JWT_SECRET }}
+          #   SECRET_KEY=${{ secrets.SECRET_KEY }}
+          #   ADMIN_JWT_SECRET=${{ secrets.ADMIN_JWT_SECRET }}
+          #   TEACHER_JWT_SECRET=${{ secrets.TEACHER_JWT_SECRET }}
+          #   STUDENT_JWT_SECRET=${{ secrets.STUDENT_JWT_SECRET }}
 
-            TEST_ADMIN_JWT_SECRET=${{ secrets.TEST_ADMIN_JWT_SECRET }}
-            TEST_TEACHER_JWT_SECRET=${{ secrets.TEST_TEACHER_JWT_SECRET }}
-            TEST_STUDENT_JWT_SECRET=${{ secrets.TEST_STUDENT_JWT_SECRET }}
+          #   TEST_ADMIN_JWT_SECRET=${{ secrets.TEST_ADMIN_JWT_SECRET }}
+          #   TEST_TEACHER_JWT_SECRET=${{ secrets.TEST_TEACHER_JWT_SECRET }}
+          #   TEST_STUDENT_JWT_SECRET=${{ secrets.TEST_STUDENT_JWT_SECRET }}
 
-            TEST_MYSQL_USER=${{ secrets.TEST_MYSQL_USER }}
-            TEST_MYSQL_PWD=${{ secrets.TEST_MYSQL_PWD }}
-            TEST_MYSQL_DB=${{ secrets.TEST_MYSQL_DB }}
+          #   TEST_MYSQL_USER=${{ secrets.TEST_MYSQL_USER }}
+          #   TEST_MYSQL_PWD=${{ secrets.TEST_MYSQL_PWD }}
+          #   TEST_MYSQL_DB=${{ secrets.TEST_MYSQL_DB }}
 
       # - name: Scan for vulnerabilities
       #   uses: aquasecurity/trivy-action@master
