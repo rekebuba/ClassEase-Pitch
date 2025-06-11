@@ -28,6 +28,7 @@ jobs:
 
       - name: Run tests using docker-compose
         env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
           MYSQL_DOCKER_HOST: ${{ secrets.MYSQL_DOCKER_HOST }}
 
           TEST_ADMIN_JWT_SECRET: ${{ secrets.TEST_ADMIN_JWT_SECRET }}
@@ -38,7 +39,7 @@ jobs:
           TEST_MYSQL_PWD: ${{ secrets.TEST_MYSQL_PWD }}
           TEST_MYSQL_DB: ${{ secrets.TEST_MYSQL_DB }}
         run: |
-          docker compose -f docker-compose.test.yml up --abort-on-container-exit --exit-code-from backend
+          docker compose -f .github/docker-compose.test.yml up --abort-on-container-exit --exit-code-from backend
 
       - name: Save test results
         uses: actions/upload-artifact@v4

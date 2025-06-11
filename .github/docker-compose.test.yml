@@ -5,6 +5,8 @@ services:
     image: ghcr.io/rekebuba/db:latest
     ports:
       - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: $MYSQL_ROOT_PASSWORD
 
   backend:
     image: ghcr.io/rekebuba/backend:latest
@@ -13,10 +15,10 @@ services:
     environment:
       MYSQL_DOCKER_HOST: $MYSQL_DOCKER_HOST
 
-      TEST_ADMIN_JWT_SECRET: $TEST_ADMIN_JWT_SECRET 
+      TEST_ADMIN_JWT_SECRET: $TEST_ADMIN_JWT_SECRET
       TEST_TEACHER_JWT_SECRET: $TEST_TEACHER_JWT_SECRET
       TEST_STUDENT_JWT_SECRET: $TEST_STUDENT_JWT_SECRET
-      
+
       TEST_MYSQL_USER: $TEST_MYSQL_USER
       TEST_MYSQL_PWD: $TEST_MYSQL_PWD
       TEST_MYSQL_DB: $TEST_MYSQL_DB
