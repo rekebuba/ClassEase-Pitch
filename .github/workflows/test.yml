@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 env:
-  IMAGE_TAG: sha-${{ github.sha }}  # Use commit SHA instead of latest
+  IMAGE_TAG: latest
 
 jobs:
   test:
