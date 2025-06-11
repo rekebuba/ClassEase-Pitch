@@ -27,7 +27,6 @@ COPY . .
 
 # Activate venv globally for this container
 ENV PATH="/opt/.venv/bin:$PATH"
-ENV PYTHONPATH=/ClassEase-Pitch/app/backend:$PYTHONPATH
 
 # Expose Flask port
 EXPOSE 5000
@@ -35,6 +34,7 @@ EXPOSE 5000
 ENV FLASK_APP=api.v1.app
 ENV FLASK_ENV=development
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/ClassEase-Pitch/app/backend
 
 # Run the Flask app
 CMD ["flask", "run", "--host=0.0.0.0", "--reload"]

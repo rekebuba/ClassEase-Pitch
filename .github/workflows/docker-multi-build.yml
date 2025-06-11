@@ -23,11 +23,15 @@ jobs:
     strategy:
       matrix:
         image_config:
+          - name: "devcontainer"
+            dockerfile: ".devcontainer/Dockerfile"
+            context: ".devcontainer"
+
           - name: "db"
             dockerfile: "app/db/Dockerfile"
             context: "app/db"
 
-          - name: "database"
+          - name: "backend"
             dockerfile: "app/backend/Dockerfile"
             context: "app/backend"
 
@@ -35,9 +39,6 @@ jobs:
             dockerfile: "app/frontend/Dockerfile"
             context: "app/frontend"
 
-          - name: "devcontainer"
-            dockerfile: ".devcontainer/Dockerfile"
-            context: ".devcontainer"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
