@@ -1,8 +1,11 @@
 services:
   db:
-    image: ghcr.io/rekebuba/db:${IMAGE_TAG:-latest}
+    image: mysql:8.0
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${TEST_MYSQL_DB}
+      MYSQL_USER: ${TEST_MYSQL_USER}
+      MYSQL_PASSWORD: ${TEST_MYSQL_PWD}
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-p${MYSQL_ROOT_PASSWORD}"]
       interval: 5s
@@ -22,14 +25,11 @@ services:
       TEST_MYSQL_PWD: ${TEST_MYSQL_PWD}
       TEST_MYSQL_DB: ${TEST_MYSQL_DB}
 
-      ADMIN_JWT_SECRET: ${TEST_ADMIN_JWT_SECRET}
-      TEACHER_JWT_SECRET: ${TEST_TEACHER_JWT_SECRET}
-      STUDENT_JWT_SECRET: ${TEST_STUDENT_JWT_SECRET}
-    volumes:
-      - ./:/app
-      - ./test-reports:/test-reports
-    working_dir: /app
+      TEST_ADMIN_JWT_SECRET: ${TEST_ADMIN_JWT_SECRET}
+      TEST_TEACHER_JWT_SECRET: ${TEST_TEACHER_JWT_SECRET}
+      TEST_STUDENT_JWT_SECRET: ${TEST_STUDENT_JWT_SECRET}
     command: >
-      bash -c "pytest --junitxml=/test-reports/results.xml 
-                   --cov=. 
-                   --cov-report=xml:/test-reports/coverage.xml"
+      bash -c "pytest"
+
+volumes:
+  mysql_data:
