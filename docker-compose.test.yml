@@ -17,6 +17,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - ./test-reports:/app/test-reports # Ensure pytest saves here
     environment:
       DB_HOST: db
       DB_PORT: 3306
@@ -29,7 +31,8 @@ services:
       TEST_TEACHER_JWT_SECRET: ${TEST_TEACHER_JWT_SECRET}
       TEST_STUDENT_JWT_SECRET: ${TEST_STUDENT_JWT_SECRET}
     command: >
-      bash -c "pytest --cov --cov-branch --cov-report=xml"
+      sh -c "mkdir -p test-reports &&
+             pytest --cov --cov-branch --cov-report=xml:test-reports/coverage.xml"
 
 volumes:
   mysql_data:
