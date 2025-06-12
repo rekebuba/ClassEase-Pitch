@@ -322,7 +322,8 @@ class PerSemesterSchema(BaseSchema):
 
 class AllStudentsSchema(BaseSchema):
     user = fields.Nested(
-        UserSchema(only=("identification", "image_path", "created_at"))
+        UserSchema(only=("identification", "image_path", "created_at")),
+        required=False, allow_none=True, dump_default=None
     )
     # it will be returned as a string ex: "John Doe Smith"
     student = fields.Nested(

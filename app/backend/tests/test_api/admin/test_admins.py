@@ -1,13 +1,15 @@
 #!/usr/bin/python
 
-from typing import Any, Dict
+from typing import Any, Dict, List
 from pydantic import TypeAdapter
 import pytest
 from models.admin import Admin
 from tests.test_api.factories import AdminFactory, EventFactory
+from tests.test_api.fixtures.admin_fixtures import AllStudentViewsResponse
 from tests.test_api.fixtures.methods import prepare_form_data
 from flask.testing import FlaskClient
 
+from tests.test_api.fixtures.student_fixtures import StudentQueryResponse
 from tests.test_api.schemas.base_schema import (
     AverageRangeResponseModel,
     DashboardUserInfoResponseModel,
@@ -169,6 +171,20 @@ class TestAdmin:
         assert "message" in response.json
         assert response.json["message"] == "Mark list created successfully!"
 
+    def test_student_query_table_data(
+        self, client: FlaskClient, admin_auth_header: Credential
+    ) -> None:
+        table_resp = client.post(
+            "/api/v1/admin/students", json={}, headers=admin_auth_header["header"]
+        )
+        assert table_resp.status_code == 200
+        assert table_resp.json is not None
+
+        try:
+            StudentQueryResponse(**table_resp.json)
+        except Exception as e:
+            pytest.fail(f"Response validation failed: {str(e)}")
+
     def test_student_grade_counts(
         self, client: FlaskClient, admin_auth_header: Credential
     ) -> None:
@@ -227,3 +243,245 @@ class TestAdmin:
             AverageRangeResponseModel(**response.json)
         except Exception as e:
             pytest.fail(f"Response validation failed: {str(e)}")
+
+    def test_admin_create_student_table_view(
+        self,
+        client: FlaskClient,
+        stud_registerd_for_semester_one_course: None,
+        admin_auth_header: Credential,
+        student_query_table_data: StudentQueryResponse,
+    ) -> None:
+        """
+        Test the saving of a student table view by an admin.
+        """
+        query = {
+            "page": 1,
+            "per_page": 10,
+            "JoinOperator": "and",
+            "tableName": "students",
+            "columns": ["identification", "grade"],
+            "sort": [
+                {
+                    "tableId": student_query_table_data.tableId.grade,
+                    "id": "grade",
+                    "desc": False,
+                }
+            ],
+            "filters": [
+                {
+                    "id": "identification",
+                    "variant": "text",
+                    "operator": "iLike",
+                    "value": "MAS/",
+                    "tableId": student_query_table_data.tableId.identification,
+                }
+            ],
+        }
+
+        response = client.post(
+            "/api/v1/admin/views",
+            json=query,
+            headers=admin_auth_header["header"],
+        )
+        assert response.status_code == 201
+        assert response.json is not None
+        assert "message" in response.json
+        assert response.json["message"] == "View Saved Successfully!"
+
+    def test_admin_all_student_table_views(
+        self,
+        client: FlaskClient,
+        stud_registerd_for_semester_one_course: None,
+        admin_create_student_table_view: Credential,
+    ) -> None:
+        """
+        Test the retrieval of all student table views.
+        """
+        response = client.get(
+            "/api/v1/admin/all-views/students",
+            headers=admin_create_student_table_view["header"],
+        )
+        assert response.status_code == 200
+        assert response.json is not None
+
+        # Validate the entire response structure
+        try:
+            # Validate a list of items
+            adapter = TypeAdapter(List[AllStudentViewsResponse])
+            adapter.validate_python(response.json)
+        except Exception as e:
+            pytest.fail(f"Response validation failed: {str(e)}")
+
+    def test_admin_rename_student_table_view(
+        self,
+        client: FlaskClient,
+        stud_registerd_for_semester_one_course: None,
+        admin_create_student_table_view: Credential,
+    ) -> None:
+        """
+        Test the renaming of a student table view.
+        """
+        response = client.get(
+            "/api/v1/admin/all-views/students",
+            headers=admin_create_student_table_view["header"],
+        )
+        assert response.status_code == 200
+        assert response.json is not None
+
+        try:
+            # Validate a list of items
+            adapter = TypeAdapter(List[AllStudentViewsResponse])
+            views = adapter.validate_python(response.json)
+        except Exception as e:
+            pytest.fail(f"Response validation failed: {str(e)}")
+
+        # Get the first view to rename
+        view = views[0]
+        new_name = f"Renamed {view.name}"
+
+        rename_data = {"name": new_name}
+
+        rename_response = client.put(
+            f"/api/v1/admin/update-view/students/{view.viewId}",
+            json=rename_data,
+            headers=admin_create_student_table_view["header"],
+        )
+        assert rename_response.status_code == 200
+        assert rename_response.json is not None
+        assert "message" in rename_response.json
+        assert rename_response.json["message"] == "View Renamed Successfully!"
+
+    def test_admin_update_student_table_view(
+        self,
+        client: FlaskClient,
+        stud_registerd_for_semester_one_course: None,
+        admin_create_student_table_view: Credential,
+        student_query_table_data: StudentQueryResponse,
+    ) -> None:
+        """
+        Test the renaming of a student table view.
+        """
+        response = client.get(
+            "/api/v1/admin/all-views/students",
+            headers=admin_create_student_table_view["header"],
+        )
+        assert response.status_code == 200
+        assert response.json is not None
+
+        try:
+            # Validate a list of items
+            adapter = TypeAdapter(List[AllStudentViewsResponse])
+            views = adapter.validate_python(response.json)
+        except Exception as e:
+            pytest.fail(f"Response validation failed: {str(e)}")
+
+        # Get the first view to rename
+        view = views[0]
+
+        update_query = {
+            "page": 2,
+            "per_page": 20,
+            "JoinOperator": "or",
+            "tableName": "students",
+            "columns": ["grade", "identification"],
+            "sort": [
+                {
+                    "tableId": view.columns[0],
+                    "id": "grade",
+                    "desc": False,
+                }
+            ],
+            "filters": [
+                {
+                    "id": "identification",
+                    "variant": "text",
+                    "operator": "iLike",
+                    "value": "MAS/",
+                    "tableId": view.columns[1],
+                }
+            ],
+        }
+
+        rename_response = client.put(
+            f"/api/v1/admin/update-view/students/{view.viewId}",
+            json=update_query,
+            headers=admin_create_student_table_view["header"],
+        )
+        assert rename_response.status_code == 200
+        assert rename_response.json is not None
+        assert "message" in rename_response.json
+        assert rename_response.json["message"] == "View Updated Successfully!"
+
+    def test_admin_single_student_table_view(
+        self,
+        client: FlaskClient,
+        stud_registerd_for_semester_one_course: None,
+        admin_create_student_table_view: Credential,
+    ) -> None:
+        """
+        Test the retrieval of a single student table view.
+        """
+        response = client.get(
+            "/api/v1/admin/all-views/students",
+            headers=admin_create_student_table_view["header"],
+        )
+        assert response.status_code == 200
+        assert response.json is not None
+
+        try:
+            # Validate a list of items
+            adapter = TypeAdapter(List[AllStudentViewsResponse])
+            views = adapter.validate_python(response.json)
+        except Exception as e:
+            pytest.fail(f"Response validation failed: {str(e)}")
+
+        # Get the first view to retrieve
+        view = views[0]
+
+        single_view_response = client.get(
+            f"/api/v1/admin/view/{view.viewId}",
+            headers=admin_create_student_table_view["header"],
+        )
+        assert single_view_response.status_code == 200
+        assert single_view_response.json is not None
+
+        # Validate the entire response structure
+        try:
+            AllStudentViewsResponse(**single_view_response.json)
+        except Exception as e:
+            pytest.fail(f"Response validation failed: {str(e)}")
+
+    def test_admin_delete_student_table_view(
+        self,
+        client: FlaskClient,
+        stud_registerd_for_semester_one_course: None,
+        admin_create_student_table_view: Credential,
+    ) -> None:
+        """
+        Test the deletion of a student table view.
+        """
+        response = client.get(
+            "/api/v1/admin/all-views/students",
+            headers=admin_create_student_table_view["header"],
+        )
+        assert response.status_code == 200
+        assert response.json is not None
+
+        try:
+            # Validate a list of items
+            adapter = TypeAdapter(List[AllStudentViewsResponse])
+            views = adapter.validate_python(response.json)
+        except Exception as e:
+            pytest.fail(f"Response validation failed: {str(e)}")
+
+        # Get the first view to delete
+        view = views[0]
+
+        delete_response = client.put(
+            f"/api/v1/admin/delete-view/students/{view.viewId}",
+            headers=admin_create_student_table_view["header"],
+        )
+        assert delete_response.status_code == 200
+        assert delete_response.json is not None
+        assert "message" in delete_response.json
+        assert delete_response.json["message"] == "View Deleted Successfully!"

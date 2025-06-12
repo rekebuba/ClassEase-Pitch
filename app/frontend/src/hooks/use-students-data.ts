@@ -25,13 +25,16 @@ import {
 } from "@/api/adminApi";
 
 
-export function useStudentsData(validQuery: SearchParams): StudentsDataResult {
+export function useStudentsData(validQuery: SearchParams | null): StudentsDataResult {
     const [data, setData] = useState<Student[]>([])
     const [pageCount, setPageCount] = useState(0)
     const [tableId, setTableId] = useState<TableId>({})
     const [statusCounts, setStatusCounts] = useState<StatusCount>({})
     const [gradeCounts, setGradeCounts] = useState<GradeCounts>({})
-    const [sectionCounts, setSectionCounts] = useState<SectionCounts>({})
+    const [sectionCounts, setSectionCounts] = useState<SectionCounts>({
+        sectionSemesterOne: {},
+        sectionSemesterTwo: {},
+    })
     const [averageRange, setAverageRange] = useState<AverageRange>({
         totalAverage: { min: "N/A", max: "N/A" },
         averageSemesterOne: { min: "N/A", max: "N/A" },
@@ -47,6 +50,12 @@ export function useStudentsData(validQuery: SearchParams): StudentsDataResult {
     const fetchData = async () => {
         setIsLoading(true)
         setError(null)
+        if (!validQuery) {
+            setData([])
+            setPageCount(0)
+            setTableId({})
+            return
+        }
 
         // Pass params to API calls if needed
         const [studentsResult, statusCountsResult, gradeCountsResult, sectionCounts, averageRangeResult] =
@@ -96,6 +105,12 @@ export function useStudentsData(validQuery: SearchParams): StudentsDataResult {
 
     // Fetch data when params change
     useEffect(() => {
+        if (!validQuery) {
+            setData([])
+            setPageCount(0)
+            setTableId({})
+            return
+        }
         fetchData()
     }, [validQuery])
 
@@ -123,8 +138,8 @@ export function studentsView() {
         setIsViewLoading(true)
         setViewError(null)
         try {
-            const result = await getAllStudentsViews()
-            setViews(result)
+            // const result = await getAllStudentsViews()
+            setViews([])
         }
         catch (err) {
             toast.error("Failed to fetch View Table", {

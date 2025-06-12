@@ -41,28 +41,28 @@ class ResponseData(BaseModel):
 
 
 class ResponseTableId(BaseModel):
-    identification: str
-    imagePath: str
-    createdAt: str
-    firstName_fatherName_grandFatherName: str
-    guardianName: str
-    guardianPhone: str
-    isActive: str
-    grade: str
-    sectionSemesterOne: str
-    sectionSemesterTwo: str
-    averageSemesterOne: str
-    averageSemesterTwo: str
-    rankSemesterOne: str
-    rankSemesterTwo: str
-    semesterOne: str
-    semesterTwo: str
-    finalScore: str
-    rank: str
+    identification: Optional[str] = None
+    imagePath: Optional[str] = None
+    createdAt: Optional[str] = None
+    firstName_fatherName_grandFatherName: Optional[str] = None
+    guardianName: Optional[str] = None
+    guardianPhone: Optional[str] = None
+    isActive: Optional[str] = None
+    grade: Optional[str] = None
+    sectionSemesterOne: Optional[str] = None
+    sectionSemesterTwo: Optional[str] = None
+    averageSemesterOne: Optional[str] = None
+    averageSemesterTwo: Optional[str] = None
+    rankSemesterOne: Optional[str] = None
+    rankSemesterTwo: Optional[str] = None
+    semesterOne: Optional[str] = None
+    semesterTwo: Optional[str] = None
+    finalScore: Optional[str] = None
+    rank: Optional[str] = None
 
 
 class StudentQueryResponse(BaseModel):
-    tableId: ResponseTableId
+    tableId: ResponseTableId = ResponseTableId()
     data: List[ResponseData]
 
 

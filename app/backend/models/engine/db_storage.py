@@ -24,6 +24,7 @@ from models.teacher_record import TeachersRecord  # noqa: F401
 from models.blacklist_token import BlacklistToken  # noqa: F401
 from models.event import Event  # noqa: F401
 from models.semester import Semester  # noqa: F401
+from models.saved_query_view import SavedQueryView # noqa: F401
 from models.year import Year, seed_year  # noqa: F401
 from models.stream import Stream, seed_streams  # noqa: F401
 from models.table import Table, seed_table  # noqa: F401

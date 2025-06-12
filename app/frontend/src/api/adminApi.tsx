@@ -1,4 +1,4 @@
-import { SearchParams } from '@/types';
+import { SearchParams } from "@/lib/types";
 import { api, zodApiHandler } from "@/api";
 import { toast } from 'sonner';
 import {

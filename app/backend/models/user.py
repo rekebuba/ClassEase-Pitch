@@ -26,3 +26,6 @@ class User(BaseModel):
     admins = relationship("Admin", back_populates="user", uselist=False)
     teachers = relationship("Teacher", back_populates="user", uselist=False)
     students = relationship("Student", back_populates="user", uselist=False)
+    saved_query_views = relationship(
+        "SavedQueryView", back_populates="user", cascade="all, delete-orphan"
+    )
