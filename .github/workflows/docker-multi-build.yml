@@ -154,9 +154,16 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: test-results
-          path: test-reports/
+          name: test-results-for-artifact
+          path: coverage.xml
           retention-days: 15
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          name: test-results-for-codecov
+          files: coverage.xml
+          fail_ci_if_error: true
 
   cleanup:
     needs: build-and-push
@@ -173,8 +180,6 @@ jobs:
         uses: dataaxiom/ghcr-cleanup-action@v1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          name: ${{ env.IMAGE_NAMESPACE }}/${{ matrix.image_config.name }}
-          type: container
           keep-n-tagged: ${{ env.KEEP_RECENT_VERSIONS }}
           exclude-tags: dev,main
           older-than: ${{ env.IMAGE_RETENTION_DAYS }} days

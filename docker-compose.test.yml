@@ -29,7 +29,7 @@ services:
       TEST_TEACHER_JWT_SECRET: ${TEST_TEACHER_JWT_SECRET}
       TEST_STUDENT_JWT_SECRET: ${TEST_STUDENT_JWT_SECRET}
     command: >
-      bash -c "pytest"
+      bash -c "pytest --cov --cov-branch --cov-report=xml"
 
 volumes:
   mysql_data:

@@ -5,8 +5,6 @@
 	],
 	"service": "devcontainer",
 	"workspaceFolder": "/ClassEase-Pitch",
-	"remoteUser": "vscode",
-	"containerUser": "vscode",
 	"customizations": {
 		"vscode": {
 			"extensions": [
@@ -17,7 +15,9 @@
 				"streetsidesoftware.code-spell-checker",
 				"ms-python.mypy-type-checker",
 				"charliermarsh.ruff",
-				"tamasfe.even-better-toml"
+				"tamasfe.even-better-toml",
+				"github.vscode-github-actions",
+				"redhat.vscode-xml"
 				// Add more extensions here
 			]
 		}
