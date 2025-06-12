@@ -18,7 +18,7 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - ./test-reports:/app/test-reports # Ensure pytest saves here
+      - ./test-reports:/ClassEase-Pitch/test-reports # Ensure pytest saves here
     environment:
       DB_HOST: db
       DB_PORT: 3306

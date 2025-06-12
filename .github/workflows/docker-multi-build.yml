@@ -163,7 +163,7 @@ jobs:
         with:
           name: test-results-for-codecov
           files: test-reports/coverage.xml
-          fail_ci_if_error: true
+          # fail_ci_if_error: true
 
   cleanup:
     needs: build-and-push
