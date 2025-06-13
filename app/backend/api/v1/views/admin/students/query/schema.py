@@ -338,8 +338,6 @@ class AllStudentsSchema(BaseSchema):
     averages = fields.Nested(AveragePerSemesterSchema, required=False, allow_none=True)
     ranks = fields.Nested(RankPerSemesterSchema, required=False, allow_none=True)
 
-    semesters = fields.Nested(PerSemesterSchema, required=False, allow_none=True)
-
     year_record = fields.Nested(
         STUDYearRecordSchema(only=("final_score", "rank")),
         required=False,

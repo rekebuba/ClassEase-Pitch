@@ -1,10 +1,11 @@
 #!/usr/bin/python
 
+from dataclasses import asdict
 from typing import Any, Dict, List
 from pydantic import TypeAdapter
 import pytest
 from models.admin import Admin
-from tests.test_api.factories import AdminFactory, EventFactory
+from tests.test_api.factories import AdminFactory, EventFactory, QueryFactory
 from tests.test_api.fixtures.admin_fixtures import AllStudentViewsResponse
 from tests.test_api.fixtures.methods import prepare_form_data
 from flask.testing import FlaskClient
@@ -254,33 +255,18 @@ class TestAdmin:
         """
         Test the saving of a student table view by an admin.
         """
-        query = {
-            "page": 1,
-            "per_page": 10,
-            "JoinOperator": "and",
-            "tableName": "students",
-            "columns": ["identification", "grade"],
-            "sort": [
-                {
-                    "tableId": student_query_table_data.tableId.grade,
-                    "id": "grade",
-                    "desc": False,
-                }
-            ],
-            "filters": [
-                {
-                    "id": "identification",
-                    "variant": "text",
-                    "operator": "iLike",
-                    "value": "MAS/",
-                    "tableId": student_query_table_data.tableId.identification,
-                }
-            ],
-        }
+        table_id = dict(student_query_table_data.tableId)
+        query = QueryFactory.create(
+            tableId=table_id,
+            get_sort=True,
+            create_sort=2,
+            get_filter=True,
+            create_filter=2,
+        )
 
         response = client.post(
             "/api/v1/admin/views",
-            json=query,
+            json=asdict(query),
             headers=admin_auth_header["header"],
         )
         assert response.status_code == 201
@@ -378,33 +364,18 @@ class TestAdmin:
         # Get the first view to rename
         view = views[0]
 
-        update_query = {
-            "page": 2,
-            "per_page": 20,
-            "JoinOperator": "or",
-            "tableName": "students",
-            "columns": ["grade", "identification"],
-            "sort": [
-                {
-                    "tableId": view.columns[0],
-                    "id": "grade",
-                    "desc": False,
-                }
-            ],
-            "filters": [
-                {
-                    "id": "identification",
-                    "variant": "text",
-                    "operator": "iLike",
-                    "value": "MAS/",
-                    "tableId": view.columns[1],
-                }
-            ],
-        }
+        table_id = dict(student_query_table_data.tableId)
+        update_query = QueryFactory.create(
+            tableId=table_id,
+            get_sort=True,
+            create_sort=2,
+            get_filter=True,
+            create_filter=2,
+        )
 
         rename_response = client.put(
             f"/api/v1/admin/update-view/students/{view.viewId}",
-            json=update_query,
+            json=asdict(update_query),
             headers=admin_create_student_table_view["header"],
         )
         assert rename_response.status_code == 200

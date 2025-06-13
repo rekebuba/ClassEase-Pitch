@@ -1,5 +1,6 @@
 from typing import (
     Any,
+    Callable,
     Dict,
     Generic,
     List,
@@ -12,7 +13,7 @@ import random
 import factory
 import bcrypt
 from PIL import Image
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 from datetime import date, datetime, timedelta
 from io import BufferedReader
 from factory import LazyAttribute
@@ -23,6 +24,7 @@ from models.section import Section
 from models.stud_semester_record import STUDSemesterRecord
 from models.stud_year_record import STUDYearRecord
 from models.subject import Subject
+from models.table import Table
 from models.year import Year
 from models.semester import Semester
 from models.teacher import Teacher
@@ -37,6 +39,7 @@ from factory.fuzzy import FuzzyChoice
 from models.base_model import CustomTypes
 from sqlalchemy.orm import scoped_session, Session
 import tempfile
+
 
 fake = Faker()
 T = TypeVar("T")
@@ -164,6 +167,19 @@ class BaseFactory(SQLAlchemyModelFactory, Generic[T]):  # type: ignore[type-arg]
 
     @classmethod
     def create(cls: Type["BaseFactory[T]"], **kwargs: Any) -> T:
+        return super().create(**kwargs)  # type: ignore[no-any-return]
+
+
+class TypedFactory(factory.Factory, Generic[T]):  # type: ignore[type-arg]
+    class Meta:
+        model = None  # Placeholder, set in subclasses
+
+    @classmethod
+    def build(cls, **kwargs: Any) -> T:
+        return super().build(**kwargs)  # type: ignore[no-any-return]
+
+    @classmethod
+    def create(cls, **kwargs: Any) -> T:
         return super().create(**kwargs)  # type: ignore[no-any-return]
 
 
@@ -665,7 +681,7 @@ class AssessmentTypesFactory(factory.Factory[Any]):
     class Meta:
         model = AssessmentTypes
 
-    type = factory.Faker("random_element", elements=("Mid", "Final"))
+    type: Any = LazyAttribute(lambda _: random.choice(["Mid", "Final"]))
     percentage: Any = LazyAttribute(lambda obj: 30 if obj.type == "Mid" else 70)
 
 
@@ -690,3 +706,339 @@ class MarkListFactory(factory.Factory[Any]):
     mark_assessment: Any = LazyAttribute(
         lambda obj: [MarkAssessmentFactory() for _ in range(obj.grade_num)]
     )
+
+
+@dataclass
+class SortQuery:
+    tableId: str
+    id: str
+    desc: bool = False
+
+
+@dataclass
+class FilterQuery:
+    id: str
+    tableId: str
+    variant: str
+    operator: str
+    value: Any
+
+
+@dataclass
+class QueryResponse:
+    page: int
+    per_page: int
+    join_operator: str
+    columns: List[str]
+    table_name: Optional[str] = None
+    sort: List[SortQuery] = field(default_factory=list)
+    filters: List[FilterQuery] = field(default_factory=list)
+
+
+class SortQueryFactory(TypedFactory[SortQuery]):
+    class Meta:
+        model = SortQuery
+        exclude = ("sort_for",)
+
+    # general fields helping defining others
+    sort_for: Any = LazyAttribute(lambda _: None)
+
+    id: Any = LazyAttribute(lambda x: next(iter(x.sort_for.items()))[0])
+    tableId: Any = LazyAttribute(lambda x: next(iter(x.sort_for.items()))[1])
+    desc: Any = LazyAttribute(lambda _: fake.boolean())
+
+    def __init__(self, *args: Any, **kwargs: Any) -> Any:
+        sort_for = kwargs.get("sort_for", self.sort_for)
+        if not sort_for:
+            raise ValueError("sort_for is required and cannot be None")
+
+        # Call the parent constructor
+        super().__init__(*args, **kwargs)
+
+
+OPERATOR_CONFIG = {
+    "text": ["iLike", "notLike", "startsWith", "endWith", "eq"],
+    "number": ["eq", "ne", "lt", "lte", "gt", "gte"],
+    "select": ["eq", "ne", "isEmpty", "isNotEmpty"],
+    "multiSelect": ["in", "notIn", "isEmpty", "isNotEmpty"],
+    "range": ["isBetween", "isNotBetween"],
+    "date": [
+        "eq",
+        "ne",
+        "lt",
+        "lte",
+        "gt",
+        "gte",
+        "isBetween",
+        "isRelativeToToday",
+        "isEmpty",
+        "isNotEmpty",
+    ],
+    "dateRange": [
+        "eq",
+        "ne",
+        "lt",
+        "lte",
+        "gt",
+        "gte",
+        "isBetween",
+        "isRelativeToToday",
+        "isEmpty",
+        "isNotEmpty",
+    ],
+    "boolean": ["eq", "ne"],
+}
+
+
+@dataclass
+class Variant:
+    value: str
+
+    def __post_init__(self):
+        if self.value not in OPERATOR_CONFIG:
+            raise ValueError(
+                f"Invalid value '{self.value}'. Must be one of {list(OPERATOR_CONFIG)}"
+            )
+
+
+class variantFactory(TypedFactory[Variant]):
+    class Meta:
+        model = Variant
+        exclude = ("variant_for", "variants")
+
+    # general fields helping defining others
+    variant_for: Any = LazyAttribute(lambda _: None)
+    variants: Any = LazyAttribute(
+        lambda _: {
+            "identification": ["text"],
+            "createdAt": ["dateRange"],
+            "firstName_fatherName_grandFatherName": ["text"],
+            "guardianName": ["text"],
+            "guardianPhone": ["text"],
+            "isActive": ["boolean"],
+            "grade": ["multiSelect"],
+            "sectionSemesterOne": ["multiSelect"],
+            "sectionSemesterTwo": ["multiSelect"],
+            "averageSemesterOne": ["multiSelect"],
+            "averageSemesterTwo": ["multiSelect"],
+            "rankSemesterOne": ["multiSelect"],
+            "rankSemesterTwo": ["multiSelect"],
+            "finalScore": ["multiSelect"],
+            "rank": ["multiSelect"],
+        }
+    )
+    value: Any = LazyAttribute(
+        lambda obj: random.choice(obj.variants.get(obj.variant_for, []))
+    )
+
+
+@dataclass
+class Value:
+    identification: str
+    createdAt: str
+    firstName_fatherName_grandFatherName: str
+    guardianName: str
+    guardianPhone: str
+    isActive: str
+    grade: str
+    sectionSemesterOne: str
+    sectionSemesterTwo: str
+    averageSemesterOne: str
+    averageSemesterTwo: str
+    rankSemesterOne: str
+    rankSemesterTwo: str
+    finalScore: str
+    rank: str
+
+
+class TableIdFactory(TypedFactory[Value]):
+    class Meta:
+        model = Value
+        exclude = ("db_table",)
+
+    db_table: Any = LazyAttribute(
+        lambda _: {
+            row[0]: row[1] for row in storage.session.query(Table.name, Table.id).all()
+        }
+    )
+
+    identification: Any = LazyAttribute(lambda x: x.db_table["users"])
+    firstName_fatherName_grandFatherName: Any = LazyAttribute(
+        lambda x: x.db_table["students"]
+    )
+    guardianName: Any = LazyAttribute(lambda x: x.db_table["students"])
+    guardianPhone: Any = LazyAttribute(lambda x: x.db_table["students"])
+    isActive: Any = LazyAttribute(lambda x: x.db_table["students"])
+
+    grade: Any = LazyAttribute(lambda x: x.db_table["grades"])
+    sectionSemesterOne: Any = LazyAttribute(
+        lambda x: x.db_table["sections"]
+    )
+    sectionSemesterTwo: Any = LazyAttribute(
+        lambda x: x.db_table["sections"]
+    )
+    createdAt: Any = LazyAttribute(lambda x: x.db_table["users"])
+    averageSemesterOne: Any = LazyAttribute(
+        lambda x: x.db_table["student_semester_records"]
+    )
+    averageSemesterTwo: Any = LazyAttribute(
+        lambda x: x.db_table["student_semester_records"]
+    )
+    rankSemesterOne: Any = LazyAttribute(
+        lambda x: x.db_table["student_semester_records"]
+    )
+    rankSemesterTwo: Any = LazyAttribute(
+        lambda x: x.db_table["student_semester_records"]
+    )
+    finalScore: Any = LazyAttribute(lambda x: x.db_table["student_year_records"])
+    rank: Any = LazyAttribute(lambda x: x.db_table["student_year_records"])
+
+
+@dataclass
+class MinMax:
+    min: Optional[float | int] = None
+    max: Optional[float | int] = None
+
+    def __post_init__(self):
+        if self.min is not None and self.max is not None and self.min > self.max:
+            raise ValueError("min cannot be greater than max")
+
+
+# Helper for MinMaxFactory
+MINMAX_GENERATE: Dict[type, Callable[[int, int], Any]] = {
+    int: lambda x, y: random.randint(x, y),
+    float: lambda x, y: round(random.uniform(x, y), 2),
+    date: lambda x, y: str(
+        fake.date_between(
+            x if isinstance(x, date) else datetime.strptime(str(x), "%Y-%m-%d").date(),
+            y if isinstance(y, date) else datetime.strptime(str(y), "%Y-%m-%d").date(),
+        )
+    ),
+}
+
+
+class MinMaxFactory(TypedFactory[MinMax]):
+    class Meta:
+        model = MinMax
+        exclude = ("type", "lowest", "highest")
+
+    # general fields helping defining others
+    type: Any = LazyAttribute(lambda _: None)
+    lowest: Any = LazyAttribute(lambda _: 0)
+    highest: Any = LazyAttribute(lambda _: 100)
+
+    min: Any = LazyAttribute(lambda x: MINMAX_GENERATE.get(x.type)(x.lowest, x.highest))
+    max: Any = LazyAttribute(lambda x: MINMAX_GENERATE.get(x.type)(x.min, x.highest))
+
+
+class valueFactory(TypedFactory[Value]):
+    class Meta:
+        model = Value
+
+    identification: Any = LazyAttribute(lambda _: "MAS/100/23")
+    firstName_fatherName_grandFatherName: Any = LazyAttribute(lambda _: fake.name())
+    guardianName: Any = LazyAttribute(lambda _: fake.name())
+    guardianPhone: Any = LazyAttribute(lambda _: "091234567")
+    isActive: Any = LazyAttribute(lambda _: fake.boolean())
+    grade: Any = LazyAttribute(
+        lambda _: random.sample(range(1, 11), random.randint(1, 10))
+    )
+    sectionSemesterOne: Any = LazyAttribute(
+        lambda _: random.sample(["A", "B", "C"], random.randint(1, 3))
+    )
+    sectionSemesterTwo: Any = LazyAttribute(
+        lambda _: random.sample(["A", "B", "C"], random.randint(1, 3))
+    )
+    createdAt: Any = LazyAttribute(
+        lambda _: MinMaxFactory(
+            type=date, lowest=fake.past_date(), highest=fake.future_date()
+        )
+    )
+    averageSemesterOne: Any = LazyAttribute(lambda _: MinMaxFactory(type=float))
+    averageSemesterTwo: Any = LazyAttribute(lambda _: MinMaxFactory(type=float))
+    rankSemesterOne: Any = LazyAttribute(
+        lambda _: MinMaxFactory(type=int, lowest=1, highest=3)
+    )
+    rankSemesterTwo: Any = LazyAttribute(
+        lambda _: MinMaxFactory(type=int, lowest=1, highest=3)
+    )
+    finalScore: Any = LazyAttribute(lambda _: MinMaxFactory(type=float))
+    rank: Any = LazyAttribute(lambda _: MinMaxFactory(type=int, lowest=1, highest=3))
+
+
+class FilterQueryFactory(TypedFactory[FilterQuery]):
+    class Meta:
+        model = FilterQuery
+        exclude = ("filter_for",)
+
+    # general fields helping defining others
+    filter_for: Any = LazyAttribute(lambda _: None)
+
+    id: Any = LazyAttribute(lambda x: next(iter(x.filter_for.items()))[0])
+    tableId: Any = LazyAttribute(lambda x: next(iter(x.filter_for.items()))[1])
+    variant: Any = LazyAttribute(lambda x: variantFactory(variant_for=x.id).value)
+    operator: Any = LazyAttribute(
+        lambda x: random.choice(OPERATOR_CONFIG.get(x.variant, []))
+    )
+
+    value: Any = LazyAttribute(lambda x: getattr(valueFactory(), x.id))
+
+    def __init__(self, *args: Any, **kwargs: Any) -> Any:
+        filter_for = kwargs.get("filter_for", self.filter_for)
+        if not filter_for:
+            raise ValueError("filter_for is required and cannot be None")
+
+        # Call the parent constructor
+        super().__init__(*args, **kwargs)
+
+
+class QueryFactory(TypedFactory[QueryResponse]):
+    class Meta:
+        model = QueryResponse
+        exclude = ("tableId", "get_sort", "get_filter", "create_sort", "create_filter")
+
+    # general fields helping defining others
+    tableId: Any = LazyAttribute(lambda _: None)
+    get_sort: Any = LazyAttribute(lambda _: False)
+    get_filter: Any = LazyAttribute(lambda _: False)
+    create_sort: Any = LazyAttribute(lambda _: 1)
+    create_filter: Any = LazyAttribute(lambda _: 1)
+
+    page: Any = LazyAttribute(lambda _: 1)
+    per_page: Any = LazyAttribute(lambda _: 10)
+    join_operator: Any = LazyAttribute(lambda _: random.choice(["and", "or"]))
+    table_name: Any = LazyAttribute(lambda _: "students")
+    columns: Any = LazyAttribute(
+        lambda obj: random.sample(
+            list(obj.tableId.keys()), random.randint(1, len(obj.tableId))
+        )
+    )
+    sort: Any = LazyAttribute(
+        lambda obj: [
+            SortQueryFactory(
+                sort_for=dict([random.choice(list(obj.tableId.items()))]),
+            )
+            for _ in range(obj.create_sort)
+        ]
+        if obj.get_sort
+        else []
+    )
+
+    filters: Any = LazyAttribute(
+        lambda obj: [
+            FilterQueryFactory(
+                filter_for=dict([random.choice(list(obj.tableId.items()))]),
+            )
+            for _ in range(obj.create_filter)
+        ]
+        if obj.get_filter
+        else []
+    )
+
+    def __init__(self, *args: Any, **kwargs: Any) -> Any:
+        tableId = kwargs.get("tableId", self.tableId)
+        if not tableId:
+            raise ValueError("tableId is required and cannot be None")
+
+        # Call the parent constructor
+        super().__init__(*args, **kwargs)

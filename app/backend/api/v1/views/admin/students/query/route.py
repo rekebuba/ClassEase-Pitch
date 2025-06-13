@@ -125,12 +125,6 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
                 }
                 if sections
                 else {},
-                "semesters": {
-                    f"semester_{num2words(i)}": v
-                    for i, v in enumerate(semesters.split(","), start=1)
-                }
-                if semesters
-                else {},
             }
             for user, student, year_record, grade, averages, ranks, sections, semesters in paginated_result[
                 "items"

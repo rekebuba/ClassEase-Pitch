@@ -5,7 +5,7 @@ import pytest
 from sqlalchemy.orm import scoped_session, Session
 
 from models.semester import Semester
-from tests.test_api.factories import SemesterFactory
+from tests.test_api.factories import QueryFactory, SemesterFactory
 from tests.test_api.fixtures.student_fixtures import StudentQueryResponse
 from tests.typing import Credential
 
@@ -67,29 +67,14 @@ def admin_create_student_table_view(
     """
     Fixture to test the saving of student table views.
     """
-    query = {
-        "page": 1,
-        "per_page": 10,
-        "JoinOperator": "and",
-        "tableName": "students",
-        "columns": ["identification", "grade"],
-        "sort": [
-            {
-                "tableId": student_query_table_data.tableId.grade,
-                "id": "grade",
-                "desc": False,
-            }
-        ],
-        "filters": [
-            {
-                "id": "identification",
-                "variant": "text",
-                "operator": "iLike",
-                "value": "MAS/",
-                "tableId": student_query_table_data.tableId.identification,
-            }
-        ],
-    }
+    table_id = dict(student_query_table_data.tableId)
+    query = QueryFactory(
+        tableId=table_id,
+        get_sort=True,
+        create_sort=2,
+        get_filter=True,
+        create_filter=2,
+    )
 
     response = client.post(
         "/api/v1/admin/views",

@@ -21,7 +21,6 @@ class ResponseData(BaseModel):
     """for all students data after post dump."""
 
     identification: str
-    imagePath: str
     createdAt: str
     guardianName: str
     guardianPhone: str
@@ -30,8 +29,6 @@ class ResponseData(BaseModel):
     grade: Optional[int]
     finalScore: Optional[float]
     rank: Optional[int]
-    semesterOne: Optional[int]
-    semesterTwo: Optional[int]
     sectionSemesterOne: Optional[str]
     sectionSemesterTwo: Optional[str]
     averageSemesterOne: Optional[float]
@@ -42,7 +39,6 @@ class ResponseData(BaseModel):
 
 class ResponseTableId(BaseModel):
     identification: Optional[str] = None
-    imagePath: Optional[str] = None
     createdAt: Optional[str] = None
     firstName_fatherName_grandFatherName: Optional[str] = None
     guardianName: Optional[str] = None
@@ -55,8 +51,6 @@ class ResponseTableId(BaseModel):
     averageSemesterTwo: Optional[str] = None
     rankSemesterOne: Optional[str] = None
     rankSemesterTwo: Optional[str] = None
-    semesterOne: Optional[str] = None
-    semesterTwo: Optional[str] = None
     finalScore: Optional[str] = None
     rank: Optional[str] = None
 

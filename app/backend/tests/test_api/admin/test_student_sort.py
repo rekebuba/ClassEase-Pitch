@@ -1,45 +1,44 @@
+from dataclasses import asdict
 from typing import Any, Dict
 from flask.testing import FlaskClient
-import pytest
 
-from tests import json_test_data
-from tests.test_api.fixtures.student_fixtures import StudentQueryResponse
+from tests.test_api.factories import QueryFactory, TableIdFactory
 from tests.typing import Credential
 
-# Read and prepare data at module level
-raw_data = json_test_data["simple_sort"]
 
-# Create a list of tuples for parametrize
-test_param = [tuple(case["sort"]) for case in raw_data]
-test_ids = [case["id"] for case in raw_data]
+def pytest_generate_tests(metafunc):
+    if "search_params" in metafunc.fixturenames:
+        table_id = TableIdFactory.create()
+        search_params = QueryFactory.create_batch(
+            tableId=asdict(table_id), get_sort=True, size=20
+        )
+
+        # test_ids = [
+        #     f"{case.sort[0].id}-{'desc' if case.sort[0].desc else 'asc'}"
+        #     for case in search_params
+        # ]
+
+        metafunc.parametrize(
+            "search_params",
+            [asdict(param) for param in search_params],
+        )
 
 
 # --- Test Cases ---
 class TestAdminStudentSorts:
-    @pytest.mark.parametrize("sort", test_param, ids=test_ids)
     def test_student_name_sorting(
         self,
         client: FlaskClient,
         register_all_students: None,
         stud_registerd_for_semester_one_course: None,
         stud_registerd_for_semester_two_course: None,
-        student_query_table_data: StudentQueryResponse,
         admin_auth_header: Credential,
-        sort: tuple[Dict[str, Any], Dict[str, Any]],
+        search_params: Dict[str, Any],
     ) -> None:
-        first_id = sort[0]["id"]
-        sort_first = sort[0]["desc"]
+        search_params.pop("columns")
+        search_params.pop("table_name")
 
-        table_ids = student_query_table_data.tableId
-
-        sort[0]["tableId"] = getattr(table_ids, first_id)
-        # Build query with sorting
-        search_params = {
-            "sort": [sort[0]],
-            "filters": [],
-            "page": 1,
-            "per_page": 10,
-        }
+        # test_id = f"{search_params['sort'][0]['id']}-{'desc' if search_params['sort'][0]['desc'] else 'asc'}"
 
         response = client.post(
             "/api/v1/admin/students",
@@ -54,6 +53,10 @@ class TestAdminStudentSorts:
         assert len(results) > 0
 
         # Verify sorting
+        first_id = search_params["sort"][0].get("id")
+        sort_first = search_params["sort"][0].get("desc", False)
+        assert first_id is not None, "Sort ID must be provided in search params"
+
         names = [r[first_id] for r in results]
         assert names == sorted(
             names, key=lambda x: (x is not None, x), reverse=sort_first
