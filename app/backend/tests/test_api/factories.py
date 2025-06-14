@@ -730,6 +730,7 @@ class QueryResponse:
     per_page: int
     join_operator: str
     columns: List[str]
+    sort_test_ids: str
     table_name: Optional[str] = None
     sort: List[SortQuery] = field(default_factory=list)
     filters: List[FilterQuery] = field(default_factory=list)
@@ -871,12 +872,8 @@ class TableIdFactory(TypedFactory[Value]):
     isActive: Any = LazyAttribute(lambda x: x.db_table["students"])
 
     grade: Any = LazyAttribute(lambda x: x.db_table["grades"])
-    sectionSemesterOne: Any = LazyAttribute(
-        lambda x: x.db_table["sections"]
-    )
-    sectionSemesterTwo: Any = LazyAttribute(
-        lambda x: x.db_table["sections"]
-    )
+    sectionSemesterOne: Any = LazyAttribute(lambda x: x.db_table["sections"])
+    sectionSemesterTwo: Any = LazyAttribute(lambda x: x.db_table["sections"])
     createdAt: Any = LazyAttribute(lambda x: x.db_table["users"])
     averageSemesterOne: Any = LazyAttribute(
         lambda x: x.db_table["student_semester_records"]
@@ -992,20 +989,62 @@ class FilterQueryFactory(TypedFactory[FilterQuery]):
         super().__init__(*args, **kwargs)
 
 
+class RandomNoRepeat:
+    def __init__(self, values: List[Any]) -> None:
+        self.original = values[:]
+        self.remaining = values[:]
+
+    def __call__(self):
+        if not self.remaining:
+            # Optionally, you can reset here
+            self.remaining = self.original[:]
+            # Or raise an error: raise StopIteration("No more values to return.")
+
+        choice = random.choice(self.remaining)
+        self.remaining.remove(choice)
+        return choice
+
+
 class QueryFactory(TypedFactory[QueryResponse]):
     class Meta:
         model = QueryResponse
-        exclude = ("tableId", "get_sort", "get_filter", "create_sort", "create_filter")
+        exclude = (
+            "tableId",
+            "get_sort",
+            "get_filter",
+            "create_sort",
+            "create_filter",
+            "sort_many",
+            "filters_many",
+        )
+
+    @staticmethod
+    def generate_sort_queries(tableId: Dict[str, str], create: int) -> List[SortQuery]:
+        picker = RandomNoRepeat(list(tableId.items()))
+
+        queries: List[SortQuery] = []
+        for _ in range(create):
+            random_pair = picker()
+            sort_for = dict([random_pair])
+            queries.append(SortQueryFactory.create(sort_for=sort_for))
+
+        return queries
 
     # general fields helping defining others
     tableId: Any = LazyAttribute(lambda _: None)
     get_sort: Any = LazyAttribute(lambda _: False)
     get_filter: Any = LazyAttribute(lambda _: False)
-    create_sort: Any = LazyAttribute(lambda _: 1)
-    create_filter: Any = LazyAttribute(lambda _: 1)
+    sort_many: Any = LazyAttribute(lambda _: False)
+    filters_many: Any = LazyAttribute(lambda _: False)
+    create_sort: Any = LazyAttribute(
+        lambda x: random.randint(1, len(x.tableId)) if x.sort_many else 1
+    )
+    create_filter: Any = LazyAttribute(
+        lambda x: random.randint(1, len(x.tableId)) if x.filters_many else 1
+    )
 
     page: Any = LazyAttribute(lambda _: 1)
-    per_page: Any = LazyAttribute(lambda _: 10)
+    per_page: Any = LazyAttribute(lambda _: random.choice([10, 20, 30, 40, 50]))
     join_operator: Any = LazyAttribute(lambda _: random.choice(["and", "or"]))
     table_name: Any = LazyAttribute(lambda _: "students")
     columns: Any = LazyAttribute(
@@ -1014,12 +1053,7 @@ class QueryFactory(TypedFactory[QueryResponse]):
         )
     )
     sort: Any = LazyAttribute(
-        lambda obj: [
-            SortQueryFactory(
-                sort_for=dict([random.choice(list(obj.tableId.items()))]),
-            )
-            for _ in range(obj.create_sort)
-        ]
+        lambda obj: QueryFactory.generate_sort_queries(obj.tableId, obj.create_sort)
         if obj.get_sort
         else []
     )
@@ -1033,6 +1067,10 @@ class QueryFactory(TypedFactory[QueryResponse]):
         ]
         if obj.get_filter
         else []
+    )
+
+    sort_test_ids: Any = LazyAttribute(
+        lambda x: ", ".join(f"{s.id}-{'desc' if s.desc else 'asc'}" for s in x.sort)
     )
 
     def __init__(self, *args: Any, **kwargs: Any) -> Any:

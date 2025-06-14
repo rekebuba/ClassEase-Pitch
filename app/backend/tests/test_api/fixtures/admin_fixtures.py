@@ -1,3 +1,4 @@
+from dataclasses import asdict
 from typing import Any, Dict, Iterator, List, Optional
 from flask.testing import FlaskClient
 from pydantic import BaseModel
@@ -68,13 +69,16 @@ def admin_create_student_table_view(
     Fixture to test the saving of student table views.
     """
     table_id = dict(student_query_table_data.tableId)
-    query = QueryFactory(
-        tableId=table_id,
-        get_sort=True,
-        create_sort=2,
-        get_filter=True,
-        create_filter=2,
+    query = asdict(
+        QueryFactory.create(
+            tableId=table_id,
+            get_sort=True,
+            create_sort=2,
+            get_filter=True,
+            create_filter=2,
+        )
     )
+    query.pop("sort_test_ids", None)
 
     response = client.post(
         "/api/v1/admin/views",

@@ -109,7 +109,7 @@ def register_all_students(
 
 
 @pytest.fixture(scope="session")
-def stud_registerd_for_semester_one_course(
+def register_stud_for_semester_one_course(
     db_session: scoped_session[Session],
     semester_one_created: Semester,
     student_data: Iterator[Student],
@@ -138,7 +138,7 @@ def stud_registerd_for_semester_one_course(
 
 
 @pytest.fixture(scope="session")
-def stud_registerd_for_semester_two_course(
+def register_stud_for_semester_two_course(
     db_session: scoped_session[Session],
     semester_two_created: Semester,
     student_data: Iterator[Student],

@@ -6,7 +6,7 @@ from flask.testing import FlaskClient
 import pytest
 from models import storage
 from typing import Iterator
-from tests import test_app
+from tests import remove_json_file, test_app
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -18,6 +18,9 @@ def app_session() -> Iterator[Flask]:
     storage.rollback()
     storage.session.remove()
     storage.drop_all()
+
+    remove_json_file("student_sort_query.json")
+    remove_json_file("student_sort_advance_query.json")
 
 
 @pytest.fixture(scope="session")

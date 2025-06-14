@@ -133,7 +133,7 @@ class TestAdmin:
     def test_registered_grades_for_mark_list_creation(
         self,
         client: FlaskClient,
-        stud_registerd_for_semester_one_course: None,
+        register_stud_for_semester_one_course: None,
         admin_auth_header: Credential,
     ) -> None:
         """
@@ -155,7 +155,7 @@ class TestAdmin:
     def test_mark_list_creation(
         self,
         client: FlaskClient,
-        stud_registerd_for_semester_one_course: None,
+        register_stud_for_semester_one_course: None,
         fake_mark_list: Dict[str, Any],
         admin_auth_header: Credential,
     ) -> None:
@@ -248,7 +248,7 @@ class TestAdmin:
     def test_admin_create_student_table_view(
         self,
         client: FlaskClient,
-        stud_registerd_for_semester_one_course: None,
+        register_stud_for_semester_one_course: None,
         admin_auth_header: Credential,
         student_query_table_data: StudentQueryResponse,
     ) -> None:
@@ -256,17 +256,20 @@ class TestAdmin:
         Test the saving of a student table view by an admin.
         """
         table_id = dict(student_query_table_data.tableId)
-        query = QueryFactory.create(
-            tableId=table_id,
-            get_sort=True,
-            create_sort=2,
-            get_filter=True,
-            create_filter=2,
+        query = asdict(
+            QueryFactory.create(
+                tableId=table_id,
+                get_sort=True,
+                create_sort=2,
+                get_filter=True,
+                create_filter=2,
+            )
         )
+        query.pop("sort_test_ids", None)
 
         response = client.post(
             "/api/v1/admin/views",
-            json=asdict(query),
+            json=query,
             headers=admin_auth_header["header"],
         )
         assert response.status_code == 201
@@ -277,7 +280,7 @@ class TestAdmin:
     def test_admin_all_student_table_views(
         self,
         client: FlaskClient,
-        stud_registerd_for_semester_one_course: None,
+        register_stud_for_semester_one_course: None,
         admin_create_student_table_view: Credential,
     ) -> None:
         """
@@ -301,7 +304,7 @@ class TestAdmin:
     def test_admin_rename_student_table_view(
         self,
         client: FlaskClient,
-        stud_registerd_for_semester_one_course: None,
+        register_stud_for_semester_one_course: None,
         admin_create_student_table_view: Credential,
     ) -> None:
         """
@@ -340,7 +343,7 @@ class TestAdmin:
     def test_admin_update_student_table_view(
         self,
         client: FlaskClient,
-        stud_registerd_for_semester_one_course: None,
+        register_stud_for_semester_one_course: None,
         admin_create_student_table_view: Credential,
         student_query_table_data: StudentQueryResponse,
     ) -> None:
@@ -365,17 +368,20 @@ class TestAdmin:
         view = views[0]
 
         table_id = dict(student_query_table_data.tableId)
-        update_query = QueryFactory.create(
-            tableId=table_id,
-            get_sort=True,
-            create_sort=2,
-            get_filter=True,
-            create_filter=2,
+        update_query = asdict(
+            QueryFactory.create(
+                tableId=table_id,
+                get_sort=True,
+                create_sort=2,
+                get_filter=True,
+                create_filter=2,
+            )
         )
+        update_query.pop("sort_test_ids", None)
 
         rename_response = client.put(
             f"/api/v1/admin/update-view/students/{view.viewId}",
-            json=asdict(update_query),
+            json=update_query,
             headers=admin_create_student_table_view["header"],
         )
         assert rename_response.status_code == 200
@@ -386,7 +392,7 @@ class TestAdmin:
     def test_admin_single_student_table_view(
         self,
         client: FlaskClient,
-        stud_registerd_for_semester_one_course: None,
+        register_stud_for_semester_one_course: None,
         admin_create_student_table_view: Credential,
     ) -> None:
         """
@@ -425,7 +431,7 @@ class TestAdmin:
     def test_admin_delete_student_table_view(
         self,
         client: FlaskClient,
-        stud_registerd_for_semester_one_course: None,
+        register_stud_for_semester_one_course: None,
         admin_create_student_table_view: Credential,
     ) -> None:
         """
