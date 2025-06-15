@@ -9,9 +9,9 @@ export type EmptyProps<T extends React.ElementType> = Omit<
   keyof React.ComponentProps<T>
 >;
 
-export interface SearchParams {
-  [key: string]: string | string[] | undefined;
-}
+// export interface SearchParams {
+//   [key: string]: string | string[] | undefined;
+// }
 
 export interface QueryBuilderOpts {
   where?: SQL;
@@ -27,7 +27,7 @@ export interface Option {
   withCount?: boolean
 }
 
-export interface DataTableFilterOption<TData> {
+export interface DataTableFilterOption {
   id: string
   label: string
   value: string

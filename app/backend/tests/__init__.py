@@ -14,10 +14,10 @@ absolute_path = Path(os.path.abspath(__file__)).parent
 
 def write_json_file(file_name: str, **kwarg: Any) -> None:
     from dataclasses import asdict
-    from tests.test_api.factories import QueryFactory, TableIdFactory
+    from tests.test_api.factories import SearchParamsFactory, TableIdFactory
 
     table_id = asdict(TableIdFactory.create())
-    search_params = QueryFactory.create_batch(
+    search_params = SearchParamsFactory.create_batch(
         tableId=table_id,
         get_sort=True,
         **kwarg,

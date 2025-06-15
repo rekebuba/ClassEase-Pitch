@@ -11,17 +11,18 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 
 import { DeleteViewForm } from "./delete-view-form"
-import type { View } from "@/lib/validations"
 import { LoaderIcon } from "lucide-react"
+import { renameViewData, StudentsViews } from "@/lib/types"
+import { renameView } from "@/api/adminApi"
 
 interface EditViewFormProps {
-  view: View
+  view: StudentsViews
   setIsEditViewFormOpen: React.Dispatch<React.SetStateAction<boolean>>
-  onSave: (updatedView: View) => void
+  refetchViews: () => void
   onDelete: (viewId: string) => void
 }
 
-export function EditViewForm({ view, setIsEditViewFormOpen, onSave, onDelete }: EditViewFormProps) {
+export function EditViewForm({ view, setIsEditViewFormOpen, refetchViews, onDelete }: EditViewFormProps) {
   const nameInputRef = useRef<HTMLInputElement>(null)
   const [name, setName] = useState(view.name)
   const [pending, setPending] = useState(false)
@@ -40,11 +41,16 @@ export function EditViewForm({ view, setIsEditViewFormOpen, onSave, onDelete }: 
     setPending(true)
 
     // Simulate API call
-    setTimeout(() => {
-      const updatedView: View = { ...view, name }
-      onSave(updatedView)
+    setTimeout(async () => {
+      const updatedView: renameViewData = { viewId: view.viewId, name: name }
+      const result = await renameView(updatedView);
       setIsEditViewFormOpen(false)
-      toast.success("View updated successfully.")
+
+      toast.error(result.message, {
+        style: { color: "green" },
+      });
+      refetchViews()
+
       setPending(false)
     }, 500)
   }
@@ -78,7 +84,7 @@ export function EditViewForm({ view, setIsEditViewFormOpen, onSave, onDelete }: 
 
       <Separator />
 
-      <DeleteViewForm viewId={view.id} setIsEditViewFormOpen={setIsEditViewFormOpen} onDelete={onDelete} />
+      <DeleteViewForm viewId={view.viewId} setIsEditViewFormOpen={setIsEditViewFormOpen} onDelete={onDelete} />
     </div>
   )
 }

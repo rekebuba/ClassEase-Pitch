@@ -256,16 +256,8 @@ class TestAdmin:
         Test the saving of a student table view by an admin.
         """
         table_id = dict(student_query_table_data.tableId)
-        query = asdict(
-            QueryFactory.create(
-                tableId=table_id,
-                get_sort=True,
-                create_sort=2,
-                get_filter=True,
-                create_filter=2,
-            )
-        )
-        query.pop("sort_test_ids", None)
+        query = asdict(QueryFactory.create(tableId=table_id))
+        query["search_params"].pop("sort_test_ids")
 
         response = client.post(
             "/api/v1/admin/views",
@@ -328,10 +320,10 @@ class TestAdmin:
         view = views[0]
         new_name = f"Renamed {view.name}"
 
-        rename_data = {"name": new_name}
+        rename_data = {"name": new_name, "view_id": view.viewId}
 
         rename_response = client.put(
-            f"/api/v1/admin/update-view/students/{view.viewId}",
+            "/api/v1/admin/rename-view",
             json=rename_data,
             headers=admin_create_student_table_view["header"],
         )
@@ -368,65 +360,18 @@ class TestAdmin:
         view = views[0]
 
         table_id = dict(student_query_table_data.tableId)
-        update_query = asdict(
-            QueryFactory.create(
-                tableId=table_id,
-                get_sort=True,
-                create_sort=2,
-                get_filter=True,
-                create_filter=2,
-            )
-        )
-        update_query.pop("sort_test_ids", None)
+        update_query = asdict(QueryFactory.create(tableId=table_id))
+        update_query["search_params"].pop("sort_test_ids")
 
         rename_response = client.put(
-            f"/api/v1/admin/update-view/students/{view.viewId}",
-            json=update_query,
+            "/api/v1/admin/update-view",
+            json={**update_query, "view_id": view.viewId},
             headers=admin_create_student_table_view["header"],
         )
         assert rename_response.status_code == 200
         assert rename_response.json is not None
         assert "message" in rename_response.json
         assert rename_response.json["message"] == "View Updated Successfully!"
-
-    def test_admin_single_student_table_view(
-        self,
-        client: FlaskClient,
-        register_stud_for_semester_one_course: None,
-        admin_create_student_table_view: Credential,
-    ) -> None:
-        """
-        Test the retrieval of a single student table view.
-        """
-        response = client.get(
-            "/api/v1/admin/all-views/students",
-            headers=admin_create_student_table_view["header"],
-        )
-        assert response.status_code == 200
-        assert response.json is not None
-
-        try:
-            # Validate a list of items
-            adapter = TypeAdapter(List[AllStudentViewsResponse])
-            views = adapter.validate_python(response.json)
-        except Exception as e:
-            pytest.fail(f"Response validation failed: {str(e)}")
-
-        # Get the first view to retrieve
-        view = views[0]
-
-        single_view_response = client.get(
-            f"/api/v1/admin/view/{view.viewId}",
-            headers=admin_create_student_table_view["header"],
-        )
-        assert single_view_response.status_code == 200
-        assert single_view_response.json is not None
-
-        # Validate the entire response structure
-        try:
-            AllStudentViewsResponse(**single_view_response.json)
-        except Exception as e:
-            pytest.fail(f"Response validation failed: {str(e)}")
 
     def test_admin_delete_student_table_view(
         self,
@@ -455,7 +400,7 @@ class TestAdmin:
         view = views[0]
 
         delete_response = client.put(
-            f"/api/v1/admin/delete-view/students/{view.viewId}",
+            f"/api/v1/admin/delete-view/{view.viewId}",
             headers=admin_create_student_table_view["header"],
         )
         assert delete_response.status_code == 200

@@ -14,10 +14,10 @@ from tests.typing import Credential
 class AllStudentViewsResponse(BaseModel):
     viewId: str
     name: str
+    tableName: str
     columns: List[str]
-    queryParameters: Optional[Dict[str, Any]] = None
+    searchParams: Optional[Dict[str, Any]] = None
     createdAt: str
-    updatedAt: str
 
 
 @pytest.fixture(scope="session")
@@ -69,16 +69,8 @@ def admin_create_student_table_view(
     Fixture to test the saving of student table views.
     """
     table_id = dict(student_query_table_data.tableId)
-    query = asdict(
-        QueryFactory.create(
-            tableId=table_id,
-            get_sort=True,
-            create_sort=2,
-            get_filter=True,
-            create_filter=2,
-        )
-    )
-    query.pop("sort_test_ids", None)
+    query = asdict(QueryFactory.create(tableId=table_id))
+    query["search_params"].pop("sort_test_ids")
 
     response = client.post(
         "/api/v1/admin/views",

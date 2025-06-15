@@ -10,6 +10,7 @@ export * from "./data-table-filter-menu";
 export * from "./data-table-input-filter";
 export * from "./data-table-pagination";
 export * from "./data-table-range-filter";
+export * from "./data-table-simple-filter";
 export * from "./data-table-skeleton";
 export * from "./data-table-slider-filter";
 export * from "./data-table-sort-list";

@@ -129,7 +129,7 @@ export function useStudentsData(validQuery: SearchParams | null): StudentsDataRe
 }
 
 export function studentsView() {
-    const [views, setViews] = useState<StudentsViews[]>()
+    const [views, setViews] = useState<StudentsViews[]>([])
     const [isViewLoading, setIsViewLoading] = useState(true)
     const [viewError, setViewError] = useState<Error | null>(null)
 
@@ -138,8 +138,19 @@ export function studentsView() {
         setIsViewLoading(true)
         setViewError(null)
         try {
-            // const result = await getAllStudentsViews()
-            setViews([])
+            const result = await getAllStudentsViews()
+            setViews(
+                result.map(view => ({
+                    ...view,
+                    searchParams: {
+                        page: view.searchParams.page ?? 1,
+                        perPage: view.searchParams.perPage ?? 10,
+                        joinOperator: view.searchParams.joinOperator ?? "and",
+                        sort: view.searchParams.sort,
+                        filters: view.searchParams.filters,
+                    },
+                }))
+            )
         }
         catch (err) {
             toast.error("Failed to fetch View Table", {
@@ -160,6 +171,6 @@ export function studentsView() {
         views,
         isViewLoading,
         viewError,
-        refetch: fetchData,
+        refetchViews: fetchData,
     }
 }

@@ -128,26 +128,16 @@ export const filterItemSchema = z.object({
 
 
 export const searchParamsCache = z.object({
-    page: z.number().optional().default(1),
-    perPage: z.number().optional().default(10),
+    page: z.number().default(1),
+    perPage: z.number().default(10),
     // advanced filter
     sort: z.array(SortItemSchema).optional(),
     filters: z.array(filterItemSchema).optional(),
-    joinOperator: z.enum(["and", "or"]).optional().default("and"),
+    joinOperator: z.enum(["and", "or"]).default("and"),
 });
 
 
-export const searchParamMap = {
-    page: parseAsInteger.withDefault(1),
-    perPage: parseAsInteger.withDefault(10),
-    sort: getSortingStateParser().withDefault([]),
-    filters: getFiltersStateParser().withDefault([]),
-    joinOperator: parseAsStringEnum(["and", "or"]).withDefault("and"),
-    createdAt: parseAsString.withDefault(""),
-    viewId: parseAsString.withDefault(""),
-}
 
-export type SearchParamMapSchema = typeof searchParamMap;
 
 
 export const createViewSchema = z.object({
@@ -186,14 +176,22 @@ export type Operator = FilterParams["joinOperator"]
 export type Sort = FilterParams["sort"]
 export type Filter = NonNullable<FilterParams["filters"]>[number]
 
-
-export const StudentsViewSchema = z.object({
-    id: z.string().uuid(),
+export const ViewSchema = z.object({
     name: z.string(),
+    table_name: z.string(),
     columns: z.array(z.string()),
     searchParams: searchParamsCache.optional(),
+});
+
+export const StudentsViewSchema = z.object({
+    viewId: z.string().uuid(),
+    name: z.string(),
+    tableName: z.string(),
+    columns: z.array(z.string()),
+    searchParams: searchParamsCache,
     createdAt: z.string().optional(),
-    updatedAt: z.string().optional(),
-    // createdAt: z.string().transform((val) => new Date(val)),
-    // updatedAt: z.string().transform((val) => new Date(val)),
 })
+
+export const ApiResponse = z.object({
+    message: z.string(),
+}).catchall(z.any());

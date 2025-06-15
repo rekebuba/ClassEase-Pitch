@@ -1,3 +1,4 @@
+import json
 from typing import Tuple
 
 from flask import Response, jsonify, request
@@ -20,18 +21,21 @@ def create_new_views(admin_data: UserT) -> Tuple[Response, int]:
     try:
         data = request.get_json()
 
-        load_schema = ValidQuerySchema()
+        load_schema = ValidQuerySchema(exclude=("view_id",))
         valid_query = load_schema.load(data)
 
         # Save the valid query to the database
-        SavedQueryView(
+        new_view = SavedQueryView(
             user_id=admin_data.id,
-            name=valid_query.pop("name"),
-            table_name=valid_query.pop("table_name"),
-            query_json=valid_query,
-        ).save()
+            name=valid_query["name"],
+            table_name=valid_query["table_name"],
+            query_json=valid_query["search_params"],
+        )
+        new_view.save()
 
-        return jsonify({"message": "View Saved Successfully!"}), 201
+        return jsonify(
+            {"message": "View Saved Successfully!", "viewId": new_view.id}
+        ), 201
 
     except ValidationError as e:
         return errors.handle_validation_error(e)
@@ -39,43 +43,70 @@ def create_new_views(admin_data: UserT) -> Tuple[Response, int]:
         return errors.handle_internal_error(e)
 
 
-@admin.route("/update-view/<table_name>/<view_id>", methods=["PUT"])
+@admin.route("/rename-view", methods=["PUT"])
 @admin_required
-def update_view(
-    admin_data: UserT, table_name: str, view_id: str
-) -> Tuple[Response, int]:
+def rename_view(admin_data: UserT) -> Tuple[Response, int]:
+    """
+    Rename an existing student view.
+    """
+
+    try:
+        data = request.get_json()
+
+        load_schema = ValidQuerySchema(only=("view_id", "name"))
+        valid_query = load_schema.load(data)
+
+        view_id = valid_query["view_id"]
+        new_name = valid_query["name"]
+
+        # Fetch the saved view by ID
+        view = storage.session.query(SavedQueryView).filter_by(id=view_id).first()
+        if not view:
+            return jsonify({"message": "View not found"}), 404
+
+        # Update the view name
+        view.name = new_name
+        view.save()
+
+        return jsonify({"message": "View Renamed Successfully!"}), 200
+
+    except ValidationError as e:
+        return errors.handle_validation_error(e)
+    except Exception as e:
+        return errors.handle_internal_error(e)
+
+
+@admin.route("/update-view", methods=["PUT"])
+@admin_required
+def update_view(admin_data: UserT) -> Tuple[Response, int]:
     """
     Update an existing student view by its ID.
     """
 
     try:
-        # Validate the view ID
-        if not view_id and not isinstance(view_id, str):
-            return jsonify({"message": "Invalid view ID"}), 400
-
-        view = storage.session.query(SavedQueryView).filter_by(id=view_id).first()
-        if not view:
-            return jsonify({"message": "View not found"}), 404
-
         data = request.get_json()
 
         load_schema = ValidQuerySchema()
-        valid_query = load_schema.load({**data, "table_name": table_name})
+        valid_query = load_schema.load(data)
 
-        valid_query.pop("table_name")
-        new_name = valid_query.pop("name")
-        rename = data.get("name")
+        view = (
+            storage.session.query(SavedQueryView)
+            .filter_by(id=valid_query["view_id"])
+            .first()
+        )
 
-        if rename:
-            # Update the existing view with the new name
-            view.name = new_name
-        else:
-            view.query_json = valid_query
+        if not view:
+            return jsonify({"message": "View not found"}), 404
+        print(valid_query)
+        view.query_json = {
+            **valid_query["search_params"],
+            "columns": valid_query.get("columns", []),
+        }
 
         view.save()
 
         return jsonify(
-            {"message": f"View {'Renamed' if rename else 'Updated'} Successfully!"}
+            {"message": "View Updated Successfully!", "viewId": view.id}
         ), 200
     except ValidationError as e:
         return errors.handle_validation_error(e)
@@ -83,19 +114,16 @@ def update_view(
         return errors.handle_internal_error(e)
 
 
-@admin.route("/delete-view/<table_name>/<view_id>", methods=["PUT"])
+@admin.route("/delete-view/<view_id>", methods=["PUT"])
 @admin_required
-def delete_view(
-    admin_data: UserT, table_name: str, view_id: str
-) -> Tuple[Response, int]:
+def delete_view(admin_data: UserT, view_id: str) -> Tuple[Response, int]:
     """
     Delete an existing student view by its ID.
     """
 
     try:
-        # Validate the view ID
-        if not view_id and not isinstance(view_id, str):
-            return jsonify({"message": "Invalid view ID"}), 400
+        if not view_id or not isinstance(view_id, str):
+            return jsonify({"message": "Invalid view ID Type"}), 400
 
         view = storage.session.query(SavedQueryView).filter_by(id=view_id).first()
         if not view:
@@ -140,57 +168,15 @@ def all_views(admin_data: UserT, table_name: str) -> Tuple[Response, int]:
             {
                 "view_id": view.id,
                 "name": view.name,
-                "columns": list(view.query_json.get("columns", [])),
+                "table_name": view.table_name.value,
+                "columns": list(view.query_json.pop("columns", [])),
+                "search_params": view.query_json,
                 "created_at": view.created_at,
-                "updated_at": view.updated_at,
             }
             for view in saved_views
         ]
 
         dump_schema = AllStudentViews(many=True)
-        valid_dump = dump_schema.dump(response_data)
-
-        return jsonify(valid_dump), 200
-
-    except ValidationError as e:
-        return errors.handle_validation_error(e)
-    except Exception as e:
-        return errors.handle_internal_error(e)
-
-
-@admin.route("/view/<view_id>", methods=["GET"])
-@admin_required
-def single_view(admin_data: UserT, view_id: str) -> Tuple[Response, int]:
-    """
-    Retrieve a single student view by its ID.
-    """
-
-    try:
-        # Validate the view ID
-        if not view_id and not isinstance(view_id, str):
-            return jsonify({"message": "Invalid view ID"}), 400
-
-        # Fetch the saved view for the admin user
-        saved_view = (
-            storage.session.query(SavedQueryView)
-            .filter_by(user_id=admin_data.id, id=view_id)
-            .first()
-        )
-
-        if not saved_view:
-            return jsonify({"message": "View not found"}), 404
-
-        # Prepare the response data
-        response_data = {
-            "view_id": saved_view.id,
-            "name": saved_view.name,
-            "columns": list(saved_view.query_json.pop("columns", [])),
-            "query_parameters": saved_view.query_json,
-            "created_at": saved_view.created_at,
-            "updated_at": saved_view.updated_at,
-        }
-
-        dump_schema = AllStudentViews()
         valid_dump = dump_schema.dump(response_data)
 
         return jsonify(valid_dump), 200

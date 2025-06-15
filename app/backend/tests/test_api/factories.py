@@ -725,15 +725,20 @@ class FilterQuery:
 
 
 @dataclass
-class QueryResponse:
+class SearchParams:
     page: int
     per_page: int
     join_operator: str
-    columns: List[str]
     sort_test_ids: str
-    table_name: Optional[str] = None
     sort: List[SortQuery] = field(default_factory=list)
     filters: List[FilterQuery] = field(default_factory=list)
+
+
+@dataclass
+class QueryResponse:
+    columns: List[str]
+    search_params: SearchParams
+    table_name: Optional[str] = None
 
 
 class SortQueryFactory(TypedFactory[SortQuery]):
@@ -1005,9 +1010,9 @@ class RandomNoRepeat:
         return choice
 
 
-class QueryFactory(TypedFactory[QueryResponse]):
+class SearchParamsFactory(TypedFactory[SearchParams]):
     class Meta:
-        model = QueryResponse
+        model = SearchParams
         exclude = (
             "tableId",
             "get_sort",
@@ -1046,18 +1051,13 @@ class QueryFactory(TypedFactory[QueryResponse]):
     page: Any = LazyAttribute(lambda _: 1)
     per_page: Any = LazyAttribute(lambda _: random.choice([10, 20, 30, 40, 50]))
     join_operator: Any = LazyAttribute(lambda _: random.choice(["and", "or"]))
-    table_name: Any = LazyAttribute(lambda _: "students")
-    columns: Any = LazyAttribute(
-        lambda obj: random.sample(
-            list(obj.tableId.keys()), random.randint(1, len(obj.tableId))
-        )
-    )
     sort: Any = LazyAttribute(
-        lambda obj: QueryFactory.generate_sort_queries(obj.tableId, obj.create_sort)
+        lambda obj: SearchParamsFactory.generate_sort_queries(
+            obj.tableId, obj.create_sort
+        )
         if obj.get_sort
         else []
     )
-
     filters: Any = LazyAttribute(
         lambda obj: [
             FilterQueryFactory(
@@ -1071,6 +1071,25 @@ class QueryFactory(TypedFactory[QueryResponse]):
 
     sort_test_ids: Any = LazyAttribute(
         lambda x: ", ".join(f"{s.id}-{'desc' if s.desc else 'asc'}" for s in x.sort)
+    )
+
+
+class QueryFactory(TypedFactory[QueryResponse]):
+    class Meta:
+        model = QueryResponse
+        exclude = ("tableId",)
+
+    # general fields helping defining others
+    tableId: Any = LazyAttribute(lambda _: None)
+
+    table_name: Any = LazyAttribute(lambda _: "students")
+    columns: Any = LazyAttribute(
+        lambda obj: random.sample(
+            list(obj.tableId.keys()), random.randint(1, len(obj.tableId))
+        )
+    )
+    search_params: Any = LazyAttribute(
+        lambda obj: SearchParamsFactory.create(tableId=obj.tableId)
     )
 
     def __init__(self, *args: Any, **kwargs: Any) -> Any:

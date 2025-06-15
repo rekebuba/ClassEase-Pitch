@@ -2,7 +2,7 @@
 
 import type { Option } from "@/types/data-table";
 import type { Column } from "@tanstack/react-table";
-import { Check, PlusCircle, XCircle } from "lucide-react";
+import { Check, PlusCircle, X, XCircle } from "lucide-react";
 import { TrashIcon } from "@radix-ui/react-icons";
 
 import { Badge, badgeVariants } from "@/components/ui/badge";
@@ -38,23 +38,25 @@ import {
 import { useState } from "react";
 import { DataTableFilterOption } from "@/types";
 
-interface DataTableFacetedFilterProps<TData, TValue> {
-  column?: Column<TData, TValue>;
-  title: string;
-  options: Option[];
-  multiple?: boolean;
-  setSelectedOptions: React.Dispatch<
-    React.SetStateAction<DataTableFilterOption<TData>[]>
-  >;
+interface DataTableFacetedFilterProps<TData> {
+  column: Column<TData>
+  title: string
+  setSelectedOptions: React.Dispatch<React.SetStateAction<DataTableFilterOption[]>>
+  options: any[]
+  multiple?: boolean
+  onFilterChange?: (value: any) => void
+  isActive?: boolean
 }
 
-export function DataTableFacetedFilter<TData, TValue>({
+export function DataTableFacetedFilter<TData>({
   column,
   title,
+  setSelectedOptions,
   options,
   multiple,
-  setSelectedOptions,
-}: DataTableFacetedFilterProps<TData, TValue>) {
+  onFilterChange,
+  isActive,
+}: DataTableFacetedFilterProps<TData>) {
   const [open, setOpen] = useState(true);
   const { addFilter, removeFilter, getFilter } = useFilters();
 
@@ -88,15 +90,7 @@ export function DataTableFacetedFilter<TData, TValue>({
           newSelectedValues.add(option.value);
         }
         const filterValues = Array.from(newSelectedValues);
-        if (filterValues.length == 0) return removeFilter(column.id);
-        addFilter({
-          id: column.id,
-          variant: column.columnDef.meta?.variant,
-          tableId: column.columnDef.meta?.tableId ?? "",
-          value: filterValues,
-          operator: selectedOperator,
-        }
-        )
+        onFilterChange?.({ value: filterValues, operator: selectedOperator })
       } else {
         removeFilter(column.id)
       }
@@ -104,55 +98,35 @@ export function DataTableFacetedFilter<TData, TValue>({
     [column, multiple, selectedValues, selectedOperator],
   );
 
-  const onOperatorSelect = React.useCallback(
-    (value: string) => {
-      if (!column) return;
+  // const onOperatorSelect = React.useCallback(
+  //   (value: string) => {
+  //     if (!column) return;
 
-      setSelectedOperator(value);
-      const filterValues = Array.from(selectedValues);
-      addFilter({
-        id: column.id,
-        variant: column.columnDef.meta?.variant,
-        tableId: column.columnDef.meta?.tableId ?? "",
-        value: filterValues,
-        operator: value,
-      });
-    },
-    [column, selectedValues],
-  );
+  //     setSelectedOperator(value);
+  //     const filterValues = Array.from(selectedValues);
+  //     onFilterChange?.({ value: filterValues, operator: selectedOperator })
+  //   },
+  //   [column, selectedValues],
+  // );
 
-  const onReset = React.useCallback(
-    (event: React.MouseEvent | undefined, remove: boolean) => {
-      event?.stopPropagation();
-      removeFilter(column?.id);
-      selectedValues.clear();
-      if (remove) {
-        setSelectedOptions((prev) =>
-          prev.filter((item) => item.value !== column?.id)
-        );
-      };
-    },
+  const onReset = React.useCallback(() => {
+    onFilterChange?.({ value: [], operator: selectedOperator })
+
+  },
     [column],
   );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="border-dashed">
-          {selectedValues?.size > 0 ? (
-            <div
-              role="button"
-              aria-label={`Clear ${title} filter`}
-              tabIndex={0}
-              onClick={() => onReset(undefined, true)}
-              className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            >
-              <XCircle />
-            </div>
-          ) : (
-            <PlusCircle />
-          )}
+        <Button variant="outline" size="sm" className={cn(
+          "h-9 w-[180px] rounded-md border border-input bg-background text-sm ring-offset-background transition-all duration-200",
+          "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+          isActive && selectedValues && "ring-2 ring-blue-500/20 border-blue-300",
+        )}>
+          <PlusCircle />
           {title}
+
           {selectedValues?.size > 0 && (
             <>
               <Separator
@@ -173,6 +147,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                   >
                     {selectedValues.size} selected
                   </Badge>
+
                 ) : (
                   options
                     .filter((option) => selectedValues.has(option.value))
@@ -193,13 +168,6 @@ export function DataTableFacetedFilter<TData, TValue>({
       </PopoverTrigger>
       <PopoverContent className="w-[12.5rem] p-0" align="start">
         <Command>
-          <FilterHeader
-            title={title}
-            comparisonOperators={comparisonOperators}
-            selectedOperator={selectedOperator}
-            onOperatorSelect={onOperatorSelect}
-            onReset={onReset}
-          />
           <CommandInput placeholder={title} />
           <CommandList className="max-h-full">
             <CommandEmpty>No results found.</CommandEmpty>
@@ -238,7 +206,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                 <CommandSeparator />
                 <CommandGroup>
                   <CommandItem
-                    onSelect={() => onReset(undefined, false)}
+                    onSelect={() => onReset()}
                     className="justify-center text-center"
                   >
                     Clear filters
@@ -250,45 +218,5 @@ export function DataTableFacetedFilter<TData, TValue>({
         </Command>
       </PopoverContent>
     </Popover >
-  );
-}
-
-interface FilterHeaderProps {
-  title: string;
-  selectedOperator: string;
-  onOperatorSelect: (value: string) => void;
-  onReset: (event: React.MouseEvent | undefined, remove: boolean) => void;
-  comparisonOperators: {
-    value: string;
-    label: string;
-  }[];
-}
-function FilterHeader({ title, selectedOperator, onOperatorSelect, onReset, comparisonOperators }: FilterHeaderProps) {
-  return (
-    <div className="flex items-center space-x-1 pl-1 pr-0.5 mt-1">
-      <div className="flex flex-1 items-center space-x-1">
-        <div className="text-xs capitalize text-muted-foreground">
-          {title}
-        </div>
-        <Select value={selectedOperator} onValueChange={value => onOperatorSelect(value)}>
-          <SelectTrigger className="h-auto w-fit truncate border-none px-2 py-0.5 text-xs hover:bg-muted/50">
-            <SelectValue placeholder={comparisonOperators.find(op => op.value === selectedOperator)?.label || "Select operator"} />
-          </SelectTrigger>
-          <SelectContent className="dark:bg-background/95 dark:backdrop-blur-md dark:supports-[backdrop-filter]:bg-background/40">
-            <SelectGroup>
-              {comparisonOperators.map(({
-                value,
-                label
-              }) => <SelectItem key={value} value={value} className="py-1">
-                  {label}
-                </SelectItem>)}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </div>
-      <Button aria-label="Remove filter" variant="ghost" size="icon" className="size-7 text-muted-foreground" onClick={() => onReset(undefined, true)}>
-        <TrashIcon className="size-4" aria-hidden="true" />
-      </Button>
-    </div>
   );
 }

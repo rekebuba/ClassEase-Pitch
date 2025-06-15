@@ -32,8 +32,8 @@ export const getSortingStateParser = <TData>(
   return createParser({
     parse: (value) => {
       try {
-        const decoded = decodeURIComponent(value);
-        const parsed = JSON.parse(decoded);
+        // const decoded = decodeURIComponent(value);
+        const parsed = JSON.parse(value);
         const result = z.array(sortingItemSchema).safeParse(parsed);
 
         if (!result.success) return null;
@@ -47,7 +47,8 @@ export const getSortingStateParser = <TData>(
         return null;
       }
     },
-    serialize: (value) => encodeURIComponent(JSON.stringify(value)),
+    // serialize: (value) => encodeURIComponent(JSON.stringify(value)),
+    serialize: (value) => JSON.stringify(value),
     eq: (a, b) =>
       a.length === b.length &&
       a.every(

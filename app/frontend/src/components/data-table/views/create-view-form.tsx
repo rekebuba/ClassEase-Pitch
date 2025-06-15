@@ -10,19 +10,19 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { LoaderIcon } from "lucide-react"
-import type { FilterParams } from "@/lib/validations"
 
 import { useTableInstanceContext } from "@/components/data-table"
+import { SearchParams } from "@/lib/types"
 
 interface CreateViewFormProps {
   backButton?: true
   onBack?: () => void
   onSuccess?: () => void
-  filterParams?: FilterParams
+  SearchParams?: SearchParams
   onCreateView?: (newView: any) => void
 }
 
-export function CreateViewForm({ backButton, filterParams, onBack, onSuccess, onCreateView }: CreateViewFormProps) {
+export function CreateViewForm({ backButton, SearchParams, onBack, onSuccess, onCreateView }: CreateViewFormProps) {
   const [pending, setPending] = useState(false)
   const [viewName, setViewName] = useState("")
   const nameInputRef = useRef<HTMLInputElement>(null)
@@ -50,11 +50,10 @@ export function CreateViewForm({ backButton, filterParams, onBack, onSuccess, on
 
     // Create a new view object
     const newView = {
-      id: `view-${Date.now()}`,
       name: viewName,
+      table_name: "students",
       columns: visibleColumns,
-      searchParams: filterParams || {},
-      createdAt: new Date().toISOString(),
+      searchParams: SearchParams || {},
     }
 
     // Simulate API call
@@ -62,7 +61,6 @@ export function CreateViewForm({ backButton, filterParams, onBack, onSuccess, on
       if (onCreateView) {
         onCreateView(newView)
       }
-      toast.success("View created successfully")
       setPending(false)
       onSuccess?.()
     }, 500)

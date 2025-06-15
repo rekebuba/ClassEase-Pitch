@@ -28,9 +28,8 @@ class TestAdminStudentAdvanceSort:
         admin_auth_header: Credential,
         search_params: Dict[str, Any],
     ) -> None:
-        search_params.pop("columns")
-        search_params.pop("table_name")
         search_params.pop("sort_test_ids", None)
+
         # Build query with sorting
         response = client.post(
             "/api/v1/admin/students",

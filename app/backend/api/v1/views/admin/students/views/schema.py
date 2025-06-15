@@ -1,5 +1,5 @@
 from api.v1.schemas.base_schema import BaseSchema
-from marshmallow import fields
+from marshmallow import EXCLUDE, fields
 
 from api.v1.schemas.config_schema import OPERATOR_CONFIG
 from api.v1.schemas.custom_schema import EnumField, ValueField
@@ -11,6 +11,9 @@ from models.table import Table
 
 class FilterSchema(BaseSchema):
     """Schema for validating filter parameters."""
+
+    class Meta:
+        unknown = EXCLUDE
 
     id = fields.String(required=True)
     table_id = fields.String(
@@ -37,22 +40,8 @@ class SortSchema(BaseSchema):
     )
 
 
-class ValidQuerySchema(BaseSchema):
-    """
-    Schema for validating query parameters for student views.
-    """
-
-    filter_flag = fields.String(required=False)
-
-    columns = fields.List(
-        fields.String(),
-        required=False,
-        load_default=[],
-    )
-    name = fields.String(
-        required=False, load_default="new View", validate=lambda x: len(x) <= 50
-    )
-    table_name = EnumField(CustomTypes.TableEnum, required=True)
+class searchParamsSchema(BaseSchema):
+    """Schema for validating search parameters."""
 
     filters = fields.List(
         fields.Nested(FilterSchema),
@@ -70,11 +59,36 @@ class ValidQuerySchema(BaseSchema):
     )
 
 
+class ValidQuerySchema(BaseSchema):
+    """
+    Schema for validating query parameters for student views.
+    """
+
+    filter_flag = fields.String(required=False)
+    view_id = fields.String(required=True)
+
+    columns = fields.List(
+        fields.String(),
+        required=False,
+        load_default=[],
+    )
+    name = fields.String(
+        required=False, load_default="new View", validate=lambda x: len(x) <= 50
+    )
+    table_name = EnumField(CustomTypes.TableEnum, required=True)
+    search_params = fields.Nested(
+        searchParamsSchema,
+        required=False,
+        load_default={},
+    )
+
+
 class AllStudentViews(BaseSchema):
     view_id = fields.String()
     name = fields.String()
+    table_name = fields.String()
     columns = fields.List(fields.String())
-    query_parameters = fields.Dict(
+    search_params = fields.Dict(
         keys=fields.String(),
         values=fields.Raw(),
         required=False,

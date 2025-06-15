@@ -12,6 +12,7 @@ import {
     tableIdValue,
     RangeSchema,
     SectionCountSchema,
+    ViewSchema,
 } from "./validations";
 
 export type RoleProps = 'admin' | 'teacher' | 'student';
@@ -92,4 +93,6 @@ export interface StudentsDataResult {
 }
 
 export type SearchParams = z.infer<typeof searchParamsCache>;
+export type View = z.infer<typeof ViewSchema>;
 export type StudentsViews = z.infer<typeof StudentsViewSchema>
+export type renameViewData = Pick<StudentsViews, 'viewId' | 'name'>;
