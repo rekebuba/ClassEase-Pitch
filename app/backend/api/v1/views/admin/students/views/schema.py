@@ -26,7 +26,7 @@ class FilterSchema(BaseSchema):
         required=True,
     )
     operator = fields.String(required=True, validate=lambda x: x in OPERATOR_CONFIG)
-    value = ValueField(required=False, load_default=None, allow_none=True)
+    value = fields.Raw(required=False, load_default="")
 
 
 class SortSchema(BaseSchema):

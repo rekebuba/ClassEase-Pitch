@@ -114,17 +114,18 @@ const SortItemSchema = z.object({
 });
 
 export const filterItemSchema = z.object({
-    id: z.string().optional(),
-    tableId: tableIdValue.optional(),
-    value: z.union([z.number(), z.array(z.number()), z.string(), z.array(z.string())]).optional(),
+    id: z.string(),
+    tableId: tableIdValue,
+    value: z.any(),
     range: z.object({
         min: z.union([z.number(), z.undefined()]),
         max: z.union([z.number(), z.undefined()]),
     }).optional(),
-    variant: z.enum(dataTableConfig.filterVariants).optional(),
-    operator: z.enum(dataTableConfig.operators).optional(),
+    variant: z.enum(dataTableConfig.filterVariants),
+    operator: z.enum(dataTableConfig.operators),
     filterId: z.string().optional(),
 });
+
 
 
 export const searchParamsCache = z.object({

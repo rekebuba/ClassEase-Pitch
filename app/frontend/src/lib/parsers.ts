@@ -7,6 +7,7 @@ import type {
   ExtendedColumnFilter,
   ExtendedColumnSort,
 } from "@/types/data-table";
+import { filterItemSchema } from "./validations";
 
 const tableIdValue = z.union([
   z.string(),
@@ -60,18 +61,6 @@ export const getSortingStateParser = <TData>(
   });
 };
 
-const filterItemSchema = z.object({
-  id: z.string(),
-  tableId: tableIdValue,
-  value: z.union([z.number(), z.array(z.number()), z.string(), z.array(z.string())]),
-  range: z.object({
-    min: z.union([z.number(), z.undefined()]),
-    max: z.union([z.number(), z.undefined()]),
-  }).optional(),
-  variant: z.enum(dataTableConfig.filterVariants),
-  operator: z.enum(dataTableConfig.operators),
-  filterId: z.string(),
-});
 
 export type FilterItemSchema = z.infer<typeof filterItemSchema>;
 

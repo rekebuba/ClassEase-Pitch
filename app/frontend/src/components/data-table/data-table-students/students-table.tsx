@@ -113,6 +113,8 @@ export function StudentsTable() {
   }
 
   const [searchParams, setSearchParams] = useQueryStates(searchParamMap);
+  const [currentViewId, setCurrentViewId] = useQueryState("viewId", parseAsString)
+
   const columnIds = React.useMemo(() => {
     return table
       .getAllColumns()
@@ -194,14 +196,18 @@ export function StudentsTable() {
             table={table}
             floatingBar={<StudentsTableFloatingBar />}
           >
-            <DataTableAdvancedToolbar searchParams={searchParams}>
+            <DataTableSimpleFilter searchParams={searchParams}
+              views={views}
+              refetchViews={refetchViews}
+              currentViewId={currentViewId}
+              setCurrentViewId={setCurrentViewId}
+              setSearchParams={setSearchParams}
+
+            />
+            <div className="flex items-center justify-between gap-2">
               <DataTableSortList align="start" />
-              <DataTableFilterList align="start" />
-              <StudentsTableToolbarActions />
               <DataTableColumnsVisibility table={table} />
-            </DataTableAdvancedToolbar>
-            <DataTableViewsDropdown views={views} SearchParams={searchParams} setSearchParams={setSearchParams} refetchViews={refetchViews} />
-            <DataTableSimpleFilter searchParams={searchParams} />
+            </div>
           </DataTable>
         </TableInstanceProvider>
       </FilterProvider>

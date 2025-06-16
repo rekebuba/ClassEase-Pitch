@@ -158,6 +158,7 @@ OPERATOR_CONFIG = {
         "gt",
         "gte",
         "isBetween",
+        "isNotBetween",
         "isRelativeToToday",
         "isEmpty",
         "isNotEmpty",

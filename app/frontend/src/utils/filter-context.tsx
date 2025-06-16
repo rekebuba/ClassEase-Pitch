@@ -38,7 +38,7 @@ function useFiltersContext<TData>(columnIds: string[]) {
                 return [...others, newFilter];
             });
         },
-        300
+        50
     );
 
     const addFilter = (newFilter: any) => {

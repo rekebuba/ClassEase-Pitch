@@ -5,7 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
-import { LoaderIcon } from "lucide-react"
+import { LoaderIcon, Save } from "lucide-react"
 import { useTableInstanceContext } from "@/components/data-table"
 import { SearchParams, StudentsViews } from "@/lib/types"
 
@@ -32,7 +32,6 @@ export default function UpdateViewForm({ isUpdated, currentView, searchParams, h
 
     setIsLoading(true)
 
-    console.log("Updating view", searchParams)
     // Create updated view with current filters
     const updatedView: StudentsViews = {
       viewId: currentView.viewId,
@@ -54,7 +53,8 @@ export default function UpdateViewForm({ isUpdated, currentView, searchParams, h
 
   return (
     <form onSubmit={handleSubmit}>
-      <Button disabled={isLoading} type="submit" size="sm" className="gap-1.5">
+      <Button variant="outline" size="sm" className="h-8 text-xs">
+        <Save className="h-3 w-3 mr-1" />
         {isLoading && <LoaderIcon aria-hidden="true" className="size-3.5 animate-spin" />}
         Update view
       </Button>

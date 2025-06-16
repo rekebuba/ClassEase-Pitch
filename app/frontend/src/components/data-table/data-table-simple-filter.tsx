@@ -3,14 +3,9 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
-// import { View } from "@/lib/validations";
-import { PlusIcon } from "@radix-ui/react-icons"
-import UpdateViewForm from "./views/update-view-form";
-
 import { DataTableFilterOption } from "@/types";
 import type { Column } from "@tanstack/react-table";
 
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 import {
@@ -21,24 +16,35 @@ import {
     DataTableInputFilter,
     DataTableSliderFilter,
     DataTableFilterCombobox,
+    DataTableFilterList,
 } from "@/components/data-table";
 import { CreateViewPopover, DataTableViewsDropdown } from "@/components/data-table/views";
-import { SearchParams } from "@/lib/types";
-import { Data } from "@dnd-kit/core";
+import { SearchParams, StudentsViews, View } from "@/lib/types";
 import { Card } from "../ui/card";
-import { ChevronDown, Filter, RotateCcw, Search, X } from "lucide-react";
+import { ChevronDown, Copy, Download, Filter, RotateCcw, Save, Search, Settings2, X, Zap } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Badge } from "../ui/badge";
 import { useFilters } from "@/utils/filter-context";
+import { Switch } from "../ui/switch";
+import { StudentsTableToolbarActions } from "./data-table-students/student-table-toolbar-action";
+import { createNewView } from "@/api/adminApi";
+import { toast } from "sonner";
 
 
 interface DataTableSimpleFilterProps {
     searchParams: SearchParams;
+    views: StudentsViews[]
+    refetchViews: () => void
+    currentViewId: string | null
+    setCurrentViewId: (viewId: string | null) => void
+    setSearchParams: (params: SearchParams) => void;
 }
 
 
-export function DataTableSimpleFilter({ searchParams }: DataTableSimpleFilterProps) {
+export function DataTableSimpleFilter({ searchParams, views, refetchViews, currentViewId, setCurrentViewId, setSearchParams }: DataTableSimpleFilterProps) {
     const { tableInstance: table } = useTableInstanceContext()
+    // Toggle between simple and advanced mode
+    const [isAdvancedMode, setIsAdvancedMode] = React.useState(false)
 
     const columns = React.useMemo(() => table.getAllColumns().filter((column) => column.getCanFilter()), [table])
 
@@ -59,19 +65,17 @@ export function DataTableSimpleFilter({ searchParams }: DataTableSimpleFilterPro
         options.length > 0 ? options[0].value : null,
     )
 
-    const { filters, addFilter, removeFilter, clearFilters, getFilter, debouncedAddFilter } = useFilters()
+    const { filters, removeFilter, clearFilters, getFilter, debouncedAddFilter } = useFilters()
 
     const [appliedFilters, setAppliedFilters] = React.useState<Record<string, any>>(() => {
         const initialFilters: Record<string, any> = {}
         options.forEach((option) => {
-            if (searchParams[option.value] !== undefined && searchParams[option.value] !== "") {
-                initialFilters[option.value] = searchParams[option.value]
+            if ((searchParams as Record<string, any>)[option.value] !== undefined && (searchParams as Record<string, any>)[option.value] !== "") {
+                initialFilters[option.value] = (searchParams as Record<string, any>)[option.value]
             }
         })
         return initialFilters
     })
-
-    const [isExpanded, setIsExpanded] = React.useState(false)
 
     const activeFilterOption = React.useMemo(
         () => options.find((option) => option.value === activeFilterId),
@@ -80,7 +84,6 @@ export function DataTableSimpleFilter({ searchParams }: DataTableSimpleFilterPro
 
     const handleFilterTypeChange = React.useCallback((newFilterId: string) => {
         setActiveFilterId(newFilterId)
-        setIsExpanded(false)
     }, [])
 
     const handleFilterValueChange = React.useCallback(
@@ -96,17 +99,12 @@ export function DataTableSimpleFilter({ searchParams }: DataTableSimpleFilterPro
                 }
             })
         },
-        [activeFilterId],
+        [activeFilterId, isAdvancedMode],
     )
 
     const resetFilters = React.useCallback(() => {
         setAppliedFilters({})
         clearFilters()
-        // columns.forEach((column) => {
-        //     const tableColumn = table.getColumn(column.id)
-        //     if (tableColumn && typeof tableColumn.setFilterValue === "function") {
-        //     }
-        // })
     }, [columns, table])
 
     const removeFilterBadges = React.useCallback(
@@ -126,69 +124,143 @@ export function DataTableSimpleFilter({ searchParams }: DataTableSimpleFilterPro
     )
 
     React.useEffect(() => {
-        const timeoutId = setTimeout(() => {
-            Object.entries(appliedFilters).forEach(([columnId, value]) => {
-                const column = table.getColumn(columnId)
-                const columnFilter = getFilter(column?.id)
-                console.log("columnFilter:", columnFilter)
+        Object.entries(appliedFilters).forEach(([columnId, value]) => {
+            const column = table.getColumn(columnId)
 
-                if (column && typeof column.setFilterValue === "function") {
-                    if (
-                        value?.value === undefined ||
-                        value?.value === null ||
-                        value?.value === "" ||
-                        (Array.isArray(value?.value) && value.value.length === 0)
-                    ) {
-                        removeFilter(column.id)
-                    } else {
-                        debouncedAddFilter({
-                            id: column.id,
-                            value: value?.value,
-                            variant: column.columnDef.meta?.variant,
-                            tableId: column.columnDef.meta?.tableId ?? getFilter(column.id)?.tableId,
-                            operator: value?.operator,
-                        })
-                    }
-                }
-            })
-        }, 0)
+            if (column && typeof column.setFilterValue === "function") {
+                if (value === null) return removeFilter(columnId);
+                debouncedAddFilter({
+                    id: column.id,
+                    value: value?.value ?? "",
+                    variant: column.columnDef.meta?.variant,
+                    tableId: column.columnDef.meta?.tableId ?? getFilter(column.id)?.tableId,
+                    operator: value?.operator,
+                })
+            }
+        })
 
-        return () => clearTimeout(timeoutId)
     }, [appliedFilters, table])
 
     const hasActiveFilters = React.useMemo(
-        () => Object.values(appliedFilters).some((value) => value && value !== ""),
-        [appliedFilters],
+        () => filters.length > 0,
+        [filters],
     )
 
     const activeFilterBadges = React.useMemo(
         () =>
-            Object.entries(appliedFilters)
-                .filter(([_, value]) => value && value !== "")
-                .map(([columnId, value]) => {
-                    const option = options.find((opt) => opt.value === columnId)
-                    return {
-                        columnId,
-                        operator: value?.operator,
-                        value: value?.value,
-                        label: option?.label || columnId,
-                        variant: option?.variant || "default",
-                    }
-                }),
-        [appliedFilters, options],
+            filters.map(({ id, operator, value }) => {
+                const column = table.getColumn(id)
+                return {
+                    columnId: id,
+                    operator,
+                    value,
+                    variant: column?.columnDef.meta?.variant || "default",
+                    label: column?.columnDef?.meta?.label || id,
+                }
+            }),
+        [filters, appliedFilters, options],
     )
 
+    function formatValue(value: unknown): string {
+        if (typeof value === "string") return value;
+
+        if (Array.isArray(value)) {
+            const sorted = [...value].sort((a, b) => {
+                const aNum = parseFloat(a);
+                const bNum = parseFloat(b);
+
+                const aIsNum = !isNaN(aNum);
+                const bIsNum = !isNaN(bNum);
+
+                if (aIsNum && bIsNum) return aNum - bNum;
+                return String(a).localeCompare(String(b));
+            });
+
+            return sorted.join(", ");
+        }
+
+
+        if (value && typeof value === "object" && "min" in value && "max" in value) {
+            const { min, max } = value as { min: number | string; max: number | string };
+
+            const isDate = typeof min === "number" && typeof max === "number" && min > 1000000000000;
+
+            if (isDate) {
+                const formattedMin = new Date(min).toLocaleDateString();
+                const formattedMax = new Date(max).toLocaleDateString();
+                return `${formattedMin} - ${formattedMax}`;
+            }
+
+            return `${min} - ${max}`;
+        }
+
+        return "";
+    }
+
     return (
-        <Card className="p-4 bg-gradient-to-r from-slate-50 to-gray-50 border-0 shadow-sm">
+        <div className="space-y-4">
             <div className="space-y-4">
-                {/* Main Filter Controls */}
-                <div className="flex items-center gap-3">
+                {/* Header with Mode Toggle */}
+                <Card className="p-4 bg-gradient-to-r from-slate-50 to-gray-50 border-0 shadow-sm">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
+                                <Filter className="h-5 w-5 text-muted-foreground" />
+                                <span className="text-lg font-semibold">Data Filters</span>
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                                {hasActiveFilters ? `${activeFilterBadges.length} active` : "No filters"}
+                            </Badge>
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                            {/* Mode Toggle */}
+                            <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-2 text-sm">
+                                    <Zap className={cn("h-4 w-4", !isAdvancedMode ? "text-blue-500" : "text-muted-foreground")} />
+                                    <span className={cn(!isAdvancedMode ? "font-medium" : "text-muted-foreground")}>Simple</span>
+                                </div>
+                                <Switch
+                                    checked={isAdvancedMode}
+                                    onCheckedChange={setIsAdvancedMode}
+                                    className="data-[state=checked]:bg-gradient-to-r data-[state=checked]:from-blue-500 data-[state=checked]:to-purple-500"
+                                />
+                                <div className="flex items-center gap-2 text-sm">
+                                    <Settings2 className={cn("h-4 w-4", isAdvancedMode ? "text-purple-500" : "text-muted-foreground")} />
+                                    <span className={cn(isAdvancedMode ? "font-medium" : "text-muted-foreground")}>Advanced</span>
+                                </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-2">
+                                <CreateViewPopover
+                                    SearchParams={searchParams}
+                                    views={views}
+                                    refetchViews={refetchViews}
+                                    currentViewId={currentViewId}
+                                    setCurrentViewId={setCurrentViewId}
+                                />
+                                <DataTableViewsDropdown views={views}
+                                    SearchParams={searchParams}
+                                    setSearchParams={setSearchParams}
+                                    refetchViews={refetchViews}
+                                    currentViewId={currentViewId}
+                                    setCurrentViewId={setCurrentViewId} />
+                                <StudentsTableToolbarActions />
+                            </div>
+                        </div>
+                    </div>
+                </Card>
+            </div>
+
+            <Card className="p-4 space-y-3 bg-gradient-to-r from-slate-50 to-gray-50 border-0 shadow-sm">
+                {/* Simple Filter Controls */}
+                <div className="flex items-center gap-3 space-x-2">
                     <div className="flex items-center gap-2">
                         <Filter className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm font-medium text-muted-foreground">Filter by:</span>
                     </div>
 
-                    {/* Filter Type Selector */}
                     <Select value={activeFilterId || ""} onValueChange={handleFilterTypeChange}>
                         <SelectTrigger className="h-9 w-[150px] bg-white border-2 hover:border-blue-300 transition-colors">
                             <SelectValue placeholder="Select filter" />
@@ -212,15 +284,13 @@ export function DataTableSimpleFilter({ searchParams }: DataTableSimpleFilterPro
                             ))}
                         </SelectContent>
                     </Select>
-
-                    {/* Active Filter Input */}
-                    {activeFilterOption && (
+                    {activeFilterOption && table.getColumn(activeFilterOption.value) && (
                         <DataTableToolbarFilter
                             key={activeFilterOption.value}
-                            column={table.getColumn(activeFilterOption.value)}
-                            filterOption={activeFilterOption}
+                            column={table.getColumn(activeFilterOption.value)!}
                             onFilterChange={handleFilterValueChange}
                             isActive={!!appliedFilters[activeFilterOption.value]}
+                            isAdvancedMode={isAdvancedMode}
                         />
                     )}
 
@@ -236,140 +306,118 @@ export function DataTableSimpleFilter({ searchParams }: DataTableSimpleFilterPro
                         Reset
                     </Button>
                 </div>
-
                 {/* Applied Filters */}
-                {activeFilterBadges.length > 0 && (
-                    <div className="space-y-2">
-                        <div className="flex items-center gap-2">
-                            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                                Active Filters ({activeFilterBadges.length})
-                            </span>
-                            <div className="flex-1 h-px bg-border" />
-                        </div>
-
-                        <div className="flex flex-wrap gap-2">
-                            {activeFilterBadges.map(({ columnId, operator, value, label, variant }) => (
-                                <Badge
-                                    key={columnId}
-                                    variant="secondary"
-                                    className={cn(
-                                        "group flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-all duration-200 hover:scale-105",
-                                        variant === "select" && "bg-blue-100 text-blue-800 hover:bg-blue-200",
-                                        variant === "number" && "bg-green-100 text-green-800 hover:bg-green-200",
-                                        variant === "date" && "bg-purple-100 text-purple-800 hover:bg-purple-200",
-                                        variant === "default" && "bg-gray-100 text-gray-800 hover:bg-gray-200",
-                                    )}
-                                >
-                                    <div
-                                        className={cn(
-                                            "w-1.5 h-1.5 rounded-full",
-                                            variant === "select" && "bg-blue-500",
-                                            variant === "number" && "bg-green-500",
-                                            variant === "date" && "bg-purple-500",
-                                            variant === "default" && "bg-gray-500",
-                                        )}
-                                    />
-                                    <span className="font-medium">{label}</span>
-                                    <span className="max-w-[100px] truncate">{`(${operator}) : ${value}`}</span>
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-4 w-4 p-0 ml-1 opacity-60 hover:opacity-100 hover:bg-red-100 hover:text-red-600 group-hover:opacity-100"
-                                        onClick={() => removeFilterBadges(columnId)}
-                                    >
-                                        <X className="h-2.5 w-2.5" />
-                                    </Button>
-                                </Badge>
-                            ))}
-                        </div>
+                <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                            Active Filters ({activeFilterBadges.length})
+                        </span>
+                        <div className="flex-1 h-px bg-border" />
                     </div>
-                )}
+
+                    <div className="flex flex-wrap gap-2">
+                        {activeFilterBadges.map(({ columnId, operator, value, label, variant }) => (
+                            <Badge
+                                key={columnId}
+                                variant="secondary"
+                                className={cn(
+                                    "group flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-all duration-200 hover:scale-105",
+                                    variant === "select" && "bg-blue-100 text-blue-800 hover:bg-blue-200",
+                                    variant === "number" && "bg-green-100 text-green-800 hover:bg-green-200",
+                                    variant === "date" && "bg-purple-100 text-purple-800 hover:bg-purple-200",
+                                    variant === "default" && "bg-gray-100 text-gray-800 hover:bg-gray-200",
+                                )}
+                            >
+                                <div
+                                    className={cn(
+                                        "w-1.5 h-1.5 rounded-full",
+                                        variant === "text" && "bg-gray-500",
+                                        (variant === "select" || variant === "multiSelect") && "bg-blue-500",
+                                        variant === "number" && "bg-green-500",
+                                        variant === "date" && "bg-purple-500",
+                                        variant === "range" && "bg-yellow-500",
+                                        variant === "default" && "bg-gray-500",
+                                    )}
+                                />
+                                <span className="font-medium">{label}</span>
+                                <span className="max-w-[200px] truncate">
+                                    {`(${operator}) : ${formatValue(value)}`}
+                                </span>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-4 w-4 p-0 ml-1 opacity-60 hover:opacity-100 hover:bg-red-100 hover:text-red-600 group-hover:opacity-100"
+                                    onClick={() => removeFilterBadges(columnId)}
+                                >
+                                    <X className="h-2.5 w-2.5" />
+                                </Button>
+                            </Badge>
+                        ))}
+                    </div>
+                </div>
 
                 {/* Empty State */}
-                {!hasActiveFilters && (
-                    <div className="text-center py-4">
+                {activeFilterBadges.length === 0 && (
+                    <div className="text-center">
                         <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
                             <Search className="h-4 w-4" />
                             <span>No filters applied. Select a filter type above to get started.</span>
                         </div>
                     </div>
                 )}
-            </div>
-        </Card>
+            </Card >
+        </div>
     )
 }
 
 
 interface DataTableToolbarFilterProps<TData> {
     column: Column<TData>
-    setSelectedOptions: React.Dispatch<React.SetStateAction<DataTableFilterOption[]>>
     onFilterChange?: (value: any) => void
     isActive?: boolean
+    isAdvancedMode?: boolean
 }
 
 
 export function DataTableToolbarFilter<TData>({
     column,
-    setSelectedOptions,
     onFilterChange,
     isActive = false,
+    isAdvancedMode = false,
 }: DataTableToolbarFilterProps<TData>) {
+    const { getFilter } = useFilters();
+
+    const columnFilter = getFilter(column?.id);
     const columnMeta = column.columnDef.meta;
     const onFilterRender = React.useCallback(() => {
         const commonProps = {
             column,
-            setSelectedOptions,
             onFilterChange,
             isActive,
+            isAdvancedMode
         }
         if (!columnMeta?.variant) return null;
 
         switch (columnMeta.variant) {
             case "text":
+            case "number":
+            case "range":
                 return (
                     <DataTableInputFilter
                         {...commonProps}
                         title={columnMeta.label ?? column.id}
+                        type={columnMeta.variant}
                     >
                     </DataTableInputFilter>
-                );
-
-            case "number":
-                return (
-                    <div className="relative">
-                        <Input
-                            type="number"
-                            inputMode="numeric"
-                            placeholder={columnMeta.placeholder ?? columnMeta.label}
-                            value={(column.getFilterValue() as string) ?? ""}
-                            onChange={(event) => column.setFilterValue(event.target.value)}
-                            className={cn("h-8 w-[120px]", columnMeta.unit && "pr-8")}
-                        />
-                        {columnMeta.unit && (
-                            <span className="absolute top-0 right-0 bottom-0 flex items-center rounded-r-md bg-accent px-2 text-muted-foreground text-sm">
-                                {columnMeta.unit}
-                            </span>
-                        )}
-                    </div>
-                );
-
-            case "range":
-                return (
-                    <DataTableSliderFilter
-                        column={column}
-                        title={columnMeta.label ?? column.id}
-                        setSelectedOptions={setSelectedOptions}
-                    />
                 );
 
             case "date":
             case "dateRange":
                 return (
                     <DataTableDateFilter
-                        column={column}
+                        {...commonProps}
                         title={columnMeta.label ?? column.id}
-                        setSelectedOptions={setSelectedOptions}
-                        multiple={columnMeta.variant === "dateRange"}
+                        multiple={(columnFilter?.operator === "isBetween" || columnFilter?.operator === "isNotBetween") ? true : false}
                     />
                 );
 
@@ -387,7 +435,7 @@ export function DataTableToolbarFilter<TData>({
             default:
                 return null;
         }
-    }, [column, columnMeta, onFilterChange, setSelectedOptions, isActive]);
+    }, [column, columnMeta, onFilterChange, isActive]);
 
     return onFilterRender();
 }

@@ -137,30 +137,20 @@ export function studentsView() {
     const fetchData = async () => {
         setIsViewLoading(true)
         setViewError(null)
-        try {
-            const result = await getAllStudentsViews()
-            setViews(
-                result.map(view => ({
-                    ...view,
-                    searchParams: {
-                        page: view.searchParams.page ?? 1,
-                        perPage: view.searchParams.perPage ?? 10,
-                        joinOperator: view.searchParams.joinOperator ?? "and",
-                        sort: view.searchParams.sort,
-                        filters: view.searchParams.filters,
-                    },
-                }))
-            )
-        }
-        catch (err) {
-            toast.error("Failed to fetch View Table", {
-                description: "Please try again later.",
-                style: { color: "red" }
-            })
-            setViewError(err instanceof Error ? err : new Error("Failed to fetch students data"))
-        } finally {
-            setIsViewLoading(false)
-        }
+        const result = await getAllStudentsViews()
+        setViews(
+            result.map(view => ({
+                ...view,
+                searchParams: {
+                    page: view.searchParams.page ?? 1,
+                    perPage: view.searchParams.perPage ?? 10,
+                    joinOperator: view.searchParams.joinOperator ?? "and",
+                    sort: view.searchParams.sort,
+                    filters: view.searchParams.filters,
+                },
+            }))
+        )
+        setIsViewLoading(false)
     }
 
     useEffect(() => {

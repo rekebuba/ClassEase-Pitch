@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { CaretDownIcon, Pencil1Icon, PlusIcon } from "@radix-ui/react-icons"
 import { useHotkeys } from "react-hotkeys-hook"
 
@@ -14,20 +14,17 @@ import { Kbd } from "@/components/kbd"
 
 import { CreateViewForm } from "./create-view-form"
 import { EditViewForm } from "./edit-view-form"
-import { parseAsString, useQueryState } from "nuqs"
 import { SearchParams, StudentsViews, View } from "@/lib/types"
-import { CreateViewPopover } from "./create-view-popover"
-import UpdateViewForm from "./update-view-form"
-import { createNewView, deleteView, renameView, updateView } from "@/api/adminApi"
+import { createNewView, deleteView, updateView } from "@/api/adminApi"
 import { toast } from "sonner"
-import { searchParamsCache } from "@/lib/validations"
-import isEqual from 'lodash/isEqual';
 
 interface DataTableViewsDropdownProps {
   views: StudentsViews[]
   SearchParams: SearchParams
   setSearchParams: (params: SearchParams) => void
   refetchViews: () => void
+  currentViewId: string | null
+  setCurrentViewId: (viewId: string | null) => void
 }
 
 export function DataTableViewsDropdown({
@@ -35,43 +32,15 @@ export function DataTableViewsDropdown({
   SearchParams,
   setSearchParams,
   refetchViews,
+  currentViewId,
+  setCurrentViewId
 }: DataTableViewsDropdownProps) {
   const [open, setOpen] = useState(false)
   const [isCreateViewFormOpen, setIsCreateViewFormOpen] = useState(false)
   const [isEditViewFormOpen, setIsEditViewFormOpen] = useState(false)
   const [selectedView, setSelectedView] = useState<StudentsViews | null>(null)
-  const [currentViewId, setCurrentViewId] = useQueryState("viewId", parseAsString)
-  const [allowUpdate, setAllowUpdate] = useState(false)
-  const [allowCreate, setAllowCreate] = useState(false)
 
   const currentView = views.find((view) => view.viewId === currentViewId)
-
-  useEffect(() => {
-    console.log("Current View:", currentView?.searchParams)
-    if (currentView && !isEqual(currentView.searchParams, SearchParams)) {
-      // setSelectedView(currentView)
-      console.log("not View:", isEqual(currentView?.searchParams, SearchParams))
-      setAllowUpdate(true)
-    }
-    else {
-      setAllowUpdate(false)
-    }
-    if (!currentViewId && SearchParams) {
-      // If no view is selected, check if SearchParams are different from default
-      const defaultSearchParams: SearchParams = {
-        page: 1,
-        perPage: 10,
-        sort: [],
-        filters: [],
-        joinOperator: "and",
-      };
-      setAllowCreate(!isEqual(SearchParams, defaultSearchParams));
-    }
-    else {
-      setAllowCreate(false)
-    }
-  }, [currentView, views, SearchParams])
-
 
   function selectView(view: StudentsViews | null) {
     if (view) {
@@ -235,13 +204,6 @@ export function DataTableViewsDropdown({
           )}
         </PopoverContent>
       </Popover>
-      {allowCreate ? <CreateViewPopover SearchParams={SearchParams} onCreateView={handleCreateView} /> : null}
-      <UpdateViewForm
-        isUpdated={allowUpdate}
-        currentView={currentView as StudentsViews}
-        searchParams={SearchParams}
-        handleUpdateView={handleUpdateView}
-      />
     </>
   )
 }

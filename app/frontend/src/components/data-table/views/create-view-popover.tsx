@@ -1,34 +1,121 @@
 "use client"
 
-import { useState } from "react"
-import type { DataTableFilterOption } from "@/types"
+import { useEffect, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 
 import { CreateViewForm } from "./create-view-form"
-import { calcFilterParams } from "./utils"
-import { SearchParams } from "@/lib/types"
+import { SearchParams, StudentsViews, View } from "@/lib/types"
+import { Save } from "lucide-react"
+import isEqual from 'lodash/isEqual';
+import UpdateViewForm from "./update-view-form"
+import { createNewView, updateView } from "@/api/adminApi"
+import { toast } from "sonner"
+import { useTableInstanceContext } from "../table-instance-provider"
 
-interface CreateViewPopoverProps<T> {
+
+interface CreateViewPopoverProps {
   SearchParams: SearchParams
-  onCreateView?: (newView: any) => void
+  views: StudentsViews[]
+  currentViewId: string | null
+  refetchViews: () => void
+  setCurrentViewId: (viewId: string | null) => void
 }
 
-export function CreateViewPopover<T>({ SearchParams, onCreateView }: CreateViewPopoverProps<T>) {
+export function CreateViewPopover({ SearchParams, views, refetchViews, currentViewId, setCurrentViewId }: CreateViewPopoverProps) {
   const [open, setOpen] = useState(false)
 
+  const [allowCreate, setAllowCreate] = useState(false)
+  const [allowUpdate, setAllowUpdate] = useState(false)
+
+  const { tableInstance } = useTableInstanceContext()
+
+  const visibleColumns =
+    tableInstance
+      ?.getVisibleFlatColumns()
+      .filter((column) => typeof column.accessorFn !== "undefined" && column.getCanHide())
+      .map((column) => column.id) || []
+
+  const [visibleColumnsState, setVisibleColumnsState] = useState<String[]>(visibleColumns);
+
+  console.log("Hidden columns:", visibleColumnsState)
+
+  const currentView = views.find((view) => view.viewId === currentViewId)
+
+  useEffect(() => {
+    if (((currentView && !isEqual(currentView.searchParams, SearchParams)) ||
+      (currentView && currentView.columns.length !== visibleColumns.length))
+    ) {
+      setAllowUpdate(true)
+    }
+    else {
+      setAllowUpdate(false)
+    }
+    if (!currentViewId && SearchParams) {
+      // If no view is selected, check if SearchParams are different from default
+      const defaultSearchParams: SearchParams = {
+        page: 1,
+        perPage: 10,
+        sort: [],
+        filters: [],
+        joinOperator: "and",
+      };
+      if (!isEqual(SearchParams, defaultSearchParams) ||
+        (currentView && currentView.columns.length !== visibleColumnsState.length)
+      ) {
+        setAllowCreate(true);
+      } else {
+        setAllowCreate(false);
+      }
+
+    }
+    else {
+      setAllowCreate(false)
+    }
+  }, [currentView, views, SearchParams, visibleColumns])
+
+  const handleCreateView = async (newView: View) => {
+    const result = await createNewView(newView)
+    toast.error(result.message, {
+      style: { color: "green" },
+    });
+    refetchViews()
+    setCurrentViewId(result?.viewId)
+  }
+
+  const handleUpdateView = async (updatedView: StudentsViews) => {
+    const result = await updateView(updatedView)
+    toast.error(result.message, {
+      style: { color: "green" },
+    });
+    refetchViews()
+    setCurrentViewId(result?.viewId)
+  }
+
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button size="sm">Save as new view</Button>
-      </PopoverTrigger>
-      <PopoverContent
-        className="w-[12.5rem] p-0 dark:bg-background/95 dark:backdrop-blur-md dark:supports-[backdrop-filter]:bg-background/40"
-        align="end"
-      >
-        <CreateViewForm SearchParams={SearchParams} onSuccess={() => setOpen(false)} onCreateView={onCreateView} />
-      </PopoverContent>
-    </Popover>
+    <>
+      {allowCreate ? (<Popover open={open} onOpenChange={setOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="outline" size="sm" className="h-8 text-xs">
+            <Save className="h-3 w-3 mr-1" />
+            Save as new view
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent
+          className="w-[12.5rem] p-0 dark:bg-background/95 dark:backdrop-blur-md dark:supports-[backdrop-filter]:bg-background/40"
+          align="end"
+        >
+          <CreateViewForm SearchParams={SearchParams} onSuccess={() => setOpen(false)} onCreateView={handleCreateView} />
+        </PopoverContent>
+      </Popover>) : (
+        <UpdateViewForm
+          isUpdated={allowUpdate}
+          currentView={currentView as StudentsViews}
+          searchParams={SearchParams}
+          handleUpdateView={handleUpdateView}
+        />
+      )}
+    </>
   )
 }
