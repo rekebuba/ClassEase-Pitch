@@ -11,7 +11,7 @@ export default function Layout({ role, children }: { role: RoleProps; children: 
             <AppSidebar role={role} />
             <div className="flex min-h-screen flex-col w-full overflow-x-hidden">
                 <Header />
-                <div className="p-5">
+                <div className="p-0">
                     {children}
                 </div>
             </div>

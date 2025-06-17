@@ -148,7 +148,7 @@ export function DataTableSimpleFilter({ searchParams, views, refetchViews, curre
 
     const activeFilterBadges = React.useMemo(
         () =>
-            filters.map(({ id, operator, value }) => {
+            filters.filter(({ value }) => value !== undefined && value !== "").map(({ id, operator, value }) => {
                 const column = table.getColumn(id)
                 return {
                     columnId: id,

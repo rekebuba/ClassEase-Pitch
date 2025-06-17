@@ -17,6 +17,7 @@ import { EditViewForm } from "./edit-view-form"
 import { SearchParams, StudentsViews, View } from "@/lib/types"
 import { createNewView, deleteView, updateView } from "@/api/adminApi"
 import { toast } from "sonner"
+import { useTableInstanceContext } from "../table-instance-provider"
 
 interface DataTableViewsDropdownProps {
   views: StudentsViews[]
@@ -39,14 +40,34 @@ export function DataTableViewsDropdown({
   const [isCreateViewFormOpen, setIsCreateViewFormOpen] = useState(false)
   const [isEditViewFormOpen, setIsEditViewFormOpen] = useState(false)
   const [selectedView, setSelectedView] = useState<StudentsViews | null>(null)
-
   const currentView = views.find((view) => view.viewId === currentViewId)
+
+  const { tableInstance: table } = useTableInstanceContext()
+  const visibleColumns =
+    table
+      ?.getVisibleFlatColumns()
+      .filter((column) => typeof column.accessorFn !== "undefined" && column.getCanHide())
+      .map((column) => column.id) || []
+
+  const [defaultColumnState] = useState<string[]>(visibleColumns);
+
+  // Update visibility to match defaultColumnState
+  const setColumns = (columns: string[]) => {
+    const allColumns = table.getAllLeafColumns();
+    const visibility = allColumns.reduce((acc, col) => {
+      acc[col.id] = columns.includes(col.id);
+      return acc;
+    }, {} as Record<string, boolean>);
+
+    table.setColumnVisibility(visibility);
+  };
 
   function selectView(view: StudentsViews | null) {
     if (view) {
       // Update state
       setCurrentViewId(view.viewId)
       setSearchParams(view.searchParams)
+      setColumns(view.columns)
     } else {
       // Clear view selection
       setSearchParams({
@@ -57,6 +78,7 @@ export function DataTableViewsDropdown({
         joinOperator: "and",
       });
       setCurrentViewId(null)
+      setColumns(defaultColumnState)
     }
   }
 
@@ -72,6 +94,7 @@ export function DataTableViewsDropdown({
     });
     refetchViews()
     setCurrentViewId(result?.viewId)
+    setColumns(newView.columns)
   }
 
   const handleUpdateView = async (updatedView: StudentsViews) => {
@@ -162,6 +185,7 @@ export function DataTableViewsDropdown({
                       refetchViews()
                       selectView(null)
                       setOpen(false)
+                      setColumns(defaultColumnState)
                     }}
                   >
                     All Items

@@ -29,7 +29,10 @@ def create_new_views(admin_data: UserT) -> Tuple[Response, int]:
             user_id=admin_data.id,
             name=valid_query["name"],
             table_name=valid_query["table_name"],
-            query_json=valid_query["search_params"],
+            query_json={
+                **valid_query["search_params"],
+                "columns": valid_query.get("columns", []),
+            },
         )
         new_view.save()
 

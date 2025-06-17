@@ -39,41 +39,44 @@ export function CreateViewPopover({ SearchParams, views, refetchViews, currentVi
 
   const [visibleColumnsState, setVisibleColumnsState] = useState<String[]>(visibleColumns);
 
-  console.log("Hidden columns:", visibleColumnsState)
-
   const currentView = views.find((view) => view.viewId === currentViewId)
 
   useEffect(() => {
-    if (((currentView && !isEqual(currentView.searchParams, SearchParams)) ||
-      (currentView && currentView.columns.length !== visibleColumns.length))
-    ) {
-      setAllowUpdate(true)
+    const isCurrentViewDifferent =
+      currentView && !isEqual(currentView.searchParams, SearchParams);
+
+    const isColumnLengthDifferent =
+      currentView && currentView.columns.length !== visibleColumns.length;
+
+    // Set allowUpdate when a view is selected and either searchParams or columns changed
+    if (currentView && (isCurrentViewDifferent || isColumnLengthDifferent)) {
+      setAllowUpdate(true);
+    } else {
+      setAllowUpdate(false);
     }
-    else {
-      setAllowUpdate(false)
-    }
+
+    const defaultSearchParams: SearchParams = {
+      page: 1,
+      perPage: 10,
+      sort: [],
+      filters: [],
+      joinOperator: "and",
+    };
+
+    // If no view is selected
     if (!currentViewId && SearchParams) {
-      // If no view is selected, check if SearchParams are different from default
-      const defaultSearchParams: SearchParams = {
-        page: 1,
-        perPage: 10,
-        sort: [],
-        filters: [],
-        joinOperator: "and",
-      };
-      if (!isEqual(SearchParams, defaultSearchParams) ||
-        (currentView && currentView.columns.length !== visibleColumnsState.length)
-      ) {
+      const isSearchParamsModified = !isEqual(SearchParams, defaultSearchParams);
+      const isVisibleColumnsChanged =
+        currentView && currentView.columns.length !== visibleColumnsState.length;
+
+      if (isSearchParamsModified || isVisibleColumnsChanged || visibleColumnsState.length !== visibleColumns.length) {
         setAllowCreate(true);
       } else {
         setAllowCreate(false);
       }
+    }
+  }, [currentView, views, SearchParams, visibleColumns, visibleColumnsState, currentViewId]);
 
-    }
-    else {
-      setAllowCreate(false)
-    }
-  }, [currentView, views, SearchParams, visibleColumns])
 
   const handleCreateView = async (newView: View) => {
     const result = await createNewView(newView)
