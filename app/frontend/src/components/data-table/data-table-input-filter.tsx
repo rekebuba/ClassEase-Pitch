@@ -49,9 +49,11 @@ export function DataTableInputFilter<TData, TValue>({
     const defaultRange = column.columnDef.meta?.range;
     const unit = column.columnDef.meta?.unit;
 
-    console.log("defaultRange", defaultRange?.max)
-
     const handleValueChange = React.useCallback((value: String | Number, operator: String) => {
+        if (defaultRange?.max && (type === "range" || type === "number") && value >= defaultRange.max) {
+            value = defaultRange.max;
+        }
+        console.log("handleValueChange", value, operator)
         onFilterChange?.({ value, operator })
     }, [filterValue, selectedOperator, onFilterChange],
     );

@@ -97,38 +97,16 @@ class FilterSchema(BaseSchema):
     """Schema for validating filter parameters."""
 
     column_name = ColumnField(required=False, load_default=None, allow_none=True)
-    defalut_filter = fields.Integer(required=False, load_default=None, allow_none=True)
+    default_filter = fields.Integer(required=False, load_default=None, allow_none=True)
     filter_id = fields.String(required=False, load_default=None, allow_none=True)
     table_id = fields.String(required=True)
     table = TableField(required=True)
-    variant = fields.String(
-        validate=lambda x: x
-        in ["text", "number", "multiSelect", "boolean", "date", "dateRange", "range"],
-        required=True,
+    variant = fields.String(required=True, validate=lambda x: x in OPERATOR_CONFIG)
+    operator = fields.String(
+        required=False, validate=lambda x: x in OPERATOR_CONFIG["operators"]
     )
-    operator = fields.String(required=False, load_default=None, allow_none=True)
     value = ValueField(required=False, load_default=None, allow_none=True)
 
-    @validates_schema
-    def validate_value(self, data: Dict[str, Any], **kwargs: Any) -> None:
-        variant = data.get("variant", None)
-        operator = data.get("operator", None)
-
-        if not variant:
-            raise ValidationError("Missing variant", field_name="variant")
-
-        if operator is not None:
-            allowed_operators = OPERATOR_CONFIG.get(variant)
-            if not allowed_operators:
-                raise ValidationError(
-                    f"'{variant}' is not a valid variant.", field_name="variant"
-                )
-
-            if operator not in allowed_operators:
-                raise ValidationError(
-                    f"'{operator}' is not valid for variant '{variant}'",
-                    field_name="operator",
-                )
 
     @pre_load
     def pre_load_data(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
@@ -157,7 +135,7 @@ class FilterSchema(BaseSchema):
             if column_obj is None and data["column_name"] in ALISA_NAME:
                 alias_column = ALISA_NAME[data["column_name"]]
                 data["column_name"] = alias_column["key"]
-                data["defalut_filter"] = alias_column["default"]
+                data["default_filter"] = alias_column["default"]
 
         value = data.get("value")
         if value is None:
@@ -183,7 +161,7 @@ class FilterSchema(BaseSchema):
                 data["column_name"],
                 data["operator"],
                 data["value"],
-                data["defalut_filter"],
+                data["default_filter"],
             )
 
         return filter
@@ -323,7 +301,9 @@ class PerSemesterSchema(BaseSchema):
 class AllStudentsSchema(BaseSchema):
     user = fields.Nested(
         UserSchema(only=("identification", "image_path", "created_at")),
-        required=False, allow_none=True, dump_default=None
+        required=False,
+        allow_none=True,
+        dump_default=None,
     )
     # it will be returned as a string ex: "John Doe Smith"
     student = fields.Nested(

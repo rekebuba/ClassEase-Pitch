@@ -8,11 +8,6 @@ from typing import Optional
 app = create_app("development")
 
 
-# import debugpy
-
-# debugpy.listen(("0.0.0.0", 5678))  # Start the debugger on port 5678
-
-
 @app.teardown_appcontext
 def cleanup_session(exception: Optional[BaseException] = None) -> None:
     storage.session.remove()  # Clean up session after request

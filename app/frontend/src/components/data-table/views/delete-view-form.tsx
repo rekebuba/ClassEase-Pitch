@@ -23,10 +23,8 @@ export function DeleteViewForm({ viewId, setIsEditViewFormOpen, onDelete }: Dele
 
     // Simulate API call
     setTimeout(() => {
-      console.log(`Deleting view with ID: ${viewId}`)
       onDelete(viewId)
       setIsEditViewFormOpen(false)
-      toast.success("View deleted successfully.")
       setPending(false)
     }, 500)
   }

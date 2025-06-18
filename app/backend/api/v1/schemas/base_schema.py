@@ -389,7 +389,7 @@ class BaseSchema(Schema):
         column_name: str,
         operator: str,
         token: Any,
-        defalut_filter: Optional[int] = None,
+        default_filter: Optional[int] = None,
     ) -> ColumnElement[Any]:
         col: Optional[Union[ColumnElement[Any], Function[Any]]] = getattr(
             model, column_name, None
@@ -405,14 +405,14 @@ class BaseSchema(Schema):
                 f"Operator '{operator}' is not callable or not defined."
             )
 
-        if defalut_filter is not None:
+        if default_filter is not None:
             # column get its Python type
             type = col.type.python_type
 
             col = func.substring_index(
                 func.group_concat(col.op("ORDER BY")(Semester.name)),
                 ",",
-                defalut_filter,
+                default_filter,
             )
 
             if type is int:
@@ -431,7 +431,7 @@ class BaseSchema(Schema):
         column_name: Union[str, List[str]],
         operator: str,
         value: Any,
-        defalut_filter: Optional[int] = None,
+        default_filter: Optional[int] = None,
     ) -> Union[True_, List[ColumnElement[Any]], ColumnElement[Any]]:
         """
         Dynamically create a SQLAlchemy filter based on operator.
@@ -443,7 +443,7 @@ class BaseSchema(Schema):
             )
         elif isinstance(column_name, str) and operator:
             result = BaseSchema.build_operator_condition(
-                model, column_name, operator, value, defalut_filter
+                model, column_name, operator, value, default_filter
             )
 
         return result

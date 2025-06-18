@@ -38,7 +38,7 @@ class FilterDict(TypedDict):
     """for filter data."""
 
     column_name: Union[str, List[str]]
-    defalut_filter: Optional[int]
+    default_filter: Optional[int]
     filter_id: str
     table_id: str
     table: Optional[Type[Base]]
