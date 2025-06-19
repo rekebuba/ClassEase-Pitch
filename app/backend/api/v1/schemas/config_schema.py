@@ -24,14 +24,14 @@ def notIn(
     col: Union[Function[Any], ColumnElement[Any]], val: List[Any]
 ) -> ColumnElement[Any]:
     non_null_vals = [v for v in val if v is not None]
-    null_vlaue = None in val  # keep nulls if None is not in val
+    null_value = None in val  # keep nulls if None is not in val
 
     conditions = []
 
     if non_null_vals:
         conditions.append(~col.in_(non_null_vals))
 
-    if null_vlaue:
+    if null_value:
         conditions.append(col.isnot(None))
     else:
         conditions.append(col.is_(None))
@@ -39,7 +39,7 @@ def notIn(
     if not conditions:
         return true()  # no values passed, return a no-op filter
 
-    return and_(*conditions) if null_vlaue else or_(*conditions)
+    return and_(*conditions) if null_value else or_(*conditions)
 
 
 OPERATOR_MAPPING: Dict[
@@ -50,24 +50,12 @@ OPERATOR_MAPPING: Dict[
     ],
 ] = {
     # Equals operators (string only)
-    "eq": lambda col, val: (
-        normalize_date_col(col, val) == val if isinstance(val, str) else true()
-    ),
-    "ne": lambda col, val: (
-        normalize_date_col(col, val) != val if isinstance(val, str) else true()
-    ),
-    "lt": lambda col, val: (
-        normalize_date_col(col, val) < val if isinstance(val, str) else true()
-    ),
-    "lte": lambda col, val: (
-        normalize_date_col(col, val) <= val if isinstance(val, str) else true()
-    ),
-    "gt": lambda col, val: (
-        normalize_date_col(col, val) > val if isinstance(val, str) else true()
-    ),
-    "gte": lambda col, val: (
-        normalize_date_col(col, val) >= val if isinstance(val, str) else true()
-    ),
+    "eq": lambda col, val: (normalize_date_col(col, val) == val),
+    "ne": lambda col, val: (normalize_date_col(col, val) != val),
+    "lt": lambda col, val: (normalize_date_col(col, val) < val),
+    "lte": lambda col, val: (normalize_date_col(col, val) <= val),
+    "gt": lambda col, val: (normalize_date_col(col, val) > val),
+    "gte": lambda col, val: (normalize_date_col(col, val) >= val),
     "iLike": lambda col, val: col.ilike(f"%{val}%"),
     "like": lambda col, val: col.like(f"%{val}%"),
     "notLike": lambda col, val: ~col.like(f"%{val}%"),
@@ -138,6 +126,7 @@ OPERATOR_CONFIG = {
     "select": ["eq", "ne", "isEmpty", "isNotEmpty"],
     "multiSelect": ["in", "notIn", "isEmpty", "isNotEmpty"],
     "range": ["isBetween", "isNotBetween"],
+    "boolean": ["eq", "ne"],
     "date": [
         "eq",
         "ne",
@@ -146,6 +135,7 @@ OPERATOR_CONFIG = {
         "gt",
         "gte",
         "isBetween",
+        "isNotBetween",
         "isRelativeToToday",
         "isEmpty",
         "isNotEmpty",
@@ -158,11 +148,30 @@ OPERATOR_CONFIG = {
         "gt",
         "gte",
         "isBetween",
+        "isNotBetween",
         "isRelativeToToday",
         "isEmpty",
         "isNotEmpty",
     ],
-    "boolean": ["eq", "ne"],
+    "operators": [
+        "iLike",
+        "notLike",
+        "startsWith",
+        "endWith",
+        "eq",
+        "ne",
+        "in",
+        "notIn",
+        "isEmpty",
+        "isNotEmpty",
+        "lt",
+        "lte",
+        "gt",
+        "gte",
+        "isBetween",
+        "isNotBetween",
+        "isRelativeToToday",
+    ],
 }
 
 VALUE_TYPE_RULES = {

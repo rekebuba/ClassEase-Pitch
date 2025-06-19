@@ -21,7 +21,6 @@ class ResponseData(BaseModel):
     """for all students data after post dump."""
 
     identification: str
-    imagePath: str
     createdAt: str
     guardianName: str
     guardianPhone: str
@@ -30,8 +29,6 @@ class ResponseData(BaseModel):
     grade: Optional[int]
     finalScore: Optional[float]
     rank: Optional[int]
-    semesterOne: Optional[int]
-    semesterTwo: Optional[int]
     sectionSemesterOne: Optional[str]
     sectionSemesterTwo: Optional[str]
     averageSemesterOne: Optional[float]
@@ -41,28 +38,25 @@ class ResponseData(BaseModel):
 
 
 class ResponseTableId(BaseModel):
-    identification: str
-    imagePath: str
-    createdAt: str
-    firstName_fatherName_grandFatherName: str
-    guardianName: str
-    guardianPhone: str
-    isActive: str
-    grade: str
-    sectionSemesterOne: str
-    sectionSemesterTwo: str
-    averageSemesterOne: str
-    averageSemesterTwo: str
-    rankSemesterOne: str
-    rankSemesterTwo: str
-    semesterOne: str
-    semesterTwo: str
-    finalScore: str
-    rank: str
+    identification: Optional[str] = None
+    createdAt: Optional[str] = None
+    firstName_fatherName_grandFatherName: Optional[str] = None
+    guardianName: Optional[str] = None
+    guardianPhone: Optional[str] = None
+    isActive: Optional[str] = None
+    grade: Optional[str] = None
+    sectionSemesterOne: Optional[str] = None
+    sectionSemesterTwo: Optional[str] = None
+    averageSemesterOne: Optional[str] = None
+    averageSemesterTwo: Optional[str] = None
+    rankSemesterOne: Optional[str] = None
+    rankSemesterTwo: Optional[str] = None
+    finalScore: Optional[str] = None
+    rank: Optional[str] = None
 
 
 class StudentQueryResponse(BaseModel):
-    tableId: ResponseTableId
+    tableId: ResponseTableId = ResponseTableId()
     data: List[ResponseData]
 
 
@@ -115,7 +109,7 @@ def register_all_students(
 
 
 @pytest.fixture(scope="session")
-def stud_registerd_for_semester_one_course(
+def register_stud_for_semester_one_course(
     db_session: scoped_session[Session],
     semester_one_created: Semester,
     student_data: Iterator[Student],
@@ -144,7 +138,7 @@ def stud_registerd_for_semester_one_course(
 
 
 @pytest.fixture(scope="session")
-def stud_registerd_for_semester_two_course(
+def register_stud_for_semester_two_course(
     db_session: scoped_session[Session],
     semester_two_created: Semester,
     student_data: Iterator[Student],

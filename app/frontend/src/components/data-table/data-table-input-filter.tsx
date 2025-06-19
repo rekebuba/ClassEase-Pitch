@@ -1,192 +1,124 @@
 "use client"
 
 import type { Column } from "@tanstack/react-table"
-import { PlusCircle, XCircle } from "lucide-react"
-import { TrashIcon } from "@radix-ui/react-icons"
+import { Search, X } from "lucide-react"
 
-import { Badge } from "@/components/ui/badge"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { Button } from "@/components/ui/button"
-import { Command, CommandGroup, CommandList } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Separator } from "@/components/ui/separator"
 import * as React from "react"
 import { useFilters } from "@/utils/filter-context"
 import { dataTableConfig } from "@/config/data-table"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useState } from "react"
-import type { DataTableFilterOption } from "@/types"
 import { Input } from "@/components/ui/input"
+import { cn } from "@/lib/utils"
+import { DataTableSliderFilter } from "./data-table-slider-filter";
 
 interface DataTableInputFilterProps<TData, TValue> {
-    column?: Column<TData, TValue>
+    column: Column<TData, TValue>
     title: string
-    setSelectedOptions: React.Dispatch<React.SetStateAction<DataTableFilterOption<TData>[]>>
+    onFilterChange?: (value: any) => void,
+    isActive?: boolean
+    isAdvancedMode?: boolean
+    type: "text" | "number" | "range"
 }
 
 export function DataTableInputFilter<TData, TValue>({
     column,
     title,
-    setSelectedOptions,
+    onFilterChange,
+    isActive,
+    isAdvancedMode,
+    type
 }: DataTableInputFilterProps<TData, TValue>) {
-    const [open, setOpen] = useState(true)
-    const { addFilter, removeFilter, getFilter, debouncedAddFilter } = useFilters()
-
+    const { getFilter } = useFilters()
     const columnFilter = getFilter(column?.id)
-    const textFilterValue = columnFilter?.value as string | undefined
+    const textFilterValue = columnFilter?.value
 
-    const comparisonOperators = dataTableConfig.textOperators
+    const filterValue = textFilterValue ?? (type === "range" || type === "number" ? 0 : "")
+    const [isFocused, setIsFocused] = React.useState(false)
 
-    const operator = comparisonOperators.find((operator) => operator.value === columnFilter?.id) ?? comparisonOperators[0]
+    const comparisonOperators = type === "text" ? dataTableConfig.textOperators : dataTableConfig.numericOperators;
 
-    const [selectedOperator, setSelectedOperator] = useState<string>(operator.value)
-    const [selectedText, setSelectedText] = useState<string>(textFilterValue ?? "")
+    const selectedOperator = columnFilter?.operator || comparisonOperators[0].value;
 
-    const onTextChange = React.useCallback(
-        (value: string) => {
-            if (!column) return
-            setSelectedText(value)
-            if (value === "") {
-                removeFilter(column.id)
-            } else {
-                debouncedAddFilter({
-                    id: column.id,
-                    value: value,
-                    variant: column.columnDef.meta?.variant,
-                    tableId: column.columnDef.meta?.tableId ?? getFilter(column.id)?.tableId,
-                    operator: selectedOperator,
-                })
-            }
-        },
-        [column, removeFilter, debouncedAddFilter, selectedOperator],
-    )
+    const defaultRange = column.columnDef.meta?.range;
+    const unit = column.columnDef.meta?.unit;
 
-    const onOperatorSelect = React.useCallback(
-        (value: string) => {
-            if (!column) return
-            setSelectedOperator(value)
-
-            if (selectedText) {
-                addFilter({
-                    id: column.id,
-                    variant: column.columnDef.meta?.variant,
-                    tableId: column.columnDef.meta?.tableId ?? getFilter(column.id)?.tableId,
-                    value: selectedText,
-                    operator: value,
-                })
-            }
-        },
-        [column, addFilter, selectedText],
-    )
-
-    const onReset = React.useCallback(
-        (event: React.MouseEvent | undefined, remove: boolean) => {
-            event?.stopPropagation()
-            removeFilter(column?.id)
-            if (remove) {
-                setSelectedOptions((prev) => prev.filter((item) => item.value !== column?.id))
-            }
-        },
-        [column],
-    )
+    const handleValueChange = React.useCallback((value: String | Number, operator: String) => {
+        if (defaultRange?.max && (type === "range" || type === "number") && value >= defaultRange.max) {
+            value = defaultRange.max;
+        }
+        console.log("handleValueChange", value, operator)
+        onFilterChange?.({ value, operator })
+    }, [filterValue, selectedOperator, onFilterChange],
+    );
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="border-dashed">
-                    {textFilterValue && textFilterValue?.length > 0 ? (
-                        <div
-                            role="button"
-                            aria-label={`Clear ${title} filter`}
-                            tabIndex={0}
-                            onClick={() => onReset(undefined, true)}
-                            className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                        >
-                            <XCircle />
-                        </div>
-                    ) : (
-                        <PlusCircle />
-                    )}
-                    {title}
-                    {textFilterValue && textFilterValue?.length > 0 && (
-                        <>
-                            <Separator orientation="vertical" className="mx-0.5 data-[orientation=vertical]:h-4" />
-                            <div className="hidden items-center gap-1 lg:flex">
-                                <Badge variant="secondary" className="rounded-sm px-1 font-normal">
-                                    <span
-                                        className=" max-w-14 truncate overflow-clip"
-                                    >{textFilterValue}</span>
-                                </Badge>
-                            </div>
-                        </>
-                    )}
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[13.5rem] p-0" align="start">
-                <Command>
-                    <FilterHeader
-                        title={title}
-                        comparisonOperators={comparisonOperators}
-                        selectedOperator={selectedOperator}
-                        onOperatorSelect={onOperatorSelect}
-                        onReset={onReset}
-                    />
-                    <CommandList className="max-h-full">
-                        <CommandGroup className="max-h-[18.75rem] overflow-y-auto overflow-x-hidden">
-                            <Input
-                                placeholder={title}
-                                value={selectedText}
-                                onChange={(e) => onTextChange(e.target.value)}
-                                className="h-8 w-14 lg:w-full"
-                            />
-                        </CommandGroup>
-                    </CommandList>
-                </Command>
-            </PopoverContent>
-        </Popover>
-    )
-}
-
-interface FilterHeaderProps {
-    title: string
-    selectedOperator: string
-    onOperatorSelect: (value: string) => void
-    onReset: (event: React.MouseEvent | undefined, remove: boolean) => void
-    comparisonOperators: {
-        value: string
-        label: string
-    }[]
-}
-function FilterHeader({ title, selectedOperator, onOperatorSelect, onReset, comparisonOperators }: FilterHeaderProps) {
-    return (
-        <div className="flex items-center space-x-1 pl-1 pr-0.5 mt-1">
-            <div className="flex flex-1 items-center space-x-1">
-                <div className="text-xs capitalize text-muted-foreground max-w-14 truncate overflow-clip">{title}</div>
-                <Select value={selectedOperator} onValueChange={(value) => onOperatorSelect(value)}>
-                    <SelectTrigger className="h-auto w-fit truncate border-none px-2 py-0.5 text-xs hover:bg-muted/50">
-                        <SelectValue
-                            placeholder={comparisonOperators.find((op) => op.value === selectedOperator)?.label || "Select operator"}
-                        />
+        <>
+            {isAdvancedMode && (
+                <Select value={selectedOperator} onValueChange={operator => handleValueChange(filterValue, operator)}>
+                    <SelectTrigger className="h-9 w-[150px] bg-white border-2 hover:border-blue-300 transition-colors">
+                        <SelectValue placeholder={selectedOperator} />
                     </SelectTrigger>
-                    <SelectContent className="dark:bg-background/95 dark:backdrop-blur-md dark:supports-[backdrop-filter]:bg-background/40">
-                        <SelectGroup>
-                            {comparisonOperators.map(({ value, label }) => (
-                                <SelectItem key={value} value={value} className="py-1">
-                                    {label}
-                                </SelectItem>
-                            ))}
-                        </SelectGroup>
+                    <SelectContent>
+                        {comparisonOperators.map(({ value, label }) => (
+                            <SelectItem key={value} value={value}>
+                                {label}
+                            </SelectItem>
+                        ))}
                     </SelectContent>
                 </Select>
-            </div>
-            <Button
-                aria-label="Remove filter"
-                variant="ghost"
-                size="icon"
-                className="size-7 text-muted-foreground"
-                onClick={() => onReset(undefined, true)}
-            >
-                <TrashIcon className="size-4" aria-hidden="true" />
-            </Button>
-        </div>
+            )}
+            {(selectedOperator !== "isBetween" &&
+                selectedOperator !== "isNotBetween" &&
+                selectedOperator !== "isEmpty" &&
+                selectedOperator !== "isNotEmpty"
+            ) ? (
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+                    <Input
+                        type={(type === "range" || type === "number") ? "number" : type}
+                        placeholder={`Filter by ${title.toLowerCase()}...`}
+                        value={defaultRange?.max ? (defaultRange?.max > filterValue ? filterValue : defaultRange?.max) : filterValue}
+                        onChange={(e) => handleValueChange((type === "range" || type === "number") ? Number(e.target.value) : e.target.value, selectedOperator)}
+                        onFocus={() => setIsFocused(true)}
+                        onBlur={() => setIsFocused(false)}
+                        max={defaultRange?.max}
+                        className={cn(
+                            "h-9 w-[180px] pl-9 transition-all duration-200",
+                            isActive && filterValue && "ring-2 ring-blue-500/20 border-blue-300",
+                            isFocused && "ring-2 ring-blue-500/20",
+                        )}
+                    />
+                    {unit && (
+                        <span className="absolute top-0 right-0 bottom-0 flex items-center rounded-r-md bg-accent px-3 text-muted-foreground text-sm">
+                            {unit}
+                        </span>
+                    )}
+                    {filterValue ? (
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-2 top-1/2 -translate-y-1/2 h-5 w-5 p-0 hover:bg-red-100 hover:text-red-600"
+                            onClick={() => handleValueChange((type === "range" || type === "number") ? 0 : "", selectedOperator)}
+                        >
+                            <X className="h-3 w-3" />
+                        </Button>
+                    ) : null}
+                </div>) :
+                <DataTableSliderFilter
+                    column={column}
+                    title={title}
+                    onFilterChange={onFilterChange}
+                    isActive={isActive}
+                    selectedOperator={selectedOperator}
+                />
+            }
+        </>
     )
 }

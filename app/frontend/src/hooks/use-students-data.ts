@@ -25,13 +25,16 @@ import {
 } from "@/api/adminApi";
 
 
-export function useStudentsData(validQuery: SearchParams): StudentsDataResult {
+export function useStudentsData(validQuery: SearchParams | null): StudentsDataResult {
     const [data, setData] = useState<Student[]>([])
     const [pageCount, setPageCount] = useState(0)
     const [tableId, setTableId] = useState<TableId>({})
     const [statusCounts, setStatusCounts] = useState<StatusCount>({})
     const [gradeCounts, setGradeCounts] = useState<GradeCounts>({})
-    const [sectionCounts, setSectionCounts] = useState<SectionCounts>({})
+    const [sectionCounts, setSectionCounts] = useState<SectionCounts>({
+        sectionSemesterOne: {},
+        sectionSemesterTwo: {},
+    })
     const [averageRange, setAverageRange] = useState<AverageRange>({
         totalAverage: { min: "N/A", max: "N/A" },
         averageSemesterOne: { min: "N/A", max: "N/A" },
@@ -47,6 +50,12 @@ export function useStudentsData(validQuery: SearchParams): StudentsDataResult {
     const fetchData = async () => {
         setIsLoading(true)
         setError(null)
+        if (!validQuery) {
+            setData([])
+            setPageCount(0)
+            setTableId({})
+            return
+        }
 
         // Pass params to API calls if needed
         const [studentsResult, statusCountsResult, gradeCountsResult, sectionCounts, averageRangeResult] =
@@ -96,6 +105,12 @@ export function useStudentsData(validQuery: SearchParams): StudentsDataResult {
 
     // Fetch data when params change
     useEffect(() => {
+        if (!validQuery) {
+            setData([])
+            setPageCount(0)
+            setTableId({})
+            return
+        }
         fetchData()
     }, [validQuery])
 
@@ -114,7 +129,7 @@ export function useStudentsData(validQuery: SearchParams): StudentsDataResult {
 }
 
 export function studentsView() {
-    const [views, setViews] = useState<StudentsViews[]>()
+    const [views, setViews] = useState<StudentsViews[]>([])
     const [isViewLoading, setIsViewLoading] = useState(true)
     const [viewError, setViewError] = useState<Error | null>(null)
 
@@ -122,19 +137,20 @@ export function studentsView() {
     const fetchData = async () => {
         setIsViewLoading(true)
         setViewError(null)
-        try {
-            const result = await getAllStudentsViews()
-            setViews(result)
-        }
-        catch (err) {
-            toast.error("Failed to fetch View Table", {
-                description: "Please try again later.",
-                style: { color: "red" }
-            })
-            setViewError(err instanceof Error ? err : new Error("Failed to fetch students data"))
-        } finally {
-            setIsViewLoading(false)
-        }
+        const result = await getAllStudentsViews()
+        setViews(
+            result.map(view => ({
+                ...view,
+                searchParams: {
+                    page: view.searchParams.page ?? 1,
+                    perPage: view.searchParams.perPage ?? 10,
+                    joinOperator: view.searchParams.joinOperator ?? "and",
+                    sort: view.searchParams.sort,
+                    filters: view.searchParams.filters,
+                },
+            }))
+        )
+        setIsViewLoading(false)
     }
 
     useEffect(() => {
@@ -145,6 +161,6 @@ export function studentsView() {
         views,
         isViewLoading,
         viewError,
-        refetch: fetchData,
+        refetchViews: fetchData,
     }
 }

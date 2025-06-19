@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { CaretDownIcon, Pencil1Icon, PlusIcon } from "@radix-ui/react-icons"
 import { useHotkeys } from "react-hotkeys-hook"
 
@@ -11,67 +11,74 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Separator } from "@/components/ui/separator"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Kbd } from "@/components/kbd"
-import type { FilterParams, View } from "@/lib/validations"
 
 import { CreateViewForm } from "./create-view-form"
 import { EditViewForm } from "./edit-view-form"
-import { parseAsString, useQueryState } from "nuqs"
+import { SearchParams, StudentsViews, View } from "@/lib/types"
+import { createNewView, deleteView, updateView } from "@/api/adminApi"
+import { toast } from "sonner"
+import { useTableInstanceContext } from "../table-instance-provider"
 
 interface DataTableViewsDropdownProps {
-  views: View[]
-  filterParams: FilterParams
+  views: StudentsViews[]
+  SearchParams: SearchParams
+  setSearchParams: (params: SearchParams) => void
+  refetchViews: () => void
+  currentViewId: string | null
+  setCurrentViewId: (viewId: string | null) => void
 }
 
 export function DataTableViewsDropdown({
   views,
-  filterParams,
+  SearchParams,
+  setSearchParams,
+  refetchViews,
+  currentViewId,
+  setCurrentViewId
 }: DataTableViewsDropdownProps) {
   const [open, setOpen] = useState(false)
   const [isCreateViewFormOpen, setIsCreateViewFormOpen] = useState(false)
   const [isEditViewFormOpen, setIsEditViewFormOpen] = useState(false)
-  const [selectedView, setSelectedView] = useState<View | null>(null)
-  const [currentViewId, setCurrentViewId] = useQueryState("viewId", parseAsString)
-  // const [currentViewId, setCurrentViewId] = useState<string | null>(null)
+  const [selectedView, setSelectedView] = useState<StudentsViews | null>(null)
+  const currentView = views.find((view) => view.viewId === currentViewId)
 
-  // Get current view from URL
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const viewId = params.get("viewId")
-    setCurrentViewId(viewId)
-  }, [window.location.search])
+  const { tableInstance: table } = useTableInstanceContext()
+  const visibleColumns =
+    table
+      ?.getVisibleFlatColumns()
+      .filter((column) => typeof column.accessorFn !== "undefined" && column.getCanHide())
+      .map((column) => column.id) || []
 
-  const currentView = views.find((view) => view.id === currentViewId)
+  const [defaultColumnState] = useState<string[]>(visibleColumns);
 
-  function selectView(view: View | null) {
+  // Update visibility to match defaultColumnState
+  const setColumns = (columns: string[]) => {
+    const allColumns = table.getAllLeafColumns();
+    const visibility = allColumns.reduce((acc, col) => {
+      acc[col.id] = columns.includes(col.id);
+      return acc;
+    }, {} as Record<string, boolean>);
+
+    table.setColumnVisibility(visibility);
+  };
+
+  function selectView(view: StudentsViews | null) {
     if (view) {
-      // Update URL with view's search params
-      const params = new URLSearchParams()
-
-      // Add viewId
-      params.set("viewId", view.id)
-
-      // Add all other search params from the view
-      for (const [key, value] of Object.entries(view.searchParams)) {
-        if (typeof value === "object") {
-          params.set(key, JSON.stringify(value))
-        } else {
-          params.set(key, String(value))
-        }
-      }
-
-      // Update URL without navigation
-      window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`)
-
       // Update state
-      setCurrentViewId(view.id)
-      console.log("Selected view:", view)
+      setCurrentViewId(view.viewId)
+      setSearchParams(view.searchParams)
+      setColumns(view.columns)
     } else {
       // Clear view selection
-      const params = new URLSearchParams(window.location.search)
-      params.delete("viewId")
-      window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`)
-
+      setSearchParams({
+        page: 1,
+        perPage: 10,
+        sort: [],
+        filters: [],
+        joinOperator: "and",
+      });
       setCurrentViewId(null)
+      setColumns(defaultColumnState)
     }
   }
 
@@ -80,129 +87,147 @@ export function DataTableViewsDropdown({
     setTimeout(() => setOpen(true), 100)
   })
 
-  const handleCreateView = (newView: View) => {
-    console.log("New view created:", newView)
+  const handleCreateView = async (newView: View) => {
+    const result = await createNewView(newView)
+    toast.error(result.message, {
+      style: { color: "green" },
+    });
+    refetchViews()
+    setCurrentViewId(result?.viewId)
+    setColumns(newView.columns)
   }
 
-  const handleUpdateView = (updatedView: View) => {
-    console.log("View updated:", updatedView)
+  const handleUpdateView = async (updatedView: StudentsViews) => {
+    const result = await updateView(updatedView)
+    toast.error(result.message, {
+      style: { color: "green" },
+    });
+    refetchViews()
+    setCurrentViewId(result?.viewId)
   }
 
-  const handleDeleteView = (viewId: string) => {
-    console.log("View deleted:", viewId)
+  const handleDeleteView = async (viewId: string) => {
+    const result = await deleteView(viewId)
+
+    toast.error(result.message, {
+      style: { color: "green" },
+    });
+    refetchViews()
+
     if (currentViewId === viewId) {
       selectView(null)
     }
   }
 
   return (
-    <Popover
-      open={open}
-      onOpenChange={(value) => {
-        setOpen(value)
-        setIsCreateViewFormOpen(false)
-        setIsEditViewFormOpen(false)
-      }}
-    >
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="flex w-36 shrink-0 justify-between">
-                <span className="truncate">{currentView?.name || "All Items"}</span>
-                <CaretDownIcon aria-hidden="true" className="size-4 shrink-0" />
-              </Button>
-            </PopoverTrigger>
-          </TooltipTrigger>
-          <TooltipContent className="flex items-center gap-2 border bg-accent font-semibold text-foreground dark:bg-background/95 dark:backdrop-blur-md dark:supports-[backdrop-filter]:bg-background/40">
-            Open views
-            <div>
-              <Kbd variant="outline" className="font-sans">
-                {isMac ? "⌘" : "ctrl"}
-              </Kbd>{" "}
-              <Kbd variant="outline" className="font-sans">
-                V
-              </Kbd>
-            </div>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-
-      <PopoverContent
-        className="w-[12.5rem] p-0 dark:bg-background/95 dark:backdrop-blur-md dark:supports-[backdrop-filter]:bg-background/40"
-        align="start"
+    <>
+      <Popover
+        open={open}
+        onOpenChange={(value) => {
+          setOpen(value)
+          setIsCreateViewFormOpen(false)
+          setIsEditViewFormOpen(false)
+        }}
       >
-        {isCreateViewFormOpen && (
-          <CreateViewForm
-            backButton
-            onBack={() => setIsCreateViewFormOpen(false)}
-            filterParams={filterParams}
-            onSuccess={() => setOpen(false)}
-            onCreateView={handleCreateView}
-          />
-        )}
-
-        {isEditViewFormOpen && selectedView && (
-          <EditViewForm
-            view={selectedView}
-            setIsEditViewFormOpen={setIsEditViewFormOpen}
-            onSave={handleUpdateView}
-            onDelete={handleDeleteView}
-          />
-        )}
-
-        {!isCreateViewFormOpen && !isEditViewFormOpen && (
-          <Command className="dark:bg-transparent">
-            <CommandInput placeholder="View name" />
-            <CommandList>
-              <CommandEmpty>No item found.</CommandEmpty>
-              <CommandGroup className="max-h-48 overflow-auto">
-                <CommandItem
-                  value="All Items"
-                  onSelect={() => {
-                    selectView(null)
-                    setOpen(false)
-                  }}
-                >
-                  All Items
-                </CommandItem>
-                {views.map((view) => (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="flex w-36 shrink-0 justify-between">
+                  <span className="truncate">{currentView?.name || "All Items"}</span>
+                  <CaretDownIcon aria-hidden="true" className="size-4 shrink-0" />
+                </Button>
+              </PopoverTrigger>
+            </TooltipTrigger>
+            <TooltipContent className="flex items-center gap-2 border bg-accent font-semibold text-foreground dark:bg-background/95 dark:backdrop-blur-md dark:supports-[backdrop-filter]:bg-background/40">
+              Open views
+              <div>
+                <Kbd variant="outline" className="font-sans">
+                  {isMac ? "⌘" : "ctrl"}
+                </Kbd>{" "}
+                <Kbd variant="outline" className="font-sans">
+                  V
+                </Kbd>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        <PopoverContent
+          className="w-[12.5rem] p-0 dark:bg-background/95 dark:backdrop-blur-md dark:supports-[backdrop-filter]:bg-background/40"
+          align="start"
+        >
+          {isCreateViewFormOpen && (
+            <CreateViewForm
+              backButton
+              onBack={() => setIsCreateViewFormOpen(false)}
+              SearchParams={SearchParams}
+              onSuccess={() => setOpen(false)}
+              onCreateView={handleCreateView}
+            />
+          )}
+          {isEditViewFormOpen && selectedView && (
+            <EditViewForm
+              view={selectedView}
+              setIsEditViewFormOpen={setIsEditViewFormOpen}
+              refetchViews={refetchViews}
+              onDelete={handleDeleteView}
+            />
+          )}
+          {!isCreateViewFormOpen && !isEditViewFormOpen && (
+            <Command className="dark:bg-transparent">
+              <CommandInput placeholder="View name" />
+              <CommandList>
+                <CommandEmpty>No item found.</CommandEmpty>
+                <CommandGroup className="max-h-48 overflow-auto">
                   <CommandItem
-                    key={view.id}
-                    value={view.name}
-                    className="group justify-between"
+                    value="All Items"
                     onSelect={() => {
-                      selectView(view)
+                      refetchViews()
+                      selectView(null)
                       setOpen(false)
+                      setColumns(defaultColumnState)
                     }}
                   >
-                    <span className="truncate">{view.name}</span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="invisible size-5 shrink-0 hover:bg-neutral-200 group-hover:visible dark:hover:bg-neutral-700"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        setIsEditViewFormOpen(true)
-                        setSelectedView(view)
+                    All Items
+                  </CommandItem>
+                  {views.map((view) => (
+                    <CommandItem
+                      key={view.viewId}
+                      value={view.name}
+                      className="group justify-between"
+                      onSelect={() => {
+                        selectView(view)
+                        setOpen(false)
                       }}
                     >
-                      <Pencil1Icon className="size-3" />
-                    </Button>
+                      <span className="truncate">{view.name}</span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="invisible size-5 shrink-0 hover:bg-neutral-200 group-hover:visible dark:hover:bg-neutral-700"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          setIsEditViewFormOpen(true)
+                          setSelectedView(view)
+                        }}
+                      >
+                        <Pencil1Icon className="size-3" />
+                      </Button>
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+                <Separator />
+                <CommandGroup>
+                  <CommandItem onSelect={() => setIsCreateViewFormOpen(true)}>
+                    <PlusIcon className="mr-2 size-4" aria-hidden="true" />
+                    Add view
                   </CommandItem>
-                ))}
-              </CommandGroup>
-              <Separator />
-              <CommandGroup>
-                <CommandItem onSelect={() => setIsCreateViewFormOpen(true)}>
-                  <PlusIcon className="mr-2 size-4" aria-hidden="true" />
-                  Add view
-                </CommandItem>
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        )}
-      </PopoverContent>
-    </Popover>
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          )}
+        </PopoverContent>
+      </Popover>
+    </>
   )
 }

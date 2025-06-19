@@ -43,6 +43,12 @@ class CustomTypes:
                     return member
             raise ValueError(f"{value!r} is not a valid {cls.__name__}")
 
+    class TableEnum(Enum):
+        STUDENTS = "students"
+        TEACHERS = "teachers"
+        ADMIN = "admin"
+        SEMESTERS = "semesters"
+
 
 @dataclass
 class AssociationBase(Base):

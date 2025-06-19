@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from decimal import Decimal
-from typing import Any, Optional
+from enum import Enum
+from typing import Any, Optional, Type
 from marshmallow import fields, ValidationError
 from sqlalchemy import and_, or_
 
@@ -88,6 +89,33 @@ class FileField(fields.Field):  # type: ignore[type-arg]
             )
 
         return value
+
+
+class EnumField(fields.Field):  # type: ignore[type-arg]
+    def __init__(self, enum: Type[Enum], *args: Any, **kwargs: Any) -> None:
+        self.enum = enum
+        super().__init__(*args, **kwargs)
+
+    def _serialize(
+        self,
+        value: Optional[CustomTypes.RoleEnum],
+        attr: Optional[str],
+        obj: Any,
+        **kwargs: Any,
+    ) -> str:
+        if isinstance(value, self.enum):
+            return value  # Or `value.name` or `value.value`
+        return None
+
+    def _deserialize(
+        self, value: Any, attr: Optional[str], data: Any, **kwargs: Any
+    ) -> Any:
+        try:
+            return self.enum(value)
+        except ValueError:
+            raise ValidationError(
+                f"Invalid value '{value}', expected one of: {[e.value for e in self.enum]}"
+            )
 
 
 class RoleEnumField(fields.Field):  # type: ignore[type-arg]

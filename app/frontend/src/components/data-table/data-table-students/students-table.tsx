@@ -1,13 +1,15 @@
 "use client"
 
 import * as React from "react"
-import { useQueryState, parseAsStringEnum, useQueryStates } from "nuqs"
+import { useQueryState, parseAsStringEnum, useQueryStates, parseAsInteger, parseAsString } from "nuqs"
 
 import {
   DataTable,
   DataTableAdvancedToolbar,
+  DataTableColumnsVisibility,
   DataTableFilterList,
   DataTableFilterMenu,
+  DataTableSimpleFilter,
   DataTableSkeleton,
   DataTableSortList,
 } from "@/components/data-table"
@@ -19,12 +21,12 @@ import { getStudentsTableColumns } from "./student-table-columns"
 import { UpdateStudentSheet } from "./update-student-sheet"
 import { DeleteStudentsDialog } from "./delete-students-dialog"
 import { StudentsTableFloatingBar } from "./students-table-floating-bar"
-import { getFiltersStateParser } from "@/lib/parsers"
+import { getFiltersStateParser, getSortingStateParser } from "@/lib/parsers"
 import { useStudentsData, studentsView } from "@/hooks/use-students-data"
 
 import type { Student, SearchParams } from "@/lib/types"
 import type { DataTableRowAction, ExtendedColumnSort } from "@/types/data-table"
-import { searchParamMap, SearchParamMapSchema, searchParamsCache } from "@/lib/validations"
+import { searchParamsCache } from "@/lib/validations"
 import { useLocation } from "react-router-dom"
 import { z, ZodError } from "zod"
 import { ShieldMoonRounded } from "@mui/icons-material"
@@ -32,6 +34,7 @@ import { toast } from "sonner"
 import { TableInstanceProvider } from "@/components/data-table"
 import { FilterProvider } from "@/utils/filter-context"
 import { StudentsTableToolbarActions } from "./student-table-toolbar-action"
+import { DataTableViewsDropdown } from "../views"
 
 
 // Constants
@@ -59,7 +62,8 @@ export function StudentsTable() {
   const {
     views,
     isViewLoading,
-    viewError
+    viewError,
+    refetchViews
   } = studentsView()
 
   // Memoized columns
@@ -99,7 +103,17 @@ export function StudentsTable() {
     shallow: false,
     clearOnDefault: true,
   })
-  const [searchParams] = useQueryStates(searchParamMap);
+
+  const searchParamMap = {
+    page: parseAsInteger.withDefault(1),
+    perPage: parseAsInteger.withDefault(10),
+    sort: getSortingStateParser().withDefault([]),
+    filters: getFiltersStateParser().withDefault([]),
+    joinOperator: parseAsStringEnum(["and", "or"]).withDefault("and"),
+  }
+
+  const [searchParams, setSearchParams] = useQueryStates(searchParamMap);
+  const [currentViewId, setCurrentViewId] = useQueryState("viewId", parseAsString)
 
   const columnIds = React.useMemo(() => {
     return table
@@ -144,7 +158,7 @@ export function StudentsTable() {
       console.error("Invalid search params", validQuery.error)
       return
     }
-    console.log("validQuery", validQuery.data)
+    // console.log("validQuery", validQuery.data)
     setDebouncedParams((prev) => (JSON.stringify(prev) !== JSON.stringify(validQuery.data) ? validQuery.data : prev))
   }, [searchParams, refetch])
 
@@ -182,11 +196,18 @@ export function StudentsTable() {
             table={table}
             floatingBar={<StudentsTableFloatingBar />}
           >
-            <DataTableAdvancedToolbar views={views} searchParams={filteredParams}>
+            <DataTableSimpleFilter searchParams={searchParams}
+              views={views}
+              refetchViews={refetchViews}
+              currentViewId={currentViewId}
+              setCurrentViewId={setCurrentViewId}
+              setSearchParams={setSearchParams}
+
+            />
+            <div className="flex items-center justify-between gap-2">
               <DataTableSortList align="start" />
-              <DataTableFilterList align="start" />
-              <StudentsTableToolbarActions />
-            </DataTableAdvancedToolbar>
+              <DataTableColumnsVisibility table={table} />
+            </div>
           </DataTable>
         </TableInstanceProvider>
       </FilterProvider>

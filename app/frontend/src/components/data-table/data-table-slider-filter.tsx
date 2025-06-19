@@ -11,22 +11,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
-import { FormInput, PlusCircle, XCircle } from "lucide-react";
-import { TrashIcon } from "@radix-ui/react-icons"
+import { PlusCircle } from "lucide-react";
 import { useFilters } from "@/utils/filter-context";
-import { DataTableFilterOption } from "@/types";
-import { dataTableConfig } from "@/config/data-table";
+import { RangeSchema } from "@/lib/types";
 
 interface Range {
   min: number;
@@ -38,49 +28,40 @@ type RangeValue = {
   max: number;
 };
 
-function getIsValidRange(value: Range | undefined): value is Range {
+function getIsValidRange(value: RangeSchema | undefined): value is Range {
   if (!value) return false;
   return (
     Object(value) &&
     'min' in value && 'max' in value &&
     typeof value.min === "number" &&
-    typeof value.max === "number"
+    typeof value.max === "number" &&
+    value.min <= value.max
   );
 }
 
 interface DataTableSliderFilterProps<TData> {
-  column: Column<TData, unknown>;
-  title?: string;
-  setSelectedOptions: React.Dispatch<
-    React.SetStateAction<DataTableFilterOption<TData>[]>
-  >
+  column: Column<TData>
+  title: string
+  onFilterChange?: (value: any) => void
+  isActive?: boolean
+  selectedOperator: string
 }
 
 export function DataTableSliderFilter<TData>({
   column,
   title,
-  setSelectedOptions,
+  onFilterChange,
+  isActive,
+  selectedOperator
 }: DataTableSliderFilterProps<TData>) {
   const id = React.useId();
 
-  const { addFilter, removeFilter, getFilter } = useFilters();
-  const [open, setOpen] = React.useState(true);
+  const { getFilter } = useFilters();
 
   const columnFilter = getFilter(column?.id);
-  const columnFilterValue = getIsValidRange(columnFilter?.range)
-    ? (columnFilter?.range as RangeValue)
+  const columnFilterValue = getIsValidRange(columnFilter?.value)
+    ? (columnFilter?.value as RangeValue)
     : undefined;
-
-  const comparisonOperators = dataTableConfig.rangeOperators;
-  const operator = React.useMemo(
-    () =>
-      comparisonOperators.find(
-        (op) => op.value === columnFilter?.toString()
-      ) ?? comparisonOperators[0],
-    [column, comparisonOperators]
-  );
-
-  const [selectedOperator, setSelectedOperator] = React.useState<string>(operator.value);
 
   const defaultRange = column.columnDef.meta?.range;
   const unit = column.columnDef.meta?.unit;
@@ -125,114 +106,52 @@ export function DataTableSliderFilter<TData>({
     return value.toLocaleString(undefined, { maximumFractionDigits: 0 });
   }, []);
 
-  const [fromInput, setFromInput] = React.useState({ min: range.min.toString(), max: range.max.toString() });
-
-  React.useEffect(() => {
-    setFromInput({ min: range.min.toString(), max: range.max.toString() });
-  }, [range.min, range.max]);
-
-  const onOperatorSelect = React.useCallback(
-    (value: string) => {
-      if (!column) return;
-      setSelectedOperator(value);
-    },
-    [column],
-  );
-
   const onFromInputChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const value = event.target.value;
-      setFromInput((prev) => ({ ...prev, min: value }));
+    (value: String, operator: String) => {
 
       const numValue = Number(value);
 
       if (
         value !== "" &&
-        !Number.isNaN(numValue) &&
-        numValue >= min &&
-        numValue <= range.max
+        !Number.isNaN(numValue)
       ) {
-        addFilter({
-          id: column.id,
-          variant: column.columnDef.meta?.variant,
-          tableId: column.columnDef.meta?.tableId ?? "",
-          operator: selectedOperator,
-          range: { min: numValue, max: range.max },
-        })
+        onFilterChange?.({ value: { min: numValue, max: range.max }, operator });
       }
     },
     [column, min, range, selectedOperator],
   );
 
   const onToInputChange = React.useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      const value = event.target.value;
-      setFromInput((prev) => ({ ...prev, max: value }));
-
+    (value: String, operator: String) => {
       const numValue = Number(value);
+
       if (
         value !== "" &&
-        !Number.isNaN(numValue) &&
-        numValue <= max &&
-        numValue >= range.min
+        !Number.isNaN(numValue)
       ) {
-        addFilter({
-          id: column.id,
-          variant: column.columnDef.meta?.variant,
-          tableId: column.columnDef.meta?.tableId ?? "",
-          operator: selectedOperator,
-          range: { min: range.min, max: numValue },
-        })
+        onFilterChange?.({ value: { min: range.min, max: numValue }, operator });
       }
     },
     [column, max, range, selectedOperator],
   );
 
   const onSliderValueChange = React.useCallback(
-    (value: RangeValue) => {
-      addFilter({
-        id: column.id,
-        variant: column.columnDef.meta?.variant,
-        tableId: column.columnDef.meta?.tableId ?? "",
-        operator: selectedOperator,
-        range: value,
-      });
+    (value: RangeValue, operator: String) => {
+      onFilterChange?.({ value, operator });
     },
     [column, selectedOperator]
   );
 
-  const onReset = React.useCallback(
-    (event: React.MouseEvent | undefined, remove: boolean) => {
-      if (event?.target instanceof HTMLDivElement) {
-        event?.stopPropagation();
-      }
-      removeFilter(column.id);
-      if (remove) {
-        setSelectedOptions((prev) =>
-          prev.filter((item) => item.value !== column?.id)
-        );
-      };
-    },
-    [column],
-  );
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="border-dashed">
-          {columnFilterValue ? (
-            <div
-              role="button"
-              aria-label={`Clear ${title} filter`}
-              tabIndex={0}
-              className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-              onClick={() => onReset(undefined, true)}
-            >
-              <XCircle />
-            </div>
-          ) : (
-            <PlusCircle />
-          )}
+        <Button variant="outline" size="sm" className={cn(
+          "h-9 min-w-[180px] rounded-md border border-input bg-background text-sm ring-offset-background transition-all duration-200",
+          "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+          isActive && range && "ring-2 ring-blue-500/20 border-blue-300",
+        )}>
+          <PlusCircle />
           <span>{title}</span>
           {columnFilterValue ? (
             <>
@@ -249,24 +168,6 @@ export function DataTableSliderFilter<TData>({
       </PopoverTrigger>
       <PopoverContent align="start" className="flex w-auto flex-col gap-4">
         <div className="flex flex-col gap-3">
-          {/* <div className="flex items-center space-x-1 pl-1 pr-0.5">
-            <div className="flex flex-1 items-center space-x-1">
-              <div className="text-xs capitalize text-muted-foreground">
-                {title}
-              </div>
-            </div>
-            <Button aria-label="Remove filter" variant="ghost" size="icon" className="size-7 text-muted-foreground" onClick={() => onReset(undefined, true)}>
-              <TrashIcon className="size-4" aria-hidden="true" />
-            </Button>
-          </div> */}
-          <FilterHeader
-            title={title || "Range Filter"}
-            comparisonOperators={comparisonOperators}
-            selectedOperator={selectedOperator}
-            onOperatorSelect={onOperatorSelect}
-            onReset={onReset}
-          />
-
           <div className="flex items-center gap-4">
             <Label htmlFor={`${id}-from`} className="sr-only">
               From
@@ -282,8 +183,8 @@ export function DataTableSliderFilter<TData>({
                 placeholder={min.toString()}
                 min={min}
                 max={max}
-                value={fromInput.min}
-                onChange={onFromInputChange}
+                value={range.min}
+                onChange={(e) => onFromInputChange(e.target.value, selectedOperator)}
                 className={cn("h-8 w-24", unit && "pr-8")}
               />
               {unit && (
@@ -306,8 +207,8 @@ export function DataTableSliderFilter<TData>({
                 placeholder={max.toString()}
                 min={min}
                 max={max}
-                value={fromInput.max}
-                onChange={onToInputChange}
+                value={range.max}
+                onChange={(e) => onToInputChange(e.target.value, selectedOperator)}
                 className={cn("h-8 w-24", unit && "pr-8")}
               />
               {unit && (
@@ -328,7 +229,7 @@ export function DataTableSliderFilter<TData>({
             value={[range.min, range.max]}
             onValueChange={(value) => {
               if (Array.isArray(value) && value.length === 2) {
-                onSliderValueChange({ min: value[0], max: value[1] });
+                onSliderValueChange({ min: value[0], max: value[1] }, selectedOperator);
               }
             }}
           />
@@ -337,52 +238,11 @@ export function DataTableSliderFilter<TData>({
           aria-label={`Clear ${title} filter`}
           variant="outline"
           size="sm"
-          onClick={() => onReset(undefined, false)}
+          onClick={() => onFilterChange?.({ value: {}, operator: selectedOperator })}
         >
           Clear
         </Button>
       </PopoverContent>
-    </Popover>
-  );
-}
-
-
-interface FilterHeaderProps {
-  title: string;
-  selectedOperator: string;
-  onOperatorSelect: (value: string) => void;
-  onReset: (event: React.MouseEvent | undefined, remove: boolean) => void;
-  comparisonOperators: {
-    value: string;
-    label: string;
-  }[];
-}
-function FilterHeader({ title, selectedOperator, onOperatorSelect, onReset, comparisonOperators }: FilterHeaderProps) {
-  return (
-    <div className="flex items-center space-x-1 pl-1 pr-0.5 mt-1">
-      <div className="flex flex-1 items-center space-x-1">
-        <div className="text-xs capitalize text-muted-foreground">
-          {title}
-        </div>
-        <Select value={selectedOperator} onValueChange={value => onOperatorSelect(value)}>
-          <SelectTrigger className="h-auto w-fit truncate border-none px-2 py-0.5 text-xs hover:bg-muted/50">
-            <SelectValue placeholder={comparisonOperators.find(op => op.value === selectedOperator)?.label || "Select operator"} />
-          </SelectTrigger>
-          <SelectContent className="dark:bg-background/95 dark:backdrop-blur-md dark:supports-[backdrop-filter]:bg-background/40">
-            <SelectGroup>
-              {comparisonOperators.map(({
-                value,
-                label
-              }) => <SelectItem key={value} value={value} className="py-1">
-                  {label}
-                </SelectItem>)}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </div>
-      <Button aria-label="Remove filter" variant="ghost" size="icon" className="size-7 text-muted-foreground" onClick={() => onReset(undefined, true)}>
-        <TrashIcon className="size-4" aria-hidden="true" />
-      </Button>
-    </div>
+    </Popover >
   );
 }

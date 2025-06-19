@@ -25,7 +25,6 @@ export function DeleteViewForm({ viewId, setIsEditViewFormOpen, onDelete }: Dele
     setTimeout(() => {
       onDelete(viewId)
       setIsEditViewFormOpen(false)
-      toast.success("View deleted successfully.")
       setPending(false)
     }, 500)
   }

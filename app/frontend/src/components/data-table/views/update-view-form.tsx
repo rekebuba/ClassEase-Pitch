@@ -5,18 +5,18 @@ import type React from "react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
-import { LoaderIcon } from "lucide-react"
-import type { FilterParams } from "@/lib/validations"
+import { LoaderIcon, Save } from "lucide-react"
 import { useTableInstanceContext } from "@/components/data-table"
-import type { View } from "@/lib/validations"
+import { SearchParams, StudentsViews } from "@/lib/types"
 
 interface UpdateViewFormProps {
   isUpdated: boolean
-  currentView: View | undefined
-  filterParams: FilterParams
+  currentView: StudentsViews
+  searchParams: SearchParams,
+  handleUpdateView: (updatedView: StudentsViews) => void
 }
 
-export default function UpdateViewForm({ isUpdated, currentView, filterParams }: UpdateViewFormProps) {
+export default function UpdateViewForm({ isUpdated, currentView, searchParams, handleUpdateView }: UpdateViewFormProps) {
   const [isLoading, setIsLoading] = useState(false)
   const { tableInstance } = useTableInstanceContext()
 
@@ -33,19 +33,19 @@ export default function UpdateViewForm({ isUpdated, currentView, filterParams }:
     setIsLoading(true)
 
     // Create updated view with current filters
-    const updatedView: View = {
-      ...currentView,
+    const updatedView: StudentsViews = {
+      viewId: currentView.viewId,
+      name: currentView.name,
+      tableName: currentView.tableName,
+      columns: visibleColumns,
+      searchParams: searchParams,
+
     }
 
     // Simulate API call
     setTimeout(() => {
-      try {
-        toast.success("View updated successfully")
-      } catch (error) {
-        toast.error("Failed to update view")
-      } finally {
-        setIsLoading(false)
-      }
+      handleUpdateView(updatedView)
+      setIsLoading(false)
     }, 500)
   }
 
@@ -53,7 +53,8 @@ export default function UpdateViewForm({ isUpdated, currentView, filterParams }:
 
   return (
     <form onSubmit={handleSubmit}>
-      <Button disabled={isLoading} type="submit" size="sm" className="gap-1.5">
+      <Button variant="outline" size="sm" className="h-8 text-xs">
+        <Save className="h-3 w-3 mr-1" />
         {isLoading && <LoaderIcon aria-hidden="true" className="size-3.5 animate-spin" />}
         Update view
       </Button>

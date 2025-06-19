@@ -1,11 +1,23 @@
-from typing import Any, Dict, Iterator
+from dataclasses import asdict
+from typing import Any, Dict, Iterator, List, Optional
 from flask.testing import FlaskClient
+from pydantic import BaseModel
 import pytest
 from sqlalchemy.orm import scoped_session, Session
 
 from models.semester import Semester
-from tests.test_api.factories import SemesterFactory
+from tests.test_api.factories import QueryFactory, SemesterFactory
+from tests.test_api.fixtures.student_fixtures import StudentQueryResponse
 from tests.typing import Credential
+
+
+class AllStudentViewsResponse(BaseModel):
+    viewId: str
+    name: str
+    tableName: str
+    columns: List[str]
+    searchParams: Optional[Dict[str, Any]] = None
+    createdAt: str
 
 
 @pytest.fixture(scope="session")
@@ -45,3 +57,30 @@ def admin_student_avrage_range(
     assert response.json is not None
 
     yield response.json
+
+
+@pytest.fixture(scope="module")
+def admin_create_student_table_view(
+    client: FlaskClient,
+    student_query_table_data: StudentQueryResponse,
+    admin_auth_header: Credential,
+) -> Iterator[Credential]:
+    """
+    Fixture to test the saving of student table views.
+    """
+    table_id = dict(student_query_table_data.tableId)
+    query = asdict(QueryFactory.create(tableId=table_id))
+    query["search_params"].pop("sort_test_ids")
+
+    response = client.post(
+        "/api/v1/admin/views",
+        json=query,
+        headers=admin_auth_header["header"],
+    )
+
+    assert response.status_code == 201
+    assert response.json is not None
+    assert "message" in response.json
+    assert response.json["message"] == "View Saved Successfully!"
+
+    yield admin_auth_header

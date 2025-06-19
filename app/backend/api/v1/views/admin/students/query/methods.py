@@ -47,5 +47,6 @@ def flatten_keys(item: Dict[str, Any]) -> QueryStudentsData:
 
     # Remove unwanted key
     result.pop("tableId", None)
+    result.pop("imagePath", None)
 
     return result

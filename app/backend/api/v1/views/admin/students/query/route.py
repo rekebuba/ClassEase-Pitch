@@ -84,8 +84,8 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
             )
         )
         # Check if any students are found
-        if not query:
-            return jsonify({"data": [], "table_id": {}, "pageCount": 1}), 200
+        if not query.all():
+            return jsonify({"data": [], "tableId": {}, "pageCount": 1}), 200
 
         # Use the paginate_query function to handle pagination
         paginated_result = paginate_query(
@@ -124,12 +124,6 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
                     for i, v in enumerate(sections.split(","), start=1)
                 }
                 if sections
-                else {},
-                "semesters": {
-                    f"semester_{num2words(i)}": v
-                    for i, v in enumerate(semesters.split(","), start=1)
-                }
-                if semesters
                 else {},
             }
             for user, student, year_record, grade, averages, ranks, sections, semesters in paginated_result[

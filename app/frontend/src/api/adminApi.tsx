@@ -1,7 +1,8 @@
-import { SearchParams } from '@/types';
+import { renameViewData, SearchParams, StudentsViews, View } from "@/lib/types";
 import { api, zodApiHandler } from "@/api";
 import { toast } from 'sonner';
 import {
+    ApiResponse,
     AverageRangeSchema,
     GradeCountsSchema,
     SectionCountSchema,
@@ -11,6 +12,7 @@ import {
 } from '@/lib/validations';
 import { z } from 'zod';
 import qs from "qs";
+import { create } from "domain";
 
 export const adminApi = {
     getDashboardData: () => api.get('/admin/dashboard'),
@@ -20,8 +22,11 @@ export const adminApi = {
     getStudentsAverageRange: () => api.get('/admin/students/average-range'),
     getGradeCounts: () => api.get('/admin/students/grade-counts'),
     getSectionCounts: () => api.get('/admin/students/section-counts'),
-    getAllStudentsViews: () => api.get('/admin/students/views'),
-    getStudentsByView: (view: string) => api.get(`/admin/students/views/${view}`),
+    getAllStudentsViews: () => api.get('/admin/all-views/students'),
+    createNewView: (viewData: View) => api.post('/admin/views', viewData),
+    updateView: (updatedView: StudentsViews) => api.put('/admin/update-view', updatedView),
+    renameView: (renameView: renameViewData) => api.put('/admin/rename-view', renameView),
+    deleteView: (viewId: string) => api.put(`/admin/delete-view/${viewId}`),
     getTeachers: () => api.get('/admin/teachers'),
     createUser: (userData) => api.post('/admin/users', userData),
     createMarkList: (markListData) => api.post('/admin/students/mark_list', markListData),
@@ -110,6 +115,63 @@ export const getSectionCounts = async () => {
     return response.data;
 }
 
+export const createNewView = async (newView: View) => {
+    const response = await zodApiHandler(
+        () => adminApi.createNewView(newView),
+        ApiResponse,
+    );
+
+    if (!response.success) {
+        toast.error(response.error.message, {
+            style: { color: "red" },
+        });
+        console.error(response.error.details);
+        throw new Error("Failed to Create view", {
+            cause: JSON.stringify(response.error.details),
+        });
+    }
+
+    return response.data;
+}
+export const deleteView = async (viewId: string) => {
+    const response = await zodApiHandler(
+        () => adminApi.deleteView(viewId),
+        ApiResponse,
+    );
+
+    if (!response.success) {
+        toast.error(response.error.message, {
+            style: { color: "red" },
+        });
+        console.error(response.error.details);
+        throw new Error("Failed to Delete view", {
+            cause: JSON.stringify(response.error.details),
+        });
+    }
+
+    return response.data;
+}
+
+export const renameView = async (newView: renameViewData) => {
+    const response = await zodApiHandler(
+        () => adminApi.renameView(newView),
+        ApiResponse,
+    );
+
+    if (!response.success) {
+        toast.error(response.error.message, {
+            style: { color: "red" },
+        });
+        console.error(response.error.details);
+        throw new Error("Failed to Rename view", {
+            cause: JSON.stringify(response.error.details),
+        });
+    }
+
+    return response.data;
+}
+
+
 export const getAllStudentsViews = async () => {
     const response = await zodApiHandler(
         () => adminApi.getAllStudentsViews(),
@@ -129,10 +191,10 @@ export const getAllStudentsViews = async () => {
     return response.data;
 }
 
-export const getStudentsByView = async (view: string) => {
+export const updateView = async (updatedView: StudentsViews) => {
     const response = await zodApiHandler(
-        () => adminApi.getStudentsByView(view),
-        StudentsViewSchema,
+        () => adminApi.updateView(updatedView),
+        ApiResponse,
     );
 
     if (!response.success) {
@@ -140,7 +202,7 @@ export const getStudentsByView = async (view: string) => {
             style: { color: "red" },
         });
         console.error(response.error.details);
-        throw new Error("Failed to fetch students by view", {
+        throw new Error("Failed to update students view", {
             cause: JSON.stringify(response.error.details),
         });
     }
