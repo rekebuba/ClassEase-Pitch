@@ -100,25 +100,6 @@ jobs:
       #     vuln-type: "os,library"
       #     severity: "CRITICAL,HIGH"
 
-      - name: Install GitHub CLI
-        # if: github.event_name == 'schedule'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gh
-
-      - name: Set retention policy
-        # if: github.event_name == 'schedule'
-        run: |
-          gh auth setup-git
-          gh api \
-            --method POST \
-            -H "Accept: application/vnd.github+json" \
-            /users/${{ github.repository_owner }}/packages/container/${{ matrix.image_config.name }}/settings \
-            -f visibility='private' \
-            -f expiration_days=${{ env.IMAGE_RETENTION_DAYS }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   test:
     needs: build-and-push
     runs-on: ubuntu-latest
