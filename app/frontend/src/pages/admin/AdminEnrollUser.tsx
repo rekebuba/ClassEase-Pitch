@@ -21,10 +21,8 @@ const AdminEnrollUser = ({ role }) => {
 
     return (
         <Layout role="admin">
-            <div className="flex-1 p-6 mt-[4.6rem] ml-[11rem] bg-gray-100">
-                {role === 'teacher' ? <TeacherRegistrationForm /> : <StudentRegistrationForm role='admin' />
-                }
-            </div>
+            {role === 'teacher' ? <TeacherRegistrationForm /> : <StudentRegistrationForm role='admin' />
+            }
         </Layout>
     );
 };
