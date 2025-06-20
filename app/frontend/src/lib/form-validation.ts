@@ -1,7 +1,7 @@
 import { z } from "zod"
 
 // Phone number validation regex
-const phoneRegex = /^\+251[79]\d{8}$/
+const phoneRegex = /^\+\(251\) [79]\d{2}-\d{6}$/
 
 // Email validation
 const emailSchema = z.string().email("Please enter a valid email address")
@@ -374,4 +374,425 @@ export const step5Schema = z
 
 export const step6Schema = z.object({
     extracurriculars: z.array(z.string()).optional(),
+})
+
+
+/************************************* TEACHER REGISTRATION Schema ********************************************/
+
+
+
+// File validation
+const documentSchema = z
+    .instanceof(File)
+    .refine((file) => file.size <= 5 * 1024 * 1024, "File size must be less than 5MB")
+    .refine(
+        (file) => ["application/pdf", "image/jpeg", "image/jpg", "image/png"].includes(file.type),
+        "Only PDF, JPEG, and PNG files are allowed",
+    )
+    .optional()
+
+// GPA validation
+const gpaSchema = z
+    .string()
+    .refine((val) => {
+        const num = Number.parseFloat(val)
+        return !isNaN(num) && num >= 0 && num <= 4.0
+    }, "GPA must be between 0.0 and 4.0")
+    .optional()
+
+// Salary expectation validation
+const salarySchema = z
+    .string()
+    .refine((val) => {
+        const num = Number.parseFloat(val.replace(/[,$]/g, ""))
+        return !isNaN(num) && num >= 0 && num <= 200000
+    }, "Please enter a valid salary amount")
+    .optional()
+
+// Main teacher registration schema
+export const teacherRegistrationSchema = z
+    .object({
+        // Personal Information
+        firstName: nameSchema.min(1, "First name is required"),
+        middleName: nameSchema.optional(),
+        lastName: nameSchema.min(1, "Last name is required"),
+        preferredName: nameSchema.optional(),
+        dateOfBirth: dateOfBirthSchema,
+        gender: z.enum(["male", "female", "non-binary", "prefer-not-to-say"], {
+            required_error: "Please select a gender",
+        }),
+        nationality: z
+            .string()
+            .min(2, "Nationality must be at least 2 characters")
+            .max(50, "Nationality must be less than 50 characters")
+            .regex(/^[a-zA-Z\s]+$/, "Nationality can only contain letters and spaces"),
+        maritalStatus: z.enum(["single", "married", "divorced", "widowed", "prefer-not-to-say"]).optional(),
+        socialSecurityNumber: z
+            .string()
+            .regex(/^\d{3}-\d{2}-\d{4}$/, "SSN must be in format 123-45-6789")
+            .optional(),
+        profilePhoto: documentSchema,
+
+        // Contact Information
+        address: z
+            .string()
+            .min(5, "Address must be at least 5 characters")
+            .max(200, "Address must be less than 200 characters"),
+        city: z
+            .string()
+            .min(2, "City must be at least 2 characters")
+            .max(50, "City must be less than 50 characters")
+            .regex(/^[a-zA-Z\s'-]+$/, "City can only contain letters, spaces, hyphens, and apostrophes"),
+        state: z
+            .string()
+            .min(2, "State must be at least 2 characters")
+            .max(50, "State must be less than 50 characters")
+            .regex(/^[a-zA-Z\s'-]+$/, "State can only contain letters, spaces, hyphens, and apostrophes"),
+        postalCode: postalCodeSchema,
+        country: z.string().min(2, "Country is required"),
+        primaryPhone: requiredPhoneSchema,
+        secondaryPhone: phoneSchema.optional(),
+        personalEmail: emailSchema,
+        workEmail: emailSchema.optional(),
+
+        // Emergency Contact
+        emergencyContactName: nameSchema.min(1, "Emergency contact name is required"),
+        emergencyContactRelation: z.string().min(1, "Relationship is required"),
+        emergencyContactPhone: requiredPhoneSchema,
+        emergencyContactEmail: emailSchema.optional(),
+
+        // Educational Background
+        highestDegree: z.enum(["bachelors", "masters", "doctorate", "other"], {
+            required_error: "Please select highest degree",
+        }),
+        majorSubject: z.string().min(1, "Major subject is required"),
+        minorSubject: z.string().optional(),
+        university: z.string().min(1, "University name is required"),
+        graduationYear: z.string().refine((year) => {
+            const num = Number.parseInt(year)
+            const currentYear = new Date().getFullYear()
+            return num >= 1950 && num <= currentYear
+        }, "Please enter a valid graduation year"),
+        gpa: gpaSchema,
+        additionalDegrees: z.string().optional(),
+
+        // Teaching Certifications & Licenses
+        teachingLicense: z.boolean(),
+        licenseNumber: z.string().optional(),
+        licenseState: z.string().optional(),
+        licenseExpirationDate: z.string().optional(),
+        certifications: z.array(z.string()).optional(),
+        specializations: z.array(z.string()).optional(),
+
+        // Teaching Experience
+        yearsOfExperience: z.enum(["0", "1-2", "3-5", "6-10", "11-15", "16-20", "20+"], {
+            required_error: "Please select years of experience",
+        }),
+        previousSchools: z.string().optional(),
+        subjectsToTeach: z.array(z.string()).min(1, "Please select at least one subject to teach"),
+        gradeLevelsToTeach: z.array(z.string()).min(1, "Please select at least one grade level"),
+        preferredSchedule: z.enum(["full-time", "part-time", "substitute", "flexible"]).optional(),
+
+        // Professional Skills & Qualifications
+        languagesSpoken: z.array(z.string()).optional(),
+        technologySkills: z.array(z.string()).optional(),
+        specialSkills: z.string().optional(),
+        professionalDevelopment: z.string().optional(),
+
+        // Employment Information
+        positionApplyingFor: z.string().min(1, "Position is required"),
+        departmentPreference: z.string().optional(),
+        availableStartDate: z.string().min(1, "Start date is required"),
+        salaryExpectation: salarySchema,
+        willingToRelocate: z.boolean(),
+        hasTransportation: z.boolean(),
+
+        // Background & References
+        hasConvictions: z.boolean(),
+        convictionDetails: z.string().optional(),
+        hasDisciplinaryActions: z.boolean(),
+        disciplinaryDetails: z.string().optional(),
+        reference1Name: nameSchema.min(1, "First reference name is required"),
+        reference1Title: z.string().min(1, "First reference title is required"),
+        reference1Organization: z.string().min(1, "First reference organization is required"),
+        reference1Phone: requiredPhoneSchema,
+        reference1Email: emailSchema,
+        reference2Name: nameSchema.optional(),
+        reference2Title: z.string().optional(),
+        reference2Organization: z.string().optional(),
+        reference2Phone: phoneSchema.optional(),
+        reference2Email: emailSchema.optional(),
+        reference3Name: nameSchema.optional(),
+        reference3Title: z.string().optional(),
+        reference3Organization: z.string().optional(),
+        reference3Phone: phoneSchema.optional(),
+        reference3Email: emailSchema.optional(),
+
+        // Documents
+        resume: documentSchema,
+        coverLetter: documentSchema,
+        transcripts: documentSchema,
+        teachingCertificate: documentSchema,
+        backgroundCheck: documentSchema,
+
+        // Additional Information
+        teachingPhilosophy: z.string().max(1000, "Teaching philosophy must be less than 1000 characters").optional(),
+        whyTeaching: z.string().max(500, "Response must be less than 500 characters").optional(),
+        additionalComments: z.string().max(500, "Comments must be less than 500 characters").optional(),
+        agreeToTerms: z.boolean().refine((val) => val === true, "You must agree to the terms and conditions"),
+        agreeToBackgroundCheck: z.boolean().refine((val) => val === true, "You must agree to background check"),
+    })
+    .refine(
+        (data) => {
+            if (data.teachingLicense && !data.licenseNumber) {
+                return false
+            }
+            return true
+        },
+        {
+            message: "License number is required when you have a teaching license",
+            path: ["licenseNumber"],
+        },
+    )
+    .refine(
+        (data) => {
+            if (data.teachingLicense && !data.licenseState) {
+                return false
+            }
+            return true
+        },
+        {
+            message: "License state is required when you have a teaching license",
+            path: ["licenseState"],
+        },
+    )
+    .refine(
+        (data) => {
+            if (data.teachingLicense && !data.licenseExpirationDate) {
+                return false
+            }
+            return true
+        },
+        {
+            message: "License expiration date is required when you have a teaching license",
+            path: ["licenseExpirationDate"],
+        },
+    )
+    .refine(
+        (data) => {
+            if (data.hasConvictions && (!data.convictionDetails || data.convictionDetails.trim().length === 0)) {
+                return false
+            }
+            return true
+        },
+        {
+            message: "Conviction details are required when you have criminal convictions",
+            path: ["convictionDetails"],
+        },
+    )
+    .refine(
+        (data) => {
+            if (data.hasDisciplinaryActions && (!data.disciplinaryDetails || data.disciplinaryDetails.trim().length === 0)) {
+                return false
+            }
+            return true
+        },
+        {
+            message: "Disciplinary action details are required",
+            path: ["disciplinaryDetails"],
+        },
+    )
+
+export type TeacherRegistrationFormData = z.infer<typeof teacherRegistrationSchema>
+
+// Step schemas for validation
+export const teacherStep1Schema = z.object({
+    firstName: nameSchema.min(1, "First name is required"),
+    middleName: nameSchema.optional(),
+    lastName: nameSchema.min(1, "Last name is required"),
+    preferredName: nameSchema.optional(),
+    dateOfBirth: dateOfBirthSchema,
+    gender: z.enum(["male", "female", "non-binary", "prefer-not-to-say"], {
+        required_error: "Please select a gender",
+    }),
+    nationality: z
+        .string()
+        .min(2, "Nationality must be at least 2 characters")
+        .max(50, "Nationality must be less than 50 characters")
+        .regex(/^[a-zA-Z\s]+$/, "Nationality can only contain letters and spaces"),
+    maritalStatus: z.enum(["single", "married", "divorced", "widowed", "prefer-not-to-say"]).optional(),
+    socialSecurityNumber: z
+        .string()
+        .regex(/^\d{3}-\d{2}-\d{4}$/, "SSN must be in format 123-45-6789")
+        .optional(),
+    profilePhoto: documentSchema,
+})
+
+export const teacherStep2Schema = z.object({
+    address: z
+        .string()
+        .min(5, "Address must be at least 5 characters")
+        .max(200, "Address must be less than 200 characters"),
+    city: z
+        .string()
+        .min(2, "City must be at least 2 characters")
+        .max(50, "City must be less than 50 characters")
+        .regex(/^[a-zA-Z\s'-]+$/, "City can only contain letters, spaces, hyphens, and apostrophes"),
+    state: z
+        .string()
+        .min(2, "State must be at least 2 characters")
+        .max(50, "State must be less than 50 characters")
+        .regex(/^[a-zA-Z\s'-]+$/, "State can only contain letters, spaces, hyphens, and apostrophes"),
+    postalCode: postalCodeSchema,
+    country: z.string().min(2, "Country is required"),
+    primaryPhone: requiredPhoneSchema,
+    secondaryPhone: phoneSchema.optional(),
+    personalEmail: emailSchema,
+    workEmail: emailSchema.optional(),
+    emergencyContactName: nameSchema.min(1, "Emergency contact name is required"),
+    emergencyContactRelation: z.string().min(1, "Relationship is required"),
+    emergencyContactPhone: requiredPhoneSchema,
+    emergencyContactEmail: emailSchema.optional(),
+})
+
+export const teacherStep3Schema = z.object({
+    highestDegree: z.enum(["bachelors", "masters", "doctorate", "other"], {
+        required_error: "Please select highest degree",
+    }),
+    majorSubject: z.string().min(1, "Major subject is required"),
+    minorSubject: z.string().optional(),
+    university: z.string().min(1, "University name is required"),
+    graduationYear: z.string().refine((year) => {
+        const num = Number.parseInt(year)
+        const currentYear = new Date().getFullYear()
+        return num >= 1950 && num <= currentYear
+    }, "Please enter a valid graduation year"),
+    gpa: gpaSchema,
+    additionalDegrees: z.string().optional(),
+})
+
+export const teacherStep4Schema = z
+    .object({
+        teachingLicense: z.boolean(),
+        licenseNumber: z.string().optional(),
+        licenseState: z.string().optional(),
+        licenseExpirationDate: z.string().optional(),
+        certifications: z.array(z.string()).optional(),
+        specializations: z.array(z.string()).optional(),
+        yearsOfExperience: z.enum(["0", "1-2", "3-5", "6-10", "11-15", "16-20", "20+"], {
+            required_error: "Please select years of experience",
+        }),
+        previousSchools: z.string().optional(),
+        subjectsToTeach: z.array(z.string()).min(1, "Please select at least one subject to teach"),
+        gradeLevelsToTeach: z.array(z.string()).min(1, "Please select at least one grade level"),
+        preferredSchedule: z.enum(["full-time", "part-time", "substitute", "flexible"]).optional(),
+    })
+    .refine(
+        (data) => {
+            if (data.teachingLicense && !data.licenseNumber) {
+                return false
+            }
+            return true
+        },
+        {
+            message: "License number is required when you have a teaching license",
+            path: ["licenseNumber"],
+        },
+    )
+    .refine(
+        (data) => {
+            if (data.teachingLicense && !data.licenseState) {
+                return false
+            }
+            return true
+        },
+        {
+            message: "License state is required when you have a teaching license",
+            path: ["licenseState"],
+        },
+    )
+    .refine(
+        (data) => {
+            if (data.teachingLicense && !data.licenseExpirationDate) {
+                return false
+            }
+            return true
+        },
+        {
+            message: "License expiration date is required when you have a teaching license",
+            path: ["licenseExpirationDate"],
+        },
+    )
+
+export const teacherStep5Schema = z.object({
+    languagesSpoken: z.array(z.string()).optional(),
+    technologySkills: z.array(z.string()).optional(),
+    specialSkills: z.string().optional(),
+    professionalDevelopment: z.string().optional(),
+    positionApplyingFor: z.string().min(1, "Position is required"),
+    departmentPreference: z.string().optional(),
+    availableStartDate: z.string().min(1, "Start date is required"),
+    salaryExpectation: salarySchema,
+    willingToRelocate: z.boolean(),
+    hasTransportation: z.boolean(),
+})
+
+export const teacherStep6Schema = z
+    .object({
+        hasConvictions: z.boolean(),
+        convictionDetails: z.string().optional(),
+        hasDisciplinaryActions: z.boolean(),
+        disciplinaryDetails: z.string().optional(),
+        reference1Name: nameSchema.min(1, "First reference name is required"),
+        reference1Title: z.string().min(1, "First reference title is required"),
+        reference1Organization: z.string().min(1, "First reference organization is required"),
+        reference1Phone: requiredPhoneSchema,
+        reference1Email: emailSchema,
+        reference2Name: nameSchema.optional(),
+        reference2Title: z.string().optional(),
+        reference2Organization: z.string().optional(),
+        reference2Phone: phoneSchema.optional(),
+        reference2Email: emailSchema.optional(),
+        reference3Name: nameSchema.optional(),
+        reference3Title: z.string().optional(),
+        reference3Organization: z.string().optional(),
+        reference3Phone: phoneSchema.optional(),
+        reference3Email: emailSchema.optional(),
+    })
+    .refine(
+        (data) => {
+            if (data.hasConvictions && (!data.convictionDetails || data.convictionDetails.trim().length === 0)) {
+                return false
+            }
+            return true
+        },
+        {
+            message: "Conviction details are required when you have criminal convictions",
+            path: ["convictionDetails"],
+        },
+    )
+    .refine(
+        (data) => {
+            if (data.hasDisciplinaryActions && (!data.disciplinaryDetails || data.disciplinaryDetails.trim().length === 0)) {
+                return false
+            }
+            return true
+        },
+        {
+            message: "Disciplinary action details are required",
+            path: ["disciplinaryDetails"],
+        },
+    )
+
+export const teacherStep7Schema = z.object({
+    resume: documentSchema,
+    coverLetter: documentSchema,
+    transcripts: documentSchema,
+    teachingCertificate: documentSchema,
+    backgroundCheck: documentSchema,
+    teachingPhilosophy: z.string().max(1000, "Teaching philosophy must be less than 1000 characters").optional(),
+    whyTeaching: z.string().max(500, "Response must be less than 500 characters").optional(),
+    additionalComments: z.string().max(500, "Comments must be less than 500 characters").optional(),
+    agreeToTerms: z.boolean().refine((val) => val === true, "You must agree to the terms and conditions"),
+    agreeToBackgroundCheck: z.boolean().refine((val) => val === true, "You must agree to background check"),
 })
