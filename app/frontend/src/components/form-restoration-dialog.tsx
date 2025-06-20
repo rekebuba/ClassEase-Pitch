@@ -18,6 +18,7 @@ interface FormRestorationDialogProps {
     onRestore: () => void
     onStartFresh: () => void
     savedStep: number
+    savedStepName: string
     lastSaved?: Date
 }
 
@@ -26,6 +27,7 @@ export default function FormRestorationDialog({
     onRestore,
     onStartFresh,
     savedStep,
+    savedStepName,
     lastSaved,
 }: FormRestorationDialogProps) {
     const [isLoading, setIsLoading] = useState(false)
@@ -34,18 +36,6 @@ export default function FormRestorationDialog({
         await new Promise((resolve) => setTimeout(resolve, 500)) // Small delay for UX
         onRestore()
         setIsLoading(false)
-    }
-
-    const getStepName = (step: number) => {
-        const stepNames = {
-            1: "Personal Information",
-            2: "Academic Information",
-            3: "Address & Contact",
-            4: "Guardian & Emergency Contact",
-            5: "Medical Information",
-            6: "Additional Information & Review",
-        }
-        return stepNames[step as keyof typeof stepNames] || "Unknown Step"
     }
 
     const formatLastSaved = (date?: Date) => {
@@ -86,7 +76,7 @@ export default function FormRestorationDialog({
                             </Badge>
                         </div>
                         <p className="text-sm text-blue-700">
-                            <strong>{getStepName(savedStep)}</strong>
+                            <strong>{savedStepName}</strong>
                         </p>
                         <div className="flex items-center gap-1 text-xs text-blue-600">
                             <Clock className="h-3 w-3" />

@@ -28,12 +28,12 @@ import FormRestorationDialog from "@/components/form-restoration-dialog"
 import AutoSaveIndicator from "@/components/auto-save-indicator"
 import { Checkbox } from "@/components/ui/checkbox"
 
-
+// undefined fields are optional
 const initialFormData: StudentRegistrationFormData = {
   firstName: "",
   lastName: "",
   fatherName: "",
-  grandFatherName: "",
+  grandFatherName: undefined as any,
   dateOfBirth: "",
   gender: undefined as any,
   nationality: "",
@@ -55,7 +55,7 @@ const initialFormData: StudentRegistrationFormData = {
   guardianPhone: "",
   guardianRelation: undefined as any,
   emergencyContactName: undefined,
-  emergencyContactPhone: "",
+  emergencyContactPhone: undefined,
   hasMedicalCondition: false,
   medicalDetails: "",
   hasDisability: false,
@@ -101,8 +101,18 @@ const extracurricularOptions = [
   "Dance",
 ]
 
+const stepNames = {
+  1: "Personal Information",
+  2: "Academic Information",
+  3: "Address & Contact",
+  4: "Guardian & Emergency Contact",
+  5: "Medical Information",
+  6: "Additional Information & Review",
+}
+
 export default function StudentRegistrationForm() {
   const [currentStep, setCurrentStep] = useState(1)
+  const [currentStepName, setCurrentStepName] = useState(stepNames[currentStep as keyof typeof stepNames] || "Unknown Step")
   const [formData, setFormData] = useState<StudentRegistrationFormData>(initialFormData)
   const [selectedExtracurriculars, setSelectedExtracurriculars] = useState<string[]>([])
 
@@ -120,6 +130,7 @@ export default function StudentRegistrationForm() {
       const savedData = loadFormData()
       if (savedData) {
         setCurrentStep(savedData.step)
+        setCurrentStepName(stepNames[savedData.step as keyof typeof stepNames] || "Unknown Step")
       }
       setShowRestorationDialog(true)
     }
@@ -155,19 +166,23 @@ export default function StudentRegistrationForm() {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  // const formatPhoneNumber = (value: string) => {
-  //   const cleaned = value.replace(/\D/g, "")
-  //   const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/)
-  //   if (match) {
-  //     return `(${match[1]}) ${match[2]}-${match[3]}`
-  //   }
-  //   return value
-  // }
+  const formatPhoneNumber = (value: string) => {
+    const cleaned = value.replace(/\D/g, "");
 
-  // const handlePhoneChange = (field: keyof StudentRegistrationFormData, value: string) => {
-  //   const formatted = formatPhoneNumber(value)
-  //   updateFormData(field, formatted)
-  // }
+    // Handle 09xxxxxxxx or 07xxxxxxxx
+    let match = cleaned.match(/^0([79])(\d{2})(\d{6})$/);
+    if (match) {
+      return `+(251) ${match[1]}${match[2]}-${match[3]}`;
+    }
+
+    // Handle 2519xxxxxxxx or 2517xxxxxxxx
+    match = cleaned.match(/^251([79])(\d{2})(\d{6})$/);
+    if (match) {
+      return `+(251) ${match[1]}${match[2]}-${match[3]}`;
+    }
+
+    return value;
+  };
 
   const handleExtracurricularToggle = (activity: string) => {
     const updated = selectedExtracurriculars.includes(activity)
@@ -306,6 +321,7 @@ export default function StudentRegistrationForm() {
   }
 
   const handleFieldChange = (field: keyof StudentRegistrationFormData, value: any) => {
+    value = value === "" ? undefined : value // Handle empty strings
     updateFormData(field, value)
     setTouchedFields((prev) => ({ ...prev, [field]: true }))
 
@@ -318,12 +334,14 @@ export default function StudentRegistrationForm() {
   const nextStep = () => {
     if (validateStep(currentStep) && currentStep < totalSteps) {
       setCurrentStep(currentStep + 1)
+      setCurrentStepName(stepNames[currentStep + 1 as keyof typeof stepNames] || "Unknown Step")
     }
   }
 
   const prevStep = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1)
+      setCurrentStepName(stepNames[currentStep - 1 as keyof typeof stepNames] || "Unknown Step")
     }
   }
 
@@ -332,6 +350,7 @@ export default function StudentRegistrationForm() {
     if (savedData) {
       setFormData((prev) => ({ ...prev, ...savedData.data }))
       setCurrentStep(savedData.step)
+      setCurrentStepName(stepNames[savedData.step as keyof typeof stepNames] || "Unknown Step")
       if (savedData.data.extracurriculars) {
         setSelectedExtracurriculars(savedData.data.extracurriculars)
       }
@@ -376,7 +395,7 @@ export default function StudentRegistrationForm() {
           <div className="space-y-6">
             <div className="flex items-center gap-2 mb-4">
               <User className="h-5 w-5 text-blue-600" />
-              <h3 className="text-lg font-semibold">Personal Information</h3>
+              <h3 className="text-lg font-semibold">{currentStepName}</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -400,7 +419,7 @@ export default function StudentRegistrationForm() {
                 id="lastName"
                 required
                 error={errors.lastName}
-                success={!errors.lastName && touchedFields.lastName && formData.lastName.length > 0}
+                success={!errors.lastName && touchedFields.lastName}
               >
                 <InputWithError
                   id="lastName"
@@ -418,7 +437,7 @@ export default function StudentRegistrationForm() {
                 id="fatherName"
                 required
                 error={errors.fatherName}
-                success={!errors.fatherName && touchedFields.fatherName && formData.fatherName.length > 0}
+                success={!errors.fatherName && touchedFields.fatherName}
               >
                 <InputWithError
                   id="fatherName"
@@ -432,7 +451,7 @@ export default function StudentRegistrationForm() {
                 label="Grandfather's Name"
                 id="grandFatherName"
                 required={false}
-                error={formData.grandFatherName && formData.grandFatherName.length > 0 ? errors.grandFatherName : undefined}
+                error={errors.grandFatherName}
                 success={
                   !errors.grandFatherName && touchedFields.grandFatherName
                 }
@@ -452,7 +471,7 @@ export default function StudentRegistrationForm() {
                 id="dateOfBirth"
                 required
                 error={errors.dateOfBirth}
-                success={!errors.dateOfBirth && touchedFields.dateOfBirth && formData.dateOfBirth.length > 0}
+                success={!errors.dateOfBirth && touchedFields.dateOfBirth}
               >
                 <InputWithError
                   id="dateOfBirth"
@@ -483,8 +502,9 @@ export default function StudentRegistrationForm() {
               <FormField
                 label="Nationality"
                 id="nationality"
+                required
                 error={errors.nationality}
-                success={!errors.nationality && touchedFields.nationality && formData.nationality.length > 0}
+                success={!errors.nationality && touchedFields.nationality}
               >
                 <InputWithError
                   id="nationality"
@@ -557,7 +577,7 @@ export default function StudentRegistrationForm() {
           <div className="space-y-6">
             <div className="flex items-center gap-2 mb-4">
               <GraduationCap className="h-5 w-5 text-green-600" />
-              <h3 className="text-lg font-semibold">Academic Information</h3>
+              <h3 className="text-lg font-semibold">{currentStepName}</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -671,7 +691,7 @@ export default function StudentRegistrationForm() {
           <div className="space-y-6">
             <div className="flex items-center gap-2 mb-4">
               <MapPin className="h-5 w-5 text-purple-600" />
-              <h3 className="text-lg font-semibold">Address & Contact Information</h3>
+              <h3 className="text-lg font-semibold">{currentStepName}</h3>
             </div>
 
             <FormField
@@ -679,7 +699,7 @@ export default function StudentRegistrationForm() {
               id="address"
               required
               error={errors.address}
-              success={!errors.address && touchedFields.address && formData.address.length > 0}
+              success={!errors.address && touchedFields.address}
             >
               <InputWithError
                 id="address"
@@ -696,7 +716,7 @@ export default function StudentRegistrationForm() {
                 id="city"
                 required
                 error={errors.city}
-                success={!errors.city && touchedFields.city && formData.city.length > 0}
+                success={!errors.city && touchedFields.city}
               >
                 <InputWithError
                   id="city"
@@ -711,7 +731,7 @@ export default function StudentRegistrationForm() {
                 id="state"
                 required
                 error={errors.state}
-                success={!errors.state && touchedFields.state && formData.state.length > 0}
+                success={!errors.state && touchedFields.state}
               >
                 <InputWithError
                   id="state"
@@ -726,7 +746,7 @@ export default function StudentRegistrationForm() {
                 id="postalCode"
                 required
                 error={errors.postalCode}
-                success={!errors.postalCode && touchedFields.postalCode && formData.postalCode.length > 0}
+                success={!errors.postalCode && touchedFields.postalCode}
               >
                 <InputWithError
                   id="postalCode"
@@ -746,12 +766,12 @@ export default function StudentRegistrationForm() {
                 id="fatherPhone"
                 required
                 error={errors.fatherPhone}
-                success={!errors.fatherPhone && touchedFields.fatherPhone && formData.fatherPhone.length > 0}
+                success={!errors.fatherPhone && touchedFields.fatherPhone}
               >
                 <InputWithError
                   id="fatherPhone"
                   value={formData.fatherPhone}
-                  onChange={(e) => handleFieldChange("fatherPhone", e.target.value)}
+                  onChange={(e) => handleFieldChange("fatherPhone", formatPhoneNumber(e.target.value))}
                   placeholder="+251/7xx-xxx-xxx"
                   error={errors.fatherPhone}
                 />
@@ -761,12 +781,12 @@ export default function StudentRegistrationForm() {
                 id="motherPhone"
                 required
                 error={errors.motherPhone}
-                success={!errors.motherPhone && touchedFields.motherPhone && formData.motherPhone.length > 0}
+                success={!errors.motherPhone && touchedFields.motherPhone}
               >
                 <InputWithError
                   id="motherPhone"
                   value={formData.motherPhone}
-                  onChange={(e) => handleFieldChange("motherPhone", e.target.value)}
+                  onChange={(e) => handleFieldChange("motherPhone", formatPhoneNumber(e.target.value))}
                   placeholder="+251/7xx-xxx-xxx"
                   error={errors.motherPhone}
                 />
@@ -778,7 +798,7 @@ export default function StudentRegistrationForm() {
               id="parentEmail"
               required
               error={errors.parentEmail}
-              success={!errors.parentEmail && touchedFields.parentEmail && formData.parentEmail.length > 0}
+              success={!errors.parentEmail && touchedFields.parentEmail}
             >
               <InputWithError
                 id="parentEmail"
@@ -797,7 +817,7 @@ export default function StudentRegistrationForm() {
           <div className="space-y-6">
             <div className="flex items-center gap-2 mb-4">
               <Users className="h-5 w-5 text-orange-600" />
-              <h3 className="text-lg font-semibold">Guardian & Emergency Contact</h3>
+              <h3 className="text-lg font-semibold">{currentStepName}</h3>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -844,7 +864,7 @@ export default function StudentRegistrationForm() {
               <InputWithError
                 id="guardianPhone"
                 value={formData.guardianPhone}
-                onChange={(e) => handleFieldChange("guardianPhone", e.target.value)}
+                onChange={(e) => handleFieldChange("guardianPhone", formatPhoneNumber(e.target.value))}
                 placeholder="+251 9/7xx-xxx-xxx"
                 error={errors.guardianPhone}
               />
@@ -878,7 +898,7 @@ export default function StudentRegistrationForm() {
                   <InputWithError
                     id="emergencyContactPhone"
                     value={formData.emergencyContactPhone}
-                    onChange={(e) => handleFieldChange("emergencyContactPhone", e.target.value)}
+                    onChange={(e) => handleFieldChange("emergencyContactPhone", formatPhoneNumber(e.target.value))}
                     placeholder="+251/7xx-xxx-xxx"
                     error={errors.emergencyContactPhone}
                   />
@@ -928,7 +948,7 @@ export default function StudentRegistrationForm() {
           <div className="space-y-6">
             <div className="flex items-center gap-2 mb-4">
               <Heart className="h-5 w-5 text-red-600" />
-              <h3 className="text-lg font-semibold">Medical Information & Special Needs</h3>
+              <h3 className="text-lg font-semibold">{currentStepName}</h3>
             </div>
 
             <div className="space-y-4">
@@ -1052,7 +1072,7 @@ export default function StudentRegistrationForm() {
           <div className="space-y-6">
             <div className="flex items-center gap-2 mb-4">
               <FileText className="h-5 w-5 text-indigo-600" />
-              <h3 className="text-lg font-semibold">Additional Information & Review</h3>
+              <h3 className="text-lg font-semibold">{currentStepName}</h3>
             </div>
 
             <div className="space-y-4">
@@ -1187,6 +1207,7 @@ export default function StudentRegistrationForm() {
           onRestore={handleRestoreForm}
           onStartFresh={handleStartFresh}
           savedStep={currentStep}
+          savedStepName={currentStepName}
           lastSaved={lastSaved}
         />
       </div>

@@ -1,6 +1,6 @@
 import { Layout } from "@/components";
 import { StudentRegistrationForm } from "@/pages/student";
-import { TeacherRegistrationForm } from "@/features/teacher";
+import { TeacherRegistrationForm } from "@/pages/teacher";
 
 /**
  * AdminEnrollStud component renders the admin dashboard container with the appropriate registration form
