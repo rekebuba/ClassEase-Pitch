@@ -24,10 +24,14 @@ from models.teacher_record import TeachersRecord  # noqa: F401
 from models.blacklist_token import BlacklistToken  # noqa: F401
 from models.event import Event  # noqa: F401
 from models.semester import Semester  # noqa: F401
-from models.saved_query_view import SavedQueryView # noqa: F401
+from models.saved_query_view import SavedQueryView  # noqa: F401
 from models.year import Year, seed_year  # noqa: F401
-from models.stream import Stream, seed_streams  # noqa: F401
+from models.stream import Stream  # noqa: F401
 from models.table import Table, seed_table  # noqa: F401
+from models.grade_stream_link import GradeStreamLink  # noqa: F401
+from models.teacher_subject_link import TeacherSubjectLink  # noqa: F401
+from models.teacher_grade_link import TeacherGradeLink  # noqa: F401
+from models.subject_grade_stream_link import SubjectGradeStreamLink  # noqa: F401
 from contextlib import contextmanager
 
 # Define a generic type variable for models
@@ -160,7 +164,6 @@ class DBStorage:
         Seed initial data into the database.
         """
         seed_grades(self.session)
-        seed_streams(self.session)
         seed_subjects(self.session)
         seed_year(self.session)
         seed_table(self.session, self.engine)

@@ -1,146 +1,154 @@
 #!/usr/bin/python3
 """Module for Subject class"""
 
-from typing import Optional
-from sqlalchemy import String, ForeignKey
+from typing import Dict, List, Optional, TypedDict
+from sqlalchemy import String, select
+from sqlalchemy.orm import Mapped, mapped_column, scoped_session, relationship, Session
 from models.stream import Stream
 from models.grade import Grade
 from models.base_model import BaseModel
-from sqlalchemy.orm import Mapped, mapped_column, scoped_session
+from models.subject_grade_stream_link import SubjectGradeStreamLink
+from models.teacher import Teacher
 
 
-def seed_subjects(session: scoped_session) -> None:
+class SubjectDetails(TypedDict):
+    grades: List[int]
+    stream: Optional[dict[str, List[str]]]
+
+
+def seed_subjects(session: scoped_session[Session]) -> None:
     """
-    Populate the Subject table with default data (from grade 1 to 12).
+    Populate the Subject table with default data from grades 1 to 12.
 
-    This function checks if the Subject table is empty. If it is, it populates
-    the table with subjects grade 1 to 12. If the table already contains data,
-    the function does nothing.
-
-    Args:
-        session (Session): SQLAlchemy session object used to interact with the database.
-
+    If the table already has subjects, no data will be added.
     """
-    subject_per_grade = {
-        "1-4": [
-            "Arts and Physical Education",
-            "Mother Tongue",
-            "Mathematics",
-            "Amharic",
-            "English",
-            "Environmental Science",
-        ],
-        "5-6": [
-            "Civics and Ethical Education",
-            "Mother Tongue",
-            "Mathematics",
-            "Amharic",
-            "English",
-            "Visual Arts and Music",
-            "Physical Education",
-            "Integrated Science",
-        ],
-        "7-8": [
-            "Civics and Ethical Education",
-            "Mother Tongue",
-            "Mathematics",
-            "Amharic",
-            "English",
-            "Visual Arts and Music",
-            "Physical Education",
-            "Biology",
-            "Chemistry",
-            "Physics",
-            "Social Study",
-        ],
-        "9-10": [
-            "Civics and Ethical Education",
-            "Mother Tongue",
-            "Mathematics",
-            "Amharic as second language",
-            "English",
-            "Physical Education",
-            "Biology",
-            "Chemistry",
-            "Physics",
-            "Geography",
-            "History",
-            "Information Technology",
-        ],
-        "11-12(Natural)": [
-            "Civics and Ethical Education",
-            "Mother Tongue",
-            "Mathematics",
-            "Amharic",
-            "English",
-            "Physical Education",
-            "Biology",
-            "Chemistry",
-            "Physics",
-            "Information Technology",
-            "Technical Drawing",
-        ],
-        "11-12(Social)": [
-            "Civics and Ethical Education",
-            "Mother Tongue",
-            "Mathematics",
-            "Amharic",
-            "English",
-            "Physical Education",
-            "Geography",
-            "History",
-            "Information Technology",
-            "Economics",
-            "General Business",
-        ],
-    }
+
     # Check if the table is already populated
     if session.query(Subject).count() > 0:
         return
 
-    bulk_insert: list[Subject] = []
+    subjects: Dict[str, SubjectDetails] = {
+        "Arts and Physical Education": {"grades": [1, 2, 3, 4], "stream": None},
+        "Environmental Science": {"grades": [1, 2, 3, 4], "stream": None},
+        "Integrated Science": {"grades": [5, 6], "stream": None},
+        "Social Study": {"grades": [7, 8], "stream": None},
+        "Visual Arts and Music": {"grades": [5, 6, 7, 8], "stream": None},
+        "Amharic as second language": {"grades": [9, 10], "stream": None},
+        "English": {
+            "grades": list(range(1, 13)),
+            "stream": {"11": ["natural", "social"], "12": ["natural", "social"]},
+        },
+        "Mathematics": {
+            "grades": list(range(1, 13)),
+            "stream": {"11": ["natural", "social"], "12": ["natural", "social"]},
+        },
+        "Mother Tongue": {
+            "grades": list(range(1, 13)),
+            "stream": {"11": ["natural", "social"], "12": ["natural", "social"]},
+        },
+        "Amharic": {
+            "grades": [1, 2, 3, 4, 5, 6, 7, 8, 11, 12],
+            "stream": {"11": ["natural", "social"], "12": ["natural", "social"]},
+        },
+        "Physical Education": {
+            "grades": list(range(5, 13)),
+            "stream": {"11": ["natural", "social"], "12": ["natural", "social"]},
+        },
+        "Civics and Ethical Education": {
+            "grades": list(range(5, 13)),
+            "stream": {"11": ["natural", "social"], "12": ["natural", "social"]},
+        },
+        "Biology": {
+            "grades": list(range(7, 13)),
+            "stream": {"11": ["natural"], "12": ["natural"]},
+        },
+        "Physics": {
+            "grades": list(range(7, 13)),
+            "stream": {"11": ["natural"], "12": ["natural"]},
+        },
+        "Chemistry": {
+            "grades": list(range(7, 13)),
+            "stream": {"11": ["natural"], "12": ["natural"]},
+        },
+        "Geography": {
+            "grades": [9, 10, 11],
+            "stream": {"11": ["social"], "12": ["social"]},
+        },
+        "History": {
+            "grades": [9, 10, 11],
+            "stream": {"11": ["social"], "12": ["social"]},
+        },
+        "Information Technology": {
+            "grades": list(range(9, 13)),
+            "stream": {"11": ["natural", "social"], "12": ["natural", "social"]},
+        },
+        "Economics": {
+            "grades": [11, 12],
+            "stream": {"11": ["social"], "12": ["social"]},
+        },
+        "General Business": {
+            "grades": [11, 12],
+            "stream": {"11": ["social"], "12": ["social"]},
+        },
+        "Technical Drawing": {
+            "grades": [11, 12],
+            "stream": {"11": ["natural"], "12": ["natural"]},
+        },
+    }
 
-    # Preload stream IDs once
-    streams = {s.name: s.id for s in session.query(Stream).all()}
-    for grade in range(1, 13):
-        grade_id = session.query(Grade.id).filter_by(grade=grade).scalar()
-        if 1 <= grade <= 4:
-            subjects = subject_per_grade["1-4"]
-        elif 5 <= grade <= 6:
-            subjects = subject_per_grade["5-6"]
-        elif 7 <= grade <= 8:
-            subjects = subject_per_grade["7-8"]
-        elif 9 <= grade <= 10:
-            subjects = subject_per_grade["9-10"]
-        elif 11 <= grade <= 12:
-            for stream, subject_list in [
-                ("natural", "11-12(Natural)"),
-                ("social", "11-12(Social)"),
-            ]:
-                for subject in subject_per_grade[subject_list]:
-                    code = generate_code(stream, bulk_insert, subject, grade)
-                    bulk_insert.append(
-                        Subject(
-                            name=subject,
+    for subject_name, details in subjects.items():
+        new_subject = Subject(name=subject_name)
+
+        for grade_number in details["grades"]:
+            grade_id = session.execute(
+                select(Grade.id).where(Grade.grade == grade_number)
+            ).scalar_one_or_none()
+
+            if not grade_id:
+                raise ValueError(f"Grade {grade_number} not found in the database.")
+
+            streams = (
+                details["stream"].get(str(grade_number), None)
+                if details["stream"] is not None
+                else []
+            )
+
+            if streams:
+                for stream_name in streams:
+                    stream_id = session.execute(
+                        select(Stream.id).where(Stream.name == stream_name)
+                    ).scalar_one_or_none()
+
+                    if not stream_id:
+                        raise ValueError(
+                            f"Stream '{stream_name}' not found in the database."
+                        )
+                    code = generate_code(subject_name, grade_number, stream_name)
+                    new_subject.grade_links.append(
+                        SubjectGradeStreamLink(
+                            subject_id=new_subject.id,
                             grade_id=grade_id,
+                            stream_id=stream_id,
                             code=code,
-                            stream_id=streams[stream],
                         )
                     )
-            continue  # Skip to next iteration after handling streams
+            else:
+                code = generate_code(subject_name, grade_number, None)
+                new_subject.grade_links.append(
+                    SubjectGradeStreamLink(
+                        subject_id=new_subject.id,
+                        grade_id=grade_id,
+                        stream_id=None,
+                        code=code,
+                    )
+                )
 
-        # Default handling for non-stream subjects
-        for subject in subjects:
-            code = generate_code(None, bulk_insert, subject, grade)
-            bulk_insert.append(Subject(name=subject, grade_id=grade_id, code=code))
+        session.add(new_subject)
 
-    session.bulk_save_objects(bulk_insert)
     session.commit()
 
 
-def generate_code(
-    stream: Optional[str], prev_data: list["Subject"], subject: str, grade: int
-) -> str:
+def generate_code(subject: str, grade: int, stream: Optional[str]) -> str:
     """
     Generate a unique code for the subject.
 
@@ -172,41 +180,35 @@ def generate_code(
     if stream:
         base_code += f"-{stream[0].upper()}"
 
-    existing_codes = {subj.code for subj in prev_data}
+    # Check for existing codes in the database
+    # existing_codes = []
 
-    code = base_code
-    suffix = "-I"
+    # code = base_code
+    # suffix = "-I"
 
-    while code in existing_codes:
-        code = f"{base_code}{suffix}"
-        suffix += "I"
+    # while code in existing_codes:
+    #     code = f"{base_code}{suffix}"
+    #     suffix += "I"
 
-    return code
+    return base_code
 
 
 class Subject(BaseModel):
     """
     Subject Model
-
-    This model represents a subject in the ClassEase system. It includes the subject's name, code, associated grade, and year.
-
-    Attributes:
-        __tablename__ (str): The name of the table in the database.
-        name (mapped_column): The name of the subject, limited to 50 characters, cannot be null.
-        code (mapped_column): The code of the subject, limited to 10 characters, cannot be null.
-        grade_id (mapped_column): Foreign key linking to the grade, cannot be null.
-        year (mapped_column): The academic year of the subject, limited to 10 characters, cannot be null.
-
-    Methods:
-        __init__(*args, **kwargs): Initializes the subject with variable length arguments and keyword arguments.
     """
 
     __tablename__ = "subjects"
     name: Mapped[str] = mapped_column(String(50), nullable=False)
-    code: Mapped[str] = mapped_column(String(120), nullable=False, unique=True)
-    grade_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("grades.id"), nullable=False
+
+    teachers: Mapped[List["Teacher"]] = relationship(
+        "Teacher",
+        back_populates="subjects_to_teach",
+        secondary="teacher_subject_links",
+        init=False,
     )
-    stream_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("streams.id"), nullable=True, default=None
+    grade_links: Mapped[List["SubjectGradeStreamLink"]] = relationship(
+        "SubjectGradeStreamLink",
+        back_populates="subject",
+        init=False,
     )

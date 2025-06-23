@@ -1,9 +1,13 @@
 #!/usr/bin/python3
 """Module for Admin class"""
 
+from typing import TYPE_CHECKING, Optional
 from sqlalchemy import CheckConstraint, Date, String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from models.base_model import BaseModel
+
+if TYPE_CHECKING:
+    from models.user import User
 
 
 class Admin(BaseModel):
@@ -24,7 +28,9 @@ class Admin(BaseModel):
     phone: Mapped[str] = mapped_column(String(25), nullable=False)
     address: Mapped[str] = mapped_column(String(120), nullable=False)
 
-    user = relationship("User", back_populates="admins")
+    user: Mapped[Optional["User"]] = relationship(
+        "User", back_populates="admins", init=False
+    )
 
     __table_args__ = (
         CheckConstraint("gender IN ('M', 'F')", name="check_admin_gender"),

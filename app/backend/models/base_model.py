@@ -49,6 +49,61 @@ class CustomTypes:
         ADMIN = "admin"
         SEMESTERS = "semesters"
 
+    class EventPurposeEnum(Enum):
+        ACADEMIC = "academic"
+        CULTURAL = "cultural"
+        SPORTS = "sports"
+        GRADUATION = "graduation"
+        ADMINISTRATION = "administration"
+        NEW_SEMESTER = "new semester"
+        OTHER = "other"
+
+    class EventOrganizerEnum(Enum):
+        SCHOOL = "school"
+        SCHOOL_ADMINISTRATION = "school administration"
+        STUDENT_CLUB = "student club"
+        EXTERNAL_ORGANIZER = "external organizer"
+
+    class EventLocationEnum(Enum):
+        AUDITORIUM = "auditorium"
+        CLASSROOM = "classroom"
+        SPORTS_FIELD = "sports field"
+        ONLINE = "online"
+        OTHER = "other"
+
+    class EventEligibilityEnum(Enum):
+        ALL = "all"
+        STUDENTS_ONLY = "students only"
+        FACULTY_ONLY = "faculty only"
+        INVITATION_ONLY = "invitation only"
+
+    class GenderEnum(Enum):
+        MALE = "m"
+        FEMALE = "f"
+
+    class MaritalStatusEnum(Enum):
+        SINGLE = "single"
+        MARRIED = "married"
+        DIVORCED = "divorced"
+        WIDOWED = "widowed"
+
+    class ExperienceYearEnum(Enum):
+        ZERO = "0"
+        ONE_TO_TWO = "1-2"
+        THREE_TO_FIVE = "3-5"
+        SIX_TO_NINE = "6-9"
+        TEN_OR_MORE = "10+"
+
+    class ScheduleEnum(Enum):
+        FULL_TIME = "full time"
+        PART_time = "part time"
+        FLEXIBLE = "flexible hours"
+
+    class GradeLevelEnum(str, Enum):
+        PRIMARY = "primary"
+        MIDDLE_SCHOOL = "middle school"
+        HIGH_SCHOOL = "high school"
+
 
 @dataclass
 class AssociationBase(Base):

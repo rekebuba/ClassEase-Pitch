@@ -1,9 +1,16 @@
 #!/usr/bin/python3
 """Module for User class"""
 
+from typing import TYPE_CHECKING
 from sqlalchemy import String, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from models.base_model import BaseModel
+
+if TYPE_CHECKING:
+    from models.admin import Admin
+    from models.student import Student
+    from models.teacher import Teacher
+    from models.saved_query_view import SavedQueryView
 
 
 class User(BaseModel):
@@ -17,15 +24,39 @@ class User(BaseModel):
     )
     password: Mapped[str] = mapped_column(String(120), nullable=False)
     role: Mapped[BaseModel.RoleEnum] = mapped_column(
-        Enum(BaseModel.RoleEnum), nullable=False
+        Enum(
+            BaseModel.RoleEnum,
+            name="role_enum",
+            values_callable=lambda x: [e.value for e in x],
+            native_enum=False,
+        ),
+        nullable=False,
     )
     image_path: Mapped[str] = mapped_column(String(255), nullable=True)
     national_id: Mapped[str] = mapped_column(String(120), nullable=False)
 
     # One-to-many relationship
-    admins = relationship("Admin", back_populates="user", uselist=False)
-    teachers = relationship("Teacher", back_populates="user", uselist=False)
-    students = relationship("Student", back_populates="user", uselist=False)
-    saved_query_views = relationship(
-        "SavedQueryView", back_populates="user", cascade="all, delete-orphan"
+    admins: Mapped["Admin"] = relationship(
+        "Admin",
+        back_populates="user",
+        uselist=False,
+        init=False,
+    )
+    teachers: Mapped["Teacher"] = relationship(
+        "Teacher",
+        back_populates="user",
+        uselist=False,
+        init=False,
+    )
+    students: Mapped["Student"] = relationship(
+        "Student",
+        back_populates="user",
+        uselist=False,
+        init=False,
+    )
+    saved_query_views: Mapped["SavedQueryView"] = relationship(
+        "SavedQueryView",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        init=False,
     )

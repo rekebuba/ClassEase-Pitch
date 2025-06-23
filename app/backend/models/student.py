@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """Module for Student class"""
 
+from typing import TYPE_CHECKING
 from sqlalchemy import (
     Date,
     String,
@@ -11,27 +12,16 @@ from sqlalchemy import (
 from models.base_model import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+if TYPE_CHECKING:
+    from models.stud_semester_record import STUDSemesterRecord
+    from models.stud_year_record import STUDYearRecord
+    from models.average_subject import AVRGSubject
+    from models.user import User
+
 
 class Student(BaseModel):
     """
     Represents a student entity in the database.
-
-    Attributes:
-        id (str): Unique identifier for the student, linked to the 'users' table.
-        name (str): Name of the student.
-        father_name (str): Name of the student's father.
-        grand_father_name (str): Name of the student's grandfather.
-        date_of_birth (datetime): Date of birth of the student.
-        father_phone (str): Phone number of the student's father.
-        mother_phone (str): Phone number of the student's mother.
-        start_year (str): The year the student started.
-        end_year (str): The year the student ended.
-
-    Constraints:
-        At least one of 'father_phone' or 'mother_phone' must be provided.
-
-    Methods:
-        __init__(*args, **kwargs): Initializes a new instance of the Student class.
     """
 
     __tablename__ = "students"
@@ -95,22 +85,31 @@ class Student(BaseModel):
     )  # Any special support needed
 
     # Whether the student is currently enrolled
-    is_active: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_active: bool = False
 
     # Relationships
-    user = relationship("User", back_populates="students")
-    semester_records = relationship(
+    user: Mapped["User"] = relationship(
+        "User",
+        back_populates="students",
+        init=False,
+    )
+    semester_records: Mapped[list["STUDSemesterRecord"]] = relationship(
         "STUDSemesterRecord",
         back_populates="students",
         cascade="all, delete-orphan",
         uselist=False,
+        init=False,
     )
-    year_records = relationship(
+    year_records: Mapped[list["STUDYearRecord"]] = relationship(
         "STUDYearRecord",
         back_populates="students",
         cascade="all, delete-orphan",
         uselist=False,
+        init=False,
     )
-    average_subjects = relationship(
-        "AVRGSubject", back_populates="students", cascade="all, delete-orphan"
+    average_subjects: Mapped[list["AVRGSubject"]] = relationship(
+        "AVRGSubject",
+        back_populates="students",
+        cascade="all, delete-orphan",
+        init=False,
     )
