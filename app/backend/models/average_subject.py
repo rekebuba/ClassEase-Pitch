@@ -1,9 +1,13 @@
 #!/usr/bin/python3
 """Module for Average Result class"""
 
+from typing import TYPE_CHECKING
 from sqlalchemy import String, Integer, ForeignKey, Float
 from models.base_model import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+if TYPE_CHECKING:
+    from models.student import Student
 
 
 class AVRGSubject(BaseModel):
@@ -31,4 +35,6 @@ class AVRGSubject(BaseModel):
     rank: Mapped[int] = mapped_column(Integer, default=None)
 
     # Relationships
-    students = relationship("Student", back_populates="average_subjects")
+    students: Mapped["Student"] = relationship(
+        "Student", back_populates="average_subjects", init=False
+    )

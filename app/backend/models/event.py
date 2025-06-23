@@ -85,10 +85,6 @@ class Event(BaseModel):
         ),
         CheckConstraint("has_fee = True AND fee_amount > 0", name="check_fee"),
         CheckConstraint(
-            "purpose = 'New Semester' AND organizer = 'School Administration'",
-            name="check_purpose_with_organizer",
-        ),
-        CheckConstraint(
             "purpose = 'New Semester' AND location = 'Online'",
             name="check_purpose_with_location",
         ),

@@ -1,9 +1,16 @@
 #!/usr/bin/python3
 """Module for Average Result class"""
 
+from typing import TYPE_CHECKING
 from sqlalchemy import String, Integer, ForeignKey, Float
 from models.base_model import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+if TYPE_CHECKING:
+    from models.section import Section
+    from models.semester import Semester
+    from models.stud_year_record import STUDYearRecord
+    from models.student import Student
 
 
 class STUDSemesterRecord(BaseModel):
@@ -28,7 +35,15 @@ class STUDSemesterRecord(BaseModel):
     rank: Mapped[int] = mapped_column(Integer, nullable=True, default=None)
 
     # Relationships
-    students = relationship("Student", back_populates="semester_records")
-    year_records = relationship("STUDYearRecord", back_populates="semester_records")
-    semesters = relationship("Semester", back_populates="semester_records")
-    sections = relationship("Section", back_populates="semester_records")
+    students: Mapped["Student"] = relationship(
+        "Student", back_populates="semester_records", init=False
+    )
+    year_records: Mapped["STUDYearRecord"] = relationship(
+        "STUDYearRecord", back_populates="semester_records", init=False
+    )
+    semesters: Mapped["Semester"] = relationship(
+        "Semester", back_populates="semester_records", init=False
+    )
+    sections: Mapped["Section"] = relationship(
+        "Section", back_populates="semester_records", init=False
+    )

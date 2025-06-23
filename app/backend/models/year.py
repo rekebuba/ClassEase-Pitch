@@ -1,14 +1,18 @@
 #!/usr/bin/python3
 """Module for Year class"""
 
+from typing import TYPE_CHECKING
 from sqlalchemy import String, Integer
-from sqlalchemy.orm import Mapped, mapped_column, relationship, scoped_session
+from sqlalchemy.orm import Mapped, mapped_column, relationship, scoped_session, Session
 from models.base_model import BaseModel
 from datetime import datetime
 from pyethiodate import EthDate  # type: ignore
 
+if TYPE_CHECKING:
+    from models.stud_year_record import STUDYearRecord
 
-def seed_year(session: scoped_session) -> None:
+
+def seed_year(session: scoped_session[Session]) -> None:
     # Check if the table is already populated
     if session.query(Year).count() > 0:
         return
@@ -40,6 +44,9 @@ class Year(BaseModel):
     )
 
     # Relationships
-    student_year_records = relationship(
-        "STUDYearRecord", back_populates="years", uselist=False
+    student_year_records: Mapped["STUDYearRecord"] = relationship(
+        "STUDYearRecord",
+        back_populates="years",
+        uselist=False,
+        init=False,
     )

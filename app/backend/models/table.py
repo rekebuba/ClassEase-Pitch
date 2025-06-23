@@ -2,17 +2,17 @@
 """Module for Table class"""
 
 from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column, scoped_session
+from sqlalchemy.orm import Mapped, mapped_column, scoped_session, Session
 from models.base_model import BaseModel
-from sqlalchemy import inspect, Engine
+from sqlalchemy import inspect, Engine, select
 
 
-def seed_table(session: scoped_session, engine: Engine) -> None:
+def seed_table(session: scoped_session[Session], engine: Engine) -> None:
     inspector = inspect(engine)
     db_tables = inspector.get_table_names()
 
     # Get names already in your 'tables' model
-    existing_tables = {t.name for t in session.query(Table).all()}
+    existing_tables = {t.name for t in session.scalars(select(Table)).all()}
 
     for table_name in db_tables:
         if table_name == "tables":

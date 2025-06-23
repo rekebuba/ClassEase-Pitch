@@ -1,9 +1,16 @@
 #!/usr/bin/python3
 """Module for STUDYearRecord class"""
 
+from typing import TYPE_CHECKING
 from sqlalchemy import Integer, String, ForeignKey, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from models.base_model import BaseModel
+
+if TYPE_CHECKING:
+    from models.grade import Grade
+    from models.stud_semester_record import STUDSemesterRecord
+    from models.student import Student
+    from models.year import Year
 
 
 class STUDYearRecord(BaseModel):
@@ -27,7 +34,23 @@ class STUDYearRecord(BaseModel):
     rank: Mapped[int] = mapped_column(Integer, nullable=True, default=None)
 
     # Relationships
-    students = relationship("Student", back_populates="year_records")
-    grades = relationship("Grade", back_populates="student_year_records")
-    years = relationship("Year", back_populates="student_year_records")
-    semester_records = relationship("STUDSemesterRecord", back_populates="year_records")
+    students: Mapped["Student"] = relationship(
+        "Student",
+        back_populates="year_records",
+        init=False,
+    )
+    grades: Mapped["Grade"] = relationship(
+        "Grade",
+        back_populates="student_year_records",
+        init=False,
+    )
+    years: Mapped["Year"] = relationship(
+        "Year",
+        back_populates="student_year_records",
+        init=False,
+    )
+    semester_records: Mapped["STUDSemesterRecord"] = relationship(
+        "STUDSemesterRecord",
+        back_populates="year_records",
+        init=False,
+    )
