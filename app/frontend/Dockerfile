@@ -31,9 +31,6 @@ RUN corepack enable pnpm
 # Set working directory
 WORKDIR /ClassEase-Pitch
 
-# Install pnpm globally again (for runtime usage like `pnpm run dev`)
-RUN npm install -g pnpm
-
 # Copy only the built output from the builder
 COPY --from=builder /app/ ./
 
