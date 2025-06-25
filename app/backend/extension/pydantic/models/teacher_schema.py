@@ -1,5 +1,5 @@
 from datetime import date
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Iterable, Optional
 from pydantic import BaseModel, ConfigDict
 from models.base_model import CustomTypes
 
@@ -108,5 +108,5 @@ class TeacherSchema(BaseModel):
 
     # Relationship
     user: Optional[UserSchema]
-    subjects_to_teach: Optional[List[SubjectSchema]]
-    grade_level: Optional[List[GradeSchema]]
+    subjects_to_teach: Optional[Iterable[SubjectSchema]]
+    grade_level: Optional[Iterable[GradeSchema]]

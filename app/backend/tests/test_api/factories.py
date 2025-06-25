@@ -5,6 +5,7 @@ from typing import (
     Generic,
     List,
     Optional,
+    Sequence,
     Type,
     TypeVar,
 )
@@ -16,15 +17,19 @@ from PIL import Image
 from dataclasses import dataclass, asdict, field
 from datetime import date, datetime, timedelta
 from io import BufferedReader
-from factory import LazyAttribute
+from factory import LazyAttribute, SubFactory
 from faker import Faker
 from pyethiodate import EthDate  # type: ignore
+from sqlalchemy import select
+from sqlmodel import col
 from models.assessment import Assessment
 from models.section import Section
 from models.stud_semester_record import STUDSemesterRecord
 from models.stud_year_record import STUDYearRecord
 from models.subject import Subject
+from models.subject_grade_stream_link import SubjectGradeStreamLink
 from models.table import Table
+from models.teacher_grade_link import TeacherGradeLink
 from models.year import Year
 from models.semester import Semester
 from models.teacher import Teacher
@@ -49,8 +54,8 @@ class DefaultFelids:
     def __init__(self, session: scoped_session[Session]):
         self.session: scoped_session[Session] = session
 
-    def set_year_id(self):
-        year_id = self.session.query(Year.id).scalar()
+    def set_year_id(self) -> str | None:
+        year_id = self.session.execute(select(Year.id)).scalar_one_or_none()
         return year_id
 
     @staticmethod
@@ -90,9 +95,7 @@ class BaseFactory(SQLAlchemyModelFactory, Generic[T]):  # type: ignore[type-arg]
         cls: Type["BaseFactory[T]"], **kwargs: Any
     ) -> Optional[scoped_session[Session]]:
         model = getattr(cls._meta, "model", None)
-        session: Optional[scoped_session[Session]] = getattr(
-            cls._meta, "sqlalchemy_session", None
-        )
+        session: Optional[Session] = getattr(cls._meta, "sqlalchemy_session", None)
         if model is None or session is None:
             raise ValueError(
                 "Model and session must be defined in the factory's Meta class."
@@ -126,8 +129,8 @@ class BaseFactory(SQLAlchemyModelFactory, Generic[T]):  # type: ignore[type-arg]
 
         # Skip fields that are not needed for the session
         skip_fields = getattr(cls, "_skip_fields", [])
-        for field in skip_fields:
-            kwargs.pop(field, None)
+        for k in skip_fields:
+            kwargs.pop(k, None)
 
         return super()._create(model_class, *arg, **kwargs)  # type: ignore[no-any-return]
 
@@ -190,7 +193,7 @@ class YearModelFactory(BaseFactory[Year]):
         model = Year
 
     # Preload existing school IDs
-    _existing_ids = storage.session.query(Year.id).scalar()
+    _existing_ids = storage.session.execute(select(Year.id)).scalar_one_or_none()
 
     @classmethod
     def get_existing_id(cls) -> Optional[str]:
@@ -202,7 +205,7 @@ class GradeModelFactory(BaseFactory[Grade]):
         model: Grade
 
     # preload IDs
-    _existing_ids = storage.session.query(Grade.grade, Grade.id).all()
+    _existing_ids = storage.session.execute(select(Grade.grade, Grade.id)).all()
 
     @classmethod
     def get_existing_id(cls, grade: int) -> Optional[str]:
@@ -506,65 +509,283 @@ class TeacherFactory(BaseFactory[Teacher]):
     class Meta:
         model = Teacher
         sqlalchemy_session = storage.session
+        exclude = ("for_session", "grades_model", "subjects_model")
 
-    _add_for_session: Dict[str, Any] = {
-        "user_id": lambda **kwarg: UserFactory.create(
-            role=CustomTypes.RoleEnum.TEACHER
-        ).id,
-    }
-    _add_for_test: Dict[str, Any] = {
-        "user": lambda **kwarg: UserFactory.build(
-            role=CustomTypes.RoleEnum.TEACHER.value
-        ),
-    }
+    @staticmethod
+    def subject_model(grades: Sequence[Grade]) -> Sequence[Subject]:
+        subject_ids = storage.session.scalars(
+            select(SubjectGradeStreamLink.subject_id)
+            .where(
+                col(SubjectGradeStreamLink.grade_id).in_([grade.id for grade in grades])
+            )
+            .distinct()
+        ).all()
+
+        subjects = storage.session.scalars(
+            select(Subject).where(
+                col(Subject.id).in_(
+                    random.choices(
+                        subject_ids, k=random.choice(range(len(subject_ids)))
+                    ),
+                )
+            )
+        ).all()
+
+        return subjects
+
+    user: Any = SubFactory(UserFactory, role=CustomTypes.RoleEnum.TEACHER)
+
+    for_session: Any = False
+    grades_model: Any = LazyAttribute(
+        lambda x: storage.session.scalars(
+            select(Grade).where(
+                col(Grade.level).in_(
+                    random.choices(
+                        list(CustomTypes.GradeLevelEnum._value2member_map_), k=2
+                    )
+                )
+            )
+        ).all()
+    )
+    subjects_model: Any = LazyAttribute(
+        lambda x: TeacherFactory.subject_model(x.grades_model)
+    )
 
     # Add additional fields for Teacher
     first_name: Any = LazyAttribute(lambda x: fake.first_name())
     father_name: Any = LazyAttribute(lambda x: fake.last_name())
     grand_father_name: Any = LazyAttribute(lambda x: fake.first_name())
+    preferred_name: Any = LazyAttribute(
+        lambda x: fake.first_name() if random.choice([True, False]) else None
+    )
     date_of_birth: Any = LazyAttribute(lambda x: fake.date_of_birth())
-    email: Any = LazyAttribute(lambda x: fake.email())
-    gender: Any = LazyAttribute(lambda x: fake.random_element(elements=("M", "F")))
-    phone: Any = LazyAttribute(lambda x: "091234567")
+    gender: Any = LazyAttribute(
+        lambda x: random.choice(list(CustomTypes.GenderEnum._value2member_map_))
+    )
+    nationality: Any = LazyAttribute(lambda x: fake.country())
+    marital_status: Any = LazyAttribute(
+        lambda x: random.choice(list(CustomTypes.MaritalStatusEnum._value2member_map_))
+    )
+    social_security_number: Any = LazyAttribute(lambda x: str(fake.uuid4()))
+    # Contact Information
     address: Any = LazyAttribute(lambda x: fake.address())
-    year_of_experience: Any = LazyAttribute(lambda x: random.randint(0, 5))
-    qualification: Any = LazyAttribute(
+    city: Any = LazyAttribute(lambda x: fake.city())
+    state: Any = LazyAttribute(lambda x: fake.state())
+    postal_code: Any = LazyAttribute(lambda x: fake.postcode())
+    country: Any = LazyAttribute(lambda x: fake.country())
+    primary_phone: Any = LazyAttribute(lambda x: fake.basic_phone_number())
+    secondary_phone: Any = LazyAttribute(lambda x: fake.basic_phone_number())
+    personal_email: Any = LazyAttribute(lambda x: fake.email())
+    work_email: Any = LazyAttribute(lambda x: fake.email())
+
+    # Emergency Contact
+    emergency_contact_name: Any = LazyAttribute(lambda x: fake.name())
+    emergency_contact_relationship: Any = LazyAttribute(
+        lambda x: fake.random_element(
+            elements=("Parent", "Sibling", "Spouse", "Friend", "Other")
+        )
+    )
+    emergency_contact_phone: Any = LazyAttribute(lambda x: fake.phone_number())
+    emergency_contact_email: Any = LazyAttribute(lambda x: fake.email())
+
+    # Educational Background
+    highest_degree: Any = LazyAttribute(
         lambda x: fake.random_element(
             elements=(
-                "Certified Teacher",
-                "Diploma in Education",
-                "Degree in Education",
+                "High School Diploma",
+                "Bachelor's Degree",
+                "Master's Degree",
+                "PhD",
+                "Other",
             )
         )
     )
+    major_subject: Any = LazyAttribute(
+        lambda x: fake.random_element(
+            elements=(
+                "Mathematics",
+                "Science",
+                "English",
+                "History",
+                "Physical Education",
+                "Art",
+                "Music",
+                "Other",
+            )
+        )
+    )
+    minor_subject: Any = LazyAttribute(
+        lambda x: fake.random_element(
+            elements=(
+                "Mathematics",
+                "Science",
+                "English",
+                "History",
+                "Physical Education",
+                "Art",
+                "Music",
+                "Other",
+            )
+        )
+    )
+    university: Any = LazyAttribute(lambda x: fake.company())
+    graduation_year: Any = LazyAttribute(lambda x: random.randint(2000, 2023))
+    gpa: Any = LazyAttribute(lambda x: round(random.uniform(1.0, 4.0), 2))
+    additional_degrees: Any = LazyAttribute(
+        lambda x: fake.text(max_nb_chars=60) if random.choice([True, False]) else None
+    )
+
+    # Teaching Certifications & Licenses
+    teaching_license: Any = LazyAttribute(lambda x: fake.boolean())
+    license_number: Any = LazyAttribute(
+        lambda x: str(fake.uuid4()) if x.teaching_license else None
+    )
+    license_state: Any = LazyAttribute(
+        lambda x: fake.state() if x.teaching_license else None
+    )
+    license_expiration_date: Any = LazyAttribute(
+        lambda x: fake.future_date() if x.teaching_license else None
+    )
+    certifications: Any = LazyAttribute(
+        lambda x: fake.text(max_nb_chars=60) if random.choice([True, False]) else None
+    )
+    specializations: Any = LazyAttribute(
+        lambda x: fake.text(max_nb_chars=60) if random.choice([True, False]) else None
+    )
+
+    # Teaching Experience
+    years_of_experience: Any = LazyAttribute(
+        lambda x: random.choice(list(CustomTypes.ExperienceYearEnum._value2member_map_))
+    )
+    previous_schools: Any = LazyAttribute(
+        lambda x: fake.text(max_nb_chars=60) if random.choice([True, False]) else None
+    )
+
+    grade_level: Any = LazyAttribute(
+        lambda x: x.grades_model
+        if x.for_session
+        else list(set([grade.level.value for grade in x.grades_model]))
+    )
+    subjects_to_teach: Any = LazyAttribute(
+        lambda x: x.subjects_model
+        if x.for_session
+        else [subject.name for subject in x.subjects_model]
+    )
+    preferred_schedule: Any = LazyAttribute(
+        lambda x: fake.random_element(list(CustomTypes.ScheduleEnum._value2member_map_))
+    )
+
+    # Professional Skills & Qualifications
+    languages_spoken: Any = LazyAttribute(
+        lambda x: random.choice(["English", "Amharic", "French", "Japanese", "Chinese"])
+    )
+    technology_skills: Any = LazyAttribute(
+        lambda x: random.choice(
+            [
+                "Microsoft Office Suite",
+                "Google Workspace",
+                "Learning Management Systems (LMS)",
+                "Educational Technology Tools",
+                "Coding and Programming",
+                "Data Analysis Tools",
+            ]
+        )
+    )
+    special_skills: Any = LazyAttribute(
+        lambda x: fake.text(max_nb_chars=30) if random.choice([True, False]) else None
+    )
+    professional_development: Any = LazyAttribute(
+        lambda x: fake.text(max_nb_chars=60) if random.choice([True, False]) else None
+    )
+
+    # Employment Information
+    position_applying_for: Any = LazyAttribute(
+        lambda x: fake.random_element(
+            elements=(
+                "Math Teacher",
+                "Science Teacher",
+                "English Teacher",
+                "History Teacher",
+                "Physical Education Teacher",
+                "Art Teacher",
+                "Music Teacher",
+                "Special Education Teacher",
+            )
+        )
+    )
+
+    # Background & References
+    has_convictions: Any = LazyAttribute(lambda _: fake.boolean())
+    conviction_details: Any = LazyAttribute(
+        lambda obj: fake.text(max_nb_chars=60) if obj.has_convictions else None
+    )
+    has_disciplinary_actions: Any = LazyAttribute(lambda _: fake.boolean())
+    disciplinary_details: Any = LazyAttribute(
+        lambda obj: fake.text(max_nb_chars=60) if obj.has_disciplinary_actions else None
+    )
+    reference1_name: Any = LazyAttribute(lambda x: fake.name())
+    reference1_title: Any = LazyAttribute(lambda x: fake.job())
+    reference1_organization: Any = LazyAttribute(lambda x: fake.company())
+    reference1_phone: Any = LazyAttribute(lambda x: fake.phone_number())
+    reference1_email: Any = LazyAttribute(lambda x: fake.email())
+    reference2_name: Any = LazyAttribute(lambda x: fake.name())
+    reference2_title: Any = LazyAttribute(lambda x: fake.job())
+    reference2_organization: Any = LazyAttribute(lambda x: fake.company())
+    reference2_phone: Any = LazyAttribute(lambda x: fake.phone_number())
+    reference2_email: Any = LazyAttribute(lambda x: fake.email())
+    reference3_name: Any = LazyAttribute(lambda x: fake.name())
+    reference3_title: Any = LazyAttribute(lambda x: fake.job())
+    reference3_organization: Any = LazyAttribute(lambda x: fake.company())
+    reference3_phone: Any = LazyAttribute(lambda x: fake.phone_number())
+    reference3_email: Any = LazyAttribute(lambda x: fake.email())
+
+    # Documents
+    resume: Any = LazyAttribute(lambda x: fake.file_name(extension="pdf"))
+    cover_letter: Any = LazyAttribute(lambda x: fake.file_name(extension="pdf"))
+    transcripts: Any = LazyAttribute(lambda x: fake.file_name(extension="pdf"))
+    teaching_certificate: Any = LazyAttribute(lambda x: fake.file_name(extension="pdf"))
+    background_check: Any = LazyAttribute(lambda x: fake.file_name(extension="pdf"))
+
+    # Additional Information
+    teaching_philosophy: Any = LazyAttribute(
+        lambda x: fake.text(max_nb_chars=1000) if random.choice([True, False]) else None
+    )
+    why_teaching: Any = LazyAttribute(
+        lambda x: fake.text(max_nb_chars=500) if random.choice([True, False]) else None
+    )
+    additional_comments: Any = LazyAttribute(
+        lambda x: fake.text(max_nb_chars=500) if random.choice([True, False]) else None
+    )
+    agree_to_terms: Any = LazyAttribute(lambda _: True)
+    agree_to_background_check: Any = LazyAttribute(lambda _: True)
 
 
 class SubjectFactory(BaseFactory[Subject]):
     class Meta:
         model = Subject
 
-    # Preload existing subject IDs
-    _query_subject = storage.session.query(Subject.id)
-
     @classmethod
     def get_existing_id(cls, student_grade_id: str, offset: int) -> str:
         """
         Returns an existing subject ID if available, otherwise raise ValueError.
         """
-        subject_id: Optional[str] = (
-            cls._query_subject.join(Grade, Grade.id == Subject.grade_id)
-            .filter(Grade.id == student_grade_id)
+        stmt = (
+            select(Subject.id)
+            .join(Grade)
+            .where(Grade.id == student_grade_id)
             .order_by(Subject.id)
             .offset(offset)
             .limit(1)
-            .scalar()
         )
-        if subject_id is None:
+
+        result = storage.session.scalars(stmt).first()  # returns single value or None
+
+        if result is None:
             raise ValueError(
                 f"No subject found for grade ID {student_grade_id} at offset {offset}"
             )
 
-        return subject_id
+        return result
 
 
 class SectionFactory(BaseFactory[Section]):
@@ -653,8 +874,8 @@ class AssessmentTypes:
 @dataclass
 class MarkAssessment:
     grade: int
-    subjects: list
-    assessment_type: list
+    subjects: List[Any]
+    assessment_type: List[Any]
 
 
 @dataclass
@@ -864,7 +1085,7 @@ class TableIdFactory(TypedFactory[Value]):
 
     db_table: Any = LazyAttribute(
         lambda _: {
-            row[0]: row[1] for row in storage.session.query(Table.name, Table.id).all()
+            name: id for name, id in storage.session.query(Table.name, Table.id).all()
         }
     )
 

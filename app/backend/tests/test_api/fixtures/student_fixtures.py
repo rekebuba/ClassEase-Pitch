@@ -10,7 +10,7 @@ from models.student import Student
 from tests.test_api.factories import AssessmentFactory, StudentFactory
 from tests.typing import Credential
 
-from sqlalchemy import func
+from sqlalchemy import func, select
 from sqlalchemy.orm import scoped_session, Session, Query
 
 from models.subject import Subject
@@ -64,14 +64,14 @@ class StudentQueryResponse(BaseModel):
 @pytest.fixture(scope="session")
 def student_data(db_session: scoped_session[Session]) -> Iterator[List[Student]]:
     """Fixture to create test student data."""
-    grade_ids = db_session.query(Grade.id).order_by(Grade.grade).all()
+    grade_ids = db_session.scalars(select(Grade.id).order_by(Grade.grade)).all()
     for grade_id in grade_ids:
         # Create 10 students for each grade
-        StudentFactory.create_batch(3, grade_id=grade_id[0])
+        StudentFactory.create_batch(3, grade_id=grade_id)
 
     db_session.commit()
 
-    yield db_session.query(Student).all()
+    yield db_session.execute(select(Student)).all()
 
 
 @pytest.fixture(scope="session")
@@ -94,14 +94,19 @@ def all_subjects(
 def register_all_students(
     db_session: scoped_session[Session],
     student_data: Iterator[Student],
-    all_subjects: Query[Tuple[int, int]],
 ) -> None:
     """Fixture to register all students in the database."""
     for student in student_data:
         # For each student, create assessments based on the grade
-        subjects_for_registration = all_subjects.filter(
-            Grade.id == student.current_grade_id
-        ).all()
+        subjects = (
+            select(func.count().label("row_count"), Grade.grade)
+            .select_from(Subject)
+            .join(Grade)
+            .where(Grade.grade <= 10, Grade.id == student.current_grade_id)
+            .order_by(Grade.grade)
+        )
+        subjects_for_registration = db_session.execute(subjects).all()
+
         for row_count, grade in subjects_for_registration:
             # Reset the sequence counter
             AssessmentFactory.reset_sequence()
@@ -113,14 +118,19 @@ def register_stud_for_semester_one_course(
     db_session: scoped_session[Session],
     semester_one_created: Semester,
     student_data: Iterator[Student],
-    all_subjects: Query[Tuple[int, int]],
 ) -> None:
     """Fixture to register all students in the second semester."""
     for student in student_data:
         # For each student, create assessments based on the grade
-        subjects_for_registration = all_subjects.filter(
-            Grade.id == student.current_grade_id
-        ).all()
+        subjects = (
+            select(func.count().label("row_count"), Grade.grade)
+            .select_from(Subject)
+            .join(Grade)
+            .where(Grade.grade <= 10, Grade.id == student.current_grade_id)
+            .order_by(Grade.grade)
+        )
+        subjects_for_registration = db_session.execute(subjects).all()
+
         for row_count, grade in subjects_for_registration:
             # Reset the sequence counter
             AssessmentFactory.reset_sequence()
@@ -142,14 +152,19 @@ def register_stud_for_semester_two_course(
     db_session: scoped_session[Session],
     semester_two_created: Semester,
     student_data: Iterator[Student],
-    all_subjects: Query[Tuple[int, int]],
 ) -> None:
     """Fixture to register all students in the second semester."""
     for student in student_data:
         # For each student, create assessments based on the grade
-        subjects_for_registration = all_subjects.filter(
-            Grade.id == student.current_grade_id
-        ).all()
+        subjects = (
+            select(func.count().label("row_count"), Grade.grade)
+            .select_from(Subject)
+            .join(Grade)
+            .where(Grade.grade <= 10, Grade.id == student.current_grade_id)
+            .order_by(Grade.grade)
+        )
+        subjects_for_registration = db_session.execute(subjects).all()
+
         for row_count, grade in subjects_for_registration:
             # Reset the sequence counter
             AssessmentFactory.reset_sequence()

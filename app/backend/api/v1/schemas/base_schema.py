@@ -27,7 +27,6 @@ from api.v1.schemas.config_schema import (
     to_camel,
     to_snake,
 )
-from models.base_model import Base
 from models.stud_year_record import STUDYearRecord
 from models.table import Table
 from models.subject import Subject
@@ -239,7 +238,7 @@ class BaseSchema(Schema):
         return subject
 
     @staticmethod
-    def get_table(table_id: Optional[str]) -> Type[Base]:
+    def get_table(table_id: Optional[str]):
         if table_id is None:
             raise ValidationError("table_id is required")
 
@@ -257,7 +256,7 @@ class BaseSchema(Schema):
         return model
 
     @staticmethod
-    def get_table_id(table: Optional[Union[Base, Type[Base]]]) -> str | None:
+    def get_table_id(table) -> str | None:
         if table is None:
             raise ValidationError("table is required")
 
@@ -269,7 +268,7 @@ class BaseSchema(Schema):
 
     @staticmethod
     def update_list_value(
-        value: Any, model: Type[Base], column_name: Union[List[str], str]
+        value: Any, model, column_name: Union[List[str], str]
     ) -> Any:
         """
         Update the list value to match the model's column type.
@@ -329,7 +328,7 @@ class BaseSchema(Schema):
 
     @staticmethod
     def filter_multiple_columns(
-        model: Type[Base],
+        model,
         column_name: List[str],
         operator: str,
         value: str,
@@ -385,7 +384,7 @@ class BaseSchema(Schema):
 
     @staticmethod
     def build_operator_condition(
-        model: Type[Base],
+        model,
         column_name: str,
         operator: str,
         token: Any,
@@ -427,7 +426,7 @@ class BaseSchema(Schema):
 
     @staticmethod
     def filter_data(
-        model: Type[Base],
+        model,
         column_name: Union[str, List[str]],
         operator: str,
         value: Any,
@@ -450,7 +449,7 @@ class BaseSchema(Schema):
 
     @staticmethod
     def sort_data(
-        model: Type[Base],
+        model,
         column_name: Union[str, List[str]],
         order: bool,
         defalut_sort: Optional[int] = None,
@@ -491,7 +490,7 @@ class BaseSchema(Schema):
 
     @staticmethod
     def sort_multiple_columns(
-        model: Type[Base], column_names: List[str], order: bool
+        model, column_names: List[str], order: bool
     ) -> list[UnaryExpression[Any]]:
         """
         Sort multiple columns based on the order.

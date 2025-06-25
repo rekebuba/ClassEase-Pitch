@@ -1,6 +1,7 @@
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any, Dict, List, Sequence, Tuple
 
 import pytest
+from sqlalchemy import select
 from models.base_model import CustomTypes
 from models.user import User
 from tests.test_api.factories import AdminFactory, StudentFactory, TeacherFactory
@@ -55,12 +56,12 @@ def pytest_generate_tests(metafunc):
 @pytest.fixture
 def role(
     request: pytest.FixtureRequest, db_session: scoped_session[Session]
-) -> list[User]:
+) -> Sequence[User]:
     """
     Fixture to get a user based on role and count.
     """
     role, count = request.param
-    user = db_session.query(User).filter(User.role == role).limit(count).all()
+    user = db_session.scalars(select(User).filter(User.role == role).limit(count)).all()
 
     return user
 

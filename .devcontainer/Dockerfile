@@ -15,6 +15,8 @@ RUN apt-get update --fix-missing && \
     python3-dev \
     python3-pip \
     ca-certificates \
+    nodejs \
+    npm \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install uv globally

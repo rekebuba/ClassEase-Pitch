@@ -1,11 +1,16 @@
+import json
+import random
 import pytest
+from sqlalchemy import select
+from sqlmodel import col
+from models.base_model import CustomTypes
+from models.grade import Grade
 from models.teacher import Teacher
 from tests.test_api.factories import TeacherFactory
-from tests.test_api.fixtures.methods import prepare_form_data
 from flask.testing import FlaskClient
-
 from tests.test_api.schemas.base_schema import DashboardUserInfoResponseModel
 from tests.typing import Credential
+from models import storage
 
 
 class TestTeachers:
@@ -17,13 +22,15 @@ class TestTeachers:
         """
         Test the successful registration of a teacher.
         """
-        teacher = TeacherFactory.build()
-        form_data = prepare_form_data(teacher)
 
+        # form_data = prepare_form_data(teacher)
+        teacher = TeacherFactory.build(user=None, for_session=False)
+
+        teacher.pop("user", None)
         # Send a POST request to the registration endpoint
         response = client.post(
-            f"/api/v1/registration/{teacher['user']['role']}",
-            data=form_data,
+            "/api/v1/register/teacher",
+            json=teacher,
         )
 
         assert response.status_code == 201
