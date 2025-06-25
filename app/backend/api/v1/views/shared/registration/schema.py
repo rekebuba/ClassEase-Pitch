@@ -1,7 +1,9 @@
+from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
+from pydantic import BaseModel, ConfigDict
 from api.v1.schemas.base_schema import BaseSchema
-from api.v1.schemas.custom_schema import RoleEnumField
+from api.v1.schemas.custom_schema import EnumField, RoleEnumField
 from marshmallow import fields
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Iterable, Optional
 from flask import url_for
 from marshmallow import (
     ValidationError,
@@ -14,7 +16,7 @@ from marshmallow import (
     validates_schema,
 )
 from pyethiodate import EthDate  # type: ignore
-from datetime import datetime
+from datetime import date, datetime
 import random
 import bcrypt
 from api.v1.schemas.custom_schema import (
@@ -170,59 +172,103 @@ class AdminSchema(BaseSchema):
         return data
 
 
-class TeacherSchema(BaseSchema):
-    """Teacher schema for validating and serializing Teacher data."""
+class TeacherRegistrationSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
 
-    user_id = fields.String(dump_only=True)
-    teacher_name = fields.Nested(FullNameSchema, required=True)
-    date_of_birth = fields.Date(required=True, format="iso")
-    email = fields.Email(required=True)
-    gender = fields.String(required=True, validate=[validate.OneOf(["M", "F"])])
-    phone = fields.String(required=True)
-    address = fields.String(required=True)
-    year_of_experience = fields.Integer(required=True, validate=[validate.Range(min=0)])
-    qualification = fields.String(required=True)
+    first_name: str
+    father_name: str
+    grand_father_name: str
+    date_of_birth: date
+    gender: CustomTypes.GenderEnum
 
-    user = fields.Nested(UserSchema)
+    nationality: str
+    social_security_number: str
 
-    @pre_load
-    def set_defaults(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
-        # add default values
-        # Convert flat fields into a nested 'student_name' dict
-        data["teacher_name"] = {
-            "first_name": data.pop("first_name"),
-            "father_name": data.pop("father_name"),
-            "grand_father_name": data.pop("grand_father_name"),
-        }
+    # Contact Information
+    address: str
+    city: str
+    state: str
+    postal_code: str
+    country: str
+    primary_phone: str
+    personal_email: str
 
-        if data.get("gender"):
-            data["gender"] = data["gender"].upper()
+    # Emergency Contact
+    emergency_contact_name: str
+    emergency_contact_relationship: str
+    emergency_contact_phone: str
+    emergency_contact_email: str
 
-        return data
+    # Educational Background
+    highest_degree: str
+    major_subject: str
+    university: str
+    graduation_year: int
+    gpa: float
 
-    @post_load
-    def merge_data(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
-        # Merge the nested 'teacher_name' dict into the main data dict
-        data.update(data.pop("teacher_name", {}))
+    # Teaching Experience
+    position_applying_for: str
+    years_of_experience: CustomTypes.ExperienceYearEnum
 
-        return data
+    preferred_schedule: CustomTypes.ScheduleEnum
 
-    @validates_schema
-    def validate_data(self, data: Dict[str, Any], **kwargs: Any) -> None:
-        if storage.session.query(Teacher).filter_by(email=data["email"]).first():
-            raise ValidationError("Email already exists.")
-        self.validate_phone(data["phone"])
+    # Background & References
+    reference1_name: str
+    reference1_title: str
+    reference1_organization: str
+    reference1_phone: str
+    reference1_email: str
 
-    @pre_dump
-    def flatten_to_nested(self, data, **kwargs: Any):
-        # Convert flat fields into a nested 'student_name' dict
-        nested_data = {
-            "first_name": data.get("first_name"),
-            "father_name": data.get("father_name"),
-            "grand_father_name": data.get("grand_father_name"),
-        }
-        data["teacher_name"] = nested_data
-        return data
+    # Additional Information (Default values)
+    preferred_name: Optional[str]
+    secondary_phone: Optional[str]
+    work_email: Optional[str]
+    minor_subject: Optional[str]
+    additional_degrees: Optional[str]
+    teaching_license: Optional[bool]
+    license_number: Optional[str]
+    license_state: Optional[str]
+    license_expiration_date: Optional[date]
+
+    certifications: Optional[str]
+    specializations: Optional[str]
+    previous_schools: Optional[str]
+
+    languages_spoken: Optional[str]
+    technology_skills: Optional[str]
+    special_skills: Optional[str]
+    professional_development: Optional[str]
+
+    has_convictions: bool
+    conviction_details: Optional[str]
+    has_disciplinary_actions: bool
+    disciplinary_details: Optional[str]
+
+    reference2_name: Optional[str]
+    reference2_title: Optional[str]
+    reference2_organization: Optional[str]
+    reference2_phone: Optional[str]
+    reference2_email: Optional[str]
+    reference3_name: Optional[str]
+    reference3_title: Optional[str]
+    reference3_organization: Optional[str]
+    reference3_phone: Optional[str]
+    reference3_email: Optional[str]
+    resume: Optional[str]
+    cover_letter: Optional[str]
+    transcripts: Optional[str]
+    teaching_certificate: Optional[str]
+    background_check: Optional[str]
+    teaching_philosophy: Optional[str]
+    why_teaching: Optional[str]
+    additional_comments: Optional[str]
+
+    agree_to_terms: bool
+    agree_to_background_check: bool
+
+    # Relationship
+    subjects_to_teach: Iterable[str]
+    grade_level: Iterable[CustomTypes.GradeLevelEnum]
 
 
 class StudentSchema(BaseSchema):

@@ -2,7 +2,7 @@ from api.v1.views.methods import save_profile
 from api.v1.views.shared.registration.schema import (
     AdminSchema,
     StudentSchema,
-    TeacherSchema,
+    TeacherRegistrationSchema,
 )
 from models import storage
 from typing import Any, Dict, Tuple, Type, Union
@@ -40,7 +40,7 @@ def create_role_based_user(
     ] = {
         CustomTypes.RoleEnum.ADMIN: (AdminSchema, Admin),
         CustomTypes.RoleEnum.STUDENT: (StudentSchema, Student),
-        CustomTypes.RoleEnum.TEACHER: (TeacherSchema, Teacher),
+        CustomTypes.RoleEnum.TEACHER: (TeacherRegistrationSchema, Teacher),
     }
 
     if role_enum in role_mapping:

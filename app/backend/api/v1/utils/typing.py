@@ -2,13 +2,14 @@ from datetime import datetime
 from typing import Any, Callable, List, Optional, Tuple, Type, TypeVar, TypedDict, Union
 from sqlalchemy.sql.expression import ClauseElement
 from sqlalchemy import ColumnElement, UnaryExpression
+from sqlmodel import SQLModel
 from models.user import User
-from models.base_model import Base, CustomTypes
+from models.base_model import CustomTypes
 
 T = TypeVar("T")  # Fully generic
 
 UserT = TypeVar("UserT", bound="User")  # User is your user model class
-BaseT = TypeVar("BaseT", bound="Base")
+BaseT = TypeVar("BaseT", bound=SQLModel)
 
 
 class AuthType(TypedDict):
@@ -41,7 +42,7 @@ class FilterDict(TypedDict):
     default_filter: Optional[int]
     filter_id: str
     table_id: str
-    table: Optional[Type[Base]]
+    table: Any
     range: RangeDict
     variant: str
     operator: str
@@ -55,9 +56,7 @@ class SortDict(TypedDict):
     default_sort: Optional[int]
     desc: bool
     table_id: str
-    table: Optional[Type[Base]]
-
-
+    table: Any
 
 
 class PostLoadParam(TypedDict):

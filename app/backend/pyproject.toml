@@ -1,4 +1,4 @@
-[project]
+ [project]
 name = "classEase-Pitch"
 version = "0.1.0"
 dependencies = [
@@ -12,6 +12,7 @@ dependencies = [
     "flask-marshmallow>=1.3.0",
     "flask-sqlalchemy>=3.1.1",
     "marshmallow>=4.0.0",
+    "marshmallow-sqlalchemy>=1.4.2",
     "mypy>=1.15.0",
     "mysql-connector-python>=9.3.0",
     "mysqlclient>=2.2.7",
@@ -26,6 +27,7 @@ dependencies = [
     "pytest-xdist>=3.6.1",
     "python-dotenv>=1.1.0",
     "sqlalchemy>=2.0.40",
+    "sqlmodel>=0.0.24",
     "types-factory-boy>=0.4.1",
     "types-flask-cors>=6.0.0.20250520",
 ]
@@ -39,7 +41,7 @@ disallow_any_generics = true       # No `Any` in generic types
 warn_return_any = true           # Warn if a function returns `Any`
 warn_unused_configs = true       # Warn about unused mypy configs
 
-# plugins = sqlalchemy.ext.mypy.plugin
+plugins = "sqlalchemy.ext.mypy.plugin"
 disable_error_code = ["misc"]     # Disable specific error codes (e.g., `misc` for non-critical issues)
 
 # Imports and modules

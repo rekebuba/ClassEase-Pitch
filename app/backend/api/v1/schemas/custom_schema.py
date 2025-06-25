@@ -110,12 +110,10 @@ class EnumField(fields.Field):  # type: ignore[type-arg]
     def _deserialize(
         self, value: Any, attr: Optional[str], data: Any, **kwargs: Any
     ) -> Any:
-        try:
-            return self.enum(value)
-        except ValueError:
-            raise ValidationError(
-                f"Invalid value '{value}', expected one of: {[e.value for e in self.enum]}"
-            )
+        for status in self.enum:
+            if status.value == value:
+                return status
+        raise ValidationError(f"Must be one of: {[s.value for s in self.enum]}")
 
 
 class RoleEnumField(fields.Field):  # type: ignore[type-arg]

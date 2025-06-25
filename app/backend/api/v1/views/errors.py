@@ -1,7 +1,8 @@
 from typing import Union
 from flask import Blueprint, Response, jsonify
-from marshmallow import ValidationError
 import logging
+from sqlalchemy.exc import SQLAlchemyError
+from pydantic import ValidationError
 
 errors = Blueprint("errors", __name__)
 
@@ -11,15 +12,24 @@ logging.basicConfig(
 )
 
 
+@errors.app_errorhandler(SQLAlchemyError)
+def handle_database_error(error: SQLAlchemyError) -> tuple[Response, int]:
+    """
+    Handle database-related errors.
+    """
+    logging.error(f"Database Error: {error}")
+    return jsonify({"message": "Database error Try Again in a moment"}), 500
+
+
 @errors.errorhandler(ValidationError)
 def handle_validation_error(error: ValidationError) -> tuple[Response, int]:
     logging.error(f"Validation Error: {error}")  # Log the error (not shown to user)
     return jsonify(
         {
             "message": "Validation error",
-            "errors": error.messages,  # Marshmallow provides error.messages
+            "errors": error.errors(),  # Pydantic-style error details
         }
-    ), 400  # HTTP 400 Bad Request
+    ), 422  # HTTP 422 Unprocessable Entity
 
 
 @errors.app_errorhandler(500)

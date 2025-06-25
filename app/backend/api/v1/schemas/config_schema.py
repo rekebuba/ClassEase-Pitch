@@ -3,7 +3,7 @@ import re
 from sqlalchemy import Function, and_, false, func, or_, true
 from sqlalchemy.sql.elements import ColumnElement
 from api.v1.utils.typing import RangeDict
-from models.base_model import Base, BaseModel
+from models.base_model import BaseModel
 from typing import Any, Callable, Dict, List, Type, Union, cast
 
 
@@ -223,7 +223,7 @@ def to_camel_case_key(s: str) -> str:
 
 
 # Get all model classes dynamically
-def get_all_model_classes() -> Dict[str, Type[Base]]:
+def get_all_model_classes():
     # Returns dict of {__tablename__: model_class}
     return {
         cls.__tablename__: cls

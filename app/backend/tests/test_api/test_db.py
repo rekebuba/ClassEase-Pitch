@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from models.year import Year
 from models.table import Table
 from models.subject import Subject
@@ -10,17 +11,17 @@ def test_db_grade_count(
     client: FlaskClient, db_session: scoped_session[Session]
 ) -> None:
     # Query the database
-    grade_count = db_session.query(Grade).count()
+    grade_count = db_session.execute(select(Grade)).all()
 
     # Assert that the database has the correct number of grades
-    assert grade_count == 12
+    assert len(grade_count) == 12
 
 
 def test_db_grade_values(
     client: FlaskClient, db_session: scoped_session[Session]
 ) -> None:
     # Query the database
-    grades = db_session.query(Grade.grade).order_by(Grade.grade).all()
+    grades = db_session.execute(select(Grade).order_by(Grade.grade)).all()
     grade_values = [grade.grade for grade in grades]
 
     # Assert that the database has the correct grade values
@@ -31,21 +32,21 @@ def test_db_subject_count(
     client: FlaskClient, db_session: scoped_session[Session]
 ) -> None:
     # Query the database
-    subject = db_session.query(Subject).count()
-    assert subject > 0
+    subject = db_session.execute(select(Subject)).all()
+    assert len(subject) > 0
 
 
 def test_db_year_count(
     client: FlaskClient, db_session: scoped_session[Session]
 ) -> None:
     # Query the database
-    year = db_session.query(Year).count()
-    assert year > 0
+    year = db_session.execute(select(Year)).all()
+    assert len(year) > 0
 
 
 def test_db_table_count(
     client: FlaskClient, db_session: scoped_session[Session]
 ) -> None:
     # Query the database
-    table = db_session.query(Table).count()
-    assert table > 0
+    table = db_session.execute(select(Table)).all()
+    assert len(table) > 0

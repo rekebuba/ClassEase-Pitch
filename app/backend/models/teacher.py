@@ -31,21 +31,6 @@ class Teacher(BaseModel):
 
     __tablename__ = "teachers"
 
-    user: Mapped[Optional["User"]] = relationship(
-        "User",
-        back_populates="teachers",
-    )
-    subjects_to_teach: Mapped[List["Subject"]] = relationship(
-        "Subject",
-        back_populates="teachers",
-        secondary="teacher_subject_links",
-    )
-    grade_level: Mapped[List["Grade"]] = relationship(
-        "Grade",
-        back_populates="teachers",
-        secondary="teacher_grade_links",
-    )
-
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
     father_name: Mapped[str] = mapped_column(String(50), nullable=False)
     grand_father_name: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -220,6 +205,26 @@ class Teacher(BaseModel):
 
     user_id: Mapped[str] = mapped_column(
         String(120), ForeignKey("users.id"), unique=True, nullable=True, default=None
+    )
+
+    # Relationship with Default
+    user: Mapped[Optional["User"]] = relationship(
+        "User",
+        back_populates="teachers",
+        default=None,
+    )
+    # Relationship with Out Default
+    subjects_to_teach: Mapped[List["Subject"]] = relationship(
+        "Subject",
+        back_populates="teachers",
+        secondary="teacher_subject_links",
+        default_factory=list,
+    )
+    grade_level: Mapped[List["Grade"]] = relationship(
+        "Grade",
+        back_populates="teachers",
+        secondary="teacher_grade_links",
+        default_factory=list,
     )
 
     __table_args__ = (
