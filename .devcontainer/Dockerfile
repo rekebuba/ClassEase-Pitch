@@ -17,6 +17,25 @@ RUN apt-get update --fix-missing && \
     ca-certificates \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Install Node.js and npm
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+
+# in lieu of restarting the shell
+RUN \. "$HOME/.nvm/nvm.sh"
+
+# Download and install Node.js:
+RUN nvm install 24
+
+# Verify the Node.js version:
+RUN node -v
+RUN nvm current
+
+# Download and install pnpm:
+RUN corepack enable pnpm
+
+# Verify pnpm version:
+RUN pnpm -v
+
 # Install uv globally
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 

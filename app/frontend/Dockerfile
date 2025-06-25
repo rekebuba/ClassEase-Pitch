@@ -1,17 +1,17 @@
 # --- Stage 1: Builder ---
-FROM node:18-alpine AS builder
+FROM node:24-alpine AS builder
 
 # Install git and other build tools
 RUN apk add --no-cache git
+
+# Enable pnpm via corepack
+RUN corepack enable pnpm
 
 # Set working directory
 WORKDIR /app
 
 # Copy only the necessary files for dependency resolution
 COPY package.json pnpm-lock.yaml ./
-
-# Install pnpm globally
-RUN npm install -g pnpm
 
 # Install dependencies
 RUN pnpm install
@@ -23,7 +23,10 @@ COPY . ./
 RUN pnpm run build
 
 # --- Stage 2: Runtime ---
-FROM node:18-alpine
+FROM node:24-alpine
+
+# Enable pnpm via corepack
+RUN corepack enable pnpm
 
 # Set working directory
 WORKDIR /ClassEase-Pitch
