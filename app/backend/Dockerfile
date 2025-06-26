@@ -10,7 +10,7 @@ WORKDIR /opt
 # Copy only dependency files (to leverage Docker cache)
 COPY pyproject.toml .
 
-# Sync dependencies (this creates `.venv`)
+# Sync dependencies (this creates `.venv` in /build/.venv)
 RUN uv sync -v
 
 # Stage 2: Runtime
@@ -19,14 +19,14 @@ FROM python:3.10-bookworm
 # Set working directory for the app
 WORKDIR /ClassEase-Pitch
 
-# Copy only the `.venv` from builder
-COPY --from=builder /opt/.venv .
+# Copy only the `.venv` from builder to a hidden directory outside source
+COPY --from=builder /opt/.venv /opt/.venv
 
 # Copy the actual app source
 COPY . .
 
 # Activate venv globally for this container
-ENV PATH=".venv/bin:$PATH"
+ENV PATH="/opt/.venv/bin:$PATH"
 
 # Expose Flask port
 EXPOSE 5000
