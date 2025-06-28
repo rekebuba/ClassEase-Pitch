@@ -1,9 +1,16 @@
 #!/usr/bin/python
 
 from dataclasses import asdict
+import json
 from typing import Any, Dict, List
 from pydantic import TypeAdapter
 import pytest
+from api.v1.views.admin.teacher.schema import (
+    DetailApplicationResponse,
+)
+from extension.pydantic.models.teacher_schema import (
+    TeacherSchema,
+)
 from models.admin import Admin
 from tests.test_api.factories import AdminFactory, EventFactory, QueryFactory
 from tests.test_api.fixtures.admin_fixtures import AllStudentViewsResponse
@@ -407,3 +414,88 @@ class TestAdmin:
         assert delete_response.json is not None
         assert "message" in delete_response.json
         assert delete_response.json["message"] == "View Deleted Successfully!"
+
+    def test_admin_all_teacher_applications(
+        self, client: FlaskClient, admin_auth_header: Credential
+    ) -> None:
+        """
+        Test the retrieval of all teacher applications.
+        """
+        response = client.get(
+            "/api/v1/admin/teacher/applications",
+            headers=admin_auth_header["header"],
+        )
+        assert response.status_code == 200
+        assert response.json is not None
+        try:
+            adapter = TypeAdapter(list[TeacherSchema])
+            adapter.validate_python(response.json)
+        except Exception as e:
+            pytest.fail(f"Response validation failed: {str(e)}")
+
+    def test_admin_teacher_application_detail(
+        self, client: FlaskClient, admin_auth_header: Credential
+    ) -> None:
+        """
+        Test the retrieval of a specific teacher application detail.
+        """
+        response = client.get(
+            "/api/v1/admin/teacher/applications",
+            headers=admin_auth_header["header"],
+        )
+        assert response.status_code == 200
+        assert response.json is not None
+        try:
+            # Validate a list of items
+            adapter = TypeAdapter(list[TeacherSchema])
+            adapter.validate_python(response.json)
+        except Exception as e:
+            pytest.fail(f"Response validation failed: {str(e)}")
+
+        # Get the first application to view details
+        application_id = response.json[0]["id"]
+
+        detail_response = client.get(
+            f"/api/v1/admin/teacher/applications/{application_id}",
+            headers=admin_auth_header["header"],
+        )
+        assert detail_response.status_code == 200
+        assert detail_response.json is not None
+        try:
+            DetailApplicationResponse.model_validate(detail_response.json)
+        except Exception as e:
+            pytest.fail(f"Response validation failed: {str(e)}")
+
+    def test_admin_update_teacher_application_status(
+        self, client: FlaskClient, admin_auth_header: Credential
+    ) -> None:
+        """
+        Test the update of a teacher application status.
+        """
+        response = client.get(
+            "/api/v1/admin/teacher/applications",
+            headers=admin_auth_header["header"],
+        )
+        assert response.status_code == 200
+        assert response.json is not None
+        try:
+            # Validate a list of items
+            adapter = TypeAdapter(list[TeacherSchema])
+            applications = adapter.validate_python(response.json)
+        except Exception as e:
+            pytest.fail(f"Response validation failed: {str(e)}")
+
+        # Get the first application to update status
+        application_id = applications[0].id
+
+        update_data = {"status": "approved"}
+
+        update_response = client.put(
+            f"/api/v1/admin/teacher/applications/{application_id}",
+            json=update_data,
+            headers=admin_auth_header["header"],
+        )
+        assert update_response.status_code == 200
+        assert update_response.json is not None
+        assert "message" in update_response.json
+        assert update_response.json["message"] == "Teacher application status updated successfully"

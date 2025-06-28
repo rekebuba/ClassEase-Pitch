@@ -1,5 +1,6 @@
+from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 if TYPE_CHECKING:
     from .user_schema import UserSchema
@@ -9,6 +10,8 @@ class AdminSchema(BaseModel):
     """
     This model represents an admin in the system. It inherits from BaseModel.
     """
+
+    model_config = ConfigDict(from_attributes=True)
 
     user_id: str
     first_name: str
@@ -20,5 +23,8 @@ class AdminSchema(BaseModel):
     phone: str
     address: str
 
-    # Relationships
+
+class AdminRelationshipSchema(BaseModel):
+    """This model represents the relationships of an AdminSchema."""
+
     user: Optional[UserSchema] = None
