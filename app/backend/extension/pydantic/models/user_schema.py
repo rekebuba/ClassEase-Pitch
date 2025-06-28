@@ -1,7 +1,11 @@
+from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 from pydantic import BaseModel, ConfigDict
 
 from models.base_model import CustomTypes
+
+from datetime import datetime
+
 
 if TYPE_CHECKING:
     from .admin_schema import AdminSchema
@@ -16,9 +20,14 @@ class UserSchema(BaseModel):
     password: str
     role: CustomTypes.RoleEnum
     image_path: Optional[str] = None
-    national_id: str
+    created_at: Optional[datetime] = None
 
-    # Relationships
+
+class UserRelationshipSchema(BaseModel):
+    """This model represents the relationships of a UserSchema.
+    It is used to define the relationships between the UserSchema and other schemas.
+    """
+
     admins: Optional[AdminSchema] = None
     teachers: Optional[TeacherSchema] = None
     students: Optional[StudentSchema] = None

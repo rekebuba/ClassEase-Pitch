@@ -1,6 +1,7 @@
-from datetime import date
-from typing import TYPE_CHECKING, Iterable, Optional
-from pydantic import BaseModel, ConfigDict
+from __future__ import annotations
+from datetime import date, datetime
+from typing import TYPE_CHECKING, Annotated, List, Optional
+from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 from models.base_model import CustomTypes
 
 
@@ -10,13 +11,57 @@ if TYPE_CHECKING:
     from .grade_schema import GradeSchema
 
 
+def parse_and_validate_date(v: str | date) -> date:
+    """Parse string and validate date logic"""
+    parsed: date | None = None
+
+    if isinstance(v, str):
+        try:
+            parsed = datetime.strptime(v, "%a, %d %b %Y %H:%M:%S %Z").date()
+        except ValueError:
+            try:
+                parsed = date.fromisoformat(v)
+            except ValueError:
+                raise ValueError("Date must be in RFC1123 or YYYY-MM-DD format")
+    elif isinstance(v, date):
+        parsed = v
+    else:
+        raise ValueError("Invalid date format")
+
+    return parsed
+
+
+def parse_and_validate_datetime(v: str | datetime) -> datetime:
+    """Parse string and validate datetime logic"""
+    parsed: datetime | None = None
+
+    if isinstance(v, str):
+        try:
+            parsed = datetime.strptime(v, "%a, %d %b %Y %H:%M:%S %Z")
+        except ValueError:
+            try:
+                parsed = datetime.fromisoformat(v)
+            except ValueError:
+                raise ValueError("Datetime must be in RFC1123 or ISO 8601 format")
+    elif isinstance(v, datetime):
+        parsed = v
+    else:
+        raise ValueError("Invalid datetime format")
+
+    return parsed
+
+
+CustomDate = Annotated[date, BeforeValidator(parse_and_validate_date)]
+CustomDateTime = Annotated[datetime, BeforeValidator(parse_and_validate_datetime)]
+
+
 class TeacherSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     first_name: str
     father_name: str
     grand_father_name: str
-    date_of_birth: date
+    date_of_birth: CustomDate
     gender: CustomTypes.GenderEnum
 
     nationality: str
@@ -33,13 +78,12 @@ class TeacherSchema(BaseModel):
 
     # Emergency Contact
     emergency_contact_name: str
-    emergency_contact_relationship: str
+    emergency_contact_relation: str
     emergency_contact_phone: str
     emergency_contact_email: str
 
     # Educational Background
-    highest_degree: str
-    major_subject: str
+    highest_degree: CustomTypes.HighestDegreeEnum
     university: str
     graduation_year: int
     gpa: float
@@ -58,55 +102,58 @@ class TeacherSchema(BaseModel):
     reference1_email: str
 
     # Additional Information (Default values)
-    preferred_name: Optional[str]
-    secondary_phone: Optional[str]
-    work_email: Optional[str]
-    minor_subject: Optional[str]
-    additional_degrees: Optional[str]
+    marital_status: Optional[CustomTypes.MaritalStatusEnum] = None
+    secondary_phone: Optional[str] = None
+    additional_degrees: Optional[str] = None
     teaching_license: Optional[bool]
-    license_number: Optional[str]
-    license_state: Optional[str]
-    license_expiration_date: Optional[date]
+    license_number: Optional[str] = None
+    license_state: Optional[str] = None
+    license_expiration_date: Optional[CustomDate] = None
 
-    certifications: Optional[str]
-    specializations: Optional[str]
-    previous_schools: Optional[str]
+    previous_schools: Optional[str] = None
 
-    languages_spoken: Optional[str]
-    technology_skills: Optional[str]
-    special_skills: Optional[str]
-    professional_development: Optional[str]
+    special_skills: Optional[str] = None
+    professional_development: Optional[str] = None
 
     has_convictions: bool
-    conviction_details: Optional[str]
+    conviction_details: Optional[str] = None
     has_disciplinary_actions: bool
-    disciplinary_details: Optional[str]
+    disciplinary_details: Optional[str] = None
 
-    reference2_name: Optional[str]
-    reference2_title: Optional[str]
-    reference2_organization: Optional[str]
-    reference2_phone: Optional[str]
-    reference2_email: Optional[str]
-    reference3_name: Optional[str]
-    reference3_title: Optional[str]
-    reference3_organization: Optional[str]
-    reference3_phone: Optional[str]
-    reference3_email: Optional[str]
-    resume: Optional[str]
-    cover_letter: Optional[str]
-    transcripts: Optional[str]
-    teaching_certificate: Optional[str]
-    background_check: Optional[str]
-    teaching_philosophy: Optional[str]
-    why_teaching: Optional[str]
-    additional_comments: Optional[str]
+    reference2_name: Optional[str] = None
+    reference2_title: Optional[str] = None
+    reference2_organization: Optional[str] = None
+    reference2_phone: Optional[str] = None
+    reference2_email: Optional[str] = None
+    reference3_name: Optional[str] = None
+    reference3_title: Optional[str] = None
+    reference3_organization: Optional[str] = None
+    reference3_phone: Optional[str] = None
+    reference3_email: Optional[str] = None
+    resume: Optional[str] = None
+    cover_letter: Optional[str] = None
+    transcripts: Optional[str] = None
+    teaching_certificate: Optional[str] = None
+    background_check: Optional[str] = None
+    teaching_philosophy: Optional[str] = None
+    why_teaching: Optional[str] = None
+    additional_comments: Optional[str] = None
 
     agree_to_terms: bool
     agree_to_background_check: bool
 
-    user_id: str
+    user_id: Optional[str] = None
+    id: Optional[str] = None
+    application_date: Optional[CustomDateTime] = Field(default=None, alias="created_at")
 
-    # Relationship
+    status: CustomTypes.StatusEnum = CustomTypes.StatusEnum.PENDING
+
+
+class TeacherRelationshipSchema(BaseModel):
+    """This model represents the relationships of a TeacherSchema.
+    It is used to define the relationships between the TeacherSchema and other schemas.
+    """
+
     user: Optional[UserSchema]
-    subjects_to_teach: Optional[Iterable[SubjectSchema]]
-    grade_level: Optional[Iterable[GradeSchema]]
+    subjects_to_teach: Optional[List[SubjectSchema]]
+    grade_level: Optional[List[GradeSchema]]

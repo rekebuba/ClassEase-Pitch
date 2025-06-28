@@ -555,9 +555,6 @@ class TeacherFactory(BaseFactory[Teacher]):
     first_name: Any = LazyAttribute(lambda x: fake.first_name())
     father_name: Any = LazyAttribute(lambda x: fake.last_name())
     grand_father_name: Any = LazyAttribute(lambda x: fake.first_name())
-    preferred_name: Any = LazyAttribute(
-        lambda x: fake.first_name() if random.choice([True, False]) else None
-    )
     date_of_birth: Any = LazyAttribute(lambda x: fake.date_of_birth())
     gender: Any = LazyAttribute(
         lambda x: random.choice(list(CustomTypes.GenderEnum._value2member_map_))
@@ -576,11 +573,10 @@ class TeacherFactory(BaseFactory[Teacher]):
     primary_phone: Any = LazyAttribute(lambda x: fake.basic_phone_number())
     secondary_phone: Any = LazyAttribute(lambda x: fake.basic_phone_number())
     personal_email: Any = LazyAttribute(lambda x: fake.email())
-    work_email: Any = LazyAttribute(lambda x: fake.email())
 
     # Emergency Contact
     emergency_contact_name: Any = LazyAttribute(lambda x: fake.name())
-    emergency_contact_relationship: Any = LazyAttribute(
+    emergency_contact_relation: Any = LazyAttribute(
         lambda x: fake.random_element(
             elements=("Parent", "Sibling", "Spouse", "Friend", "Other")
         )
@@ -590,44 +586,9 @@ class TeacherFactory(BaseFactory[Teacher]):
 
     # Educational Background
     highest_degree: Any = LazyAttribute(
-        lambda x: fake.random_element(
-            elements=(
-                "High School Diploma",
-                "Bachelor's Degree",
-                "Master's Degree",
-                "PhD",
-                "Other",
-            )
-        )
+        lambda x: fake.random_element(list(CustomTypes.HighestDegreeEnum._value2member_map_))
     )
-    major_subject: Any = LazyAttribute(
-        lambda x: fake.random_element(
-            elements=(
-                "Mathematics",
-                "Science",
-                "English",
-                "History",
-                "Physical Education",
-                "Art",
-                "Music",
-                "Other",
-            )
-        )
-    )
-    minor_subject: Any = LazyAttribute(
-        lambda x: fake.random_element(
-            elements=(
-                "Mathematics",
-                "Science",
-                "English",
-                "History",
-                "Physical Education",
-                "Art",
-                "Music",
-                "Other",
-            )
-        )
-    )
+
     university: Any = LazyAttribute(lambda x: fake.company())
     graduation_year: Any = LazyAttribute(lambda x: random.randint(2000, 2023))
     gpa: Any = LazyAttribute(lambda x: round(random.uniform(1.0, 4.0), 2))
@@ -676,21 +637,6 @@ class TeacherFactory(BaseFactory[Teacher]):
     )
 
     # Professional Skills & Qualifications
-    languages_spoken: Any = LazyAttribute(
-        lambda x: random.choice(["English", "Amharic", "French", "Japanese", "Chinese"])
-    )
-    technology_skills: Any = LazyAttribute(
-        lambda x: random.choice(
-            [
-                "Microsoft Office Suite",
-                "Google Workspace",
-                "Learning Management Systems (LMS)",
-                "Educational Technology Tools",
-                "Coding and Programming",
-                "Data Analysis Tools",
-            ]
-        )
-    )
     special_skills: Any = LazyAttribute(
         lambda x: fake.text(max_nb_chars=30) if random.choice([True, False]) else None
     )

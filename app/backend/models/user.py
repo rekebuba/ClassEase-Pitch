@@ -32,8 +32,8 @@ class User(BaseModel):
         ),
         nullable=False,
     )
-    image_path: Mapped[str] = mapped_column(String(255), nullable=True)
     national_id: Mapped[str] = mapped_column(String(120), nullable=False)
+    image_path: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
 
     # One-to-many relationship
     admins: Mapped["Admin"] = relationship(

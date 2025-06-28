@@ -1,16 +1,19 @@
+from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from models.base_model import CustomTypes
 
 if TYPE_CHECKING:
-    from extension.pydantic.models.user_schema import UserSchema
+    from .user_schema import UserSchema
 
 
 class StudentSchema(BaseModel):
     """
     This model represents a student in the system. It inherits from BaseModel.
     """
+
+    model_config = ConfigDict(from_attributes=True)
 
     first_name: str
     father_name: str
@@ -30,5 +33,8 @@ class StudentSchema(BaseModel):
     semester_id: str | None = None
     has_passed: bool = False
 
-    # Relationships
+
+class StudentRelationshipSchema(BaseModel):
+    """This model represents the relationships of a StudentSchema."""
+
     user: Optional[UserSchema] = None

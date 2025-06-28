@@ -15,6 +15,10 @@ from api.v1.views.shared.registration.schema import (
     DumpResultSchema,
     TeacherRegistrationSchema,
 )
+from extension.pydantic.models.teacher_schema import (
+    TeacherRelationshipSchema,
+    TeacherSchema,
+)
 from models.base_model import CustomTypes
 from models import storage
 from api.v1.views import errors

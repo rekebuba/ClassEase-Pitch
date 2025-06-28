@@ -58,15 +58,22 @@ class Teacher(BaseModel):
 
     # Emergency Contact
     emergency_contact_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    emergency_contact_relationship: Mapped[str] = mapped_column(
+    emergency_contact_relation: Mapped[str] = mapped_column(
         String(50), nullable=False
     )
     emergency_contact_phone: Mapped[str] = mapped_column(String(50), nullable=False)
     emergency_contact_email: Mapped[str] = mapped_column(String(50), nullable=False)
 
     # Educational Background
-    highest_degree: Mapped[str] = mapped_column(String(50), nullable=False)
-    major_subject: Mapped[str] = mapped_column(String(50), nullable=False)
+    highest_degree: Mapped[BaseModel.HighestDegreeEnum] = mapped_column(
+        Enum(
+            BaseModel.HighestDegreeEnum,
+            name="highest_degree_enum",
+            values_callable=lambda x: [e.value for e in x],
+            native_enum=False,
+        ),
+        nullable=False,
+    )
     university: Mapped[str] = mapped_column(String(50), nullable=False)
     graduation_year: Mapped[int] = mapped_column(Integer, nullable=False)
     gpa: Mapped[float] = mapped_column(Float, nullable=False)
@@ -101,22 +108,18 @@ class Teacher(BaseModel):
     reference1_email: Mapped[str] = mapped_column(String(50), nullable=False)
 
     # Additional Information (Default values)
-    preferred_name: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
     marital_status: Mapped[Optional[BaseModel.MaritalStatusEnum]] = mapped_column(
-        Enum(BaseModel.MaritalStatusEnum, name="marital_status_enum"),
+        Enum(
+            BaseModel.MaritalStatusEnum,
+            name="marital_status_enum",
+            values_callable=lambda x: [e.value for e in x],
+            native_enum=False,
+        ),
         nullable=True,
         default=None,
     )
 
     secondary_phone: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-    work_email: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-    minor_subject: Mapped[Optional[str]] = mapped_column(
         String(50), nullable=True, default=None
     )
     additional_degrees: Mapped[Optional[str]] = mapped_column(
@@ -143,8 +146,6 @@ class Teacher(BaseModel):
         Text, nullable=True, default=None
     )
 
-    languages_spoken: Mapped[Optional[str]] = mapped_column(Text, default=None)
-    technology_skills: Mapped[Optional[str]] = mapped_column(Text, default=None)
     special_skills: Mapped[Optional[str]] = mapped_column(Text, default=None)
     professional_development: Mapped[Optional[str]] = mapped_column(Text, default=None)
 
@@ -205,6 +206,17 @@ class Teacher(BaseModel):
 
     user_id: Mapped[str] = mapped_column(
         String(120), ForeignKey("users.id"), unique=True, nullable=True, default=None
+    )
+
+    status: Mapped[BaseModel.StatusEnum] = mapped_column(
+        Enum(
+            BaseModel.StatusEnum,
+            name="status_enum",
+            values_callable=lambda x: [e.value for e in x],
+            native_enum=False,
+        ),
+        nullable=False,
+        default=BaseModel.StatusEnum.PENDING,
     )
 
     # Relationship with Default

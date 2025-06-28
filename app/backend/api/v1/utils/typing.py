@@ -1,15 +1,13 @@
 from datetime import datetime
-from typing import Any, Callable, List, Optional, Tuple, Type, TypeVar, TypedDict, Union
-from sqlalchemy.sql.expression import ClauseElement
+from typing import Any, Callable, List, Optional, TypeVar, TypedDict, Union
 from sqlalchemy import ColumnElement, UnaryExpression
-from sqlmodel import SQLModel
 from models.user import User
-from models.base_model import CustomTypes
+from models.base_model import Base, CustomTypes
 
 T = TypeVar("T")  # Fully generic
 
 UserT = TypeVar("UserT", bound="User")  # User is your user model class
-BaseT = TypeVar("BaseT", bound=SQLModel)
+BaseT = TypeVar("BaseT", bound="Base")
 
 
 class AuthType(TypedDict):
