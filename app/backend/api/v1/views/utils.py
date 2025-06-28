@@ -9,13 +9,14 @@ from flask import Response, current_app  # Import current_app to access app cont
 from functools import wraps
 from flask import request, jsonify
 from api.v1.utils.typing import T
+from extension.enums.enum import RoleEnum
 from models import storage
 from models.user import User
 from models.blacklist_token import BlacklistToken
-from models.base_model import CustomTypes
 
 
-def create_token(user_id: str, role: CustomTypes.RoleEnum) -> str:
+
+def create_token(user_id: str, role: RoleEnum) -> str:
     """
     Generate a JWT token for a user based on their role.
 
@@ -25,10 +26,10 @@ def create_token(user_id: str, role: CustomTypes.RoleEnum) -> str:
     The token expires in 720 minutes (12 hours) from the time of creation.
     """
     # Determine the secret key based on the role
-    secret_keys: Dict[CustomTypes.RoleEnum, Any] = {
-        CustomTypes.RoleEnum.ADMIN: current_app.config["ADMIN_SECRET_KEY"],
-        CustomTypes.RoleEnum.TEACHER: current_app.config["TEACHER_SECRET_KEY"],
-        CustomTypes.RoleEnum.STUDENT: current_app.config["STUDENT_SECRET_KEY"],
+    secret_keys: Dict[RoleEnum, Any] = {
+        RoleEnum.ADMIN: current_app.config["ADMIN_SECRET_KEY"],
+        RoleEnum.TEACHER: current_app.config["TEACHER_SECRET_KEY"],
+        RoleEnum.STUDENT: current_app.config["STUDENT_SECRET_KEY"],
     }
     secret_key = secret_keys.get(role)
     if not secret_key:

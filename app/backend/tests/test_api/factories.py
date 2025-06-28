@@ -22,6 +22,7 @@ from faker import Faker
 from pyethiodate import EthDate  # type: ignore
 from sqlalchemy import select
 from sqlmodel import col
+from extension.enums.enum import ExperienceYearEnum, GenderEnum, GradeLevelEnum, HighestDegreeEnum, MaritalStatusEnum, RoleEnum, ScheduleEnum
 from models.assessment import Assessment
 from models.section import Section
 from models.stud_semester_record import STUDSemesterRecord
@@ -41,7 +42,7 @@ from models.grade import Grade
 from factory.alchemy import SQLAlchemyModelFactory
 from models import storage
 from factory.fuzzy import FuzzyChoice
-from models.base_model import CustomTypes
+
 from sqlalchemy.orm import scoped_session, Session
 import tempfile
 
@@ -370,7 +371,7 @@ class UserFactory(BaseFactory[User]):
             return open(tmp.name, "rb")
 
     @staticmethod
-    def _generate_id(role: "CustomTypes.RoleEnum", count: int) -> str:
+    def _generate_id(role: "RoleEnum", count: int) -> str:
         """
         Generates a custom ID based on the role (Admin, Student, Teacher).
 
@@ -383,11 +384,11 @@ class UserFactory(BaseFactory[User]):
         section: str = ""
 
         # Assign prefix based on role
-        if role == CustomTypes.RoleEnum.STUDENT:
+        if role == RoleEnum.STUDENT:
             section = "MAS"
-        elif role == CustomTypes.RoleEnum.TEACHER:
+        elif role == RoleEnum.TEACHER:
             section = "MAT"
-        elif role == CustomTypes.RoleEnum.ADMIN:
+        elif role == RoleEnum.ADMIN:
             section = "MAA"
         else:
             raise ValueError(f"Invalid role: {role}")
@@ -411,7 +412,7 @@ class UserFactory(BaseFactory[User]):
         lambda x: UserFactory.generate_fake_profile_picture()
     )
     national_id: Any = LazyAttribute(lambda x: str(fake.uuid4()))
-    role: Any = LazyAttribute(lambda x: random.choice(list(CustomTypes.RoleEnum)))
+    role: Any = LazyAttribute(lambda x: random.choice(list(RoleEnum)))
 
 
 class AdminFactory(BaseFactory[Admin]):
@@ -421,12 +422,12 @@ class AdminFactory(BaseFactory[Admin]):
 
     _add_for_session: Dict[str, Any] = {
         "user_id": lambda **kwarg: UserFactory.create(
-            role=CustomTypes.RoleEnum.ADMIN
+            role=RoleEnum.ADMIN
         ).id,
     }
     _add_for_test: Dict[str, Any] = {
         "user": lambda **kwarg: UserFactory.build(
-            role=CustomTypes.RoleEnum.ADMIN.value
+            role=RoleEnum.ADMIN.value
         ),
     }
 
@@ -448,7 +449,7 @@ class StudentFactory(BaseFactory[Student]):
 
     _add_for_session: Dict[str, Any] = {
         "user_id": lambda **kwarg: UserFactory.create(
-            role=CustomTypes.RoleEnum.STUDENT
+            role=RoleEnum.STUDENT
         ).id,
         "start_year_id": lambda **kwarg: YearModelFactory.get_existing_id(),
         "current_year_id": lambda **kwarg: YearModelFactory.get_existing_id(),
@@ -458,7 +459,7 @@ class StudentFactory(BaseFactory[Student]):
     }
     _add_for_test: Dict[str, Any] = {
         "user": lambda **kwarg: UserFactory.build(
-            role=CustomTypes.RoleEnum.STUDENT.value
+            role=RoleEnum.STUDENT.value
         ),
         "current_grade": lambda **kwarg: random.randint(1, 10),
         "academic_year": lambda **kwarg: EthDate.date_to_ethiopian(datetime.now()).year,
@@ -533,7 +534,7 @@ class TeacherFactory(BaseFactory[Teacher]):
 
         return subjects
 
-    user: Any = SubFactory(UserFactory, role=CustomTypes.RoleEnum.TEACHER)
+    user: Any = SubFactory(UserFactory, role=RoleEnum.TEACHER)
 
     for_session: Any = False
     grades_model: Any = LazyAttribute(
@@ -541,7 +542,7 @@ class TeacherFactory(BaseFactory[Teacher]):
             select(Grade).where(
                 col(Grade.level).in_(
                     random.choices(
-                        list(CustomTypes.GradeLevelEnum._value2member_map_), k=2
+                        list(GradeLevelEnum._value2member_map_), k=2
                     )
                 )
             )
@@ -557,11 +558,11 @@ class TeacherFactory(BaseFactory[Teacher]):
     grand_father_name: Any = LazyAttribute(lambda x: fake.first_name())
     date_of_birth: Any = LazyAttribute(lambda x: fake.date_of_birth())
     gender: Any = LazyAttribute(
-        lambda x: random.choice(list(CustomTypes.GenderEnum._value2member_map_))
+        lambda x: random.choice(list(GenderEnum._value2member_map_))
     )
     nationality: Any = LazyAttribute(lambda x: fake.country())
     marital_status: Any = LazyAttribute(
-        lambda x: random.choice(list(CustomTypes.MaritalStatusEnum._value2member_map_))
+        lambda x: random.choice(list(MaritalStatusEnum._value2member_map_))
     )
     social_security_number: Any = LazyAttribute(lambda x: str(fake.uuid4()))
     # Contact Information
@@ -586,7 +587,7 @@ class TeacherFactory(BaseFactory[Teacher]):
 
     # Educational Background
     highest_degree: Any = LazyAttribute(
-        lambda x: fake.random_element(list(CustomTypes.HighestDegreeEnum._value2member_map_))
+        lambda x: fake.random_element(list(HighestDegreeEnum._value2member_map_))
     )
 
     university: Any = LazyAttribute(lambda x: fake.company())
@@ -616,7 +617,7 @@ class TeacherFactory(BaseFactory[Teacher]):
 
     # Teaching Experience
     years_of_experience: Any = LazyAttribute(
-        lambda x: random.choice(list(CustomTypes.ExperienceYearEnum._value2member_map_))
+        lambda x: random.choice(list(ExperienceYearEnum._value2member_map_))
     )
     previous_schools: Any = LazyAttribute(
         lambda x: fake.text(max_nb_chars=60) if random.choice([True, False]) else None
@@ -633,7 +634,7 @@ class TeacherFactory(BaseFactory[Teacher]):
         else [subject.name for subject in x.subjects_model]
     )
     preferred_schedule: Any = LazyAttribute(
-        lambda x: fake.random_element(list(CustomTypes.ScheduleEnum._value2member_map_))
+        lambda x: fake.random_element(list(ScheduleEnum._value2member_map_))
     )
 
     # Professional Skills & Qualifications

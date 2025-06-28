@@ -4,6 +4,7 @@
 from typing import TYPE_CHECKING, Any, Dict
 from sqlalchemy import JSON, Enum, String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from extension.enums.enum import TableEnum
 from models.base_model import BaseModel
 
 if TYPE_CHECKING:
@@ -20,9 +21,9 @@ class SavedQueryView(BaseModel):
         String(126), ForeignKey("users.id"), nullable=False
     )
     name: Mapped[str] = mapped_column(String(50), nullable=False)
-    table_name: Mapped[BaseModel.TableEnum] = mapped_column(
+    table_name: Mapped[TableEnum] = mapped_column(
         Enum(
-            BaseModel.TableEnum,
+            TableEnum,
             name="table_enum",
             values_callable=lambda x: [e.value for e in x],
             native_enum=False,

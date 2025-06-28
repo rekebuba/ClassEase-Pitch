@@ -4,12 +4,13 @@ from api.v1.views.shared.registration.schema import (
     StudentSchema,
     TeacherRegistrationSchema,
 )
+from extension.enums.enum import RoleEnum
 from models import storage
 from typing import Any, Dict, Tuple, Type, Union
 from marshmallow import Schema
 from werkzeug.datastructures import FileStorage
 from models.admin import Admin
-from models.base_model import CustomTypes
+
 from models.student import Student
 from models.teacher import Teacher
 from models.user import User
@@ -32,15 +33,15 @@ def create_user(data: Dict[str, Any]) -> User:
 
 
 def create_role_based_user(
-    role_enum: CustomTypes.RoleEnum, data: Dict[str, Any]
+    role_enum: RoleEnum, data: Dict[str, Any]
 ) -> User | None:
     role_mapping: Dict[
-        CustomTypes.RoleEnum,
+        RoleEnum,
         Tuple[Type[Schema], Union[Type[Admin], Type[Student], Type[Teacher]]],
     ] = {
-        CustomTypes.RoleEnum.ADMIN: (AdminSchema, Admin),
-        CustomTypes.RoleEnum.STUDENT: (StudentSchema, Student),
-        CustomTypes.RoleEnum.TEACHER: (TeacherRegistrationSchema, Teacher),
+        RoleEnum.ADMIN: (AdminSchema, Admin),
+        RoleEnum.STUDENT: (StudentSchema, Student),
+        RoleEnum.TEACHER: (TeacherRegistrationSchema, Teacher),
     }
 
     if role_enum in role_mapping:

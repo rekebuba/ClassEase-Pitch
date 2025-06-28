@@ -2,9 +2,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 from pydantic import BaseModel, ConfigDict
 
-from models.base_model import CustomTypes
+
 
 from datetime import datetime
+
+from extension.enums.enum import RoleEnum
 
 
 if TYPE_CHECKING:
@@ -18,7 +20,7 @@ class UserSchema(BaseModel):
 
     identification: str
     password: str
-    role: CustomTypes.RoleEnum
+    role: RoleEnum
     image_path: Optional[str] = None
     created_at: Optional[datetime] = None
 

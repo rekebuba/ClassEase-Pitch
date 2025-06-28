@@ -2,7 +2,15 @@ from __future__ import annotations
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Annotated, List, Optional
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
-from models.base_model import CustomTypes
+
+from extension.enums.enum import (
+    ExperienceYearEnum,
+    GenderEnum,
+    HighestDegreeEnum,
+    MaritalStatusEnum,
+    ScheduleEnum,
+    StatusEnum,
+)
 
 
 if TYPE_CHECKING:
@@ -62,7 +70,7 @@ class TeacherSchema(BaseModel):
     father_name: str
     grand_father_name: str
     date_of_birth: CustomDate
-    gender: CustomTypes.GenderEnum
+    gender: GenderEnum
 
     nationality: str
     social_security_number: str
@@ -83,16 +91,16 @@ class TeacherSchema(BaseModel):
     emergency_contact_email: str
 
     # Educational Background
-    highest_degree: CustomTypes.HighestDegreeEnum
+    highest_degree: HighestDegreeEnum
     university: str
     graduation_year: int
     gpa: float
 
     # Teaching Experience
     position_applying_for: str
-    years_of_experience: CustomTypes.ExperienceYearEnum
+    years_of_experience: ExperienceYearEnum
 
-    preferred_schedule: CustomTypes.ScheduleEnum
+    preferred_schedule: ScheduleEnum
 
     # Background & References
     reference1_name: str
@@ -102,7 +110,7 @@ class TeacherSchema(BaseModel):
     reference1_email: str
 
     # Additional Information (Default values)
-    marital_status: Optional[CustomTypes.MaritalStatusEnum] = None
+    marital_status: Optional[MaritalStatusEnum] = None
     secondary_phone: Optional[str] = None
     additional_degrees: Optional[str] = None
     teaching_license: Optional[bool]
@@ -146,7 +154,7 @@ class TeacherSchema(BaseModel):
     id: Optional[str] = None
     application_date: Optional[CustomDateTime] = Field(default=None, alias="created_at")
 
-    status: CustomTypes.StatusEnum = CustomTypes.StatusEnum.PENDING
+    status: StatusEnum = StatusEnum.PENDING
 
 
 class TeacherRelationshipSchema(BaseModel):

@@ -25,9 +25,10 @@ from api.v1.schemas.custom_schema import (
 )
 from api.v1.schemas.schemas import FullNameSchema
 from api.v1.utils.typing import PostLoadUser
+from extension.enums.enum import GradeLevelEnum, RoleEnum
 from extension.pydantic.models.teacher_schema import TeacherSchema
 from models.student import Student
-from models.base_model import CustomTypes
+
 from models import storage
 from models.user import User
 from models.semester import Semester
@@ -51,7 +52,7 @@ class UserSchema(BaseSchema):
         return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
     @staticmethod
-    def _generate_id(role: CustomTypes.RoleEnum) -> str:
+    def _generate_id(role: RoleEnum) -> str:
         """
         Generates a custom ID based on the role (Admin, Student, Teacher).
 
@@ -70,10 +71,10 @@ class UserSchema(BaseSchema):
         section = ""
 
         # Assign prefix based on role
-        role_prefix_map: Dict[CustomTypes.RoleEnum, str] = {
-            CustomTypes.RoleEnum.STUDENT: "MAS",
-            CustomTypes.RoleEnum.TEACHER: "MAT",
-            CustomTypes.RoleEnum.ADMIN: "MAA",
+        role_prefix_map: Dict[RoleEnum, str] = {
+            RoleEnum.STUDENT: "MAS",
+            RoleEnum.TEACHER: "MAT",
+            RoleEnum.ADMIN: "MAA",
         }
         section = role_prefix_map[role]
 
@@ -103,7 +104,7 @@ class UserSchema(BaseSchema):
     @pre_load
     def set_defaults(self, data: Dict[str, Any], **kwargs: Any) -> Dict[str, Any]:
         if "role" in data and isinstance(data["role"], str):
-            data["role"] = CustomTypes.RoleEnum.enum_value(data["role"].lower())
+            data["role"] = RoleEnum.enum_value(data["role"].lower())
         data["identification"] = UserSchema._generate_id(data["role"])
         data["password"] = UserSchema._hash_password(data["identification"])
         return data
@@ -175,7 +176,7 @@ class AdminSchema(BaseSchema):
 
 class TeacherRegistrationSchema(TeacherSchema):
     subjects_to_teach: Iterable[str]
-    grade_level: Iterable[CustomTypes.GradeLevelEnum]
+    grade_level: Iterable[GradeLevelEnum]
 
 
 class StudentSchema(BaseSchema):

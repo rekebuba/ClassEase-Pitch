@@ -15,11 +15,12 @@ from api.v1.views.shared.registration.schema import (
     DumpResultSchema,
     TeacherRegistrationSchema,
 )
+from extension.enums.enum import RoleEnum
 from extension.pydantic.models.teacher_schema import (
     TeacherRelationshipSchema,
     TeacherSchema,
 )
-from models.base_model import CustomTypes
+
 from models import storage
 from api.v1.views import errors
 from models.grade import Grade
@@ -37,7 +38,7 @@ def register_new_user(role: str) -> Tuple[Response, int]:
     try:
         data_to_parse = {**request.form.to_dict(), **request.files.to_dict()}
         data = parse_nested_form(data_to_parse)
-        role_enum = CustomTypes.RoleEnum.enum_value(role.lower())
+        role_enum = RoleEnum.enum_value(role.lower())
 
         if not data:
             raise Exception("No data provided")

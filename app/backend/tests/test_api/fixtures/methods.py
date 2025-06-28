@@ -2,7 +2,8 @@ from typing import Any, Dict, List, Sequence, Tuple
 
 import pytest
 from sqlalchemy import select
-from models.base_model import CustomTypes
+
+from extension.enums.enum import RoleEnum
 from models.user import User
 from tests.test_api.factories import AdminFactory, StudentFactory, TeacherFactory
 from sqlalchemy.orm import scoped_session, Session
@@ -12,18 +13,18 @@ all_params: Dict[str, Any] = {
     "test_users_log_in_success": {
         "params": "role",
         "values": [
-            (CustomTypes.RoleEnum.ADMIN, 1),
-            (CustomTypes.RoleEnum.TEACHER, 1),
-            (CustomTypes.RoleEnum.STUDENT, 1),
+            (RoleEnum.ADMIN, 1),
+            (RoleEnum.TEACHER, 1),
+            (RoleEnum.STUDENT, 1),
         ],
         "ids": ["Admin", "Teacher", "Student"],
     },
     "test_users_dashboard_information": {
         "params": "role",
         "values": [
-            (CustomTypes.RoleEnum.ADMIN, 1),
-            (CustomTypes.RoleEnum.TEACHER, 1),
-            (CustomTypes.RoleEnum.STUDENT, 1),
+            (RoleEnum.ADMIN, 1),
+            (RoleEnum.TEACHER, 1),
+            (RoleEnum.STUDENT, 1),
         ],
         "ids": ["Admin", "Teacher", "Student"],
     },

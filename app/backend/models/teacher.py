@@ -15,6 +15,7 @@ from sqlalchemy import (
     Text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from extension.enums.enum import ExperienceYearEnum, GenderEnum, HighestDegreeEnum, MaritalStatusEnum, ScheduleEnum, StatusEnum
 from models.base_model import BaseModel
 
 
@@ -35,9 +36,9 @@ class Teacher(BaseModel):
     father_name: Mapped[str] = mapped_column(String(50), nullable=False)
     grand_father_name: Mapped[str] = mapped_column(String(50), nullable=False)
     date_of_birth: Mapped[Date] = mapped_column(Date, nullable=False)
-    gender: Mapped[BaseModel.GenderEnum] = mapped_column(
+    gender: Mapped[GenderEnum] = mapped_column(
         Enum(
-            BaseModel.GenderEnum,
+            GenderEnum,
             name="gender_enum",
             values_callable=lambda x: [e.value for e in x],
             native_enum=False,
@@ -58,16 +59,14 @@ class Teacher(BaseModel):
 
     # Emergency Contact
     emergency_contact_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    emergency_contact_relation: Mapped[str] = mapped_column(
-        String(50), nullable=False
-    )
+    emergency_contact_relation: Mapped[str] = mapped_column(String(50), nullable=False)
     emergency_contact_phone: Mapped[str] = mapped_column(String(50), nullable=False)
     emergency_contact_email: Mapped[str] = mapped_column(String(50), nullable=False)
 
     # Educational Background
-    highest_degree: Mapped[BaseModel.HighestDegreeEnum] = mapped_column(
+    highest_degree: Mapped[HighestDegreeEnum] = mapped_column(
         Enum(
-            BaseModel.HighestDegreeEnum,
+            HighestDegreeEnum,
             name="highest_degree_enum",
             values_callable=lambda x: [e.value for e in x],
             native_enum=False,
@@ -80,9 +79,9 @@ class Teacher(BaseModel):
 
     # Teaching Experience
     position_applying_for: Mapped[str] = mapped_column(String(50), nullable=False)
-    years_of_experience: Mapped[BaseModel.ExperienceYearEnum] = mapped_column(
+    years_of_experience: Mapped[ExperienceYearEnum] = mapped_column(
         Enum(
-            BaseModel.ExperienceYearEnum,
+            ExperienceYearEnum,
             name="experience_year_enum",
             values_callable=lambda x: [e.value for e in x],
             native_enum=False,
@@ -90,9 +89,9 @@ class Teacher(BaseModel):
         nullable=False,
     )
 
-    preferred_schedule: Mapped[BaseModel.ScheduleEnum] = mapped_column(
+    preferred_schedule: Mapped[ScheduleEnum] = mapped_column(
         Enum(
-            BaseModel.ScheduleEnum,
+            ScheduleEnum,
             name="schedule_enum",
             values_callable=lambda x: [e.value for e in x],
             native_enum=False,
@@ -108,9 +107,9 @@ class Teacher(BaseModel):
     reference1_email: Mapped[str] = mapped_column(String(50), nullable=False)
 
     # Additional Information (Default values)
-    marital_status: Mapped[Optional[BaseModel.MaritalStatusEnum]] = mapped_column(
+    marital_status: Mapped[Optional[MaritalStatusEnum]] = mapped_column(
         Enum(
-            BaseModel.MaritalStatusEnum,
+            MaritalStatusEnum,
             name="marital_status_enum",
             values_callable=lambda x: [e.value for e in x],
             native_enum=False,
@@ -208,15 +207,15 @@ class Teacher(BaseModel):
         String(120), ForeignKey("users.id"), unique=True, nullable=True, default=None
     )
 
-    status: Mapped[BaseModel.StatusEnum] = mapped_column(
+    status: Mapped[StatusEnum] = mapped_column(
         Enum(
-            BaseModel.StatusEnum,
+            StatusEnum,
             name="status_enum",
             values_callable=lambda x: [e.value for e in x],
             native_enum=False,
         ),
         nullable=False,
-        default=BaseModel.StatusEnum.PENDING,
+        default=StatusEnum.PENDING,
     )
 
     # Relationship with Default

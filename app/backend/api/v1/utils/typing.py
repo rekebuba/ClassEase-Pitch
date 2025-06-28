@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import Any, Callable, List, Optional, TypeVar, TypedDict, Union
 from sqlalchemy import ColumnElement, UnaryExpression
+from extension.enums.enum import RoleEnum
 from models.user import User
-from models.base_model import Base, CustomTypes
+from models.base_model import Base
 
 T = TypeVar("T")  # Fully generic
 
@@ -14,14 +15,14 @@ class AuthType(TypedDict):
     """for valid user data."""
 
     identification: str
-    role: CustomTypes.RoleEnum
+    role: RoleEnum
 
 
 class PostLoadUser(TypedDict):
     """for user data after post load."""
 
     id: str
-    role: CustomTypes.RoleEnum
+    role: RoleEnum
     national_id: str
     image_path: Optional[str]
     created_at: Optional[str]

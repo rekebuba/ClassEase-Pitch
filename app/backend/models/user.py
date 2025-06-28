@@ -4,6 +4,7 @@
 from typing import TYPE_CHECKING
 from sqlalchemy import String, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from extension.enums.enum import RoleEnum
 from models.base_model import BaseModel
 
 if TYPE_CHECKING:
@@ -23,9 +24,9 @@ class User(BaseModel):
         String(120), unique=True, nullable=False
     )
     password: Mapped[str] = mapped_column(String(120), nullable=False)
-    role: Mapped[BaseModel.RoleEnum] = mapped_column(
+    role: Mapped[RoleEnum] = mapped_column(
         Enum(
-            BaseModel.RoleEnum,
+            RoleEnum,
             name="role_enum",
             values_callable=lambda x: [e.value for e in x],
             native_enum=False,

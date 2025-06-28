@@ -2,7 +2,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, List, Optional
 from pydantic import BaseModel, ConfigDict
 
-from models.base_model import CustomTypes
+from extension.enums.enum import GradeLevelEnum
+
+
 
 if TYPE_CHECKING:
     from .teacher_schema import TeacherSchema
@@ -16,7 +18,7 @@ class GradeSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     grade: int
-    level: CustomTypes.GradeLevelEnum
+    level: GradeLevelEnum
 
 
 class GradeRelationshipSchema(BaseModel):

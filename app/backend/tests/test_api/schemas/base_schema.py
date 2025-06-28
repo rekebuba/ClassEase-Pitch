@@ -2,7 +2,7 @@
 from typing import Dict, List
 from pydantic import BaseModel, field_validator
 
-from models.base_model import CustomTypes
+
 
 
 class UserModel(BaseModel):
@@ -13,7 +13,7 @@ class UserModel(BaseModel):
     @field_validator("role")
     @classmethod
     def validate_role(cls, value):
-        if value.lower() not in CustomTypes.RoleEnum._value2member_map_:
+        if value.lower() not in RoleEnum._value2member_map_:
             raise ValueError(f"Invalid role: {value}")
         return value
 
