@@ -3,8 +3,9 @@ from marshmallow import EXCLUDE, fields
 
 from api.v1.schemas.config_schema import OPERATOR_CONFIG
 from api.v1.schemas.custom_schema import EnumField, ValueField
+from extension.enums.enum import TableEnum
 from models import storage
-from models.base_model import CustomTypes
+
 from models.saved_query_view import SavedQueryView
 from models.table import Table
 
@@ -75,7 +76,7 @@ class ValidQuerySchema(BaseSchema):
     name = fields.String(
         required=False, load_default="new View", validate=lambda x: len(x) <= 50
     )
-    table_name = EnumField(CustomTypes.TableEnum, required=True)
+    table_name = EnumField(TableEnum, required=True)
     search_params = fields.Nested(
         searchParamsSchema,
         required=False,

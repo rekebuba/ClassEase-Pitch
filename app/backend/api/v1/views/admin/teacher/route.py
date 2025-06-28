@@ -2,6 +2,7 @@ import json
 from typing import Tuple
 from urllib.parse import parse_qs, urlparse
 
+from extension.enums.enum import RoleEnum, StatusEnum
 from extension.pydantic.models.teacher_schema import (
     TeacherSchema,
 )
@@ -10,7 +11,7 @@ from api.v1.utils.typing import UserT
 from api.v1.views.admin import admins as admin
 from api.v1.views.utils import admin_required
 from extension.pydantic.models.user_schema import UserSchema
-from models.base_model import CustomTypes
+
 from models.teacher import Teacher
 from models.user import User
 from models import storage
@@ -144,10 +145,10 @@ def update_teacher_application_status(
             return jsonify({"message": "Invalid request data"}), 400
 
         status = data["status"]
-        if status not in CustomTypes.StatusEnum._value2member_map_:
+        if status not in StatusEnum._value2member_map_:
             return jsonify({"message": "Invalid status"}), 400
 
-        status_enum = CustomTypes.StatusEnum(status)
+        status_enum = StatusEnum(status)
 
         teacher = storage.session.query(Teacher).filter(Teacher.id == id).first()
         if not teacher:
@@ -155,11 +156,11 @@ def update_teacher_application_status(
 
         teacher.status = status_enum
 
-        if status_enum == CustomTypes.StatusEnum.APPROVED and teacher.user is None:
+        if status_enum == StatusEnum.APPROVED and teacher.user is None:
             # If accepted, set the teacher's user
             user_data = UserCreateSchema.model_validate(
                 {
-                    "role": CustomTypes.RoleEnum.TEACHER,
+                    "role": RoleEnum.TEACHER,
                     "national_id": teacher.social_security_number,
                 }
             )

@@ -3,7 +3,8 @@
 
 from sqlalchemy import Enum, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship, scoped_session, Session
-from models.base_model import BaseModel, CustomTypes
+from extension.enums.enum import GradeLevelEnum
+from models.base_model import BaseModel
 from typing import TYPE_CHECKING, List
 
 from models.stream import Stream
@@ -38,11 +39,11 @@ def seed_grades(session: scoped_session[Session]) -> None:
     for i in range(1, 13):
         grade = Grade(
             grade=i,
-            level=CustomTypes.GradeLevelEnum.PRIMARY
+            level=GradeLevelEnum.PRIMARY
             if i < 5
-            else CustomTypes.GradeLevelEnum.MIDDLE_SCHOOL
+            else GradeLevelEnum.MIDDLE_SCHOOL
             if i < 8
-            else CustomTypes.GradeLevelEnum.HIGH_SCHOOL,
+            else GradeLevelEnum.HIGH_SCHOOL,
         )
 
         if i > 10:
@@ -61,9 +62,9 @@ class Grade(BaseModel):
 
     # Database column
     grade: Mapped[int] = mapped_column(Integer, unique=True, nullable=False, index=True)
-    level: Mapped[BaseModel.GradeLevelEnum] = mapped_column(
+    level: Mapped[GradeLevelEnum] = mapped_column(
         Enum(
-            BaseModel.GradeLevelEnum,
+            GradeLevelEnum,
             name="grade_level_enum",
             values_callable=lambda x: [e.value for e in x],
             native_enum=False,

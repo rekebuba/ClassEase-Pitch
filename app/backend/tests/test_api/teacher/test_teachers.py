@@ -3,7 +3,7 @@ import random
 import pytest
 from sqlalchemy import select
 from sqlmodel import col
-from models.base_model import CustomTypes
+
 from models.grade import Grade
 from models.teacher import Teacher
 from tests.test_api.factories import TeacherFactory

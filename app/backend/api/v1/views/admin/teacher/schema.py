@@ -6,7 +6,8 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from pyethiodate import EthDate  # type: ignore
 
-from models.base_model import CustomTypes
+from extension.enums.enum import GradeLevelEnum, RoleEnum
+
 from models.user import User
 from models import storage
 
@@ -15,7 +16,7 @@ class DetailApplicationResponse(BaseModel):
     model_config = dict(populate_by_name=True, from_attributes=True)
 
     subjects_to_teach: List[str]
-    grade_levels_to_teach: List[CustomTypes.GradeLevelEnum]
+    grade_levels_to_teach: List[GradeLevelEnum]
 
 
 class UserCreateSchema(BaseModel):
@@ -23,7 +24,7 @@ class UserCreateSchema(BaseModel):
 
     identification: Optional[str]
     password: Optional[str] = Field(exclude=True)
-    role: CustomTypes.RoleEnum
+    role: RoleEnum
     national_id: str
     image_path: Optional[str] = None
 
@@ -42,9 +43,9 @@ class UserCreateSchema(BaseModel):
             raise ValueError("Role must be provided")
 
         role_prefix_map = {
-            CustomTypes.RoleEnum.STUDENT: "MAS",
-            CustomTypes.RoleEnum.TEACHER: "MAT",
-            CustomTypes.RoleEnum.ADMIN: "MAA",
+            RoleEnum.STUDENT: "MAS",
+            RoleEnum.TEACHER: "MAT",
+            RoleEnum.ADMIN: "MAA",
         }
         section = role_prefix_map[role]
 

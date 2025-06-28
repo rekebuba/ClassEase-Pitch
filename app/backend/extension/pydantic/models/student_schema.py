@@ -2,7 +2,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 from pydantic import BaseModel, ConfigDict
 
-from models.base_model import CustomTypes
+from extension.enums.enum import GenderEnum
+
+
 
 if TYPE_CHECKING:
     from .user_schema import UserSchema
@@ -19,7 +21,7 @@ class StudentSchema(BaseModel):
     father_name: str
     grand_father_name: str
     date_of_birth: str
-    gender: CustomTypes.GenderEnum
+    gender: GenderEnum
 
     father_phone: str
     mother_phone: str

@@ -9,8 +9,9 @@ from api.v1.views import errors
 from api.v1.views.shared import auths as auth
 from api.v1.views.shared.dashboard.schema import UserDetailSchema
 from api.v1.views.utils import student_teacher_or_admin_required
+from extension.enums.enum import RoleEnum
 from models.admin import Admin
-from models.base_model import CustomTypes
+
 from models.student import Student
 from models.teacher import Teacher
 from models.user import User
@@ -21,26 +22,26 @@ QueryResult = Optional[
 ]
 
 # Define the query dictionary type
-QueryDict = Dict[CustomTypes.RoleEnum, Callable[[], QueryResult]]
+QueryDict = Dict[RoleEnum, Callable[[], QueryResult]]
 
 
 @auth.route("/", methods=["GET"])
 @student_teacher_or_admin_required
 def user(user: UserT) -> Tuple[Response, int]:
     query: QueryDict = {
-        CustomTypes.RoleEnum.ADMIN: lambda: (
+        RoleEnum.ADMIN: lambda: (
             storage.session.query(User, Admin)
             .join(User.admins)
             .filter(User.id == user.id)
             .first()
         ),
-        CustomTypes.RoleEnum.TEACHER: lambda: (
+        RoleEnum.TEACHER: lambda: (
             storage.session.query(User, Teacher)
             .join(User.teachers)
             .filter(User.id == user.id)
             .first()
         ),
-        CustomTypes.RoleEnum.STUDENT: lambda: (
+        RoleEnum.STUDENT: lambda: (
             storage.session.query(User, Student)
             .join(User.students)
             .filter(User.id == user.id)

@@ -6,7 +6,8 @@ from marshmallow import fields, ValidationError
 from sqlalchemy import and_, or_
 
 from api.v1.schemas.base_schema import get_all_model_classes
-from models.base_model import CustomTypes
+from extension.enums.enum import RoleEnum
+
 from werkzeug.datastructures import FileStorage
 
 
@@ -98,7 +99,7 @@ class EnumField(fields.Field):  # type: ignore[type-arg]
 
     def _serialize(
         self,
-        value: Optional[CustomTypes.RoleEnum],
+        value: Optional[RoleEnum],
         attr: Optional[str],
         obj: Any,
         **kwargs: Any,
@@ -121,13 +122,13 @@ class RoleEnumField(fields.Field):  # type: ignore[type-arg]
 
     def _serialize(
         self,
-        value: Optional[CustomTypes.RoleEnum],
+        value: Optional[RoleEnum],
         attr: Optional[str],
         obj: Any,
         **kwargs: Any,
     ) -> str:
         """Custom serialization for RoleEnum."""
-        if isinstance(value, CustomTypes.RoleEnum):
+        if isinstance(value, RoleEnum):
             return value.value.capitalize()  # Returns "Admin", "Teacher", or "Student"
         raise ValidationError("Expected RoleEnum instance")
 
@@ -137,12 +138,12 @@ class RoleEnumField(fields.Field):  # type: ignore[type-arg]
     ) -> Any:
         """Custom deserialization for RoleEnum."""
         try:
-            if isinstance(value, CustomTypes.RoleEnum):
+            if isinstance(value, RoleEnum):
                 return value
-            return CustomTypes.RoleEnum(value.lower())  # Converts string to enum
+            return RoleEnum(value.lower())  # Converts string to enum
         except ValueError as error:
             raise ValidationError(
-                f"Invalid role. Must be one of: {[role.value for role in CustomTypes.RoleEnum]}"
+                f"Invalid role. Must be one of: {[role.value for role in RoleEnum]}"
             ) from error
 
 
