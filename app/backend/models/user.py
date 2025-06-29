@@ -42,22 +42,26 @@ class User(BaseModel):
         back_populates="user",
         uselist=False,
         init=False,
+        repr=False,
     )
     teachers: Mapped["Teacher"] = relationship(
         "Teacher",
         back_populates="user",
         uselist=False,
         init=False,
+        repr=False,
     )
     students: Mapped["Student"] = relationship(
         "Student",
         back_populates="user",
         uselist=False,
         init=False,
+        repr=False,
     )
     saved_query_views: Mapped["SavedQueryView"] = relationship(
         "SavedQueryView",
         back_populates="user",
         cascade="all, delete-orphan",
         init=False,
+        repr=False,
     )

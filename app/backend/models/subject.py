@@ -206,9 +206,11 @@ class Subject(BaseModel):
         back_populates="subjects_to_teach",
         secondary="teacher_subject_links",
         init=False,
+        repr=False,
     )
     grade_links: Mapped[List["SubjectGradeStreamLink"]] = relationship(
         "SubjectGradeStreamLink",
         back_populates="subject",
         init=False,
+        repr=False,
     )

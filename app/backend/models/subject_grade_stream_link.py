@@ -23,6 +23,6 @@ class SubjectGradeStreamLink(BaseModel):
     )
 
     # Optional: for bidirectional navigation
-    subject: Mapped["Subject"] = relationship("Subject", init=False)
-    grade: Mapped["Grade"] = relationship("Grade", init=False)
-    stream: Mapped["Stream"] = relationship("Stream", init=False)
+    subject: Mapped["Subject"] = relationship("Subject", init=False, repr=False)
+    grade: Mapped["Grade"] = relationship("Grade", init=False, repr=False)
+    stream: Mapped["Stream"] = relationship("Stream", init=False, repr=False)
