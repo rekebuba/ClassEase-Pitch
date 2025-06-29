@@ -11,6 +11,7 @@ from extension.enums.enum import (
     ScheduleEnum,
     StatusEnum,
 )
+from extension.functions.helper import to_camel
 
 
 if TYPE_CHECKING:
@@ -64,7 +65,11 @@ CustomDateTime = Annotated[datetime, BeforeValidator(parse_and_validate_datetime
 
 
 class TeacherSchema(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
 
     first_name: str
     father_name: str

@@ -6,7 +6,7 @@ from api import create_app
 from models import storage
 
 
-test_app = create_app("testing")
+test_app = create_app("development")
 storage.init_app(test_app)
 
 absolute_path = Path(os.path.abspath(__file__)).parent

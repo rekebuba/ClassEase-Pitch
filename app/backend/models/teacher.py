@@ -223,6 +223,7 @@ class Teacher(BaseModel):
         "User",
         back_populates="teachers",
         default=None,
+        repr=False
     )
     # Relationship with Out Default
     subjects_to_teach: Mapped[List["Subject"]] = relationship(
@@ -230,12 +231,14 @@ class Teacher(BaseModel):
         back_populates="teachers",
         secondary="teacher_subject_links",
         default_factory=list,
+        repr=False
     )
     grade_level: Mapped[List["Grade"]] = relationship(
         "Grade",
         back_populates="teachers",
         secondary="teacher_grade_links",
         default_factory=list,
+        repr=False
     )
 
     __table_args__ = (

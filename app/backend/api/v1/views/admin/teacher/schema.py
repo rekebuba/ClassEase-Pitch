@@ -8,6 +8,7 @@ from pyethiodate import EthDate  # type: ignore
 
 from extension.enums.enum import GradeLevelEnum, RoleEnum
 
+from extension.functions.helper import to_camel
 from models.user import User
 from models import storage
 
@@ -16,11 +17,15 @@ class DetailApplicationResponse(BaseModel):
     model_config = dict(populate_by_name=True, from_attributes=True)
 
     subjects_to_teach: List[str]
-    grade_levels_to_teach: List[GradeLevelEnum]
+    grade_levels_to_teach: List[int]
 
 
 class UserCreateSchema(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
 
     identification: Optional[str]
     password: Optional[str] = Field(exclude=True)

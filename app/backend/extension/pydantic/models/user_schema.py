@@ -3,10 +3,10 @@ from typing import TYPE_CHECKING, Optional
 from pydantic import BaseModel, ConfigDict
 
 
-
 from datetime import datetime
 
 from extension.enums.enum import RoleEnum
+from extension.functions.helper import to_camel
 
 
 if TYPE_CHECKING:
@@ -16,7 +16,11 @@ if TYPE_CHECKING:
 
 
 class UserSchema(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
 
     identification: str
     password: str

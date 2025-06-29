@@ -2,6 +2,8 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Optional
 from pydantic import BaseModel, ConfigDict
 
+from extension.functions.helper import to_camel
+
 if TYPE_CHECKING:
     from .user_schema import UserSchema
 
@@ -11,7 +13,11 @@ class AdminSchema(BaseModel):
     This model represents an admin in the system. It inherits from BaseModel.
     """
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
 
     user_id: str
     first_name: str

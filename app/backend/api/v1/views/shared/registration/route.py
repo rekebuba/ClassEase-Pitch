@@ -2,7 +2,7 @@
 """Public views module for the API"""
 
 from flask import Response, request, jsonify
-from pydantic import ValidationError
+from pydantic import TypeAdapter, ValidationError
 from typing import List, Tuple
 
 from sqlalchemy import select
@@ -16,6 +16,7 @@ from api.v1.views.shared.registration.schema import (
     TeacherRegistrationSchema,
 )
 from extension.enums.enum import RoleEnum
+from extension.pydantic.models.subject_schema import SubjectSchema
 from extension.pydantic.models.teacher_schema import (
     TeacherRelationshipSchema,
     TeacherSchema,
@@ -137,3 +138,43 @@ def _validate_relations(
 
     if errors:
         raise ValidationError(" | ".join(errors))
+
+
+@auth.route("/available-subjects", methods=["GET"])
+def get_available_subjects() -> Tuple[Response, int]:
+    """
+    Returns a list of all available subjects in the system.
+    """
+    try:
+        subjects = storage.session.scalars(select(Subject)).all()
+
+        response = [subject.name for subject in subjects]
+
+        return jsonify(response), 200
+
+    except SQLAlchemyError as e:
+        storage.session.rollback()
+        return errors.handle_database_error(e)
+    except Exception as e:
+        storage.session.rollback()
+        return errors.handle_internal_error(e)
+
+
+@auth.route("/available-grades")
+def get_available_grades() -> Tuple[Response, int]:
+    """
+    Returns a list of all available grades in the system.
+    """
+    try:
+        grades = storage.session.scalars(select(Grade)).all()
+
+        response = [grade.grade for grade in grades]
+
+        return jsonify(response), 200
+
+    except SQLAlchemyError as e:
+        storage.session.rollback()
+        return errors.handle_database_error(e)
+    except Exception as e:
+        storage.session.rollback()
+        return errors.handle_internal_error(e)

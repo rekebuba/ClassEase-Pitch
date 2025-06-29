@@ -77,6 +77,7 @@ class Grade(BaseModel):
         "Section",
         back_populates="grade",
         init=False,
+        repr=False,
     )
 
     streams: Mapped[List["Stream"]] = relationship(
@@ -84,16 +85,24 @@ class Grade(BaseModel):
         back_populates="grades",
         secondary="grade_stream_links",
         init=False,
+        repr=False,
     )
     teachers: Mapped[List["Teacher"]] = relationship(
         "Teacher",
         back_populates="grade_level",
         secondary="teacher_grade_links",
         init=False,
+        repr=False,
     )
     subject_links: Mapped[List["SubjectGradeStreamLink"]] = relationship(
-        "SubjectGradeStreamLink", back_populates="grade", init=False
+        "SubjectGradeStreamLink",
+        back_populates="grade",
+        init=False,
+        repr=False,
     )
     student_year_records: Mapped[list["STUDYearRecord"]] = relationship(
-        "STUDYearRecord", back_populates="grades", init=False
+        "STUDYearRecord",
+        back_populates="grades",
+        init=False,
+        repr=False,
     )

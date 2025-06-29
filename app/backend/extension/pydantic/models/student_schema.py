@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Optional
 from pydantic import BaseModel, ConfigDict
 
 from extension.enums.enum import GenderEnum
-
+from extension.functions.helper import to_camel
 
 
 if TYPE_CHECKING:
@@ -15,7 +15,11 @@ class StudentSchema(BaseModel):
     This model represents a student in the system. It inherits from BaseModel.
     """
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
 
     first_name: str
     father_name: str

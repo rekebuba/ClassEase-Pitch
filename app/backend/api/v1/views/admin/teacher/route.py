@@ -118,7 +118,7 @@ def detail_teacher_application(admin_data: UserT, id: str) -> Tuple[Response, in
                 "subjects_to_teach": [
                     subject.name for subject in teacher.subjects_to_teach
                 ],
-                "grade_levels_to_teach": [grade.level for grade in teacher.grade_level],
+                "grade_levels_to_teach": {grade.grade for grade in teacher.grade_level},
             }
         )
 
