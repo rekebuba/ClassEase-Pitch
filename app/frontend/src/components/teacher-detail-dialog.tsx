@@ -26,14 +26,16 @@ import {
     XCircle,
     Eye,
 } from "lucide-react"
-import type { TeacherApplication } from "@/lib/api-validation"
+import type { TeacherApplicationWithDetails } from "@/lib/api-validation"
 import { TeacherStatusBadge } from "@/components"
+import { updateTeacherApplicationStatus } from "@/api"
+import { toast } from "sonner"
 
 interface TeacherDetailDialogProps {
-    teacher: TeacherApplication | null
+    teacher: TeacherApplicationWithDetails | null
     isOpen: boolean
     onClose: () => void
-    onStatusChange: (teacherId: string, newStatus: TeacherApplication["status"]) => void
+    onStatusChange: (teacherId: string, newStatus: TeacherApplicationWithDetails["status"]) => void
 }
 
 export default function TeacherDetailDialog({ teacher, isOpen, onClose, onStatusChange }: TeacherDetailDialogProps) {
@@ -41,10 +43,12 @@ export default function TeacherDetailDialog({ teacher, isOpen, onClose, onStatus
 
     if (!teacher) return null
 
-    const handleStatusChange = async (newStatus: TeacherApplication["status"]) => {
+    const handleStatusChange = async (newStatus: TeacherApplicationWithDetails["status"]) => {
         setIsUpdating(true)
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000))
+        const response = await updateTeacherApplicationStatus(teacher.id, newStatus)
+        toast.success(response.message, {
+            style: { color: "green" },
+        })
         onStatusChange(teacher.id, newStatus)
         setIsUpdating(false)
     }
@@ -74,17 +78,17 @@ export default function TeacherDetailDialog({ teacher, isOpen, onClose, onStatus
 
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden">
+            <DialogContent className="fixed top-10 right-[10%] max-w-6xl max-h-[90vh] overflow-hidden">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-3">
                         <Avatar className="h-10 w-10">
                             <AvatarImage src={teacher.profilePhoto || "/placeholder.svg"} />
-                            <AvatarFallback>{getInitials(teacher.firstName, teacher.lastName)}</AvatarFallback>
+                            <AvatarFallback>{getInitials(teacher.firstName, teacher.fatherName)}</AvatarFallback>
                         </Avatar>
                         <div>
                             <div className="flex items-center gap-2">
                                 <span>
-                                    {teacher.firstName} {teacher.lastName}
+                                    {teacher.firstName} {teacher.fatherName} {teacher.grandFatherName}
                                 </span>
                                 <TeacherStatusBadge status={teacher.status} />
                             </div>
@@ -166,10 +170,10 @@ export default function TeacherDetailDialog({ teacher, isOpen, onClose, onStatus
                                             <div>
                                                 <p className="text-sm font-medium text-gray-500">Full Name</p>
                                                 <p>
-                                                    {teacher.firstName} {teacher.middleName} {teacher.lastName}
+                                                    {teacher.firstName} {teacher.fatherName} {teacher.grandFatherName}
                                                 </p>
-                                                {teacher.preferredName && (
-                                                    <p className="text-sm text-gray-600">Preferred: {teacher.preferredName}</p>
+                                                {teacher.firstName && (
+                                                    <p className="text-sm text-gray-600">Preferred: {teacher.firstName}</p>
                                                 )}
                                             </div>
                                             <div>
@@ -225,7 +229,6 @@ export default function TeacherDetailDialog({ teacher, isOpen, onClose, onStatus
                                                     Email Addresses
                                                 </p>
                                                 <p>Personal: {teacher.personalEmail}</p>
-                                                {teacher.workEmail && <p>Work: {teacher.workEmail}</p>}
                                             </div>
                                         </CardContent>
                                     </Card>
@@ -277,16 +280,6 @@ export default function TeacherDetailDialog({ teacher, isOpen, onClose, onStatus
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-500">Major Subject</p>
-                                                <p>{teacher.majorSubject}</p>
-                                            </div>
-                                            {teacher.minorSubject && (
-                                                <div>
-                                                    <p className="text-sm font-medium text-gray-500">Minor Subject</p>
-                                                    <p>{teacher.minorSubject}</p>
-                                                </div>
-                                            )}
                                             <div>
                                                 <p className="text-sm font-medium text-gray-500">Graduation Year</p>
                                                 <p>{teacher.graduationYear}</p>
@@ -356,16 +349,6 @@ export default function TeacherDetailDialog({ teacher, isOpen, onClose, onStatus
                                                 <p className="text-sm font-medium text-gray-500">Position Applying For</p>
                                                 <p>{teacher.positionApplyingFor}</p>
                                             </div>
-                                            {teacher.departmentPreference && (
-                                                <div>
-                                                    <p className="text-sm font-medium text-gray-500">Department Preference</p>
-                                                    <p>{teacher.departmentPreference}</p>
-                                                </div>
-                                            )}
-                                            <div>
-                                                <p className="text-sm font-medium text-gray-500">Available Start Date</p>
-                                                <p>{formatDate(teacher.availableStartDate)}</p>
-                                            </div>
                                             {teacher.salaryExpectation && (
                                                 <div>
                                                     <p className="text-sm font-medium text-gray-500">Salary Expectation</p>
@@ -396,7 +379,7 @@ export default function TeacherDetailDialog({ teacher, isOpen, onClose, onStatus
                                             <div className="flex flex-wrap gap-1">
                                                 {teacher.gradeLevelsToTeach.map((grade) => (
                                                     <Badge key={grade} variant="outline">
-                                                        {grade}
+                                                        Grade {grade}
                                                     </Badge>
                                                 ))}
                                             </div>
@@ -425,64 +408,12 @@ export default function TeacherDetailDialog({ teacher, isOpen, onClose, onStatus
                                                 Languages & Technology
                                             </CardTitle>
                                         </CardHeader>
-                                        <CardContent className="space-y-4">
-                                            {teacher.languagesSpoken.length > 0 && (
-                                                <div>
-                                                    <p className="text-sm font-medium text-gray-500 mb-2">Languages Spoken</p>
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {teacher.languagesSpoken.map((language) => (
-                                                            <Badge key={language} variant="secondary">
-                                                                {language}
-                                                            </Badge>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )}
-                                            {teacher.technologySkills.length > 0 && (
-                                                <div>
-                                                    <p className="text-sm font-medium text-gray-500 mb-2">Technology Skills</p>
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {teacher.technologySkills.map((skill) => (
-                                                            <Badge key={skill} variant="outline">
-                                                                {skill}
-                                                            </Badge>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </CardContent>
                                     </Card>
 
                                     <Card>
                                         <CardHeader>
                                             <CardTitle>Certifications & Specializations</CardTitle>
                                         </CardHeader>
-                                        <CardContent className="space-y-4">
-                                            {teacher.certifications.length > 0 && (
-                                                <div>
-                                                    <p className="text-sm font-medium text-gray-500 mb-2">Certifications</p>
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {teacher.certifications.map((cert) => (
-                                                            <Badge key={cert} className="bg-blue-100 text-blue-800">
-                                                                {cert}
-                                                            </Badge>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )}
-                                            {teacher.specializations.length > 0 && (
-                                                <div>
-                                                    <p className="text-sm font-medium text-gray-500 mb-2">Specializations</p>
-                                                    <div className="flex flex-wrap gap-1">
-                                                        {teacher.specializations.map((spec) => (
-                                                            <Badge key={spec} className="bg-purple-100 text-purple-800">
-                                                                {spec}
-                                                            </Badge>
-                                                        ))}
-                                                    </div>
-                                                </div>
-                                            )}
-                                        </CardContent>
                                     </Card>
                                 </div>
 

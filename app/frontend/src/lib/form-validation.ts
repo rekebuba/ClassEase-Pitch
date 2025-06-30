@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { ExperienceYearEnum, GenderEnum, HighestDegreeEnum, MaritalStatusEnum, ScheduleEnum } from "./enums"
 
 // Phone number validation regex
 const phoneRegex = /^\+\(251\) [79]\d{2}-\d{6}$/
@@ -62,9 +63,7 @@ export const studentRegistrationSchema = z
         fatherName: nameSchema.min(1, "Father's name is required"),
         grandFatherName: nameSchema.optional(),
         dateOfBirth: dateOfBirthSchema,
-        gender: z.enum(["male", "female"], {
-            required_error: "Please select a gender",
-        }),
+        gender: GenderEnum,
         nationality: z
             .string()
             .min(2, "Nationality must be at least 2 characters")
@@ -219,9 +218,7 @@ export const step1Schema = z.object({
     fatherName: nameSchema.min(1, "Father's name is required"),
     grandFatherName: nameSchema.optional(),
     dateOfBirth: dateOfBirthSchema,
-    gender: z.enum(["male", "female"], {
-        required_error: "Please select a gender",
-    }),
+    gender: GenderEnum,
     nationality: z
         .string()
         .min(2, "Nationality must be at least 2 characters")
@@ -414,19 +411,16 @@ export const teacherRegistrationSchema = z
     .object({
         // Personal Information
         firstName: nameSchema.min(1, "First name is required"),
-        middleName: nameSchema.optional(),
-        lastName: nameSchema.min(1, "Last name is required"),
-        preferredName: nameSchema.optional(),
+        fatherName: nameSchema.optional(),
+        grandFatherName: nameSchema.min(1, "Last name is required"),
         dateOfBirth: dateOfBirthSchema,
-        gender: z.enum(["male", "female", "non-binary", "prefer-not-to-say"], {
-            required_error: "Please select a gender",
-        }),
+        gender: GenderEnum,
         nationality: z
             .string()
             .min(2, "Nationality must be at least 2 characters")
             .max(50, "Nationality must be less than 50 characters")
             .regex(/^[a-zA-Z\s]+$/, "Nationality can only contain letters and spaces"),
-        maritalStatus: z.enum(["single", "married", "divorced", "widowed", "prefer-not-to-say"]).optional(),
+        maritalStatus: MaritalStatusEnum.optional(),
         socialSecurityNumber: z
             .string()
             .regex(/^\d{3}-\d{2}-\d{4}$/, "SSN must be in format 123-45-6789")
@@ -453,20 +447,14 @@ export const teacherRegistrationSchema = z
         primaryPhone: requiredPhoneSchema,
         secondaryPhone: phoneSchema.optional(),
         personalEmail: emailSchema,
-        workEmail: emailSchema.optional(),
 
         // Emergency Contact
         emergencyContactName: nameSchema.min(1, "Emergency contact name is required"),
         emergencyContactRelation: z.string().min(1, "Relationship is required"),
         emergencyContactPhone: requiredPhoneSchema,
-        emergencyContactEmail: emailSchema.optional(),
 
         // Educational Background
-        highestDegree: z.enum(["bachelors", "masters", "doctorate", "other"], {
-            required_error: "Please select highest degree",
-        }),
-        majorSubject: z.string().min(1, "Major subject is required"),
-        minorSubject: z.string().optional(),
+        highestDegree: HighestDegreeEnum,
         university: z.string().min(1, "University name is required"),
         graduationYear: z.string().refine((year) => {
             const num = Number.parseInt(year)
@@ -474,44 +462,33 @@ export const teacherRegistrationSchema = z
             return num >= 1950 && num <= currentYear
         }, "Please enter a valid graduation year"),
         gpa: gpaSchema,
-        additionalDegrees: z.string().optional(),
 
         // Teaching Certifications & Licenses
         teachingLicense: z.boolean(),
         licenseNumber: z.string().optional(),
         licenseState: z.string().optional(),
         licenseExpirationDate: z.string().optional(),
-        certifications: z.array(z.string()).optional(),
-        specializations: z.array(z.string()).optional(),
 
         // Teaching Experience
-        yearsOfExperience: z.enum(["0", "1-2", "3-5", "6-10", "11-15", "16-20", "20+"], {
-            required_error: "Please select years of experience",
-        }),
+        yearsOfExperience: ExperienceYearEnum,
         previousSchools: z.string().optional(),
         subjectsToTeach: z.array(z.string()).min(1, "Please select at least one subject to teach"),
         gradeLevelsToTeach: z.array(z.string()).min(1, "Please select at least one grade level"),
-        preferredSchedule: z.enum(["full-time", "part-time", "substitute", "flexible"]).optional(),
+        preferredSchedule: ScheduleEnum.optional(),
 
         // Professional Skills & Qualifications
-        languagesSpoken: z.array(z.string()).optional(),
-        technologySkills: z.array(z.string()).optional(),
         specialSkills: z.string().optional(),
-        professionalDevelopment: z.string().optional(),
 
         // Employment Information
         positionApplyingFor: z.string().min(1, "Position is required"),
-        departmentPreference: z.string().optional(),
-        availableStartDate: z.string().min(1, "Start date is required"),
         salaryExpectation: salarySchema,
-        willingToRelocate: z.boolean(),
-        hasTransportation: z.boolean(),
 
         // Background & References
         hasConvictions: z.boolean(),
         convictionDetails: z.string().optional(),
         hasDisciplinaryActions: z.boolean(),
         disciplinaryDetails: z.string().optional(),
+
         reference1Name: nameSchema.min(1, "First reference name is required"),
         reference1Title: z.string().min(1, "First reference title is required"),
         reference1Organization: z.string().min(1, "First reference organization is required"),
@@ -608,19 +585,16 @@ export type TeacherRegistrationFormData = z.infer<typeof teacherRegistrationSche
 // Step schemas for validation
 export const teacherStep1Schema = z.object({
     firstName: nameSchema.min(1, "First name is required"),
-    middleName: nameSchema.optional(),
-    lastName: nameSchema.min(1, "Last name is required"),
-    preferredName: nameSchema.optional(),
+    fatherName: nameSchema.optional(),
+    grandFatherName: nameSchema.min(1, "Last name is required"),
     dateOfBirth: dateOfBirthSchema,
-    gender: z.enum(["male", "female", "non-binary", "prefer-not-to-say"], {
-        required_error: "Please select a gender",
-    }),
+    gender: GenderEnum,
     nationality: z
         .string()
         .min(2, "Nationality must be at least 2 characters")
         .max(50, "Nationality must be less than 50 characters")
         .regex(/^[a-zA-Z\s]+$/, "Nationality can only contain letters and spaces"),
-    maritalStatus: z.enum(["single", "married", "divorced", "widowed", "prefer-not-to-say"]).optional(),
+    maritalStatus: MaritalStatusEnum.optional(),
     socialSecurityNumber: z
         .string()
         .regex(/^\d{3}-\d{2}-\d{4}$/, "SSN must be in format 123-45-6789")
@@ -648,19 +622,15 @@ export const teacherStep2Schema = z.object({
     primaryPhone: requiredPhoneSchema,
     secondaryPhone: phoneSchema.optional(),
     personalEmail: emailSchema,
-    workEmail: emailSchema.optional(),
     emergencyContactName: nameSchema.min(1, "Emergency contact name is required"),
     emergencyContactRelation: z.string().min(1, "Relationship is required"),
     emergencyContactPhone: requiredPhoneSchema,
-    emergencyContactEmail: emailSchema.optional(),
 })
 
 export const teacherStep3Schema = z.object({
     highestDegree: z.enum(["bachelors", "masters", "doctorate", "other"], {
         required_error: "Please select highest degree",
     }),
-    majorSubject: z.string().min(1, "Major subject is required"),
-    minorSubject: z.string().optional(),
     university: z.string().min(1, "University name is required"),
     graduationYear: z.string().refine((year) => {
         const num = Number.parseInt(year)
@@ -668,7 +638,9 @@ export const teacherStep3Schema = z.object({
         return num >= 1950 && num <= currentYear
     }, "Please enter a valid graduation year"),
     gpa: gpaSchema,
-    additionalDegrees: z.string().optional(),
+    specialSkills: z.string().optional(),
+    positionApplyingFor: z.string().min(1, "Position is required"),
+    salaryExpectation: salarySchema,
 })
 
 export const teacherStep4Schema = z
@@ -677,15 +649,11 @@ export const teacherStep4Schema = z
         licenseNumber: z.string().optional(),
         licenseState: z.string().optional(),
         licenseExpirationDate: z.string().optional(),
-        certifications: z.array(z.string()).optional(),
-        specializations: z.array(z.string()).optional(),
-        yearsOfExperience: z.enum(["0", "1-2", "3-5", "6-10", "11-15", "16-20", "20+"], {
-            required_error: "Please select years of experience",
-        }),
+        yearsOfExperience: ExperienceYearEnum,
         previousSchools: z.string().optional(),
         subjectsToTeach: z.array(z.string()).min(1, "Please select at least one subject to teach"),
         gradeLevelsToTeach: z.array(z.string()).min(1, "Please select at least one grade level"),
-        preferredSchedule: z.enum(["full-time", "part-time", "substitute", "flexible"]).optional(),
+        preferredSchedule: ScheduleEnum.optional(),
     })
     .refine(
         (data) => {
@@ -724,20 +692,7 @@ export const teacherStep4Schema = z
         },
     )
 
-export const teacherStep5Schema = z.object({
-    languagesSpoken: z.array(z.string()).optional(),
-    technologySkills: z.array(z.string()).optional(),
-    specialSkills: z.string().optional(),
-    professionalDevelopment: z.string().optional(),
-    positionApplyingFor: z.string().min(1, "Position is required"),
-    departmentPreference: z.string().optional(),
-    availableStartDate: z.string().min(1, "Start date is required"),
-    salaryExpectation: salarySchema,
-    willingToRelocate: z.boolean(),
-    hasTransportation: z.boolean(),
-})
-
-export const teacherStep6Schema = z
+export const teacherStep5Schema = z
     .object({
         hasConvictions: z.boolean(),
         convictionDetails: z.string().optional(),
@@ -784,7 +739,7 @@ export const teacherStep6Schema = z
         },
     )
 
-export const teacherStep7Schema = z.object({
+export const teacherStep6Schema = z.object({
     resume: documentSchema,
     coverLetter: documentSchema,
     transcripts: documentSchema,

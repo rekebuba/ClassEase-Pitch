@@ -115,7 +115,7 @@ const data: DataProps = {
                     },
                     {
                         title: "Teacher Registration",
-                        href: "/admin/teacher/registration",
+                        href: "/admin/teacher/applications",
                     }
                 ],
             },

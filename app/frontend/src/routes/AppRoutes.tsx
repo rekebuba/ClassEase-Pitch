@@ -10,7 +10,8 @@ import {
     AdminManageTeacher,
     AdminUpdateProfile,
     AdminUserAccessControl,
-    AdminEventForm
+    AdminEventForm,
+    ManageTeachersApplication
 } from "@/pages/admin";
 import {
     TeacherDashboard,
@@ -86,8 +87,12 @@ const router = createBrowserRouter([
         element: <ProtectedRoute element={<AdminUpdateProfile />} allowedRoles={['admin']} />,
     },
     {
-        path: "admin/teacher/registration",
-        element: <AdminEnrollUser role="teacher" />
+        path: "/admin/teacher/applications",
+        element: <ManageTeachersApplication />
+    },
+    {
+        path: "/admin/teacher/registration/new",
+        element: <ProtectedRoute element={<AdminEnrollUser role="teacher" />} allowedRoles={['admin']} />,
     },
     {
         path: '/admin/event/new',
