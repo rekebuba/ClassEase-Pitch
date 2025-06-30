@@ -10,7 +10,6 @@ import {
     teacherStep4Schema,
     teacherStep5Schema,
     teacherStep6Schema,
-    teacherStep7Schema,
     type TeacherRegistrationFormData,
 } from "@/lib/form-validation"
 import { FormField, InputWithError, TextareaWithError, SelectWithError } from "@/components/form-field-with-error"
@@ -24,18 +23,19 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { Upload, User, MapPin, GraduationCap, Award, Briefcase, FileText, Shield } from "lucide-react"
+import { Upload, User, MapPin, GraduationCap, Award, FileText, Shield } from "lucide-react"
 import { useTeacherFormPersistence } from "@/hooks/use-teacher-form-persistence"
 import FormRestorationDialog from "@/components/form-restoration-dialog"
 import AutoSaveIndicator from "@/components/auto-save-indicator"
+import { availableGradeLevels, availableSubjects, saveTeacherRegistration } from "@/api/sharedApi"
+import { toast } from "sonner"
 
 // undefined fields are optional
 const initialFormData: TeacherRegistrationFormData = {
     // Personal Information
     firstName: "",
-    middleName: undefined as any,
-    lastName: "",
-    preferredName: "",
+    fatherName: undefined as any,
+    grandFatherName: "",
     dateOfBirth: "",
     gender: undefined as any,
     nationality: "",
@@ -52,30 +52,23 @@ const initialFormData: TeacherRegistrationFormData = {
     primaryPhone: "",
     secondaryPhone: "",
     personalEmail: "",
-    workEmail: undefined as any,
 
     // Emergency Contact
     emergencyContactName: "",
     emergencyContactRelation: "",
     emergencyContactPhone: "",
-    emergencyContactEmail: undefined as any,
 
     // Educational Background
     highestDegree: undefined as any,
-    majorSubject: "",
-    minorSubject: "",
     university: "",
     graduationYear: "",
     gpa: "",
-    additionalDegrees: "",
 
     // Teaching Certifications & Licenses
     teachingLicense: false,
     licenseNumber: "",
     licenseState: "",
     licenseExpirationDate: "",
-    certifications: [],
-    specializations: [],
 
     // Teaching Experience
     yearsOfExperience: undefined as any,
@@ -85,18 +78,11 @@ const initialFormData: TeacherRegistrationFormData = {
     preferredSchedule: undefined,
 
     // Professional Skills & Qualifications
-    languagesSpoken: [],
-    technologySkills: [],
     specialSkills: "",
-    professionalDevelopment: "",
 
     // Employment Information
     positionApplyingFor: "",
-    departmentPreference: "",
-    availableStartDate: "",
     salaryExpectation: "",
-    willingToRelocate: false,
-    hasTransportation: false,
 
     // Background & References
     hasConvictions: false,
@@ -134,110 +120,21 @@ const initialFormData: TeacherRegistrationFormData = {
     agreeToBackgroundCheck: false,
 }
 
-const subjects = [
-    "Mathematics",
-    "English Language Arts",
-    "Science",
-    "Social Studies",
-    "History",
-    "Geography",
-    "Physics",
-    "Chemistry",
-    "Biology",
-    "Art",
-    "Music",
-    "Physical Education",
-    "Foreign Languages",
-    "Computer Science",
-    "Special Education",
-    "ESL/EFL",
-]
-
-const gradeLevels = [
-    "Pre-K",
-    "Kindergarten",
-    "Grade 1",
-    "Grade 2",
-    "Grade 3",
-    "Grade 4",
-    "Grade 5",
-    "Grade 6",
-    "Grade 7",
-    "Grade 8",
-    "Grade 9",
-    "Grade 10",
-    "Grade 11",
-    "Grade 12",
-]
-
-const languages = [
-    "English",
-    "Spanish",
-    "French",
-    "German",
-    "Italian",
-    "Portuguese",
-    "Chinese",
-    "Japanese",
-    "Korean",
-    "Arabic",
-    "Russian",
-    "Other",
-]
-
-const techSkills = [
-    "Microsoft Office",
-    "Google Workspace",
-    "Learning Management Systems",
-    "Interactive Whiteboards",
-    "Educational Software",
-    "Video Conferencing",
-    "Online Assessment Tools",
-    "Coding/Programming",
-    "Graphic Design",
-    "Web Development",
-]
-
-const certifications = [
-    "Teaching License",
-    "ESL Certification",
-    "Special Education Certification",
-    "Reading Specialist",
-    "Technology Integration",
-    "Curriculum Development",
-    "Assessment and Evaluation",
-    "Classroom Management",
-    "First Aid/CPR",
-    "Other",
-]
-
-const specializations = [
-    "Special Needs Education",
-    "Gifted and Talented",
-    "English as Second Language",
-    "STEM Education",
-    "Arts Integration",
-    "Technology Integration",
-    "Montessori Method",
-    "Waldorf Education",
-    "IB Programme",
-    "AP Courses",
-]
-
 const stepNames = {
     1: "Personal Information",
     2: "Contact Information",
     3: "Educational Background",
     4: "Teaching Certifications & Experience",
-    5: "Professional Skills & Employment",
-    6: "Background Check & References",
-    7: "Documents & Final Information"
+    5: "Background Check & References",
+    6: "Documents & Final Information"
 }
 
 export default function TeacherRegistrationForm() {
     const [currentStep, setCurrentStep] = useState(1)
     const [currentStepName, setCurrentStepName] = useState(stepNames[currentStep as keyof typeof stepNames] || "Unknown Step")
     const [formData, setFormData] = useState<TeacherRegistrationFormData>(initialFormData)
+    const [subjects, setSubjects] = useState<string[]>([])
+    const [gradeLevels, setGradeLevels] = useState<string[]>([])
     const [errors, setErrors] = useState<Record<string, string>>({})
     const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({})
     const [showRestorationDialog, setShowRestorationDialog] = useState(false)
@@ -246,7 +143,7 @@ export default function TeacherRegistrationForm() {
 
     const { saveFormData, loadFormData, clearFormData, hasSavedData } = useTeacherFormPersistence()
 
-    const totalSteps = 7
+    const totalSteps = stepNames ? Object.keys(stepNames).length : 6
     const progress = (currentStep / totalSteps) * 100
 
     // Handle form restoration on component mount
@@ -275,9 +172,22 @@ export default function TeacherRegistrationForm() {
         }
     }, [])
 
+    useEffect(() => {
+        // load available subjects and grade levels
+        const loadSubjectsAndGrades = async () => {
+            const subjects = await availableSubjects()
+            const grades = await availableGradeLevels()
+
+            setSubjects(subjects)
+            setGradeLevels(grades.map((grade) => `Grade ${grade}`))
+        }
+
+        loadSubjectsAndGrades()
+    }, [])
+
     // Auto-save form data
     useEffect(() => {
-        if (formData.firstName || formData.lastName || formData.personalEmail) {
+        if (formData.firstName || formData.grandFatherName || formData.personalEmail) {
             saveFormData(formData, currentStep)
             setLastSaved(new Date())
         }
@@ -331,9 +241,8 @@ export default function TeacherRegistrationForm() {
                 schema = teacherStep1Schema
                 dataToValidate = {
                     firstName: formData.firstName,
-                    middleName: formData.middleName,
-                    lastName: formData.lastName,
-                    preferredName: formData.preferredName,
+                    fatherName: formData.fatherName,
+                    grandFatherName: formData.grandFatherName,
                     dateOfBirth: formData.dateOfBirth,
                     gender: formData.gender,
                     nationality: formData.nationality,
@@ -353,23 +262,21 @@ export default function TeacherRegistrationForm() {
                     primaryPhone: formData.primaryPhone,
                     secondaryPhone: formData.secondaryPhone,
                     personalEmail: formData.personalEmail,
-                    workEmail: formData.workEmail,
                     emergencyContactName: formData.emergencyContactName,
                     emergencyContactRelation: formData.emergencyContactRelation,
                     emergencyContactPhone: formData.emergencyContactPhone,
-                    emergencyContactEmail: formData.emergencyContactEmail,
                 }
                 break
             case 3:
                 schema = teacherStep3Schema
                 dataToValidate = {
                     highestDegree: formData.highestDegree,
-                    majorSubject: formData.majorSubject,
-                    minorSubject: formData.minorSubject,
                     university: formData.university,
                     graduationYear: formData.graduationYear,
                     gpa: formData.gpa,
-                    additionalDegrees: formData.additionalDegrees,
+                    specialSkills: formData.specialSkills,
+                    positionApplyingFor: formData.positionApplyingFor,
+                    salaryExpectation: formData.salaryExpectation,
                 }
                 break
             case 4:
@@ -379,8 +286,6 @@ export default function TeacherRegistrationForm() {
                     licenseNumber: formData.licenseNumber,
                     licenseState: formData.licenseState,
                     licenseExpirationDate: formData.licenseExpirationDate,
-                    certifications: formData.certifications,
-                    specializations: formData.specializations,
                     yearsOfExperience: formData.yearsOfExperience,
                     previousSchools: formData.previousSchools,
                     subjectsToTeach: formData.subjectsToTeach,
@@ -390,21 +295,6 @@ export default function TeacherRegistrationForm() {
                 break
             case 5:
                 schema = teacherStep5Schema
-                dataToValidate = {
-                    languagesSpoken: formData.languagesSpoken,
-                    technologySkills: formData.technologySkills,
-                    specialSkills: formData.specialSkills,
-                    professionalDevelopment: formData.professionalDevelopment,
-                    positionApplyingFor: formData.positionApplyingFor,
-                    departmentPreference: formData.departmentPreference,
-                    availableStartDate: formData.availableStartDate,
-                    salaryExpectation: formData.salaryExpectation,
-                    willingToRelocate: formData.willingToRelocate,
-                    hasTransportation: formData.hasTransportation,
-                }
-                break
-            case 6:
-                schema = teacherStep6Schema
                 dataToValidate = {
                     hasConvictions: formData.hasConvictions,
                     convictionDetails: formData.convictionDetails,
@@ -427,8 +317,8 @@ export default function TeacherRegistrationForm() {
                     reference3Email: formData.reference3Email,
                 }
                 break
-            case 7:
-                schema = teacherStep7Schema
+            case 6:
+                schema = teacherStep6Schema
                 dataToValidate = {
                     resume: formData.resume,
                     coverLetter: formData.coverLetter,
@@ -536,12 +426,17 @@ export default function TeacherRegistrationForm() {
         setShowRestorationDialog(false)
     }
 
-    const handleFinalSubmit = () => {
+    const handleFinalSubmit = async () => {
         try {
             const validatedData = teacherRegistrationSchema.parse(formData)
-            console.log("Teacher registration submitted:", validatedData)
             clearFormData()
-            alert("Teacher registration submitted successfully!")
+            const response = await saveTeacherRegistration(validatedData)
+            toast.success(response.message, {
+                style: { color: "green" },
+            })
+            alert("Registration successful! Your application has been submitted.")
+            // setFormData(initialFormData) // Reset form after successful submission
+            // setCurrentStep(1)
         } catch (error) {
             if (error instanceof z.ZodError) {
                 const newErrors: Record<string, string> = {}
@@ -584,16 +479,16 @@ export default function TeacherRegistrationForm() {
                             </FormField>
                             <FormField
                                 label="Middle Name"
-                                id="middleName"
-                                error={errors.middleName}
-                                success={!errors.middleName && touchedFields.middleName}
+                                id="fatherName"
+                                error={errors.fatherName}
+                                success={!errors.fatherName && touchedFields.fatherName}
                             >
                                 <InputWithError
-                                    id="middleName"
-                                    value={formData.middleName}
-                                    onChange={(e) => handleFieldChange("middleName", e.target.value)}
+                                    id="fatherName"
+                                    value={formData.fatherName}
+                                    onChange={(e) => handleFieldChange("fatherName", e.target.value)}
                                     placeholder="Enter middle name"
-                                    error={errors.middleName}
+                                    error={errors.fatherName}
                                 />
                             </FormField>
                         </div>
@@ -601,31 +496,17 @@ export default function TeacherRegistrationForm() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <FormField
                                 label="Last Name"
-                                id="lastName"
+                                id="grandFatherName"
                                 required
-                                error={errors.lastName}
-                                success={!errors.lastName && touchedFields.lastName}
+                                error={errors.grandFatherName}
+                                success={!errors.grandFatherName && touchedFields.grandFatherName}
                             >
                                 <InputWithError
-                                    id="lastName"
-                                    value={formData.lastName}
-                                    onChange={(e) => handleFieldChange("lastName", e.target.value)}
+                                    id="grandFatherName"
+                                    value={formData.grandFatherName}
+                                    onChange={(e) => handleFieldChange("grandFatherName", e.target.value)}
                                     placeholder="Enter last name"
-                                    error={errors.lastName}
-                                />
-                            </FormField>
-                            <FormField
-                                label="Preferred Name"
-                                id="preferredName"
-                                error={errors.preferredName}
-                                success={!errors.preferredName && touchedFields.preferredName}
-                            >
-                                <InputWithError
-                                    id="preferredName"
-                                    value={formData.preferredName}
-                                    onChange={(e) => handleFieldChange("preferredName", e.target.value)}
-                                    placeholder="Name you prefer to be called"
-                                    error={errors.preferredName}
+                                    error={errors.grandFatherName}
                                 />
                             </FormField>
                         </div>
@@ -876,21 +757,6 @@ export default function TeacherRegistrationForm() {
                                     error={errors.personalEmail}
                                 />
                             </FormField>
-                            <FormField
-                                label="Work Email"
-                                id="workEmail"
-                                error={errors.workEmail}
-                                success={!errors.workEmail && touchedFields.workEmail}
-                            >
-                                <InputWithError
-                                    id="workEmail"
-                                    type="email"
-                                    value={formData.workEmail}
-                                    onChange={(e) => handleFieldChange("workEmail", e.target.value)}
-                                    placeholder="work@example.com"
-                                    error={errors.workEmail}
-                                />
-                            </FormField>
                         </div>
 
                         <Separator />
@@ -957,24 +823,6 @@ export default function TeacherRegistrationForm() {
                                         error={errors.emergencyContactPhone}
                                     />
                                 </FormField>
-                                <FormField
-                                    label="Emergency Contact Email"
-                                    id="emergencyContactEmail"
-                                    error={errors.emergencyContactEmail}
-                                    success={
-                                        !errors.emergencyContactEmail &&
-                                        touchedFields.emergencyContactEmail
-                                    }
-                                >
-                                    <InputWithError
-                                        id="emergencyContactEmail"
-                                        type="email"
-                                        value={formData.emergencyContactEmail}
-                                        onChange={(e) => handleFieldChange("emergencyContactEmail", e.target.value)}
-                                        placeholder="emergency@example.com"
-                                        error={errors.emergencyContactEmail}
-                                    />
-                                </FormField>
                             </div>
                         </div>
                     </div>
@@ -987,6 +835,51 @@ export default function TeacherRegistrationForm() {
                             <GraduationCap className="h-5 w-5 text-green-600" />
                             <h3 className="text-lg font-semibold">{currentStepName}</h3>
                         </div>
+
+
+                        <Separator />
+
+                        <div className="grid grid-cols-2 md:grid-cols-2 gap-4">
+                            <FormField
+                                label="Position Applying For"
+                                id="positionApplyingFor"
+                                required
+                                error={errors.positionApplyingFor}
+                                success={
+                                    !errors.positionApplyingFor &&
+                                    touchedFields.positionApplyingFor &&
+                                    formData.positionApplyingFor.length > 0
+                                }
+                            >
+                                <InputWithError
+                                    id="positionApplyingFor"
+                                    value={formData.positionApplyingFor}
+                                    onChange={(e) => handleFieldChange("positionApplyingFor", e.target.value)}
+                                    placeholder="e.g., Elementary Teacher, Math Teacher"
+                                    error={errors.positionApplyingFor}
+                                />
+                            </FormField>
+
+                            <FormField
+                                label="Salary Expectation"
+                                id="salaryExpectation"
+                                required
+                                error={errors.salaryExpectation}
+                                success={
+                                    !errors.salaryExpectation && touchedFields.salaryExpectation
+                                }
+                            >
+                                <InputWithError
+                                    id="salaryExpectation"
+                                    value={formData.salaryExpectation}
+                                    onChange={(e) => handleFieldChange("salaryExpectation", e.target.value)}
+                                    placeholder="$50,000"
+                                    error={errors.salaryExpectation}
+                                />
+                            </FormField>
+                        </div>
+
+                        <Separator />
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
@@ -1004,38 +897,7 @@ export default function TeacherRegistrationForm() {
                                 </SelectWithError>
                                 {errors.highestDegree && <p className="text-red-500 text-sm">{errors.highestDegree}</p>}
                             </div>
-                            <FormField
-                                label="Major Subject"
-                                id="majorSubject"
-                                required
-                                error={errors.majorSubject}
-                                success={!errors.majorSubject && touchedFields.majorSubject}
-                            >
-                                <InputWithError
-                                    id="majorSubject"
-                                    value={formData.majorSubject}
-                                    onChange={(e) => handleFieldChange("majorSubject", e.target.value)}
-                                    placeholder="e.g., Elementary Education, Mathematics"
-                                    error={errors.majorSubject}
-                                />
-                            </FormField>
-                        </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField
-                                label="Minor Subject"
-                                id="minorSubject"
-                                error={errors.minorSubject}
-                                success={!errors.minorSubject && touchedFields.minorSubject}
-                            >
-                                <InputWithError
-                                    id="minorSubject"
-                                    value={formData.minorSubject}
-                                    onChange={(e) => handleFieldChange("minorSubject", e.target.value)}
-                                    placeholder="e.g., Psychology, English"
-                                    error={errors.minorSubject}
-                                />
-                            </FormField>
                             <FormField
                                 label="University/College"
                                 id="university"
@@ -1091,22 +953,19 @@ export default function TeacherRegistrationForm() {
                                 />
                             </FormField>
                         </div>
-
                         <FormField
-                            label="Additional Degrees/Certifications"
-                            id="additionalDegrees"
-                            error={errors.additionalDegrees}
-                            success={
-                                !errors.additionalDegrees && touchedFields.additionalDegrees
-                            }
+                            label="Special Skills & Abilities"
+                            id="specialSkills"
+                            error={errors.specialSkills}
+                            success={!errors.specialSkills && touchedFields.specialSkills}
                         >
                             <TextareaWithError
-                                id="additionalDegrees"
-                                value={formData.additionalDegrees}
-                                onChange={(e) => handleFieldChange("additionalDegrees", e.target.value)}
-                                placeholder="List any additional degrees, certifications, or relevant coursework"
+                                id="specialSkills"
+                                value={formData.specialSkills}
+                                onChange={(e) => handleFieldChange("specialSkills", e.target.value)}
+                                placeholder="Describe any special skills, talents, or abilities that would benefit your teaching"
                                 rows={3}
-                                error={errors.additionalDegrees}
+                                error={errors.specialSkills}
                             />
                         </FormField>
                     </div>
@@ -1183,66 +1042,6 @@ export default function TeacherRegistrationForm() {
                                     </FormField>
                                 </div>
                             )}
-                        </div>
-
-                        <div className="space-y-4">
-                            <div className="space-y-2">
-                                <Label>Teaching Certifications</Label>
-                                <p className="text-sm text-gray-600">Select all certifications you have:</p>
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                                    {certifications.map((cert) => (
-                                        <div key={cert} className="flex items-center space-x-2">
-                                            <Checkbox
-                                                id={cert}
-                                                checked={(formData.certifications || []).includes(cert)}
-                                                onCheckedChange={() => handleArrayToggle("certifications", cert)}
-                                            />
-                                            <Label htmlFor={cert} className="text-sm">
-                                                {cert}
-                                            </Label>
-                                        </div>
-                                    ))}
-                                </div>
-                                {(formData.certifications || []).length > 0 && (
-                                    <div className="flex flex-wrap gap-1 mt-2">
-                                        {(formData.certifications || []).map((cert) => (
-                                            <Badge key={cert} variant="secondary">
-                                                {cert}
-                                            </Badge>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div className="space-y-2">
-                                <Label>Teaching Specializations</Label>
-                                <p className="text-sm text-gray-600">Select your areas of specialization:</p>
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                                    {specializations.map((spec) => (
-                                        <div key={spec} className="flex items-center space-x-2">
-                                            <Checkbox
-                                                id={spec}
-                                                checked={(formData.specializations || []).includes(spec)}
-                                                onCheckedChange={() => handleArrayToggle("specializations", spec)}
-                                            />
-                                            <Label htmlFor={spec} className="text-sm">
-                                                {spec}
-                                            </Label>
-                                        </div>
-                                    ))}
-                                </div>
-                                {(formData.specializations || []).length > 0 && (
-                                    <div className="flex flex-wrap gap-1 mt-2">
-                                        {(formData.specializations || []).map((spec) => (
-                                            <Badge key={spec} variant="secondary">
-                                                {spec}
-                                            </Badge>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
                         </div>
 
                         <Separator />
@@ -1364,204 +1163,6 @@ export default function TeacherRegistrationForm() {
                 )
 
             case 5:
-                return (
-                    <div className="space-y-6">
-                        <div className="flex items-center gap-2 mb-4">
-                            <Briefcase className="h-5 w-5 text-indigo-600" />
-                            <h3 className="text-lg font-semibold">{currentStepName}</h3>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div className="space-y-2">
-                                <Label>Languages Spoken</Label>
-                                <p className="text-sm text-gray-600">Select all languages you speak fluently:</p>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                                    {languages.map((language) => (
-                                        <div key={language} className="flex items-center space-x-2">
-                                            <Checkbox
-                                                id={language}
-                                                checked={(formData.languagesSpoken || []).includes(language)}
-                                                onCheckedChange={() => handleArrayToggle("languagesSpoken", language)}
-                                            />
-                                            <Label htmlFor={language} className="text-sm">
-                                                {language}
-                                            </Label>
-                                        </div>
-                                    ))}
-                                </div>
-                                {(formData.languagesSpoken || []).length > 0 && (
-                                    <div className="flex flex-wrap gap-1 mt-2">
-                                        {(formData.languagesSpoken || []).map((language) => (
-                                            <Badge key={language} variant="secondary">
-                                                {language}
-                                            </Badge>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            <div className="space-y-2">
-                                <Label>Technology Skills</Label>
-                                <p className="text-sm text-gray-600">Select your technology proficiencies:</p>
-                                <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                                    {techSkills.map((skill) => (
-                                        <div key={skill} className="flex items-center space-x-2">
-                                            <Checkbox
-                                                id={skill}
-                                                checked={(formData.technologySkills || []).includes(skill)}
-                                                onCheckedChange={() => handleArrayToggle("technologySkills", skill)}
-                                            />
-                                            <Label htmlFor={skill} className="text-sm">
-                                                {skill}
-                                            </Label>
-                                        </div>
-                                    ))}
-                                </div>
-                                {(formData.technologySkills || []).length > 0 && (
-                                    <div className="flex flex-wrap gap-1 mt-2">
-                                        {(formData.technologySkills || []).map((skill) => (
-                                            <Badge key={skill} variant="secondary">
-                                                {skill}
-                                            </Badge>
-                                        ))}
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        <FormField
-                            label="Special Skills & Abilities"
-                            id="specialSkills"
-                            error={errors.specialSkills}
-                            success={!errors.specialSkills && touchedFields.specialSkills}
-                        >
-                            <TextareaWithError
-                                id="specialSkills"
-                                value={formData.specialSkills}
-                                onChange={(e) => handleFieldChange("specialSkills", e.target.value)}
-                                placeholder="Describe any special skills, talents, or abilities that would benefit your teaching"
-                                rows={3}
-                                error={errors.specialSkills}
-                            />
-                        </FormField>
-
-                        <FormField
-                            label="Professional Development"
-                            id="professionalDevelopment"
-                            error={errors.professionalDevelopment}
-                            success={!errors.professionalDevelopment && touchedFields.professionalDevelopment}
-                        >
-                            <TextareaWithError
-                                id="professionalDevelopment"
-                                value={formData.professionalDevelopment}
-                                onChange={(e) => handleFieldChange("professionalDevelopment", e.target.value)}
-                                placeholder="List recent workshops, conferences, or professional development activities"
-                                rows={3}
-                                error={errors.professionalDevelopment}
-                            />
-                        </FormField>
-
-                        <Separator />
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField
-                                label="Position Applying For"
-                                id="positionApplyingFor"
-                                required
-                                error={errors.positionApplyingFor}
-                                success={
-                                    !errors.positionApplyingFor &&
-                                    touchedFields.positionApplyingFor &&
-                                    formData.positionApplyingFor.length > 0
-                                }
-                            >
-                                <InputWithError
-                                    id="positionApplyingFor"
-                                    value={formData.positionApplyingFor}
-                                    onChange={(e) => handleFieldChange("positionApplyingFor", e.target.value)}
-                                    placeholder="e.g., Elementary Teacher, Math Teacher"
-                                    error={errors.positionApplyingFor}
-                                />
-                            </FormField>
-                            <FormField
-                                label="Department Preference"
-                                id="departmentPreference"
-                                error={errors.departmentPreference}
-                                success={!errors.departmentPreference && touchedFields.departmentPreference}
-                            >
-                                <InputWithError
-                                    id="departmentPreference"
-                                    value={formData.departmentPreference}
-                                    onChange={(e) => handleFieldChange("departmentPreference", e.target.value)}
-                                    placeholder="e.g., Mathematics, Science, Elementary"
-                                    error={errors.departmentPreference}
-                                />
-                            </FormField>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField
-                                label="Available Start Date"
-                                id="availableStartDate"
-                                required
-                                error={errors.availableStartDate}
-                                success={
-                                    !errors.availableStartDate &&
-                                    touchedFields.availableStartDate &&
-                                    formData.availableStartDate.length > 0
-                                }
-                            >
-                                <InputWithError
-                                    id="availableStartDate"
-                                    type="date"
-                                    value={formData.availableStartDate}
-                                    onChange={(e) => handleFieldChange("availableStartDate", e.target.value)}
-                                    error={errors.availableStartDate}
-                                />
-                            </FormField>
-                            <FormField
-                                label="Salary Expectation"
-                                id="salaryExpectation"
-                                required
-                                error={errors.salaryExpectation}
-                                success={
-                                    !errors.salaryExpectation && touchedFields.salaryExpectation
-                                }
-                            >
-                                <InputWithError
-                                    id="salaryExpectation"
-                                    value={formData.salaryExpectation}
-                                    onChange={(e) => handleFieldChange("salaryExpectation", e.target.value)}
-                                    placeholder="$50,000"
-                                    error={errors.salaryExpectation}
-                                />
-                            </FormField>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="flex items-center space-x-2">
-                                <Checkbox
-                                    id="willingToRelocate"
-                                    checked={formData.willingToRelocate}
-                                    onCheckedChange={(checked) => handleFieldChange("willingToRelocate", checked)}
-                                />
-                                <Label htmlFor="willingToRelocate">Willing to relocate if necessary</Label>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <Checkbox
-                                    id="hasTransportation"
-                                    checked={formData.hasTransportation}
-                                    onCheckedChange={(checked) => handleFieldChange("hasTransportation", checked)}
-                                />
-                                <Label htmlFor="hasTransportation">Have reliable transportation</Label>
-                            </div>
-                        </div>
-                    </div>
-                )
-
-            case 6:
                 return (
                     <div className="space-y-6">
                         <div className="flex items-center gap-2 mb-4">
@@ -1909,7 +1510,7 @@ export default function TeacherRegistrationForm() {
                     </div>
                 )
 
-            case 7:
+            case 6:
                 return (
                     <div className="space-y-6">
                         <div className="flex items-center gap-2 mb-4">

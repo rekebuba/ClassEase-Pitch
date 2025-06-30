@@ -13,6 +13,7 @@ import {
 import { z } from 'zod';
 import qs from "qs";
 import { create } from "domain";
+import { DetailTeacherAPPlicationSchema, TeacherApplicationSchema } from "@/lib/api-validation";
 
 export const adminApi = {
     getDashboardData: () => api.get('/admin/dashboard'),
@@ -35,6 +36,9 @@ export const adminApi = {
     deleteUser: (userId) => api.delete(`/admin/users/${userId}`),
     createEvent: (eventData) => api.post('/admin/event/new', eventData),
     getEvents: () => api.get('/admin/events'),
+    fetchTeachersApplications: () => api.get('/admin/teacher/applications'),
+    detailTeachersApplications: (applicationId: string) => api.get(`/admin/teacher/applications/${applicationId}`),
+    updateTeacherApplicationStatus: (applicationId: string, newStatus: string) => api.put(`/admin/teacher/applications/${applicationId}`, { status: newStatus }),
 };
 
 export const getStudents = async (validQuery: SearchParams) => {
@@ -203,6 +207,63 @@ export const updateView = async (updatedView: StudentsViews) => {
         });
         console.error(response.error.details);
         throw new Error("Failed to update students view", {
+            cause: JSON.stringify(response.error.details),
+        });
+    }
+
+    return response.data;
+}
+
+export const fetchTeachersApplications = async () => {
+    const response = await zodApiHandler(
+        () => adminApi.fetchTeachersApplications(),
+        TeacherApplicationSchema.array(),
+    );
+
+    if (!response.success) {
+        toast.error(response.error.message, {
+            style: { color: "red" },
+        });
+        console.error(response.error.details);
+        throw new Error("Failed to fetch teachers applications", {
+            cause: JSON.stringify(response.error.details),
+        });
+    }
+
+    return response.data;
+}
+
+export const detailTeachersApplications = async (applicationId: string) => {
+    const response = await zodApiHandler(
+        () => adminApi.detailTeachersApplications(applicationId),
+        DetailTeacherAPPlicationSchema,
+    );
+
+    if (!response.success) {
+        toast.error(response.error.message, {
+            style: { color: "red" },
+        });
+        console.error(response.error.details);
+        throw new Error("Failed to fetch teacher application details", {
+            cause: JSON.stringify(response.error.details),
+        });
+    }
+
+    return response.data;
+}
+
+export const updateTeacherApplicationStatus = async (applicationId: string, newStatus: string) => {
+    const response = await zodApiHandler(
+        () => adminApi.updateTeacherApplicationStatus(applicationId, newStatus),
+        ApiResponse,
+    );
+
+    if (!response.success) {
+        toast.error(response.error.message, {
+            style: { color: "red" },
+        });
+        console.error(response.error.details);
+        throw new Error("Failed to update teacher application status", {
             cause: JSON.stringify(response.error.details),
         });
     }

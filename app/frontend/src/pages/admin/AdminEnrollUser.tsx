@@ -21,7 +21,7 @@ const AdminEnrollUser = ({ role }) => {
 
     return (
         <Layout role="admin">
-            {role === 'teacher' ? <TeacherRegistrationForm /> : <StudentRegistrationForm role='admin' />
+            {role === 'teacher' ? <TeacherRegistrationForm /> : <StudentRegistrationForm />
             }
         </Layout>
     );
