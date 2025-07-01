@@ -16,4 +16,7 @@ class Registration(BaseModel):
     subject_id: Mapped[str] = mapped_column(
         String(120), ForeignKey("subjects.id"), nullable=False
     )
+    semester_id: Mapped[str] = mapped_column(
+        String(120), ForeignKey("semesters.id"), nullable=False
+    )
     registration_date: Mapped[DateTime] = mapped_column(DateTime, nullable=False)

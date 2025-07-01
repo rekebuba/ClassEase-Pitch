@@ -27,7 +27,7 @@ from api.v1.schemas.config_schema import (
     to_camel,
     to_snake,
 )
-from models.stud_year_record import STUDYearRecord
+from models.student_year_record import StudentYearRecord
 from models.table import Table
 from models.subject import Subject
 from models.user import User
@@ -141,7 +141,7 @@ class BaseSchema(Schema):
 
         # Fetch the year_records_id from the database
         year_record_id: Optional[str] = (
-            storage.session.query(STUDYearRecord.id).filter_by(year_id=year_id).scalar()
+            storage.session.query(StudentYearRecord.id).filter_by(year_id=year_id).scalar()
         )
 
         if year_record_id is None:

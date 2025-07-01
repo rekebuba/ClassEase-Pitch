@@ -10,7 +10,7 @@ from models.student import Student
 from models.grade import Grade
 from models.subject import Subject
 from models.mark_list import MarkList
-from models.stud_year_record import STUDYearRecord
+from models.student_year_record import StudentYearRecord
 
 admin = Blueprint("admin", __name__, url_prefix="/api/v1/admin")
 
@@ -28,10 +28,10 @@ def school_overview(admin_data: UserT) -> Tuple[Response, int]:
     total_teachers = storage.get_all(Teacher)
     total_students = storage.get_all(Student)
     enrollment_by_grade = (
-        storage.session.query(Grade.grade, func.count(STUDYearRecord.student_id))
-        .join(Grade, STUDYearRecord.grade_id == Grade.id)
+        storage.session.query(Grade.grade, func.count(StudentYearRecord.student_id))
+        .join(Grade, StudentYearRecord.grade_id == Grade.id)
         .group_by(
-            STUDYearRecord.grade_id,
+            StudentYearRecord.grade_id,
         )
         .all()
     )

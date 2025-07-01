@@ -9,7 +9,7 @@ from datetime import datetime
 from pyethiodate import EthDate  # type: ignore
 
 if TYPE_CHECKING:
-    from models.stud_year_record import STUDYearRecord
+    from models.student_year_record import StudentYearRecord
 
 
 def seed_year(session: scoped_session[Session]) -> None:
@@ -44,8 +44,8 @@ class Year(BaseModel):
     )
 
     # Relationships
-    student_year_records: Mapped["STUDYearRecord"] = relationship(
-        "STUDYearRecord",
+    student_year_records: Mapped["StudentYearRecord"] = relationship(
+        "StudentYearRecord",
         back_populates="years",
         uselist=False,
         init=False,

@@ -7,10 +7,10 @@ from api.v1.views.student import stud
 from models.assessment import Assessment
 from models.grade import Grade
 from models.mark_list import MarkList
-from models.stud_semester_record import STUDSemesterRecord
+from models.student_semester_record import StudentSemesterRecord
 from models.student import Student
 from models.subject import Subject
-from models.stud_year_record import STUDYearRecord
+from models.student_year_record import StudentYearRecord
 from models import storage
 
 
@@ -21,7 +21,7 @@ def get_student_score(student_data: UserT) -> Tuple[Response, int]:
     Retrieve and return the score details of a student for a specific grade and semester.
 
     Args:
-        student_data (STUDYearRecord): The yearly record of the student. If not provided, it will be fetched using the student_id from the request query parameters.
+        student_data (StudentYearRecord): The yearly record of the student. If not provided, it will be fetched using the student_id from the request query parameters.
         admin_data (dict): Additional data related to the admin making the request (currently unused).
 
     Returns:
@@ -41,7 +41,7 @@ def get_student_score(student_data: UserT) -> Tuple[Response, int]:
     if not student_data:
         if "student_id" not in data:
             return jsonify({"message": "Missing student id"}), 400
-        student_data = storage.get_first(STUDYearRecord, student_id=data["student_id"])
+        student_data = storage.get_first(StudentYearRecord, student_id=data["student_id"])
 
     required_data = {
         "grade",
@@ -91,7 +91,7 @@ def get_student_score(student_data: UserT) -> Tuple[Response, int]:
 
     student = storage.get_first(Student, id=student_id)
     average_score = storage.get_first(
-        STUDSemesterRecord,
+        StudentSemesterRecord,
         student_id=student_id,
         year=student_data.year,
         semester=data["semester"][0],

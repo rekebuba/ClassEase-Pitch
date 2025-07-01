@@ -79,32 +79,4 @@ class Event(BaseModel):
             "registration_start <= registration_end", name="check_registration_dates"
         ),
         CheckConstraint("fee_amount >= 0", name="check_fee_amount"),
-        CheckConstraint(
-            "requires_registration = True AND registration_start IS NOT NULL AND registration_end IS NOT NULL",
-            name="check_registration_with_dates",
-        ),
-        CheckConstraint("has_fee = True AND fee_amount > 0", name="check_fee"),
-        CheckConstraint(
-            "purpose = 'New Semester' AND location = 'Online'",
-            name="check_purpose_with_location",
-        ),
-        CheckConstraint(
-            "purpose = 'New Semester' AND has_fee = True", name="check_purpose_with_fee"
-        ),
-        CheckConstraint(
-            "purpose = 'New Semester' AND requires_registration = True",
-            name="check_purpose_with_registration",
-        ),
-        CheckConstraint(
-            "purpose = 'New Semester' AND eligibility = 'All'",
-            name="check_purpose_with_eligibility",
-        ),
-        CheckConstraint(
-            "purpose = 'New Semester' AND registration_start IS NOT NULL",
-            name="check_purpose_with_registration_start",
-        ),
-        CheckConstraint(
-            "purpose = 'New Semester' AND registration_end IS NOT NULL",
-            name="check_purpose_with_registration_end",
-        ),
     )

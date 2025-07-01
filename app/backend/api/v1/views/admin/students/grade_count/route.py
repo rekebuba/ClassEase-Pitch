@@ -11,7 +11,7 @@ from api.v1.views.admin.students.grade_count.schema import (
 )
 from api.v1.views.utils import admin_required
 from models.grade import Grade
-from models.stud_year_record import STUDYearRecord
+from models.student_year_record import StudentYearRecord
 
 from models import storage
 from models.student import Student
@@ -31,8 +31,8 @@ def student_grade_counts(admin_data: UserT) -> Tuple[Response, int]:
         query = (
             storage.session.query(Grade.grade, func.count(Student.id))
             .select_from(Student)
-            .outerjoin(STUDYearRecord, STUDYearRecord.student_id == Student.id)
-            .outerjoin(Grade, STUDYearRecord.grade_id == Grade.id)
+            .outerjoin(StudentYearRecord, StudentYearRecord.student_id == Student.id)
+            .outerjoin(Grade, StudentYearRecord.grade_id == Grade.id)
             .group_by(Grade.id)
             .order_by(Grade.grade)
         ).all()

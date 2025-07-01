@@ -16,8 +16,8 @@ from models.subject import Subject
 from models.year import Year
 from models.event import Event
 from models.grade import Grade
-from models.stud_semester_record import STUDSemesterRecord
-from models.stud_year_record import STUDYearRecord
+from models.student_semester_record import StudentSemesterRecord
+from models.student_year_record import StudentYearRecord
 from models import storage
 from api.v1.views import errors
 
@@ -110,7 +110,7 @@ def register_course(user_data: UserT) -> Tuple[Response, int]:
         valid_data = course_schema.load(data)
 
         if valid_data.get("semester") == 1:
-            year_record = STUDYearRecord(
+            year_record = StudentYearRecord(
                 student_id=valid_data.get("student_id"),
                 grade_id=valid_data.get("grade_id"),
                 year_id=valid_data.get("year_id"),
@@ -119,7 +119,7 @@ def register_course(user_data: UserT) -> Tuple[Response, int]:
             storage.session.flush()
         else:
             year_record = (
-                storage.session.query(STUDYearRecord)
+                storage.session.query(StudentYearRecord)
                 .filter_by(
                     student_id=valid_data.get("student_id"),
                     grade_id=valid_data.get("grade_id"),
@@ -149,7 +149,7 @@ def register_course(user_data: UserT) -> Tuple[Response, int]:
             storage.session.add(section)
             storage.session.flush()
 
-        new_semester_record = STUDSemesterRecord(
+        new_semester_record = StudentSemesterRecord(
             section_id=section.id,
             student_id=valid_data.get("student_id"),
             semester_id=valid_data.get("semester_id"),

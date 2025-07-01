@@ -10,10 +10,10 @@ from models.user import User
 from models.subject import Subject
 from models.assessment import Assessment
 from models.mark_list import MarkList
-from models.stud_semester_record import STUDSemesterRecord
-from models.average_subject import AVRGSubject
+from models.student_semester_record import StudentSemesterRecord
+from models.subject_yearly_average import SubjectYearlyAverage
 from models.teacher_record import TeachersRecord
-from models.stud_year_record import STUDYearRecord
+from models.student_year_record import StudentYearRecord
 from urllib.parse import urlparse, parse_qs
 from sqlalchemy import update, and_
 from flask import Blueprint
@@ -57,20 +57,20 @@ def student_assessment(user_data: UserT) -> Tuple[Response, int]:
             Assessment.semester,
             Assessment.total,
             Assessment.rank,
-            AVRGSubject.average,
-            AVRGSubject.rank,
+            SubjectYearlyAverage.average,
+            SubjectYearlyAverage.rank,
             Assessment.year,
         )
         .select_from(Assessment)
         .join(TeachersRecord, TeachersRecord.id == Assessment.teachers_record_id)
         .join(Subject, Assessment.subject_id == Subject.id)
         .join(
-            AVRGSubject,
+            SubjectYearlyAverage,
             and_(
-                AVRGSubject.student_id == Assessment.student_id,
-                AVRGSubject.grade_id == Assessment.grade_id,
-                AVRGSubject.subject_id == Assessment.subject_id,
-                AVRGSubject.year == Assessment.year,
+                SubjectYearlyAverage.student_id == Assessment.student_id,
+                SubjectYearlyAverage.grade_id == Assessment.grade_id,
+                SubjectYearlyAverage.subject_id == Assessment.subject_id,
+                SubjectYearlyAverage.year == Assessment.year,
             ),
         )
         .filter(
@@ -118,23 +118,23 @@ def student_assessment(user_data: UserT) -> Tuple[Response, int]:
 
     summary = (
         storage.session.query(
-            STUDSemesterRecord.semester,
-            STUDSemesterRecord.average,
-            STUDSemesterRecord.rank,
-            STUDYearRecord.final_score,
-            STUDYearRecord.rank,
+            StudentSemesterRecord.semesters,
+            StudentSemesterRecord.average,
+            StudentSemesterRecord.rank,
+            StudentYearRecord.final_score,
+            StudentYearRecord.rank,
         )
-        .select_from(STUDSemesterRecord)
+        .select_from(StudentSemesterRecord)
         .join(
-            STUDYearRecord,
+            StudentYearRecord,
             and_(
-                STUDYearRecord.student_id == STUDSemesterRecord.student_id,
-                STUDYearRecord.grade_id == STUDSemesterRecord.grade_id,
-                STUDYearRecord.year == STUDSemesterRecord.year,
+                StudentYearRecord.student_id == StudentSemesterRecord.student_id,
+                StudentYearRecord.grade_id == StudentSemesterRecord.grade_id,
+                StudentYearRecord.year == StudentSemesterRecord.year,
             ),
         )
-        .filter(STUDSemesterRecord.student_id == student_id)
-        .order_by(STUDSemesterRecord.semester)
+        .filter(StudentSemesterRecord.student_id == student_id)
+        .order_by(StudentSemesterRecord.semesters)
     ).all()
 
     if not summary:

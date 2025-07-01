@@ -9,7 +9,7 @@ from api.v1.views.utils import admin_required
 from api.v1.views.admin.mark_list.schema import CreateMarkListSchema
 from models.student import Student
 from models.mark_list import MarkList
-from models.stud_semester_record import STUDSemesterRecord
+from models.student_semester_record import StudentSemesterRecord
 from api.v1.views import errors
 from models import storage
 
@@ -36,11 +36,11 @@ def create_mark_list(admin_data: UserT) -> Tuple[Response, int]:
         mark_list = []
         for assessment in validated_data["mark_assessment"]:
             registered_students = (
-                storage.session.query(STUDSemesterRecord.id, Student.user_id)
-                .join(STUDSemesterRecord.students)
+                storage.session.query(StudentSemesterRecord.id, Student.user_id)
+                .join(StudentSemesterRecord.students)
                 .filter(
                     and_(
-                        STUDSemesterRecord.semester_id == validated_data["semester_id"],
+                        StudentSemesterRecord.semester_id == validated_data["semester_id"],
                         Student.current_grade_id == assessment["grade_id"],
                     )
                 )

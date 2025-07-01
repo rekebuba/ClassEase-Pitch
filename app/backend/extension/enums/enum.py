@@ -108,3 +108,12 @@ class HighestDegreeEnum(str, Enum):
     BACHELORS = "bachelors"
     MASTERS = "masters"
     DOCTORATE = "doctorate"
+
+
+class StudentApplicationStatusEnum(str, Enum):
+    PENDING = "pending"
+    UNDER_REVIEW = "under-review"
+    DOCUMENTS_REQUIRED = "documents-required"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    ENROLLED = "enrolled"

@@ -5,7 +5,7 @@ from sqlalchemy import and_, select, true, update
 from api.v1.utils.typing import UserT
 from api.v1.views.utils import admin_required
 from models.assessment import Assessment
-from models.average_subject import AVRGSubject
+from models.subject_yearly_average import SubjectYearlyAverage
 from models.grade import Grade
 from models.mark_list import MarkList
 from models.section import Section
@@ -139,14 +139,14 @@ def assign_class(admin_data: UserT) -> Tuple[Response, int]:
                     .values(teachers_record_id=teacher_record.id)
                 )
 
-                # Update the AVRGSubject table
+                # Update the SubjectYearlyAverage table
                 storage.session.execute(
-                    update(AVRGSubject)
+                    update(SubjectYearlyAverage)
                     .where(
                         and_(
-                            AVRGSubject.grade_id == grade_id,
-                            AVRGSubject.subject_id == subject.id,
-                            AVRGSubject.year == data["mark_list_year"],
+                            SubjectYearlyAverage.grade_id == grade_id,
+                            SubjectYearlyAverage.subject_id == subject.id,
+                            SubjectYearlyAverage.year == data["mark_list_year"],
                         )
                     )
                     .values(teachers_record_id=teacher_record.id)

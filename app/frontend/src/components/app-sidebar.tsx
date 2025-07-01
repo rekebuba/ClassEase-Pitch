@@ -111,7 +111,7 @@ const data: DataProps = {
                 items: [
                     {
                         title: "Student Registration",
-                        href: "/admin/student/registration",
+                        href: "/admin/student/applications",
                     },
                     {
                         title: "Teacher Registration",

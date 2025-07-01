@@ -13,8 +13,8 @@ from api.v1.views.methods import (
     min_max_semester_lookup,
     min_max_year_lookup,
 )
-from models.stud_semester_record import STUDSemesterRecord
-from models.stud_year_record import STUDYearRecord
+from models.student_semester_record import StudentSemesterRecord
+from models.student_year_record import StudentYearRecord
 from models.student import Student
 from models.user import User
 from models import storage
@@ -33,12 +33,12 @@ def student_average_range(admin_data: UserT) -> Tuple[Response, int]:
     """
     try:
         custom_types = {
-            **min_max_year_lookup(STUDYearRecord.final_score, "year"),
-            **min_max_year_lookup(STUDYearRecord.rank, "rank"),
-            **min_max_semester_lookup(1, STUDSemesterRecord.average, "semester_one"),
-            **min_max_semester_lookup(2, STUDSemesterRecord.average, "semester_two"),
-            **min_max_semester_lookup(1, STUDSemesterRecord.rank, "rank_semester_one"),
-            **min_max_semester_lookup(2, STUDSemesterRecord.rank, "rank_semester_two"),
+            **min_max_year_lookup(StudentYearRecord.final_score, "year"),
+            **min_max_year_lookup(StudentYearRecord.rank, "rank"),
+            **min_max_semester_lookup(1, StudentSemesterRecord.average, "semester_one"),
+            **min_max_semester_lookup(2, StudentSemesterRecord.average, "semester_two"),
+            **min_max_semester_lookup(1, StudentSemesterRecord.rank, "rank_semester_one"),
+            **min_max_semester_lookup(2, StudentSemesterRecord.rank, "rank_semester_two"),
         }
         query = (
             storage.session.query(
@@ -57,8 +57,8 @@ def student_average_range(admin_data: UserT) -> Tuple[Response, int]:
             )
             .join(User.students)
             .outerjoin(Student.year_records)
-            .outerjoin(STUDYearRecord.semester_records)
-            .outerjoin(STUDSemesterRecord.semesters)
+            .outerjoin(StudentYearRecord.semester_records)
+            .outerjoin(StudentSemesterRecord.semesters)
         )
 
         result = query.one()

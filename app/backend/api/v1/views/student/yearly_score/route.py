@@ -5,8 +5,8 @@ from api.v1.utils.typing import UserT
 from api.v1.views.utils import student_required
 from api.v1.views.student import stud
 from models.grade import Grade
-from models.stud_semester_record import STUDSemesterRecord
-from models.stud_year_record import STUDYearRecord
+from models.student_semester_record import StudentSemesterRecord
+from models.student_year_record import StudentYearRecord
 from models import storage
 
 
@@ -25,24 +25,24 @@ def student_yearly_scores(student_data: UserT) -> Tuple[Response, int]:
 
     query = (
         storage.session.query(
-            STUDYearRecord.user_id,
+            StudentYearRecord.user_id,
             Grade.id,
             Grade.grade,
-            STUDSemesterRecord.semester,
-            STUDSemesterRecord.average,
-            STUDYearRecord.final_score,
-            STUDYearRecord.year,
+            StudentSemesterRecord.semesters,
+            StudentSemesterRecord.average,
+            StudentYearRecord.final_score,
+            StudentYearRecord.year,
         )
-        .join(Grade, STUDSemesterRecord.grade_id == Grade.id)
-        .join(STUDYearRecord, STUDYearRecord.user_id == STUDSemesterRecord.user_id)
+        .join(Grade, StudentSemesterRecord.grade_id == Grade.id)
+        .join(StudentYearRecord, StudentYearRecord.user_id == StudentSemesterRecord.user_id)
         .filter(
             and_(
-                STUDSemesterRecord.user_id == student_data.user_id,
-                STUDYearRecord.grade_id == STUDSemesterRecord.grade_id,
-                STUDYearRecord.year == STUDSemesterRecord.year,
+                StudentSemesterRecord.user_id == student_data.user_id,
+                StudentYearRecord.grade_id == StudentSemesterRecord.grade_id,
+                StudentYearRecord.year == StudentSemesterRecord.year,
             )
         )
-        .order_by(Grade.grade, STUDSemesterRecord.semester)
+        .order_by(Grade.grade, StudentSemesterRecord.semesters)
     ).all()
 
     score = {}
