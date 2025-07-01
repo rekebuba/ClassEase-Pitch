@@ -1,19 +1,19 @@
 #!/usr/bin/python3
-"""Module for STUDYearRecord class"""
+"""Module for StudentYearRecord class"""
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 from sqlalchemy import Integer, String, ForeignKey, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from models.base_model import BaseModel
 
 if TYPE_CHECKING:
     from models.grade import Grade
-    from models.stud_semester_record import STUDSemesterRecord
+    from models.student_semester_record import StudentSemesterRecord
     from models.student import Student
     from models.year import Year
 
 
-class STUDYearRecord(BaseModel):
+class StudentYearRecord(BaseModel):
     """
     Represents a student's yearly academic record.
     """
@@ -49,8 +49,8 @@ class STUDYearRecord(BaseModel):
         back_populates="student_year_records",
         init=False,
     )
-    semester_records: Mapped["STUDSemesterRecord"] = relationship(
-        "STUDSemesterRecord",
+    semester_records: Mapped[List["StudentSemesterRecord"]] = relationship(
+        "StudentSemesterRecord",
         back_populates="year_records",
         init=False,
     )

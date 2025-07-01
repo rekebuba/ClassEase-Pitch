@@ -1,14 +1,14 @@
 #!/usr/bin/python3
 """Module for Section class"""
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from models.base_model import BaseModel
 
 if TYPE_CHECKING:
     from models.grade import Grade
-    from models.stud_semester_record import STUDSemesterRecord
+    from models.student_semester_record import StudentSemesterRecord
 
 
 class Section(BaseModel):
@@ -28,6 +28,6 @@ class Section(BaseModel):
     grade: Mapped["Grade"] = relationship(
         "Grade", back_populates="sections", init=False
     )
-    semester_records: Mapped[list["STUDSemesterRecord"]] = relationship(
-        "STUDSemesterRecord", back_populates="sections", uselist=False, init=False
+    semester_records: Mapped[List["StudentSemesterRecord"]] = relationship(
+        "StudentSemesterRecord", back_populates="sections", init=False
     )

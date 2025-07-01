@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Module for Average Result class"""
+"""Module for SubjectYearlyAverage class"""
 
 from typing import TYPE_CHECKING
 from sqlalchemy import String, Integer, ForeignKey, Float
@@ -10,11 +10,8 @@ if TYPE_CHECKING:
     from models.student import Student
 
 
-class AVRGSubject(BaseModel):
-    __tablename__ = "average_subjects"
-    user_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("users.id"), nullable=False
-    )
+class SubjectYearlyAverage(BaseModel):
+    __tablename__ = "subject_yearly_averages"
     student_id: Mapped[str] = mapped_column(
         String(120), ForeignKey("students.id"), nullable=False
     )

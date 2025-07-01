@@ -13,9 +13,6 @@ class MarkList(BaseModel):
 
     __tablename__ = "mark_lists"
 
-    user_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("users.id"), nullable=False
-    )
     subject_id: Mapped[str] = mapped_column(
         String(120), ForeignKey("subjects.id"), nullable=False
     )

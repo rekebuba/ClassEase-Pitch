@@ -11,7 +11,7 @@ from api.v1.schemas.custom_schema import (
 )
 from models.section import Section
 from models.semester import Semester
-from models.stud_year_record import STUDYearRecord
+from models.student_year_record import StudentYearRecord
 from models.grade import Grade
 
 
@@ -114,6 +114,6 @@ class STUDYearRecordSchema(BaseSchema):
 
     @post_dump
     def add_fields(self, data, **kwargs: Any):
-        data["table_id"] = self.get_table_id(STUDYearRecord)
+        data["table_id"] = self.get_table_id(StudentYearRecord)
 
         return data

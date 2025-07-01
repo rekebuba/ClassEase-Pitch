@@ -17,9 +17,9 @@ from models.subject import Subject, seed_subjects  # noqa: F401
 from models.teacher import Teacher  # noqa: F401
 from models.assessment import Assessment  # noqa: F401
 from models.mark_list import MarkList  # noqa: F401
-from models.stud_semester_record import STUDSemesterRecord  # noqa: F401
-from models.average_subject import AVRGSubject  # noqa: F401
-from models.stud_year_record import STUDYearRecord  # noqa: F401
+from models.student_semester_record import StudentSemesterRecord  # noqa: F401
+from models.subject_yearly_average import SubjectYearlyAverage  # noqa: F401
+from models.student_year_record import StudentYearRecord  # noqa: F401
 from models.teacher_record import TeachersRecord  # noqa: F401
 from models.blacklist_token import BlacklistToken  # noqa: F401
 from models.event import Event  # noqa: F401

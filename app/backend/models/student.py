@@ -1,21 +1,23 @@
 #!/usr/bin/python3
 """Module for Student class"""
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List, Optional
 from sqlalchemy import (
     Date,
     String,
     ForeignKey,
     Boolean,
     Text,
+    Enum,
 )
 from models.base_model import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from extension.enums.enum import GenderEnum, StudentApplicationStatusEnum
 
 if TYPE_CHECKING:
-    from models.stud_semester_record import STUDSemesterRecord
-    from models.stud_year_record import STUDYearRecord
-    from models.average_subject import AVRGSubject
+    from models.student_semester_record import StudentSemesterRecord
+    from models.student_year_record import StudentYearRecord
+    from models.subject_yearly_average import SubjectYearlyAverage
     from models.user import User
 
 
@@ -25,91 +27,104 @@ class Student(BaseModel):
     """
 
     __tablename__ = "students"
-    user_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("users.id"), unique=True, nullable=False
-    )
+    registration_date: Mapped[Date] = mapped_column(Date, nullable=False)
+
+    # Personal Information
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
     father_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    grand_father_name: Mapped[str] = mapped_column(String(50), nullable=False)
     date_of_birth: Mapped[Date] = mapped_column(Date, nullable=False)
-    gender: Mapped[str] = mapped_column(String(1), nullable=False)
-
-    # Parent/Guardian Contacts
-    father_phone: Mapped[str] = mapped_column(String(25))
-    mother_phone: Mapped[str] = mapped_column(String(25))
-    guardian_name: Mapped[str] = mapped_column(
-        String(50)
-    )  # If student lives with someone else
-    guardian_phone: Mapped[str] = mapped_column(String(25))
-
-    # Academic Info
-    start_year_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("years.id"), nullable=False
+    gender: Mapped[GenderEnum] = mapped_column(
+        Enum(
+            GenderEnum,
+            name="gender_enum",
+            values_callable=lambda x: [e.value for e in x],
+            native_enum=False,
+        ),
+        nullable=False,
     )
-    current_year_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("years.id"), nullable=False
-    )
-    current_grade_id: Mapped[str] = mapped_column(
+
+    # Academic Information
+    grade_id: Mapped[str] = mapped_column(
         String(120), ForeignKey("grades.id"), nullable=False
     )
-    next_grade_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("grades.id"), nullable=True, default=None
-    )
-    semester_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("semesters.id"), nullable=True, default=None
-    )
-    has_passed: Mapped[bool] = mapped_column(Boolean, default=False)
-    is_registered: Mapped[bool] = mapped_column(Boolean, default=False)
-
-    # If transferring from another school
-    is_transfer: Mapped[bool] = mapped_column(Boolean, default=False)
-    previous_school_name: Mapped[str] = mapped_column(
-        String(100), nullable=True, default=None
+    academic_year_id: Mapped[str] = mapped_column(
+        String(120), ForeignKey("years.id"), nullable=False
     )
 
-    # Identification & Legal Docs
-    birth_certificate: Mapped[str] = mapped_column(
-        String(255), nullable=True, default=None
-    )  # Path to uploaded file
+    # Contact Information
+    address: Mapped[str] = mapped_column(Text, nullable=False)
+    city: Mapped[str] = mapped_column(String(50), nullable=False)
+    state: Mapped[str] = mapped_column(String(50), nullable=False)
+    postal_code: Mapped[str] = mapped_column(String(20), nullable=False)
+    father_phone: Mapped[str] = mapped_column(String(25))
+    mother_phone: Mapped[str] = mapped_column(String(25))
+    parent_email: Mapped[str] = mapped_column(String(120), nullable=False)
 
-    # Health & Special Needs
+    grand_father_name: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    nationality: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    blood_type: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
+    student_photo: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
+    previous_school: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    previous_grades: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    transportation: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    guardian_name: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    guardian_phone: Mapped[Optional[str]] = mapped_column(String(25), nullable=True)
+    guardian_relation: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    emergency_contact_name: Mapped[Optional[str]] = mapped_column(
+        String(50), nullable=True
+    )
+    emergency_contact_phone: Mapped[Optional[str]] = mapped_column(
+        String(25), nullable=True
+    )
+    disability_details: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    sibling_details: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    medical_details: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
+    # Defaulted Fields
+    sibling_in_school: Mapped[bool] = mapped_column(Boolean, default=False)
     has_medical_condition: Mapped[bool] = mapped_column(Boolean, default=False)
-    # Explanation of medical conditions
-    medical_details: Mapped[str] = mapped_column(Text, nullable=True, default=None)
     has_disability: Mapped[bool] = mapped_column(Boolean, default=False)
-    # Explanation of disabilities
-    disability_details: Mapped[str] = mapped_column(Text, nullable=True, default=None)
-    requires_special_accommodation: Mapped[bool] = mapped_column(Boolean, default=False)
-    special_accommodation_details: Mapped[str] = mapped_column(
-        Text, nullable=True, default=None
-    )  # Any special support needed
+    is_transfer: Mapped[bool] = mapped_column(Boolean, default=False)
+    status: Mapped[StudentApplicationStatusEnum] = mapped_column(
+        Enum(
+            StudentApplicationStatusEnum,
+            name="student_application_status_enum",
+            values_callable=lambda x: [e.value for e in x],
+            native_enum=False,
+        ),
+        nullable=False,
+        default=StudentApplicationStatusEnum.PENDING,
+    )
 
-    # Whether the student is currently enrolled
-    is_active: bool = False
+    user_id: Mapped[str] = mapped_column(
+        String(120), ForeignKey("users.id"), unique=True, nullable=True, default=None
+    )
 
     # Relationships
     user: Mapped["User"] = relationship(
         "User",
         back_populates="students",
         init=False,
+        default=None,
     )
-    semester_records: Mapped[list["STUDSemesterRecord"]] = relationship(
-        "STUDSemesterRecord",
-        back_populates="students",
-        cascade="all, delete-orphan",
-        uselist=False,
-        init=False,
-    )
-    year_records: Mapped[list["STUDYearRecord"]] = relationship(
-        "STUDYearRecord",
-        back_populates="students",
-        cascade="all, delete-orphan",
-        uselist=False,
-        init=False,
-    )
-    average_subjects: Mapped[list["AVRGSubject"]] = relationship(
-        "AVRGSubject",
+    semester_records: Mapped[List["StudentSemesterRecord"]] = relationship(
+        "StudentSemesterRecord",
         back_populates="students",
         cascade="all, delete-orphan",
         init=False,
+        default_factory=list,
+    )
+    year_records: Mapped[List["StudentYearRecord"]] = relationship(
+        "StudentYearRecord",
+        back_populates="students",
+        cascade="all, delete-orphan",
+        init=False,
+        default_factory=list,
+    )
+    average_subjects: Mapped[List["SubjectYearlyAverage"]] = relationship(
+        "SubjectYearlyAverage",
+        back_populates="students",
+        cascade="all, delete-orphan",
+        init=False,
+        default_factory=list,
     )

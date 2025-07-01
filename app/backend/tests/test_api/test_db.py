@@ -21,7 +21,7 @@ def test_db_grade_values(
     client: FlaskClient, db_session: scoped_session[Session]
 ) -> None:
     # Query the database
-    grades = db_session.execute(select(Grade).order_by(Grade.grade)).all()
+    grades = db_session.scalars(select(Grade).order_by(Grade.grade)).all()
     grade_values = [grade.grade for grade in grades]
 
     # Assert that the database has the correct grade values

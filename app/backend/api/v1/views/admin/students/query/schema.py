@@ -28,8 +28,8 @@ from api.v1.views.shared.registration.schema import StudentSchema, UserSchema
 from models.grade import Grade
 from models.section import Section
 from models.semester import Semester
-from models.stud_semester_record import STUDSemesterRecord
-from models.stud_year_record import STUDYearRecord
+from models.student_semester_record import StudentSemesterRecord
+from models.student_year_record import StudentYearRecord
 
 
 class RangeSchema(BaseSchema):
@@ -221,7 +221,7 @@ class STUDYearRecordSchema(BaseSchema):
 
     @post_dump
     def add_fields(self, data, **kwargs: Any):
-        data["table_id"] = self.get_table_id(STUDYearRecord)
+        data["table_id"] = self.get_table_id(StudentYearRecord)
 
         return data
 
@@ -268,7 +268,7 @@ class AveragePerSemesterSchema(BaseSchema):
     @post_dump
     def add_fields(self, data, **kwargs: Any):
         """Add table_id to the dumped data."""
-        data["table_id"] = self.get_table_id(STUDSemesterRecord)
+        data["table_id"] = self.get_table_id(StudentSemesterRecord)
         return data
 
 
@@ -281,7 +281,7 @@ class RankPerSemesterSchema(BaseSchema):
     @post_dump
     def add_fields(self, data, **kwargs: Any):
         """Add table_id to the dumped data."""
-        data["table_id"] = self.get_table_id(STUDSemesterRecord)
+        data["table_id"] = self.get_table_id(StudentSemesterRecord)
         return data
 
 

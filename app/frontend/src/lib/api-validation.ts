@@ -1,6 +1,60 @@
 import { z } from "zod";
 import { ExperienceYearEnum, GenderEnum, GradeLevelEnum, HighestDegreeEnum, MaritalStatusEnum, ScheduleEnum, StatusEnum } from "./enums";
 
+export const StudentApplicationSchema = z.object({
+    id: z.string(),
+    registrationDate: z.string(),
+    status: z.enum(["pending", "under-review", "documents-required", "approved", "rejected", "enrolled"]),
+
+    // Personal Information
+    firstName: z.string(),
+    fatherName: z.string(),
+    grandFatherName: z.string().optional(),
+    dateOfBirth: z.string(),
+    gender: GenderEnum,
+    nationality: z.string().optional(),
+    bloodType: z.string().optional(),
+    studentPhoto: z.string().optional(),
+
+    // Academic Information
+    grade: z.string(),
+    academicYear: z.string(),
+    isTransfer: z.boolean(),
+    previousSchool: z.string().optional(),
+    previousGrades: z.string().optional(),
+    transportation: z.string().optional(),
+
+    // Contact Information
+    address: z.string(),
+    city: z.string(),
+    state: z.string(),
+    postalCode: z.string(),
+    fatherPhone: z.string(),
+    motherPhone: z.string(),
+    parentEmail: z.string(),
+
+    // Guardian Information
+    guardianName: z.string().optional(),
+    guardianPhone: z.string().optional(),
+    guardianRelation: z.string().optional(),
+    emergencyContactName: z.string().optional(),
+    emergencyContactPhone: z.string().optional(),
+    siblingInSchool: z.boolean(),
+    siblingDetails: z.string().optional(),
+
+    // Medical Information
+    hasMedicalCondition: z.boolean(),
+    medicalDetails: z.string().optional(),
+    hasDisability: z.boolean(),
+    disabilityDetails: z.string().optional(),
+
+    // Calculated fields
+    age: z.number().optional(),
+    enrollmentPriority: z.enum(["high", "medium", "low"]).optional(),
+    medicalFlags: z.array(z.string()).optional(),
+    documentsComplete: z.boolean().optional(),
+});
+
 export const TeacherApplicationSchema = z.object({
     id: z.string(),
     applicationDate: z.string(),
@@ -98,3 +152,4 @@ export const TeacherApplicationWithDetailsSchema = TeacherApplicationSchema.merg
 
 export type TeacherApplication = z.infer<typeof TeacherApplicationSchema>;
 export type TeacherApplicationWithDetails = z.infer<typeof TeacherApplicationWithDetailsSchema>;
+export type StudentApplication = z.infer<typeof StudentApplicationSchema>;

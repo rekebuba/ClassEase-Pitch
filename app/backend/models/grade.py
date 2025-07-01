@@ -12,7 +12,7 @@ from models.stream import Stream
 if TYPE_CHECKING:
     from models.subject_grade_stream_link import SubjectGradeStreamLink
     from models.grade_stream_link import GradeStreamLink
-    from models.stud_year_record import STUDYearRecord
+    from models.student_year_record import StudentYearRecord
     from models.section import Section
     from models.teacher import Teacher
 
@@ -100,8 +100,8 @@ class Grade(BaseModel):
         init=False,
         repr=False,
     )
-    student_year_records: Mapped[list["STUDYearRecord"]] = relationship(
-        "STUDYearRecord",
+    student_year_records: Mapped[list["StudentYearRecord"]] = relationship(
+        "StudentYearRecord",
         back_populates="grades",
         init=False,
         repr=False,

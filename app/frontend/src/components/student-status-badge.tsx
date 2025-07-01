@@ -1,14 +1,11 @@
 import { Badge } from "@/components/ui/badge"
-import { StatusEnum } from "@/lib/enums";
-import { Clock, Eye, Calendar, CheckCircle, XCircle } from "lucide-react"
-import { z } from "zod";
+import { Clock, Eye, FileText, CheckCircle, XCircle, GraduationCap } from "lucide-react"
 
-type TeacherStatusBadgeProps = {
-    status: z.infer<typeof StatusEnum>;
-};
+interface StudentStatusBadgeProps {
+    status: "pending" | "under-review" | "documents-required" | "approved" | "rejected" | "enrolled"
+}
 
-
-export default function TeacherStatusBadge({ status }: TeacherStatusBadgeProps) {
+export default function StudentStatusBadge({ status }: StudentStatusBadgeProps) {
     const statusConfig = {
         pending: {
             label: "Pending",
@@ -22,11 +19,11 @@ export default function TeacherStatusBadge({ status }: TeacherStatusBadgeProps) 
             icon: Eye,
             className: "bg-blue-100 text-blue-800 border-blue-200",
         },
-        "interview-scheduled": {
-            label: "Interview Scheduled",
+        "documents-required": {
+            label: "Documents Required",
             variant: "secondary" as const,
-            icon: Calendar,
-            className: "bg-purple-100 text-purple-800 border-purple-200",
+            icon: FileText,
+            className: "bg-orange-100 text-orange-800 border-orange-200",
         },
         approved: {
             label: "Approved",
@@ -39,6 +36,12 @@ export default function TeacherStatusBadge({ status }: TeacherStatusBadgeProps) 
             variant: "secondary" as const,
             icon: XCircle,
             className: "bg-red-100 text-red-800 border-red-200",
+        },
+        enrolled: {
+            label: "Enrolled",
+            variant: "secondary" as const,
+            icon: GraduationCap,
+            className: "bg-purple-100 text-purple-800 border-purple-200",
         },
     }
 

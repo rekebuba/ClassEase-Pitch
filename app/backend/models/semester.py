@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from models.base_model import BaseModel
 
 if TYPE_CHECKING:
-    from models.stud_semester_record import STUDSemesterRecord
+    from models.student_semester_record import StudentSemesterRecord
 
 
 class Semester(BaseModel):
@@ -20,9 +20,8 @@ class Semester(BaseModel):
     name: Mapped[int] = mapped_column(Integer, nullable=False)
 
     # Relationships
-    semester_records: Mapped[List["STUDSemesterRecord"]] = relationship(
-        "STUDSemesterRecord",
+    semester_records: Mapped[List["StudentSemesterRecord"]] = relationship(
+        "StudentSemesterRecord",
         back_populates="semesters",
-        uselist=False,
         init=False,
     )

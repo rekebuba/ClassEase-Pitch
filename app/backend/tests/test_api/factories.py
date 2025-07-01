@@ -25,8 +25,8 @@ from sqlmodel import col
 from extension.enums.enum import ExperienceYearEnum, GenderEnum, GradeLevelEnum, HighestDegreeEnum, MaritalStatusEnum, RoleEnum, ScheduleEnum
 from models.assessment import Assessment
 from models.section import Section
-from models.stud_semester_record import STUDSemesterRecord
-from models.stud_year_record import STUDYearRecord
+from models.student_semester_record import StudentSemesterRecord
+from models.student_year_record import StudentYearRecord
 from models.subject import Subject
 from models.subject_grade_stream_link import SubjectGradeStreamLink
 from models.table import Table
@@ -745,9 +745,9 @@ class SectionFactory(BaseFactory[Section]):
     section: Any = LazyAttribute(lambda _: random.choice(["A", "B", "C"]))
 
 
-class STUDSemesterRecordFactory(BaseFactory[STUDSemesterRecord]):
+class StudentSemesterRecordFactory(BaseFactory[StudentSemesterRecord]):
     class Meta:
-        model = STUDSemesterRecord
+        model = StudentSemesterRecord
 
     student_id: Any = LazyAttribute(lambda _: StudentFactory.get_or_create().id)
     semester_id: Any = LazyAttribute(lambda _: SemesterFactory.get_or_create().id)
@@ -764,9 +764,9 @@ class STUDSemesterRecordFactory(BaseFactory[STUDSemesterRecord]):
     rank: Any = LazyAttribute(lambda _: random.randint(1, 50))
 
 
-class YearRecordFactory(BaseFactory[STUDYearRecord]):
+class YearRecordFactory(BaseFactory[StudentYearRecord]):
     class Meta:
-        model = STUDYearRecord
+        model = StudentYearRecord
 
     student_id: Any = LazyAttribute(lambda _: StudentFactory.get_or_create().id)
     grade_id: Any = LazyAttribute(
@@ -798,7 +798,7 @@ class AssessmentFactory(BaseFactory[Assessment]):
         )
     )  # Placeholder
     semester_record_id: Any = LazyAttribute(
-        lambda obj: STUDSemesterRecordFactory.get_or_create(
+        lambda obj: StudentSemesterRecordFactory.get_or_create(
             student_id=obj.student_id, semester_id=obj.semester_id
         ).id
     )

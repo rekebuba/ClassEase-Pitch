@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Module for Average Result class"""
+"""Module for StudentSemesterRecord class"""
 
 from typing import TYPE_CHECKING
 from sqlalchemy import String, Integer, ForeignKey, Float
@@ -9,11 +9,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 if TYPE_CHECKING:
     from models.section import Section
     from models.semester import Semester
-    from models.stud_year_record import STUDYearRecord
+    from models.student_year_record import StudentYearRecord
     from models.student import Student
 
 
-class STUDSemesterRecord(BaseModel):
+class StudentSemesterRecord(BaseModel):
     """
     This model represents the average result of a student for a particular semester and year.
     """
@@ -38,8 +38,8 @@ class STUDSemesterRecord(BaseModel):
     students: Mapped["Student"] = relationship(
         "Student", back_populates="semester_records", init=False
     )
-    year_records: Mapped["STUDYearRecord"] = relationship(
-        "STUDYearRecord", back_populates="semester_records", init=False
+    year_records: Mapped["StudentYearRecord"] = relationship(
+        "StudentYearRecord", back_populates="semester_records", init=False
     )
     semesters: Mapped["Semester"] = relationship(
         "Semester", back_populates="semester_records", init=False
