@@ -10,7 +10,6 @@ from tests.test_api.factories import TeacherFactory
 from flask.testing import FlaskClient
 from tests.test_api.schemas.base_schema import DashboardUserInfoResponseModel
 from tests.typing import Credential
-from models import storage
 
 
 class TestTeachers:
