@@ -11,7 +11,7 @@ from models.base_model import Base
 from models.grade import Grade, seed_grades  # noqa: F401
 from models.user import User  # noqa: F401
 from models.student import Student  # noqa: F401
-from models.section import Section  # noqa: F401
+from models.section import Section, seed_section # noqa: F401
 from models.admin import Admin  # noqa: F401
 from models.subject import Subject, seed_subjects  # noqa: F401
 from models.teacher import Teacher  # noqa: F401
@@ -31,7 +31,7 @@ from models.table import Table, seed_table  # noqa: F401
 from models.grade_stream_link import GradeStreamLink  # noqa: F401
 from models.teacher_subject_link import TeacherSubjectLink  # noqa: F401
 from models.teacher_grade_link import TeacherGradeLink  # noqa: F401
-from models.subject_grade_stream_link import SubjectGradeStreamLink  # noqa: F401
+from models.yearly_subject import YearlySubject  # noqa: F401
 from contextlib import contextmanager
 
 # Define a generic type variable for models
@@ -163,9 +163,10 @@ class DBStorage:
         """
         Seed initial data into the database.
         """
-        seed_grades(self.session)
-        seed_subjects(self.session)
-        seed_year(self.session)
+        # seed_section(self.session)
+        # seed_grades(self.session)
+        # seed_subjects(self.session)
+        # seed_year(self.session)
         seed_table(self.session, self.engine)
 
     def close(self) -> None:

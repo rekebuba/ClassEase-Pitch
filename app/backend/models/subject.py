@@ -1,14 +1,17 @@
 #!/usr/bin/python3
 """Module for Subject class"""
 
-from typing import Dict, List, Optional, TypedDict
+from typing import TYPE_CHECKING, Dict, List, Optional, TypedDict
 from sqlalchemy import String, select
 from sqlalchemy.orm import Mapped, mapped_column, scoped_session, relationship, Session
 from models.stream import Stream
 from models.grade import Grade
 from models.base_model import BaseModel
-from models.subject_grade_stream_link import SubjectGradeStreamLink
-from models.teacher import Teacher
+from models.yearly_subject import YearlySubject
+
+if TYPE_CHECKING:
+    from models.teacher import Teacher
+    from models.student_year_record import StudentYearRecord
 
 
 class SubjectDetails(TypedDict):
@@ -123,23 +126,21 @@ def seed_subjects(session: scoped_session[Session]) -> None:
                         raise ValueError(
                             f"Stream '{stream_name}' not found in the database."
                         )
-                    code = generate_code(subject_name, grade_number, stream_name)
-                    new_subject.grade_links.append(
-                        SubjectGradeStreamLink(
+                    new_subject.yearly_subjects.append(
+                        YearlySubject(
+                            year_id=year_id,
                             subject_id=new_subject.id,
                             grade_id=grade_id,
                             stream_id=stream_id,
-                            code=code,
                         )
                     )
             else:
-                code = generate_code(subject_name, grade_number, None)
-                new_subject.grade_links.append(
-                    SubjectGradeStreamLink(
+                new_subject.yearly_subjects.append(
+                    YearlySubject(
+                        year_id=year_id,
                         subject_id=new_subject.id,
                         grade_id=grade_id,
                         stream_id=None,
-                        code=code,
                     )
                 )
 
@@ -205,12 +206,12 @@ class Subject(BaseModel):
         "Teacher",
         back_populates="subjects_to_teach",
         secondary="teacher_subject_links",
-        init=False,
+        default_factory=list,
         repr=False,
     )
-    grade_links: Mapped[List["SubjectGradeStreamLink"]] = relationship(
-        "SubjectGradeStreamLink",
+    yearly_subjects: Mapped[List["YearlySubject"]] = relationship(
+        "YearlySubject",
         back_populates="subject",
-        init=False,
+        default_factory=list,
         repr=False,
     )

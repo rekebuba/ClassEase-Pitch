@@ -7,8 +7,7 @@ from models.base_model import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
-    from models.subject_grade_stream_link import SubjectGradeStreamLink
-    from models.grade_stream_link import GradeStreamLink
+    from models.yearly_subject import YearlySubject
     from models.grade import Grade
 
 
@@ -21,10 +20,12 @@ class Stream(BaseModel):
         "Grade",
         back_populates="streams",
         secondary="grade_stream_links",
-        init=False,
+        repr=False,
+        default_factory=list,
     )
-    subject_links: Mapped[List["SubjectGradeStreamLink"]] = relationship(
-        "SubjectGradeStreamLink",
+    yearly_subjects: Mapped[List["YearlySubject"]] = relationship(
+        "YearlySubject",
         back_populates="stream",
-        init=False,
+        repr=False,
+        default_factory=list,
     )

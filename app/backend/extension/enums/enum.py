@@ -117,3 +117,226 @@ class StudentApplicationStatusEnum(str, Enum):
     APPROVED = "approved"
     REJECTED = "rejected"
     ENROLLED = "enrolled"
+
+
+class SemesterStatusEnum(str, Enum):
+    UPCOMING = "upcoming"
+    ACTIVE = "active"
+    COMPLETED = "completed"
+    ARCHIVED = "archived"
+
+
+class GradeOneSubjectsEnum(str, Enum):
+    ARTS_AND_PHYSICAL_EDUCATION = "Arts and Physical Education"
+    ENVIRONMENTAL_SCIENCE = "Environmental Science"
+    ENGLISH = "English"
+    MATHEMATICS = "Mathematics"
+    MOTHER_TONGUE = "Mother Tongue"
+    AMHARIC = "Amharic"
+
+
+class GradeTwoSubjectsEnum(str, Enum):
+    ARTS_AND_PHYSICAL_EDUCATION = "Arts and Physical Education"
+    ENVIRONMENTAL_SCIENCE = "Environmental Science"
+    ENGLISH = "English"
+    MATHEMATICS = "Mathematics"
+    MOTHER_TONGUE = "Mother Tongue"
+    AMHARIC = "Amharic"
+
+
+class GradeThreeSubjectsEnum(str, Enum):
+    ARTS_AND_PHYSICAL_EDUCATION = "Arts and Physical Education"
+    ENVIRONMENTAL_SCIENCE = "Environmental Science"
+    ENGLISH = "English"
+    MATHEMATICS = "Mathematics"
+    MOTHER_TONGUE = "Mother Tongue"
+    AMHARIC = "Amharic"
+
+
+class GradeFourSubjectsEnum(str, Enum):
+    ARTS_AND_PHYSICAL_EDUCATION = "Arts and Physical Education"
+    ENVIRONMENTAL_SCIENCE = "Environmental Science"
+    ENGLISH = "English"
+    MATHEMATICS = "Mathematics"
+    MOTHER_TONGUE = "Mother Tongue"
+    AMHARIC = "Amharic"
+
+
+class GradeFiveSubjectsEnum(str, Enum):
+    INTEGRATED_SCIENCE = "Integrated Science"
+    VISUAL_ARTS_AND_MUSIC = "Visual Arts and Music"
+    ENGLISH = "English"
+    MATHEMATICS = "Mathematics"
+    MOTHER_TONGUE = "Mother Tongue"
+    AMHARIC = "Amharic"
+    PHYSICAL_EDUCATION = "Physical Education"
+    CIVICS_AND_ETHICAL_EDUCATION = "Civics and Ethical Education"
+
+
+class GradeSixSubjectsEnum(str, Enum):
+    INTEGRATED_SCIENCE = "Integrated Science"
+    VISUAL_ARTS_AND_MUSIC = "Visual Arts and Music"
+    ENGLISH = "English"
+    MATHEMATICS = "Mathematics"
+    MOTHER_TONGUE = "Mother Tongue"
+    AMHARIC = "Amharic"
+    PHYSICAL_EDUCATION = "Physical Education"
+    CIVICS_AND_ETHICAL_EDUCATION = "Civics and Ethical Education"
+
+
+class GradeSevenSubjectsEnum(str, Enum):
+    SOCIAL_STUDY = "Social Study"
+    VISUAL_ARTS_AND_MUSIC = "Visual Arts and Music"
+    ENGLISH = "English"
+    MATHEMATICS = "Mathematics"
+    MOTHER_TONGUE = "Mother Tongue"
+    AMHARIC = "Amharic"
+    PHYSICAL_EDUCATION = "Physical Education"
+    CIVICS_AND_ETHICAL_EDUCATION = "Civics and Ethical Education"
+    BIOLOGY = "Biology"
+    PHYSICS = "Physics"
+    CHEMISTRY = "Chemistry"
+
+
+class GradeEightSubjectsEnum(str, Enum):
+    SOCIAL_STUDY = "Social Study"
+    VISUAL_ARTS_AND_MUSIC = "Visual Arts and Music"
+    ENGLISH = "English"
+    MATHEMATICS = "Mathematics"
+    MOTHER_TONGUE = "Mother Tongue"
+    AMHARIC = "Amharic"
+    PHYSICAL_EDUCATION = "Physical Education"
+    CIVICS_AND_ETHICAL_EDUCATION = "Civics and Ethical Education"
+    BIOLOGY = "Biology"
+    PHYSICS = "Physics"
+    CHEMISTRY = "Chemistry"
+
+
+class GradeNineSubjectsEnum(str, Enum):
+    AMHARIC_AS_SECOND_LANGUAGE = "Amharic as second language"
+    ENGLISH = "English"
+    MATHEMATICS = "Mathematics"
+    MOTHER_TONGUE = "Mother Tongue"
+    PHYSICAL_EDUCATION = "Physical Education"
+    CIVICS_AND_ETHICAL_EDUCATION = "Civics and Ethical Education"
+    BIOLOGY = "Biology"
+    PHYSICS = "Physics"
+    CHEMISTRY = "Chemistry"
+    GEOGRAPHY = "Geography"
+    HISTORY = "History"
+    INFORMATION_TECHNOLOGY = "Information Technology"
+
+
+class GradeTenSubjectsEnum(str, Enum):
+    ENGLISH = "English"
+    MATHEMATICS = "Mathematics"
+    MOTHER_TONGUE = "Mother Tongue"
+    AMHARIC = "Amharic"
+    PHYSICAL_EDUCATION = "Physical Education"
+    CIVICS_AND_ETHICAL_EDUCATION = "Civics and Ethical Education"
+    INFORMATION_TECHNOLOGY = "Information Technology"
+    BIOLOGY = "Biology"
+    PHYSICS = "Physics"
+    CHEMISTRY = "Chemistry"
+    GEOGRAPHY = "Geography"
+    HISTORY = "History"
+
+
+class GradeElevenSubjectsEnum(str, Enum):
+    BIOLOGY = "Biology"
+    PHYSICS = "Physics"
+    CHEMISTRY = "Chemistry"
+    GEOGRAPHY = "Geography"
+    HISTORY = "History"
+    ECONOMICS = "Economics"
+    TECHNICAL_DRAWING = "Technical Drawing"
+    GENERAL_BUSINESS = "General Business"
+    ENGLISH = "English"
+    MATHEMATICS = "Mathematics"
+    MOTHER_TONGUE = "Mother Tongue"
+    AMHARIC = "Amharic"
+    PHYSICAL_EDUCATION = "Physical Education"
+    CIVICS_AND_ETHICAL_EDUCATION = "Civics and Ethical Education"
+    INFORMATION_TECHNOLOGY = "Information Technology"
+
+
+class GradeTwelveSubjectsEnum(str, Enum):
+    BIOLOGY = "Biology"
+    PHYSICS = "Physics"
+    CHEMISTRY = "Chemistry"
+    GEOGRAPHY = "Geography"
+    HISTORY = "History"
+    ECONOMICS = "Economics"
+    TECHNICAL_DRAWING = "Technical Drawing"
+    GENERAL_BUSINESS = "General Business"
+    ENGLISH = "English"
+    MATHEMATICS = "Mathematics"
+    MOTHER_TONGUE = "Mother Tongue"
+    AMHARIC = "Amharic"
+    PHYSICAL_EDUCATION = "Physical Education"
+    CIVICS_AND_ETHICAL_EDUCATION = "Civics and Ethical Education"
+    INFORMATION_TECHNOLOGY = "Information Technology"
+
+
+class SocialStreamSubjectsEnum(str, Enum):
+    GEOGRAPHY = "Geography"
+    HISTORY = "History"
+    ECONOMICS = "Economics"
+    GENERAL_BUSINESS = "General Business"
+
+
+class NaturalStreamSubjectsEnum(str, Enum):
+    BIOLOGY = "Biology"
+    PHYSICS = "Physics"
+    CHEMISTRY = "Chemistry"
+    TECHNICAL_DRAWING = "Technical Drawing"
+
+
+class AllSubjectsEnum(str, Enum):
+    ARTS_AND_PHYSICAL_EDUCATION = "Arts and Physical Education"
+    ENVIRONMENTAL_SCIENCE = "Environmental Science"
+    INTEGRATED_SCIENCE = "Integrated Science"
+    SOCIAL_STUDY = "Social Study"
+    VISUAL_ARTS_AND_MUSIC = "Visual Arts and Music"
+    AMHARIC_AS_SECOND_LANGUAGE = "Amharic as second language"
+    ENGLISH = "English"
+    MATHEMATICS = "Mathematics"
+    MOTHER_TONGUE = "Mother Tongue"
+    AMHARIC = "Amharic"
+    PHYSICAL_EDUCATION = "Physical Education"
+    CIVICS_AND_ETHICAL_EDUCATION = "Civics and Ethical Education"
+    BIOLOGY = "Biology"
+    PHYSICS = "Physics"
+    CHEMISTRY = "Chemistry"
+    GEOGRAPHY = "Geography"
+    HISTORY = "History"
+    INFORMATION_TECHNOLOGY = "Information Technology"
+    ECONOMICS = "Economics"
+    GENERAL_BUSINESS = "General Business"
+    TECHNICAL_DRAWING = "Technical Drawing"
+
+
+class StreamEnum(str, Enum):
+    NATURAL = "Natural"
+    SOCIAL = "Social"
+
+
+class GradeEnum(str, Enum):
+    GRADE_ONE = 1
+    GRADE_TWO = 2
+    GRADE_THREE = 3
+    GRADE_FOUR = 4
+    GRADE_FIVE = 5
+    GRADE_SIX = 6
+    GRADE_SEVEN = 7
+    GRADE_EIGHT = 8
+    GRADE_NINE = 9
+    GRADE_TEN = 10
+    GRADE_ELEVEN = 11
+    GRADE_TWELVE = 12
+
+
+class SectionEnum(str, Enum):
+    SECTION_A = "A"
+    SECTION_B = "B"
+    SECTION_C = "C"

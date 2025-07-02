@@ -7,6 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from models.base_model import BaseModel
 
 if TYPE_CHECKING:
+    from models.subject import Subject
     from models.grade import Grade
     from models.student_semester_record import StudentSemesterRecord
     from models.student import Student
@@ -34,23 +35,24 @@ class StudentYearRecord(BaseModel):
     rank: Mapped[int] = mapped_column(Integer, nullable=True, default=None)
 
     # Relationships
-    students: Mapped["Student"] = relationship(
+    student: Mapped["Student"] = relationship(
         "Student",
-        back_populates="year_records",
+        back_populates="student_year_records",
         init=False,
     )
-    grades: Mapped["Grade"] = relationship(
+    grade: Mapped["Grade"] = relationship(
         "Grade",
         back_populates="student_year_records",
         init=False,
     )
-    years: Mapped["Year"] = relationship(
+    year: Mapped["Year"] = relationship(
         "Year",
         back_populates="student_year_records",
         init=False,
     )
-    semester_records: Mapped[List["StudentSemesterRecord"]] = relationship(
+    student_semester_records: Mapped[List["StudentSemesterRecord"]] = relationship(
         "StudentSemesterRecord",
-        back_populates="year_records",
-        init=False,
+        back_populates="student_year_record",
+        default_factory=list,
+        repr=False,
     )

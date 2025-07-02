@@ -25,9 +25,12 @@ from extension.pydantic.models.teacher_schema import (
 from models import storage
 from api.v1.views import errors
 from models.grade import Grade
+from models.student import Student
 from models.subject import Subject
 from models.teacher import Teacher
 from sqlalchemy.exc import SQLAlchemyError
+
+from models.year import Year
 
 
 @auth.route("/registration/<role>", methods=["POST"])
@@ -65,6 +68,51 @@ def register_new_user(role: str) -> Tuple[Response, int]:
         return errors.handle_validation_error(e)
     except Exception as e:
         storage.rollback()
+        return errors.handle_internal_error(e)
+
+
+@auth.route("/register/student", methods=["POST"])
+def register_new_student() -> Tuple[Response, int]:
+    """Registers a new student in the system."""
+
+    try:
+        # Validate and parse the incoming JSON
+        student_data = TypeAdapter(StudentRegistrationSchema).model_validate_json(
+            request.data
+        )
+
+        # Start transaction
+        grade = storage.session.scalar(
+            select(Grade).where(Grade.grade == student_data.grade)
+        )
+        academic_year = storage.session.scalar(
+            select(Year).where(Year.academic_year == student_data.academic_year)
+        )
+        if not grade or not academic_year:
+            raise ValidationError(
+                "Invalid grade or academic year provided. Please check your input."
+            )
+
+        # Convert to dictionary before unpacking
+        student_dict = student_data.model_dump(exclude_unset=True)
+
+        # Create SQLAlchemy model instance
+        new_student = Student(**student_dict)
+
+        # Add relationship after creation
+        new_student.grade = grade
+
+        storage.session.add(new_student)
+        storage.session.commit()
+
+        return jsonify(message="student registered successfully!"), 201
+    except ValidationError as e:
+        return errors.handle_validation_error(e)
+    except SQLAlchemyError as e:
+        storage.session.rollback()
+        return errors.handle_database_error(e)
+    except Exception as e:
+        storage.session.rollback()
         return errors.handle_internal_error(e)
 
 
