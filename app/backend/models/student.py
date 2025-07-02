@@ -19,6 +19,7 @@ if TYPE_CHECKING:
     from models.student_year_record import StudentYearRecord
     from models.subject_yearly_average import SubjectYearlyAverage
     from models.user import User
+    from models.assessment import Assessment
 
 
 class Student(BaseModel):
@@ -27,7 +28,6 @@ class Student(BaseModel):
     """
 
     __tablename__ = "students"
-    registration_date: Mapped[Date] = mapped_column(Date, nullable=False)
 
     # Personal Information
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -43,14 +43,6 @@ class Student(BaseModel):
         nullable=False,
     )
 
-    # Academic Information
-    grade_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("grades.id"), nullable=False
-    )
-    academic_year_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("years.id"), nullable=False
-    )
-
     # Contact Information
     address: Mapped[str] = mapped_column(Text, nullable=False)
     city: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -61,7 +53,7 @@ class Student(BaseModel):
     parent_email: Mapped[str] = mapped_column(String(120), nullable=False)
 
     grand_father_name: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    nationality: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    nationality: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
     blood_type: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
     student_photo: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
     previous_school: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
@@ -105,26 +97,33 @@ class Student(BaseModel):
         "User",
         back_populates="students",
         init=False,
-        default=None,
+        repr=False,
     )
-    semester_records: Mapped[List["StudentSemesterRecord"]] = relationship(
+    student_semester_records: Mapped[List["StudentSemesterRecord"]] = relationship(
         "StudentSemesterRecord",
-        back_populates="students",
+        back_populates="student",
         cascade="all, delete-orphan",
-        init=False,
         default_factory=list,
+        repr=False,
     )
-    year_records: Mapped[List["StudentYearRecord"]] = relationship(
+    student_year_records: Mapped[List["StudentYearRecord"]] = relationship(
         "StudentYearRecord",
-        back_populates="students",
+        back_populates="student",
         cascade="all, delete-orphan",
-        init=False,
         default_factory=list,
+        repr=False,
     )
-    average_subjects: Mapped[List["SubjectYearlyAverage"]] = relationship(
+    subject_yearly_averages: Mapped[List["SubjectYearlyAverage"]] = relationship(
         "SubjectYearlyAverage",
-        back_populates="students",
+        back_populates="student",
         cascade="all, delete-orphan",
-        init=False,
         default_factory=list,
+        repr=False,
+    )
+    assessments: Mapped[List["Assessment"]] = relationship(
+        "Assessment",
+        back_populates="student",
+        cascade="all, delete-orphan",
+        default_factory=list,
+        repr=False,
     )

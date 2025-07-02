@@ -1,9 +1,15 @@
 #!/usr/bin/python3
 """Module for Assessment class"""
 
+from typing import TYPE_CHECKING
 from sqlalchemy import String, Integer, ForeignKey, Float
 from models.base_model import BaseModel
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+if TYPE_CHECKING:
+    from models.student import Student
+    from models.student_semester_record import StudentSemesterRecord
+    from models.yearly_subject import YearlySubject
 
 
 class Assessment(BaseModel):
@@ -13,16 +19,16 @@ class Assessment(BaseModel):
 
     __tablename__ = "assessments"
     student_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("students.id"), nullable=False
+        String(36), ForeignKey("students.id"), nullable=False
     )
-    semester_record_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("student_semester_records.id"), nullable=False
+    student_semester_record_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("student_semester_records.id"), nullable=False
     )
-    subject_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("subjects.id"), nullable=False
+    yearly_subject_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("yearly_subjects.id"), nullable=False
     )
     teachers_record_id: Mapped[str] = mapped_column(
-        String(120),
+        String(36),
         ForeignKey("teachers_records.id", ondelete="SET NULL"),
         nullable=True,
         default=None,
@@ -30,3 +36,20 @@ class Assessment(BaseModel):
     # The subject sum score of the student for each assessment
     total: Mapped[float] = mapped_column(Float, nullable=True, default=None)
     rank: Mapped[int] = mapped_column(Integer, nullable=True, default=None)
+
+    # Relationship
+    student: Mapped["Student"] = relationship(
+        "Student",
+        back_populates="assessments",
+        init=False,
+    )
+    student_semester_record: Mapped["StudentSemesterRecord"] = relationship(
+        "StudentSemesterRecord",
+        back_populates="assessments",
+        init=False,
+    )
+    yearly_subject: Mapped["YearlySubject"] = relationship(
+        "YearlySubject",
+        back_populates="assessments",
+        init=False,
+    )

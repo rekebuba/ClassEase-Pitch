@@ -10,10 +10,8 @@ from typing import TYPE_CHECKING, List
 from models.stream import Stream
 
 if TYPE_CHECKING:
-    from models.subject_grade_stream_link import SubjectGradeStreamLink
-    from models.grade_stream_link import GradeStreamLink
+    from models.yearly_subject import YearlySubject
     from models.student_year_record import StudentYearRecord
-    from models.section import Section
     from models.teacher import Teacher
 
 
@@ -73,36 +71,29 @@ class Grade(BaseModel):
     )
 
     # Relationships
-    sections: Mapped["Section"] = relationship(
-        "Section",
-        back_populates="grade",
-        init=False,
-        repr=False,
-    )
-
     streams: Mapped[List["Stream"]] = relationship(
         "Stream",
         back_populates="grades",
         secondary="grade_stream_links",
-        init=False,
         repr=False,
+        default_factory=list,
     )
     teachers: Mapped[List["Teacher"]] = relationship(
         "Teacher",
         back_populates="grade_level",
         secondary="teacher_grade_links",
-        init=False,
         repr=False,
+        default_factory=list,
     )
-    subject_links: Mapped[List["SubjectGradeStreamLink"]] = relationship(
-        "SubjectGradeStreamLink",
+    yearly_subjects: Mapped[List["YearlySubject"]] = relationship(
+        "YearlySubject",
         back_populates="grade",
-        init=False,
         repr=False,
+        default_factory=list,
     )
     student_year_records: Mapped[list["StudentYearRecord"]] = relationship(
         "StudentYearRecord",
-        back_populates="grades",
-        init=False,
+        back_populates="grade",
         repr=False,
+        default_factory=list,
     )

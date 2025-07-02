@@ -18,7 +18,7 @@ class SubjectYearlyAverage(BaseModel):
     subject_id: Mapped[str] = mapped_column(
         String(120), ForeignKey("subjects.id"), nullable=False
     )
-    year_record_id: Mapped[str] = mapped_column(
+    student_year_record_id: Mapped[str] = mapped_column(
         String(120), ForeignKey("student_year_records.id"), nullable=True
     )
     teachers_record_id: Mapped[str] = mapped_column(
@@ -32,6 +32,9 @@ class SubjectYearlyAverage(BaseModel):
     rank: Mapped[int] = mapped_column(Integer, default=None)
 
     # Relationships
-    students: Mapped["Student"] = relationship(
-        "Student", back_populates="average_subjects", init=False
+    student: Mapped["Student"] = relationship(
+        "Student",
+        back_populates="subject_yearly_averages",
+        default=None,
+        repr=False,
     )
