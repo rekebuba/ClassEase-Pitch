@@ -15,17 +15,11 @@ class SubjectYearlyAverage(BaseModel):
     student_id: Mapped[str] = mapped_column(
         String(120), ForeignKey("students.id"), nullable=False
     )
-    subject_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("subjects.id"), nullable=False
+    yearly_subject_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("yearly_subjects.id"), nullable=False
     )
     student_year_record_id: Mapped[str] = mapped_column(
         String(120), ForeignKey("student_year_records.id"), nullable=True
-    )
-    teachers_record_id: Mapped[str] = mapped_column(
-        String(120),
-        ForeignKey("teachers_records.id", ondelete="SET NULL"),
-        nullable=True,
-        default=None,
     )
     # The actual average score of the student in this for all subject
     average: Mapped[float] = mapped_column(Float, default=None)

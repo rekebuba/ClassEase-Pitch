@@ -1,6 +1,6 @@
 import random
 from typing import Any
-from factory import LazyAttribute, RelatedFactoryList
+from factory import LazyAttribute, RelatedFactoryList, SelfAttribute
 from models.section import Section
 from models import storage
 from .base_factory import BaseFactory
