@@ -7,7 +7,7 @@ from api.v1.views.student import stud
 from models.assessment import Assessment
 from models.grade import Grade
 from models.mark_list import MarkList
-from models.student_semester_record import StudentSemesterRecord
+from models.student_term_record import StudentTermRecord
 from models.student import Student
 from models.subject import Subject
 from models.student_year_record import StudentYearRecord
@@ -91,7 +91,7 @@ def get_student_score(student_data: UserT) -> Tuple[Response, int]:
 
     student = storage.get_first(Student, id=student_id)
     average_score = storage.get_first(
-        StudentSemesterRecord,
+        StudentTermRecord,
         student_id=student_id,
         year=student_data.year,
         semester=data["semester"][0],

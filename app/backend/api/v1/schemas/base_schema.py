@@ -31,7 +31,7 @@ from models.student_year_record import StudentYearRecord
 from models.table import Table
 from models.subject import Subject
 from models.user import User
-from models.semester import Semester
+from models.academic_term import AcademicTerm
 from models.student import Student
 from models.event import Event
 from models.grade import Grade

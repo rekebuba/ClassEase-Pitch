@@ -1,9 +1,8 @@
-import json
 from typing import Any
 
 from models.yearly_subject import YearlySubject
 from .base_factory import BaseFactory
-from factory import LazyAttribute, SubFactory, RelatedFactoryList, SelfAttribute
+from factory import LazyAttribute, SubFactory
 from models import storage
 
 
@@ -34,6 +33,7 @@ class YearlySubjectFactory(BaseFactory[YearlySubject]):
             .filter_by(
                 year_id=kwargs.get("year_id"),
                 subject_id=kwargs.get("subject_id"),
+                stream_id=kwargs.get("stream_id"),
             )
             .first()
         )

@@ -222,7 +222,7 @@ class Teacher(BaseModel):
     user: Mapped[Optional["User"]] = relationship(
         "User",
         back_populates="teachers",
-        default=None,
+        init=False,
         repr=False
     )
     # Relationship with Out Default

@@ -5,7 +5,7 @@ from api.v1.utils.typing import UserT
 from api.v1.views.utils import student_required
 from api.v1.views.student import stud
 from models.grade import Grade
-from models.student_semester_record import StudentSemesterRecord
+from models.student_term_record import StudentTermRecord
 from models.student_year_record import StudentYearRecord
 from models import storage
 
@@ -28,21 +28,21 @@ def student_yearly_scores(student_data: UserT) -> Tuple[Response, int]:
             StudentYearRecord.user_id,
             Grade.id,
             Grade.grade,
-            StudentSemesterRecord.semesters,
-            StudentSemesterRecord.average,
+            StudentTermRecord.semesters,
+            StudentTermRecord.average,
             StudentYearRecord.final_score,
             StudentYearRecord.year,
         )
-        .join(Grade, StudentSemesterRecord.grade_id == Grade.id)
-        .join(StudentYearRecord, StudentYearRecord.user_id == StudentSemesterRecord.user_id)
+        .join(Grade, StudentTermRecord.grade_id == Grade.id)
+        .join(StudentYearRecord, StudentYearRecord.user_id == StudentTermRecord.user_id)
         .filter(
             and_(
-                StudentSemesterRecord.user_id == student_data.user_id,
-                StudentYearRecord.grade_id == StudentSemesterRecord.grade_id,
-                StudentYearRecord.year == StudentSemesterRecord.year,
+                StudentTermRecord.user_id == student_data.user_id,
+                StudentYearRecord.grade_id == StudentTermRecord.grade_id,
+                StudentYearRecord.year == StudentTermRecord.year,
             )
         )
-        .order_by(Grade.grade, StudentSemesterRecord.semesters)
+        .order_by(Grade.grade, StudentTermRecord.semesters)
     ).all()
 
     score = {}

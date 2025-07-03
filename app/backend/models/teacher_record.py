@@ -15,8 +15,8 @@ class TeachersRecord(BaseModel):
     teacher_id: Mapped[str] = mapped_column(
         String(120), ForeignKey("teachers.id"), nullable=False
     )
-    semester_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("semesters.id"), nullable=False
+    academic_term_id: Mapped[str] = mapped_column(
+        String(120), ForeignKey("academic_terms.id"), nullable=False
     )
     subject_id: Mapped[str] = mapped_column(
         String(120), ForeignKey("subjects.id"), nullable=True, default=None

@@ -4,6 +4,8 @@ from typing import Dict, List, Optional, Type
 from faker import Faker
 
 from extension.enums.enum import (
+    AcademicTermEnum,
+    AcademicTermTypeEnum,
     AllSubjectsEnum,
     GradeEightSubjectsEnum,
     GradeElevenSubjectsEnum,
@@ -24,6 +26,7 @@ from extension.enums.enum import (
     StreamEnum,
 )
 from models import storage
+from models.academic_term import AcademicTerm
 from models.grade import Grade
 from models.section import Section
 from models.stream import Stream
@@ -35,42 +38,95 @@ fake = Faker()
 
 
 class BaseAction:
-    grade_subjects_map: Dict[int, Type[Enum]] = {
-        1: GradeOneSubjectsEnum,
-        2: GradeTwoSubjectsEnum,
-        3: GradeThreeSubjectsEnum,
-        4: GradeFourSubjectsEnum,
-        5: GradeFiveSubjectsEnum,
-        6: GradeSixSubjectsEnum,
-        7: GradeSevenSubjectsEnum,
-        8: GradeEightSubjectsEnum,
-        9: GradeNineSubjectsEnum,
-        10: GradeTenSubjectsEnum,
-        11: GradeElevenSubjectsEnum,
-        12: GradeTwelveSubjectsEnum,
+    grade_subjects_map: Dict[str, Type[Enum]] = {
+        "1": GradeOneSubjectsEnum,
+        "2": GradeTwoSubjectsEnum,
+        "3": GradeThreeSubjectsEnum,
+        "4": GradeFourSubjectsEnum,
+        "5": GradeFiveSubjectsEnum,
+        "6": GradeSixSubjectsEnum,
+        "7": GradeSevenSubjectsEnum,
+        "8": GradeEightSubjectsEnum,
+        "9": GradeNineSubjectsEnum,
+        "10": GradeTenSubjectsEnum,
+        "11": GradeElevenSubjectsEnum,
+        "12": GradeTwelveSubjectsEnum,
     }
+
+    @staticmethod
+    def create_academic_term(year: Year) -> None:
+        """
+        Creates academic terms for the given year based on its type.
+        """
+        # Check if academic terms already exist for the year
+        existing_terms = (
+            storage.session.query(AcademicTerm).filter_by(year_id=year.id).all()
+        )
+        if existing_terms:
+            return
+
+        academic_term = [
+            AcademicTerm(
+                year_id=year.id,
+                name=term,
+                start_date=fake.past_date(),
+                end_date=fake.future_date(),
+                registration_start=fake.past_date(),
+                registration_end=fake.future_date(),
+            )
+            for term in list(AcademicTermEnum)[
+                : 4 if year.calendar_type == AcademicTermTypeEnum.QUARTER else 2
+            ]
+        ]
+
+        storage.session.bulk_save_objects(academic_term)
+        storage.save()
 
     @staticmethod
     def create_grades() -> None:
         """Populates the grades table with all grades from 1 to 12."""
+        if storage.session.query(Grade).count() > 0:
+            return
+
+        social_stream = (
+            storage.session.query(Stream)
+            .filter_by(name=StreamEnum.SOCIAL.value)
+            .first()
+        )
+        natural_stream = (
+            storage.session.query(Stream)
+            .filter_by(name=StreamEnum.NATURAL.value)
+            .first()
+        )
+
         for grade_level in range(1, 13):
-            if not storage.session.query(Grade).filter_by(grade=grade_level).first():
-                grade = Grade(
-                    grade=grade_level,
-                    level=(
-                        GradeLevelEnum.PRIMARY
-                        if grade_level < 5
-                        else GradeLevelEnum.MIDDLE_SCHOOL
-                        if grade_level < 8
-                        else GradeLevelEnum.HIGH_SCHOOL
-                    ),
-                )
-                storage.new(grade)
+            grade = Grade(
+                grade=str(grade_level),
+                level=(
+                    GradeLevelEnum.PRIMARY
+                    if grade_level < 5
+                    else GradeLevelEnum.MIDDLE_SCHOOL
+                    if grade_level < 8
+                    else GradeLevelEnum.HIGH_SCHOOL
+                ),
+            )
+
+            if grade_level > 10:
+                if not social_stream or not natural_stream:
+                    continue  # Ensure streams exist before assigning
+
+                # Assign streams to grades 11 and 12
+                grade.streams = [social_stream, natural_stream]
+
+            storage.new(grade)
         storage.save()
 
     @staticmethod
     def create_streams() -> None:
         """Populates the streams table with 'natural' and 'social' streams."""
+        if storage.session.query(Stream).count() == len(StreamEnum):
+            return
+
         for stream_name in StreamEnum:
             if (
                 not storage.session.query(Stream)
@@ -84,19 +140,21 @@ class BaseAction:
     @staticmethod
     def create_section() -> None:
         """Populates the section table with 'A', 'B', and 'C' sections."""
+        if storage.session.query(Section).count() > 0:
+            return
+
         for section_name in SectionEnum:
-            if (
-                not storage.session.query(Section)
-                .filter_by(section=section_name.value)
-                .first()
-            ):
-                section = Section(section=section_name.value)
-                storage.new(section)
+            section = Section(section=section_name.value)
+            storage.new(section)
+
         storage.save()
 
     @staticmethod
     def create_subjects() -> None:
         """Populates the subjects table with all subjects from AllSubjectsEnum."""
+        if storage.session.query(Subject).count() == len(AllSubjectsEnum):
+            return
+
         for subject_enum in AllSubjectsEnum:
             if (
                 not storage.session.query(Subject)
@@ -108,7 +166,7 @@ class BaseAction:
         storage.save()
 
     @staticmethod
-    def _get_grade(grade_level: int) -> Grade:
+    def _get_grade(grade_level: str) -> Grade:
         """Fetches a grade by its level, raising an error if not found."""
         grade = storage.session.query(Grade).filter_by(grade=grade_level).first()
         if not grade:
@@ -174,8 +232,9 @@ class BaseAction:
         Orchestrates the creation of all necessary academic records for a new year.
         """
         # 1. Ensure all prerequisite data exists
+        BaseAction.create_academic_term(year)
+        BaseAction.create_streams()  # Order Maters
         BaseAction.create_grades()
-        BaseAction.create_streams()
         BaseAction.create_section()
         BaseAction.create_subjects()
 
@@ -189,7 +248,7 @@ class BaseAction:
                 subject = BaseAction._get_subject(subject_enum)
 
                 # 3. Handle streamed vs. non-streamed grades
-                if grade_level in [11, 12]:
+                if grade_level in ["11", "12"]:
                     for stream_enum in StreamEnum:
                         stream = BaseAction._get_stream(stream_enum)
 

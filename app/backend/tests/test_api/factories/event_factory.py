@@ -8,7 +8,6 @@ from pyethiodate import EthDate  # type: ignore
 from models.event import Event
 from .base_factory import BaseFactory
 from .year_factory import YearFactory
-from .semester_factory import SemesterFactory
 from extension.enums.enum import (
     EventEligibilityEnum,
     EventLocationEnum,
@@ -22,11 +21,6 @@ fake = Faker()
 class EventFactory(BaseFactory[Event]):
     class Meta:
         model = Event
-
-    _add_for_test: Dict[str, Any] = {
-        "academic_year": lambda **kwarg: EthDate.date_to_ethiopian(datetime.now()).year,
-        "semester": lambda **kwarg: SemesterFactory.build(),
-    }
 
     year: Any = SubFactory(YearFactory)
     year_id: Any = LazyAttribute(lambda x: x.year.id)

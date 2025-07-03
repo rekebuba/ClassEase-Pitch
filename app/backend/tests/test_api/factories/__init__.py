@@ -8,14 +8,14 @@ from .typed_factory import TypedFactory
 from .year_factory import YearFactory
 from .grade_factory import GradeFactory
 from .event_factory import EventFactory
-from .semester_factory import SemesterFactory
+from .academic_term_factory import AcademicTermFactory
 from .user_factory import UserFactory
 from .admin_factory import AdminFactory
 from .student_factory import StudentFactory
 from .teacher_factory import TeacherFactory
 from .subject_factory import SubjectFactory
 from .section_factory import SectionFactory
-from .student_semester_record_factory import StudentSemesterRecordFactory
+from .student_term_record_factory import StudentTermRecordFactory
 from .student_year_record_factory import StudentYearRecordFactory
 from .assessment_factory import AssessmentFactory
 from .subjects_factory import SubjectsFactory, AvailableSubject
@@ -40,14 +40,14 @@ __all__ = [
     "YearFactory",
     "GradeFactory",
     "EventFactory",
-    "SemesterFactory",
+    "AcademicTermFactory",
     "UserFactory",
     "AdminFactory",
     "StudentFactory",
     "TeacherFactory",
     "SubjectFactory",
     "SectionFactory",
-    "StudentSemesterRecordFactory",
+    "StudentTermRecordFactory",
     "StudentYearRecordFactory",
     "AssessmentFactory",
     "SubjectsFactory",

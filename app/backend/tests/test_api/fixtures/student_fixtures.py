@@ -5,7 +5,7 @@ import pytest
 from flask.testing import FlaskClient
 
 from models.grade import Grade
-from models.semester import Semester
+from models.academic_term import AcademicTerm
 from models.student import Student
 from tests.test_api.factories import AssessmentFactory, StudentFactory
 from tests.typing import Credential
@@ -116,7 +116,7 @@ def register_all_students(
 @pytest.fixture(scope="session")
 def register_stud_for_semester_one_course(
     db_session: scoped_session[Session],
-    semester_one_created: Semester,
+    semester_one_created: AcademicTerm,
     student_data: Iterator[Student],
 ) -> None:
     """Fixture to register all students in the second semester."""
@@ -150,7 +150,7 @@ def register_stud_for_semester_one_course(
 @pytest.fixture(scope="session")
 def register_stud_for_semester_two_course(
     db_session: scoped_session[Session],
-    semester_two_created: Semester,
+    semester_two_created: AcademicTerm,
     student_data: Iterator[Student],
 ) -> None:
     """Fixture to register all students in the second semester."""

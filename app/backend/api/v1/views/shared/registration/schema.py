@@ -31,7 +31,7 @@ from models.student import Student
 
 from models import storage
 from models.user import User
-from models.semester import Semester
+from models.academic_term import AcademicTerm
 from models.teacher import Teacher
 from models.admin import Admin
 

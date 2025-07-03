@@ -340,3 +340,15 @@ class SectionEnum(str, Enum):
     SECTION_A = "A"
     SECTION_B = "B"
     SECTION_C = "C"
+
+
+class AcademicTermEnum(str, Enum):
+    FIRST_TERM = "First Term"
+    SECOND_TERM = "Second Term"
+    THIRD_TERM = "Third Term"
+    FOURTH_TERM = "Fourth Term"
+
+
+class AcademicTermTypeEnum(str, Enum):
+    SEMESTER = "Semester"
+    QUARTER = "Quarter"

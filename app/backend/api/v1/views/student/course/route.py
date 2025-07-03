@@ -10,13 +10,13 @@ from api.v1.views.student import stud
 from api.v1.views.student.course.schema import CourseListSchema
 from models.assessment import Assessment
 from models.section import Section
-from models.semester import Semester
+from models.academic_term import AcademicTerm
 from models.student import Student
 from models.subject import Subject
 from models.year import Year
 from models.event import Event
 from models.grade import Grade
-from models.student_semester_record import StudentSemesterRecord
+from models.student_term_record import StudentTermRecord
 from models.student_year_record import StudentYearRecord
 from models import storage
 from api.v1.views import errors
@@ -149,7 +149,7 @@ def register_course(user_data: UserT) -> Tuple[Response, int]:
             storage.session.add(section)
             storage.session.flush()
 
-        new_semester_record = StudentSemesterRecord(
+        new_semester_record = StudentTermRecord(
             section_id=section.id,
             student_id=valid_data.get("student_id"),
             semester_id=valid_data.get("semester_id"),

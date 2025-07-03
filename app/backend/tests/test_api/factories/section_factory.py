@@ -10,8 +10,8 @@ class SectionFactory(BaseFactory[Section]):
     class Meta:
         model = Section
 
-    student_semester_records: Any = RelatedFactoryList(
-        "tests.test_api.factories.StudentSemesterRecordFactory",
+    student_term_records: Any = RelatedFactoryList(
+        "tests.test_api.factories.StudentTermRecordFactory",
         factory_related_name="section",
         size=2,
     )

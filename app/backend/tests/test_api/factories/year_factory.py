@@ -1,6 +1,10 @@
-from typing import Any, Optional
-from factory import LazyAttribute, RelatedFactoryList
-from sqlalchemy import select
+#!/usr/bin/python3
+"""Module for YearFactory class"""
+
+import random
+from typing import Any
+from factory import LazyAttribute
+from extension.enums.enum import AcademicTermTypeEnum
 from models.year import Year
 from models import storage
 from .base_action import BaseAction
@@ -14,14 +18,10 @@ class YearFactory(BaseFactory[Year]):
     class Meta:
         model = Year
 
-    semesters: Any = RelatedFactoryList(
-        "tests.test_api.factories.SemesterFactory",
-        factory_related_name="year",
-        size=2,
-    )  # Two semesters per year
-
-    # Preload existing school IDs
-    _existing_ids = storage.session.execute(select(Year.id)).scalar_one_or_none()
+    # calendar_type: Any = LazyAttribute(
+    #     lambda _: random.choice(list(AcademicTermTypeEnum._value2member_map_))
+    # )
+    calendar_type: Any = LazyAttribute(lambda _: AcademicTermTypeEnum.QUARTER.value)
 
     ethiopian_year: Any = LazyAttribute(lambda _: current_EC_year())
     gregorian_year: Any = LazyAttribute(lambda x: current_GC_year(x.ethiopian_year))
@@ -30,7 +30,11 @@ class YearFactory(BaseFactory[Year]):
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
         # Try to get existing year first
-        existing = storage.session.query(Year).filter_by(**kwargs).first()
+        existing = (
+            storage.session.query(Year)
+            .filter_by(academic_year=kwargs.get("academic_year"))
+            .first()
+        )
         if existing:
             return existing
 
@@ -41,16 +45,3 @@ class YearFactory(BaseFactory[Year]):
         BaseAction.create_necessary_academic_data(year)
 
         return year
-
-    @classmethod
-    def get_existing_id(cls) -> Optional[str]:
-        return cls._existing_ids if cls._existing_ids else None
-
-    @classmethod
-    def get_year(cls, academic_year: str) -> Optional[Year]:
-        """
-        Returns a Year instance for the given year if it exists.
-        """
-        return storage.session.scalars(
-            select(Year).where(Year.academic_year == academic_year)
-        ).first()

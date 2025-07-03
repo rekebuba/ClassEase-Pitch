@@ -12,7 +12,7 @@ from models.section import Section
 from models.subject import Subject
 from models.assessment import Assessment
 from models.mark_list import MarkList
-from models.student_semester_record import StudentSemesterRecord
+from models.student_term_record import StudentTermRecord
 from models.subject_yearly_average import SubjectYearlyAverage
 from models.teacher_record import TeachersRecord
 from models.student_year_record import StudentYearRecord
@@ -549,7 +549,7 @@ def average_subject_ranks(student_data):
 def semester_average(student_data):
     """
     Calculate the average score for a student in a specific semester and year,
-    update or create an StudentSemesterRecord entry with the calculated average, and
+    update or create an StudentTermRecord entry with the calculated average, and
     subsequently update the semester ranks.
 
     Returns:
@@ -574,12 +574,12 @@ def semester_average(student_data):
 
     if average:
         storage.session.execute(
-            update(StudentSemesterRecord)
+            update(StudentTermRecord)
             .where(
                 and_(
-                    StudentSemesterRecord.student_id == average.student_id,
-                    StudentSemesterRecord.semesters == average.semester,
-                    StudentSemesterRecord.year == average.year,
+                    StudentTermRecord.student_id == average.student_id,
+                    StudentTermRecord.semesters == average.semester,
+                    StudentTermRecord.year == average.year,
                 )
             )
             .values(
@@ -608,31 +608,31 @@ def semester_ranks(student_data):
     """
     ranked_data_subquery = (
         storage.session.query(
-            StudentSemesterRecord.student_id,
-            StudentSemesterRecord.semesters,
-            StudentSemesterRecord.year,
+            StudentTermRecord.student_id,
+            StudentTermRecord.semesters,
+            StudentTermRecord.year,
             func.rank()
-            .over(order_by=StudentSemesterRecord.average.desc())
+            .over(order_by=StudentTermRecord.average.desc())
             .label("new_rank"),
         )
         .where(
             and_(
-                StudentSemesterRecord.semesters == student_data["semester"],
-                StudentSemesterRecord.year == student_data["year"],
-                StudentSemesterRecord.average.isnot(None),
+                StudentTermRecord.semesters == student_data["semester"],
+                StudentTermRecord.year == student_data["year"],
+                StudentTermRecord.average.isnot(None),
             )
         )
         .subquery()
     )
 
     storage.session.execute(
-        update(StudentSemesterRecord)
+        update(StudentTermRecord)
         .where(
             and_(
                 # c is short for Column
-                StudentSemesterRecord.student_id == ranked_data_subquery.c.student_id,
-                StudentSemesterRecord.semesters == ranked_data_subquery.c.semester,
-                StudentSemesterRecord.year == ranked_data_subquery.c.year,
+                StudentTermRecord.student_id == ranked_data_subquery.c.student_id,
+                StudentTermRecord.semesters == ranked_data_subquery.c.semester,
+                StudentTermRecord.year == ranked_data_subquery.c.year,
             )
         )
         .values(
@@ -662,15 +662,15 @@ def yearly_average(student_data):
 
     average = (
         storage.session.query(
-            StudentSemesterRecord.student_id,
-            StudentSemesterRecord.year,
-            func.avg(StudentSemesterRecord.average).label("semester_average"),
+            StudentTermRecord.student_id,
+            StudentTermRecord.year,
+            func.avg(StudentTermRecord.average).label("semester_average"),
         )
         .filter(
-            StudentSemesterRecord.student_id == student_data["student_id"],
-            StudentSemesterRecord.year == student_data["year"],
+            StudentTermRecord.student_id == student_data["student_id"],
+            StudentTermRecord.year == student_data["year"],
         )
-        .group_by(StudentSemesterRecord.student_id)
+        .group_by(StudentTermRecord.student_id)
         .first()
     )
 
@@ -732,7 +732,7 @@ def year_ranks(student_data):
             and_(
                 # c is short for Column
                 StudentYearRecord.student_id == ranked_data_subquery.c.student_id,
-                StudentSemesterRecord.year == ranked_data_subquery.c.year,
+                StudentTermRecord.year == ranked_data_subquery.c.year,
             )
         )
         .values(

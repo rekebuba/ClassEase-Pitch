@@ -1,9 +1,10 @@
 #!/usr/bin/python3
 
 import pytest
-from models.semester import Semester
+from models.academic_term import AcademicTerm
 from models.student import Student
 from models.user import User
+from tests.test_api.factories.assessment_factory import AssessmentFactory
 from tests.test_api.factories.year_factory import YearFactory
 from tests.test_api.fixtures.methods import prepare_form_data
 from tests.test_api.factories import StudentFactory
@@ -113,7 +114,7 @@ class TestStudents:
     def test_available_subjects_for_registration(
         self,
         client: FlaskClient,
-        semester_one_created: Semester,
+        semester_one_created: AcademicTerm,
         stud_auth_header: Credential,
     ) -> None:
         """
@@ -135,7 +136,7 @@ class TestStudents:
     def test_course_registration(
         self,
         client: FlaskClient,
-        semester_one_created: Semester,
+        semester_one_created: AcademicTerm,
         stud_auth_header: Credential,
     ) -> None:
         """
