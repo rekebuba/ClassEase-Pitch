@@ -1,5 +1,5 @@
 from typing import Any
-from factory import LazyAttribute, SubFactory
+from factory import LazyAttribute, SubFactory, SelfAttribute
 from models.assessment import Assessment
 from .base_factory import BaseFactory
 
@@ -13,7 +13,9 @@ class AssessmentFactory(BaseFactory[Assessment]):
         "tests.test_api.factories.StudentFactory", student_year_records=[]
     )
     student_semester_record: Any = SubFactory(
-        "tests.test_api.factories.StudentSemesterRecordFactory", assessments=[]
+        "tests.test_api.factories.StudentSemesterRecordFactory",
+        student=SelfAttribute("..student"),
+        assessments=[],
     )
     yearly_subject: Any = SubFactory(
         "tests.test_api.factories.YearlySubjectFactory",
