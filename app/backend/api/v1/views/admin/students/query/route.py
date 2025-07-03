@@ -21,8 +21,8 @@ from api.v1.views.methods import paginate_query
 from api.v1.views.utils import admin_required
 from models.grade import Grade
 from models.section import Section
-from models.semester import Semester
-from models.student_semester_record import StudentSemesterRecord
+from models.academic_term import AcademicTerm
+from models.student_term_record import StudentTermRecord
 from models.student_year_record import StudentYearRecord
 from models.student import Student
 from models.user import User
@@ -51,10 +51,10 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
                 StudentYearRecord,
                 Grade,
                 func.group_concat(
-                    StudentSemesterRecord.average.op("ORDER BY")(Semester.name)
+                    StudentTermRecord.average.op("ORDER BY")(Semester.name)
                 ).label("average"),
                 func.group_concat(
-                    StudentSemesterRecord.rank.op("ORDER BY")(Semester.name)
+                    StudentTermRecord.rank.op("ORDER BY")(Semester.name)
                 ).label("rank"),
                 func.group_concat(Section.section.op("ORDER BY")(Semester.name)).label(
                     "section"
@@ -66,8 +66,8 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
             .join(User.students)  # User → Student
             .outerjoin(Student.year_records)  # Student → StudentYearRecord
             .outerjoin(StudentYearRecord.semester_records)
-            .outerjoin(StudentSemesterRecord.sections)  # SemesterRecord → Section
-            .outerjoin(StudentSemesterRecord.semesters)  # SemesterRecord → Semester
+            .outerjoin(StudentTermRecord.sections)  # SemesterRecord → Section
+            .outerjoin(StudentTermRecord.semesters)  # SemesterRecord → Semester
             .outerjoin(Section.grade)  # Section → Grade
             .group_by(
                 User.id,
@@ -79,7 +79,7 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
                 joinedload(User.students)
                 .joinedload(Student.year_records)
                 .joinedload(StudentYearRecord.semester_records)
-                .joinedload(StudentSemesterRecord.sections)
+                .joinedload(StudentTermRecord.sections)
                 .joinedload(Section.grade)
             )
         )

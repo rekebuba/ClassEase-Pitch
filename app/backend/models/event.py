@@ -28,7 +28,7 @@ if TYPE_CHECKING:
 
 
 class Event(BaseModel):
-    """docstring for Semester."""
+    """docstring for Event."""
 
     __tablename__ = "events"
     year_id: Mapped[str] = mapped_column(

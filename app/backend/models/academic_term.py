@@ -1,27 +1,34 @@
 #!/usr/bin/python3
-"""Module for Semester class"""
+"""Module for AcademicTerm class"""
 
 from datetime import date
 from typing import TYPE_CHECKING, List
-from sqlalchemy import String, Integer, ForeignKey, Date
+from sqlalchemy import String, ForeignKey, Date, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from extension.enums.enum import AcademicTermEnum
 from models.base_model import BaseModel
 import sqlalchemy as sa
 
-
 if TYPE_CHECKING:
-    from models.student_semester_record import StudentSemesterRecord
+    from models.student_term_record import StudentTermRecord
     from models.year import Year
 
 
-class Semester(BaseModel):
-    """docstring for Semester."""
+class AcademicTerm(BaseModel):
+    """docstring for AcademicTerm."""
 
-    __tablename__ = "semesters"
+    __tablename__ = "academic_terms"
     year_id: Mapped[str] = mapped_column(
         String(125), ForeignKey("years.id"), nullable=False
     )
-    name: Mapped[int] = mapped_column(Integer, nullable=False)
+    name: Mapped[AcademicTermEnum] = mapped_column(
+        Enum(
+            AcademicTermEnum,
+            name="academic_term_enum",
+            values_callable=lambda x: [e.value for e in x],
+        ),
+        nullable=False,
+    )
 
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     end_date: Mapped[date] = mapped_column(Date, nullable=False)
@@ -32,20 +39,20 @@ class Semester(BaseModel):
     # Relationships
     year: Mapped["Year"] = relationship(
         "Year",
-        back_populates="semesters",
+        back_populates="academic_terms",
         init=False,
     )
-    student_semester_records: Mapped[List["StudentSemesterRecord"]] = relationship(
-        "StudentSemesterRecord",
-        back_populates="semester",
+    student_term_records: Mapped[List["StudentTermRecord"]] = relationship(
+        "StudentTermRecord",
+        back_populates="academic_term",
         default_factory=list,
         repr=False,
     )
 
     __table_args__ = (
-        sa.CheckConstraint("start_date <= end_date", name="check_semester_dates"),
+        sa.CheckConstraint("start_date <= end_date", name="check_term_dates"),
         sa.CheckConstraint(
             "registration_start <= registration_end",
-            name="check_semester_registration_dates",
+            name="check_term_registration_dates",
         ),
     )

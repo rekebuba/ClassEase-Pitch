@@ -10,7 +10,7 @@ from api.v1.schemas.custom_schema import (
     FloatOrDateField,
 )
 from models.section import Section
-from models.semester import Semester
+from models.academic_term import AcademicTerm
 from models.student_year_record import StudentYearRecord
 from models.grade import Grade
 

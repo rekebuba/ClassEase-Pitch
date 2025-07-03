@@ -40,6 +40,7 @@ class StudentFactory(BaseFactory[Student]):
         factory_related_name="student",
         size=1,
     )
+    
 
     # Personal Information
     first_name: Any = LazyAttribute(lambda x: fake.first_name())

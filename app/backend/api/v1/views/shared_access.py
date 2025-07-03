@@ -10,7 +10,7 @@ from models.user import User
 from models.subject import Subject
 from models.assessment import Assessment
 from models.mark_list import MarkList
-from models.student_semester_record import StudentSemesterRecord
+from models.student_term_record import StudentTermRecord
 from models.subject_yearly_average import SubjectYearlyAverage
 from models.teacher_record import TeachersRecord
 from models.student_year_record import StudentYearRecord
@@ -118,23 +118,23 @@ def student_assessment(user_data: UserT) -> Tuple[Response, int]:
 
     summary = (
         storage.session.query(
-            StudentSemesterRecord.semesters,
-            StudentSemesterRecord.average,
-            StudentSemesterRecord.rank,
+            StudentTermRecord.semesters,
+            StudentTermRecord.average,
+            StudentTermRecord.rank,
             StudentYearRecord.final_score,
             StudentYearRecord.rank,
         )
-        .select_from(StudentSemesterRecord)
+        .select_from(StudentTermRecord)
         .join(
             StudentYearRecord,
             and_(
-                StudentYearRecord.student_id == StudentSemesterRecord.student_id,
-                StudentYearRecord.grade_id == StudentSemesterRecord.grade_id,
-                StudentYearRecord.year == StudentSemesterRecord.year,
+                StudentYearRecord.student_id == StudentTermRecord.student_id,
+                StudentYearRecord.grade_id == StudentTermRecord.grade_id,
+                StudentYearRecord.year == StudentTermRecord.year,
             ),
         )
-        .filter(StudentSemesterRecord.student_id == student_id)
-        .order_by(StudentSemesterRecord.semesters)
+        .filter(StudentTermRecord.student_id == student_id)
+        .order_by(StudentTermRecord.semesters)
     ).all()
 
     if not summary:

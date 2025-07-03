@@ -8,24 +8,24 @@ from sqlalchemy.orm import sessionmaker, scoped_session, Session
 from flask import Flask
 from api.v1.utils.typing import BaseT
 from models.base_model import Base
-from models.grade import Grade, seed_grades  # noqa: F401
+from models.grade import Grade  # noqa: F401
 from models.user import User  # noqa: F401
 from models.student import Student  # noqa: F401
-from models.section import Section, seed_section # noqa: F401
+from models.section import Section  # noqa: F401
 from models.admin import Admin  # noqa: F401
-from models.subject import Subject, seed_subjects  # noqa: F401
+from models.subject import Subject  # noqa: F401
 from models.teacher import Teacher  # noqa: F401
 from models.assessment import Assessment  # noqa: F401
 from models.mark_list import MarkList  # noqa: F401
-from models.student_semester_record import StudentSemesterRecord  # noqa: F401
+from models.student_term_record import StudentTermRecord  # noqa: F401
 from models.subject_yearly_average import SubjectYearlyAverage  # noqa: F401
 from models.student_year_record import StudentYearRecord  # noqa: F401
 from models.teacher_record import TeachersRecord  # noqa: F401
 from models.blacklist_token import BlacklistToken  # noqa: F401
 from models.event import Event  # noqa: F401
-from models.semester import Semester  # noqa: F401
+from models.academic_term import AcademicTerm  # noqa: F401
 from models.saved_query_view import SavedQueryView  # noqa: F401
-from models.year import Year, seed_year  # noqa: F401
+from models.year import Year  # noqa: F401
 from models.stream import Stream  # noqa: F401
 from models.table import Table, seed_table  # noqa: F401
 from models.grade_stream_link import GradeStreamLink  # noqa: F401
@@ -163,10 +163,6 @@ class DBStorage:
         """
         Seed initial data into the database.
         """
-        # seed_section(self.session)
-        # seed_grades(self.session)
-        # seed_subjects(self.session)
-        # seed_year(self.session)
         seed_table(self.session, self.engine)
 
     def close(self) -> None:

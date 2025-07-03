@@ -14,8 +14,8 @@ from api.v1.views.admin.students.section_count.schema import (
     SectionCountsSchema,
 )
 from models.section import Section
-from models.semester import Semester
-from models.student_semester_record import StudentSemesterRecord
+from models.academic_term import AcademicTerm
+from models.student_term_record import StudentTermRecord
 from models import storage
 from models.student import Student
 
@@ -38,9 +38,9 @@ def student_section_counts(admin_data: UserT) -> Tuple[Response, int]:
                 func.count(Student.id.distinct()).label("student_count"),
             )
             .select_from(Student)
-            .outerjoin(StudentSemesterRecord, StudentSemesterRecord.student_id == Student.id)
-            .outerjoin(Section, Section.id == StudentSemesterRecord.section_id)
-            .outerjoin(Semester, Semester.id == StudentSemesterRecord.semester_id)
+            .outerjoin(StudentTermRecord, StudentTermRecord.student_id == Student.id)
+            .outerjoin(Section, Section.id == StudentTermRecord.section_id)
+            .outerjoin(Semester, Semester.id == StudentTermRecord.semester_id)
             .group_by(Section.section, Semester.name)
         ).subquery()
 

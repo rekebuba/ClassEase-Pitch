@@ -5,8 +5,9 @@ from pydantic import BaseModel
 import pytest
 from sqlalchemy.orm import scoped_session, Session
 
-from models.semester import Semester
-from tests.test_api.factories import QueryFactory, SemesterFactory
+from models.academic_term import AcademicTerm
+from tests.test_api.factories import QueryFactory
+from tests.test_api.factories.academic_term_factory import AcademicTermFactory
 from tests.test_api.fixtures.student_fixtures import StudentQueryResponse
 from tests.typing import Credential
 
@@ -24,22 +25,22 @@ class AllStudentViewsResponse(BaseModel):
 def semester_one_created(
     db_session: scoped_session[Session],
     client: FlaskClient,
-) -> Iterator[Semester]:
+) -> Iterator[AcademicTerm]:
     """
     Fixture to create the first semester for testing purposes.
     """
-    yield SemesterFactory.get_or_create(name=1)
+    yield AcademicTermFactory.get_or_create(name=1)
 
 
 @pytest.fixture(scope="session")
 def semester_two_created(
     db_session: scoped_session[Session],
     client: FlaskClient,
-) -> Iterator[Semester]:
+) -> Iterator[AcademicTerm]:
     """
     Fixture to create the second semester for testing purposes.
     """
-    yield SemesterFactory.get_or_create(name=2)
+    yield AcademicTermFactory.get_or_create(name=2)
 
 
 @pytest.fixture(scope="session")

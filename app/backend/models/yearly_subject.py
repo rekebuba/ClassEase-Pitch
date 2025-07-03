@@ -1,13 +1,14 @@
 #!/usr/bin/python3
 """Module for Subject class"""
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional
+from typing import TYPE_CHECKING, List, Optional
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from models.assessment import Assessment
 from models.base_model import BaseModel
 
 if TYPE_CHECKING:
+    from models.subject_yearly_average import SubjectYearlyAverage
     from models.subject import Subject
     from models.grade import Grade
     from models.stream import Stream
@@ -52,6 +53,12 @@ class YearlySubject(BaseModel):
     )
     assessments: Mapped[List["Assessment"]] = relationship(  # noqa: F821
         "Assessment",
+        back_populates="yearly_subject",
+        default_factory=list,
+        repr=False,
+    )
+    subject_yearly_averages: Mapped[List["SubjectYearlyAverage"]] = relationship(  # noqa: F821
+        "SubjectYearlyAverage",
         back_populates="yearly_subject",
         default_factory=list,
         repr=False,

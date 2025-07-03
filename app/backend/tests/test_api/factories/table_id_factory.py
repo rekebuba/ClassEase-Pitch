@@ -49,16 +49,16 @@ class TableIdFactory(TypedFactory[Value]):
     sectionSemesterTwo: Any = LazyAttribute(lambda x: x.db_table["sections"])
     createdAt: Any = LazyAttribute(lambda x: x.db_table["users"])
     averageSemesterOne: Any = LazyAttribute(
-        lambda x: x.db_table["student_semester_records"]
+        lambda x: x.db_table["student_term_records"]
     )
     averageSemesterTwo: Any = LazyAttribute(
-        lambda x: x.db_table["student_semester_records"]
+        lambda x: x.db_table["student_term_records"]
     )
     rankSemesterOne: Any = LazyAttribute(
-        lambda x: x.db_table["student_semester_records"]
+        lambda x: x.db_table["student_term_records"]
     )
     rankSemesterTwo: Any = LazyAttribute(
-        lambda x: x.db_table["student_semester_records"]
+        lambda x: x.db_table["student_term_records"]
     )
     finalScore: Any = LazyAttribute(lambda x: x.db_table["student_year_records"])
     rank: Any = LazyAttribute(lambda x: x.db_table["student_year_records"])

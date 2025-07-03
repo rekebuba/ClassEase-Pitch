@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""Module for StudentSemesterRecord class"""
+"""Module for StudentTermRecord class"""
 
 from typing import TYPE_CHECKING, List
 from sqlalchemy import String, Integer, ForeignKey, Float
@@ -9,22 +9,22 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
     from models.section import Section
-    from models.semester import Semester
+    from models.academic_term import AcademicTerm
     from models.student_year_record import StudentYearRecord
     from models.student import Student
 
 
-class StudentSemesterRecord(BaseModel):
+class StudentTermRecord(BaseModel):
     """
-    This model represents the average result of a student for a particular semester and year.
+    This model represents the average result of a student for a particular term and year.
     """
 
-    __tablename__ = "student_semester_records"
+    __tablename__ = "student_term_records"
     student_id: Mapped[str] = mapped_column(
         String(36), ForeignKey("students.id"), nullable=False
     )
-    semester_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("semesters.id"), nullable=False
+    academic_term_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("academic_terms.id"), nullable=False
     )
     section_id: Mapped[str] = mapped_column(
         String(36), ForeignKey("sections.id"), nullable=False
@@ -38,27 +38,27 @@ class StudentSemesterRecord(BaseModel):
     # Relationships
     student: Mapped["Student"] = relationship(
         "Student",
-        back_populates="student_semester_records",
+        back_populates="student_term_records",
         init=False,
     )
     student_year_record: Mapped["StudentYearRecord"] = relationship(
         "StudentYearRecord",
-        back_populates="student_semester_records",
+        back_populates="student_term_records",
         init=False,
     )
-    semester: Mapped["Semester"] = relationship(
-        "Semester",
-        back_populates="student_semester_records",
+    academic_term: Mapped["AcademicTerm"] = relationship(
+        "AcademicTerm",
+        back_populates="student_term_records",
         init=False,
     )
     section: Mapped["Section"] = relationship(
         "Section",
-        back_populates="student_semester_records",
+        back_populates="student_term_records",
         init=False,
     )
     assessments: Mapped[List["Assessment"]] = relationship(
         "Assessment",
-        back_populates="student_semester_record",
+        back_populates="student_term_record",
         default_factory=list,
         repr=False,
     )

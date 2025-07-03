@@ -6,9 +6,11 @@ from sqlalchemy import String
 from models.base_model import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+
 if TYPE_CHECKING:
     from models.yearly_subject import YearlySubject
     from models.grade import Grade
+    from models.student_year_record import StudentYearRecord
 
 
 class Stream(BaseModel):
@@ -25,6 +27,12 @@ class Stream(BaseModel):
     )
     yearly_subjects: Mapped[List["YearlySubject"]] = relationship(
         "YearlySubject",
+        back_populates="stream",
+        repr=False,
+        default_factory=list,
+    )
+    students: Mapped[List["StudentYearRecord"]] = relationship(
+        "StudentYearRecord",
         back_populates="stream",
         repr=False,
         default_factory=list,

@@ -5,7 +5,7 @@ from math import ceil
 from sqlalchemy import UnaryExpression, and_, case, func, true
 from werkzeug.utils import secure_filename
 from werkzeug.datastructures import FileStorage
-from models.semester import Semester
+from models.academic_term import AcademicTerm
 from sqlalchemy.sql.elements import ColumnElement
 from sqlalchemy.orm.attributes import InstrumentedAttribute
 from sqlalchemy.orm import Query

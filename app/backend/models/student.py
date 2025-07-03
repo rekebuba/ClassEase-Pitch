@@ -15,7 +15,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from extension.enums.enum import GenderEnum, StudentApplicationStatusEnum
 
 if TYPE_CHECKING:
-    from models.student_semester_record import StudentSemesterRecord
+    from models.student_term_record import StudentTermRecord
     from models.student_year_record import StudentYearRecord
     from models.subject_yearly_average import SubjectYearlyAverage
     from models.user import User
@@ -89,7 +89,11 @@ class Student(BaseModel):
     )
 
     user_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("users.id"), unique=True, nullable=True, default=None
+        String(36),
+        ForeignKey("users.id"),
+        unique=True,
+        nullable=True,
+        default=None,
     )
 
     # Relationships
@@ -99,31 +103,27 @@ class Student(BaseModel):
         init=False,
         repr=False,
     )
-    student_semester_records: Mapped[List["StudentSemesterRecord"]] = relationship(
-        "StudentSemesterRecord",
+    student_term_records: Mapped[List["StudentTermRecord"]] = relationship(
+        "StudentTermRecord",
         back_populates="student",
-        cascade="all, delete-orphan",
         default_factory=list,
         repr=False,
     )
     student_year_records: Mapped[List["StudentYearRecord"]] = relationship(
         "StudentYearRecord",
         back_populates="student",
-        cascade="all, delete-orphan",
         default_factory=list,
         repr=False,
     )
     subject_yearly_averages: Mapped[List["SubjectYearlyAverage"]] = relationship(
         "SubjectYearlyAverage",
         back_populates="student",
-        cascade="all, delete-orphan",
         default_factory=list,
         repr=False,
     )
     assessments: Mapped[List["Assessment"]] = relationship(
         "Assessment",
         back_populates="student",
-        cascade="all, delete-orphan",
         default_factory=list,
         repr=False,
     )

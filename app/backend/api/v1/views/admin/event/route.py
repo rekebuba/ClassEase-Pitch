@@ -7,7 +7,7 @@ from api.v1.utils.typing import UserT
 from api.v1.views.admin import admins as admin
 from api.v1.views.utils import admin_required
 from api.v1.views.admin.event.schema import AvailableEventsSchema, EventSchema
-from models.semester import Semester
+from models.academic_term import AcademicTerm
 from models.year import Year
 from models.event import Event
 from models import storage

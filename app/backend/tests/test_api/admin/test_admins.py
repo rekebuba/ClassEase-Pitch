@@ -125,7 +125,7 @@ class TestAdmin:
         """
         Test the creation of a new event for a semester.
         """
-        event_form = EventFactory.build(purpose="New Semester")
+        event_form = EventFactory.build(purpose="New AcademicTerm")
 
         response = client.post(
             "/api/v1/admin/event/new",

@@ -8,21 +8,21 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
     from models.student import Student
-    from models.student_semester_record import StudentSemesterRecord
+    from models.student_term_record import StudentTermRecord
     from models.yearly_subject import YearlySubject
 
 
 class Assessment(BaseModel):
     """
-    This model represents an assessment record for a student, including details such as the student's ID, grade ID, subject ID, total score, rank, semester, and year.
+    This model represents an assessment record for a student including details
     """
 
     __tablename__ = "assessments"
     student_id: Mapped[str] = mapped_column(
         String(36), ForeignKey("students.id"), nullable=False
     )
-    student_semester_record_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("student_semester_records.id"), nullable=False
+    student_term_record_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("student_term_records.id"), nullable=False
     )
     yearly_subject_id: Mapped[str] = mapped_column(
         String(36), ForeignKey("yearly_subjects.id"), nullable=False
@@ -44,8 +44,8 @@ class Assessment(BaseModel):
         init=False,
         repr=False,
     )
-    student_semester_record: Mapped["StudentSemesterRecord"] = relationship(
-        "StudentSemesterRecord",
+    student_term_record: Mapped["StudentTermRecord"] = relationship(
+        "StudentTermRecord",
         back_populates="assessments",
         init=False,
         repr=False,

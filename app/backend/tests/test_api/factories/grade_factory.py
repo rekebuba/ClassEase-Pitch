@@ -15,12 +15,12 @@ class GradeFactory(BaseFactory[Grade]):
     # preload IDs
     _existing_ids = storage.session.execute(select(Grade.grade, Grade.id)).all()
 
-    grade: Any = LazyAttribute(lambda _: random.choice(range(1, 13)))
+    grade: Any = LazyAttribute(lambda _: str(random.choice(range(1, 13))))
     level: Any = LazyAttribute(
         lambda x: GradeLevelEnum.PRIMARY.value
-        if x.grade < 5
+        if int(x.grade) < 5
         else GradeLevelEnum.MIDDLE_SCHOOL.value
-        if x.grade < 8
+        if int(x.grade) < 8
         else GradeLevelEnum.HIGH_SCHOOL.value
     )
 
