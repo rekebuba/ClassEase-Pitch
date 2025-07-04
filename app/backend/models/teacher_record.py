@@ -18,11 +18,8 @@ class TeachersRecord(BaseModel):
     academic_term_id: Mapped[str] = mapped_column(
         String(120), ForeignKey("academic_terms.id"), nullable=False
     )
-    subject_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("subjects.id"), nullable=True, default=None
-    )
-    grade_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("grades.id"), nullable=True, default=None
+    yearly_subject_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("yearly_subjects.id"), nullable=False
     )
     section_id: Mapped[str] = mapped_column(
         String(120), ForeignKey("sections.id"), nullable=True, default=None
