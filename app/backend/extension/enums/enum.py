@@ -352,3 +352,11 @@ class AcademicTermEnum(str, Enum):
 class AcademicTermTypeEnum(str, Enum):
     SEMESTER = "Semester"
     QUARTER = "Quarter"
+
+class MarkListTypeEnum(str, Enum):
+    TEST = "Test"
+    QUIZ = "Quiz"
+    ASSIGNMENT = "Assignment"
+    MIDTERM = "Midterm"
+    FINAL = "Final"
+    

@@ -1,29 +1,30 @@
-from typing import Any, Dict
-from factory import LazyAttribute
+import random
+from typing import Any
+from factory import LazyAttribute, SubFactory, SelfAttribute
 import factory
-from dataclasses import dataclass, asdict
-from .mark_assessment_factory import MarkAssessmentFactory
-from .default_felids import DefaultFelids
 
-
-@dataclass
-class FakeMarkList:
-    grade_num: int  # number of mark List to create based on available grades
-    academic_year: int
-    semester: int
-    mark_assessment: Dict[str, Any]
-
-    def to_dict(self):
-        return asdict(self)  # Converts all fields to dict automatically
+from extension.enums.enum import MarkListTypeEnum
+from models.mark_list import MarkList
 
 
 class MarkListFactory(factory.Factory[Any]):
     class Meta:
-        model = FakeMarkList
+        model = MarkList
 
-    academic_year: Any = LazyAttribute(lambda _: DefaultFelids.current_EC_year())
-    semester: Any = LazyAttribute(lambda _: 1)
-    grade_num: Any = LazyAttribute(lambda _: 0)  # number of available grades
-    mark_assessment: Any = LazyAttribute(
-        lambda obj: [MarkAssessmentFactory() for _ in range(obj.grade_num)]
+    student: Any = SubFactory("tests.test_api.factories.StudentFactory")
+    student_term_record: Any = SubFactory(
+        "tests.test_api.factories.StudentTermRecordFactory",
+        student=SelfAttribute("..student"),
+        assessments=[],
     )
+    yearly_subject: Any = SubFactory("tests.test_api.factories.YearlySubjectFactory")
+
+    student_id: Any = LazyAttribute(lambda x: x.student.id)
+    student_term_record_id: Any = LazyAttribute(lambda x: x.student_term_record.id)
+    yearly_subject_id: Any = LazyAttribute(lambda x: x.yearly_subject.id)
+
+    type: Any = LazyAttribute(
+        lambda x: random.choice(list(MarkListTypeEnum._value2member_map_))
+    )
+    percentage: Any = LazyAttribute(lambda x: random.choice([10, 20, 50, 100]))
+    score: Any = LazyAttribute(lambda x: random.uniform(10, 100))

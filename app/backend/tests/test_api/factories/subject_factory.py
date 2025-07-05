@@ -1,6 +1,6 @@
 import random
 from typing import Any
-from factory import LazyAttribute
+from factory import LazyAttribute, RelatedFactoryList
 from sqlalchemy import select
 from extension.enums.enum import AllSubjectsEnum
 from models.subject import Subject

@@ -1,8 +1,9 @@
 #!/usr/bin/python3
 """Module for MarkList class"""
 
-from sqlalchemy import String, Integer, ForeignKey, Float
+from sqlalchemy import Enum, String, Integer, ForeignKey, Float
 from sqlalchemy.orm import Mapped, mapped_column
+from extension.enums.enum import MarkListTypeEnum
 from models.base_model import BaseModel
 
 
@@ -13,19 +14,23 @@ class MarkList(BaseModel):
 
     __tablename__ = "mark_lists"
 
-    subject_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("subjects.id"), nullable=False
+    student_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("students.id"), nullable=False
     )
-    # e.g., 'Test', 'Quiz', 'Assignment', 'Midterm', 'Final'
-    type: Mapped[str] = mapped_column(String(50), nullable=False)
+    student_term_record_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("student_term_records.id"), nullable=False
+    )
+    yearly_subject_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("yearly_subjects.id"), nullable=False
+    )
+    type: Mapped[MarkListTypeEnum] = mapped_column(
+        Enum(
+            MarkListTypeEnum,
+            name="mark_list_type",
+            value_callable=lambda x: [e.value for e in x],
+            native_enum=False,
+        ),
+        nullable=False,
+    )
     percentage: Mapped[int] = mapped_column(Integer, nullable=False)
     score = mapped_column(Float, nullable=True, default=None)
-    semester_record_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("student_term_records.id"), nullable=False
-    )
-    teachers_record_id: Mapped[str] = mapped_column(
-        String(120),
-        ForeignKey("teachers_records.id", ondelete="SET NULL"),
-        nullable=True,
-        default=None,
-    )

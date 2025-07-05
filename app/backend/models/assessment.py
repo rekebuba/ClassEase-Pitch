@@ -6,10 +6,12 @@ from sqlalchemy import String, Integer, ForeignKey, Float
 from models.base_model import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+
 if TYPE_CHECKING:
     from models.student import Student
     from models.student_term_record import StudentTermRecord
     from models.yearly_subject import YearlySubject
+    from models.teacher_record import TeachersRecord
 
 
 class Assessment(BaseModel):
@@ -29,7 +31,7 @@ class Assessment(BaseModel):
     )
     teachers_record_id: Mapped[str] = mapped_column(
         String(36),
-        ForeignKey("teachers_records.id", ondelete="SET NULL"),
+        ForeignKey("teacher_records.id", ondelete="SET NULL"),
         nullable=True,
         default=None,
     )
