@@ -31,6 +31,8 @@ from models.table import Table, seed_table  # noqa: F401
 from models.grade_stream_link import GradeStreamLink  # noqa: F401
 from models.teacher_subject_link import TeacherSubjectLink  # noqa: F401
 from models.teacher_grade_link import TeacherGradeLink  # noqa: F401
+from models.teacher_yearly_subject_link import TeacherYearlySubjectLink  # noqa: F401
+from models.teacher_record_section_link import TeacherRecordSectionLink  # noqa: F401
 from models.yearly_subject import YearlySubject  # noqa: F401
 from contextlib import contextmanager
 

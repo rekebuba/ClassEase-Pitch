@@ -9,9 +9,11 @@ from extension.enums.enum import AcademicTermEnum
 from models.base_model import BaseModel
 import sqlalchemy as sa
 
+
 if TYPE_CHECKING:
     from models.student_term_record import StudentTermRecord
     from models.year import Year
+    from models.teacher_record import TeachersRecord
 
 
 class AcademicTerm(BaseModel):
@@ -44,6 +46,12 @@ class AcademicTerm(BaseModel):
     )
     student_term_records: Mapped[List["StudentTermRecord"]] = relationship(
         "StudentTermRecord",
+        back_populates="academic_term",
+        default_factory=list,
+        repr=False,
+    )
+    teacher_records: Mapped[List["TeachersRecord"]] = relationship(
+        "TeachersRecord",
         back_populates="academic_term",
         default_factory=list,
         repr=False,

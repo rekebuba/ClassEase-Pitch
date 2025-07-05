@@ -13,6 +13,7 @@ from .user_factory import UserFactory
 from .admin_factory import AdminFactory
 from .student_factory import StudentFactory
 from .teacher_factory import TeacherFactory
+from .teacher_record_factory import TeacherRecordFactory
 from .subject_factory import SubjectFactory
 from .section_factory import SectionFactory
 from .student_term_record_factory import StudentTermRecordFactory
@@ -45,6 +46,7 @@ __all__ = [
     "AdminFactory",
     "StudentFactory",
     "TeacherFactory",
+    "TeacherRecordFactory",
     "SubjectFactory",
     "SectionFactory",
     "StudentTermRecordFactory",

@@ -1,11 +1,13 @@
+from itertools import chain
 import random
 from typing import Any, Sequence
-from factory import LazyAttribute, SubFactory, post_generation
+from factory import LazyAttribute, SubFactory, RelatedFactoryList, post_generation
 from faker import Faker
 from sqlalchemy import select
 from sqlmodel import col
 from models.teacher import Teacher
 from models import storage
+from tests.test_api.factories.grade_factory import GradeFactory
 from tests.test_api.factories.subject_factory import SubjectFactory
 from .base_factory import BaseFactory
 from .user_factory import UserFactory
@@ -17,7 +19,6 @@ from extension.enums.enum import (
     RoleEnum,
     ScheduleEnum,
 )
-from models.yearly_subject import YearlySubject
 
 fake = Faker()
 
@@ -25,31 +26,32 @@ fake = Faker()
 class TeacherFactory(BaseFactory[Teacher]):
     class Meta:
         model = Teacher
-        sqlalchemy_session = storage.session
-        exclude = ("user", "for_session")
+        exclude = ("user", "for_session", "selected_yearly_subjects")
 
     for_session: Any = False
-    grade_level: Any = []
-    subjects_to_teach: Any = []
 
-    @post_generation
-    def subject_and_grade_to_teach(self, create, extracted, **kwargs):
-        if not create:
-            return
-        subjects = SubjectFactory.create_batch(size=random.randint(1, 3))
-        self.subjects_to_teach.extend(subjects)
+    teacher_records: Any = RelatedFactoryList(
+        "tests.test_api.factories.TeacherRecordFactory",
+        factory_related_name="teacher",
+        size=1,
+    )
 
-        yearly_subject = storage.session.scalars(
-            select(YearlySubject)
-            .where(
-                col(YearlySubject.subject_id).in_([subject.id for subject in subjects])
-            )
-            .distinct()
-        ).all()
-
-        self.grade_level.extend(
-            yearly_subject.grade for yearly_subject in yearly_subject
+    subjects_to_teach: Any = LazyAttribute(
+        lambda _: SubjectFactory.create_batch(size=random.randint(1, 3))
+    )
+    selected_yearly_subjects: Any = LazyAttribute(
+        lambda x: random.choices(
+            list(
+                chain.from_iterable(
+                    subject.yearly_subjects for subject in x.subjects_to_teach
+                )
+            ),
+            k=random.randint(1, len(x.subjects_to_teach) or 1),
         )
+    )
+    grade_level: Any = LazyAttribute(
+        lambda x: [selected.grade for selected in x.selected_yearly_subjects]
+    )
 
     user: Any = SubFactory(UserFactory, role=RoleEnum.TEACHER)
     user_id: Any = LazyAttribute(lambda x: x.user.id if x.user else None)

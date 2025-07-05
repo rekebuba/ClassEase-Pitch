@@ -1,9 +1,16 @@
 #!/usr/bin/python3
 """Module for TeachersRecord class"""
 
+from typing import TYPE_CHECKING, List
 from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from models.base_model import BaseModel
+
+if TYPE_CHECKING:
+    from models.teacher import Teacher
+    from models.academic_term import AcademicTerm
+    from models.yearly_subject import YearlySubject
+    from models.section import Section
 
 
 class TeachersRecord(BaseModel):
@@ -11,29 +18,38 @@ class TeachersRecord(BaseModel):
     This model represents the record of teachers, including their associated subjects, grades, and sections.
     """
 
-    __tablename__ = "teachers_records"
+    __tablename__ = "teacher_records"
     teacher_id: Mapped[str] = mapped_column(
         String(120), ForeignKey("teachers.id"), nullable=False
     )
     academic_term_id: Mapped[str] = mapped_column(
         String(120), ForeignKey("academic_terms.id"), nullable=False
     )
-    yearly_subject_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("yearly_subjects.id"), nullable=False
+
+    teacher: Mapped["Teacher"] = relationship(
+        "Teacher",
+        back_populates="teacher_records",
+        init=False,
+        repr=False,
     )
-    section_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("sections.id"), nullable=True, default=None
+    academic_term: Mapped["AcademicTerm"] = relationship(
+        "AcademicTerm",
+        back_populates="teacher_records",
+        init=False,
     )
 
-    mark_list = relationship(
-        "MarkList",
-        backref="teachers_record",
-        cascade="save-update",
-        passive_deletes=True,
+    # Many-to-many relationships
+    yearly_subjects_link: Mapped[List["YearlySubject"]] = relationship(
+        "YearlySubject",
+        back_populates="teacher_records_link",
+        secondary="teacher_yearly_subject_links",
+        default_factory=list,
+        repr=False,
     )
-    assessment = relationship(
-        "Assessment",
-        backref="teachers_record",
-        cascade="save-update",
-        passive_deletes=True,
+    sections_link: Mapped[List["Section"]] = relationship(
+        "Section",
+        back_populates="teacher_records_link",
+        secondary="teacher_record_section_links",
+        default_factory=list,
+        repr=False,
     )

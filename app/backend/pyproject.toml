@@ -71,7 +71,7 @@ ignore_errors = true
 [tool.pytest.ini_options]
 testpaths = ["tests"]       # Replaces pytestArgs
 pythonpath = ["."]       # Ensures correct import resolution
-addopts = "-ravs"           # Optional: Add verbose flag
+addopts = "-rav -s"           # Optional: Add verbose flag
 
 [dependency-groups]
 dev = [
