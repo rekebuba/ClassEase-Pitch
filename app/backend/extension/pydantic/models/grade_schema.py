@@ -5,9 +5,11 @@ from pydantic import BaseModel, ConfigDict
 from extension.enums.enum import GradeLevelEnum
 from extension.functions.helper import to_camel
 
-
 if TYPE_CHECKING:
     from .teacher_schema import TeacherSchema
+    from .stream_schema import StreamSchema
+    from .yearly_subject_schema import YearlySubjectSchema
+    from .student_year_record_schema import StudentYearRecordSchema
 
 
 class GradeSchema(BaseModel):
@@ -31,3 +33,6 @@ class GradeRelationshipSchema(BaseModel):
     """
 
     teachers: Optional[List[TeacherSchema]]
+    streams: Optional[List[StreamSchema]]
+    yearly_subjects: Optional[List[YearlySubjectSchema]]
+    student_year_records: Optional[List[StudentYearRecordSchema]]

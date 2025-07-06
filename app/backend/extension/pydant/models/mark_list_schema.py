@@ -8,7 +8,7 @@ from extension.functions.helper import to_camel
 
 class MarkListSchema(BaseModel):
     """
-    This model represents an assessment record for a student including details
+    This model represents a list of marks for students in various assessments.
     """
 
     model_config = ConfigDict(
@@ -18,8 +18,8 @@ class MarkListSchema(BaseModel):
     )
 
     student_id: str
-    student_term_record_id: str
+    academic_term_id: str
     yearly_subject_id: str
     type: MarkListTypeEnum
-    percentage: Optional[float] = None
+    percentage: int
     score: Optional[float] = None
