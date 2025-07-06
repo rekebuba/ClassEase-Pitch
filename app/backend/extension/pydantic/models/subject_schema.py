@@ -1,11 +1,12 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 from pydantic import BaseModel, ConfigDict
 
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
     from .teacher_schema import TeacherSchema
+    from .yearly_subject_schema import YearlySubjectSchema
 
 
 class SubjectSchema(BaseModel):
@@ -27,4 +28,5 @@ class SubjectRelationshipSchema(BaseModel):
     It is used to define the relationships between the SubjectSchema and other schemas.
     """
 
-    teachers: List[TeacherSchema]
+    teachers: Optional[List[TeacherSchema]]
+    yearly_subjects: Optional[List[YearlySubjectSchema]]

@@ -1,4 +1,5 @@
 from __future__ import annotations
+from datetime import date
 from typing import TYPE_CHECKING, Optional
 from pydantic import BaseModel, ConfigDict
 
@@ -23,7 +24,7 @@ class AdminSchema(BaseModel):
     first_name: str
     father_name: str
     grand_father_name: str
-    date_of_birth: str
+    date_of_birth: date
     gender: str
     email: str
     phone: str
