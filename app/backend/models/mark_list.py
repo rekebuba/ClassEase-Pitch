@@ -17,8 +17,8 @@ class MarkList(BaseModel):
     student_id: Mapped[str] = mapped_column(
         String(36), ForeignKey("students.id"), nullable=False
     )
-    student_term_record_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("student_term_records.id"), nullable=False
+    academic_term_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("academic_terms.id"), nullable=False
     )
     yearly_subject_id: Mapped[str] = mapped_column(
         String(36), ForeignKey("yearly_subjects.id"), nullable=False
@@ -33,4 +33,4 @@ class MarkList(BaseModel):
         nullable=False,
     )
     percentage: Mapped[int] = mapped_column(Integer, nullable=False)
-    score = mapped_column(Float, nullable=True, default=None)
+    score: Mapped[float] = mapped_column(Float, nullable=True, default=None)

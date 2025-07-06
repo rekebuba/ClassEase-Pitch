@@ -22,7 +22,7 @@ from .assessment_factory import AssessmentFactory
 from .subjects_factory import SubjectsFactory, AvailableSubject
 from .assessment_types_factory import AssessmentTypesFactory, AssessmentTypes
 from .mark_assessment_factory import MarkAssessmentFactory, MarkAssessment
-from .mark_list_factory import MarkListFactory, FakeMarkList
+from .mark_list_factory import MarkListFactory
 from .sort_query_factory import SortQueryFactory, SortQuery
 from .variant_factory import variantFactory, Variant
 from .table_id_factory import TableIdFactory, Value
@@ -59,7 +59,6 @@ __all__ = [
     "MarkAssessmentFactory",
     "MarkAssessment",
     "MarkListFactory",
-    "FakeMarkList",
     "SortQueryFactory",
     "SortQuery",
     "variantFactory",
