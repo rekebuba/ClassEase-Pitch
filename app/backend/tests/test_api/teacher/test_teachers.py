@@ -8,6 +8,7 @@ from models.grade import Grade
 from models.teacher import Teacher
 from tests.test_api.factories import TeacherFactory
 from flask.testing import FlaskClient
+from tests.test_api.factories.student_factory import StudentFactory
 from tests.test_api.factories.year_factory import YearFactory
 from tests.test_api.schemas.base_schema import DashboardUserInfoResponseModel
 from tests.typing import Credential

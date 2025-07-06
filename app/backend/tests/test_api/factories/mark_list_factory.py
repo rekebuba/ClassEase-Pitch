@@ -11,17 +11,10 @@ class MarkListFactory(factory.Factory[Any]):
     class Meta:
         model = MarkList
 
-    student: Any = SubFactory("tests.test_api.factories.StudentFactory")
-    student_term_record: Any = SubFactory(
-        "tests.test_api.factories.StudentTermRecordFactory",
-        student=SelfAttribute("..student"),
-        assessments=[],
-    )
-    yearly_subject: Any = SubFactory("tests.test_api.factories.YearlySubjectFactory")
-
-    student_id: Any = LazyAttribute(lambda x: x.student.id)
-    student_term_record_id: Any = LazyAttribute(lambda x: x.student_term_record.id)
-    yearly_subject_id: Any = LazyAttribute(lambda x: x.yearly_subject.id)
+    # fields will be assigned on call
+    student_id: Any = None
+    academic_term_id: Any = None
+    yearly_subject_id: Any = None
 
     type: Any = LazyAttribute(
         lambda x: random.choice(list(MarkListTypeEnum._value2member_map_))

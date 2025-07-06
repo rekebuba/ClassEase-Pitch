@@ -36,8 +36,6 @@ from models.teacher_record_section_link import TeacherRecordSectionLink  # noqa:
 from models.yearly_subject import YearlySubject  # noqa: F401
 from contextlib import contextmanager
 
-# Define a generic type variable for models
-
 
 class DBStorage:
     """

@@ -1,13 +1,9 @@
 from itertools import chain
 import random
-from typing import Any, Sequence
-from factory import LazyAttribute, SubFactory, RelatedFactoryList, post_generation
+from typing import Any
+from factory import LazyAttribute, SubFactory, RelatedFactoryList
 from faker import Faker
-from sqlalchemy import select
-from sqlmodel import col
 from models.teacher import Teacher
-from models import storage
-from tests.test_api.factories.grade_factory import GradeFactory
 from tests.test_api.factories.subject_factory import SubjectFactory
 from .base_factory import BaseFactory
 from .user_factory import UserFactory
@@ -26,9 +22,7 @@ fake = Faker()
 class TeacherFactory(BaseFactory[Teacher]):
     class Meta:
         model = Teacher
-        exclude = ("user", "for_session", "selected_yearly_subjects")
-
-    for_session: Any = False
+        exclude = ("user", "selected_yearly_subjects")
 
     teacher_records: Any = RelatedFactoryList(
         "tests.test_api.factories.TeacherRecordFactory",
@@ -74,7 +68,7 @@ class TeacherFactory(BaseFactory[Teacher]):
     city: Any = LazyAttribute(lambda x: fake.city())
     state: Any = LazyAttribute(lambda x: fake.state())
     postal_code: Any = LazyAttribute(lambda x: fake.postcode())
-    country: Any = LazyAttribute(lambda x: fake.country())
+    country: Any = LazyAttribute(lambda x: fake.country()[:50])
     primary_phone: Any = LazyAttribute(lambda x: fake.basic_phone_number())
     secondary_phone: Any = LazyAttribute(lambda x: fake.basic_phone_number())
     personal_email: Any = LazyAttribute(lambda x: fake.email())
@@ -165,17 +159,17 @@ class TeacherFactory(BaseFactory[Teacher]):
         lambda obj: fake.text(max_nb_chars=60) if obj.has_disciplinary_actions else None
     )
     reference1_name: Any = LazyAttribute(lambda x: fake.name())
-    reference1_title: Any = LazyAttribute(lambda x: fake.job())
+    reference1_title: Any = LazyAttribute(lambda x: fake.job()[:50])
     reference1_organization: Any = LazyAttribute(lambda x: fake.company())
     reference1_phone: Any = LazyAttribute(lambda x: fake.phone_number())
     reference1_email: Any = LazyAttribute(lambda x: fake.email())
     reference2_name: Any = LazyAttribute(lambda x: fake.name())
-    reference2_title: Any = LazyAttribute(lambda x: fake.job())
+    reference2_title: Any = LazyAttribute(lambda x: fake.job()[:50])
     reference2_organization: Any = LazyAttribute(lambda x: fake.company())
     reference2_phone: Any = LazyAttribute(lambda x: fake.phone_number())
     reference2_email: Any = LazyAttribute(lambda x: fake.email())
     reference3_name: Any = LazyAttribute(lambda x: fake.name())
-    reference3_title: Any = LazyAttribute(lambda x: fake.job())
+    reference3_title: Any = LazyAttribute(lambda x: fake.job()[:50])
     reference3_organization: Any = LazyAttribute(lambda x: fake.company())
     reference3_phone: Any = LazyAttribute(lambda x: fake.phone_number())
     reference3_email: Any = LazyAttribute(lambda x: fake.email())

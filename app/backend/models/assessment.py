@@ -29,12 +29,6 @@ class Assessment(BaseModel):
     yearly_subject_id: Mapped[str] = mapped_column(
         String(36), ForeignKey("yearly_subjects.id"), nullable=False
     )
-    teachers_record_id: Mapped[str] = mapped_column(
-        String(36),
-        ForeignKey("teacher_records.id", ondelete="SET NULL"),
-        nullable=True,
-        default=None,
-    )
     # The subject sum score of the student for each assessment
     total: Mapped[float] = mapped_column(Float, nullable=True, default=None)
     rank: Mapped[int] = mapped_column(Integer, nullable=True, default=None)

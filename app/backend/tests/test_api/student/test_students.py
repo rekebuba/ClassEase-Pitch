@@ -33,7 +33,7 @@ class TestStudents:
         """
         Test the student registration endpoint for successful registration.
         """
-        student = StudentFactory.create_batch(user=None, size=1)
+        student = StudentFactory.create_batch(user=None, size=50)
         # form_data = prepare_form_data(student)
 
         # Send a POST request to the registration endpoint

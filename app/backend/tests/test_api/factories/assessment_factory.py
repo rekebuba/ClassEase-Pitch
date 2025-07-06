@@ -26,4 +26,3 @@ class AssessmentFactory(BaseFactory[Assessment]):
         lambda x: x.student_term_record.id
     )
     yearly_subject_id: Any = LazyAttribute(lambda x: x.yearly_subject.id)
-    teachers_record_id: Any = None  # Placeholder, can be set later
