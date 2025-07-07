@@ -13,10 +13,10 @@ class YearlySubjectFactory(BaseFactory[YearlySubject]):
         model = YearlySubject
         exclude = ("year", "subject", "grade", "stream")
 
-    year: Any = SubFactory("tests.test_api.factories.YearFactory")
-    subject: Any = SubFactory("tests.test_api.factories.SubjectFactory")
-    grade: Any = SubFactory("tests.test_api.factories.GradeFactory")
-    stream: Any = SubFactory("tests.test_api.factories.StreamFactory")
+    year: Any = SubFactory("tests.factories.models.YearFactory")
+    subject: Any = SubFactory("tests.factories.models.SubjectFactory")
+    grade: Any = SubFactory("tests.factories.models.GradeFactory")
+    stream: Any = SubFactory("tests.factories.models.StreamFactory")
 
     year_id: Any = LazyAttribute(lambda x: x.year.id)
     subject_id: Any = LazyAttribute(lambda x: x.subject.id)

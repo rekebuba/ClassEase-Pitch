@@ -11,7 +11,7 @@ class SectionFactory(BaseFactory[Section]):
         model = Section
 
     student_term_records: Any = RelatedFactoryList(
-        "tests.test_api.factories.StudentTermRecordFactory",
+        "tests.factories.models.StudentTermRecordFactory",
         factory_related_name="section",
         size=2,
     )

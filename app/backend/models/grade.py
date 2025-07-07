@@ -44,7 +44,7 @@ class Grade(BaseModel):
     )
     teachers: Mapped[List["Teacher"]] = relationship(
         "Teacher",
-        back_populates="grade_level",
+        back_populates="grade_to_teach",
         secondary="teacher_grade_links",
         repr=False,
         default_factory=list,

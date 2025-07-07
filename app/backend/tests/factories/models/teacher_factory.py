@@ -4,7 +4,7 @@ from typing import Any
 from factory import LazyAttribute, SubFactory, RelatedFactoryList
 from faker import Faker
 from models.teacher import Teacher
-from tests.test_api.factories.subject_factory import SubjectFactory
+from .subject_factory import SubjectFactory
 from .base_factory import BaseFactory
 from .user_factory import UserFactory
 from extension.enums.enum import (
@@ -25,7 +25,7 @@ class TeacherFactory(BaseFactory[Teacher]):
         exclude = ("user", "selected_yearly_subjects")
 
     teacher_records: Any = RelatedFactoryList(
-        "tests.test_api.factories.TeacherRecordFactory",
+        "tests.factories.models.TeacherRecordFactory",
         factory_related_name="teacher",
         size=1,
     )
@@ -43,7 +43,7 @@ class TeacherFactory(BaseFactory[Teacher]):
             k=random.randint(1, len(x.subjects_to_teach) or 1),
         )
     )
-    grade_level: Any = LazyAttribute(
+    grade_to_teach: Any = LazyAttribute(
         lambda x: [selected.grade for selected in x.selected_yearly_subjects]
     )
 

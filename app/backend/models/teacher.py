@@ -238,7 +238,7 @@ class Teacher(BaseModel):
         default_factory=list,
         repr=False,
     )
-    grade_level: Mapped[List["Grade"]] = relationship(
+    grade_to_teach: Mapped[List["Grade"]] = relationship(
         "Grade",
         back_populates="teachers",
         secondary="teacher_grade_links",

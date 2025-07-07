@@ -4,7 +4,7 @@ from extension.enums.enum import StreamEnum
 from models import storage
 from models.stream import Stream
 from factory import LazyAttribute
-from tests.test_api.factories.base_factory import BaseFactory
+from .base_factory import BaseFactory
 
 
 class StreamFactory(BaseFactory[Stream]):

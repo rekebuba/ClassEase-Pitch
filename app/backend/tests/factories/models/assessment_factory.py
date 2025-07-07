@@ -10,15 +10,15 @@ class AssessmentFactory(BaseFactory[Assessment]):
         exclude = ("student", "student_term_record", "yearly_subject")
 
     student: Any = SubFactory(
-        "tests.test_api.factories.StudentFactory", student_year_records=[]
+        "tests.factories.models.StudentFactory", student_year_records=[]
     )
     student_term_record: Any = SubFactory(
-        "tests.test_api.factories.StudentTermRecordFactory",
+        "tests.factories.models.StudentTermRecordFactory",
         student=SelfAttribute("..student"),
         assessments=[],
     )
     yearly_subject: Any = SubFactory(
-        "tests.test_api.factories.YearlySubjectFactory",
+        "tests.factories.models.YearlySubjectFactory",
     )
 
     student_id: Any = LazyAttribute(lambda x: x.student.id)
