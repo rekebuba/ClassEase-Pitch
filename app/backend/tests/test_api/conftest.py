@@ -6,3 +6,4 @@ from tests.test_api.fixtures.factory_form import *
 from tests.test_api.fixtures.admin_fixtures import *
 from tests.test_api.fixtures.student_fixtures import *
 from tests.test_api.fixtures.methods import *
+from tests.test_api.fixtures.shared_fixture import *

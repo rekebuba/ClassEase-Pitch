@@ -32,6 +32,15 @@ def handle_validation_error(error: ValidationError) -> tuple[Response, int]:
     ), 422  # HTTP 422 Unprocessable Entity
 
 
+@errors.app_errorhandler(ValueError)
+def handle_value_error(error: ValueError) -> tuple[Response, int]:
+    """
+    Handle ValueError exceptions.
+    """
+    logging.error(f"Value Error: {error}")
+    return jsonify({"message": "Invalid input", "error": str(error)}), 400
+
+
 @errors.app_errorhandler(500)
 def handle_internal_error(error: Union[Exception, str]) -> tuple[Response, int]:
     logging.error(f"Internal Server Error: {error}")

@@ -7,7 +7,7 @@ from flask.testing import FlaskClient
 from models.grade import Grade
 from models.academic_term import AcademicTerm
 from models.student import Student
-from tests.test_api.factories import AssessmentFactory, StudentFactory
+from tests.factories.models import AssessmentFactory, StudentFactory
 from tests.typing import Credential
 
 from sqlalchemy import func, select

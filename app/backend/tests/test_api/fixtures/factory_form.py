@@ -3,7 +3,7 @@ import pytest
 from sqlalchemy import select
 from sqlmodel import col
 from models.student import Student
-from tests.test_api.factories import (
+from tests.factories.models import (
     AvailableSubject,
     MarkListFactory,
 )

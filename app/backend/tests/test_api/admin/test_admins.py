@@ -12,7 +12,7 @@ from extension.pydantic.models.teacher_schema import (
     TeacherSchema,
 )
 from models.admin import Admin
-from tests.test_api.factories import AdminFactory, EventFactory, QueryFactory
+from tests.factories.models import AdminFactory, EventFactory, QueryFactory
 from tests.test_api.fixtures.admin_fixtures import AllStudentViewsResponse
 from tests.test_api.fixtures.methods import prepare_form_data
 from flask.testing import FlaskClient

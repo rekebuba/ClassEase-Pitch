@@ -5,7 +5,7 @@ from sqlalchemy import select
 
 from extension.enums.enum import RoleEnum
 from models.user import User
-from tests.test_api.factories import AdminFactory, StudentFactory, TeacherFactory
+from tests.factories.models import AdminFactory, StudentFactory, TeacherFactory
 from sqlalchemy.orm import scoped_session, Session
 
 

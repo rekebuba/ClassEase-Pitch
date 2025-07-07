@@ -4,10 +4,11 @@ import pytest
 from models.academic_term import AcademicTerm
 from models.student import Student
 from models.user import User
-from tests.test_api.factories.assessment_factory import AssessmentFactory
-from tests.test_api.factories.year_factory import YearFactory
+from tests.factories.api.student_registration_factory import StudentRegistrationFactory
+from tests.factories.models.assessment_factory import AssessmentFactory
+from tests.factories.models.year_factory import YearFactory
 from tests.test_api.fixtures.methods import prepare_form_data
-from tests.test_api.factories import StudentFactory
+from tests.factories.models import StudentFactory
 
 from flask.testing import FlaskClient
 
@@ -23,29 +24,24 @@ class TestStudents:
     tests for the student-related API endpoints.
     """
 
-    def test_new_academic_year(self, client: FlaskClient) -> None:
-        """
-        Test the endpoint to create a new academic year.
-        """
-        YearFactory.create()
-
     def test_register_success(self, client: FlaskClient) -> None:
         """
         Test the student registration endpoint for successful registration.
         """
-        student = StudentFactory.create_batch(user=None, size=50)
+        student = StudentRegistrationFactory.build()
         # form_data = prepare_form_data(student)
 
         # Send a POST request to the registration endpoint
-        # response = client.post(
-        #     "/api/v1/register/student",
-        #     json=student,
-        # )
+        response = client.post(
+            "/api/v1/register/student",
+            data=student.model_dump_json(by_alias=True, exclude={"starting_grade_id"}),
+            content_type="application/json",
+        )
 
-        # assert response.status_code == 201
-        # assert response.json is not None
-        # assert "message" in response.json
-        # assert response.json["message"] == "student registered successfully!"
+        assert response.status_code == 201
+        assert response.json is not None
+        assert "message" in response.json
+        assert response.json["message"] == "student registered successfully!"
 
     def test_login_success(self, client: FlaskClient, create_student: Student) -> None:
         """

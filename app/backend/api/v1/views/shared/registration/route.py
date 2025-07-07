@@ -13,6 +13,7 @@ from api.v1.views.methods import parse_nested_form
 from api.v1.views.shared.registration.methods import create_role_based_user
 from api.v1.views.shared.registration.schema import (
     DumpResultSchema,
+    StudentRegistrationSchema,
     TeacherRegistrationSchema,
 )
 from extension.enums.enum import RoleEnum
@@ -76,31 +77,22 @@ def register_new_student() -> Tuple[Response, int]:
     """Registers a new student in the system."""
 
     try:
-        # Validate and parse the incoming JSON
-        student_data = TypeAdapter(StudentRegistrationSchema).model_validate_json(
-            request.data
+        data = request.get_json()
+        grade_id = storage.session.scalar(
+            select(Grade.id).where(Grade.grade == data.get("starting_grade"))
         )
+        if not grade_id:
+            raise ValueError("Invalid grade provided. Please check your input.")
+        data["starting_grade_id"] = grade_id
 
-        # Start transaction
-        grade = storage.session.scalar(
-            select(Grade).where(Grade.grade == student_data.grade)
-        )
-        academic_year = storage.session.scalar(
-            select(Year).where(Year.academic_year == student_data.academic_year)
-        )
-        if not grade or not academic_year:
-            raise ValidationError(
-                "Invalid grade or academic year provided. Please check your input."
-            )
+        # Validate and parse the incoming JSON
+        student_data = StudentRegistrationSchema.model_validate(data)
 
         # Convert to dictionary before unpacking
-        student_dict = student_data.model_dump(exclude_unset=True)
+        student_dict = student_data.model_dump(exclude={"starting_grade"})
 
         # Create SQLAlchemy model instance
         new_student = Student(**student_dict)
-
-        # Add relationship after creation
-        new_student.grade = grade
 
         storage.session.add(new_student)
         storage.session.commit()
@@ -111,6 +103,9 @@ def register_new_student() -> Tuple[Response, int]:
     except SQLAlchemyError as e:
         storage.session.rollback()
         return errors.handle_database_error(e)
+    except ValueError as e:
+        storage.session.rollback()
+        return errors.handle_value_error(e)
     except Exception as e:
         storage.session.rollback()
         return errors.handle_internal_error(e)
@@ -127,23 +122,23 @@ def register_new_teacher() -> Tuple[Response, int]:
 
         # Start transaction
         subjects = storage.session.scalars(
-            select(Subject).where(col(Subject.name).in_(teacher_data.subjects_to_teach))
+            select(Subject).where(Subject.name.in_(teacher_data.subjects_to_teach))
         ).all()
         grades = storage.session.scalars(
-            select(Grade).where(col(Grade.level).in_(teacher_data.grade_level))
+            select(Grade).where(Grade.grade.in_(teacher_data.grade_to_teach))
         ).all()
 
         # Validate all subjects/grades exist
         _validate_relations(
-            requested_subjects=list(teacher_data.subjects_to_teach),
+            requested_subjects=teacher_data.subjects_to_teach,
             found_subjects=list(subjects),
-            requested_grades=list(teacher_data.grade_level),
+            requested_grades=teacher_data.grade_to_teach,
             found_grades=list(grades),
         )
 
         # Convert to dictionary before unpacking
         teacher_dict = teacher_data.model_dump(
-            exclude={"grade_level", "subjects_to_teach"},
+            exclude={"grade_to_teach", "subjects_to_teach"},
             exclude_unset=True,
         )
 
@@ -152,7 +147,7 @@ def register_new_teacher() -> Tuple[Response, int]:
 
         # Add relationships after creation
         new_teacher.subjects_to_teach = list(subjects)
-        new_teacher.grade_level = list(grades)
+        new_teacher.grade_to_teach = list(grades)
 
         storage.session.add(new_teacher)
         storage.session.commit()
@@ -163,6 +158,9 @@ def register_new_teacher() -> Tuple[Response, int]:
     except SQLAlchemyError as e:
         storage.session.rollback()
         return errors.handle_database_error(e)
+    except ValueError as e:
+        storage.session.rollback()
+        return errors.handle_value_error(e)
     except Exception as e:
         storage.session.rollback()
         return errors.handle_internal_error(e)
@@ -176,53 +174,13 @@ def _validate_relations(
 ) -> None:
     """Validate that all requested relations exist."""
     missing_subjects = set(requested_subjects) - {s.name for s in found_subjects}
-    missing_grades = set(requested_grades) - {g.level for g in found_grades}
+    missing_grades = set(requested_grades) - {g.grade for g in found_grades}
 
     errors = []
     if missing_subjects:
         errors.append(f"Invalid subjects: {', '.join(missing_subjects)}")
     if missing_grades:
-        errors.append(f"Invalid grade levels: {', '.join(missing_grades)}")
+        errors.append(f"Invalid grade: {', '.join(missing_grades)}")
 
     if errors:
-        raise ValidationError(" | ".join(errors))
-
-
-@auth.route("/available-subjects", methods=["GET"])
-def get_available_subjects() -> Tuple[Response, int]:
-    """
-    Returns a list of all available subjects in the system.
-    """
-    try:
-        subjects = storage.session.scalars(select(Subject)).all()
-
-        response = [subject.name for subject in subjects]
-
-        return jsonify(response), 200
-
-    except SQLAlchemyError as e:
-        storage.session.rollback()
-        return errors.handle_database_error(e)
-    except Exception as e:
-        storage.session.rollback()
-        return errors.handle_internal_error(e)
-
-
-@auth.route("/available-grades")
-def get_available_grades() -> Tuple[Response, int]:
-    """
-    Returns a list of all available grades in the system.
-    """
-    try:
-        grades = storage.session.scalars(select(Grade)).all()
-
-        response = [grade.grade for grade in grades]
-
-        return jsonify(response), 200
-
-    except SQLAlchemyError as e:
-        storage.session.rollback()
-        return errors.handle_database_error(e)
-    except Exception as e:
-        storage.session.rollback()
-        return errors.handle_internal_error(e)
+        raise ValueError(" | ".join(errors))

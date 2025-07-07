@@ -4,7 +4,6 @@ This package contains the factories for creating test data.
 
 from .default_felids import DefaultFelids
 from .base_factory import BaseFactory
-from .typed_factory import TypedFactory
 from .year_factory import YearFactory
 from .grade_factory import GradeFactory
 from .event_factory import EventFactory
@@ -23,21 +22,20 @@ from .subjects_factory import SubjectsFactory, AvailableSubject
 from .assessment_types_factory import AssessmentTypesFactory, AssessmentTypes
 from .mark_assessment_factory import MarkAssessmentFactory, MarkAssessment
 from .mark_list_factory import MarkListFactory
-from .sort_query_factory import SortQueryFactory, SortQuery
-from .variant_factory import variantFactory, Variant
-from .table_id_factory import TableIdFactory, Value
-from .min_max_factory import MinMaxFactory, MinMax
-from .value_factory import valueFactory
-from .filter_query_factory import FilterQueryFactory, FilterQuery
-from .search_params_factory import SearchParamsFactory, SearchParams
-from .query_factory import QueryFactory, QueryResponse
+from ..api.sort_query_factory import SortQueryFactory, SortQuery
+from ..api.variant_factory import variantFactory, Variant
+from ..api.table_id_factory import TableIdFactory, Value
+from ..api.min_max_factory import MinMaxFactory, MinMax
+from ..api.value_factory import valueFactory
+from ..api.filter_query_factory import FilterQueryFactory, FilterQuery
+from ..api.search_params_factory import SearchParamsFactory, SearchParams
+from ..api.query_factory import QueryFactory, QueryResponse
 from .yearly_subject_factory import YearlySubjectFactory
 from .stream_factory import StreamFactory
 
 __all__ = [
     "DefaultFelids",
     "BaseFactory",
-    "TypedFactory",
     "YearFactory",
     "GradeFactory",
     "EventFactory",
