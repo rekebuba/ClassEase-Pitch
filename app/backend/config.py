@@ -18,6 +18,8 @@ class Config:
     # File upload configuration
     UPLOAD_FOLDER = "uploads"
 
+    secret_id = os.getenv("SECRET_ID")
+
 
 class DevelopmentConfig(Config):
     DEBUG = True

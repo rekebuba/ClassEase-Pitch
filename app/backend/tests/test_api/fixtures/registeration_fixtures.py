@@ -6,7 +6,7 @@ import pytest
 from models.admin import Admin
 from models.student import Student
 from models.teacher import Teacher
-from tests.test_api.factories import (
+from tests.factories.models import (
     AdminFactory,
     StudentFactory,
     TeacherFactory,

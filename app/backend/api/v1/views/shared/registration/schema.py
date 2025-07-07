@@ -3,7 +3,7 @@ from pydantic import BaseModel, ConfigDict
 from api.v1.schemas.base_schema import BaseSchema
 from api.v1.schemas.custom_schema import EnumField, RoleEnumField
 from marshmallow import fields
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Dict, Iterable, List, Optional
 from flask import url_for
 from marshmallow import (
     ValidationError,
@@ -27,6 +27,9 @@ from api.v1.schemas.schemas import FullNameSchema
 from api.v1.utils.typing import PostLoadUser
 from extension.enums.enum import GradeLevelEnum, RoleEnum
 from extension.pydantic.models.teacher_schema import TeacherSchema
+from extension.pydantic.models.student_schema import (
+    StudentSchema as StudentSchemaPydantic,
+)
 from models.student import Student
 
 from models import storage
@@ -174,9 +177,13 @@ class AdminSchema(BaseSchema):
         return data
 
 
+class StudentRegistrationSchema(StudentSchemaPydantic):
+    starting_grade: str
+
+
 class TeacherRegistrationSchema(TeacherSchema):
-    subjects_to_teach: Iterable[str]
-    grade_level: Iterable[GradeLevelEnum]
+    subjects_to_teach: List[str]
+    grade_to_teach: List[str]
 
 
 class StudentSchema(BaseSchema):

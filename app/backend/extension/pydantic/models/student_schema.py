@@ -7,6 +7,7 @@ from extension.enums.enum import GenderEnum, StudentApplicationStatusEnum
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
+    from .grade_schema import GradeSchema
     from .user_schema import UserSchema
     from .student_term_record_schema import StudentTermRecordSchema
     from .student_year_record_schema import StudentYearRecordSchema
@@ -25,6 +26,7 @@ class StudentSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    starting_grade_id: str
     first_name: str
     father_name: str
     date_of_birth: date
@@ -62,6 +64,7 @@ class StudentSchema(BaseModel):
 class StudentRelationshipSchema(BaseModel):
     """This model represents the relationships of a StudentSchema."""
 
+    starting_grade: GradeSchema
     user: Optional[UserSchema] = None
     student_term_records: Optional[List[StudentTermRecordSchema]] = None
     student_year_records: Optional[List[StudentYearRecordSchema]] = None

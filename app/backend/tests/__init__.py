@@ -14,7 +14,7 @@ absolute_path = Path(os.path.abspath(__file__)).parent
 
 def write_json_file(file_name: str, **kwarg: Any) -> None:
     from dataclasses import asdict
-    from tests.test_api.factories import SearchParamsFactory, TableIdFactory
+    from tests.factories.models import SearchParamsFactory, TableIdFactory
 
     table_id = asdict(TableIdFactory.create())
     search_params = SearchParamsFactory.create_batch(

@@ -6,8 +6,8 @@ import pytest
 from sqlalchemy.orm import scoped_session, Session
 
 from models.academic_term import AcademicTerm
-from tests.test_api.factories import QueryFactory
-from tests.test_api.factories.academic_term_factory import AcademicTermFactory
+from tests.factories.models import QueryFactory
+from tests.factories.models.academic_term_factory import AcademicTermFactory
 from tests.test_api.fixtures.student_fixtures import StudentQueryResponse
 from tests.typing import Credential
 

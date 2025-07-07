@@ -1,15 +1,16 @@
 #!/usr/bin/python3
 """Module for Grade class"""
 
-from sqlalchemy import Enum, Integer, String
+from sqlalchemy import Enum, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from extension.enums.enum import GradeLevelEnum
 from models.base_model import BaseModel
 from typing import TYPE_CHECKING, List
 
-from models.stream import Stream
 
 if TYPE_CHECKING:
+    from models.stream import Stream
+    from models.student import Student
     from models.yearly_subject import YearlySubject
     from models.student_year_record import StudentYearRecord
     from models.teacher import Teacher
@@ -58,6 +59,12 @@ class Grade(BaseModel):
     student_year_records: Mapped[list["StudentYearRecord"]] = relationship(
         "StudentYearRecord",
         back_populates="grade",
+        repr=False,
+        default_factory=list,
+    )
+    students: Mapped[List["Student"]] = relationship(
+        "Student",
+        back_populates="starting_grade",
         repr=False,
         default_factory=list,
     )

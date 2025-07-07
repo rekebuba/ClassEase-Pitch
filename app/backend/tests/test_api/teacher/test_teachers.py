@@ -1,15 +1,9 @@
-import json
 import random
+from typing import List
 import pytest
-from sqlalchemy import select
-from sqlmodel import col
-
-from models.grade import Grade
 from models.teacher import Teacher
-from tests.test_api.factories import TeacherFactory
+from tests.factories.api.teacher_registration_factory import TeacherRegistrationFactory
 from flask.testing import FlaskClient
-from tests.test_api.factories.student_factory import StudentFactory
-from tests.test_api.factories.year_factory import YearFactory
 from tests.test_api.schemas.base_schema import DashboardUserInfoResponseModel
 from tests.typing import Credential
 
@@ -19,26 +13,37 @@ class TestTeachers:
     TestTeachers is a test case class for testing the teacher-related endpoints of the API.
     """
 
-    def test_teacher_register_success(self, client: FlaskClient) -> None:
+    def test_teacher_register_success(
+        self, client: FlaskClient, subject_list: List[str]
+    ) -> None:
         """
         Test the successful registration of a teacher.
         """
 
         # form_data = prepare_form_data(teacher)
-        YearFactory.create()
-        teacher = TeacherFactory.create(user=None, for_session=True)
+        teacher = TeacherRegistrationFactory.build()
+        teacher.subjects_to_teach = random.sample(subject_list, k=random.randint(1, 3))
+        response = client.get(
+            "/api/v1/subjects/grades",
+            json={"subjects": teacher.subjects_to_teach},
+        )
+        assert response.status_code == 200
+        assert response.json is not None
+        assert isinstance(response.json, list)
+        assert len(response.json) > 0
+        teacher.grade_to_teach = random.sample(response.json, k=random.randint(1, 3))
 
-        # teacher.pop("user", None)
-        # # Send a POST request to the registration endpoint
-        # response = client.post(
-        #     "/api/v1/register/teacher",
-        #     json=teacher,
-        # )
+        # Send a POST request to the registration endpoint
+        response = client.post(
+            "/api/v1/register/teacher",
+            data=teacher.model_dump_json(by_alias=True),
+            content_type="application/json",
+        )
 
-        # assert response.status_code == 201
-        # assert response.json is not None
-        # assert "message" in response.json
-        # assert response.json["message"] == "teacher registered successfully!"
+        assert response.status_code == 201
+        assert response.json is not None
+        assert "message" in response.json
+        assert response.json["message"] == "teacher registered successfully!"
 
     def test_teacher_login_success(
         self, client: FlaskClient, create_teacher: Teacher

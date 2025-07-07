@@ -15,9 +15,9 @@ def app_session() -> Iterator[Flask]:
 
     yield test_app
 
-    # storage.rollback()
-    # storage.session.remove()
-    # storage.drop_all()
+    storage.rollback()
+    storage.session.remove()
+    storage.drop_all()
 
     remove_json_file("student_sort_query.json")
     remove_json_file("student_sort_advance_query.json")
@@ -36,3 +36,12 @@ def client(app_session: Flask) -> Iterator[FlaskClient]:
     """Session-scoped fixture for the Flask test client."""
     with app_session.test_client() as client:
         yield client
+
+
+@pytest.fixture(scope="session", autouse=True)
+def setup_academic_year(db_session: scoped_session[Session]) -> None:
+    """Fixture to set up the academic year."""
+    from tests.factories.models.year_factory import YearFactory
+
+    # Create a default academic year if it doesn't exist
+    YearFactory.create()

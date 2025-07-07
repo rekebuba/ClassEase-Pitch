@@ -15,6 +15,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from extension.enums.enum import GenderEnum, StudentApplicationStatusEnum
 
 if TYPE_CHECKING:
+    from models.grade import Grade
     from models.student_term_record import StudentTermRecord
     from models.student_year_record import StudentYearRecord
     from models.subject_yearly_average import SubjectYearlyAverage
@@ -30,6 +31,9 @@ class Student(BaseModel):
     __tablename__ = "students"
 
     # Personal Information
+    starting_grade_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("grades.id"), nullable=False
+    )
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
     father_name: Mapped[str] = mapped_column(String(50), nullable=False)
     date_of_birth: Mapped[Date] = mapped_column(Date, nullable=False)
@@ -97,6 +101,12 @@ class Student(BaseModel):
     )
 
     # Relationships
+    starting_grade: Mapped["Grade"] = relationship(
+        "Grade",
+        back_populates="students",
+        init=False,
+        repr=False,
+    )
     user: Mapped["User"] = relationship(
         "User",
         back_populates="students",

@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 """Utility functions for the API"""
 
+import os
+from itsdangerous import URLSafeSerializer
 import jwt
 import uuid
 from datetime import datetime, timedelta
@@ -13,7 +15,6 @@ from extension.enums.enum import RoleEnum
 from models import storage
 from models.user import User
 from models.blacklist_token import BlacklistToken
-
 
 
 def create_token(user_id: str, role: RoleEnum) -> str:
@@ -329,3 +330,24 @@ def student_teacher_or_admin_required(
         return jsonify({"message": "Unauthorized Access. Please Login Again."}), 401
 
     return decorated_function
+
+
+serializer = URLSafeSerializer(os.getenv("SECRET_ID", ""), salt="token_id_validation")
+
+
+def generate_token(fn: Callable[..., Any]) -> Callable[..., Any]:
+    @wraps(fn)
+    def wrapper(cls: Any, obj: Any, *args: Any, **kwargs: Any) -> Any:
+        token: str = serializer.dumps(obj.id)
+        return fn(cls, obj, token, *args, **kwargs)
+
+    return wrapper
+
+
+def validate_token(fn: Callable[..., Any]) -> Callable[..., Any]:
+    @wraps(fn)
+    def wrapper(cls: Any, obj: Any, *args: Any, **kwargs: Any) -> Any:
+        token: str = serializer.load(obj)
+        return fn(cls, token, *args, **kwargs)
+
+    return wrapper
