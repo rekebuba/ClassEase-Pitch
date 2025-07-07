@@ -7,7 +7,7 @@ from factory import (
     post_generation,
 )
 from models.student_term_record import StudentTermRecord
-from tests.test_api.factories.assessment_factory import AssessmentFactory
+from .assessment_factory import AssessmentFactory
 from .base_factory import BaseFactory
 from models import storage
 from models.yearly_subject import YearlySubject
@@ -19,15 +19,15 @@ class StudentTermRecordFactory(BaseFactory[StudentTermRecord]):
         exclude = ("student", "academic_term", "section", "student_year_record")
 
     student: Any = SubFactory(
-        "tests.test_api.factories.StudentFactory", student_year_records=[]
+        "tests.factories.models.StudentFactory", student_year_records=[]
     )
-    academic_term: Any = SubFactory("tests.test_api.factories.AcademicTermFactory")
+    academic_term: Any = SubFactory("tests.factories.models.AcademicTermFactory")
     section: Any = SubFactory(
-        "tests.test_api.factories.SectionFactory", student_term_records=[]
+        "tests.factories.models.SectionFactory", student_term_records=[]
     )
 
     student_year_record: Any = SubFactory(
-        "tests.test_api.factories.StudentYearRecordFactory",
+        "tests.factories.models.StudentYearRecordFactory",
         student=SelfAttribute("..student"),
         student_term_records=[],
     )

@@ -11,8 +11,8 @@ from models.teacher_record import TeachersRecord
 from models.teacher_record_section_link import TeacherRecordSectionLink
 from models.teacher_yearly_subject_link import TeacherYearlySubjectLink
 from models.yearly_subject import YearlySubject
-from tests.test_api.factories.mark_list_factory import MarkListFactory
-from tests.test_api.factories.section_factory import SectionFactory
+from .mark_list_factory import MarkListFactory
+from .section_factory import SectionFactory
 from .base_factory import BaseFactory
 from models import storage
 
@@ -22,9 +22,9 @@ class TeacherRecordFactory(BaseFactory[TeachersRecord]):
         model = TeachersRecord
         exclude = ("teacher", "academic_term", "section")
 
-    academic_term: Any = SubFactory("tests.test_api.factories.AcademicTermFactory")
+    academic_term: Any = SubFactory("tests.factories.models.AcademicTermFactory")
     teacher: Any = SubFactory(
-        "tests.test_api.factories.TeacherFactory", teacher_records=[]
+        "tests.factories.models.TeacherFactory", teacher_records=[]
     )
 
     sections_link: Any = LazyAttribute(
@@ -49,7 +49,7 @@ class TeacherRecordFactory(BaseFactory[TeachersRecord]):
             .join(YearlySubject.subject)
             .where(
                 YearlySubject.grade_id.in_(
-                    [grade.id for grade in self.teacher.grade_level]
+                    [grade.id for grade in self.teacher.grade_to_teach]
                 ),
                 YearlySubject.subject_id.in_(
                     [subject.id for subject in self.teacher.subjects_to_teach]

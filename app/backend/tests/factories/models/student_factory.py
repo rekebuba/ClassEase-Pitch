@@ -6,7 +6,7 @@ from pyethiodate import EthDate  # type: ignore
 from datetime import datetime
 from models.student import Student
 from models import storage
-from tests.test_api.factories.student_year_record_factory import (
+from .student_year_record_factory import (
     StudentYearRecordFactory,
 )
 from .base_factory import BaseFactory
@@ -36,7 +36,7 @@ class StudentFactory(BaseFactory[Student]):
 
     user: Any = SubFactory(UserFactory, role=RoleEnum.STUDENT)
     student_year_records: Any = RelatedFactoryList(
-        "tests.test_api.factories.StudentYearRecordFactory",
+        "tests.factories.models.StudentYearRecordFactory",
         factory_related_name="student",
         size=1,
     )

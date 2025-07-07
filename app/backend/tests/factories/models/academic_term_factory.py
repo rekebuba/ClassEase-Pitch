@@ -7,7 +7,7 @@ from faker import Faker
 from models.academic_term import AcademicTerm
 from extension.enums.enum import AcademicTermEnum, AcademicTermTypeEnum
 from models import storage
-from tests.test_api.factories.year_factory import YearFactory
+from .year_factory import YearFactory
 from .base_factory import BaseFactory
 
 

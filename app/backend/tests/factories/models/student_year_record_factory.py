@@ -3,10 +3,10 @@ from typing import Any
 from factory import LazyAttribute, SubFactory, post_generation
 from extension.enums.enum import AcademicTermTypeEnum
 from models.student_year_record import StudentYearRecord
-from tests.test_api.factories.student_term_record_factory import (
+from .student_term_record_factory import (
     StudentTermRecordFactory,
 )
-from tests.test_api.factories.subject_yearly_average_factory import (
+from .subject_yearly_average_factory import (
     SubjectYearlyAverageFactory,
 )
 from .base_factory import BaseFactory
@@ -22,11 +22,11 @@ class StudentYearRecordFactory(BaseFactory[StudentYearRecord]):
         exclude = ("student", "grade", "year", "stream")
 
     student: Any = SubFactory(
-        "tests.test_api.factories.StudentFactory", student_year_records=[]
+        "tests.factories.models.StudentFactory", student_year_records=[]
     )
     year: Any = SubFactory(YearFactory)  # Order Matters
     grade: Any = SubFactory(GradeFactory)
-    stream: Any = SubFactory("tests.test_api.factories.StreamFactory")
+    stream: Any = SubFactory("tests.factories.models.StreamFactory")
 
     @post_generation
     def student_term_records(self, create, extracted, **kwargs):
