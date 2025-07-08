@@ -1,9 +1,8 @@
-import random
-from typing import List
 import pytest
+from extension.pydantic.models.teacher_schema import TeacherWithRelationshipsSchema
 from models.teacher import Teacher
-from tests.factories.api.teacher_registration_factory import TeacherRegistrationFactory
 from flask.testing import FlaskClient
+from tests.factories.models.teacher_factory import TeacherFactory
 from tests.test_api.schemas.base_schema import DashboardUserInfoResponseModel
 from tests.typing import Credential
 
@@ -19,12 +18,25 @@ class TestTeachers:
         """
 
         # form_data = prepare_form_data(teacher)
-        teacher = TeacherRegistrationFactory.build()
+        teacher = TeacherFactory.stub(
+            user=None,
+            teacher_records=[],
+        )
+
+        teacher_schema = TeacherWithRelationshipsSchema.model_validate(teacher)
+        data = teacher_schema.model_dump_json(
+            by_alias=True,
+            exclude={
+                "id",
+                "user",
+                "teacher_records",
+            },
+        )
 
         # Send a POST request to the registration endpoint
         response = client.post(
             "/api/v1/register/teacher",
-            data=teacher.model_dump_json(by_alias=True),
+            data=data,
             content_type="application/json",
         )
 

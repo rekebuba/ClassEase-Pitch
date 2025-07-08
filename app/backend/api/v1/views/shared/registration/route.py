@@ -12,13 +12,16 @@ from api.v1.views.methods import parse_nested_form
 from api.v1.views.shared.registration.methods import create_role_based_user
 from api.v1.views.shared.registration.schema import (
     DumpResultSchema,
-    TeacherRegistrationSchema,
 )
 from extension.enums.enum import RoleEnum
 from extension.pydantic.models.grade_schema import GradeSchema
-from extension.pydantic.models.student_schema import StudentSchema
+from extension.pydantic.models.student_schema import (
+    StudentSchema,
+    StudentWithRelationshipsSchema,
+)
 
 from extension.pydantic.models.subject_schema import SubjectSchema
+from extension.pydantic.models.teacher_schema import TeacherWithRelationshipsSchema
 from models import storage
 from api.v1.views import errors
 from models.grade import Grade
@@ -26,7 +29,6 @@ from models.student import Student
 from models.subject import Subject
 from models.teacher import Teacher
 from sqlalchemy.exc import SQLAlchemyError
-
 
 
 @auth.route("/registration/<role>", methods=["POST"])
@@ -67,16 +69,56 @@ def register_new_user(role: str) -> Tuple[Response, int]:
         return errors.handle_internal_error(e)
 
 
+@auth.route("/register/admin", methods=["POST"])
+def register_new_admin() -> Tuple[Response, int]:
+    """Registers a new admin in the system."""
+
+    try:
+        # Validate and parse the incoming JSON
+        admin_data = request.json
+
+        if not admin_data:
+            raise ValueError("No data provided")
+
+        # Create SQLAlchemy model instance
+        new_admin = create_role_based_user(RoleEnum.ADMIN, admin_data)
+
+        storage.session.add(new_admin)
+        storage.session.commit()
+
+        return jsonify(message="Admin Registered Successfully!"), 201
+    except ValidationError as e:
+        return errors.handle_validation_error(e)
+    except SQLAlchemyError as e:
+        storage.session.rollback()
+        return errors.handle_database_error(e)
+    except ValueError as e:
+        storage.session.rollback()
+        return errors.handle_value_error(e)
+    except Exception as e:
+        storage.session.rollback()
+        return errors.handle_internal_error(e)
+
+
 @auth.route("/register/student", methods=["POST"])
 def register_new_student() -> Tuple[Response, int]:
     """Registers a new student in the system."""
 
     try:
         # Validate and parse the incoming JSON
-        student_data = StudentSchema.model_validate_json(request.data)
+        student_data = StudentWithRelationshipsSchema.model_validate_json(request.data)
+
+        grades = storage.session.scalars(
+            select(Grade).where(Grade.id == student_data.starting_grade_id)
+        ).first()
+
+        if not grades:
+            raise ValueError(
+                f"Invalid starting grade {student_data.starting_grade_id} provided."
+            )
 
         # Convert to dictionary before unpacking
-        student_dict = student_data.model_dump(exclude={"id"})
+        student_dict = student_data.model_dump(exclude_none=True)
 
         # Create SQLAlchemy model instance
         new_student = Student(**student_dict)
@@ -105,7 +147,7 @@ def register_new_teacher() -> Tuple[Response, int]:
     """
     try:
         # Validate and parse the incoming JSON
-        teacher_data = TeacherRegistrationSchema.model_validate_json(request.data)
+        teacher_data = TeacherWithRelationshipsSchema.model_validate_json(request.data)
 
         subjects = storage.session.scalars(
             select(Subject).where(
@@ -138,23 +180,21 @@ def register_new_teacher() -> Tuple[Response, int]:
         # Convert to dictionary before unpacking
         teacher_dict = teacher_data.model_dump(
             exclude={
-                "user",
                 "grade_to_teach",
                 "subjects_to_teach",
-                "teacher_records",
-                "id",
             },
-            exclude_unset=True,
+            exclude_none=True,
         )
 
         # Create SQLAlchemy model instance
         new_teacher = Teacher(**teacher_dict)
 
+        storage.session.add(new_teacher)
+
         # Add relationships after creation
         new_teacher.subjects_to_teach = list(subjects)
         new_teacher.grade_to_teach = list(grades)
 
-        storage.session.add(new_teacher)
         storage.session.commit()
 
         return jsonify(message="Teacher Registered Successfully!"), 201

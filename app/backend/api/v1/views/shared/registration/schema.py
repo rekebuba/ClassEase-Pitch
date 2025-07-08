@@ -182,10 +182,6 @@ class AdminSchema(BaseSchema):
         return data
 
 
-class TeacherRegistrationSchema(TeacherSchema, TeacherRelationshipSchema):
-    pass
-
-
 class StudentSchema(BaseSchema):
     """Student schema for validating and serializing Student data."""
 

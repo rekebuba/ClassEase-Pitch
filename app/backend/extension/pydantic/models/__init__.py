@@ -19,7 +19,11 @@ from .saved_query_view_schema import (
 )
 from .section_schema import SectionRelationshipSchema, SectionSchema
 from .stream_schema import StreamRelationshipSchema, StreamSchema
-from .student_schema import StudentRelationshipSchema, StudentSchema
+from .student_schema import (
+    StudentRelationshipSchema,
+    StudentSchema,
+    StudentWithRelationshipsSchema,
+)
 from .student_term_record_schema import (
     StudentTermRecordRelationshipSchema,
     StudentTermRecordSchema,
@@ -39,7 +43,11 @@ from .teacher_record_schema import (
     TeacherRecordRelationshipSchema,
     TeacherRecordSchema,
 )
-from .teacher_schema import TeacherRelationshipSchema, TeacherSchema
+from .teacher_schema import (
+    TeacherRelationshipSchema,
+    TeacherSchema,
+    TeacherWithRelationshipsSchema,
+)
 from .teacher_subject_link_schema import TeacherSubjectLinkSchema
 from .user_schema import UserRelationshipSchema, UserSchema
 from .year_schema import YearRelationshipSchema, YearSchema
@@ -70,6 +78,7 @@ __all__ = [
     "StreamSchema",
     "StreamRelationshipSchema",
     "StudentSchema",
+    "StudentWithRelationshipsSchema",
     "StudentRelationshipSchema",
     "StudentTermRecordSchema",
     "StudentTermRecordRelationshipSchema",
@@ -85,6 +94,7 @@ __all__ = [
     "TeacherRecordRelationshipSchema",
     "TeacherSchema",
     "TeacherRelationshipSchema",
+    "TeacherWithRelationshipsSchema",
     "TeacherSubjectLinkSchema",
     "UserSchema",
     "UserRelationshipSchema",
@@ -112,6 +122,7 @@ SectionRelationshipSchema.model_rebuild()
 StreamSchema.model_rebuild()
 StreamRelationshipSchema.model_rebuild()
 StudentSchema.model_rebuild()
+StudentWithRelationshipsSchema.model_rebuild()
 StudentRelationshipSchema.model_rebuild()
 StudentTermRecordSchema.model_rebuild()
 StudentTermRecordRelationshipSchema.model_rebuild()
@@ -125,6 +136,7 @@ TeacherRecordSchema.model_rebuild()
 TeacherRecordRelationshipSchema.model_rebuild()
 TeacherSchema.model_rebuild()
 TeacherRelationshipSchema.model_rebuild()
+TeacherWithRelationshipsSchema.model_rebuild()
 UserSchema.model_rebuild()
 UserRelationshipSchema.model_rebuild()
 YearSchema.model_rebuild()

@@ -26,7 +26,7 @@ class StudentSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: str | None = None
+    id: Optional[str] = None
     starting_grade_id: str
     first_name: str
     father_name: str
@@ -65,9 +65,13 @@ class StudentSchema(BaseModel):
 class StudentRelationshipSchema(BaseModel):
     """This model represents the relationships of a StudentSchema."""
 
-    starting_grade: GradeSchema
+    starting_grade: Optional[GradeSchema] = None
     user: Optional[UserSchema] = None
     student_term_records: Optional[List[StudentTermRecordSchema]] = None
     student_year_records: Optional[List[StudentYearRecordSchema]] = None
     subject_yearly_averages: Optional[List[SubjectYearlyAverageSchema]] = None
     assessments: Optional[List[AssessmentSchema]] = None
+
+
+class StudentWithRelationshipsSchema(StudentSchema, StudentRelationshipSchema):
+    pass

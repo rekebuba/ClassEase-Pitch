@@ -86,40 +86,44 @@ class BaseFactory(SQLAlchemyModelFactory, Generic[T]):  # type: ignore[type-arg]
 
         return super()._create(model_class, *arg, **kwargs)  # type: ignore[no-any-return]
 
-    @classmethod
-    def _build(
-        cls: Type["BaseFactory[T]"], model_class: Type[T], *arg: Any, **kwargs: Any
-    ) -> Dict[str, Any]:
-        """
-        Override creation to skip specific fields marked in _skip_for_session
-        """
-        add_fields = getattr(cls, "_add_for_test", {})
+    # @classmethod
+    # def _build(
+    #     cls: Type["BaseFactory[T]"], model_class: Type[T], *arg: Any, **kwargs: Any
+    # ) -> Dict[str, Any]:
+    #     """
+    #     Override creation to skip specific fields marked in _skip_for_session
+    #     """
+    #     add_fields = getattr(cls, "_add_for_test", {})
 
-        # Add to attributes
-        for field, value in add_fields.items():
-            all_args = field.split(".")
-            key = all_args[0]
-            args = {}
-            for v in all_args[1:]:
-                args[v] = kwargs.get(v, None)
-            kwargs[key] = value(**args)
+    #     # Add to attributes
+    #     for field, value in add_fields.items():
+    #         all_args = field.split(".")
+    #         key = all_args[0]
+    #         args = {}
+    #         for v in all_args[1:]:
+    #             args[v] = kwargs.get(v, None)
+    #         kwargs[key] = value(**args)
 
-        # Skip fields that are not needed for the test
-        skip_fields = getattr(cls, "_skip_fields", [])
-        for field in skip_fields:
-            kwargs.pop(field, None)
+    #     # Skip fields that are not needed for the test
+    #     skip_fields = getattr(cls, "_skip_fields", [])
+    #     for field in skip_fields:
+    #         kwargs.pop(field, None)
 
-        for key, value in kwargs.items():
-            if isinstance(value, datetime):
-                if "time" in key:
-                    kwargs[key] = value.strftime("%H:%M:%S")
-                else:
-                    kwargs[key] = value.strftime("%Y-%m-%d")
-            elif isinstance(value, date):
-                kwargs[key] = value.strftime("%Y-%m-%d")
+    #     for key, value in kwargs.items():
+    #         if isinstance(value, datetime):
+    #             if "time" in key:
+    #                 kwargs[key] = value.strftime("%H:%M:%S")
+    #             else:
+    #                 kwargs[key] = value.strftime("%Y-%m-%d")
+    #         elif isinstance(value, date):
+    #             kwargs[key] = value.strftime("%Y-%m-%d")
 
-        return kwargs
+    #     return kwargs
 
     @classmethod
     def create(cls: Type["BaseFactory[T]"], **kwargs: Any) -> T:
         return super().create(**kwargs)  # type: ignore[no-any-return]
+
+    @classmethod
+    def build(cls: Type["BaseFactory[T]"], **kwargs: Any) -> Dict[str, Any]:
+        return super().build(**kwargs)  # type: ignore[no-any-return]

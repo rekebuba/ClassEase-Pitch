@@ -1,14 +1,8 @@
-import random
-from typing import Any, Dict
-from factory import LazyAttribute, SubFactory, RelatedFactoryList, SelfAttribute
+from typing import Any
+from factory import LazyAttribute, SubFactory, RelatedFactoryList
 from faker import Faker
-from pyethiodate import EthDate  # type: ignore
-from datetime import datetime
 from models.student import Student
-from models import storage
-from .student_year_record_factory import (
-    StudentYearRecordFactory,
-)
+from tests.factories.models.grade_factory import GradeFactory
 from .base_factory import BaseFactory
 from .user_factory import UserFactory
 from extension.enums.enum import (
@@ -19,28 +13,21 @@ from extension.enums.enum import (
 
 fake = Faker()
 
-StudentYearRecordFactory
-
 
 class StudentFactory(BaseFactory[Student]):
     class Meta:
         model = Student
-        sqlalchemy_session = storage.session
-        exclude = ("user",)
-
-    # _add_for_test: Dict[str, Any] = {
-    #     "user": lambda **kwarg: UserFactory.build(role=RoleEnum.STUDENT.value),
-    #     "grade": lambda **kwarg: random.randint(1, 10),
-    #     "academic_year": lambda **kwarg: EthDate.date_to_ethiopian(datetime.now()).year,
-    # }
+        exclude = ("user", "starting_grade")
 
     user: Any = SubFactory(UserFactory, role=RoleEnum.STUDENT)
+    user_id: Any = LazyAttribute(lambda x: x.user.id if x.user else None)
+    starting_grade: Any = LazyAttribute(lambda _: GradeFactory.create())
+    starting_grade_id: Any = LazyAttribute(lambda x: x.starting_grade.id)
     student_year_records: Any = RelatedFactoryList(
         "tests.factories.models.StudentYearRecordFactory",
         factory_related_name="student",
         size=1,
     )
-    
 
     # Personal Information
     first_name: Any = LazyAttribute(lambda x: fake.first_name())
