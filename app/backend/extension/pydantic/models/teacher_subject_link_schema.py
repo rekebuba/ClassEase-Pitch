@@ -15,5 +15,6 @@ class TeacherSubjectLinkSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: str | None = None
     teacher_id: str
     subject_id: str

@@ -20,6 +20,7 @@ class SavedQueryViewSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: str | None = None
     user_id: str
     name: str
     table_name: TableEnum

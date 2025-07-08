@@ -27,6 +27,8 @@ class UserCreateSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: str
+
     identification: Optional[str]
     password: Optional[str] = Field(exclude=True)
     role: RoleEnum

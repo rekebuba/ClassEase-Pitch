@@ -1,5 +1,5 @@
 import random
-from typing import Any, List
+from typing import Any
 from faker import Faker
 from api.v1.views.shared.registration.schema import TeacherRegistrationSchema
 from tests.factories.api.typed_factory import TypedFactory
@@ -11,6 +11,8 @@ from extension.enums.enum import (
     MaritalStatusEnum,
     ScheduleEnum,
 )
+from tests.factories.models.subject_factory import SubjectFactory
+from tests.factories.models.yearly_subject_factory import YearlySubjectFactory
 
 fake = Faker()
 
@@ -19,8 +21,15 @@ class TeacherRegistrationFactory(TypedFactory[TeacherRegistrationSchema]):
     class Meta:
         model = TeacherRegistrationSchema
 
-    subjects_to_teach: List[str] = []
-    grade_to_teach: List[str] = []
+    subjects_to_teach: Any = LazyAttribute(
+        lambda _: SubjectFactory.create_batch(size=random.randint(1, 3))
+    )
+    grade_to_teach: Any = LazyAttribute(
+        lambda x: [
+            YearlySubjectFactory.get_or_create(subject_id=subject.id).grade
+            for subject in x.subjects_to_teach
+        ]
+    )
 
     # Add additional fields for Teacher
     first_name: Any = LazyAttribute(lambda x: fake.first_name())

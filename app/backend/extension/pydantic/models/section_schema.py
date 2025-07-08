@@ -20,6 +20,7 @@ class SectionSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: str | None = None
     section: Optional[str] = None
 
 

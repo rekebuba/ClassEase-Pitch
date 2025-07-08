@@ -34,14 +34,14 @@ class TestStudents:
         # Send a POST request to the registration endpoint
         response = client.post(
             "/api/v1/register/student",
-            data=student.model_dump_json(by_alias=True, exclude={"starting_grade_id"}),
+            data=student.model_dump_json(by_alias=True),
             content_type="application/json",
         )
 
         assert response.status_code == 201
         assert response.json is not None
         assert "message" in response.json
-        assert response.json["message"] == "student registered successfully!"
+        assert response.json["message"] == "Student Registered Successfully!"
 
     def test_login_success(self, client: FlaskClient, create_student: Student) -> None:
         """

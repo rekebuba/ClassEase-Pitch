@@ -21,6 +21,7 @@ class SubjectYearlyAverageSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: str | None = None
     student_id: str
     yearly_subject_id: str
     student_year_record_id: Optional[str] = None

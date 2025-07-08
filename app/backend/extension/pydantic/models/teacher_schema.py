@@ -27,6 +27,7 @@ class TeacherSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: str | None = None
     first_name: str
     father_name: str
     grand_father_name: str
@@ -102,7 +103,13 @@ class TeacherRelationshipSchema(BaseModel):
     It is used to define the relationships between the TeacherSchema and other schemas.
     """
 
-    user: Optional[UserSchema]
-    subjects_to_teach: Optional[List[SubjectSchema]]
-    grade_level: Optional[List[GradeSchema]]
-    teacher_records: Optional[List[TeacherRecordSchema]]
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    user: Optional[UserSchema] = None
+    subjects_to_teach: Optional[List[SubjectSchema]] = []
+    grade_to_teach: Optional[List[GradeSchema]] = []
+    teacher_records: Optional[List[TeacherRecordSchema]] = []

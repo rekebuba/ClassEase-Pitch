@@ -15,4 +15,5 @@ class BlacklistTokenSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: str | None = None
     jti: str

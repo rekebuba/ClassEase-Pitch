@@ -23,6 +23,7 @@ class StudentTermRecordSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: str | None = None
     student_id: str
     academic_term_id: str
     section_id: str

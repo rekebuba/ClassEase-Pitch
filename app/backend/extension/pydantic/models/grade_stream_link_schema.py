@@ -15,5 +15,6 @@ class GradeStreamLinkSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: str | None = None
     grade_id: str
     stream_id: str

@@ -1,26 +1,23 @@
 from typing import Any
-import uuid
 from faker import Faker
-from api.v1.views.shared.registration.schema import StudentRegistrationSchema
+from extension.pydantic.models.student_schema import StudentSchema
 from tests.factories.api.typed_factory import TypedFactory
 from factory import LazyAttribute
 from extension.enums.enum import (
     GenderEnum,
     StudentApplicationStatusEnum,
 )
+from tests.factories.models.grade_factory import GradeFactory
 
 
 fake = Faker()
 
 
-class StudentRegistrationFactory(TypedFactory[StudentRegistrationSchema]):
+class StudentRegistrationFactory(TypedFactory[StudentSchema]):
     class Meta:
-        model = StudentRegistrationSchema
+        model = StudentSchema
 
-    starting_grade: Any = LazyAttribute(lambda x: str(fake.random_int(min=1, max=12)))
-    starting_grade_id: Any = LazyAttribute(
-        lambda _: str(uuid.uuid4())
-    )  # "dummy-grade-id"
+    starting_grade_id: Any = LazyAttribute(lambda _: GradeFactory.create().id)
 
     first_name: Any = LazyAttribute(lambda x: fake.first_name())
     father_name: Any = LazyAttribute(lambda x: fake.last_name())

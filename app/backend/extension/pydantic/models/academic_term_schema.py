@@ -23,6 +23,7 @@ class AcademicTermSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: str | None = None
     year_id: str
     name: AcademicTermEnum
     start_date: date

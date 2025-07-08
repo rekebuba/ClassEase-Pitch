@@ -20,6 +20,7 @@ class UserSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: str | None = None
     identification: str
     password: str
     role: RoleEnum

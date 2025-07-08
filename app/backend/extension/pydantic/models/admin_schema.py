@@ -20,6 +20,7 @@ class AdminSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: str | None = None
     user_id: str
     first_name: str
     father_name: str
