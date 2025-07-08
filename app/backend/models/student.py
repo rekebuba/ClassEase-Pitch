@@ -52,29 +52,55 @@ class Student(BaseModel):
     city: Mapped[str] = mapped_column(String(50), nullable=False)
     state: Mapped[str] = mapped_column(String(50), nullable=False)
     postal_code: Mapped[str] = mapped_column(String(20), nullable=False)
-    father_phone: Mapped[str] = mapped_column(String(25))
-    mother_phone: Mapped[str] = mapped_column(String(25))
+    father_phone: Mapped[str] = mapped_column(String(25), nullable=False)
+    mother_phone: Mapped[str] = mapped_column(String(25), nullable=False)
     parent_email: Mapped[str] = mapped_column(String(120), nullable=False)
 
-    grand_father_name: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    nationality: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    blood_type: Mapped[Optional[str]] = mapped_column(String(10), nullable=True)
-    student_photo: Mapped[Optional[str]] = mapped_column(String(255), nullable=True)
-    previous_school: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
-    previous_grades: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    transportation: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    guardian_name: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
-    guardian_phone: Mapped[Optional[str]] = mapped_column(String(25), nullable=True)
-    guardian_relation: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    grand_father_name: Mapped[Optional[str]] = mapped_column(
+        String(50), nullable=True, default=None
+    )
+    nationality: Mapped[Optional[str]] = mapped_column(
+        String(100), nullable=True, default=None
+    )
+    blood_type: Mapped[Optional[str]] = mapped_column(
+        String(10), nullable=True, default=None
+    )
+    student_photo: Mapped[Optional[str]] = mapped_column(
+        String(255), nullable=True, default=None
+    )
+    previous_school: Mapped[Optional[str]] = mapped_column(
+        String(100), nullable=True, default=None
+    )
+    previous_grades: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True, default=None
+    )
+    transportation: Mapped[Optional[str]] = mapped_column(
+        String(50), nullable=True, default=None
+    )
+    guardian_name: Mapped[Optional[str]] = mapped_column(
+        String(50), nullable=True, default=None
+    )
+    guardian_phone: Mapped[Optional[str]] = mapped_column(
+        String(25), nullable=True, default=None
+    )
+    guardian_relation: Mapped[Optional[str]] = mapped_column(
+        String(50), nullable=True, default=None
+    )
     emergency_contact_name: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True
+        String(50), nullable=True, default=None
     )
     emergency_contact_phone: Mapped[Optional[str]] = mapped_column(
-        String(25), nullable=True
+        String(25), nullable=True, default=None
     )
-    disability_details: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    sibling_details: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
-    medical_details: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    disability_details: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True, default=None
+    )
+    sibling_details: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True, default=None
+    )
+    medical_details: Mapped[Optional[str]] = mapped_column(
+        Text, nullable=True, default=None
+    )
 
     # Defaulted Fields
     sibling_in_school: Mapped[bool] = mapped_column(Boolean, default=False)

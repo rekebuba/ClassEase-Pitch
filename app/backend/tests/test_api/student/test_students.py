@@ -1,13 +1,9 @@
 #!/usr/bin/python3
 
 import pytest
+from extension.pydantic.models.student_schema import StudentWithRelationshipsSchema
 from models.academic_term import AcademicTerm
 from models.student import Student
-from models.user import User
-from tests.factories.api.student_registration_factory import StudentRegistrationFactory
-from tests.factories.models.assessment_factory import AssessmentFactory
-from tests.factories.models.year_factory import YearFactory
-from tests.test_api.fixtures.methods import prepare_form_data
 from tests.factories.models import StudentFactory
 
 from flask.testing import FlaskClient
@@ -28,13 +24,24 @@ class TestStudents:
         """
         Test the student registration endpoint for successful registration.
         """
-        student = StudentRegistrationFactory.build()
+        student = StudentFactory.build(
+            user=None,
+            student_year_records=[],
+        )
         # form_data = prepare_form_data(student)
-
+        student_schema = StudentWithRelationshipsSchema.model_validate(student)
+        data = student_schema.model_dump_json(
+            by_alias=True,
+            exclude={
+                "id",
+                "user_id",
+                "student_year_records",
+            },
+        )
         # Send a POST request to the registration endpoint
         response = client.post(
             "/api/v1/register/student",
-            data=student.model_dump_json(by_alias=True),
+            data=data,
             content_type="application/json",
         )
 

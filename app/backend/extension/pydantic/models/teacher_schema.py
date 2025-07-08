@@ -113,3 +113,8 @@ class TeacherRelationshipSchema(BaseModel):
     subjects_to_teach: Optional[List[SubjectSchema]] = []
     grade_to_teach: Optional[List[GradeSchema]] = []
     teacher_records: Optional[List[TeacherRecordSchema]] = []
+
+
+class TeacherWithRelationshipsSchema(TeacherSchema, TeacherRelationshipSchema):
+    """This model extends TeacherSchema to include relationships."""
+    pass

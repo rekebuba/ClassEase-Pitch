@@ -27,26 +27,3 @@ class SubjectFactory(BaseFactory[Subject]):
             storage.session.query(Subject).filter_by(name=kwargs.get("name")).first()
         )
         return existing or super()._create(model_class, *args, **kwargs)
-
-    @classmethod
-    def get_existing_id(cls, student_grade_id: str, offset: int) -> str:
-        """
-        Returns an existing subject ID if available, otherwise raise ValueError.
-        """
-        stmt = (
-            select(Subject.id)
-            .join(Grade)
-            .where(Grade.id == student_grade_id)
-            .order_by(Subject.id)
-            .offset(offset)
-            .limit(1)
-        )
-
-        result = storage.session.scalars(stmt).first()  # returns single value or None
-
-        if result is None:
-            raise ValueError(
-                f"No subject found for grade ID {student_grade_id} at offset {offset}"
-            )
-
-        return result

@@ -2,9 +2,9 @@ from api.v1.views.methods import save_profile
 from api.v1.views.shared.registration.schema import (
     AdminSchema,
     StudentSchema,
-    TeacherRegistrationSchema,
 )
 from extension.enums.enum import RoleEnum
+from extension.pydantic.models.teacher_schema import TeacherWithRelationshipsSchema
 from models import storage
 from typing import Any, Dict, Tuple, Type, Union
 from marshmallow import Schema
@@ -32,16 +32,14 @@ def create_user(data: Dict[str, Any]) -> User:
     return new_user
 
 
-def create_role_based_user(
-    role_enum: RoleEnum, data: Dict[str, Any]
-) -> User | None:
+def create_role_based_user(role_enum: RoleEnum, data: Dict[str, Any]) -> User | None:
     role_mapping: Dict[
         RoleEnum,
         Tuple[Type[Schema], Union[Type[Admin], Type[Student], Type[Teacher]]],
     ] = {
         RoleEnum.ADMIN: (AdminSchema, Admin),
         RoleEnum.STUDENT: (StudentSchema, Student),
-        RoleEnum.TEACHER: (TeacherRegistrationSchema, Teacher),
+        RoleEnum.TEACHER: (TeacherWithRelationshipsSchema, Teacher),
     }
 
     if role_enum in role_mapping:
