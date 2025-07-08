@@ -22,6 +22,19 @@ class TestSharedApi:
         except ValidationError as e:
             pytest.fail(f"Validation error: {e}")
 
+    def test_get_subject_by_id(
+        self, client: FlaskClient, subjects: List[SubjectSchema]
+    ) -> None:
+        response = client.get(f"api/v1/subjects/{random.choice(subjects).id}")
+
+        assert response.status_code == 200
+        assert response.json is not None
+        assert isinstance(response.json, dict)
+        try:
+            TypeAdapter(SubjectSchema).validate_python(response.json)
+        except ValidationError as e:
+            pytest.fail(f"Validation error: {e}")
+
     def test_get_grades(self, client: FlaskClient) -> None:
         response = client.get("/api/v1/grades")
 
@@ -29,19 +42,28 @@ class TestSharedApi:
         assert response.json is not None
         assert isinstance(response.json, list)
         assert len(response.json) > 0
-        print(json.dumps(response.json, indent=2))
         try:
             TypeAdapter(List[GradeSchema]).validate_python(response.json)
         except ValidationError as e:
             pytest.fail(f"Validation error: {e}")
 
-    def test_get_subject_grades(self, client, subject_list):
-        subject_names = random.sample(
-            subject_list, k=random.randint(0, len(subject_list))
-        )
-        response = client.get(
-            "/api/v1/subjects/grades", json={"subjects": subject_names}
-        )
+    def test_get_grade_by_id(
+        self, client: FlaskClient, grades: List[GradeSchema]
+    ) -> None:
+        response = client.get(f"api/v1/grades/{random.choice(grades).id}")
+
+        assert response.status_code == 200
+        assert response.json is not None
+        assert isinstance(response.json, dict)
+        try:
+            TypeAdapter(GradeSchema).validate_python(response.json)
+        except ValidationError as e:
+            pytest.fail(f"Validation error: {e}")
+
+    def test_get_subject_grades(
+        self, client: FlaskClient, subjects: List[SubjectSchema]
+    ) -> None:
+        response = client.get(f"/api/v1/subjects/{random.choice(subjects).id}/grades")
 
         assert response.status_code == 200
         assert response.json is not None

@@ -21,6 +21,7 @@ class AssessmentSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: str | None = None
     student_id: str
     student_term_record_id: str
     yearly_subject_id: str

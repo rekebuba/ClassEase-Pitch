@@ -3,11 +3,12 @@ from flask.testing import FlaskClient
 import pytest
 from pydantic import TypeAdapter, ValidationError
 
+from extension.pydantic.models.grade_schema import GradeSchema
 from extension.pydantic.models.subject_schema import SubjectSchema
 
 
 @pytest.fixture
-def subject_list(client: FlaskClient) -> List[str]:
+def subjects(client: FlaskClient) -> List[SubjectSchema]:
     response = client.get("/api/v1/subjects")
     assert response.status_code == 200
     assert response.json is not None
@@ -21,7 +22,7 @@ def subject_list(client: FlaskClient) -> List[str]:
 
 
 @pytest.fixture
-def grade_list(client: FlaskClient) -> List[str]:
+def grades(client: FlaskClient) -> List[GradeSchema]:
     response = client.get("/api/v1/grades")
 
     assert response.status_code == 200
@@ -29,7 +30,7 @@ def grade_list(client: FlaskClient) -> List[str]:
     assert isinstance(response.json, list)
     assert len(response.json) > 0
     try:
-        grades = TypeAdapter(list[str]).validate_python(response.json)
+        grades = TypeAdapter(list[GradeSchema]).validate_python(response.json)
         return grades
     except ValidationError as e:
         pytest.fail(f"Validation error: {e}")

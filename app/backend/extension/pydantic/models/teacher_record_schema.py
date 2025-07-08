@@ -22,6 +22,7 @@ class TeacherRecordSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: str | None = None
     teacher_id: str
     academic_term_id: str
 

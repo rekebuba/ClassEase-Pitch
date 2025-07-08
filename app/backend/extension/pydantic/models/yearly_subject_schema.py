@@ -25,6 +25,7 @@ class YearlySubjectSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: str | None = None
     year_id: Optional[str] = None
     subject_id: str
     grade_id: str

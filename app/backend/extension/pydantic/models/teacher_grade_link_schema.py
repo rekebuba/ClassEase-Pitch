@@ -15,5 +15,6 @@ class TeacherGradeLinkSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: str | None = None
     teacher_id: str
     grade_id: str

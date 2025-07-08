@@ -26,7 +26,12 @@ from api.v1.schemas.custom_schema import (
 from api.v1.schemas.schemas import FullNameSchema
 from api.v1.utils.typing import PostLoadUser
 from extension.enums.enum import GradeLevelEnum, RoleEnum
-from extension.pydantic.models.teacher_schema import TeacherSchema
+from extension.pydantic.models.grade_schema import GradeSchema
+from extension.pydantic.models.subject_schema import SubjectSchema
+from extension.pydantic.models.teacher_schema import (
+    TeacherRelationshipSchema,
+    TeacherSchema,
+)
 from extension.pydantic.models.student_schema import (
     StudentSchema as StudentSchemaPydantic,
 )
@@ -177,13 +182,8 @@ class AdminSchema(BaseSchema):
         return data
 
 
-class StudentRegistrationSchema(StudentSchemaPydantic):
-    starting_grade: str
-
-
-class TeacherRegistrationSchema(TeacherSchema):
-    subjects_to_teach: List[str]
-    grade_to_teach: List[str]
+class TeacherRegistrationSchema(TeacherSchema, TeacherRelationshipSchema):
+    pass
 
 
 class StudentSchema(BaseSchema):

@@ -26,6 +26,7 @@ class StudentSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: str | None = None
     starting_grade_id: str
     first_name: str
     father_name: str

@@ -23,6 +23,7 @@ class YearSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: str | None = None
     calendar_type: AcademicTermTypeEnum
     academic_year: str
     ethiopian_year: int

@@ -17,7 +17,8 @@ def get_available_grades() -> Tuple[Response, int]:
     try:
         grades = storage.session.scalars(select(Grade)).all()
 
-        valid_grades = [GradeSchema.hal_form(grade) for grade in grades]
+        grade_schemas = [GradeSchema.model_validate(grade) for grade in grades]
+        valid_grades = [schema.model_dump(by_alias=True) for schema in grade_schemas]
 
         return jsonify(valid_grades), 200
 
@@ -37,7 +38,7 @@ def get_grade_by_id(grade_id: str) -> Tuple[Response, int]:
         if not grade:
             return jsonify({"error": "Grade not found"}), 404
 
-        valid_grade = GradeSchema.hal_form(grade)
+        valid_grade = GradeSchema.model_validate(grade)
 
         return jsonify(valid_grade), 200
 

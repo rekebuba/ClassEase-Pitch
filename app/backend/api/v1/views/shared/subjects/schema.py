@@ -1,9 +1,11 @@
 from pydantic import BaseModel
 
+from extension.pydantic.models.subject_schema import SubjectSchema
 
-class SubjectList(BaseModel):
+
+class SubjectResponse(BaseModel):
     """
     Schema for the list of subjects.
     """
 
-    subjects: list[str] = []
+    subjects: list[SubjectSchema] = []

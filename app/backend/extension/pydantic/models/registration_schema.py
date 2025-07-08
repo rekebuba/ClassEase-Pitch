@@ -16,6 +16,7 @@ class RegistrationSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: str | None = None
     student_id: str
     subject_id: str
     semester_id: str

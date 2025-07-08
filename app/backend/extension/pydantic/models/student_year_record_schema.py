@@ -24,6 +24,7 @@ class StudentYearRecordSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: str | None = None
     student_id: str
     grade_id: str
     year_id: str

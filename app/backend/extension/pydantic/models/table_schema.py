@@ -15,4 +15,5 @@ class TableSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: str | None = None
     name: str
