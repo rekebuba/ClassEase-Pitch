@@ -135,7 +135,7 @@ class Student(BaseModel):
     )
     user: Mapped["User"] = relationship(
         "User",
-        back_populates="students",
+        back_populates="student",
         init=False,
         repr=False,
     )

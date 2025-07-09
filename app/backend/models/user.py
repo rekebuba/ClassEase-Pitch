@@ -2,6 +2,7 @@
 """Module for User class"""
 
 from typing import TYPE_CHECKING
+import bcrypt
 from sqlalchemy import String, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from extension.enums.enum import RoleEnum
@@ -33,25 +34,24 @@ class User(BaseModel):
         ),
         nullable=False,
     )
-    national_id: Mapped[str] = mapped_column(String(120), nullable=False)
     image_path: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
 
     # One-to-many relationship
-    admins: Mapped["Admin"] = relationship(
+    admin: Mapped["Admin"] = relationship(
         "Admin",
         back_populates="user",
         uselist=False,
         init=False,
         repr=False,
     )
-    teachers: Mapped["Teacher"] = relationship(
+    teacher: Mapped["Teacher"] = relationship(
         "Teacher",
         back_populates="user",
         uselist=False,
         init=False,
         repr=False,
     )
-    students: Mapped["Student"] = relationship(
+    student: Mapped["Student"] = relationship(
         "Student",
         back_populates="user",
         uselist=False,

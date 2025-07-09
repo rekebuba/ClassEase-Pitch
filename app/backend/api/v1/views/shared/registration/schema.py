@@ -383,3 +383,11 @@ class DumpResultSchema(BaseSchema):
 
     message = fields.String(dump_only=True)
     user = fields.Nested(UserSchema(only=("identification", "role")), dump_only=True)
+
+class SucssussfulRegistrationResponse(BaseModel):
+    """
+    Schema for successful registration response.
+    """
+
+    message: str
+    id: str

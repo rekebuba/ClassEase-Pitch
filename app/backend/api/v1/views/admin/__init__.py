@@ -16,6 +16,6 @@ from api.v1.views.admin.students.mark_list import route
 from api.v1.views.admin.students.section_count import route
 from api.v1.views.admin.students.status_count import route
 from api.v1.views.admin.students.views import route
-
+from api.v1.views.admin.user import route  # noqa: E402
 
 from api.v1.views.admin.teacher import route  # noqa: E402

@@ -3,6 +3,7 @@ from datetime import date
 from typing import TYPE_CHECKING, Optional
 from pydantic import BaseModel, ConfigDict
 
+from extension.enums.enum import GenderEnum
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
@@ -21,12 +22,12 @@ class AdminSchema(BaseModel):
     )
 
     id: str | None = None
-    user_id: str
+    user_id: Optional[str] = None
     first_name: str
     father_name: str
     grand_father_name: str
     date_of_birth: date
-    gender: str
+    gender: GenderEnum
     email: str
     phone: str
     address: str
@@ -36,3 +37,7 @@ class AdminRelationshipSchema(BaseModel):
     """This model represents the relationships of an AdminSchema."""
 
     user: Optional[UserSchema] = None
+
+
+class AdminWithRelationshipsSchema(AdminSchema, AdminRelationshipSchema):
+    pass

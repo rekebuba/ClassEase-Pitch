@@ -1,11 +1,9 @@
-from typing import Any, Dict
-from factory import LazyAttribute
+from typing import Any
+from factory import LazyAttribute, SubFactory
 from faker import Faker
 from models.admin import Admin
-from models import storage
 from .base_factory import BaseFactory
-from .user_factory import UserFactory
-from extension.enums.enum import RoleEnum
+from extension.enums.enum import RoleEnum, GenderEnum
 
 fake = Faker()
 
@@ -13,14 +11,14 @@ fake = Faker()
 class AdminFactory(BaseFactory[Admin]):
     class Meta:
         model = Admin
-        sqlalchemy_session = storage.session
+        exclude = ("user",)
 
-    _add_for_session: Dict[str, Any] = {
-        "user_id": lambda **kwarg: UserFactory.create(role=RoleEnum.ADMIN).id,
-    }
-    _add_for_test: Dict[str, Any] = {
-        "user": lambda **kwarg: UserFactory.build(role=RoleEnum.ADMIN.value),
-    }
+    user: Any = SubFactory(
+        "tests.factories.models.user_factory.UserFactory",
+        role=RoleEnum.ADMIN,
+        admin=None,
+    )
+    user_id: Any = LazyAttribute(lambda x: x.user.id if x.user else None)
 
     # Add additional fields for Admin
     first_name: Any = LazyAttribute(lambda x: fake.first_name())
@@ -28,6 +26,8 @@ class AdminFactory(BaseFactory[Admin]):
     grand_father_name: Any = LazyAttribute(lambda x: fake.first_name())
     date_of_birth: Any = LazyAttribute(lambda x: fake.date_of_birth())
     email: Any = LazyAttribute(lambda x: fake.email())
-    gender: Any = LazyAttribute(lambda x: fake.random_element(elements=("M", "F")))
+    gender: Any = LazyAttribute(
+        lambda x: fake.random_element(elements=list(GenderEnum))
+    )
     phone: Any = LazyAttribute(lambda x: "091234567")
     address: Any = LazyAttribute(lambda x: fake.address())
