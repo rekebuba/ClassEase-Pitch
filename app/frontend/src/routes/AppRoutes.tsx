@@ -17,6 +17,7 @@ const LandingPage = lazy(() => import("@/pages/landing-page"));
 // Admin pages
 const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
 const AcademicYearSetup = lazy(() => import("@/pages/admin/academic-year-setup"));
+const AcademicYearManagement = lazy(() => import("@/pages/admin/academic-year-management"));
 const AdminCreateMarkList = lazy(() => import("@/pages/admin/create-mark-list"));
 const StudentRegistrationForm = lazy(() => import("@/pages/admin/student-registration-form"));
 const TeacherRegistrationForm = lazy(() => import("@/pages/admin/teacher-registration-form"));
@@ -66,7 +67,7 @@ const router = createBrowserRouter([
         path: "/admin",
         element: (
             <AuthProvider>
-                <Layout role="admin">
+                <Layout>
                     <ProtectedRoute allowedRoles={['admin']} />
                 </Layout>
             </AuthProvider>
@@ -75,6 +76,7 @@ const router = createBrowserRouter([
             { index: true, element: <Navigate to="dashboard" replace /> },
             { path: "dashboard", element: <AdminDashboard /> },
             { path: "academic-year-setup", element: <AcademicYearSetup /> },
+            { path: "academic-year-manage", element: <AcademicYearManagement /> },
             { path: "manage/students", element: <AdminManageStudents /> },
             { path: "manage/teachers", element: <AdminManageTeacher /> },
             { path: "student/registration", element: <StudentRegistrationForm /> },

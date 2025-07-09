@@ -153,6 +153,44 @@ export default function SubjectManagement({ subjects, onUpdate }: SubjectManagem
                 </CardContent>
             </Card>
 
+            {/* Selected Subjects */}
+            <Card>
+                <CardHeader>
+                    <CardTitle>Selected Subjects ({subjects.length})</CardTitle>
+                    <p className="text-sm text-gray-600">Subjects that will be available for this academic year</p>
+                </CardHeader>
+                <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        {subjects.map((subject) => (
+                            <Card key={subject.id} className="p-3">
+                                <div className="flex items-start justify-between">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <h4 className="font-medium text-sm">{subject.name}</h4>
+                                            <Badge className={`text-xs ${getCategoryColor(subject.category)}`}>{subject.category}</Badge>
+                                        </div>
+                                        <p className="text-xs text-gray-500 mb-2">{subject.description}</p>
+                                        <div className="flex items-center gap-2">
+                                            <Badge variant="outline" className="text-xs">
+                                                {subject.code}
+                                            </Badge>
+                                            {subject.isRequired && (
+                                                <Badge variant="destructive" className="text-xs">
+                                                    Required
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <Button size="sm" variant="outline" onClick={() => removeSubject(subject.id)}>
+                                        <X className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
+
             {/* Add Custom Subject */}
             <Card>
                 <CardHeader>
@@ -218,44 +256,6 @@ export default function SubjectManagement({ subjects, onUpdate }: SubjectManagem
                                 Add Custom Subject
                             </Button>
                         </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Selected Subjects */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Selected Subjects ({subjects.length})</CardTitle>
-                    <p className="text-sm text-gray-600">Subjects that will be available for this academic year</p>
-                </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {subjects.map((subject) => (
-                            <Card key={subject.id} className="p-3">
-                                <div className="flex items-start justify-between">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-2 mb-1">
-                                            <h4 className="font-medium text-sm">{subject.name}</h4>
-                                            <Badge className={`text-xs ${getCategoryColor(subject.category)}`}>{subject.category}</Badge>
-                                        </div>
-                                        <p className="text-xs text-gray-500 mb-2">{subject.description}</p>
-                                        <div className="flex items-center gap-2">
-                                            <Badge variant="outline" className="text-xs">
-                                                {subject.code}
-                                            </Badge>
-                                            {subject.isRequired && (
-                                                <Badge variant="destructive" className="text-xs">
-                                                    Required
-                                                </Badge>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <Button size="sm" variant="outline" onClick={() => removeSubject(subject.id)}>
-                                        <X className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            </Card>
-                        ))}
                     </div>
                 </CardContent>
             </Card>
