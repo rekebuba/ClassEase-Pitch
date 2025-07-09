@@ -78,6 +78,7 @@ const data = {
                 href: "#",
                 items: [
                     { title: "Academic Year", href: "/admin/academic-year-setup" },
+                    { title: "Manage Academic Year", href: "/admin/academic-year-manage" },
                 ],
             }
         ],

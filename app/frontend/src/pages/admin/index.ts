@@ -11,3 +11,4 @@ export { default as AdminEventForm } from './event-form';
 export { default as ManageTeachersApplication } from './manage-teacher-application';
 export { default as ManageStudentsApplication } from './manage-student-application';
 export { default as AcademicYearSetup } from './academic-year-setup'
+export { default as AcademicYearManagement } from './academic-year-management'

@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -11,18 +9,33 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar, GraduationCap, BookOpen, Settings, Plus, Save, Eye } from "lucide-react"
 import type { AcademicYear, Grade } from "@/lib/academic-year"
 import { GRADE_SUGGESTIONS } from "@/lib/academic-year"
-import { GradeSetupCard, SubjectManagement } from "@/components"
+import { GradeSetupCard } from "@/components"
+import { SubjectManagement } from "@/components"
 
-export default function AcademicYearSetup() {
-    const [academicYear, setAcademicYear] = useState<Partial<AcademicYear>>({
-        name: "",
-        startDate: "",
-        endDate: "",
-        termSystem: "semesterly",
-        status: "draft",
-        grades: [],
-        subjects: [],
-    })
+interface AcademicYearSetupProps {
+    initialData?: AcademicYear
+    onSave?: (academicYear: AcademicYear) => void
+    onCancel?: () => void
+    mode?: "create" | "edit"
+}
+
+export default function AcademicYearSetup({
+    initialData,
+    onSave,
+    onCancel,
+    mode = "create",
+}: AcademicYearSetupProps = {}) {
+    const [academicYear, setAcademicYear] = useState<Partial<AcademicYear>>(
+        initialData || {
+            name: "",
+            startDate: "",
+            endDate: "",
+            termSystem: "semesterly",
+            status: "draft",
+            grades: [],
+            subjects: [],
+        },
+    )
 
     const [activeTab, setActiveTab] = useState("basic")
 
@@ -77,9 +90,25 @@ export default function AcademicYearSetup() {
 
     const saveAcademicYear = () => {
         if (validateForm()) {
-            console.log("Saving Academic Year:", academicYear)
-            // Here you would typically save to your backend
-            alert("Academic Year setup saved successfully!")
+            const completeAcademicYear: AcademicYear = {
+                id: initialData?.id || Date.now().toString(),
+                name: academicYear.name!,
+                startDate: academicYear.startDate!,
+                endDate: academicYear.endDate!,
+                termSystem: academicYear.termSystem!,
+                status: academicYear.status || "draft",
+                grades: academicYear.grades || [],
+                subjects: academicYear.subjects || [],
+                createdAt: initialData?.createdAt || new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+            }
+
+            if (onSave) {
+                onSave(completeAcademicYear)
+            } else {
+                console.log("Saving Academic Year:", completeAcademicYear)
+                alert("Academic Year setup saved successfully!")
+            }
         } else {
             alert("Please fill in all required fields")
         }
@@ -96,17 +125,28 @@ export default function AcademicYearSetup() {
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900">Academic Year Setup</h1>
-                        <p className="text-gray-600 mt-1">Configure your school's academic year structure</p>
+                        <h1 className="text-3xl font-bold text-gray-900">
+                            {mode === "edit" ? "Edit Academic Year" : "Academic Year Setup"}
+                        </h1>
+                        <p className="text-gray-600 mt-1">
+                            {mode === "edit"
+                                ? "Modify your academic year configuration"
+                                : "Configure your school's academic year structure"}
+                        </p>
                     </div>
                     <div className="flex items-center gap-3">
+                        {onCancel && (
+                            <Button variant="outline" onClick={onCancel}>
+                                Cancel
+                            </Button>
+                        )}
                         <Button variant="outline" onClick={previewAcademicYear}>
                             <Eye className="h-4 w-4 mr-2" />
                             Preview
                         </Button>
                         <Button onClick={saveAcademicYear} disabled={!validateForm()}>
                             <Save className="h-4 w-4 mr-2" />
-                            Save Academic Year
+                            {mode === "edit" ? "Update Academic Year" : "Save Academic Year"}
                         </Button>
                     </div>
                 </div>
@@ -123,15 +163,15 @@ export default function AcademicYearSetup() {
                             </div>
                             <div className="flex items-center gap-2">
                                 <div
-                                    className={`w-3 h-3 rounded-full ${academicYear.grades?.length ? "bg-green-500" : "bg-gray-300"}`}
-                                />
-                                <span>Grades & Streams</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div
                                     className={`w-3 h-3 rounded-full ${academicYear.subjects?.length ? "bg-green-500" : "bg-gray-300"}`}
                                 />
                                 <span>Subjects</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div
+                                    className={`w-3 h-3 rounded-full ${academicYear.grades?.length ? "bg-green-500" : "bg-gray-300"}`}
+                                />
+                                <span>Grades & Streams</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <div className={`w-3 h-3 rounded-full ${validateForm() ? "bg-green-500" : "bg-gray-300"}`} />
@@ -148,13 +188,13 @@ export default function AcademicYearSetup() {
                             <Calendar className="h-4 w-4" />
                             Basic Info
                         </TabsTrigger>
-                        <TabsTrigger value="grades" className="flex items-center gap-2">
-                            <GraduationCap className="h-4 w-4" />
-                            Grades & Streams
-                        </TabsTrigger>
                         <TabsTrigger value="subjects" className="flex items-center gap-2">
                             <BookOpen className="h-4 w-4" />
                             Subjects
+                        </TabsTrigger>
+                        <TabsTrigger value="grades" className="flex items-center gap-2">
+                            <GraduationCap className="h-4 w-4" />
+                            Grades & Streams
                         </TabsTrigger>
                         <TabsTrigger value="review" className="flex items-center gap-2">
                             <Settings className="h-4 w-4" />
