@@ -8,7 +8,10 @@ from api.v1.views.admin.user.method import generate_id, hash_password
 from api.v1.views.admin.user.schema import NewUserSchema, SucssussfulLinkResponse
 from api.v1.views.utils import admin_required
 from extension.enums.enum import RoleEnum
-from extension.pydantic.models.user_schema import UserSchema
+from extension.pydantic.models.user_schema import (
+    UserSchema,
+    UserWithRelationshipsSchema,
+)
 from models import storage
 from models.admin import Admin
 from models.student import Student
@@ -29,7 +32,7 @@ def get_user_by_id(admin_data: UserT, user_id: str) -> Tuple[Response, int]:
             return jsonify({"message": "User not found"}), 404
 
         user_schema = UserSchema.model_validate(user)
-        return jsonify(user_schema.model_dump()), 200
+        return jsonify(user_schema.model_dump_json()), 200
     except SQLAlchemyError as e:
         return errors.handle_database_error(e)
 

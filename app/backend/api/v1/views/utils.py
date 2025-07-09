@@ -38,7 +38,7 @@ def decode_and_retrieve_user(
     """Helper function to decode token and retrieve user data"""
     try:
         payload = jwt.decode(token, secret_key, algorithms=["HS256"])
-        user_data = storage.get_first(User, identification=payload["id"])
+        user_data = storage.get_first(User, id=payload["id"])
         if user_data:
             return user_data
     except jwt.ExpiredSignatureError:

@@ -14,6 +14,7 @@ import {
     Award,
     Lightbulb,
     Settings,
+    Cog,
 } from "lucide-react"
 import { Link } from "react-router-dom";
 import {
@@ -28,60 +29,25 @@ import {
 } from "@/components/ui/sidebar"
 
 import { useState, useEffect } from "react";
-import { sharedApi } from '@/api';
-
 import { NavMain } from "@/components/nav-main"
 import { NavSidebar } from "@/components/nav-sidebar"
 import { NavUser } from "@/components/nav-user"
 import { Skeleton } from "@/components/ui/skeleton"
-// import { title } from "process";
+import { useAuth } from "@/context/auth-context";
+import FadeIn from "@/components/fade-in";
+import { type UserProfile } from "@/lib/api-response-validation";
+import { getDashboardData } from "@/api/sharedApi";
+import { toast } from "sonner";
 
-import { type UserDataProps, type RoleProps, type DataProps } from "@/lib/types"
-import { userSchema } from "@/lib/validations"
-import { zodApiHandler } from "@/api";
-
-
-
-const data: DataProps = {
+const data = {
     admin: {
-        user: {
-            firstName: "Example",
-            fatherName: "Example",
-            grandFatherName: "Example",
-            email: "m@example.com",
-            role: "Example",
-        },
         system: [
-            {
-                title: "Academics",
-                icon: BookOpen,
-                href: "/admin/academics",
-            },
-            {
-                title: "Attendance",
-                icon: Clock,
-                href: "/admin/attendance",
-            },
-            {
-                title: "Analytics",
-                icon: BarChart3,
-                href: "/admin/analytics",
-            },
-            {
-                title: "Communication",
-                icon: MessageSquare,
-                href: "/admin/communication",
-            },
-            {
-                title: "Finance",
-                icon: DollarSign,
-                href: "/admin/finance",
-            },
-            {
-                title: "Resources",
-                icon: Layers,
-                href: "/admin/resources",
-            },
+            { title: "Academics", icon: BookOpen, href: "/admin/academics" },
+            { title: "Attendance", icon: Clock, href: "/admin/attendance" },
+            { title: "Analytics", icon: BarChart3, href: "/admin/analytics" },
+            { title: "Communication", icon: MessageSquare, href: "/admin/communication" },
+            { title: "Finance", icon: DollarSign, href: "/admin/finance" },
+            { title: "Resources", icon: Layers, href: "/admin/resources" },
         ],
         navMain: [
             {
@@ -90,18 +56,9 @@ const data: DataProps = {
                 href: "#",
                 isActive: true,
                 items: [
-                    {
-                        title: "Manage Students",
-                        href: "/admin/manage/students",
-                    },
-                    {
-                        title: "Manage Teachers",
-                        href: "/admin/manage/teachers",
-                    },
-                    {
-                        title: "Roles & Permissions",
-                        href: "/admin/manage/user-access",
-                    }
+                    { title: "Manage Students", href: "/admin/manage/students" },
+                    { title: "Manage Teachers", href: "/admin/manage/teachers" },
+                    { title: "Roles & Permissions", href: "/admin/manage/user-access" }
                 ],
             },
             {
@@ -109,141 +66,45 @@ const data: DataProps = {
                 icon: GraduationCap,
                 href: "#",
                 items: [
-                    {
-                        title: "Student Registration",
-                        href: "/admin/student/applications",
-                    },
-                    {
-                        title: "Teacher Registration",
-                        href: "/admin/teacher/applications",
-                    }
+                    { title: "Student Registration", href: "/admin/student/applications" },
+                    { title: "Teacher Registration", href: "/admin/teacher/applications" }
                 ],
             },
+            { title: "Calendar", icon: Calendar, href: "#", items: [{ title: "Events", href: "/admin/calendar/events" }] },
+            { title: "Assessments", icon: FileText, href: "#", items: [{ title: "Mark List", href: "/admin/assessment/mark-list" }] },
             {
-                title: "Calendar",
-                icon: Calendar,
+                title: "Setup",
+                icon: Cog,
                 href: "#",
                 items: [
-                    {
-                        title: "Events",
-                        href: "/admin/calendar/events",
-                    }
+                    { title: "Academic Year", href: "/admin/academic-year-setup" },
                 ],
-            },
-            {
-                title: "Assessments",
-                icon: FileText,
-                href: "#",
-                items: [
-                    {
-                        title: "Mark List",
-                        href: "/admin/assessment/mark-list",
-                    }
-                ],
-            },
-        ],
-    },
-    teacher: {
-        user: {
-            firstName: "Example",
-            fatherName: "Example",
-            grandFatherName: "Example",
-            email: "m@example.com",
-            role: "Example",
-        },
-        navMain: [],
-        system: [
-            {
-                title: "Students",
-                icon: Users,
-                href: "/teacher/students",
-            },
-            {
-                title: "Assignments",
-                icon: FileText,
-                href: "/teacher/assignments",
-            },
-            {
-                title: "Grades",
-                icon: Award,
-                href: "/teacher/grades",
-            },
-            {
-                title: "Attendance",
-                icon: Clock,
-                href: "/teacher/attendance",
-            },
-            {
-                title: "Calendar",
-                icon: Calendar,
-                href: "/teacher/calendar",
-            },
-            {
-                title: "Resources",
-                icon: Layers,
-                href: "/teacher/resources",
-            },
-            {
-                title: "Analytics",
-                icon: BarChart3,
-                href: "/teacher/analytics",
-            },
-            {
-                title: "Insights",
-                icon: Lightbulb,
-                href: "/teacher/insights",
-            },
-            {
-                title: "Settings",
-                icon: Settings,
-                href: "/teacher/settings",
             }
         ],
     },
-    student: {
-        user: {
-            firstName: "Example",
-            fatherName: "Example",
-            grandFatherName: "Example",
-            email: "m@example.com",
-            role: "Example",
-        },
+    teacher: {
+        navMain: [],
         system: [
-            {
-                title: "Course Registration",
-                icon: MessageSquare,
-                href: "/student/course/registration",
-            },
-            {
-                title: "Schedule",
-                icon: Calendar,
-                href: "#"
-            },
-            {
-                title: "Assignments",
-                icon: FileText,
-                href: "#"
-            },
-            {
-                title: "Grades",
-                icon: GraduationCap,
-                href: "#"
-            },
-            {
-                title: "Courses",
-                icon: BookOpen,
-                href: "#"
-            },
-            {
-                title: "Achievements",
-                icon: Award,
-                href: "#"
-            },
-            {
-                title: "Classmates",
-                icon: Users,
-                href: "#"
-            },
+            { title: "Students", icon: Users, href: "/teacher/students" },
+            { title: "Assignments", icon: FileText, href: "/teacher/assignments" },
+            { title: "Grades", icon: Award, href: "/teacher/grades" },
+            { title: "Attendance", icon: Clock, href: "/teacher/attendance" },
+            { title: "Calendar", icon: Calendar, href: "/teacher/calendar" },
+            { title: "Resources", icon: Layers, href: "/teacher/resources" },
+            { title: "Analytics", icon: BarChart3, href: "/teacher/analytics" },
+            { title: "Insights", icon: Lightbulb, href: "/teacher/insights" },
+            { title: "Settings", icon: Settings, href: "/teacher/settings" }
+        ],
+    },
+    student: {
+        system: [
+            { title: "Course Registration", icon: MessageSquare, href: "/student/course/registration" },
+            { title: "Schedule", icon: Calendar, href: "#" },
+            { title: "Assignments", icon: FileText, href: "#" },
+            { title: "Grades", icon: GraduationCap, href: "#" },
+            { title: "Courses", icon: BookOpen, href: "#" },
+            { title: "Achievements", icon: Award, href: "#" },
+            { title: "Classmates", icon: Users, href: "#" }
         ],
         navMain: [
             {
@@ -252,50 +113,41 @@ const data: DataProps = {
                 href: "#",
                 isActive: true,
                 items: [
-                    {
-                        title: "Maths",
-                        href: "#",
-                    },
-                    {
-                        title: "English",
-                        href: "#",
-                    },
-                    {
-                        title: "Science",
-                        href: "#",
-                    }
+                    { title: "Maths", href: "#" },
+                    { title: "English", href: "#" },
+                    { title: "Science", href: "#" }
                 ],
             }
         ]
     }
-}
+};
 
-type AppSidebarProps = { role: RoleProps } & React.ComponentProps<typeof Sidebar>;
+type AppSidebarProps = React.ComponentProps<typeof Sidebar>;
 
-export function AppSidebar({ role, ...props }: AppSidebarProps) {
-    const [userData, setUserData] = useState<UserDataProps | null>(null);
+export function AppSidebar({ ...props }: AppSidebarProps) {
+    const [userData, setUserData] = useState<UserProfile | null>(null);
+    const { userRole } = useAuth();
 
-    /**
-     * @hook useEffect
-     * @description Fetches user data from the server when the component mounts.
-     * @param {Function} fetchUser - Fetches user data from the server.
-     */
     useEffect(() => {
-        const fetchUser = async () => {
-            const result = await zodApiHandler(
-                () => sharedApi.getUser(),
-                userSchema
-            );
-            if (!result.success) {
-                console.error(result.error);
-                // Handle error (show toast, update state, etc.)
+        const fetchUserData = async () => {
+            if (!userRole) return;
+
+            const response = await getDashboardData(userRole);
+            if (!response.success) {
+                toast.error(response.error.message, {
+                    style: { color: "red" },
+                });
                 return;
             }
-
-            setUserData(result.data);
+            setUserData(response.data);
         };
-        fetchUser();
-    }, []);
+
+        fetchUserData();
+    }, [userRole]);
+
+    if (!userRole) {
+
+    }
 
     return (
         <Sidebar collapsible="icon" {...props}>
@@ -304,11 +156,9 @@ export function AppSidebar({ role, ...props }: AppSidebarProps) {
                     <SidebarMenuItem>
                         <SidebarMenuButton
                             size="lg"
-                            // aria-title="Go to Dashboard"
-                            className="data-[state=open]:bg-sidebar-accent
-                            data-[state=open]:text-sidebar-accent-foreground"
+                            className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                         >
-                            <Link to={`/${role}/dashboard`} className="flex items-center gap-2 font-semibold">
+                            <Link to={`/${userRole}/dashboard`} className="flex items-center gap-2 font-semibold">
                                 <GraduationCap className="h-6 w-6 text-sky-500" />
                                 <span className="text-xl font-bold text-sky-500">ClassEase</span>
                             </Link>
@@ -317,23 +167,48 @@ export function AppSidebar({ role, ...props }: AppSidebarProps) {
                 </SidebarMenu>
             </SidebarHeader>
             <SidebarContent>
-                <NavMain items={data[role].navMain} />
-                <NavSidebar items={data[role].system} />
+                <FadeIn isLoading={!userRole} loader={<SidebarSkeleton {...props} />}>
+                    {userRole && (
+                        <>
+                            <NavMain items={data[userRole].navMain} />
+                            <NavSidebar items={data[userRole].system} />
+                        </>
+                    )}
+                </FadeIn>
             </SidebarContent>
             <SidebarFooter className="border-t p-4">
-                {userData ? (
-                    <NavUser user={userData} />
-                ) : (
-                    <div className="flex items-center space-x-4">
-                        <Skeleton className="h-10 w-10 rounded-full" />
-                        <div className="space-y-2">
-                            <Skeleton className="h-4 w-[100px]" />
-                            <Skeleton className="h-4 w-[70px]" />
-                        </div>
-                    </div>
-                )}
+                <FadeIn isLoading={!userData} loader={<SidebarSkeleton {...props} />}>
+                    {userData && <NavUser user={userData} />}
+                </FadeIn>
             </SidebarFooter>
             <SidebarRail />
         </Sidebar>
     )
+}
+
+function SidebarSkeleton({ ...props }) {
+    return (
+        <Sidebar collapsible="icon" {...props}>
+            <SidebarHeader className="flex h-14 items-center border-b px-4">
+                <Skeleton className="h-8 w-32" />
+            </SidebarHeader>
+            <SidebarContent>
+                <div className="space-y-4 p-4">
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                    <Skeleton className="h-8 w-full" />
+                </div>
+            </SidebarContent>
+            <SidebarFooter className="border-t p-4">
+                <div className="flex items-center space-x-4">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <div className="space-y-2">
+                        <Skeleton className="h-4 w-[100px]" />
+                        <Skeleton className="h-4 w-[70px]" />
+                    </div>
+                </div>
+            </SidebarFooter>
+            <SidebarRail />
+        </Sidebar>
+    );
 }

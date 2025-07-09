@@ -73,10 +73,10 @@ const AdminManageTeacher = () => {
     };
 
     return (
-        <Layout role="admin">
+        <>
             <AdminTeacherList toggleDropdown={toggleDropdown} teacherSummary={summary} />
             <AdminAssignTeacher isEditOpen={isEditOpen} toggleEditProfile={toggleEditProfile} teacherData={teacherSummary} />
-        </Layout>
+        </>
     );
 };
 

@@ -11,19 +11,20 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { GraduationCap, EyeIcon, EyeOffIcon, AlertCircle, CheckCircle } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
-import { loginSchema } from "@/lib/validations"
+import { LoginSchema, loginSchema } from "@/lib/validations"
+import { login } from "@/api/authApi";
 
 const AuthPage = () => {
   const [activeTab, setActiveTab] = useState("login")
   const [showPassword, setShowPassword] = useState(false)
   const [password, setPassword] = useState("")
   const [email, setEmail] = useState("")
-  const [id, setId] = useState("")
+  const [identification, setIdentification] = useState("")
   const [name, setName] = useState("")
   const [school, setSchool] = useState("")
   const [role, setRole] = useState("administrator")
   const [rememberMe, setRememberMe] = useState(false)
-  const [loginStatus, setLoginStatus] = useState<null | "error" | "success">(null)
+  const [loginStatus, setLoginStatus] = useState<null | "error" | "success" | "timeout">(null)
   const [signupStatus, setSignupStatus] = useState<null | "error" | "success">(null)
   const [isLoading, setIsLoading] = useState(false)
 
@@ -66,22 +67,24 @@ const AuthPage = () => {
     setLoginStatus(null)
 
     // Simulate API call
-    const response = await zodApiHandler(
-      () => authApi.login({ id, password }),
-      loginSchema.pick({ apiKey: true, role: true })
-    )
+    const timeout = 7000; // 7 seconds
+    try {
+      const response = await Promise.race([
+        login({ identification, password }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Request timed out")), timeout))
+      ]) as LoginSchema;
 
-    if (!response.success) {
-      setLoginStatus("error")
+      localStorage.setItem("apiKey", response.apiKey);
+      setLoginStatus("success")
+      window.location.href = `/${response.role}/dashboard`
+
       setIsLoading(false)
+    } catch (error) {
+      setLoginStatus("timeout");
+      setIsLoading(false);
       return;
     }
 
-    localStorage.setItem("apiKey", response.data.apiKey);
-    setLoginStatus("success")
-    window.location.href = `/${response.data.role}/dashboard`
-
-    setIsLoading(false)
   }
 
 
@@ -142,8 +145,8 @@ const AuthPage = () => {
                       id="id"
                       type="id"
                       placeholder="XXX/XXX/XXXX"
-                      value={id}
-                      onChange={(e) => setId(e.target.value)}
+                      value={identification}
+                      onChange={(e) => setIdentification(e.target.value)}
                       required
                     />
                   </div>
@@ -185,6 +188,13 @@ const AuthPage = () => {
                       Remember me
                     </label>
                   </div>
+
+                  {loginStatus === "timeout" && (
+                    <Alert variant="destructive">
+                      <AlertCircle className="h-4 w-4" />
+                      <AlertDescription>Request Timed Out. Please try again.</AlertDescription>
+                    </Alert>
+                  )}
 
                   {loginStatus === "error" && (
                     <Alert variant="destructive">

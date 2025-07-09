@@ -1,37 +1,45 @@
-import { createBrowserRouter } from "react-router-dom";
-import { LandingPage, AuthPage } from "@/pages";
-import { Forbidden, NotFound, ServerError, ServiceUnavailablePage } from "@/pages/error"
-import {
-    AdminDashboard,
-    AdminCreateMarkList,
-    AdminEnrollUser,
-    AdminManageEvent,
-    AdminManageStudents,
-    AdminManageTeacher,
-    AdminUpdateProfile,
-    AdminUserAccessControl,
-    AdminEventForm,
-    ManageTeachersApplication,
-    ManageStudentsApplication
-} from "@/pages/admin";
-import {
-    TeacherDashboard,
-    TeacherManageStudent,
-    TeacherUpdateProfile
-} from "@/pages/teacher";
-import {
-    StudentDashboard,
-    StudentUpdateProfile,
-    StudentRegistrationForm,
-    StudentReportCard,
-    StudentCourseRegistration
-} from "@/pages/student";
-import { ProtectedRoute } from "@/routes";
+import { lazy } from "react";
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import { AuthProvider } from "@/context/auth-context";
+import { ProtectedRoute } from "@/routes/";
+import { Layout } from "@/components";
 
+// Error pages
+const Forbidden = lazy(() => import("@/pages/error/403"));
+const NotFound = lazy(() => import("@/pages/error/404"));
+const ServerError = lazy(() => import("@/pages/error/500"));
+const ServiceUnavailablePage = lazy(() => import("@/pages/error/503"));
 
-/**
- * Defines the routes for the application using `createBrowserRouter`.
- */
+// Auth pages
+const AuthPage = lazy(() => import("@/pages/auth-page"));
+const LandingPage = lazy(() => import("@/pages/landing-page"));
+
+// Admin pages
+const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
+const AcademicYearSetup = lazy(() => import("@/pages/admin/academic-year-setup"));
+const AdminCreateMarkList = lazy(() => import("@/pages/admin/create-mark-list"));
+const StudentRegistrationForm = lazy(() => import("@/pages/admin/student-registration-form"));
+const TeacherRegistrationForm = lazy(() => import("@/pages/admin/teacher-registration-form"));
+const AdminManageEvent = lazy(() => import("@/pages/admin/manage-event"));
+const AdminManageStudents = lazy(() => import("@/pages/admin/manage-students"));
+const AdminManageTeacher = lazy(() => import("@/pages/admin/manage-teachers"));
+const AdminUpdateProfile = lazy(() => import("@/pages/admin/profile"));
+const AdminUserAccessControl = lazy(() => import("@/pages/admin/user-access-control"));
+const AdminEventForm = lazy(() => import("@/pages/admin/event-form"));
+const ManageTeachersApplication = lazy(() => import("@/pages/admin/manage-teacher-application"));
+const ManageStudentsApplication = lazy(() => import("@/pages/admin/manage-student-application"));
+
+// Teacher pages
+const TeacherDashboard = lazy(() => import("@/pages/teacher/dashboard"));
+const TeacherManageStudent = lazy(() => import("@/pages/teacher/manage-student"));
+const TeacherUpdateProfile = lazy(() => import("@/pages/teacher/profile"));
+
+// Student pages
+const StudentDashboard = lazy(() => import("@/pages/student/dashboard"));
+const StudentUpdateProfile = lazy(() => import("@/pages/student/profile"));
+const StudentReportCard = lazy(() => import("@/pages/student/report-card"));
+const StudentCourseRegistration = lazy(() => import("@/pages/student/course-registration"));
+
 const router = createBrowserRouter([
     {
         path: "/",
@@ -41,7 +49,6 @@ const router = createBrowserRouter([
     {
         path: "/forbidden",
         element: <Forbidden />,
-        loader: () => ({ status: 403, statusText: "Forbidden" }),
     },
     {
         path: "/server-error",
@@ -56,89 +63,61 @@ const router = createBrowserRouter([
         element: <AuthPage />,
     },
     {
-        path: "/admin/dashboard",
-        element: <ProtectedRoute element={<AdminDashboard />} allowedRoles={['admin']} />,
+        path: "/admin",
+        element: (
+            <AuthProvider>
+                <Layout role="admin">
+                    <ProtectedRoute allowedRoles={['admin']} />
+                </Layout>
+            </AuthProvider>
+        ),
+        children: [
+            { index: true, element: <Navigate to="dashboard" replace /> },
+            { path: "dashboard", element: <AdminDashboard /> },
+            { path: "academic-year-setup", element: <AcademicYearSetup /> },
+            { path: "manage/students", element: <AdminManageStudents /> },
+            { path: "manage/teachers", element: <AdminManageTeacher /> },
+            { path: "student/registration", element: <StudentRegistrationForm /> },
+            { path: "assessment/mark-list", element: <AdminCreateMarkList /> },
+            { path: "calendar/events", element: <AdminManageEvent /> },
+            { path: "manage/user-access", element: <AdminUserAccessControl /> },
+            { path: "update/profile", element: <AdminUpdateProfile /> },
+            { path: "student/applications", element: <ManageStudentsApplication /> },
+            { path: "student/registration/new", element: <TeacherRegistrationForm /> },
+            { path: "teacher/applications", element: <ManageTeachersApplication /> },
+            { path: "teacher/registration/new", element: <TeacherRegistrationForm /> },
+            { path: "event/new", element: <AdminEventForm /> },
+        ],
     },
     {
-        path: "/admin/manage/students",
-        element: <ProtectedRoute element={<AdminManageStudents />} allowedRoles={['admin']} />,
+        path: "/teacher",
+        element: (
+            <AuthProvider>
+                <ProtectedRoute allowedRoles={['teacher']} />
+            </AuthProvider>
+        ),
+        children: [
+            { index: true, element: <Navigate to="dashboard" replace /> },
+            { path: "dashboard", element: <TeacherDashboard /> },
+            { path: "students", element: <TeacherManageStudent /> },
+            { path: "update/profile", element: <TeacherUpdateProfile /> },
+        ],
     },
     {
-        path: "/admin/manage/teachers",
-        element: <ProtectedRoute element={<AdminManageTeacher />} allowedRoles={['admin']} />,
+        path: "/student",
+        element: (
+            <AuthProvider>
+                <ProtectedRoute allowedRoles={['student']} />
+            </AuthProvider>
+        ),
+        children: [
+            { index: true, element: <Navigate to="dashboard" replace /> },
+            { path: "dashboard", element: <StudentDashboard /> },
+            { path: "course/registration", element: <StudentCourseRegistration /> },
+            { path: "update/profile", element: <StudentUpdateProfile /> },
+            { path: "report-card", element: <StudentReportCard /> },
+        ],
     },
-    {
-        path: "admin/student/registration",
-        element: <AdminEnrollUser role="student" />
-    },
-    {
-        path: "/admin/assessment/mark-list",
-        element: <ProtectedRoute element={<AdminCreateMarkList />} allowedRoles={['admin']} />,
-    },
-    {
-        path: "/admin/calendar/events",
-        element: <ProtectedRoute element={<AdminManageEvent />} allowedRoles={['admin']} />,
-    },
-    {
-        path: "/admin/manage/user-access",
-        element: <ProtectedRoute element={<AdminUserAccessControl />} allowedRoles={['admin']} />,
-    },
-    {
-        path: "/admin/update/profile",
-        element: <ProtectedRoute element={<AdminUpdateProfile />} allowedRoles={['admin']} />,
-    },
-    {
-        path: "/admin/student/applications",
-        element: <ManageStudentsApplication />
-    },
-    {
-        path: "/admin/student/registration/new",
-        element: <ProtectedRoute element={<AdminEnrollUser role="student" />} allowedRoles={['admin']} />,
-    },
-    {
-        path: "/admin/teacher/applications",
-        element: <ManageTeachersApplication />
-    },
-    {
-        path: "/admin/teacher/registration/new",
-        element: <ProtectedRoute element={<AdminEnrollUser role="teacher" />} allowedRoles={['admin']} />,
-    },
-    {
-        path: '/admin/event/new',
-        element: <ProtectedRoute element={<AdminEventForm />} allowedRoles={['admin']} />,
-    },
-    {
-        path: "/teacher/dashboard",
-        element: <ProtectedRoute element={<TeacherDashboard />} allowedRoles={['teacher']} />,
-    },
-    {
-        path: "/teacher/students",
-        element: <ProtectedRoute element={<TeacherManageStudent />} allowedRoles={['teacher']} />
-    },
-    {
-        path: "/teacher/update/profile",
-        element: <ProtectedRoute element={<TeacherUpdateProfile />} allowedRoles={['teacher']} />,
-    },
-    {
-        path: "/student/dashboard",
-        element: <ProtectedRoute element={<StudentDashboard />} allowedRoles={['student']} />,
-    },
-    {
-        path: "/student/registration",
-        element: <ProtectedRoute element={<StudentRegistrationForm />} allowedRoles={['admin']} />,
-    },
-    {
-        path: "/student/course/registration",
-        element: <ProtectedRoute element={<StudentCourseRegistration />} allowedRoles={['student']} />,
-    },
-    {
-        path: "/student/update/profile",
-        element: <ProtectedRoute element={<StudentUpdateProfile />} allowedRoles={['student']} />
-    },
-    {
-        path: "/student/report-card",
-        element: <ProtectedRoute element={<StudentReportCard />} allowedRoles={['student']} />
-    }
 ]);
 
 export default router;

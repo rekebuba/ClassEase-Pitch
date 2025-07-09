@@ -1,34 +1,30 @@
-import { Navigate } from "react-router-dom";
-import useAuth from "../hooks/useAuth";
+import { LoadingSpinner } from "@/components";
+import useAuth from "@/context/auth-context";
+import { RoleEnumType } from "@/lib/enums";
+import { Navigate, Outlet } from "react-router-dom";
 
+interface ProtectedRouteProps {
+  allowedRoles?: RoleEnumType[];
+}
 /**
- * ProtectedRoute component to guard routes that require authentication.
- *
  * This component checks if a JWT token is present in the local storage.
  * If the token is found, it renders the given component.
  * Otherwise, it redirects the user to the login page.
- *
- * @param {Object} props - The properties object.
- * @param {React.Component} props.element - The component to render if authenticated.
- * @returns {React.Component} - The given component if authenticated, otherwise a <Navigate> component to redirect to the login page.
  */
-const ProtectedRoute = ({ element, allowedRoles }) => {
-  const { isAuthenticated, userRole, loading } = useAuth();
+const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
+  const { isAuthenticated, userRole, isLoading } = useAuth();
 
-  if (loading) {
-    return <div>Loading...</div>; // Show a loading spinner or placeholder
-  }
+  if (isLoading) return <LoadingSpinner />;
 
   if (!isAuthenticated) {
-    return <Navigate to="/auth" />;
+    return <Navigate to="/auth" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(userRole)) {
-    return <Navigate to="/unauthorized" />; // Redirect to an unauthorized page
+  if (allowedRoles && userRole && !allowedRoles.includes(userRole)) {
+    return <Navigate to="/unauthorized" replace />;
   }
 
-
-  return element;
+  return <Outlet />;
 };
 
 export default ProtectedRoute;

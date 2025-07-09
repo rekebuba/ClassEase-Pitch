@@ -139,7 +139,7 @@ const AdminUserAccessControl = () => {
     };
 
     return (
-        <Layout role="admin">
+        <div>
             <h2 className="access-control-h2">User Access Control</h2>
 
             <div className="add-user">
@@ -217,7 +217,7 @@ const AdminUserAccessControl = () => {
                     ))}
                 </ul>
             </div>
-        </Layout>
+        </div>
     );
 };
 

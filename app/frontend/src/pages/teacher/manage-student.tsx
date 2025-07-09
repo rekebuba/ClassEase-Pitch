@@ -12,9 +12,7 @@ import "../../styles/AdminManageStudents.css";
  */
 const TeacherManageStudent = () => {
     return (
-        <Layout role="teacher">
-            <TeacherStudentList />
-        </Layout>
+        <TeacherStudentList />
     );
 };
 

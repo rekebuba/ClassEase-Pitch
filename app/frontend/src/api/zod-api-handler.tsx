@@ -1,8 +1,6 @@
 import { z, ZodError } from "zod";
 import axios from "axios";
 import { ApiHandlerResponse } from "@/lib/types";
-import { toast } from "sonner";
-import camelcaseKeys from 'camelcase-keys';
 
 /**
  * Handles API calls with Zod validation and error handling
@@ -21,10 +19,9 @@ export async function zodApiHandler<T>(
     try {
         // Execute API request
         const response = await request();
-        const camelCaseResponse = camelcaseKeys(response.data, { deep: true });
 
         // Validate response data
-        const parsedResult = schema.safeParse(camelCaseResponse);
+        const parsedResult = schema.safeParse(response.data);
 
         if (!parsedResult.success) {
             throw new ZodError(parsedResult.error.errors);

@@ -1,4 +1,3 @@
-export { default as TeacherDashboard } from './TeacherDashboard';
-export { default as TeacherManageStudent } from './TeacherManageStud';
-export { default as TeacherUpdateProfile } from './TeacherUpdateProfile';
-export { default as TeacherRegistrationForm } from './teacher-registration-form';
+export { default as TeacherDashboard } from './dashboard';
+export { default as TeacherManageStudent } from './manage-student';
+export { default as TeacherUpdateProfile } from './profile';

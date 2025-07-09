@@ -44,7 +44,7 @@ def login() -> Tuple[Response, int]:
         user_schema = UserSchema.model_validate(user)
 
         # Generate an api_key token based on the user's role
-        api_key = create_token(user_schema.identification, user_schema.role)
+        api_key = create_token(user_schema.id, user_schema.role)
 
         response = AuthResponseSchema(
             message="logged in successfully.",

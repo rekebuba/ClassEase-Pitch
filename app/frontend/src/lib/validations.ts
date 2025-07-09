@@ -9,7 +9,30 @@ import {
 import { flagConfig } from "@/config/flag";
 import { dataTableConfig } from "@/config/data-table";
 import { generateId } from "./id";
+import { RoleEnum } from "./enums";
 
+export const jwtPayloadSchema = z.object({
+    id: z.string(),
+    exp: z.number(),
+    role: RoleEnum,
+    jti: z.string(),
+});
+export type JwtPayloadType = z.infer<typeof jwtPayloadSchema>;
+
+export const DOBSchema = z
+    .string()
+    .transform((dobStr) => {
+        const dob = new Date(dobStr);
+        const today = new Date();
+
+        let age = today.getFullYear() - dob.getFullYear();
+        const m = today.getMonth() - dob.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+            age--;
+        }
+
+        return age;
+    });
 
 export const logoutSchema = z.object({
     message: z.string(),
@@ -17,15 +40,15 @@ export const logoutSchema = z.object({
 
 const roleSchema = z.preprocess(
     (val) => typeof val === "string" ? val.toLowerCase() : val,
-    z.enum(["admin", "teacher", "student"])
+    RoleEnum
 );
 
 export const loginSchema = z.object({
     id: z.string(),
-    password: z.string(),
     apiKey: z.string(),
     role: roleSchema,
 });
+export type LoginSchema = z.infer<typeof loginSchema>;
 
 export const userSchema = z.object({
     user: z.object({

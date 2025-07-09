@@ -11,15 +11,11 @@ interface IndexPageProps {
 
 const AdminManageStudents = () => {
   return (
-    <Layout role="admin">
-
-      <div className="container mx-auto py-5">
-        <Shell className="gap-2">
-          <StudentsTable />
-        </Shell>
-
-      </div>
-    </Layout>
+    <div className="container mx-auto py-5">
+      <Shell className="gap-2">
+        <StudentsTable />
+      </Shell>
+    </div>
   );
 };
 

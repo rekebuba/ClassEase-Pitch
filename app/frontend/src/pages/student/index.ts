@@ -1,5 +1,4 @@
-export { default as StudentDashboard } from './StudDashboard';
-export { default as StudentUpdateProfile } from './StudUpdateProfile';
-export { default as StudentRegistrationForm } from './StudRegistrationForm';
-export { default as StudentReportCard } from './StudReportCard';
-export { default as StudentCourseRegistration } from './StudCourseRegistration';
+export { default as StudentDashboard } from './dashboard';
+export { default as StudentUpdateProfile } from './profile';
+export { default as StudentReportCard } from './report-card';
+export { default as StudentCourseRegistration } from './course-registration';

@@ -77,7 +77,7 @@ const StudentDashboard = () => {
   };
 
   return (
-    <Layout role="student">
+    <>
       <div className="flex space-x-10">
         <StudentEventPanel />
         <StudentScorePanel yearlyScore={yearlyScore} isAssesOpen={toggleAssessment} />
@@ -137,7 +137,7 @@ const StudentDashboard = () => {
             closeAssessment={closeAssessment}
             assessmentSummary={studentSummary}
           /> */}
-    </Layout>
+    </>
   );
 };
 export default StudentDashboard;

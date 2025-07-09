@@ -11,7 +11,7 @@ import "../../styles/Dashboard.css";
  */
 const TeacherDashboard = () => {
   return (
-    <Layout role="teacher">
+    <>
       {/* Teacher Stats */}
       <section className="mb-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -80,7 +80,7 @@ const TeacherDashboard = () => {
           </table>
         </div>
       </section>
-    </Layout>
+    </>
 
   );
 };

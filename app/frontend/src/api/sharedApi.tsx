@@ -3,10 +3,10 @@ import api from './api';
 import { zodApiHandler } from './zod-api-handler';
 import { z } from 'zod';
 import { TeacherRegistrationFormData } from '@/lib/form-validation';
-import { ApiResponse } from '@/lib/validations';
-
+import { RoleEnumType } from '@/lib/enums';
+import { UserWithAdminSchema, UserWithTeacherSchema, UserWithStudentSchema, UserProfile } from "@/lib/api-response-validation";
 const sharedApi = {
-    getUser: () => api.get('/'),
+    getDashboardData: () => api.get('/'),
     getStudentAssessment: (requirements) => api.get('/student/assessment', { params: requirements }),
     getStudentAssessmentDetail: (requirements) => api.get('/student/assessment/detail', { params: requirements }),
     updateProfile: (data) => api.post('/upload/profile', data, { headers: { 'Content-Type': 'multipart/form-data' } }),
@@ -16,6 +16,31 @@ const sharedApi = {
 };
 
 export default sharedApi;
+
+export const getDashboardData = async (userRole: RoleEnumType) => {
+
+    let schema: z.ZodSchema<UserProfile>;
+    switch (userRole) {
+        case 'admin':
+            schema = UserWithAdminSchema;
+            break;
+        case 'teacher':
+            schema = UserWithTeacherSchema;
+            break;
+        case 'student':
+            schema = UserWithStudentSchema;
+            break;
+        default:
+            throw new Error("Invalid user role");
+    }
+
+    const response = await zodApiHandler(
+        () => sharedApi.getDashboardData(),
+        UserWithAdminSchema
+    );
+
+    return response;
+};
 
 export const availableSubjects = async () => {
     const response = await zodApiHandler(
