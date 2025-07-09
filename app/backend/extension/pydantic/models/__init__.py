@@ -53,7 +53,7 @@ from .teacher_schema import (
     TeacherWithRelationshipsSchema,
 )
 from .teacher_subject_link_schema import TeacherSubjectLinkSchema
-from .user_schema import UserRelationshipSchema, UserSchema
+from .user_schema import UserRelationshipSchema, UserSchema, UserWithRelationshipsSchema
 from .year_schema import YearRelationshipSchema, YearSchema
 from .yearly_subject_schema import (
     YearlySubjectRelationshipSchema,
@@ -103,6 +103,7 @@ __all__ = [
     "TeacherSubjectLinkSchema",
     "UserSchema",
     "UserRelationshipSchema",
+    "UserWithRelationshipsSchema",
     "YearSchema",
     "YearRelationshipSchema",
     "YearlySubjectSchema",
@@ -145,6 +146,7 @@ TeacherRelationshipSchema.model_rebuild()
 TeacherWithRelationshipsSchema.model_rebuild()
 UserSchema.model_rebuild()
 UserRelationshipSchema.model_rebuild()
+UserWithRelationshipsSchema.model_rebuild()
 YearSchema.model_rebuild()
 YearRelationshipSchema.model_rebuild()
 YearlySubjectSchema.model_rebuild()

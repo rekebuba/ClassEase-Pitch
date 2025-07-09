@@ -11,6 +11,7 @@ from api.v1.views.shared.registration.schema import SucssussfulRegistrationRespo
 from extension.enums.enum import RoleEnum
 from extension.pydantic.models.admin_schema import AdminSchema
 from extension.pydantic.models.teacher_schema import TeacherSchema
+from extension.pydantic.models.user_schema import UserWithRelationshipsSchema
 from models.user import User
 from models.year import Year
 from tests.factories.api.new_user_factory import NewUserFactory
@@ -154,7 +155,7 @@ class TestAdmin:
 
         # Validate the entire response structure
         try:
-            DashboardUserInfoResponseModel(**response.json)
+            UserWithRelationshipsSchema.model_validate(response.json)
         except Exception as e:
             pytest.fail(f"Response validation failed: {str(e)}")
 

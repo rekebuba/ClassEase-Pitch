@@ -27,10 +27,31 @@ import {
     useSidebar,
 } from "@/components/ui/sidebar"
 import { Logout } from "@/components";
-import { type UserDataProps } from "@/lib/types";
+import { UserProfile } from "@/lib/api-response-validation";
 
-export function NavUser({ user }: { user: UserDataProps }) {
+function getRoleSpecificData(user: UserProfile) {
+    if ("admin" in user && user.admin) {
+        return user.admin;
+    }
+    if ("teacher" in user && user.teacher) {
+        return user.teacher;
+    }
+    if ("student" in user && user.student) {
+        return user.student;
+    }
+    return null;
+}
+
+export function NavUser({ user }: { user: UserProfile }) {
     const { isMobile } = useSidebar()
+    const profileData = getRoleSpecificData(user);
+
+    if (!profileData) {
+        return null; // Or a loading/error state
+    }
+
+    const { firstName, fatherName, grandFatherName } = profileData;
+    const { imagePath, role, identification } = user;
 
     return (
         <SidebarMenu>
@@ -42,12 +63,12 @@ export function NavUser({ user }: { user: UserDataProps }) {
                             className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                         >
                             <Avatar className="h-8 w-8 rounded-lg">
-                                <AvatarImage src={user.user.imagePath} alt={user.detail.firstName} />
-                                <AvatarFallback className="rounded-lg">{user.detail.firstName.charAt(0).toUpperCase() + user.detail.fatherName.charAt(0).toUpperCase()}</AvatarFallback>
+                                <AvatarImage src={imagePath} alt={firstName} />
+                                <AvatarFallback className="rounded-lg">{firstName.charAt(0).toUpperCase() + fatherName.charAt(0).toUpperCase()}</AvatarFallback>
                             </Avatar>
                             <div className="grid flex-1 text-left text-sm leading-tight">
-                                <span className="truncate font-semibold">Mr. {user.detail.firstName} {user.detail.fatherName}</span>
-                                <span className="truncate text-xs font-bold">{user.user.role}</span>
+                                <span className="truncate font-semibold">Mr. {firstName} {fatherName}</span>
+                                <span className="truncate text-xs font-bold">{role}</span>
                             </div>
                             <ChevronsUpDown className="ml-auto size-4" />
                         </SidebarMenuButton>
@@ -61,12 +82,12 @@ export function NavUser({ user }: { user: UserDataProps }) {
                         <DropdownMenuLabel className="p-0 font-normal">
                             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                                 <Avatar className="h-8 w-8 rounded-lg">
-                                    <AvatarImage src={user.user.imagePath} alt={user.detail.firstName} />
-                                    <AvatarFallback className="rounded-lg">{user.detail.firstName.charAt(0).toUpperCase() + user.detail.fatherName.charAt(0).toUpperCase()}</AvatarFallback>
+                                    <AvatarImage src={imagePath} alt={firstName} />
+                                    <AvatarFallback className="rounded-lg">{firstName.charAt(0).toUpperCase() + fatherName.charAt(0).toUpperCase()}</AvatarFallback>
                                 </Avatar>
                                 <div className="grid flex-1 text-left text-sm leading-tight">
-                                    <span className="truncate font-semibold">Mr. {user.detail.firstName} {user.detail.fatherName} {user.detail.grandFatherName}</span>
-                                    <span className="truncate text-xs">{user.user.identification}</span>
+                                    <span className="truncate font-semibold">Mr. {firstName} {fatherName} {grandFatherName}</span>
+                                    <span className="truncate text-xs">{identification}</span>
                                 </div>
                             </div>
                         </DropdownMenuLabel>

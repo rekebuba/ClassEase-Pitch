@@ -44,11 +44,11 @@ const StudentReportCard = () => {
     }, [student_id, grade_id, year]);
 
     return (
-        <Layout role="student">
+        <>
             {studentAssessment &&
                 (<CollapsibleTable studentAssessment={studentAssessment} studentReport={studentReport} />)
             }
-        </Layout>
+        </>
     );
 };
 

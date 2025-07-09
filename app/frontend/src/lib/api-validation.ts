@@ -150,6 +150,8 @@ export const DetailTeacherAPPlicationSchema = z.object({
 
 export const TeacherApplicationWithDetailsSchema = TeacherApplicationSchema.merge(DetailTeacherAPPlicationSchema);
 
+
+
 export type TeacherApplication = z.infer<typeof TeacherApplicationSchema>;
 export type TeacherApplicationWithDetails = z.infer<typeof TeacherApplicationWithDetailsSchema>;
 export type StudentApplication = z.infer<typeof StudentApplicationSchema>;

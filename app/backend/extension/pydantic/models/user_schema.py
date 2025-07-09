@@ -22,10 +22,8 @@ class UserSchema(BaseModel):
 
     id: str
     identification: str
-    password: str
     role: RoleEnum
     image_path: Optional[str] = None
-    created_at: Optional[datetime] = None
 
 
 class UserRelationshipSchema(BaseModel):
@@ -37,3 +35,7 @@ class UserRelationshipSchema(BaseModel):
     teacher: Optional[TeacherSchema] = None
     student: Optional[StudentSchema] = None
     saved_query_views: Optional[List[SavedQueryViewSchema]] = None
+
+
+class UserWithRelationshipsSchema(UserSchema, UserRelationshipSchema):
+    pass
