@@ -1,20 +1,21 @@
 #!/usr/bin/python
 
 from dataclasses import asdict
-import json
 from typing import Any, Dict, List
 from pydantic import TypeAdapter
 import pytest
-from api.v1.views.admin.teacher.schema import (
-    DetailApplicationResponse,
-)
-from extension.pydantic.models.teacher_schema import (
-    TeacherSchema,
-)
-from models.admin import Admin
+from api.v1.views.admin.teacher.schema import DetailApplicationResponse
+from api.v1.views.admin.user.schema import NewUserSchema, SucssussfulLinkResponse
+from api.v1.views.shared.auth.schema import AuthResponseSchema
+from api.v1.views.shared.registration.schema import SucssussfulRegistrationResponse
+from extension.enums.enum import RoleEnum
+from extension.pydantic.models.admin_schema import AdminSchema
+from extension.pydantic.models.teacher_schema import TeacherSchema
+from models.user import User
+from models.year import Year
+from tests.factories.api.new_user_factory import NewUserFactory
 from tests.factories.models import AdminFactory, EventFactory, QueryFactory
 from tests.test_api.fixtures.admin_fixtures import AllStudentViewsResponse
-from tests.test_api.fixtures.methods import prepare_form_data
 from flask.testing import FlaskClient
 
 from tests.test_api.fixtures.student_fixtures import StudentQueryResponse
@@ -36,23 +37,59 @@ class TestAdmin:
         """
         Test the successful registration of an admin.
         """
-        admin = AdminFactory.build()
-        form_data = prepare_form_data(admin)
+        # form_data = prepare_form_data(admin)
+        admin = AdminFactory.stub(user=None)
+
+        admin_schema = AdminSchema.model_validate(admin)
+        data = admin_schema.model_dump_json(by_alias=True, exclude_none=True)
 
         # Send a POST request to the registration endpoint
         response = client.post(
-            f"/api/v1/registration/{admin['user']['role']}",
-            data=form_data,
+            "/api/v1/register/admin",
+            data=data,
+            content_type="application/json",
         )
 
         assert response.status_code == 201
         assert response.json is not None
-        assert "message" in response.json
-        assert response.json["message"] == "admin registered successfully!"
 
-    def test_admin_login_success(
-        self, client: FlaskClient, create_admin: Admin
+        try:
+            SucssussfulRegistrationResponse.model_validate(response.json)
+        except Exception as e:
+            pytest.fail(f"Response validation failed: {str(e)}")
+
+    def test_admin_link_to_user(
+        self,
+        client: FlaskClient,
+        setup_academic_year: Year,
+        admin_auth_header: Credential,
     ) -> None:
+        """Test linking an admin to a user."""
+        admin = AdminFactory.create(user=None)
+
+        user = NewUserFactory.stub(
+            role=RoleEnum.ADMIN,
+            academic_id=setup_academic_year.id,
+        )
+
+        user_schema = NewUserSchema.model_validate(user)
+        data = user_schema.model_dump(by_alias=True, exclude_none=True)
+
+        response = client.post(
+            f"/api/v1/admin/link_user/{admin.id}",
+            json=data,
+            headers=admin_auth_header["header"],
+        )
+
+        assert response.status_code == 201
+        assert response.json is not None
+
+        try:
+            SucssussfulLinkResponse.model_validate(response.json)
+        except Exception as e:
+            pytest.fail(f"Response validation failed: {str(e)}")
+
+    def test_admin_login_success(self, client: FlaskClient, create_admin: User) -> None:
         """
         Test the admin login endpoint for successful login.
         """
@@ -60,19 +97,21 @@ class TestAdmin:
         response = client.post(
             "/api/v1/auth/login",
             json={
-                "id": create_admin.user.identification,
-                "password": create_admin.user.identification,
+                "identification": create_admin.identification,
+                "password": create_admin.identification,
             },
         )
 
         assert response.status_code == 200
         assert response.json is not None
-        assert "apiKey" in response.json
-        assert isinstance(response.json["apiKey"], str)
-        assert len(response.json["apiKey"]) > 0
+
+        try:
+            AuthResponseSchema.model_validate(response.json)
+        except Exception as e:
+            pytest.fail(f"Response validation failed: {str(e)}")
 
     def test_admin_login_wrong_id(
-        self, client: FlaskClient, create_admin: Admin
+        self, client: FlaskClient, create_admin: User
     ) -> None:
         """
         Test that an invalid admin login returns an error.
@@ -80,15 +119,15 @@ class TestAdmin:
         response = client.post(
             "/api/v1/auth/login",
             json={
-                "id": "wrong_id",
-                "password": create_admin.user.identification,
+                "identification": "wrong_id",
+                "password": create_admin.identification,
             },
         )
 
         assert response.status_code, 401
 
     def test_admin_login_wrong_password(
-        self, client: FlaskClient, create_admin: Admin
+        self, client: FlaskClient, create_admin: User
     ) -> None:
         """
         Test the admin login functionality with an incorrect password.
@@ -96,7 +135,7 @@ class TestAdmin:
         response = client.post(
             "/api/v1/auth/login",
             json={
-                "id": create_admin.user.identification,
+                "identification": create_admin.identification,
                 "password": "wrong_password",
             },
         )
@@ -498,4 +537,7 @@ class TestAdmin:
         assert update_response.status_code == 200
         assert update_response.json is not None
         assert "message" in update_response.json
-        assert update_response.json["message"] == "Teacher application status updated successfully"
+        assert (
+            update_response.json["message"]
+            == "Teacher application status updated successfully"
+        )

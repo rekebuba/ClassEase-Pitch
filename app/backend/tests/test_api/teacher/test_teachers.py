@@ -1,7 +1,9 @@
 import pytest
+from api.v1.views.shared.auth.schema import AuthResponseSchema
+from api.v1.views.shared.registration.schema import SucssussfulRegistrationResponse
 from extension.pydantic.models.teacher_schema import TeacherWithRelationshipsSchema
-from models.teacher import Teacher
 from flask.testing import FlaskClient
+from models.user import User
 from tests.factories.models.teacher_factory import TeacherFactory
 from tests.test_api.schemas.base_schema import DashboardUserInfoResponseModel
 from tests.typing import Credential
@@ -42,11 +44,13 @@ class TestTeachers:
 
         assert response.status_code == 201
         assert response.json is not None
-        assert "message" in response.json
-        assert response.json["message"] == "Teacher Registered Successfully!"
+        try:
+            SucssussfulRegistrationResponse.model_validate(response.json)
+        except Exception as e:
+            pytest.fail(f"Response validation failed: {str(e)}")
 
     def test_teacher_login_success(
-        self, client: FlaskClient, create_teacher: Teacher
+        self, client: FlaskClient, create_teacher: User
     ) -> None:
         """
         Test the teacher login endpoint for successful login.
@@ -54,19 +58,20 @@ class TestTeachers:
         response = client.post(
             "/api/v1/auth/login",
             json={
-                "id": create_teacher.user.identification,
-                "password": create_teacher.user.identification,
+                "identification": create_teacher.identification,
+                "password": create_teacher.identification,
             },
         )
 
         assert response.status_code == 200
         assert response.json is not None
-        assert "apiKey" in response.json
-        assert isinstance(response.json["apiKey"], str)
-        assert len(response.json["apiKey"]) > 0
+        try:
+            AuthResponseSchema.model_validate(response.json)
+        except Exception as e:
+            pytest.fail(f"Response validation failed: {str(e)}")
 
     def test_teacher_login_wrong_id(
-        self, client: FlaskClient, create_teacher: Teacher
+        self, client: FlaskClient, create_teacher: User
     ) -> None:
         """
         Test that an invalid teacher ID returns an error during login.
@@ -74,15 +79,15 @@ class TestTeachers:
         response = client.post(
             "/api/v1/auth/login",
             json={
-                "id": "wrong_id",
-                "password": create_teacher.user.identification,
+                "identification": "wrong_id",
+                "password": create_teacher.identification,
             },
         )
 
         assert response.status_code, 401
 
     def test_admin_login_wrong_password(
-        self, client: FlaskClient, create_teacher: Teacher
+        self, client: FlaskClient, create_teacher: User
     ) -> None:
         """
         Test that an invalid password returns an error during admin login.
@@ -90,7 +95,7 @@ class TestTeachers:
         response = client.post(
             "/api/v1/auth/login",
             json={
-                "id": create_teacher.user.identification,
+                "identification": create_teacher.identification,
                 "password": "wrong_password",
             },
         )

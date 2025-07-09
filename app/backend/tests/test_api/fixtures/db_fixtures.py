@@ -6,6 +6,7 @@ from flask.testing import FlaskClient
 import pytest
 from models import storage
 from typing import Iterator
+from models.year import Year
 from tests import remove_json_file, test_app
 
 
@@ -39,9 +40,9 @@ def client(app_session: Flask) -> Iterator[FlaskClient]:
 
 
 @pytest.fixture(scope="session", autouse=True)
-def setup_academic_year(db_session: scoped_session[Session]) -> None:
+def setup_academic_year(db_session: scoped_session[Session]) -> Year:
     """Fixture to set up the academic year."""
     from tests.factories.models.year_factory import YearFactory
 
     # Create a default academic year if it doesn't exist
-    YearFactory.create()
+    return YearFactory.create()

@@ -9,3 +9,4 @@ from api.v1.views.shared.registration import route  # noqa: E402
 from api.v1.views.shared.dashboard import route  # noqa: E402
 from api.v1.views.shared.grades import route  # noqa: E402
 from api.v1.views.shared.subjects import route  # noqa: E402
+from api.v1.views.shared.year import route  # noqa: E402

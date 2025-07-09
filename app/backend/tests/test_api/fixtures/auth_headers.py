@@ -1,8 +1,8 @@
 from flask.testing import FlaskClient
 import pytest
-from models.admin import Admin
 from models.student import Student
 from models.teacher import Teacher
+from models.user import User
 from tests.typing import Credential
 from sqlalchemy.orm import scoped_session, Session
 
@@ -11,14 +11,14 @@ from sqlalchemy.orm import scoped_session, Session
 def admin_auth_header(
     db_session: scoped_session[Session],
     client: FlaskClient,
-    create_admin: Admin,
+    create_admin: User,
 ) -> Credential:
     """Fixture to authenticate as an admin user and return the auth header."""
     response = client.post(
         "/api/v1/auth/login",
         json={
-            "id": create_admin.user.identification,
-            "password": create_admin.user.identification,
+            "identification": create_admin.identification,
+            "password": create_admin.identification,
         },
     )
 
@@ -39,7 +39,7 @@ def stud_auth_header(
     response = client.post(
         "/api/v1/auth/login",
         json={
-            "id": create_student.user.identification,
+            "identification": create_student.user.identification,
             "password": create_student.user.identification,
         },
     )
@@ -56,14 +56,14 @@ def stud_auth_header(
 def teacher_auth_header(
     db_session: scoped_session[Session],
     client: FlaskClient,
-    create_teacher: Teacher,
+    create_teacher: User,
 ) -> Credential:
     """Fixture to authenticate as a teacher user and return the auth header."""
     response = client.post(
         "/api/v1/auth/login",
         json={
-            "id": create_teacher.user.identification,
-            "password": create_teacher.user.identification,
+            "identification": create_teacher.identification,
+            "password": create_teacher.identification,
         },
     )
 

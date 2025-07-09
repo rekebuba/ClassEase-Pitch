@@ -228,7 +228,10 @@ class Teacher(BaseModel):
 
     # Relationship with Default
     user: Mapped[Optional["User"]] = relationship(
-        "User", back_populates="teachers", init=False, repr=False
+        "User",
+        back_populates="teacher",
+        init=False,
+        repr=False,
     )
     # Relationship with Out Default
     subjects_to_teach: Mapped[List["Subject"]] = relationship(

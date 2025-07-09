@@ -47,7 +47,10 @@ class TeacherFactory(BaseFactory[Teacher]):
         lambda x: [selected.grade for selected in x.selected_yearly_subjects]
     )
 
-    user: Any = SubFactory(UserFactory, role=RoleEnum.TEACHER)
+    user: Any = SubFactory(
+        "tests.factories.models.user_factory.UserFactory",
+        role=RoleEnum.TEACHER,
+    )
     user_id: Any = LazyAttribute(lambda x: x.user.id if x.user else None)
 
     # Add additional fields for Teacher

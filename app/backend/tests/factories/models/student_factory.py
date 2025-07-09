@@ -19,7 +19,10 @@ class StudentFactory(BaseFactory[Student]):
         model = Student
         exclude = ("user", "starting_grade")
 
-    user: Any = SubFactory(UserFactory, role=RoleEnum.STUDENT)
+    user: Any = SubFactory(
+        "tests.factories.models.user_factory.UserFactory",
+        role=RoleEnum.STUDENT,
+    )
     user_id: Any = LazyAttribute(lambda x: x.user.id if x.user else None)
     starting_grade: Any = LazyAttribute(lambda _: GradeFactory.create())
     starting_grade_id: Any = LazyAttribute(lambda x: x.starting_grade.id)

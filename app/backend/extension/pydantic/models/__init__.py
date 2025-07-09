@@ -2,7 +2,11 @@ from .academic_term_schema import (
     AcademicTermRelationshipSchema,
     AcademicTermSchema,
 )
-from .admin_schema import AdminRelationshipSchema, AdminSchema
+from .admin_schema import (
+    AdminRelationshipSchema,
+    AdminSchema,
+    AdminWithRelationshipsSchema,
+)
 from .assessment_schema import (
     AssessmentRelationshipSchema,
     AssessmentSchema,
@@ -61,6 +65,7 @@ __all__ = [
     "AcademicTermRelationshipSchema",
     "AdminSchema",
     "AdminRelationshipSchema",
+    "AdminWithRelationshipsSchema",
     "AssessmentSchema",
     "AssessmentRelationshipSchema",
     "BlacklistTokenSchema",
@@ -108,6 +113,7 @@ AcademicTermSchema.model_rebuild()
 AcademicTermRelationshipSchema.model_rebuild()
 AdminSchema.model_rebuild()
 AdminRelationshipSchema.model_rebuild()
+AdminWithRelationshipsSchema.model_rebuild()
 AssessmentSchema.model_rebuild()
 AssessmentRelationshipSchema.model_rebuild()
 EventSchema.model_rebuild()

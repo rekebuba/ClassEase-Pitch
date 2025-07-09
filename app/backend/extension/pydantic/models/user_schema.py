@@ -20,11 +20,10 @@ class UserSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: str | None = None
+    id: str
     identification: str
     password: str
     role: RoleEnum
-    national_id: str
     image_path: Optional[str] = None
     created_at: Optional[datetime] = None
 
@@ -34,7 +33,7 @@ class UserRelationshipSchema(BaseModel):
     It is used to define the relationships between the UserSchema and other schemas.
     """
 
-    admins: Optional[AdminSchema] = None
-    teachers: Optional[TeacherSchema] = None
-    students: Optional[StudentSchema] = None
+    admin: Optional[AdminSchema] = None
+    teacher: Optional[TeacherSchema] = None
+    student: Optional[StudentSchema] = None
     saved_query_views: Optional[List[SavedQueryViewSchema]] = None

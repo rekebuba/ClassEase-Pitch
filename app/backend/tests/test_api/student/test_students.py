@@ -1,9 +1,11 @@
 #!/usr/bin/python3
 
 import pytest
+from api.v1.views.shared.auth.schema import AuthResponseSchema
+from api.v1.views.shared.registration.schema import SucssussfulRegistrationResponse
 from extension.pydantic.models.student_schema import StudentWithRelationshipsSchema
 from models.academic_term import AcademicTerm
-from models.student import Student
+from models.user import User
 from tests.factories.models import StudentFactory
 
 from flask.testing import FlaskClient
@@ -47,43 +49,48 @@ class TestStudents:
 
         assert response.status_code == 201
         assert response.json is not None
-        assert "message" in response.json
-        assert response.json["message"] == "Student Registered Successfully!"
+        try:
+            SucssussfulRegistrationResponse.model_validate(response.json)
+        except Exception as e:
+            pytest.fail(f"Response validation failed: {str(e)}")
 
-    def test_login_success(self, client: FlaskClient, create_student: Student) -> None:
+    def test_login_success(self, client: FlaskClient, create_student: User) -> None:
         """
         Test the student login endpoint for successful login.
         """
         response = client.post(
             "/api/v1/auth/login",
             json={
-                "id": create_student.user.identification,
-                "password": create_student.user.identification,
+                "identification": create_student.identification,
+                "password": create_student.identification,
             },
         )
 
         assert response.status_code == 200
         assert response.json is not None
-        assert "apiKey" in response.json
-        assert isinstance(response.json["apiKey"], str)
-        assert len(response.json["apiKey"]) > 0
+        try:
+            AuthResponseSchema.model_validate(response.json)
+        except Exception as e:
+            pytest.fail(f"Response validation failed: {str(e)}")
 
-    def test_login_wrong_id(self, client: FlaskClient, create_student: Student) -> None:
+    def test_login_wrong_id(self, client: FlaskClient, create_student: User) -> None:
         """
         Test that an invalid student ID returns an error during login.
         """
         response = client.post(
             "/api/v1/auth/login",
             json={
-                "id": "wrong_id",
-                "password": create_student.user.identification,
+                "identification": "wrong_id",
+                "password": create_student.identification,
             },
         )
 
         assert response.status_code, 401
 
     def test_login_wrong_password(
-        self, client: FlaskClient, create_student: Student
+        self,
+        client: FlaskClient,
+        create_student: User,
     ) -> None:
         """
         Test that an invalid student ID returns an error during login.
@@ -91,7 +98,7 @@ class TestStudents:
         response = client.post(
             "/api/v1/auth/login",
             json={
-                "id": create_student.user.identification,
+                "identification": create_student.identification,
                 "password": "wrong_password",
             },
         )

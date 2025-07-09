@@ -2,49 +2,14 @@
 """Utility functions for the API"""
 
 import jwt
-import uuid
-from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, Tuple, Union
+from typing import Any, Callable, Tuple, Union
 from flask import Response, current_app  # Import current_app to access app context
 from functools import wraps
 from flask import request, jsonify
 from api.v1.utils.typing import T
-from extension.enums.enum import RoleEnum
 from models import storage
 from models.user import User
 from models.blacklist_token import BlacklistToken
-
-
-def create_token(user_id: str, role: RoleEnum) -> str:
-    """
-    Generate a JWT token for a user based on their role.
-
-    Returns:
-        str: A JWT token encoded with the user's ID, expiration time, role, and a unique JTI.
-
-    The token expires in 720 minutes (12 hours) from the time of creation.
-    """
-    # Determine the secret key based on the role
-    secret_keys: Dict[RoleEnum, Any] = {
-        RoleEnum.ADMIN: current_app.config["ADMIN_SECRET_KEY"],
-        RoleEnum.TEACHER: current_app.config["TEACHER_SECRET_KEY"],
-        RoleEnum.STUDENT: current_app.config["STUDENT_SECRET_KEY"],
-    }
-    secret_key = secret_keys.get(role)
-    if not secret_key:
-        raise ValueError(f"Invalid role: {role}")
-
-    # Create the payload
-    payload = {
-        "id": user_id,
-        "exp": datetime.utcnow() + timedelta(minutes=720),  # 12 hours expiration
-        "role": role.value,
-        "jti": str(uuid.uuid4()),  # Unique token identifier
-    }
-
-    # Encode and return the token
-    token = jwt.encode(payload, secret_key, algorithm="HS256")
-    return token
 
 
 def check_blacklist_token(token: str) -> Tuple[bool, str | None]:
