@@ -263,6 +263,7 @@ def student_teacher_or_admin_required(
         Returns:
             T: The decorated function with user data as the first argument.
         """
+        token = None
         if "apiKey" in request.headers:
             token = request.headers["apiKey"].split()[1]  # Bearer token
 

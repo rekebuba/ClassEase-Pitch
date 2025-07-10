@@ -1,9 +1,8 @@
 #!/usr/bin/python3
 """Module for YearFactory class"""
 
-import random
 from typing import Any
-from factory import LazyAttribute
+from factory import LazyAttribute, RelatedFactoryList
 from extension.enums.enum import AcademicTermTypeEnum
 from models.year import Year
 from models import storage

@@ -36,7 +36,7 @@ export const getDashboardData = async (userRole: RoleEnumType) => {
 
     const response = await zodApiHandler(
         () => sharedApi.getDashboardData(),
-        UserWithAdminSchema
+        schema
     );
 
     return response;

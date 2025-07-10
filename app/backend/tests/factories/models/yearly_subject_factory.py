@@ -24,6 +24,7 @@ class YearlySubjectFactory(BaseFactory[YearlySubject]):
     stream_id: Any = LazyAttribute(
         lambda x: x.stream.id if x.grade.grade in ["11", "12"] else None
     )
+    subject_code: Any = LazyAttribute(lambda _: "Test")
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):

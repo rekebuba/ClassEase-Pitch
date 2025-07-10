@@ -30,6 +30,7 @@ class YearlySubjectSchema(BaseModel):
     subject_id: str
     grade_id: str
     stream_id: Optional[str] = None
+    subject_code: str
 
 
 class YearlySubjectRelationshipSchema(BaseModel):

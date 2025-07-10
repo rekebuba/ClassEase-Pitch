@@ -12,7 +12,6 @@ if TYPE_CHECKING:
     from models.student_year_record import StudentYearRecord
     from models.event import Event
     from models.academic_term import AcademicTerm
-    from models.teacher_record import TeachersRecord
 
 
 class Year(BaseModel):

@@ -2,7 +2,7 @@
 """Module for Admin class"""
 
 from typing import TYPE_CHECKING, Optional
-from sqlalchemy import CheckConstraint, Date, Enum, String, ForeignKey, Text
+from sqlalchemy import Date, Enum, String, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from extension.enums.enum import GenderEnum
 from models.base_model import BaseModel

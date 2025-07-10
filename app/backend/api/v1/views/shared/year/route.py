@@ -1,6 +1,8 @@
 from typing import Tuple
 from flask import Response
+from api.v1.utils.typing import UserT
 from api.v1.views.shared import auths as auth
+from api.v1.views.utils import student_teacher_or_admin_required
 from models import storage
 from models.year import Year
 from sqlalchemy import select
@@ -11,7 +13,8 @@ from api.v1.views import errors
 
 
 @auth.route("/academic_years", methods=["GET"])
-def get_years() -> Tuple[Response, int]:
+@student_teacher_or_admin_required
+def get_years(user: UserT) -> Tuple[Response, int]:
     """
     Returns a list of all academic years in the system.
     """

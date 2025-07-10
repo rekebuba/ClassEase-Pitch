@@ -22,7 +22,6 @@ from flask.testing import FlaskClient
 from tests.test_api.fixtures.student_fixtures import StudentQueryResponse
 from tests.test_api.schemas.base_schema import (
     AverageRangeResponseModel,
-    DashboardUserInfoResponseModel,
     RegisteredGradeResponseModel,
     SectionCountResponseModel,
 )

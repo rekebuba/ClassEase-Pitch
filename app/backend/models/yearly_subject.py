@@ -14,16 +14,21 @@ if TYPE_CHECKING:
     from models.grade import Grade
     from models.stream import Stream
     from models.year import Year
+    from models.section import Section
 
 
 class YearlySubject(BaseModel):
     __tablename__ = "yearly_subjects"
 
-    year_id: Mapped[Optional[str]] = mapped_column(String(36), ForeignKey("years.id"))
+    subject_code: Mapped[str] = mapped_column(String(25), nullable=False)
+    year_id: Mapped[str] = mapped_column(String(36), ForeignKey("years.id"))
     subject_id: Mapped[str] = mapped_column(String(36), ForeignKey("subjects.id"))
     grade_id: Mapped[str] = mapped_column(String(36), ForeignKey("grades.id"))
     stream_id: Mapped[Optional[str]] = mapped_column(
-        String(36), ForeignKey("streams.id"), nullable=True, default=None
+        String(36),
+        ForeignKey("streams.id"),
+        nullable=True,
+        default=None,
     )
 
     # Relationships
@@ -52,13 +57,13 @@ class YearlySubject(BaseModel):
         init=False,
         repr=False,
     )
-    assessments: Mapped[List["Assessment"]] = relationship(  # noqa: F821
+    assessments: Mapped[List["Assessment"]] = relationship(
         "Assessment",
         back_populates="yearly_subject",
         default_factory=list,
         repr=False,
     )
-    subject_yearly_averages: Mapped[List["SubjectYearlyAverage"]] = relationship(  # noqa: F821
+    subject_yearly_averages: Mapped[List["SubjectYearlyAverage"]] = relationship(
         "SubjectYearlyAverage",
         back_populates="yearly_subject",
         default_factory=list,
@@ -66,10 +71,17 @@ class YearlySubject(BaseModel):
     )
 
     # Many-to-many relationships
-    teacher_records_link: Mapped[List["TeachersRecord"]] = relationship(  # noqa: F821
+    teacher_records_link: Mapped[List["TeachersRecord"]] = relationship(
         "TeachersRecord",
         back_populates="yearly_subjects_link",
         secondary="teacher_yearly_subject_links",
+        default_factory=list,
+        repr=False,
+    )
+    sections_link: Mapped[List["Section"]] = relationship(
+        "Section",
+        back_populates="yearly_subjects_link",
+        secondary="yearly_subject_section_links",
         default_factory=list,
         repr=False,
     )

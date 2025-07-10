@@ -1,19 +1,19 @@
 #!/usr/bin/python3
-"""Module for Teacher class"""
 
 from dataclasses import dataclass
+from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import ForeignKey, String
+from sqlmodel import ForeignKey
 from models.base_model import Base
 
 
 @dataclass
-class TeacherYearlySubjectLink(Base):
-    __tablename__ = "teacher_yearly_subject_links"
+class YearlySubjectSectionLink(Base):
+    __tablename__ = "yearly_subject_section_links"
 
-    teacher_record_id: Mapped[str] = mapped_column(
+    section_id: Mapped[str] = mapped_column(
         String(36),
-        ForeignKey("teacher_records.id"),
+        ForeignKey("sections.id"),
         primary_key=True,
     )
     yearly_subject_id: Mapped[str] = mapped_column(

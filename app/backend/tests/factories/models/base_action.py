@@ -1,7 +1,9 @@
 from enum import Enum
+import random
 from typing import Dict, List, Optional, Type
 
 from faker import Faker
+from sqlalchemy import select
 
 from extension.enums.enum import (
     AcademicTermEnum,
@@ -21,7 +23,6 @@ from extension.enums.enum import (
     GradeTwelveSubjectsEnum,
     GradeTwoSubjectsEnum,
     NaturalStreamSubjectsEnum,
-    SectionEnum,
     SocialStreamSubjectsEnum,
     StreamEnum,
 )
@@ -33,6 +34,7 @@ from models.stream import Stream
 from models.subject import Subject
 from models.year import Year
 from models.yearly_subject import YearlySubject
+from models.yearly_subject_section_link import YearlySubjectSectionLink
 
 fake = Faker()
 
@@ -138,18 +140,6 @@ class BaseAction:
         storage.save()
 
     @staticmethod
-    def create_section() -> None:
-        """Populates the section table with 'A', 'B', and 'C' sections."""
-        if storage.session.query(Section).count() > 0:
-            return
-
-        for section_name in SectionEnum:
-            section = Section(section=section_name.value)
-            storage.new(section)
-
-        storage.save()
-
-    @staticmethod
     def create_subjects() -> None:
         """Populates the subjects table with all subjects from AllSubjectsEnum."""
         if storage.session.query(Subject).count() == len(AllSubjectsEnum):
@@ -195,8 +185,12 @@ class BaseAction:
 
     @staticmethod
     def _create_yearly_subject_if_not_exists(
-        year: Year, subject: Subject, grade: Grade, stream: Optional[Stream] = None
-    ) -> Optional[YearlySubject]:
+        year: Year,
+        subject: Subject,
+        grade: Grade,
+        sections: List[Section],
+        stream: Optional[Stream] = None,
+    ) -> None:
         """
         Creates a YearlySubject if it doesn't already exist for the given
         year, subject, grade, and optional stream.
@@ -210,13 +204,36 @@ class BaseAction:
 
         if query.first():
             return None
+        # Generate a unique subject code
+        subject_code = BaseAction._generate_subject_code(
+            subject=subject.name,
+            grade=grade.grade,
+            year_id=year.id,
+            stream=stream.name if stream else None,
+        )
 
-        return YearlySubject(
+        new_yearly_subject = YearlySubject(
             year_id=year.id,
             subject_id=subject.id,
             grade_id=grade.id,
             stream_id=stream.id if stream else None,
+            subject_code=subject_code,
         )
+
+        storage.new(new_yearly_subject)
+        storage.session.flush()  # Ensure the new subject is saved to get its ID
+
+        new_link = []
+        new_link.extend(
+            [
+                YearlySubjectSectionLink(
+                    section_id=section.id,
+                    yearly_subject_id=new_yearly_subject.id,
+                )
+                for section in sections
+            ]
+        )
+        storage.session.bulk_save_objects(new_link)
 
     @staticmethod
     def _is_subject_invalid_for_stream(subject_name: str, stream: StreamEnum) -> bool:
@@ -227,6 +244,58 @@ class BaseAction:
         return False
 
     @staticmethod
+    def _generate_subject_code(
+        subject: str,
+        grade: str,
+        year_id: str,
+        stream: Optional[str],
+    ) -> str:
+        """
+        Generate a unique code for the subject.
+
+        Args:
+            prev_data (list): Previously generated Subject objects to check for duplicates.
+            subject (str): Subject name.
+            grade (int): Grade level.
+        """
+
+        # Split the subject name into words
+        words = subject.split()
+
+        # Determine the length of the prefix for each word (2 letters if multiple words, 3 otherwise)
+        prefix_length = 3
+
+        # Generate the base code by taking the first 'prefix_length' characters of each word and converting them to uppercase
+        base_code = "".join(
+            [
+                word[:prefix_length].upper()
+                for word in words
+                if word.isalpha() and word != "and"
+            ]
+        )
+
+        # Append the grade number to the base code
+        base_code += str(grade)
+
+        # Append the stream to the base code
+        if stream:
+            base_code += f"-{stream[0].upper()}"
+
+        # Check for existing codes in the database
+        existing_codes = storage.session.scalars(
+            select(YearlySubject.subject_code).where(YearlySubject.year_id == year_id)
+        ).all()
+
+        code = base_code
+        suffix = "-I"
+
+        while code in existing_codes:
+            code = f"{base_code}{suffix}"
+            suffix += "I"
+
+        return base_code
+
+    @staticmethod
     def create_necessary_academic_data(year: Year) -> None:
         """
         Orchestrates the creation of all necessary academic records for a new year.
@@ -235,10 +304,10 @@ class BaseAction:
         BaseAction.create_academic_term(year)
         BaseAction.create_streams()  # Order Maters
         BaseAction.create_grades()
-        BaseAction.create_section()
         BaseAction.create_subjects()
 
-        yearly_subjects_to_create: List[YearlySubject] = []
+        sections = storage.session.scalars(select(Section)).all()
+        random_sections = random.sample(sections, k=random.randint(1, len(sections)))
 
         # 2. Iterate through the grade-to-subject mapping
         for grade_level, subject_enum_class in BaseAction.grade_subjects_map.items():
@@ -257,22 +326,19 @@ class BaseAction:
                             subject.name, StreamEnum(stream.name)
                         ):
                             continue
-
-                        yearly_subject = (
-                            BaseAction._create_yearly_subject_if_not_exists(
-                                year=year, subject=subject, grade=grade, stream=stream
-                            )
+                        BaseAction._create_yearly_subject_if_not_exists(
+                            year=year,
+                            subject=subject,
+                            grade=grade,
+                            sections=random_sections,
+                            stream=stream,
                         )
-                        if yearly_subject:
-                            yearly_subjects_to_create.append(yearly_subject)
                 else:
-                    yearly_subject = BaseAction._create_yearly_subject_if_not_exists(
-                        year=year, subject=subject, grade=grade
+                    BaseAction._create_yearly_subject_if_not_exists(
+                        year=year,
+                        subject=subject,
+                        grade=grade,
+                        sections=random_sections,
                     )
-                    if yearly_subject:
-                        yearly_subjects_to_create.append(yearly_subject)
 
-        # 4. Bulk save all new YearlySubject objects
-        if yearly_subjects_to_create:
-            storage.session.bulk_save_objects(yearly_subjects_to_create)
-            storage.save()
+        storage.save()
