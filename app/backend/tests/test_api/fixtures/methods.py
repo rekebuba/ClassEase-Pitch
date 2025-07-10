@@ -1,5 +1,6 @@
 from typing import Any, Dict, List, Sequence, Tuple
 
+from flask.testing import FlaskClient
 import pytest
 from sqlalchemy import select
 
@@ -8,33 +9,58 @@ from models.user import User
 from tests.factories.models import AdminFactory, StudentFactory, TeacherFactory
 from sqlalchemy.orm import scoped_session, Session
 
+from tests.typing import Credential
+
 
 all_params: Dict[str, Any] = {
-    "test_users_log_in_success": {
-        "params": "role",
-        "values": [
-            (RoleEnum.ADMIN, 1),
-            (RoleEnum.TEACHER, 1),
-            (RoleEnum.STUDENT, 1),
-        ],
+    "test_get_subjects": {
+        "params": "create_random_user",
+        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
         "ids": ["Admin", "Teacher", "Student"],
     },
-    "test_users_dashboard_information": {
-        "params": "role",
-        "values": [
-            (RoleEnum.ADMIN, 1),
-            (RoleEnum.TEACHER, 1),
-            (RoleEnum.STUDENT, 1),
-        ],
+    "test_get_subject_by_id": {
+        "params": "create_random_user",
+        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
         "ids": ["Admin", "Teacher", "Student"],
     },
-    "test_each_user_registration": {
-        "params": "register_user_temp",
-        "values": [
-            (AdminFactory, 1),
-            (TeacherFactory, 1),
-            (StudentFactory, 2),
-        ],
+    "test_get_grades": {
+        "params": "create_random_user",
+        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
+        "ids": ["Admin", "Teacher", "Student"],
+    },
+    "test_get_grade_by_id": {
+        "params": "create_random_user",
+        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
+        "ids": ["Admin", "Teacher", "Student"],
+    },
+    "test_get_subject_grades": {
+        "params": "create_random_user",
+        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
+        "ids": ["Admin", "Teacher", "Student"],
+    },
+    "test_get_academic_years": {
+        "params": "create_random_user",
+        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
+        "ids": ["Admin", "Teacher", "Student"],
+    },
+    "test_get_sections": {
+        "params": "create_random_user",
+        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
+        "ids": ["Admin", "Teacher", "Student"],
+    },
+    "test_get_section_by_id": {
+        "params": "create_random_user",
+        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
+        "ids": ["Admin", "Teacher", "Student"],
+    },
+    "test_get_streams": {
+        "params": "create_random_user",
+        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
+        "ids": ["Admin", "Teacher", "Student"],
+    },
+    "test_get_stream_by_id": {
+        "params": "create_random_user",
+        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
         "ids": ["Admin", "Teacher", "Student"],
     },
 }
@@ -154,3 +180,31 @@ def is_table_sorted(columns_info: List[Tuple[List[Any], bool]]) -> bool:
                 else:
                     break
     return True
+
+
+def get_auth_header(
+    client: FlaskClient,
+    identification: str,
+    password: str,
+) -> Credential:
+    """
+    Authenticate a user and return the authorization header.
+
+    Args:
+        client: The Flask test client.
+        identification: The identification of the user to authenticate.
+        password: The password of the user to authenticate.
+
+    Returns:
+        A dictionary containing the authorization header.
+    """
+    response = client.post(
+        "/api/v1/auth/login",
+        json={"identification": identification, "password": password},
+    )
+    assert response.status_code == 200, "Authentication failed"
+    assert response.json is not None
+    assert "apiKey" in response.json
+
+    token = response.json["apiKey"]
+    return {"header": {"apiKey": f"Bearer {token}"}}

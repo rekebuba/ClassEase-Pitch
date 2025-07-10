@@ -11,7 +11,7 @@ from models.base_model import Base
 from models.grade import Grade  # noqa: F401
 from models.user import User  # noqa: F401
 from models.student import Student  # noqa: F401
-from models.section import Section  # noqa: F401
+from models.section import Section, seed_section  # noqa: F401
 from models.admin import Admin  # noqa: F401
 from models.subject import Subject  # noqa: F401
 from models.teacher import Teacher  # noqa: F401
@@ -33,6 +33,7 @@ from models.teacher_subject_link import TeacherSubjectLink  # noqa: F401
 from models.teacher_grade_link import TeacherGradeLink  # noqa: F401
 from models.teacher_yearly_subject_link import TeacherYearlySubjectLink  # noqa: F401
 from models.teacher_record_section_link import TeacherRecordSectionLink  # noqa: F401
+from models.yearly_subject_section_link import YearlySubjectSectionLink  # noqa: F401
 from models.yearly_subject import YearlySubject  # noqa: F401
 from contextlib import contextmanager
 
@@ -164,6 +165,7 @@ class DBStorage:
         Seed initial data into the database.
         """
         seed_table(self.session, self.engine)
+        seed_section(self.session)
 
     def close(self) -> None:
         """

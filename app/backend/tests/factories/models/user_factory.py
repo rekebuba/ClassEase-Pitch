@@ -2,7 +2,7 @@ import os
 import random
 import tempfile
 from typing import Any
-from factory import LazyAttribute, SubFactory, RelatedFactory
+from factory import LazyAttribute, RelatedFactory
 from faker import Faker
 from io import BufferedReader
 from PIL import Image

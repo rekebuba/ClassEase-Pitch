@@ -146,10 +146,6 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
         fetchUserData();
     }, [userRole]);
 
-    if (!userRole) {
-
-    }
-
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader className="flex h-14 items-center border-b px-4">

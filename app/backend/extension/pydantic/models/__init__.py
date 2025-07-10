@@ -21,7 +21,11 @@ from .saved_query_view_schema import (
     SavedQueryViewRelationshipSchema,
     SavedQueryViewSchema,
 )
-from .section_schema import SectionRelationshipSchema, SectionSchema
+from .section_schema import (
+    SectionRelationshipSchema,
+    SectionSchema,
+    SectionSchemaWithRelationships,
+)
 from .stream_schema import StreamRelationshipSchema, StreamSchema
 from .student_schema import (
     StudentRelationshipSchema,
@@ -80,6 +84,7 @@ __all__ = [
     "SavedQueryViewRelationshipSchema",
     "SectionSchema",
     "SectionRelationshipSchema",
+    "SectionSchemaWithRelationships",
     "StreamSchema",
     "StreamRelationshipSchema",
     "StudentSchema",
@@ -126,6 +131,7 @@ SavedQueryViewSchema.model_rebuild()
 SavedQueryViewRelationshipSchema.model_rebuild()
 SectionSchema.model_rebuild()
 SectionRelationshipSchema.model_rebuild()
+SectionSchemaWithRelationships.model_rebuild()
 StreamSchema.model_rebuild()
 StreamRelationshipSchema.model_rebuild()
 StudentSchema.model_rebuild()

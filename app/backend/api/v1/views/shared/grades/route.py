@@ -1,7 +1,9 @@
 from typing import Tuple
 from sqlalchemy import select
+from api.v1.utils.typing import UserT
 from api.v1.views import errors
 from api.v1.views.shared import auths as auth
+from api.v1.views.utils import student_teacher_or_admin_required
 from extension.pydantic.models.grade_schema import GradeSchema
 from models import storage
 from models.grade import Grade
@@ -10,7 +12,8 @@ from flask import Response, jsonify
 
 
 @auth.route("/grades", methods=["GET"])
-def get_available_grades() -> Tuple[Response, int]:
+@student_teacher_or_admin_required
+def get_available_grades(user: UserT) -> Tuple[Response, int]:
     """
     Returns a list of all available grades in the system.
     """
@@ -30,8 +33,9 @@ def get_available_grades() -> Tuple[Response, int]:
         return errors.handle_internal_error(e)
 
 
-@auth.route("/grades/<grade_id>", methods=["GET"])
-def get_grade_by_id(grade_id: str) -> Tuple[Response, int]:
+@auth.route("/grades/<string:grade_id>", methods=["GET"])
+@student_teacher_or_admin_required
+def get_grade_by_id(user: UserT, grade_id: str) -> Tuple[Response, int]:
     """Returns Grade model based on grade_id"""
     try:
         grade = storage.session.get(Grade, grade_id)
@@ -40,7 +44,7 @@ def get_grade_by_id(grade_id: str) -> Tuple[Response, int]:
 
         valid_grade = GradeSchema.model_validate(grade)
 
-        return jsonify(valid_grade), 200
+        return jsonify(valid_grade.model_dump(by_alias=True)), 200
 
     except SQLAlchemyError as e:
         storage.session.rollback()

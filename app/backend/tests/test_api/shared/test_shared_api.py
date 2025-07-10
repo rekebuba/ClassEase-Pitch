@@ -1,19 +1,27 @@
-import json
 import random
 from typing import List
 from flask.testing import FlaskClient
 from pydantic import TypeAdapter, ValidationError
 import pytest
 
+from extension.enums.enum import RoleEnum
 from extension.pydantic.models.grade_schema import GradeSchema
+from extension.pydantic.models.section_schema import SectionSchema
 from extension.pydantic.models.subject_schema import SubjectSchema
 from extension.pydantic.models.year_schema import YearSchema
+from tests.typing import Credential
 
 
 class TestSharedApi:
-    def test_get_subjects(self, client: FlaskClient) -> None:
+    def test_get_subjects(
+        self,
+        client: FlaskClient,
+        random_user_auth_header: Credential,
+    ) -> None:
         """Test the API endpoint for retrieving all subjects."""
-        response = client.get("/api/v1/subjects")
+        response = client.get(
+            "/api/v1/subjects", headers=random_user_auth_header["header"]
+        )
 
         assert response.status_code == 200
         assert response.json is not None
@@ -25,10 +33,16 @@ class TestSharedApi:
             pytest.fail(f"Validation error: {e}")
 
     def test_get_subject_by_id(
-        self, client: FlaskClient, subjects: List[SubjectSchema]
+        self,
+        client: FlaskClient,
+        subjects: List[SubjectSchema],
+        random_user_auth_header: Credential,
     ) -> None:
         """Test the API endpoint for retrieving a subject by its ID."""
-        response = client.get(f"api/v1/subjects/{random.choice(subjects).id}")
+        response = client.get(
+            f"api/v1/subjects/{random.choice(subjects).id}",
+            headers=random_user_auth_header["header"],
+        )
 
         assert response.status_code == 200
         assert response.json is not None
@@ -38,9 +52,15 @@ class TestSharedApi:
         except ValidationError as e:
             pytest.fail(f"Validation error: {e}")
 
-    def test_get_grades(self, client: FlaskClient) -> None:
+    def test_get_grades(
+        self,
+        client: FlaskClient,
+        random_user_auth_header: Credential,
+    ) -> None:
         """Test the API endpoint for retrieving all grades."""
-        response = client.get("/api/v1/grades")
+        response = client.get(
+            "/api/v1/grades", headers=random_user_auth_header["header"]
+        )
 
         assert response.status_code == 200
         assert response.json is not None
@@ -52,9 +72,15 @@ class TestSharedApi:
             pytest.fail(f"Validation error: {e}")
 
     def test_get_grade_by_id(
-        self, client: FlaskClient, grades: List[GradeSchema]
+        self,
+        client: FlaskClient,
+        grades: List[GradeSchema],
+        random_user_auth_header: Credential,
     ) -> None:
-        response = client.get(f"api/v1/grades/{random.choice(grades).id}")
+        response = client.get(
+            f"api/v1/grades/{random.choice(grades).id}",
+            headers=random_user_auth_header["header"],
+        )
 
         assert response.status_code == 200
         assert response.json is not None
@@ -65,10 +91,16 @@ class TestSharedApi:
             pytest.fail(f"Validation error: {e}")
 
     def test_get_subject_grades(
-        self, client: FlaskClient, subjects: List[SubjectSchema]
+        self,
+        client: FlaskClient,
+        subjects: List[SubjectSchema],
+        random_user_auth_header: Credential,
     ) -> None:
         """Test getting grades for a specific subject."""
-        response = client.get(f"/api/v1/subjects/{random.choice(subjects).id}/grades")
+        response = client.get(
+            f"/api/v1/subjects/{random.choice(subjects).id}/grades",
+            headers=random_user_auth_header["header"],
+        )
 
         assert response.status_code == 200
         assert response.json is not None
@@ -79,9 +111,15 @@ class TestSharedApi:
         except ValidationError as e:
             pytest.fail(f"Validation error: {e}")
 
-    def test_get_academic_years(self, client: FlaskClient) -> None:
+    def test_get_academic_years(
+        self,
+        client: FlaskClient,
+        random_user_auth_header: Credential,
+    ) -> None:
         """Test getting all available academic years."""
-        response = client.get("/api/v1/academic_years")
+        response = client.get(
+            "/api/v1/academic_years", headers=random_user_auth_header["header"]
+        )
 
         assert response.status_code == 200
         assert response.json is not None
@@ -89,5 +127,79 @@ class TestSharedApi:
         assert len(response.json) > 0
         try:
             TypeAdapter(List[YearSchema]).validate_python(response.json)
+        except ValidationError as e:
+            pytest.fail(f"Validation error: {e}")
+
+    def test_get_sections(
+        self, client: FlaskClient, random_user_auth_header: Credential
+    ) -> None:
+        """Test getting all sections."""
+        response = client.get(
+            "/api/v1/sections", headers=random_user_auth_header["header"]
+        )
+
+        assert response.status_code == 200
+        assert response.json is not None
+        assert isinstance(response.json, list)
+        assert len(response.json) > 0
+        try:
+            TypeAdapter(List[SectionSchema]).validate_python(response.json)
+        except ValidationError as e:
+            pytest.fail(f"Validation error: {e}")
+
+    def test_get_section_by_id(
+        self,
+        client: FlaskClient,
+        sections: List[SectionSchema],
+        random_user_auth_header: Credential,
+    ) -> None:
+        """Test getting a section by its ID."""
+        response = client.get(
+            f"/api/v1/sections/{random.choice(sections).id}",
+            headers=random_user_auth_header["header"],
+        )
+
+        assert response.status_code == 200
+        assert response.json is not None
+        assert isinstance(response.json, dict)
+        try:
+            TypeAdapter(SectionSchema).validate_python(response.json)
+        except ValidationError as e:
+            pytest.fail(f"Validation error: {e}")
+
+    def test_get_streams(
+        self, client: FlaskClient, random_user_auth_header: Credential
+    ) -> None:
+        """Test getting all streams."""
+        response = client.get(
+            "/api/v1/streams", headers=random_user_auth_header["header"]
+        )
+
+        assert response.status_code == 200
+        assert response.json is not None
+        assert isinstance(response.json, list)
+        assert len(response.json) > 0
+        try:
+            TypeAdapter(List[SectionSchema]).validate_python(response.json)
+        except ValidationError as e:
+            pytest.fail(f"Validation error: {e}")
+
+    def test_get_stream_by_id(
+        self,
+        client: FlaskClient,
+        streams: List[SectionSchema],
+        random_user_auth_header: Credential,
+    ) -> None:
+        """Test getting a stream by its ID."""
+        response = client.get(
+            f"/api/v1/streams/{random.choice(streams).id}",
+            headers=random_user_auth_header["header"],
+        )
+
+        assert response.status_code == 200
+        assert response.json is not None
+        assert isinstance(response.json, dict)
+        try:
+            TypeAdapter(SectionSchema).validate_python(response.json)
         except ValidationError as e:
             pytest.fail(f"Validation error: {e}")

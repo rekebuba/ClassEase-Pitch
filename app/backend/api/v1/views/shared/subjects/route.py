@@ -1,7 +1,9 @@
 from typing import Tuple
 from sqlalchemy import select
+from api.v1.utils.typing import UserT
 from api.v1.views import errors
 from api.v1.views.shared import auths as auth
+from api.v1.views.utils import student_teacher_or_admin_required
 from extension.pydantic.models.grade_schema import GradeSchema
 from extension.pydantic.models.subject_schema import SubjectSchema
 from models import storage
@@ -14,7 +16,8 @@ from models.yearly_subject import YearlySubject
 
 
 @auth.route("/subjects", methods=["GET"])
-def get_available_subjects() -> Tuple[Response, int]:
+@student_teacher_or_admin_required
+def get_available_subjects(user: UserT) -> Tuple[Response, int]:
     """
     Returns a list of all available subjects in the system.
     """
@@ -37,8 +40,9 @@ def get_available_subjects() -> Tuple[Response, int]:
         return errors.handle_internal_error(e)
 
 
-@auth.route("/subjects/<subject_id>", methods=["GET"])
-def get_subject_by_id(subject_id: str) -> Tuple[Response, int]:
+@auth.route("/subjects/<string:subject_id>", methods=["GET"])
+@student_teacher_or_admin_required
+def get_subject_by_id(user: UserT, subject_id: str) -> Tuple[Response, int]:
     """Returns Subject model based on subject_id"""
     try:
         subject = storage.session.get(Subject, subject_id)
@@ -59,7 +63,8 @@ def get_subject_by_id(subject_id: str) -> Tuple[Response, int]:
 
 
 @auth.route("/subjects/<subject_id>/grades", methods=["GET"])
-def get_subject_grade(subject_id: str) -> Tuple[Response, int]:
+@student_teacher_or_admin_required
+def get_subject_grade(user: UserT, subject_id: str) -> Tuple[Response, int]:
     """
     Returns the grades associated with a specific subject.
     """
