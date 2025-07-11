@@ -256,14 +256,13 @@ export default function GradeSetupCard({ grade, onUpdate, onRemove, availableSub
                     {!grade.hasStreams && (
                         <div>
                             <Label>Grade Subjects</Label>
-                            <p className="text-sm text-gray-500 mb-3">Select subjects for this grade</p>
+                            <p className="text-sm text-gray-500 mb-3">Selected subjects for this grade</p>
                             <div className="flex flex-wrap gap-2">
-                                {availableSubjects.map((subject) => (
+                                {grade.subjects.map((subject) => (
                                     <Badge
                                         key={subject}
                                         variant={grade.subjects.includes(subject) ? "default" : "outline"}
                                         className="cursor-pointer"
-                                        onClick={() => toggleSubject(subject)}
                                     >
                                         {subject}
                                     </Badge>
