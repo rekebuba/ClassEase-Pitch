@@ -105,12 +105,14 @@ export const StudentApplicationStatusEnum = z.enum([
     "rejected",
     "enrolled"
 ]);
+
 export const AcademicTermEnum = z.enum([
     "First Term",
     "Second Term",
     "Third Term",
     "Fourth Term",
 ]);
+
 export const MarkListTypeEnum = z.enum([
     "Test",
     "Quiz",
@@ -118,10 +120,12 @@ export const MarkListTypeEnum = z.enum([
     "Midterm",
     "Final",
 ]);
+
 export const AcademicTermTypeEnum = z.enum([
     "Semester",
     "Quarter"
 ]);
+
 
 export type RoleEnumType = z.infer<typeof RoleEnum>;
 export type TableEnumType = z.infer<typeof TableEnum>;

@@ -7,10 +7,11 @@ import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar, GraduationCap, BookOpen, Settings, Plus, Save, Eye } from "lucide-react"
-import type { AcademicYear, Grade } from "@/lib/academic-year"
+import type { AcademicYear, Grade, Subject } from "@/lib/academic-year"
 import { GRADE_SUGGESTIONS } from "@/lib/academic-year"
 import { GradeSetupCard } from "@/components"
 import { SubjectManagement } from "@/components"
+import { AllSubjects } from "@/config/suggestion"
 
 interface AcademicYearSetupProps {
     initialData?: AcademicYear
@@ -25,6 +26,12 @@ export default function AcademicYearSetup({
     onCancel,
     mode = "create",
 }: AcademicYearSetupProps = {}) {
+    const [suggestedSubjects, setSuggestedSubjects] = useState<Subject[]>(AllSubjects.map((subject) => ({
+        id: crypto.randomUUID(),
+        name: subject.subject,
+        code: subject.codes,
+        grades: subject.grades,
+    })))
     const [academicYear, setAcademicYear] = useState<Partial<AcademicYear>>(
         initialData || {
             name: "",
@@ -33,7 +40,7 @@ export default function AcademicYearSetup({
             termSystem: "semesterly",
             status: "draft",
             grades: [],
-            subjects: [],
+            subjects: suggestedSubjects,
         },
     )
 
@@ -374,6 +381,7 @@ export default function AcademicYearSetup({
                     {/* Subjects Tab */}
                     <TabsContent value="subjects" className="space-y-6">
                         <SubjectManagement
+                            suggestedSubjects={suggestedSubjects}
                             subjects={academicYear.subjects || []}
                             onUpdate={(subjects) => updateAcademicYear({ subjects })}
                         />
@@ -449,7 +457,6 @@ export default function AcademicYearSetup({
                                         {academicYear.subjects?.map((subject) => (
                                             <Badge key={subject.id} variant="outline" className="flex items-center gap-1">
                                                 {subject.name}
-                                                {subject.isRequired && <span className="text-red-500">*</span>}
                                             </Badge>
                                         ))}
                                     </div>
