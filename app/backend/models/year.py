@@ -12,6 +12,10 @@ if TYPE_CHECKING:
     from models.student_year_record import StudentYearRecord
     from models.event import Event
     from models.academic_term import AcademicTerm
+    from models.grade import Grade
+    from models.section import Section
+    from models.stream import Stream
+    from models.subject import Subject
 
 
 class Year(BaseModel):
@@ -55,6 +59,30 @@ class Year(BaseModel):
     )
     yearly_subjects: Mapped[List["YearlySubject"]] = relationship(
         "YearlySubject",
+        back_populates="year",
+        repr=False,
+        default_factory=list,
+    )
+    grades: Mapped[List["Grade"]] = relationship(
+        "Grade",
+        back_populates="year",
+        repr=False,
+        default_factory=list,
+    )
+    sections: Mapped[List["Section"]] = relationship(
+        "Section",
+        back_populates="year",
+        repr=False,
+        default_factory=list,
+    )
+    streams: Mapped[List["Stream"]] = relationship(
+        "Stream",
+        back_populates="year",
+        repr=False,
+        default_factory=list,
+    )
+    subjects: Mapped[List["Subject"]] = relationship(
+        "Subject",
         back_populates="year",
         repr=False,
         default_factory=list,

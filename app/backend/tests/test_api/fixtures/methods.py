@@ -43,6 +43,11 @@ all_params: Dict[str, Any] = {
         "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
         "ids": ["Admin", "Teacher", "Student"],
     },
+    "test_get_academic_year_by_id": {
+        "params": "create_random_user",
+        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
+        "ids": ["Admin", "Teacher", "Student"],
+    },
     "test_get_sections": {
         "params": "create_random_user",
         "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],

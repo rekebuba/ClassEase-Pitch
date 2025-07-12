@@ -13,7 +13,11 @@ from .assessment_schema import (
 )
 from .blacklist_token_schema import BlacklistTokenSchema
 from .event_schema import EventRelationshipSchema, EventSchema
-from .grade_schema import GradeRelationshipSchema, GradeSchema
+from .grade_schema import (
+    GradeRelationshipSchema,
+    GradeSchema,
+    GradeWithRelationshipsSchema,
+)
 from .grade_stream_link_schema import GradeStreamLinkSchema
 from .mark_list_schema import MarkListSchema
 from .registration_schema import RegistrationSchema
@@ -40,7 +44,11 @@ from .student_year_record_schema import (
     StudentYearRecordRelationshipSchema,
     StudentYearRecordSchema,
 )
-from .subject_schema import SubjectRelationshipSchema, SubjectSchema
+from .subject_schema import (
+    SubjectRelationshipSchema,
+    SubjectSchema,
+    SubjectWithRelationshipsSchema,
+)
 from .subject_yearly_average_schema import (
     SubjectYearlyAverageRelationshipSchema,
     SubjectYearlyAverageSchema,
@@ -77,6 +85,7 @@ __all__ = [
     "EventRelationshipSchema",
     "GradeSchema",
     "GradeRelationshipSchema",
+    "GradeWithRelationshipsSchema",
     "GradeStreamLinkSchema",
     "MarkListSchema",
     "RegistrationSchema",
@@ -96,6 +105,7 @@ __all__ = [
     "StudentYearRecordRelationshipSchema",
     "SubjectSchema",
     "SubjectRelationshipSchema",
+    "SubjectWithRelationshipsSchema",
     "SubjectYearlyAverageSchema",
     "SubjectYearlyAverageRelationshipSchema",
     "TableSchema",
@@ -126,6 +136,7 @@ EventSchema.model_rebuild()
 EventRelationshipSchema.model_rebuild()
 GradeSchema.model_rebuild()
 GradeRelationshipSchema.model_rebuild()
+GradeWithRelationshipsSchema.model_rebuild()
 MarkListSchema.model_rebuild()
 SavedQueryViewSchema.model_rebuild()
 SavedQueryViewRelationshipSchema.model_rebuild()
@@ -143,6 +154,7 @@ StudentYearRecordSchema.model_rebuild()
 StudentYearRecordRelationshipSchema.model_rebuild()
 SubjectSchema.model_rebuild()
 SubjectRelationshipSchema.model_rebuild()
+SubjectWithRelationshipsSchema.model_rebuild()
 SubjectYearlyAverageSchema.model_rebuild()
 SubjectYearlyAverageRelationshipSchema.model_rebuild()
 TeacherRecordSchema.model_rebuild()

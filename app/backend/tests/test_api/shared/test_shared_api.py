@@ -9,6 +9,7 @@ from extension.pydantic.models.grade_schema import GradeSchema
 from extension.pydantic.models.section_schema import SectionSchema
 from extension.pydantic.models.subject_schema import SubjectSchema
 from extension.pydantic.models.year_schema import YearSchema
+from models.year import Year
 from tests.typing import Credential
 
 
@@ -127,6 +128,25 @@ class TestSharedApi:
         assert len(response.json) > 0
         try:
             TypeAdapter(List[YearSchema]).validate_python(response.json)
+        except ValidationError as e:
+            pytest.fail(f"Validation error: {e}")
+
+    def test_get_academic_year_by_id(
+        self,
+        client: FlaskClient,
+        random_user_auth_header: Credential,
+        academic_year: Year,
+    ) -> None:
+        """Test getting all available academic years."""
+        response = client.get(
+            f"/api/v1/academic_year/{academic_year.id}",
+            headers=random_user_auth_header["header"],
+        )
+
+        assert response.status_code == 200
+        assert response.json is not None
+        try:
+            YearSchema.model_validate(response.json)
         except ValidationError as e:
             pytest.fail(f"Validation error: {e}")
 

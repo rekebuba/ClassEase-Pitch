@@ -12,9 +12,22 @@ from .base_factory import BaseFactory
 class SubjectFactory(BaseFactory[Subject]):
     class Meta:
         model = Subject
+        exclude = ("words", "prefix_length")
+
+    words: Any = LazyAttribute(lambda x: x.name.split())
+    prefix_length = 3
 
     name: Any = LazyAttribute(
         lambda _: random.choice(list(AllSubjectsEnum._value2member_map_))
+    )
+    code: Any = LazyAttribute(
+        lambda x: "".join(
+            [
+                word[: x.prefix_length].upper()
+                for word in x.words
+                if word.isalpha() and word != "and"
+            ]
+        )
     )
 
     @classmethod
