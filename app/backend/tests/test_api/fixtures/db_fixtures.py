@@ -40,7 +40,7 @@ def client(app_session: Flask) -> Iterator[FlaskClient]:
 
 
 @pytest.fixture(scope="session", autouse=True)
-def setup_academic_year(db_session: scoped_session[Session]) -> Year:
+def academic_year(db_session: scoped_session[Session]) -> Year:
     """Fixture to set up the academic year."""
     from tests.factories.models.year_factory import YearFactory
 

@@ -1,6 +1,6 @@
 import random
 from typing import Any, Optional
-from factory import LazyAttribute
+from factory import LazyAttribute, SubFactory
 from sqlalchemy import select
 from models.grade import Grade
 from models import storage
@@ -11,10 +11,13 @@ from extension.enums.enum import GradeLevelEnum
 class GradeFactory(BaseFactory[Grade]):
     class Meta:
         model = Grade
+        exclude = "year"
 
     # preload IDs
     _existing_ids = storage.session.execute(select(Grade.grade, Grade.id)).all()
+    year: Any = SubFactory("tests.factories.models.year_factory.YearFactory")
 
+    year_id: Any = LazyAttribute(lambda x: x.year.id)
     grade: Any = LazyAttribute(lambda _: str(random.choice(range(1, 13))))
     level: Any = LazyAttribute(
         lambda x: GradeLevelEnum.PRIMARY.value
@@ -22,6 +25,9 @@ class GradeFactory(BaseFactory[Grade]):
         else GradeLevelEnum.MIDDLE_SCHOOL.value
         if int(x.grade) < 8
         else GradeLevelEnum.HIGH_SCHOOL.value
+    )
+    has_stream: Any = LazyAttribute(
+        lambda x: True if x.grade in ["11", "12"] else False
     )
 
     @classmethod

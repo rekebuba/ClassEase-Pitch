@@ -8,16 +8,16 @@ from models.base_model import Base
 
 
 @dataclass
-class YearlySubjectSectionLink(Base):
-    __tablename__ = "yearly_subject_section_links"
+class GradeSectionLink(Base):
+    __tablename__ = "grade_section_links"
 
     section_id: Mapped[str] = mapped_column(
         String(36),
         ForeignKey("sections.id"),
         primary_key=True,
     )
-    yearly_subject_id: Mapped[str] = mapped_column(
+    grade_id: Mapped[str] = mapped_column(
         String(36),
-        ForeignKey("yearly_subjects.id"),
+        ForeignKey("grades.id"),
         primary_key=True,
     )

@@ -3,11 +3,11 @@ from typing import TYPE_CHECKING, Optional, List
 from pydantic import BaseModel, ConfigDict
 
 from extension.functions.helper import to_camel
-from extension.pydantic.models.yearly_subject_schema import YearlySubjectSchema
 
 if TYPE_CHECKING:
     from .student_term_record_schema import StudentTermRecordSchema
     from .teacher_record_schema import TeacherRecordSchema
+    from .grade_schema import GradeSchema
 
 
 class SectionSchema(BaseModel):
@@ -22,16 +22,20 @@ class SectionSchema(BaseModel):
     )
 
     id: str | None = None
+    year_id: str
     section: Optional[str] = None
 
 
 class SectionRelationshipSchema(BaseModel):
     """This model represents the relationships of a SectionSchema."""
 
+    year: Optional[str] = None
     student_term_records: List[StudentTermRecordSchema] = []
     teacher_records_link: List[TeacherRecordSchema] = []
-    yearly_subjects_link: List[YearlySubjectSchema] = []
+    grades_link: List[GradeSchema] = []
+
 
 class SectionSchemaWithRelationships(SectionSchema):
     """This model represents a SectionSchema with its relationships."""
+
     pass

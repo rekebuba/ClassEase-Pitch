@@ -2,9 +2,11 @@
 """Module for Subject class"""
 
 from typing import TYPE_CHECKING, List
-from sqlalchemy import String
+from sqlalchemy import ForeignKey, String
 from models.base_model import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from models.year import Year
 
 
 if TYPE_CHECKING:
@@ -16,8 +18,18 @@ if TYPE_CHECKING:
 class Stream(BaseModel):
     __tablename__ = "streams"
 
+    year_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("years.id"), nullable=False, index=True
+    )
     name: Mapped[str] = mapped_column(String(10), nullable=False)
 
+    # Relationships
+    year: Mapped["Year"] = relationship(
+        "Year",
+        back_populates="streams",
+        repr=False,
+        init=False,
+    )
     grades: Mapped[List["Grade"]] = relationship(
         "Grade",
         back_populates="streams",

@@ -3,7 +3,7 @@ from typing import Any
 from extension.enums.enum import StreamEnum
 from models import storage
 from models.stream import Stream
-from factory import LazyAttribute
+from factory import LazyAttribute, SubFactory
 from .base_factory import BaseFactory
 
 
@@ -12,7 +12,11 @@ class StreamFactory(BaseFactory[Stream]):
 
     class Meta:
         model = Stream
+        exclude = ("year",)
 
+    year: Any = SubFactory("tests.factories.models.YearFactory")
+
+    year_id: Any = LazyAttribute(lambda x: x.year.id)
     name: Any = LazyAttribute(
         lambda x: random.choice(list(StreamEnum._value2member_map_))
     )

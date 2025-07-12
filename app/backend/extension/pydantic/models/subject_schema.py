@@ -21,6 +21,7 @@ class SubjectSchema(BaseModel):
 
     id: str | None = None
     name: str
+    code: str
 
 
 class SubjectRelationshipSchema(BaseModel):
@@ -28,5 +29,15 @@ class SubjectRelationshipSchema(BaseModel):
     It is used to define the relationships between the SubjectSchema and other schemas.
     """
 
-    teachers: Optional[List[TeacherSchema]]
-    yearly_subjects: Optional[List[YearlySubjectSchema]]
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    teachers: List[TeacherSchema] = []
+    yearly_subjects: List[YearlySubjectSchema] = []
+
+
+class SubjectWithRelationshipsSchema(SubjectSchema, SubjectRelationshipSchema):
+    pass

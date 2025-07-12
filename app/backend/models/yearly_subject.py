@@ -78,10 +78,3 @@ class YearlySubject(BaseModel):
         default_factory=list,
         repr=False,
     )
-    sections_link: Mapped[List["Section"]] = relationship(
-        "Section",
-        back_populates="yearly_subjects_link",
-        secondary="yearly_subject_section_links",
-        default_factory=list,
-        repr=False,
-    )

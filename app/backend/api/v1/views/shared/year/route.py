@@ -32,3 +32,25 @@ def get_years(user: UserT) -> Tuple[Response, int]:
     except Exception as e:
         storage.session.rollback()
         return errors.handle_internal_error(e)
+
+
+@auth.route("/academic_year/<string:year_id>", methods=["GET"])
+@student_teacher_or_admin_required
+def get_year_by_id(user: UserT, year_id: str) -> Tuple[Response, int]:
+    """
+    Returns specific academic year
+    """
+    try:
+        year = storage.session.scalar(select(Year).where(Year.id == year_id))
+
+        year_schema = YearSchema.model_validate(year)
+        response = year_schema.model_dump(by_alias=True)
+
+        return jsonify(response), 200
+
+    except SQLAlchemyError as e:
+        storage.session.rollback()
+        return errors.handle_database_error(e)
+    except Exception as e:
+        storage.session.rollback()
+        return errors.handle_internal_error(e)

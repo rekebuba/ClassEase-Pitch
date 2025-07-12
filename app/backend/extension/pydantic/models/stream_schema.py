@@ -22,12 +22,14 @@ class StreamSchema(BaseModel):
     )
 
     id: str | None = None
+    year_id: str
     name: str
 
 
 class StreamRelationshipSchema(BaseModel):
     """This model represents the relationships of a StreamSchema."""
 
+    year: Optional[str] = None
     grades: Optional[List[GradeSchema]] = None
     yearly_subjects: Optional[List[YearlySubjectSchema]] = None
     students: Optional[List[StudentYearRecordSchema]] = None

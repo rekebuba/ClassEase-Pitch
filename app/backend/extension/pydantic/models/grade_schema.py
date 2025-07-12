@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, List, Optional
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from extension.enums.enum import GradeLevelEnum
 from extension.functions.helper import to_camel
@@ -11,6 +11,8 @@ if TYPE_CHECKING:
     from .yearly_subject_schema import YearlySubjectSchema
     from .student_year_record_schema import StudentYearRecordSchema
     from .student_schema import StudentSchema
+    from .year_schema import YearSchema
+    from .section_schema import SectionSchema
 
 
 class GradeSchema(BaseModel):
@@ -25,8 +27,10 @@ class GradeSchema(BaseModel):
     )
 
     id: str | None = None
+    year_id: str
     grade: str
     level: GradeLevelEnum
+    has_stream: bool = False
 
 
 class GradeRelationshipSchema(BaseModel):
@@ -34,8 +38,20 @@ class GradeRelationshipSchema(BaseModel):
     It is used to define the relationships between the GradeSchema and other schemas.
     """
 
-    teachers: Optional[List[TeacherSchema]]
-    streams: Optional[List[StreamSchema]]
-    yearly_subjects: Optional[List[YearlySubjectSchema]]
-    student_year_records: Optional[List[StudentYearRecordSchema]]
-    students: Optional[List["StudentSchema"]] = None
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    year: YearSchema
+    teachers: List[TeacherSchema] = []
+    streams: List[StreamSchema] = []
+    yearly_subjects: List[YearlySubjectSchema] = Field(alias="subjects")
+    student_year_records: List[StudentYearRecordSchema] = []
+    students: List[StudentSchema] = []
+    sections_link: List[SectionSchema] = Field(alias="sections")
+
+
+class GradeWithRelationshipsSchema(GradeSchema, GradeRelationshipSchema):
+    pass

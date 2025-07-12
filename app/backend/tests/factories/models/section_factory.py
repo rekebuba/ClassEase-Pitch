@@ -1,6 +1,6 @@
 import random
 from typing import Any
-from factory import LazyAttribute, RelatedFactoryList, SelfAttribute
+from factory import LazyAttribute, RelatedFactoryList, SubFactory
 from models.section import Section
 from models import storage
 from .base_factory import BaseFactory
@@ -9,6 +9,9 @@ from .base_factory import BaseFactory
 class SectionFactory(BaseFactory[Section]):
     class Meta:
         model = Section
+        exclude = ("year",)
+
+    year: Any = SubFactory("tests.factories.models.YearFactory")
 
     student_term_records: Any = RelatedFactoryList(
         "tests.factories.models.StudentTermRecordFactory",
@@ -16,6 +19,7 @@ class SectionFactory(BaseFactory[Section]):
         size=2,
     )
 
+    year_id: Any = LazyAttribute(lambda x: x.year.id)
     section: Any = LazyAttribute(lambda _: random.choice(["A", "B", "C"]))
 
     @classmethod

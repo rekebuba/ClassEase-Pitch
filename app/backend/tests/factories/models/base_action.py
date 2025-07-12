@@ -23,6 +23,7 @@ from extension.enums.enum import (
     GradeTwelveSubjectsEnum,
     GradeTwoSubjectsEnum,
     NaturalStreamSubjectsEnum,
+    SectionEnum,
     SocialStreamSubjectsEnum,
     StreamEnum,
 )
@@ -34,7 +35,7 @@ from models.stream import Stream
 from models.subject import Subject
 from models.year import Year
 from models.yearly_subject import YearlySubject
-from models.yearly_subject_section_link import YearlySubjectSectionLink
+from models.grade_section_link import GradeSectionLink
 
 fake = Faker()
 
@@ -85,7 +86,7 @@ class BaseAction:
         storage.save()
 
     @staticmethod
-    def create_grades() -> None:
+    def create_grades(year: Year, sections: List[Section]) -> None:
         """Populates the grades table with all grades from 1 to 12."""
         if storage.session.query(Grade).count() > 0:
             return
@@ -101,8 +102,10 @@ class BaseAction:
             .first()
         )
 
+        grade_link = []
         for grade_level in range(1, 13):
             grade = Grade(
+                year_id=year.id,
                 grade=str(grade_level),
                 level=(
                     GradeLevelEnum.PRIMARY
@@ -111,6 +114,7 @@ class BaseAction:
                     if grade_level < 8
                     else GradeLevelEnum.HIGH_SCHOOL
                 ),
+                has_stream=grade_level in [11, 12],
             )
 
             if grade_level > 10:
@@ -121,10 +125,23 @@ class BaseAction:
                 grade.streams = [social_stream, natural_stream]
 
             storage.new(grade)
+            storage.session.flush()  # Ensure the new Grade is saved
+
+            grade_link.extend(
+                [
+                    GradeSectionLink(
+                        section_id=section.id,
+                        grade_id=grade.id,
+                    )
+                    for section in sections[: random.randint(1, len(sections))]
+                ]
+            )
+
+        storage.session.bulk_save_objects(grade_link)
         storage.save()
 
     @staticmethod
-    def create_streams() -> None:
+    def create_streams(year: Year) -> None:
         """Populates the streams table with 'natural' and 'social' streams."""
         if storage.session.query(Stream).count() == len(StreamEnum):
             return
@@ -135,12 +152,24 @@ class BaseAction:
                 .filter_by(name=stream_name.value)
                 .first()
             ):
-                stream = Stream(name=stream_name.value)
+                stream = Stream(year_id=year.id, name=stream_name.value)
                 storage.new(stream)
         storage.save()
 
     @staticmethod
-    def create_subjects() -> None:
+    def create_section(year: Year) -> None:
+        """Populates the section table with 'A', 'B', and 'C' sections."""
+        if storage.session.query(Section).count() > 0:
+            return
+
+        for section_name in SectionEnum:
+            section = Section(year_id=year.id, section=section_name.value)
+            storage.new(section)
+
+        storage.save()
+
+    @staticmethod
+    def create_subjects(year: Year) -> None:
         """Populates the subjects table with all subjects from AllSubjectsEnum."""
         if storage.session.query(Subject).count() == len(AllSubjectsEnum):
             return
@@ -151,7 +180,21 @@ class BaseAction:
                 .filter_by(name=subject_enum.value)
                 .first()
             ):
-                subject = Subject(name=subject_enum.value)
+                # Split the subject name into words
+                words = subject_enum.value.split()
+
+                # Determine the length of the prefix for each word (2 letters if multiple words, 3 otherwise)
+                prefix_length = 3
+
+                # Generate the base code by taking the first 'prefix_length' characters of each word and converting them to uppercase
+                code = "".join(
+                    [
+                        word[:prefix_length].upper()
+                        for word in words
+                        if word.isalpha() and word != "and"
+                    ]
+                )
+                subject = Subject(year_id=year.id, name=subject_enum.value, code=code)
                 storage.new(subject)
         storage.save()
 
@@ -188,7 +231,6 @@ class BaseAction:
         year: Year,
         subject: Subject,
         grade: Grade,
-        sections: List[Section],
         stream: Optional[Stream] = None,
     ) -> None:
         """
@@ -221,19 +263,7 @@ class BaseAction:
         )
 
         storage.new(new_yearly_subject)
-        storage.session.flush()  # Ensure the new subject is saved to get its ID
-
-        new_link = []
-        new_link.extend(
-            [
-                YearlySubjectSectionLink(
-                    section_id=section.id,
-                    yearly_subject_id=new_yearly_subject.id,
-                )
-                for section in sections
-            ]
-        )
-        storage.session.bulk_save_objects(new_link)
+        storage.session.commit()
 
     @staticmethod
     def _is_subject_invalid_for_stream(subject_name: str, stream: StreamEnum) -> bool:
@@ -302,12 +332,12 @@ class BaseAction:
         """
         # 1. Ensure all prerequisite data exists
         BaseAction.create_academic_term(year)
-        BaseAction.create_streams()  # Order Maters
-        BaseAction.create_grades()
-        BaseAction.create_subjects()
+        BaseAction.create_streams(year)  # Order Maters
+        BaseAction.create_section(year)
+        BaseAction.create_subjects(year)
 
         sections = storage.session.scalars(select(Section)).all()
-        random_sections = random.sample(sections, k=random.randint(1, len(sections)))
+        BaseAction.create_grades(year, list(sections))
 
         # 2. Iterate through the grade-to-subject mapping
         for grade_level, subject_enum_class in BaseAction.grade_subjects_map.items():
@@ -330,7 +360,6 @@ class BaseAction:
                             year=year,
                             subject=subject,
                             grade=grade,
-                            sections=random_sections,
                             stream=stream,
                         )
                 else:
@@ -338,7 +367,6 @@ class BaseAction:
                         year=year,
                         subject=subject,
                         grade=grade,
-                        sections=random_sections,
                     )
 
         storage.save()

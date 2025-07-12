@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from .event_schema import EventSchema
     from .academic_term_schema import AcademicTermSchema
     from .yearly_subject_schema import YearlySubjectSchema
+    from .grade_schema import GradeSchema
 
 
 class YearSchema(BaseModel):
@@ -33,7 +34,10 @@ class YearSchema(BaseModel):
 class YearRelationshipSchema(BaseModel):
     """This model represents the relationships of a YearSchema."""
 
-    student_year_records: Optional[List[StudentYearRecordSchema]] = None
-    events: Optional[List[EventSchema]] = None
-    academic_terms: Optional[List[AcademicTermSchema]] = None
-    yearly_subjects: Optional[List[YearlySubjectSchema]] = None
+    student_year_records: List[StudentYearRecordSchema] = []
+    events: List[EventSchema] = []
+    academic_terms: List[AcademicTermSchema] = []
+    yearly_subjects: List[YearlySubjectSchema] = []
+    grades: List[GradeSchema] = []
+    sections: List[str] = []
+    streams: List[str] = []
