@@ -4,7 +4,6 @@ from flask.testing import FlaskClient
 from pydantic import TypeAdapter, ValidationError
 import pytest
 
-from extension.enums.enum import RoleEnum
 from extension.pydantic.models.grade_schema import GradeSchema
 from extension.pydantic.models.section_schema import SectionSchema
 from extension.pydantic.models.subject_schema import SubjectSchema

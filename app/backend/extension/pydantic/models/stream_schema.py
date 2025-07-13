@@ -1,6 +1,6 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Optional, List
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from extension.functions.helper import to_camel
 
@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     from .grade_schema import GradeSchema
     from .yearly_subject_schema import YearlySubjectSchema
     from .student_year_record_schema import StudentYearRecordSchema
+    from .subject_schema import SubjectSchema
 
 
 class StreamSchema(BaseModel):
@@ -33,3 +34,4 @@ class StreamRelationshipSchema(BaseModel):
     grades: Optional[List[GradeSchema]] = None
     yearly_subjects: Optional[List[YearlySubjectSchema]] = None
     students: Optional[List[StudentYearRecordSchema]] = None
+    subject_links: List[SubjectSchema] = Field(alias="subjects")

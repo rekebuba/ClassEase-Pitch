@@ -22,7 +22,9 @@ def get_years(user: UserT) -> Tuple[Response, int]:
         years = storage.session.scalars(select(Year)).all()
 
         year_schemas = [YearSchema.model_validate(year) for year in years]
-        valid_years = [schema.model_dump(by_alias=True) for schema in year_schemas]
+        valid_years = [
+            schema.model_dump(by_alias=True, mode="json") for schema in year_schemas
+        ]
 
         return jsonify(valid_years), 200
 
@@ -44,7 +46,7 @@ def get_year_by_id(user: UserT, year_id: str) -> Tuple[Response, int]:
         year = storage.session.scalar(select(Year).where(Year.id == year_id))
 
         year_schema = YearSchema.model_validate(year)
-        response = year_schema.model_dump(by_alias=True)
+        response = year_schema.model_dump(by_alias=True, mode="json")
 
         return jsonify(response), 200
 

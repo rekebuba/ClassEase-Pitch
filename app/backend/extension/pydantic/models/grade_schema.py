@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List
 from pydantic import BaseModel, ConfigDict, Field
 
 from extension.enums.enum import GradeLevelEnum
@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from .student_schema import StudentSchema
     from .year_schema import YearSchema
     from .section_schema import SectionSchema
+    from .subject_schema import SubjectSchema
 
 
 class GradeSchema(BaseModel):
@@ -51,6 +52,7 @@ class GradeRelationshipSchema(BaseModel):
     student_year_records: List[StudentYearRecordSchema] = []
     students: List[StudentSchema] = []
     sections_link: List[SectionSchema] = Field(alias="sections")
+    subject_links: List[SubjectSchema] = Field(alias="subjects")
 
 
 class GradeWithRelationshipsSchema(GradeSchema, GradeRelationshipSchema):

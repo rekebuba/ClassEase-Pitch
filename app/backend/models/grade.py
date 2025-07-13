@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from models.student_year_record import StudentYearRecord
     from models.teacher import Teacher
     from models.section import Section
+    from models.subject import Subject
     from models.year import Year
 
 
@@ -83,6 +84,13 @@ class Grade(BaseModel):
         "Section",
         back_populates="grades_link",
         secondary="grade_section_links",
+        default_factory=list,
+        repr=False,
+    )
+    subject_links: Mapped[List["Subject"]] = relationship(
+        "Subject",
+        back_populates="grade_links",
+        secondary="subject_grade_links",
         default_factory=list,
         repr=False,
     )

@@ -1,10 +1,11 @@
 #!/usr/bin/python3
 """Module for Year class"""
 
+from datetime import date
 from typing import TYPE_CHECKING, List
-from sqlalchemy import String, Integer, Enum
+from sqlalchemy import Date, String, Integer, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from extension.enums.enum import AcademicTermTypeEnum
+from extension.enums.enum import AcademicTermTypeEnum, AcademicYearStatusEnum
 from models.base_model import BaseModel
 
 if TYPE_CHECKING:
@@ -34,8 +35,16 @@ class Year(BaseModel):
 
     academic_year: Mapped[str] = mapped_column(String(50), unique=True)
     ethiopian_year: Mapped[int] = mapped_column(Integer, nullable=False, unique=True)
-    gregorian_year: Mapped[str] = mapped_column(
-        String(15), default=None, nullable=True, unique=True
+    gregorian_year: Mapped[str] = mapped_column(String(15), nullable=True, unique=True)
+    start_date: Mapped[Date] = mapped_column(Date, nullable=False)
+    end_date: Mapped[Date] = mapped_column(Date, nullable=False)
+    status: Mapped[str] = mapped_column(
+        Enum(
+            AcademicYearStatusEnum,
+            name="year_status_enum",
+            values_callable=lambda x: [e.value for e in x],
+        ),
+        nullable=False,
     )
 
     # Relationships

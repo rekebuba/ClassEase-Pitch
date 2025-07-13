@@ -119,6 +119,13 @@ class StudentApplicationStatusEnum(str, Enum):
     ENROLLED = "enrolled"
 
 
+class AcademicYearStatusEnum(str, Enum):
+    UPCOMING = "upcoming"
+    ACTIVE = "active"
+    COMPLETED = "completed"
+    ARCHIVED = "archived"
+
+
 class SemesterStatusEnum(str, Enum):
     UPCOMING = "upcoming"
     ACTIVE = "active"
@@ -243,14 +250,6 @@ class GradeTenSubjectsEnum(str, Enum):
 
 
 class GradeElevenSubjectsEnum(str, Enum):
-    BIOLOGY = "Biology"
-    PHYSICS = "Physics"
-    CHEMISTRY = "Chemistry"
-    GEOGRAPHY = "Geography"
-    HISTORY = "History"
-    ECONOMICS = "Economics"
-    TECHNICAL_DRAWING = "Technical Drawing"
-    GENERAL_BUSINESS = "General Business"
     ENGLISH = "English"
     MATHEMATICS = "Mathematics"
     MOTHER_TONGUE = "Mother Tongue"
@@ -261,14 +260,6 @@ class GradeElevenSubjectsEnum(str, Enum):
 
 
 class GradeTwelveSubjectsEnum(str, Enum):
-    BIOLOGY = "Biology"
-    PHYSICS = "Physics"
-    CHEMISTRY = "Chemistry"
-    GEOGRAPHY = "Geography"
-    HISTORY = "History"
-    ECONOMICS = "Economics"
-    TECHNICAL_DRAWING = "Technical Drawing"
-    GENERAL_BUSINESS = "General Business"
     ENGLISH = "English"
     MATHEMATICS = "Mathematics"
     MOTHER_TONGUE = "Mother Tongue"
@@ -353,10 +344,10 @@ class AcademicTermTypeEnum(str, Enum):
     SEMESTER = "Semester"
     QUARTER = "Quarter"
 
+
 class MarkListTypeEnum(str, Enum):
     TEST = "Test"
     QUIZ = "Quiz"
     ASSIGNMENT = "Assignment"
     MIDTERM = "Midterm"
     FINAL = "Final"
-    

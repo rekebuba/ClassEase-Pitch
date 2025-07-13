@@ -1,8 +1,9 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, Optional, List
+from datetime import date
+from typing import TYPE_CHECKING, List
 from pydantic import BaseModel, ConfigDict
 
-from extension.enums.enum import AcademicTermTypeEnum
+from extension.enums.enum import AcademicTermTypeEnum, AcademicYearStatusEnum
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
@@ -28,7 +29,12 @@ class YearSchema(BaseModel):
     calendar_type: AcademicTermTypeEnum
     academic_year: str
     ethiopian_year: int
-    gregorian_year: Optional[str] = None
+    gregorian_year: str
+    start_date: date
+    end_date: date
+    status: AcademicYearStatusEnum
+    created_at: date
+    updated_at: date
 
 
 class YearRelationshipSchema(BaseModel):
