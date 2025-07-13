@@ -5,11 +5,13 @@ from typing import TYPE_CHECKING, List
 from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from models.base_model import BaseModel
-from models.yearly_subject import YearlySubject
 
 if TYPE_CHECKING:
     from models.teacher import Teacher
     from models.year import Year
+    from models.grade import Grade
+    from models.stream import Stream
+    from models.yearly_subject import YearlySubject
 
 
 class Subject(BaseModel):
@@ -41,6 +43,20 @@ class Subject(BaseModel):
     yearly_subjects: Mapped[List["YearlySubject"]] = relationship(
         "YearlySubject",
         back_populates="subject",
+        default_factory=list,
+        repr=False,
+    )
+    grade_links: Mapped[List["Grade"]] = relationship(
+        "Grade",
+        secondary="subject_grade_links",
+        back_populates="subject_links",
+        default_factory=list,
+        repr=False,
+    )
+    stream_links: Mapped[List["Stream"]] = relationship(
+        "Stream",
+        secondary="subject_stream_links",
+        back_populates="subject_links",
         default_factory=list,
         repr=False,
     )

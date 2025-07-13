@@ -6,13 +6,13 @@ from sqlalchemy import ForeignKey, String
 from models.base_model import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from models.year import Year
-
 
 if TYPE_CHECKING:
     from models.yearly_subject import YearlySubject
     from models.grade import Grade
     from models.student_year_record import StudentYearRecord
+    from models.subject import Subject
+    from models.year import Year
 
 
 class Stream(BaseModel):
@@ -48,4 +48,11 @@ class Stream(BaseModel):
         back_populates="stream",
         repr=False,
         default_factory=list,
+    )
+    subject_links: Mapped[List["Subject"]] = relationship(
+        "Subject",
+        back_populates="stream_links",
+        secondary="subject_stream_links",
+        default_factory=list,
+        repr=False,
     )

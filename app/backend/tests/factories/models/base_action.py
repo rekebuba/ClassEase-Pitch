@@ -55,6 +55,10 @@ class BaseAction:
         "11": GradeElevenSubjectsEnum,
         "12": GradeTwelveSubjectsEnum,
     }
+    grade_streams_map: Dict[StreamEnum, Type[Enum]] = {
+        StreamEnum.SOCIAL: SocialStreamSubjectsEnum,
+        StreamEnum.NATURAL: NaturalStreamSubjectsEnum,
+    }
 
     @staticmethod
     def create_academic_term(year: Year) -> None:
@@ -368,5 +372,16 @@ class BaseAction:
                         subject=subject,
                         grade=grade,
                     )
+
+                subject.grade_links.append(grade)
+
+        # 4. Handle the stream-specific subjects
+        for stream_enum, subject_enum_class in BaseAction.grade_streams_map.items():
+            stream = BaseAction._get_stream(stream_enum)
+
+            for subject_stream_enum in subject_enum_class:
+                stream_subject = BaseAction._get_subject(subject_stream_enum)
+
+                stream_subject.stream_links.append(stream)
 
         storage.save()
