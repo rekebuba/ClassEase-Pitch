@@ -86,9 +86,9 @@ def list_of_course_available(user_data: UserT) -> Tuple[Response, int]:
 
         return jsonify(result), 200
     except ValidationError as e:
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except Exception as e:
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)
 
 
 @stud.route("/course/registration", methods=["POST"])
@@ -189,7 +189,7 @@ def register_course(user_data: UserT) -> Tuple[Response, int]:
         return jsonify({"message": "Course registration successful!"}), 201
     except ValidationError as e:
         storage.rollback()
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except Exception as e:
         storage.rollback()
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)

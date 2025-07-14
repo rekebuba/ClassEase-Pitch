@@ -25,6 +25,14 @@ class SectionSchema(BaseModel):
     year_id: str
     section: Optional[str] = None
 
+    @classmethod
+    def default_fields(cls) -> set[str]:
+        """
+        Returns a list of default fields to be used when no specific fields are requested.
+        This can be overridden in subclasses if needed.
+        """
+        return {"id", "section"}
+
 
 class SectionRelationshipSchema(BaseModel):
     """This model represents the relationships of a SectionSchema."""

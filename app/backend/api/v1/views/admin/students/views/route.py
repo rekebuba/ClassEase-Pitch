@@ -41,9 +41,9 @@ def create_new_views(admin_data: UserT) -> Tuple[Response, int]:
         ), 201
 
     except ValidationError as e:
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except Exception as e:
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)
 
 
 @admin.route("/rename-view", methods=["PUT"])
@@ -74,9 +74,9 @@ def rename_view(admin_data: UserT) -> Tuple[Response, int]:
         return jsonify({"message": "View Renamed Successfully!"}), 200
 
     except ValidationError as e:
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except Exception as e:
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)
 
 
 @admin.route("/update-view", methods=["PUT"])
@@ -112,9 +112,9 @@ def update_view(admin_data: UserT) -> Tuple[Response, int]:
             {"message": "View Updated Successfully!", "viewId": view.id}
         ), 200
     except ValidationError as e:
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except Exception as e:
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)
 
 
 @admin.route("/delete-view/<view_id>", methods=["PUT"])
@@ -139,9 +139,9 @@ def delete_view(admin_data: UserT, view_id: str) -> Tuple[Response, int]:
         return jsonify({"message": "View Deleted Successfully!"}), 200
 
     except ValidationError as e:
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except Exception as e:
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)
 
 
 @admin.route("/all-views/<table_name>", methods=["GET"])
@@ -185,6 +185,6 @@ def all_views(admin_data: UserT, table_name: str) -> Tuple[Response, int]:
         return jsonify(valid_dump), 200
 
     except ValidationError as e:
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except Exception as e:
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)

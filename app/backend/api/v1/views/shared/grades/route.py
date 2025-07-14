@@ -1,54 +1,74 @@
-from typing import Tuple
+from typing import Set, Tuple
 from sqlalchemy import select
+from api.v1.utils.parameter import validate_fields
 from api.v1.utils.typing import UserT
 from api.v1.views import errors
 from api.v1.views.shared import auths as auth
 from api.v1.views.utils import student_teacher_or_admin_required
 from extension.pydantic.models.grade_schema import GradeSchema
+from extension.pydantic.response.schema import success_response
 from models import storage
 from models.grade import Grade
 from sqlalchemy.exc import SQLAlchemyError
 from flask import Response, jsonify
 
+from models.year import Year
 
-@auth.route("/grades", methods=["GET"])
+
+@auth.route("/years/<string:year_id>/grades", methods=["GET"])
 @student_teacher_or_admin_required
-def get_available_grades(user: UserT) -> Tuple[Response, int]:
+@validate_fields(GradeSchema, GradeSchema.default_fields())
+def grades(user: UserT, fields: Set[str], year_id: str) -> Tuple[Response, int]:
     """
     Returns a list of all available grades in the system.
     """
     try:
-        grades = storage.session.scalars(select(Grade)).all()
+        grades = storage.session.scalars(
+            select(Grade).where(Grade.year_id == year_id)
+        ).all()
 
         grade_schemas = [GradeSchema.model_validate(grade) for grade in grades]
-        valid_grades = [schema.model_dump(by_alias=True) for schema in grade_schemas]
+        valid_grades = [
+            schema.model_dump(by_alias=True, include=fields) for schema in grade_schemas
+        ]
 
-        return jsonify(valid_grades), 200
+        return success_response(data=valid_grades)
 
     except SQLAlchemyError as e:
         storage.session.rollback()
-        return errors.handle_database_error(e)
+        return errors.handle_database_error(error=e)
     except Exception as e:
         storage.session.rollback()
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)
 
 
-@auth.route("/grades/<string:grade_id>", methods=["GET"])
+@auth.route("/years/<string:year_id>/grades/<string:grade_id>", methods=["GET"])
 @student_teacher_or_admin_required
-def get_grade_by_id(user: UserT, grade_id: str) -> Tuple[Response, int]:
+@validate_fields(GradeSchema, GradeSchema.default_fields())
+def get_grade_by_id(
+    user: UserT,
+    fields: Set[str],
+    year_id: str,
+    grade_id: str,
+) -> Tuple[Response, int]:
     """Returns Grade model based on grade_id"""
     try:
-        grade = storage.session.get(Grade, grade_id)
+        grade = storage.session.scalar(
+            select(Grade)
+            .join(Year, Year.id == year_id)
+            .where(Grade.id == grade_id, Year.id == year_id)
+        )
         if not grade:
             return jsonify({"error": "Grade not found"}), 404
 
-        valid_grade = GradeSchema.model_validate(grade)
+        grade_schema = GradeSchema.model_validate(grade)
+        valid_grade = grade_schema.model_dump(by_alias=True, include=fields)
 
-        return jsonify(valid_grade.model_dump(by_alias=True)), 200
+        return success_response(data=valid_grade)
 
     except SQLAlchemyError as e:
         storage.session.rollback()
-        return errors.handle_database_error(e)
+        return errors.handle_database_error(error=e)
     except Exception as e:
         storage.session.rollback()
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)

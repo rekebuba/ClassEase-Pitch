@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Set
 from pydantic import BaseModel, ConfigDict, Field
 
 from extension.enums.enum import GradeLevelEnum
@@ -22,6 +22,7 @@ class GradeSchema(BaseModel):
     """
 
     model_config = ConfigDict(
+        extra="forbid",
         from_attributes=True,
         populate_by_name=True,
         alias_generator=to_camel,
@@ -32,6 +33,14 @@ class GradeSchema(BaseModel):
     grade: str
     level: GradeLevelEnum
     has_stream: bool = False
+
+    @classmethod
+    def default_fields(cls) -> Set[str]:
+        """
+        Returns a list of default fields to be used when no specific fields are requested.
+        This can be overridden in subclasses if needed.
+        """
+        return {"id", "grade"}
 
 
 class GradeRelationshipSchema(BaseModel):

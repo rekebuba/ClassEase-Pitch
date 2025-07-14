@@ -24,16 +24,16 @@ def available_events(admin_data: UserT) -> Tuple[Response, int]:
         events = storage.session.query(Event).all()
 
         if not events:
-            return errors.handle_not_found_error("No event found")
+            return errors.handle_not_found_error(message="No event found")
 
         schema = AvailableEventsSchema()
         result = schema.dump({"events": events})
 
         return jsonify(result), 200
     except ValidationError as e:
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except Exception as e:
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)
 
 
 @admin.route("/event/new", methods=["POST"])
@@ -79,7 +79,7 @@ def create_events(admin_data: UserT) -> Tuple[Response, int]:
         return event_schema.dump({"message": "Event Created Successfully"}), 201
     except ValidationError as e:
         storage.rollback()
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     # except Exception as e:
     #     storage.rollback()
-    #     return errors.handle_internal_error(e)
+    #     return errors.handle_internal_error(error=e)

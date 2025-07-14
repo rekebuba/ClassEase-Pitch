@@ -1,5 +1,5 @@
 from __future__ import annotations
-from datetime import date
+from datetime import date, datetime
 from typing import TYPE_CHECKING, List
 from pydantic import BaseModel, ConfigDict
 
@@ -33,8 +33,16 @@ class YearSchema(BaseModel):
     start_date: date
     end_date: date
     status: AcademicYearStatusEnum
-    created_at: date
-    updated_at: date
+    created_at: datetime
+    updated_at: datetime
+
+    @classmethod
+    def default_fields(cls) -> set[str]:
+        """
+        Returns a list of default fields to be used when no specific fields are requested.
+        This can be overridden in subclasses if needed.
+        """
+        return {"id", "academic_year", "status"}
 
 
 class YearRelationshipSchema(BaseModel):

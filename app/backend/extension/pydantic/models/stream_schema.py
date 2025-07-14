@@ -26,6 +26,14 @@ class StreamSchema(BaseModel):
     year_id: str
     name: str
 
+    @classmethod
+    def default_fields(cls) -> set[str]:
+        """
+        Returns a list of default fields to be used when no specific fields are requested.
+        This can be overridden in subclasses if needed.
+        """
+        return {"id", "name"}
+
 
 class StreamRelationshipSchema(BaseModel):
     """This model represents the relationships of a StreamSchema."""

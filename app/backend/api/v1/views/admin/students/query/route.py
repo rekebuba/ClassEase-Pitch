@@ -145,6 +145,6 @@ def admin_student_list(admin_data: UserT) -> Tuple[Response, int]:
             {**modified_result, "pageCount": paginated_result["meta"]["total_pages"]}
         ), 200
     except ValidationError as e:
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except Exception as e:
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)

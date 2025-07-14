@@ -34,7 +34,7 @@ def get_user_by_id(admin_data: UserT, user_id: str) -> Tuple[Response, int]:
         user_schema = UserSchema.model_validate(user)
         return jsonify(user_schema.model_dump_json()), 200
     except SQLAlchemyError as e:
-        return errors.handle_database_error(e)
+        return errors.handle_database_error(error=e)
 
 
 @admin.route("/link_user/<id>", methods=["POST"])
@@ -92,7 +92,7 @@ def link_to_user(admin_data: UserT, id: str) -> Tuple[Response, int]:
         return jsonify(response.model_dump(by_alias=True)), 201
     except SQLAlchemyError as e:
         storage.session.rollback()
-        return errors.handle_database_error(e)
+        return errors.handle_database_error(error=e)
     except Exception as e:
         storage.session.rollback()
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)
