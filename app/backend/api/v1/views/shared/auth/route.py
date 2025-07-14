@@ -55,11 +55,11 @@ def login() -> Tuple[Response, int]:
 
         return jsonify(response), 200
     except ValidationError as e:
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except InvalidCredentialsError as e:
-        return errors.handle_invalid_credentials_error(e)
+        return errors.handle_invalid_credentials_error(error=e)
     except Exception as e:
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)
 
 
 @auth.route("auth/logout", methods=["POST"])
@@ -80,4 +80,4 @@ def logout(user: UserT) -> Tuple[Response, int]:
 
         return jsonify({"message": "Successfully logged out"}), 200
     except Exception as e:
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)

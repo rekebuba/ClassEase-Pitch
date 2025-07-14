@@ -84,13 +84,13 @@ def teacher_applications(admin_data: UserT) -> Tuple[Response, int]:
 
         return jsonify(teacher_schemas), 200
     except ValidationError as e:
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except SQLAlchemyError as e:
         storage.session.rollback()
-        return errors.handle_database_error(e)
+        return errors.handle_database_error(error=e)
     except Exception as e:
         storage.session.rollback()
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)
 
 
 @admin.route("/teacher/applications/<string:id>", methods=["GET"])
@@ -124,13 +124,13 @@ def detail_teacher_application(admin_data: UserT, id: str) -> Tuple[Response, in
 
         return jsonify(teacher_schema.model_dump(by_alias=True)), 200
     except ValidationError as e:
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except SQLAlchemyError as e:
         storage.session.rollback()
-        return errors.handle_database_error(e)
+        return errors.handle_database_error(error=e)
     except Exception as e:
         storage.session.rollback()
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)
 
 
 @admin.route("/teacher/applications/<string:id>", methods=["PUT"])
@@ -181,13 +181,13 @@ def update_teacher_application_status(
             {"message": "Teacher application status updated successfully"}
         ), 200
     except ValidationError as e:
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except SQLAlchemyError as e:
         storage.session.rollback()
-        return errors.handle_database_error(e)
+        return errors.handle_database_error(error=e)
     except Exception as e:
         storage.session.rollback()
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)
     except ValueError as e:
         storage.session.rollback()
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)

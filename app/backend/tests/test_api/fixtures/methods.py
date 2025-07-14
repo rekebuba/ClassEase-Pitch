@@ -4,85 +4,10 @@ from flask.testing import FlaskClient
 import pytest
 from sqlalchemy import select
 
-from extension.enums.enum import RoleEnum
 from models.user import User
-from tests.factories.models import AdminFactory, StudentFactory, TeacherFactory
 from sqlalchemy.orm import scoped_session, Session
 
 from tests.typing import Credential
-
-
-all_params: Dict[str, Any] = {
-    "test_get_subjects": {
-        "params": "create_random_user",
-        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
-        "ids": ["Admin", "Teacher", "Student"],
-    },
-    "test_get_subject_by_id": {
-        "params": "create_random_user",
-        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
-        "ids": ["Admin", "Teacher", "Student"],
-    },
-    "test_get_grades": {
-        "params": "create_random_user",
-        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
-        "ids": ["Admin", "Teacher", "Student"],
-    },
-    "test_get_grade_by_id": {
-        "params": "create_random_user",
-        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
-        "ids": ["Admin", "Teacher", "Student"],
-    },
-    "test_get_subject_grades": {
-        "params": "create_random_user",
-        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
-        "ids": ["Admin", "Teacher", "Student"],
-    },
-    "test_get_academic_years": {
-        "params": "create_random_user",
-        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
-        "ids": ["Admin", "Teacher", "Student"],
-    },
-    "test_get_academic_year_by_id": {
-        "params": "create_random_user",
-        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
-        "ids": ["Admin", "Teacher", "Student"],
-    },
-    "test_get_sections": {
-        "params": "create_random_user",
-        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
-        "ids": ["Admin", "Teacher", "Student"],
-    },
-    "test_get_section_by_id": {
-        "params": "create_random_user",
-        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
-        "ids": ["Admin", "Teacher", "Student"],
-    },
-    "test_get_streams": {
-        "params": "create_random_user",
-        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
-        "ids": ["Admin", "Teacher", "Student"],
-    },
-    "test_get_stream_by_id": {
-        "params": "create_random_user",
-        "values": [RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT],
-        "ids": ["Admin", "Teacher", "Student"],
-    },
-}
-
-
-def pytest_generate_tests(metafunc):
-    fct_name = metafunc.function.__name__
-    if fct_name in all_params:
-        params = all_params[fct_name]
-        print("FUNCTION NAME:", fct_name)
-        print("PARAMS:", params)
-        metafunc.parametrize(
-            params["params"],
-            params["values"],
-            ids=params["ids"],
-            indirect=True,
-        )
 
 
 @pytest.fixture

@@ -34,7 +34,7 @@ def registered_grades(admin_data: UserT) -> Tuple[Response, int]:
         )
 
         if not registered_grades:
-            return errors.handle_not_found_error("No registered grades found")
+            return errors.handle_not_found_error(message="No registered grades found")
 
         schema = RegisteredGradesSchema()
         result = schema.dump(
@@ -43,6 +43,6 @@ def registered_grades(admin_data: UserT) -> Tuple[Response, int]:
 
         return jsonify(result), 200
     except ValidationError as e:
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except Exception as e:
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)

@@ -1,19 +1,22 @@
-from typing import Tuple
-from flask import Response, jsonify
+from typing import Set, Tuple
+from flask import Response
 from pydantic import ValidationError
 from sqlalchemy import select
+from api.v1.utils.parameter import validate_fields
 from api.v1.utils.typing import UserT
 from api.v1.views import errors
 from api.v1.views.shared import auths as auth
 from api.v1.views.utils import student_teacher_or_admin_required
 from extension.pydantic.models.section_schema import SectionSchema
+from extension.pydantic.response.schema import success_response
 from models import storage
 from models.section import Section
-# noqa: E402
 
-@auth.route("/sections", methods=["GET"])
+
+@auth.route("/years/<string:year_id>/sections", methods=["GET"])
 @student_teacher_or_admin_required
-def get_sections(user: UserT) -> Tuple[Response, int]:
+@validate_fields(SectionSchema, SectionSchema.default_fields())
+def get_sections(user: UserT, fields: Set[str], year_id: str) -> Tuple[Response, int]:
     """
     Get all sections.
 
@@ -21,25 +24,40 @@ def get_sections(user: UserT) -> Tuple[Response, int]:
         Tuple[Response, int]: JSON response with sections and status code.
     """
     try:
-        sections = storage.session.scalars(select(Section)).all()
+        sections = storage.session.scalars(
+            select(Section).where(Section.year_id == year_id)
+        ).all()
+
         sections_schema = [
             SectionSchema.model_validate(section) for section in sections
         ]
         response = [
-            section_schema.model_dump(by_alias=True, exclude_none=True)
+            section_schema.model_dump(
+                by_alias=True,
+                exclude_none=True,
+                include=fields,
+                mode="json",
+            )
             for section_schema in sections_schema
         ]
-        return jsonify(response), 200
+
+        return success_response(data=response)
 
     except ValidationError as e:
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except Exception as e:
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)
 
 
-@auth.route("/sections/<string:section_id>", methods=["GET"])
+@auth.route("/years/<string:year_id>/sections/<string:section_id>", methods=["GET"])
 @student_teacher_or_admin_required
-def get_section_by_id(user: UserT, section_id: str) -> Tuple[Response, int]:
+@validate_fields(SectionSchema, SectionSchema.default_fields())
+def get_section_by_id(
+    user: UserT,
+    fields: Set[str],
+    year_id: str,
+    section_id: str,
+) -> Tuple[Response, int]:
     """
     Get a section by its ID.
 
@@ -48,14 +66,23 @@ def get_section_by_id(user: UserT, section_id: str) -> Tuple[Response, int]:
 
     """
     try:
-        section = storage.session.get(Section, section_id)
+        section = storage.session.scalar(
+            select(Section).where(Section.id == section_id, Section.year_id == year_id)
+        )
         if not section:
-            return errors.handle_not_found_error("Section not found")
+            return errors.handle_not_found_error(message="Section not found")
 
         section_schema = SectionSchema.model_validate(section)
-        return jsonify(section_schema.model_dump(by_alias=True, exclude_none=True)), 200
+        section_response = section_schema.model_dump(
+            by_alias=True,
+            exclude_none=True,
+            include=fields,
+            mode="json",
+        )
+
+        return success_response(data=section_response)
 
     except ValidationError as e:
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except Exception as e:
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)

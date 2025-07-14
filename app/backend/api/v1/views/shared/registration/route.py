@@ -63,10 +63,10 @@ def register_new_user(role: str) -> Tuple[Response, int]:
         return jsonify(**send_result), 201
     except ValidationError as e:
         storage.rollback()
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except Exception as e:
         storage.rollback()
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)
 
 
 @auth.route("/register/admin", methods=["POST"])
@@ -93,16 +93,16 @@ def register_new_admin() -> Tuple[Response, int]:
 
         return jsonify(response.model_dump()), 201
     except ValidationError as e:
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except SQLAlchemyError as e:
         storage.session.rollback()
-        return errors.handle_database_error(e)
+        return errors.handle_database_error(error=e)
     except ValueError as e:
         storage.session.rollback()
-        return errors.handle_value_error(e)
+        return errors.handle_value_error(error=e)
     except Exception as e:
         storage.session.rollback()
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)
 
 
 @auth.route("/register/student", methods=["POST"])
@@ -138,16 +138,16 @@ def register_new_student() -> Tuple[Response, int]:
 
         return jsonify(response.model_dump()), 201
     except ValidationError as e:
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except SQLAlchemyError as e:
         storage.session.rollback()
-        return errors.handle_database_error(e)
+        return errors.handle_database_error(error=e)
     except ValueError as e:
         storage.session.rollback()
-        return errors.handle_value_error(e)
+        return errors.handle_value_error(error=e)
     except Exception as e:
         storage.session.rollback()
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)
 
 
 @auth.route("/register/teacher", methods=["POST"])
@@ -214,16 +214,16 @@ def register_new_teacher() -> Tuple[Response, int]:
 
         return jsonify(response.model_dump()), 201
     except ValidationError as e:
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except SQLAlchemyError as e:
         storage.session.rollback()
-        return errors.handle_database_error(e)
+        return errors.handle_database_error(error=e)
     except ValueError as e:
         storage.session.rollback()
-        return errors.handle_value_error(e)
+        return errors.handle_value_error(error=e)
     except Exception as e:
         storage.session.rollback()
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)
 
 
 def _validate_relations(

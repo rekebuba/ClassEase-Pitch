@@ -64,6 +64,6 @@ def create_mark_list(admin_data: UserT) -> Tuple[Response, int]:
 
         return jsonify({"message": "Mark list created successfully!"}), 201
     except ValidationError as e:
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     # except Exception as e:
-    #     return errors.handle_internal_error(e)
+    #     return errors.handle_internal_error(error=e)

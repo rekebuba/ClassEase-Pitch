@@ -25,6 +25,14 @@ class SubjectSchema(BaseModel):
     name: str
     code: str
 
+    @classmethod
+    def default_fields(cls) -> set[str]:
+        """
+        Returns a list of default fields to be used when no specific fields are requested.
+        This can be overridden in subclasses if needed.
+        """
+        return {"id", "name", "code"}
+
 
 class SubjectRelationshipSchema(BaseModel):
     """This model represents the relationships of a SubjectSchema.

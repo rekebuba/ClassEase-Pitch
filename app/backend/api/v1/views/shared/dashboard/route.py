@@ -18,6 +18,6 @@ def user(user: UserT) -> Tuple[Response, int]:
         ), 200
 
     except ValidationError as e:
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except Exception as e:
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)

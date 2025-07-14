@@ -95,6 +95,6 @@ def student_average_range(admin_data: UserT) -> Tuple[Response, int]:
 
         return jsonify(**result), 200
     except ValidationError as e:
-        return errors.handle_validation_error(e)
+        return errors.handle_validation_error(error=e)
     except Exception as e:
-        return errors.handle_internal_error(e)
+        return errors.handle_internal_error(error=e)
