@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Optional, List
 from pydantic import BaseModel, ConfigDict
 from datetime import date
 
-from extension.enums.enum import GenderEnum, StudentApplicationStatusEnum
+from extension.enums.enum import BloodTypeEnum, GenderEnum, StudentApplicationStatusEnum
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
@@ -41,7 +41,7 @@ class StudentSchema(BaseModel):
     parent_email: str
     grand_father_name: Optional[str] = None
     nationality: Optional[str] = None
-    blood_type: Optional[str] = None
+    blood_type: BloodTypeEnum = BloodTypeEnum.UNKNOWN
     student_photo: Optional[str] = None
     previous_school: Optional[str] = None
     previous_grades: Optional[str] = None

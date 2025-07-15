@@ -69,13 +69,13 @@ def register_new_user(role: str) -> Tuple[Response, int]:
         return errors.handle_internal_error(error=e)
 
 
-@auth.route("/register/admin", methods=["POST"])
+@auth.route("/admins", methods=["POST"])
 def register_new_admin() -> Tuple[Response, int]:
     """Registers a new admin in the system."""
 
     try:
         # Validate and parse the incoming JSON
-        admin_data = AdminSchema.model_validate_json(request.data)
+        admin_data = AdminSchema.model_validate(request.json)
 
         # Convert to dictionary before unpacking
         admin_dict = admin_data.model_dump(exclude_none=True)
@@ -105,13 +105,13 @@ def register_new_admin() -> Tuple[Response, int]:
         return errors.handle_internal_error(error=e)
 
 
-@auth.route("/register/student", methods=["POST"])
+@auth.route("/students", methods=["POST"])
 def register_new_student() -> Tuple[Response, int]:
     """Registers a new student in the system."""
 
     try:
         # Validate and parse the incoming JSON
-        student_data = StudentWithRelationshipsSchema.model_validate_json(request.data)
+        student_data = StudentWithRelationshipsSchema.model_validate(request.json)
 
         grades = storage.session.scalars(
             select(Grade).where(Grade.id == student_data.starting_grade_id)
@@ -150,14 +150,14 @@ def register_new_student() -> Tuple[Response, int]:
         return errors.handle_internal_error(error=e)
 
 
-@auth.route("/register/teacher", methods=["POST"])
+@auth.route("/teachers", methods=["POST"])
 def register_new_teacher() -> Tuple[Response, int]:
     """
     Registers a new user (Admin, Student, Teacher) in the system.
     """
     try:
         # Validate and parse the incoming JSON
-        teacher_data = TeacherWithRelationshipsSchema.model_validate_json(request.data)
+        teacher_data = TeacherWithRelationshipsSchema.model_validate(request.json)
 
         subjects = storage.session.scalars(
             select(Subject).where(

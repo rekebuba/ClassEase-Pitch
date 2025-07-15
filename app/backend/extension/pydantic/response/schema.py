@@ -1,6 +1,6 @@
 from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, Union
 from flask import Response, jsonify
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from extension.functions.helper import to_camel
 
@@ -46,6 +46,23 @@ class ErrorResponseSchema(BaseModel, Generic[M, L]):
     links: Optional[L] = None
 
 
+class ValidationErrorSchema(BaseModel):
+    """
+    To transform and sanitize raw Pydantic error entries to a more user-friendly format.
+    """
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+    location: str
+    message: str
+    input: Any
+    expected_type: str
+    expected: Optional[Any] = None  # will be populated manually from ctx
+
+
 def success_response(
     data: Union[BaseModel, List[BaseModel], Dict[str, Any], List[Dict[str, Any]]],
     message: str = "Success",
@@ -65,7 +82,9 @@ def success_response(
 
 def error_response(
     message: str,
-    meta: Optional[BaseModel] = None,
+    meta: Optional[
+        Union[BaseModel, List[BaseModel], Dict[str, Any], List[Dict[str, Any]]]
+    ] = None,
     links: Optional[BaseModel] = None,
     status: int = 400,
 ) -> Tuple[Response, int]:

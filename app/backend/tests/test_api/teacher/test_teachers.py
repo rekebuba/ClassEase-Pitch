@@ -26,19 +26,21 @@ class TestTeachers:
         )
 
         teacher_schema = TeacherWithRelationshipsSchema.model_validate(teacher)
-        data = teacher_schema.model_dump_json(
+        data = teacher_schema.model_dump(
             by_alias=True,
             exclude={
                 "id",
                 "user",
                 "teacher_records",
             },
+            exclude_none=True,
+            mode="json",
         )
 
         # Send a POST request to the registration endpoint
         response = client.post(
-            "/api/v1/register/teacher",
-            data=data,
+            "/api/v1/teachers",
+            json=data,
             content_type="application/json",
         )
 

@@ -8,6 +8,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session, Session
 from flask import Flask
 from api.v1.utils.typing import BaseT
 from models.base_model import Base
+from models.ceo import CEO, seed_ceo  # noqa: F401
 from models.grade import Grade  # noqa: F401
 from models.user import User  # noqa: F401
 from models.student import Student  # noqa: F401
@@ -166,6 +167,7 @@ class DBStorage:
         """
         Seed initial data into the database.
         """
+        seed_ceo(self.session)
         seed_table(self.session, self.engine)
 
     def close(self) -> None:
