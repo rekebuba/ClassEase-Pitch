@@ -11,6 +11,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # JWT Secret Keys for different roles
+    CEO_SECRET_KEY = os.getenv("CEO_JWT_SECRET")
     ADMIN_SECRET_KEY = os.getenv("ADMIN_JWT_SECRET")
     TEACHER_SECRET_KEY = os.getenv("TEACHER_JWT_SECRET")
     STUDENT_SECRET_KEY = os.getenv("STUDENT_JWT_SECRET")
@@ -61,6 +62,7 @@ class TestingConfig(Config):
         app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
         # Overriding the JWT secret keys for testing
+        app.config["CEO_SECRET_KEY"] = os.getenv("TEST_CEO_JWT_SECRET")
         app.config["ADMIN_SECRET_KEY"] = os.getenv("TEST_ADMIN_JWT_SECRET")
         app.config["TEACHER_SECRET_KEY"] = os.getenv("TEST_TEACHER_JWT_SECRET")
         app.config["STUDENT_SECRET_KEY"] = os.getenv("TEST_STUDENT_JWT_SECRET")

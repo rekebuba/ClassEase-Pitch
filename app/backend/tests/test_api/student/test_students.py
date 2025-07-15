@@ -32,18 +32,20 @@ class TestStudents:
         )
         # form_data = prepare_form_data(student)
         student_schema = StudentWithRelationshipsSchema.model_validate(student)
-        data = student_schema.model_dump_json(
+        data = student_schema.model_dump(
             by_alias=True,
             exclude={
                 "id",
                 "user_id",
                 "student_year_records",
             },
+            exclude_none=True,
+            mode="json",
         )
         # Send a POST request to the registration endpoint
         response = client.post(
-            "/api/v1/register/student",
-            data=data,
+            "/api/v1/student",
+            json=data,
             content_type="application/json",
         )
 

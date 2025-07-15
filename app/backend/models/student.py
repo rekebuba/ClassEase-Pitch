@@ -12,7 +12,7 @@ from sqlalchemy import (
 )
 from models.base_model import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from extension.enums.enum import GenderEnum, StudentApplicationStatusEnum
+from extension.enums.enum import BloodTypeEnum, GenderEnum, StudentApplicationStatusEnum
 
 if TYPE_CHECKING:
     from models.grade import Grade
@@ -62,8 +62,15 @@ class Student(BaseModel):
     nationality: Mapped[Optional[str]] = mapped_column(
         String(100), nullable=True, default=None
     )
-    blood_type: Mapped[Optional[str]] = mapped_column(
-        String(10), nullable=True, default=None
+    blood_type: Mapped[BloodTypeEnum] = mapped_column(
+        Enum(
+            BloodTypeEnum,
+            name="blood_type_enum",
+            values_callable=lambda x: [e.value for e in x],
+            native_enum=False,
+        ),
+        nullable=True,
+        default=BloodTypeEnum.UNKNOWN,
     )
     student_photo: Mapped[Optional[str]] = mapped_column(
         String(255), nullable=True, default=None

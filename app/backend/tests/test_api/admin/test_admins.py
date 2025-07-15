@@ -41,12 +41,12 @@ class TestAdmin:
         admin = AdminFactory.stub(user=None)
 
         admin_schema = AdminSchema.model_validate(admin)
-        data = admin_schema.model_dump_json(by_alias=True, exclude_none=True)
+        data = admin_schema.model_dump(by_alias=True, exclude_none=True, mode="json")
 
         # Send a POST request to the registration endpoint
         response = client.post(
-            "/api/v1/register/admin",
-            data=data,
+            "/api/v1/admins",
+            json=data,
             content_type="application/json",
         )
 

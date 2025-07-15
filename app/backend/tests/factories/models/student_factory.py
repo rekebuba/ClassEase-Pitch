@@ -6,6 +6,7 @@ from tests.factories.models.grade_factory import GradeFactory
 from .base_factory import BaseFactory
 from .user_factory import UserFactory
 from extension.enums.enum import (
+    BloodTypeEnum,
     GenderEnum,
     RoleEnum,
     StudentApplicationStatusEnum,
@@ -42,9 +43,7 @@ class StudentFactory(BaseFactory[Student]):
     )
     nationality: Any = LazyAttribute(lambda x: fake.country())
     blood_type: Any = LazyAttribute(
-        lambda x: fake.random_element(
-            elements=("A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-")
-        )
+        lambda x: fake.random_element(elements=list(BloodTypeEnum))
     )
     student_photo: Any = LazyAttribute(lambda x: fake.file_name(extension="jpg"))
 

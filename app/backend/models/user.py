@@ -2,7 +2,6 @@
 """Module for User class"""
 
 from typing import TYPE_CHECKING
-import bcrypt
 from sqlalchemy import String, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from extension.enums.enum import RoleEnum
