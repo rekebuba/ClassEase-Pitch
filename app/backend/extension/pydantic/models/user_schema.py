@@ -1,4 +1,5 @@
 from __future__ import annotations
+import uuid
 from typing import TYPE_CHECKING, Optional, List
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
@@ -20,7 +21,7 @@ class UserSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: str
+    id: uuid.UUID
     identification: str
     role: RoleEnum
     image_path: Optional[str] = None

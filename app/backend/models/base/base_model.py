@@ -5,16 +5,18 @@ from dataclasses import asdict, dataclass
 from datetime import date, datetime, timezone
 import models
 from enum import Enum
-from sqlalchemy import String, DateTime
+from sqlalchemy import DateTime
+import uuid
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
     DeclarativeBase,
     MappedAsDataclass,
 )
-import uuid
 from sqlalchemy.sql import func
-from typing import Any, Dict, Optional, Type, TypeVar
+from typing import Any, Dict, Optional
+
+from models.base.column_type import UUIDType
 
 
 class Base(DeclarativeBase):
@@ -36,8 +38,8 @@ class BaseModel(MappedAsDataclass, Base):
 
     # Dataclass fields (not mapped to SQLAlchemy)
     id: Mapped[str] = mapped_column(
-        String(36),  # UUIDs are 36 characters long
-        default_factory=lambda: str(uuid.uuid4()),
+        UUIDType(),
+        default_factory=uuid.uuid4,
         primary_key=True,
         init=False,
     )

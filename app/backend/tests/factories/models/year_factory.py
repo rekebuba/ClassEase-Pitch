@@ -25,9 +25,9 @@ class YearFactory(BaseFactory[Year]):
     # )
     calendar_type: Any = LazyAttribute(lambda _: AcademicTermTypeEnum.QUARTER.value)
 
-    ethiopian_year: Any = LazyAttribute(lambda _: current_EC_year())
-    gregorian_year: Any = LazyAttribute(lambda x: current_GC_year(x.ethiopian_year))
-    academic_year: Any = LazyAttribute(lambda x: academic_year(x.ethiopian_year))
+    ethiopian_year: Any = LazyAttribute(lambda _: str(current_EC_year()))
+    gregorian_year: Any = LazyAttribute(lambda x: current_GC_year(int(x.ethiopian_year)))
+    academic_year: Any = LazyAttribute(lambda x: academic_year(int(x.ethiopian_year)))
     start_date: Any = LazyAttribute(lambda _: fake.past_date())
     end_date: Any = LazyAttribute(lambda _: fake.future_date())
     status: Any = LazyAttribute(lambda _: AcademicYearStatusEnum.ACTIVE)

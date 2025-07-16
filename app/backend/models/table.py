@@ -3,7 +3,7 @@
 
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column, scoped_session, Session
-from models.base_model import BaseModel
+from models.base.base_model import BaseModel
 from sqlalchemy import inspect, Engine, select
 
 

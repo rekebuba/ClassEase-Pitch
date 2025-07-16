@@ -10,9 +10,11 @@ from sqlalchemy import (
     Text,
     Enum,
 )
-from models.base_model import BaseModel
+from models.base.base_model import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from extension.enums.enum import BloodTypeEnum, GenderEnum, StudentApplicationStatusEnum
+from models.base.column_type import UUIDType
+import uuid
 
 if TYPE_CHECKING:
     from models.grade import Grade
@@ -31,8 +33,8 @@ class Student(BaseModel):
     __tablename__ = "students"
 
     # Personal Information
-    starting_grade_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("grades.id"), nullable=False
+    starting_grade_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(), ForeignKey("grades.id"), nullable=False
     )
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
     father_name: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -125,8 +127,8 @@ class Student(BaseModel):
         default=StudentApplicationStatusEnum.PENDING,
     )
 
-    user_id: Mapped[str] = mapped_column(
-        String(36),
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(),
         ForeignKey("users.id"),
         unique=True,
         nullable=True,

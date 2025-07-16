@@ -2,10 +2,12 @@
 """Module for Subject class"""
 
 from typing import TYPE_CHECKING, List, Optional
+import uuid
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from models.assessment import Assessment
-from models.base_model import BaseModel
+from models.base.base_model import BaseModel
+from models.base.column_type import UUIDType
 
 if TYPE_CHECKING:
     from models.teacher_record import TeachersRecord
@@ -14,18 +16,17 @@ if TYPE_CHECKING:
     from models.grade import Grade
     from models.stream import Stream
     from models.year import Year
-    from models.section import Section
 
 
 class YearlySubject(BaseModel):
     __tablename__ = "yearly_subjects"
 
     subject_code: Mapped[str] = mapped_column(String(25), nullable=False)
-    year_id: Mapped[str] = mapped_column(String(36), ForeignKey("years.id"))
-    subject_id: Mapped[str] = mapped_column(String(36), ForeignKey("subjects.id"))
-    grade_id: Mapped[str] = mapped_column(String(36), ForeignKey("grades.id"))
+    year_id: Mapped[uuid.UUID] = mapped_column(UUIDType(), ForeignKey("years.id"))
+    subject_id: Mapped[uuid.UUID] = mapped_column(UUIDType(), ForeignKey("subjects.id"))
+    grade_id: Mapped[uuid.UUID] = mapped_column(UUIDType(), ForeignKey("grades.id"))
     stream_id: Mapped[Optional[str]] = mapped_column(
-        String(36),
+        UUIDType(),
         ForeignKey("streams.id"),
         nullable=True,
         default=None,

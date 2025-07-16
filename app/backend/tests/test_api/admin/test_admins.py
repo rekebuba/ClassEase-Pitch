@@ -16,6 +16,7 @@ from models.user import User
 from models.year import Year
 from tests.factories.api.new_user_factory import NewUserFactory
 from tests.factories.models import AdminFactory, EventFactory, QueryFactory
+from tests.test_api.dynamic_schema import DynamicSchema
 from tests.test_api.fixtures.admin_fixtures import AllStudentViewsResponse
 from flask.testing import FlaskClient
 
@@ -53,10 +54,12 @@ class TestAdmin:
         assert response.status_code == 201
         assert response.json is not None
 
-        try:
-            SucssussfulRegistrationResponse.model_validate(response.json)
-        except Exception as e:
-            pytest.fail(f"Response validation failed: {str(e)}")
+        DynamicSchema.validate_response(
+            response_data=response.json,
+            base_model=AdminSchema,
+            expected_fields=["id"],
+            type="dict",
+        )
 
     def test_admin_link_to_user(
         self,

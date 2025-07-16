@@ -19,9 +19,11 @@ from extension.enums.enum import (
     EventOrganizerEnum,
     EventPurposeEnum,
 )
-from models.base_model import BaseModel
+from models.base.base_model import BaseModel
 from sqlalchemy.orm import relationship
 from typing import TYPE_CHECKING
+from models.base.column_type import UUIDType
+import uuid
 
 if TYPE_CHECKING:
     from models.year import Year
@@ -31,8 +33,8 @@ class Event(BaseModel):
     """docstring for Event."""
 
     __tablename__ = "events"
-    year_id: Mapped[str] = mapped_column(
-        String(125), ForeignKey("years.id"), nullable=False
+    year_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(), ForeignKey("years.id"), nullable=False
     )
 
     title: Mapped[str] = mapped_column(String(100), nullable=False)

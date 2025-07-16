@@ -79,6 +79,8 @@ def validate_fields(
                 # If no fields are requested, use default fields
                 requested_fields = default_fields
 
+            requested_fields.add("id")  # Ensure 'id' is always included
+
             return f(*args, requested_fields, **kwargs)
 
         return wrapped

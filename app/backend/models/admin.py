@@ -5,7 +5,10 @@ from typing import TYPE_CHECKING, Optional
 from sqlalchemy import Date, Enum, String, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from extension.enums.enum import GenderEnum
-from models.base_model import BaseModel
+from models.base.base_model import BaseModel
+
+from models.base.column_type import UUIDType
+import uuid
 
 if TYPE_CHECKING:
     from models.user import User
@@ -33,8 +36,8 @@ class Admin(BaseModel):
     email: Mapped[str] = mapped_column(String(120), nullable=False)
     phone: Mapped[str] = mapped_column(String(25), nullable=False)
     address: Mapped[str] = mapped_column(Text, nullable=False)
-    user_id: Mapped[str] = mapped_column(
-        String(36),
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(),
         ForeignKey("users.id"),
         nullable=True,
         default=None,

@@ -21,6 +21,7 @@ from extension.pydantic.models.student_schema import StudentWithRelationshipsSch
 
 from extension.pydantic.models.subject_schema import SubjectSchema
 from extension.pydantic.models.teacher_schema import TeacherWithRelationshipsSchema
+from extension.pydantic.response.schema import success_response
 from models import storage
 from api.v1.views import errors
 from models.admin import Admin
@@ -86,12 +87,18 @@ def register_new_admin() -> Tuple[Response, int]:
         storage.session.add(new_admin)
         storage.session.commit()
 
-        response = SucssussfulRegistrationResponse(
-            message="Admin Registered Successfully!",
-            id=new_admin.id,
+        # Validate and parse the incoming JSON
+        new_admin_data = AdminSchema.model_validate(new_admin)
+
+        # Convert to dictionary before unpacking
+        new_admin_dict = new_admin_data.model_dump(include={"id"})
+
+        return success_response(
+            message="Admin Registered Successfully",
+            data=new_admin_dict,
+            status=201,
         )
 
-        return jsonify(response.model_dump()), 201
     except ValidationError as e:
         return errors.handle_validation_error(error=e)
     except SQLAlchemyError as e:

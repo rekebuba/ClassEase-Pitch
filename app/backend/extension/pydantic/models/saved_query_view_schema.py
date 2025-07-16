@@ -1,4 +1,5 @@
 from __future__ import annotations
+import uuid
 from typing import TYPE_CHECKING, Optional, Any, Dict
 from pydantic import BaseModel, ConfigDict
 
@@ -20,8 +21,8 @@ class SavedQueryViewSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: str | None = None
-    user_id: str
+    id: uuid.UUID | None = None
+    user_id: uuid.UUID
     name: str
     table_name: TableEnum
     query_json: Dict[str, Any]

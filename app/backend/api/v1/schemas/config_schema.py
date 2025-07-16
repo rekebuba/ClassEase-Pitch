@@ -3,7 +3,7 @@ import re
 from sqlalchemy import Function, and_, false, func, or_, true
 from sqlalchemy.sql.elements import ColumnElement
 from api.v1.utils.typing import RangeDict
-from models.base_model import BaseModel
+from models.base.base_model import BaseModel
 from typing import Any, Callable, Dict, List, Type, Union, cast
 
 

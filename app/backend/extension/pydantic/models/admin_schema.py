@@ -1,4 +1,5 @@
 from __future__ import annotations
+import uuid
 from datetime import date
 from typing import TYPE_CHECKING, Optional
 from pydantic import BaseModel, ConfigDict
@@ -21,8 +22,8 @@ class AdminSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: str | None = None
-    user_id: Optional[str] = None
+    id: uuid.UUID | None = None
+    user_id: Optional[uuid.UUID] = None
     first_name: str
     father_name: str
     grand_father_name: str

@@ -3,11 +3,14 @@
 
 from datetime import date
 from typing import TYPE_CHECKING, List
-from sqlalchemy import String, ForeignKey, Date, Enum
+from sqlalchemy import ForeignKey, Date, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from extension.enums.enum import AcademicTermEnum
-from models.base_model import BaseModel
+from models.base.base_model import BaseModel
 import sqlalchemy as sa
+
+from models.base.column_type import UUIDType
+import uuid
 
 
 if TYPE_CHECKING:
@@ -20,8 +23,8 @@ class AcademicTerm(BaseModel):
     """docstring for AcademicTerm."""
 
     __tablename__ = "academic_terms"
-    year_id: Mapped[str] = mapped_column(
-        String(125), ForeignKey("years.id"), nullable=False
+    year_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(), ForeignKey("years.id"), nullable=False
     )
     name: Mapped[AcademicTermEnum] = mapped_column(
         Enum(

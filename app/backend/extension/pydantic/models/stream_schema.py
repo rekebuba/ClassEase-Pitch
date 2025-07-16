@@ -1,4 +1,5 @@
 from __future__ import annotations
+import uuid
 from typing import TYPE_CHECKING, Optional, List
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -22,8 +23,8 @@ class StreamSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: str | None = None
-    year_id: str
+    id: uuid.UUID | None = None
+    year_id: uuid.UUID
     name: str
 
     @classmethod
