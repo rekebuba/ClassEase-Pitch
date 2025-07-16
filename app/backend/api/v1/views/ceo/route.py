@@ -42,7 +42,7 @@ def link_to_user(CEO_data: CEO, id: str) -> Tuple[Response, int]:
 
         valid_role = getter()
         if not valid_role:
-            return jsonify({"message": "Invalid role ID provided"}), 400
+            return jsonify({"message": "Invalid ID provided"}), 400
 
         if valid_role.user_id:
             return jsonify({"message": "This role is already linked to a user"}), 400

@@ -3,17 +3,19 @@
 
 from dataclasses import dataclass
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import ForeignKey, String
-from models.base_model import Base
+from sqlalchemy import ForeignKey
+from models.base.base_model import Base
+from models.base.column_type import UUIDType
+import uuid
 
 
 @dataclass
 class GradeStreamLink(Base):
     __tablename__ = "grade_stream_links"
 
-    grade_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("grades.id"), primary_key=True
+    grade_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(), ForeignKey("grades.id"), primary_key=True
     )
-    stream_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("streams.id"), primary_key=True
+    stream_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(), ForeignKey("streams.id"), primary_key=True
     )

@@ -15,7 +15,7 @@ def check_password(stored_password: str, provided_password: str) -> bool:
     )
 
 
-def create_token(user_id: str, role: RoleEnum) -> str:
+def create_token(user_id: uuid.UUID, role: RoleEnum) -> str:
     """
     Generate a JWT token for a user based on their role.
 
@@ -36,7 +36,7 @@ def create_token(user_id: str, role: RoleEnum) -> str:
 
     # Create the payload
     payload = {
-        "id": user_id,
+        "id": str(user_id),
         "exp": datetime.utcnow() + timedelta(minutes=720),  # 12 hours expiration
         "role": role.value,
         "jti": str(uuid.uuid4()),  # Unique token identifier

@@ -1,4 +1,5 @@
 from __future__ import annotations
+import uuid
 from pydantic import BaseModel, ConfigDict
 
 from extension.functions.helper import to_camel
@@ -15,6 +16,6 @@ class TeacherSubjectLinkSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: str | None = None
-    teacher_id: str
-    subject_id: str
+    id: uuid.UUID | None = None
+    teacher_id: uuid.UUID
+    subject_id: uuid.UUID

@@ -1,4 +1,5 @@
 from __future__ import annotations
+import uuid
 from typing import TYPE_CHECKING, Optional, List
 from pydantic import BaseModel, ConfigDict
 
@@ -24,11 +25,11 @@ class StudentYearRecordSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: str | None = None
-    student_id: str
-    grade_id: str
-    year_id: str
-    stream_id: Optional[str] = None
+    id: uuid.UUID | None = None
+    student_id: uuid.UUID
+    grade_id: uuid.UUID
+    year_id: uuid.UUID
+    stream_id: Optional[uuid.UUID] = None
     final_score: Optional[float] = None
     rank: Optional[int] = None
 

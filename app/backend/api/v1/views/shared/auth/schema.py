@@ -1,4 +1,5 @@
 from typing import Any, Dict
+import uuid
 import bcrypt
 from pydantic import BaseModel, ConfigDict
 from api.v1.utils.typing import AuthType
@@ -35,9 +36,7 @@ class AuthResponseSchema(BaseModel):
     )
 
     api_key: str
-    message: str
-    id: str
-    role: str
+    id: uuid.UUID
 
 
 # class AuthSchema(BaseSchema):

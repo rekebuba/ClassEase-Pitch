@@ -11,6 +11,7 @@ from api.v1.views.utils import student_teacher_or_admin_required
 from api.v1.utils.typing import UserT
 from api.v1.views.shared import auths as auth
 from extension.pydantic.models.user_schema import UserSchema
+from extension.pydantic.response.schema import success_response
 from models import storage
 from models.blacklist_token import BlacklistToken
 from api.v1.views.shared.auth.schema import (
@@ -46,14 +47,14 @@ def login() -> Tuple[Response, int]:
         # Generate an api_key token based on the user's role
         api_key = create_token(user_schema.id, user_schema.role)
 
-        response = AuthResponseSchema(
-            message="logged in successfully.",
+        auth_response = AuthResponseSchema(
             api_key=api_key,
             id=user_schema.id,
-            role=user_schema.role,
-        ).model_dump(by_alias=True)
-
-        return jsonify(response), 200
+        )
+        return success_response(
+            message="logged in Successful.",
+            data=auth_response,
+        )
     except ValidationError as e:
         return errors.handle_validation_error(error=e)
     except InvalidCredentialsError as e:

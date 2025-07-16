@@ -58,8 +58,9 @@ class TestYearsApi:
 
         if expected_status == 200:
             expected_fields = (
-                fields if fields is not None else YearSchema.default_fields()
+                fields if fields is not None else list(YearSchema.default_fields())
             )
+            # insure id is always included
             DynamicSchema.validate_response(
                 response_data=response.json,
                 base_model=YearSchema,

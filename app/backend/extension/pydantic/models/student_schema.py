@@ -1,4 +1,5 @@
 from __future__ import annotations
+import uuid
 from typing import TYPE_CHECKING, Optional, List
 from pydantic import BaseModel, ConfigDict
 from datetime import date
@@ -27,7 +28,7 @@ class StudentSchema(BaseModel):
     )
 
     id: Optional[str] = None
-    starting_grade_id: str
+    starting_grade_id: uuid.UUID
     first_name: str
     father_name: str
     date_of_birth: date
@@ -59,7 +60,7 @@ class StudentSchema(BaseModel):
     has_disability: bool = False
     is_transfer: bool = False
     status: StudentApplicationStatusEnum = StudentApplicationStatusEnum.PENDING
-    user_id: Optional[str] = None
+    user_id: Optional[uuid.UUID] = None
 
 
 class StudentRelationshipSchema(BaseModel):

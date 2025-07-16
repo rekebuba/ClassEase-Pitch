@@ -4,10 +4,12 @@
 from sqlalchemy import Enum, String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from extension.enums.enum import GradeLevelEnum
-from models.base_model import BaseModel
+from models.base.base_model import BaseModel
 from typing import TYPE_CHECKING, List
 
 
+from models.base.column_type import UUIDType
+import uuid
 if TYPE_CHECKING:
     from models.stream import Stream
     from models.student import Student
@@ -25,8 +27,8 @@ class Grade(BaseModel):
     __tablename__ = "grades"
 
     # Database column
-    year_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("years.id"), nullable=False, index=True
+    year_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(), ForeignKey("years.id"), nullable=False, index=True
     )
     grade: Mapped[str] = mapped_column(String(25), unique=True, nullable=False)
     level: Mapped[GradeLevelEnum] = mapped_column(

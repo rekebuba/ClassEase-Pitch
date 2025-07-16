@@ -1,4 +1,5 @@
 from __future__ import annotations
+import uuid
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
@@ -16,8 +17,8 @@ class RegistrationSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: str | None = None
-    student_id: str
-    subject_id: str
-    semester_id: str
+    id: uuid.UUID | None = None
+    student_id: uuid.UUID
+    subject_id: uuid.UUID
+    semester_id: uuid.UUID
     registration_date: datetime

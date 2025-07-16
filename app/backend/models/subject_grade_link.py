@@ -1,10 +1,11 @@
 #!/usr/bin/python3
 
 from dataclasses import dataclass
-from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlmodel import ForeignKey
-from models.base_model import Base
+from models.base.base_model import Base
+from models.base.column_type import UUIDType
+import uuid
 
 
 @dataclass
@@ -13,15 +14,15 @@ class SubjectGradeLink(Base):
 
     __tablename__ = "subject_grade_links"
 
-    subject_id: Mapped[str] = mapped_column(
+    subject_id: Mapped[uuid.UUID] = mapped_column(
         "subject_id",
-        String(36),
+        UUIDType(),
         ForeignKey("subjects.id"),
         primary_key=True,
     )
-    grade_id: Mapped[str] = mapped_column(
+    grade_id: Mapped[uuid.UUID] = mapped_column(
         "grade_id",
-        String(36),
+        UUIDType(),
         ForeignKey("grades.id"),
         primary_key=True,
     )

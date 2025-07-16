@@ -1,4 +1,5 @@
 from __future__ import annotations
+import uuid
 from datetime import date
 from typing import TYPE_CHECKING, List, Optional
 from pydantic import BaseModel, ConfigDict
@@ -27,7 +28,7 @@ class TeacherSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: str | None = None
+    id: uuid.UUID | None = None
     first_name: str
     father_name: str
     grand_father_name: str
@@ -94,7 +95,7 @@ class TeacherSchema(BaseModel):
     additional_comments: Optional[str] = None
     agree_to_terms: bool = False
     agree_to_background_check: bool = False
-    user_id: Optional[str] = None
+    user_id: Optional[uuid.UUID] = None
     status: StatusEnum = StatusEnum.PENDING
 
 

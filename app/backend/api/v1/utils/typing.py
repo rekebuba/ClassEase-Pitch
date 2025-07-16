@@ -3,7 +3,7 @@ from typing import Any, Callable, List, Optional, TypeVar, TypedDict, Union
 from sqlalchemy import ColumnElement, UnaryExpression
 from extension.enums.enum import RoleEnum
 from models.user import User
-from models.base_model import Base
+from models.base.base_model import Base
 
 T = TypeVar("T")  # Fully generic
 

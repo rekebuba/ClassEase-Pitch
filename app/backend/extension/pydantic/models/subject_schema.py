@@ -1,4 +1,5 @@
 from __future__ import annotations
+import uuid
 from typing import TYPE_CHECKING, List
 from pydantic import BaseModel, ConfigDict, Field
 from extension.functions.helper import to_camel
@@ -21,7 +22,7 @@ class SubjectSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: str | None = None
+    id: uuid.UUID | None = None
     name: str
     code: str
 

@@ -4,8 +4,10 @@
 from typing import TYPE_CHECKING, List
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from models.base_model import BaseModel
+from models.base.base_model import BaseModel
 
+from models.base.column_type import UUIDType
+import uuid
 if TYPE_CHECKING:
     from models.student_term_record import StudentTermRecord
     from models.teacher_record import TeachersRecord
@@ -19,8 +21,8 @@ class Section(BaseModel):
     """
 
     __tablename__ = "sections"
-    year_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("years.id"), nullable=False, index=True
+    year_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(), ForeignKey("years.id"), nullable=False, index=True
     )
     section: Mapped[str] = mapped_column(
         String(1), nullable=True, default=None

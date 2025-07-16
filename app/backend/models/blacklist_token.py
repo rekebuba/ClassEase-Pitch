@@ -2,7 +2,7 @@
 """Module for Grade class"""
 
 from sqlalchemy import String
-from models.base_model import BaseModel
+from models.base.base_model import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column
 
 

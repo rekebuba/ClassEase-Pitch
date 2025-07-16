@@ -1,4 +1,5 @@
 from __future__ import annotations
+import uuid
 from datetime import date, datetime
 from typing import TYPE_CHECKING, List
 from pydantic import BaseModel, ConfigDict
@@ -25,10 +26,10 @@ class YearSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: str | None = None
+    id: uuid.UUID | None = None
     calendar_type: AcademicTermTypeEnum
     academic_year: str
-    ethiopian_year: int
+    ethiopian_year: str
     gregorian_year: str
     start_date: date
     end_date: date

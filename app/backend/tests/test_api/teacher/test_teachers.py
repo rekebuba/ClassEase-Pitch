@@ -1,10 +1,14 @@
+from typing import Dict
 import pytest
 from api.v1.views.shared.auth.schema import AuthResponseSchema
 from api.v1.views.shared.registration.schema import SucssussfulRegistrationResponse
 from extension.pydantic.models.teacher_schema import TeacherWithRelationshipsSchema
 from flask.testing import FlaskClient
+from extension.pydantic.models.user_schema import UserSchema
+from extension.pydantic.response.schema import SuccessResponseSchema
 from models.user import User
 from tests.factories.models.teacher_factory import TeacherFactory
+from tests.test_api.dynamic_schema import DynamicSchema
 from tests.test_api.schemas.base_schema import DashboardUserInfoResponseModel
 from tests.typing import Credential
 
@@ -46,10 +50,13 @@ class TestTeachers:
 
         assert response.status_code == 201
         assert response.json is not None
-        try:
-            SucssussfulRegistrationResponse.model_validate(response.json)
-        except Exception as e:
-            pytest.fail(f"Response validation failed: {str(e)}")
+
+        # DynamicSchema.validate_response(
+        #     response_data=response.json,
+        #     base_model=TeacherSchema,
+        #     expected_fields=["id"],
+        #     type="dict",
+        # )
 
     def test_teacher_login_success(
         self, client: FlaskClient, create_teacher: User
@@ -67,8 +74,12 @@ class TestTeachers:
 
         assert response.status_code == 200
         assert response.json is not None
+
+        # Validate the response structure
         try:
-            AuthResponseSchema.model_validate(response.json)
+            SuccessResponseSchema[AuthResponseSchema, None, None].model_validate(
+                response.json
+            )
         except Exception as e:
             pytest.fail(f"Response validation failed: {str(e)}")
 

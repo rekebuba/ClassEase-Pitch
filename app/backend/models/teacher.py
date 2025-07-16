@@ -23,9 +23,11 @@ from extension.enums.enum import (
     ScheduleEnum,
     StatusEnum,
 )
-from models.base_model import BaseModel
+from models.base.base_model import BaseModel
 
 
+from models.base.column_type import UUIDType
+import uuid
 if TYPE_CHECKING:
     from models.user import User  # Avoid circular import
     from models.subject import Subject
@@ -211,8 +213,8 @@ class Teacher(BaseModel):
     agree_to_terms: Mapped[bool] = mapped_column(Boolean, default=False)
     agree_to_background_check: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    user_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("users.id"), unique=True, nullable=True, default=None
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(), ForeignKey("users.id"), unique=True, nullable=True, default=None
     )
 
     status: Mapped[StatusEnum] = mapped_column(

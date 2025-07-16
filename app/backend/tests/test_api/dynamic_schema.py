@@ -10,7 +10,7 @@ class DynamicSchema:
     @staticmethod
     def create_dynamic_model(
         base_model: Type[BaseModel],
-        include_fields: Iterable[str],
+        include_fields: List[str],
         *,
         extra_config: Optional[ConfigDict] = None,
     ) -> Type[BaseModel]:
@@ -56,7 +56,7 @@ class DynamicSchema:
         cls,
         response_data: Dict[str, Any],
         base_model: Type[BaseModel],
-        expected_fields: Iterable[str],
+        expected_fields: List[str],
         type: Literal["list", "dict"] = "dict",
     ) -> None:
         """
@@ -70,6 +70,10 @@ class DynamicSchema:
         Raises:
             AssertionError: If validation fails
         """
+
+        # ensure id is always included
+        expected_fields = list(set(expected_fields) | {"id"})
+
         DynamicModel = cls.create_dynamic_model(base_model, expected_fields)
 
         try:
@@ -106,7 +110,8 @@ class DynamicSchema:
         except ValidationError as e:
             errors = "\n".join(f"{err['loc']}: {err['msg']}" for err in e.errors())
             raise AssertionError(
-                f"Validation failed for {base_model.__name__} with fields {expected_fields}.\n"
+                f"Validation failed for {base_model.__name__}.\n"
+                f"Expected fields{expected_fields}.\n"
                 f"Response data: {response_data}\n"
                 f"Errors:\n{errors}"
             )

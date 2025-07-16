@@ -1,10 +1,12 @@
 #!/usr/bin/python3
 """Module for MarkList class"""
 
-from sqlalchemy import Enum, String, Integer, ForeignKey, Float
+from sqlalchemy import Enum, Integer, ForeignKey, Float
 from sqlalchemy.orm import Mapped, mapped_column
 from extension.enums.enum import MarkListTypeEnum
-from models.base_model import BaseModel
+from models.base.base_model import BaseModel
+from models.base.column_type import UUIDType
+import uuid
 
 
 class MarkList(BaseModel):
@@ -14,14 +16,14 @@ class MarkList(BaseModel):
 
     __tablename__ = "mark_lists"
 
-    student_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("students.id"), nullable=False
+    student_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(), ForeignKey("students.id"), nullable=False
     )
-    academic_term_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("academic_terms.id"), nullable=False
+    academic_term_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(), ForeignKey("academic_terms.id"), nullable=False
     )
-    yearly_subject_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("yearly_subjects.id"), nullable=False
+    yearly_subject_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(), ForeignKey("yearly_subjects.id"), nullable=False
     )
     type: Mapped[MarkListTypeEnum] = mapped_column(
         Enum(

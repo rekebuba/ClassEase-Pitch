@@ -2,9 +2,11 @@
 """Module for SubjectYearlyAverage class"""
 
 from typing import TYPE_CHECKING
-from sqlalchemy import String, Integer, ForeignKey, Float
-from models.base_model import BaseModel
+from sqlalchemy import Integer, ForeignKey, Float
+from models.base.base_model import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from models.base.column_type import UUIDType
+import uuid
 
 
 if TYPE_CHECKING:
@@ -15,14 +17,14 @@ if TYPE_CHECKING:
 
 class SubjectYearlyAverage(BaseModel):
     __tablename__ = "subject_yearly_averages"
-    student_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("students.id"), nullable=False
+    student_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(), ForeignKey("students.id"), nullable=False
     )
-    yearly_subject_id: Mapped[str] = mapped_column(
-        String(36), ForeignKey("yearly_subjects.id"), nullable=False
+    yearly_subject_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(), ForeignKey("yearly_subjects.id"), nullable=False
     )
-    student_year_record_id: Mapped[str] = mapped_column(
-        String(36),
+    student_year_record_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(),
         ForeignKey("student_year_records.id"),
         nullable=True,
     )

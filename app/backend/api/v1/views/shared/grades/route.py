@@ -1,4 +1,5 @@
 from typing import Set, Tuple
+import uuid
 from sqlalchemy import select
 from api.v1.utils.parameter import validate_fields
 from api.v1.utils.typing import UserT
@@ -15,10 +16,10 @@ from flask import Response, jsonify
 from models.year import Year
 
 
-@auth.route("/years/<string:year_id>/grades", methods=["GET"])
+@auth.route("/years/<uuid:year_id>/grades", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(GradeSchema, GradeSchema.default_fields())
-def grades(user: UserT, fields: Set[str], year_id: str) -> Tuple[Response, int]:
+def grades(user: UserT, fields: Set[str], year_id: uuid.UUID) -> Tuple[Response, int]:
     """
     Returns a list of all available grades in the system.
     """
@@ -31,6 +32,8 @@ def grades(user: UserT, fields: Set[str], year_id: str) -> Tuple[Response, int]:
         valid_grades = [
             schema.model_dump(by_alias=True, include=fields) for schema in grade_schemas
         ]
+        
+        print(valid_grades)
 
         return success_response(data=valid_grades)
 
@@ -42,7 +45,7 @@ def grades(user: UserT, fields: Set[str], year_id: str) -> Tuple[Response, int]:
         return errors.handle_internal_error(error=e)
 
 
-@auth.route("/years/<string:year_id>/grades/<string:grade_id>", methods=["GET"])
+@auth.route("/years/<uuid:year_id>/grades/<uuid:grade_id>", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(GradeSchema, GradeSchema.default_fields())
 def get_grade_by_id(

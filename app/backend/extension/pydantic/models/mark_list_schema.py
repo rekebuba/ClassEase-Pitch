@@ -1,4 +1,5 @@
 from __future__ import annotations
+import uuid
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
@@ -17,10 +18,10 @@ class MarkListSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: str | None = None
-    student_id: str
-    student_term_record_id: str
-    yearly_subject_id: str
+    id: uuid.UUID | None = None
+    student_id: uuid.UUID
+    student_term_record_id: uuid.UUID
+    yearly_subject_id: uuid.UUID
     type: MarkListTypeEnum
     percentage: Optional[float] = None
     score: Optional[float] = None

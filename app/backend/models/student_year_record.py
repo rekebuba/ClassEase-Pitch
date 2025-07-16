@@ -2,10 +2,12 @@
 """Module for StudentYearRecord class"""
 
 from typing import TYPE_CHECKING, List, Optional
-from sqlalchemy import Integer, String, ForeignKey, Float
+from sqlalchemy import Integer, ForeignKey, Float
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from models.base_model import BaseModel
+from models.base.base_model import BaseModel
 
+from models.base.column_type import UUIDType
+import uuid
 if TYPE_CHECKING:
     from models.grade import Grade
     from models.subject_yearly_average import SubjectYearlyAverage
@@ -21,17 +23,17 @@ class StudentYearRecord(BaseModel):
     """
 
     __tablename__ = "student_year_records"
-    student_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("students.id"), nullable=False
+    student_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(), ForeignKey("students.id"), nullable=False
     )
-    grade_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("grades.id"), nullable=False
+    grade_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(), ForeignKey("grades.id"), nullable=False
     )
-    year_id: Mapped[str] = mapped_column(
-        String(120), ForeignKey("years.id"), nullable=False
+    year_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(), ForeignKey("years.id"), nullable=False
     )
     stream_id: Mapped[Optional[str]] = mapped_column(
-        String(36),
+        UUIDType(),
         ForeignKey("streams.id"),
         nullable=True,
         default=None,

@@ -1,4 +1,5 @@
 from __future__ import annotations
+import uuid
 from pydantic import BaseModel, ConfigDict
 
 from extension.functions.helper import to_camel
@@ -15,5 +16,5 @@ class BlacklistTokenSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: str | None = None
+    id: uuid.UUID | None = None
     jti: str

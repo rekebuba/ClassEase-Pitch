@@ -1,4 +1,5 @@
 from __future__ import annotations
+import uuid
 from typing import TYPE_CHECKING, Optional, List
 from pydantic import BaseModel, ConfigDict
 
@@ -22,9 +23,9 @@ class TeacherRecordSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: str | None = None
-    teacher_id: str
-    academic_term_id: str
+    id: uuid.UUID | None = None
+    teacher_id: uuid.UUID
+    academic_term_id: uuid.UUID
 
 
 class TeacherRecordRelationshipSchema(BaseModel):
