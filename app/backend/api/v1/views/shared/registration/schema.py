@@ -1,3 +1,4 @@
+import uuid
 from marshmallow_sqlalchemy import SQLAlchemyAutoSchema, auto_field
 from pydantic import BaseModel, ConfigDict
 from api.v1.schemas.base_schema import BaseSchema
@@ -384,10 +385,10 @@ class DumpResultSchema(BaseSchema):
     message = fields.String(dump_only=True)
     user = fields.Nested(UserSchema(only=("identification", "role")), dump_only=True)
 
-class SucssussfulRegistrationResponse(BaseModel):
+
+class RegistrationResponse(BaseModel):
     """
     Schema for successful registration response.
     """
 
-    message: str
-    id: str
+    id: uuid.UUID

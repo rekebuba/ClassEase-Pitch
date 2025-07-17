@@ -1,5 +1,6 @@
 from typing import Set, Tuple
-from flask import Response, jsonify
+import uuid
+from flask import Response
 from pydantic import ValidationError
 from sqlalchemy import select
 from api.v1.utils.parameter import validate_fields
@@ -13,10 +14,12 @@ from models import storage
 from models.stream import Stream
 
 
-@auth.route("/years/<string:year_id>/streams", methods=["GET"])
+@auth.route("/years/<uuid:year_id>/streams", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(StreamSchema, StreamSchema.default_fields())
-def get_streams(user: UserT, fields: Set[str], year_id: str) -> Tuple[Response, int]:
+def get_streams(
+    user: UserT, fields: Set[str], year_id: uuid.UUID
+) -> Tuple[Response, int]:
     """
     Get all streams.
 
@@ -47,14 +50,14 @@ def get_streams(user: UserT, fields: Set[str], year_id: str) -> Tuple[Response, 
         return errors.handle_internal_error(error=e)
 
 
-@auth.route("/years/<string:year_id>/streams/<string:stream_id>", methods=["GET"])
+@auth.route("/years/<uuid:year_id>/streams/<uuid:stream_id>", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(StreamSchema, StreamSchema.default_fields())
 def get_stream_by_id(
     user: UserT,
     fields: Set[str],
-    year_id: str,
-    stream_id: str,
+    year_id: uuid.UUID,
+    stream_id: uuid.UUID,
 ) -> Tuple[Response, int]:
     """
     Get a stream by its ID.

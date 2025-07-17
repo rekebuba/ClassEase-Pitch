@@ -1,4 +1,5 @@
 from typing import Set, Tuple
+import uuid
 from sqlalchemy import select
 from api.v1.utils.parameter import validate_fields
 from api.v1.utils.typing import UserT
@@ -17,11 +18,11 @@ from flask import Response, jsonify
 from models.yearly_subject import YearlySubject
 
 
-@auth.route("/years/<string:year_id>/subjects", methods=["GET"])
+@auth.route("/years/<uuid:year_id>/subjects", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(SubjectSchema, SubjectSchema.default_fields())
 def get_available_subjects(
-    user: UserT, fields: Set[str], year_id: str
+    user: UserT, fields: Set[str], year_id: uuid.UUID
 ) -> Tuple[Response, int]:
     """
     Returns a list of all available subjects in the system.
@@ -48,14 +49,14 @@ def get_available_subjects(
         return errors.handle_internal_error(error=e)
 
 
-@auth.route("/years/<string:year_id>/subjects/<string:subject_id>", methods=["GET"])
+@auth.route("/years/<uuid:year_id>/subjects/<uuid:subject_id>", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(SubjectSchema, SubjectSchema.default_fields())
 def get_subject_by_id(
     user: UserT,
     fields: Set[str],
-    year_id: str,
-    subject_id: str,
+    year_id: uuid.UUID,
+    subject_id: uuid.UUID,
 ) -> Tuple[Response, int]:
     """Returns Subject model based on subject_id"""
     try:

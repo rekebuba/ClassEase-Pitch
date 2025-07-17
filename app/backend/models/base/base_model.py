@@ -37,7 +37,7 @@ class BaseModel(MappedAsDataclass, Base):
     __abstract__ = True  # Prevents SQLAlchemy from creating a table for this class
 
     # Dataclass fields (not mapped to SQLAlchemy)
-    id: Mapped[str] = mapped_column(
+    id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),
         default_factory=uuid.uuid4,
         primary_key=True,

@@ -7,11 +7,12 @@ import pytest
 from api.v1.views.admin.teacher.schema import DetailApplicationResponse
 from api.v1.views.admin.user.schema import NewUserSchema, SucssussfulLinkResponse
 from api.v1.views.shared.auth.schema import AuthResponseSchema
-from api.v1.views.shared.registration.schema import SucssussfulRegistrationResponse
+from api.v1.views.shared.registration.schema import RegistrationResponse
 from extension.enums.enum import RoleEnum
 from extension.pydantic.models.admin_schema import AdminSchema
 from extension.pydantic.models.teacher_schema import TeacherSchema
 from extension.pydantic.models.user_schema import UserWithRelationshipsSchema
+from extension.pydantic.response.schema import SuccessResponseSchema
 from models.user import User
 from models.year import Year
 from tests.factories.api.new_user_factory import NewUserFactory
@@ -54,12 +55,13 @@ class TestAdmin:
         assert response.status_code == 201
         assert response.json is not None
 
-        DynamicSchema.validate_response(
-            response_data=response.json,
-            base_model=AdminSchema,
-            expected_fields=["id"],
-            type="dict",
-        )
+        # Validate the response structure
+        try:
+            SuccessResponseSchema[RegistrationResponse, None, None].model_validate(
+                response.json
+            )
+        except Exception as e:
+            pytest.fail(f"Response validation failed: {str(e)}")
 
     def test_admin_link_to_user(
         self,
