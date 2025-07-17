@@ -1,4 +1,5 @@
 from typing import Set, Tuple
+import uuid
 from flask import Response
 from api.v1.utils.parameter import validate_fields
 from api.v1.utils.typing import UserT
@@ -39,17 +40,23 @@ def get_years(user: UserT, fields: Set[str]) -> Tuple[Response, int]:
         return errors.handle_internal_error(error=e)
 
 
-@auth.route("/years/<string:year_id>", methods=["GET"])
+@auth.route("/years/<uuid:year_id>", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(YearSchema, YearSchema.default_fields())
-def get_year_by_id(user: UserT, fields: Set[str], year_id: str) -> Tuple[Response, int]:
+def get_year_by_id(
+    user: UserT,
+    fields: Set[str],
+    year_id: uuid.UUID,
+) -> Tuple[Response, int]:
     """
     Returns specific academic year
     """
     try:
         year = storage.session.get(Year, year_id)
         if not year:
-            return errors.handle_not_found_error(message=f"Year with ID {year_id} not found.")
+            return errors.handle_not_found_error(
+                message=f"Year with ID {year_id} not found."
+            )
 
         year_schema = YearSchema.model_validate(year)
         valid_year = year_schema.model_dump(by_alias=True, include=fields, mode="json")

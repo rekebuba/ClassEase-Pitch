@@ -12,12 +12,15 @@ from api.v1.views.methods import parse_nested_form
 from api.v1.views.shared.registration.methods import create_role_based_user
 from api.v1.views.shared.registration.schema import (
     DumpResultSchema,
-    SucssussfulRegistrationResponse,
+    RegistrationResponse,
 )
 from extension.enums.enum import RoleEnum
 from extension.pydantic.models.admin_schema import AdminSchema
 from extension.pydantic.models.grade_schema import GradeSchema
-from extension.pydantic.models.student_schema import StudentWithRelationshipsSchema
+from extension.pydantic.models.student_schema import (
+    StudentSchema,
+    StudentWithRelationshipsSchema,
+)
 
 from extension.pydantic.models.subject_schema import SubjectSchema
 from extension.pydantic.models.teacher_schema import TeacherWithRelationshipsSchema
@@ -88,14 +91,11 @@ def register_new_admin() -> Tuple[Response, int]:
         storage.session.commit()
 
         # Validate and parse the incoming JSON
-        new_admin_data = AdminSchema.model_validate(new_admin)
-
-        # Convert to dictionary before unpacking
-        new_admin_dict = new_admin_data.model_dump(include={"id"})
+        new_admin_data = RegistrationResponse(id=new_admin.id)
 
         return success_response(
             message="Admin Registered Successfully",
-            data=new_admin_dict,
+            data=new_admin_data,
             status=201,
         )
 
@@ -118,11 +118,11 @@ def register_new_student() -> Tuple[Response, int]:
 
     try:
         # Validate and parse the incoming JSON
-        student_data = StudentWithRelationshipsSchema.model_validate(request.json)
+        student_data = StudentSchema.model_validate(request.json)
 
-        grades = storage.session.scalars(
+        grades = storage.session.scalar(
             select(Grade).where(Grade.id == student_data.starting_grade_id)
-        ).first()
+        )
 
         if not grades:
             raise ValueError(
@@ -138,12 +138,13 @@ def register_new_student() -> Tuple[Response, int]:
         storage.session.add(new_student)
         storage.session.commit()
 
-        response = SucssussfulRegistrationResponse(
-            message="Student Registered Successfully!",
-            id=new_student.id,
-        )
+        response = RegistrationResponse(id=new_student.id)
 
-        return jsonify(response.model_dump()), 201
+        return success_response(
+            message="Student Registered Successfully",
+            data=response,
+            status=201,
+        )
     except ValidationError as e:
         return errors.handle_validation_error(error=e)
     except SQLAlchemyError as e:
@@ -214,12 +215,13 @@ def register_new_teacher() -> Tuple[Response, int]:
 
         storage.session.commit()
 
-        response = SucssussfulRegistrationResponse(
-            message="Teacher Registered Successfully!",
-            id=new_teacher.id,
-        )
+        response = RegistrationResponse(id=new_teacher.id)
 
-        return jsonify(response.model_dump()), 201
+        return success_response(
+            message="Teacher Registered Successfully",
+            data=response,
+            status=201,
+        )
     except ValidationError as e:
         return errors.handle_validation_error(error=e)
     except SQLAlchemyError as e:

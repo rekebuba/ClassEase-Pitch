@@ -1,4 +1,5 @@
 from typing import Set, Tuple
+import uuid
 from flask import Response
 from pydantic import ValidationError
 from sqlalchemy import select
@@ -13,10 +14,12 @@ from models import storage
 from models.section import Section
 
 
-@auth.route("/years/<string:year_id>/sections", methods=["GET"])
+@auth.route("/years/<uuid:year_id>/sections", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(SectionSchema, SectionSchema.default_fields())
-def get_sections(user: UserT, fields: Set[str], year_id: str) -> Tuple[Response, int]:
+def get_sections(
+    user: UserT, fields: Set[str], year_id: uuid.UUID
+) -> Tuple[Response, int]:
     """
     Get all sections.
 
@@ -49,14 +52,14 @@ def get_sections(user: UserT, fields: Set[str], year_id: str) -> Tuple[Response,
         return errors.handle_internal_error(error=e)
 
 
-@auth.route("/years/<string:year_id>/sections/<string:section_id>", methods=["GET"])
+@auth.route("/years/<uuid:year_id>/sections/<uuid:section_id>", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(SectionSchema, SectionSchema.default_fields())
 def get_section_by_id(
     user: UserT,
     fields: Set[str],
-    year_id: str,
-    section_id: str,
+    year_id: uuid.UUID,
+    section_id: uuid.UUID,
 ) -> Tuple[Response, int]:
     """
     Get a section by its ID.

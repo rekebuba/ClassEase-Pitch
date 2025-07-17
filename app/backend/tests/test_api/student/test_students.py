@@ -2,8 +2,12 @@
 
 import pytest
 from api.v1.views.shared.auth.schema import AuthResponseSchema
-from api.v1.views.shared.registration.schema import SucssussfulRegistrationResponse
-from extension.pydantic.models.student_schema import StudentWithRelationshipsSchema
+from api.v1.views.shared.registration.schema import RegistrationResponse
+from extension.pydantic.models.student_schema import (
+    StudentSchema,
+    StudentWithRelationshipsSchema,
+)
+from extension.pydantic.response.schema import SuccessResponseSchema
 from models.academic_term import AcademicTerm
 from models.user import User
 from tests.factories.models import StudentFactory
@@ -31,7 +35,7 @@ class TestStudents:
             student_year_records=[],
         )
         # form_data = prepare_form_data(student)
-        student_schema = StudentWithRelationshipsSchema.model_validate(student)
+        student_schema = StudentSchema.model_validate(student)
         data = student_schema.model_dump(
             by_alias=True,
             exclude={
@@ -44,15 +48,18 @@ class TestStudents:
         )
         # Send a POST request to the registration endpoint
         response = client.post(
-            "/api/v1/student",
+            "/api/v1/students",
             json=data,
             content_type="application/json",
         )
 
         assert response.status_code == 201
         assert response.json is not None
+        # Validate the response structure
         try:
-            SucssussfulRegistrationResponse.model_validate(response.json)
+            SuccessResponseSchema[RegistrationResponse, None, None].model_validate(
+                response.json
+            )
         except Exception as e:
             pytest.fail(f"Response validation failed: {str(e)}")
 
