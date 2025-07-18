@@ -7,22 +7,13 @@ from api.v1.views.utils import admin_required
 from extension.pydantic.models.section_schema import SectionSchema
 from models.grade import Grade
 from models import storage
-from models.year import Year
 
 
-@admin.route(
-    "/academic_year/<string:year_id>/grade/<string:grade_id>/section", methods=["GET"]
-)
+@admin.route("grade/<uuid:grade_id>/section", methods=["GET"])
 @admin_required
-def get_section_for_grade(
-    user: UserT, year_id: str, grade_id: str
-) -> Tuple[Response, int]:
+def get_section_for_grade(user: UserT, grade_id: str) -> Tuple[Response, int]:
     """Get a specific academic year grade by ID."""
-    grade = storage.session.scalar(
-        select(Grade)
-        .join(Year, Year.id == Grade.year_id)
-        .where(Grade.id == grade_id, Year.id == year_id)
-    )
+    grade = storage.session.scalar(select(Grade).where(Grade.id == grade_id))
     if not grade:
         return jsonify({"error": "Grade not found"}), 404
 

@@ -21,23 +21,15 @@ def get_years(user: UserT, fields: Set[str]) -> Tuple[Response, int]:
     """
     Returns a list of all academic years in the system.
     """
-    try:
-        years = storage.session.scalars(select(Year)).all()
+    years = storage.session.scalars(select(Year)).all()
 
-        year_schemas = [YearSchema.model_validate(year) for year in years]
-        valid_years = [
-            schema.model_dump(by_alias=True, include=fields, mode="json")
-            for schema in year_schemas
-        ]
+    year_schemas = [YearSchema.model_validate(year) for year in years]
+    valid_years = [
+        schema.model_dump(by_alias=True, include=fields, mode="json")
+        for schema in year_schemas
+    ]
 
-        return success_response(data=valid_years)
-
-    except SQLAlchemyError as e:
-        storage.session.rollback()
-        return errors.handle_database_error(error=e)
-    except Exception as e:
-        storage.session.rollback()
-        return errors.handle_internal_error(error=e)
+    return success_response(data=valid_years)
 
 
 @auth.route("/years/<uuid:year_id>", methods=["GET"])
@@ -51,21 +43,13 @@ def get_year_by_id(
     """
     Returns specific academic year
     """
-    try:
-        year = storage.session.get(Year, year_id)
-        if not year:
-            return errors.handle_not_found_error(
-                message=f"Year with ID {year_id} not found."
-            )
+    year = storage.session.get(Year, year_id)
+    if not year:
+        return errors.handle_not_found_error(
+            message=f"Year with ID {year_id} not found."
+        )
 
-        year_schema = YearSchema.model_validate(year)
-        valid_year = year_schema.model_dump(by_alias=True, include=fields, mode="json")
+    year_schema = YearSchema.model_validate(year)
+    valid_year = year_schema.model_dump(by_alias=True, include=fields, mode="json")
 
-        return success_response(data=valid_year)
-
-    except SQLAlchemyError as e:
-        storage.session.rollback()
-        return errors.handle_database_error(error=e)
-    except Exception as e:
-        storage.session.rollback()
-        return errors.handle_internal_error(error=e)
+    return success_response(data=valid_year)

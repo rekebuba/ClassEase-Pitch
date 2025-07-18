@@ -1,6 +1,6 @@
 import random
 from typing import Any
-from factory import LazyAttribute, RelatedFactoryList
+from factory import LazyAttribute, SubFactory
 from sqlalchemy import select
 from extension.enums.enum import AllSubjectsEnum
 from models.subject import Subject
@@ -14,9 +14,11 @@ class SubjectFactory(BaseFactory[Subject]):
         model = Subject
         exclude = ("words", "prefix_length")
 
+    year: Any = SubFactory("tests.factories.models.year_factory.YearFactory")
     words: Any = LazyAttribute(lambda x: x.name.split())
     prefix_length = 3
 
+    year_id: Any = LazyAttribute(lambda x: x.year.id)
     name: Any = LazyAttribute(
         lambda _: random.choice(list(AllSubjectsEnum._value2member_map_))
     )

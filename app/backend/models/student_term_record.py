@@ -9,6 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.column_type import UUIDType
 import uuid
+
 if TYPE_CHECKING:
     from models.section import Section
     from models.academic_term import AcademicTerm

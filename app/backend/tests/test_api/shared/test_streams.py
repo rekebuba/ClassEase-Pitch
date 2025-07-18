@@ -60,7 +60,7 @@ class TestStreamsApi:
 
         if expected_status == 200:
             expected_fields = (
-                fields if fields is not None else StreamSchema.default_fields()
+                fields if fields is not None else list(StreamSchema.default_fields())
             )
             DynamicSchema.validate_response(
                 response_data=response.json,
@@ -113,7 +113,7 @@ class TestStreamsApi:
     ) -> None:
         """Test the API endpoint for retrieving a single grade by ID with various field selections."""
         stream_id = random.choice(streams).id
-        url = f"/api/v1/years/{academic_year.id}/streams/{stream_id}"
+        url = f"/api/v1/streams/{stream_id}"
         if fields:
             url += f"?fields={','.join(fields)}"
 
@@ -124,7 +124,7 @@ class TestStreamsApi:
 
         if expected_status == 200:
             expected_fields = (
-                fields if fields is not None else StreamSchema.default_fields()
+                fields if fields is not None else list(StreamSchema.default_fields())
             )
             DynamicSchema.validate_response(
                 response_data=response.json,
@@ -150,12 +150,11 @@ class TestStreamsApi:
     def test_get_stream_by_id_unauthorized(
         self,
         client: FlaskClient,
-        academic_year: Year,
         streams: List[StreamSchema],
     ) -> None:
         """Test that a 401 error is returned when no auth header is provided."""
         stream_id = random.choice(streams).id
-        url = f"/api/v1/years/{academic_year.id}/streams/{stream_id}"
+        url = f"/api/v1/streams/{stream_id}"
         response = client.get(url)
 
         assert response.status_code == 401
@@ -164,11 +163,10 @@ class TestStreamsApi:
         self,
         client: FlaskClient,
         random_auth_header: Credential,
-        academic_year: Year,
     ) -> None:
         """Test that a 404 error is returned for a non-existent stream ID."""
         non_existent_stream_id = 99999  # An ID that is unlikely to exist
-        url = f"/api/v1/years/{academic_year.id}/streams/{non_existent_stream_id}"
+        url = f"/api/v1/streams/{non_existent_stream_id}"
         response = client.get(url, headers=random_auth_header["header"])
 
         assert response.status_code == 404

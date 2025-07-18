@@ -111,7 +111,9 @@ class TestAdmin:
         assert response.json is not None
 
         try:
-            AuthResponseSchema.model_validate(response.json)
+            SuccessResponseSchema[AuthResponseSchema, None, None].model_validate(
+                response.json
+            )
         except Exception as e:
             pytest.fail(f"Response validation failed: {str(e)}")
 

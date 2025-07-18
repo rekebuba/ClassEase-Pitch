@@ -60,7 +60,7 @@ class TestGradesApi:
 
         if expected_status == 200:
             expected_fields = (
-                fields if fields is not None else GradeSchema.default_fields()
+                fields if fields is not None else list(GradeSchema.default_fields())
             )
             DynamicSchema.validate_response(
                 response_data=response.json,
@@ -113,7 +113,7 @@ class TestGradesApi:
     ) -> None:
         """Test the API endpoint for retrieving a single grade by ID with various field selections."""
         grade_id = random.choice(grades).id
-        url = f"/api/v1/years/{academic_year.id}/grades/{grade_id}"
+        url = f"/api/v1/grades/{grade_id}"
         if fields:
             url += f"?fields={','.join(fields)}"
 
@@ -124,7 +124,7 @@ class TestGradesApi:
 
         if expected_status == 200:
             expected_fields = (
-                fields if fields is not None else GradeSchema.default_fields()
+                fields if fields is not None else list(GradeSchema.default_fields())
             )
             DynamicSchema.validate_response(
                 response_data=response.json,
@@ -155,7 +155,7 @@ class TestGradesApi:
     ) -> None:
         """Test that a 401 error is returned when no auth header is provided."""
         grade_id = random.choice(grades).id
-        url = f"/api/v1/years/{academic_year.id}/grades/{grade_id}"
+        url = f"/api/v1/grades/{grade_id}"
         response = client.get(url)
 
         assert response.status_code == 401
@@ -168,7 +168,7 @@ class TestGradesApi:
     ) -> None:
         """Test that a 404 error is returned for a non-existent grade ID."""
         non_existent_grade_id = 99999  # An ID that is unlikely to exist
-        url = f"/api/v1/years/{academic_year.id}/grades/{non_existent_grade_id}"
+        url = f"/api/v1/grades/{non_existent_grade_id}"
         response = client.get(url, headers=random_auth_header["header"])
 
         assert response.status_code == 404

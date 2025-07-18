@@ -60,7 +60,7 @@ class TestSubjectsApi:
 
         if expected_status == 200:
             expected_fields = (
-                fields if fields is not None else SubjectSchema.default_fields()
+                fields if fields is not None else list(SubjectSchema.default_fields())
             )
             DynamicSchema.validate_response(
                 response_data=response.json,
@@ -103,7 +103,6 @@ class TestSubjectsApi:
     )
     def test_get_subject_by_id(
         self,
-        academic_year: Year,
         client: FlaskClient,
         subjects: List[SubjectSchema],
         random_auth_header: Credential,
@@ -113,7 +112,7 @@ class TestSubjectsApi:
     ) -> None:
         """Test the API endpoint for retrieving a single subject by ID with various field selections."""
         subject_id = random.choice(subjects).id
-        url = f"/api/v1/years/{academic_year.id}/subjects/{subject_id}"
+        url = f"/api/v1/subjects/{subject_id}"
         if fields:
             url += f"?fields={','.join(fields)}"
 
@@ -124,7 +123,7 @@ class TestSubjectsApi:
 
         if expected_status == 200:
             expected_fields = (
-                fields if fields is not None else SubjectSchema.default_fields()
+                fields if fields is not None else list(SubjectSchema.default_fields())
             )
             DynamicSchema.validate_response(
                 response_data=response.json,
@@ -150,12 +149,11 @@ class TestSubjectsApi:
     def test_get_subject_by_id_unauthorized(
         self,
         client: FlaskClient,
-        academic_year: Year,
         subjects: List[SubjectSchema],
     ) -> None:
         """Test that a 401 error is returned when no auth header is provided."""
         subject_id = random.choice(subjects).id
-        url = f"/api/v1/years/{academic_year.id}/subjects/{subject_id}"
+        url = f"/api/v1/subjects/{subject_id}"
         response = client.get(url)
 
         assert response.status_code == 401
@@ -164,11 +162,10 @@ class TestSubjectsApi:
         self,
         client: FlaskClient,
         random_auth_header: Credential,
-        academic_year: Year,
     ) -> None:
         """Test that a 404 error is returned for a non-existent subject ID."""
         non_existent_subject_id = 99999  # An ID that is unlikely to exist
-        url = f"/api/v1/years/{academic_year.id}/subjects/{non_existent_subject_id}"
+        url = f"/api/v1/subjects/{non_existent_subject_id}"
         response = client.get(url, headers=random_auth_header["header"])
 
         assert response.status_code == 404

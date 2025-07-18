@@ -4,6 +4,7 @@ from sqlalchemy.orm import scoped_session, Session
 from flask import Flask
 from flask.testing import FlaskClient
 import pytest
+from extension.enums.enum import RoleEnum
 from models import storage
 from typing import Iterator
 from models.year import Year
@@ -46,3 +47,15 @@ def academic_year(db_session: scoped_session[Session]) -> Year:
 
     # Create a default academic year if it doesn't exist
     return YearFactory.create()
+
+
+@pytest.fixture(scope="session")
+def mock_student(db_session: scoped_session[Session]) -> None:
+    """Fixture to create a mock student for testing."""
+    from tests.factories.models.user_factory import UserFactory
+
+    from tests.factories.models.student_factory import StudentFactory
+
+    # Create a mock student
+    # UserFactory.create_batch(role=RoleEnum.STUDENT, admin=None, teacher=None, size=5)
+    StudentFactory.create_batch(user=None, size=5)
