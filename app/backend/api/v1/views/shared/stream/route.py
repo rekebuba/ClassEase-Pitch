@@ -50,13 +50,12 @@ def get_streams(
         return errors.handle_internal_error(error=e)
 
 
-@auth.route("/years/<uuid:year_id>/streams/<uuid:stream_id>", methods=["GET"])
+@auth.route("/streams/<uuid:stream_id>", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(StreamSchema, StreamSchema.default_fields())
 def get_stream_by_id(
     user: UserT,
     fields: Set[str],
-    year_id: uuid.UUID,
     stream_id: uuid.UUID,
 ) -> Tuple[Response, int]:
     """
@@ -65,24 +64,16 @@ def get_stream_by_id(
     Args:
         stream_id (str): The ID of the stream.
     """
-    try:
-        stream = storage.session.scalar(
-            select(Stream).where(Stream.id == stream_id, Stream.year_id == year_id)
-        )
-        if not stream:
-            return errors.handle_not_found_error(message="Stream not found")
+    stream = storage.session.scalar(select(Stream).where(Stream.id == stream_id))
+    if not stream:
+        return errors.handle_not_found_error(message="Stream not found")
 
-        stream_schema = StreamSchema.model_validate(stream)
-        stream_response = stream_schema.model_dump(
-            by_alias=True,
-            exclude_none=True,
-            include=fields,
-            mode="json",
-        )
+    stream_schema = StreamSchema.model_validate(stream)
+    stream_response = stream_schema.model_dump(
+        by_alias=True,
+        exclude_none=True,
+        include=fields,
+        mode="json",
+    )
 
-        return success_response(data=stream_response)
-
-    except ValidationError as e:
-        return errors.handle_validation_error(error=e)
-    except Exception as e:
-        return errors.handle_internal_error(error=e)
+    return success_response(data=stream_response)

@@ -4,6 +4,8 @@ from flask.testing import FlaskClient
 import pytest
 from sqlalchemy import select
 
+from api.v1.views.shared.auth.schema import AuthResponseSchema
+from extension.pydantic.response.schema import SuccessResponseSchema
 from models.user import User
 from sqlalchemy.orm import scoped_session, Session
 
@@ -134,7 +136,15 @@ def get_auth_header(
     )
     assert response.status_code == 200, "Authentication failed"
     assert response.json is not None
-    assert "apiKey" in response.json
+    try:
+        valid_response = SuccessResponseSchema[
+            AuthResponseSchema, None, None
+        ].model_validate(response.json)
+    except Exception as e:
+        pytest.fail(f"Response validation failed: {str(e)}")
 
-    token = response.json["apiKey"]
+    token = valid_response.data.api_key
+    if not token:
+        pytest.fail("Authentication token is missing in the response")
+
     return {"header": {"apiKey": f"Bearer {token}"}}

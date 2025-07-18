@@ -3,10 +3,7 @@
 import pytest
 from api.v1.views.shared.auth.schema import AuthResponseSchema
 from api.v1.views.shared.registration.schema import RegistrationResponse
-from extension.pydantic.models.student_schema import (
-    StudentSchema,
-    StudentWithRelationshipsSchema,
-)
+from extension.pydantic.models.student_schema import StudentSchema
 from extension.pydantic.response.schema import SuccessResponseSchema
 from models.academic_term import AcademicTerm
 from models.user import User
@@ -26,7 +23,7 @@ class TestStudents:
     tests for the student-related API endpoints.
     """
 
-    def test_register_success(self, client: FlaskClient) -> None:
+    def test_register_success(self, client: FlaskClient, mock_student: None) -> None:
         """
         Test the student registration endpoint for successful registration.
         """
@@ -78,7 +75,9 @@ class TestStudents:
         assert response.status_code == 200
         assert response.json is not None
         try:
-            AuthResponseSchema.model_validate(response.json)
+            SuccessResponseSchema[AuthResponseSchema, None, None].model_validate(
+                response.json
+            )
         except Exception as e:
             pytest.fail(f"Response validation failed: {str(e)}")
 
