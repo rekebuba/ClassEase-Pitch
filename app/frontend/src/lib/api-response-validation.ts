@@ -149,13 +149,16 @@ export const TeacherSchema = z.object({
 
 export const GradeSchema = z.object({
     id: z.string().optional(),
+    year_id: z.string(),
     grade: z.string(),
     level: GradeLevelEnum,
+    has_stream: z.boolean(),
 });
 
 export const SubjectSchema = z.object({
     id: z.string().optional(),
     name: z.string(),
+    code: z.string(),
 });
 
 export const AcademicTermSchema = z.object({
@@ -221,6 +224,7 @@ export const SectionSchema = z.object({
 
 export const StreamSchema = z.object({
     id: z.string().optional(),
+    yearId: z.string(),
     name: z.string(),
 });
 
@@ -265,6 +269,11 @@ export const YearSchema = z.object({
     academicYear: z.string(),
     ethiopianYear: z.number(),
     gregorianYear: z.string().optional(),
+    startDate: z.string().datetime(),
+    endDate: z.string().datetime(),
+    status: z.string().optional(),
+    createdAt: z.string().datetime().optional(),
+    updatedAt: z.string().datetime().optional(),
 });
 
 export const YearlySubjectSchema = z.object({
@@ -292,3 +301,7 @@ export const UserWithAdminSchema = UserSchema.extend({ admin: AdminSchema });
 export const UserWithTeacherSchema = UserSchema.extend({ teacher: TeacherSchema });
 export const UserWithStudentSchema = UserSchema.extend({ student: StudentSchema });
 export type UserProfile = z.infer<typeof UserWithAdminSchema> | z.infer<typeof UserWithTeacherSchema> | z.infer<typeof UserWithStudentSchema>;
+
+export const GradeWithSectionsSchema = GradeSchema.extend({
+    sections: z.array(SectionSchema).optional()
+});

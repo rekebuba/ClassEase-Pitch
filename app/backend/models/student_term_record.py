@@ -2,7 +2,7 @@
 """Module for StudentTermRecord class"""
 
 from typing import TYPE_CHECKING, List
-from sqlalchemy import String, Integer, ForeignKey, Float
+from sqlalchemy import Integer, ForeignKey, Float
 from models.assessment import Assessment
 from models.base.base_model import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship

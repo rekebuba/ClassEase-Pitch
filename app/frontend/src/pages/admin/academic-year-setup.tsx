@@ -170,15 +170,15 @@ export default function AcademicYearSetup({
                             </div>
                             <div className="flex items-center gap-2">
                                 <div
-                                    className={`w-3 h-3 rounded-full ${academicYear.subjects?.length ? "bg-green-500" : "bg-gray-300"}`}
-                                />
-                                <span>Subjects</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div
                                     className={`w-3 h-3 rounded-full ${academicYear.grades?.length ? "bg-green-500" : "bg-gray-300"}`}
                                 />
                                 <span>Grades & Streams</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <div
+                                    className={`w-3 h-3 rounded-full ${academicYear.subjects?.length ? "bg-green-500" : "bg-gray-300"}`}
+                                />
+                                <span>Subjects</span>
                             </div>
                             <div className="flex items-center gap-2">
                                 <div className={`w-3 h-3 rounded-full ${validateForm() ? "bg-green-500" : "bg-gray-300"}`} />
@@ -195,13 +195,13 @@ export default function AcademicYearSetup({
                             <Calendar className="h-4 w-4" />
                             Basic Info
                         </TabsTrigger>
-                        <TabsTrigger value="subjects" className="flex items-center gap-2">
-                            <BookOpen className="h-4 w-4" />
-                            Subjects
-                        </TabsTrigger>
                         <TabsTrigger value="grades" className="flex items-center gap-2">
                             <GraduationCap className="h-4 w-4" />
                             Grades & Streams
+                        </TabsTrigger>
+                        <TabsTrigger value="subjects" className="flex items-center gap-2">
+                            <BookOpen className="h-4 w-4" />
+                            Subjects
                         </TabsTrigger>
                         <TabsTrigger value="review" className="flex items-center gap-2">
                             <Settings className="h-4 w-4" />

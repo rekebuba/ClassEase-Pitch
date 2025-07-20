@@ -16,6 +16,7 @@ from extension.enums.enum import BloodTypeEnum, GenderEnum, StudentApplicationSt
 from models.base.column_type import UUIDType
 import uuid
 
+
 if TYPE_CHECKING:
     from models.grade import Grade
     from models.student_term_record import StudentTermRecord
@@ -23,6 +24,10 @@ if TYPE_CHECKING:
     from models.subject_yearly_average import SubjectYearlyAverage
     from models.user import User
     from models.assessment import Assessment
+    from models.year import Year
+    from models.section import Section
+    from models.stream import Stream
+    from models.academic_term import AcademicTerm
 
 
 class Student(BaseModel):
@@ -169,6 +174,42 @@ class Student(BaseModel):
     assessments: Mapped[List["Assessment"]] = relationship(
         "Assessment",
         back_populates="student",
+        default_factory=list,
+        repr=False,
+    )
+
+    year_links: Mapped[List["Year"]] = relationship(
+        "Year",
+        secondary="student_year_links",
+        back_populates="student_links",
+        default_factory=list,
+        repr=False,
+    )
+    academic_term_links: Mapped[List["AcademicTerm"]] = relationship(
+        "AcademicTerm",
+        secondary="student_academic_term_links",
+        back_populates="student_links",
+        default_factory=list,
+        repr=False,
+    )
+    stream_links: Mapped[List["Stream"]] = relationship(
+        "Stream",
+        secondary="student_stream_links",
+        back_populates="student_links",
+        default_factory=list,
+        repr=False,
+    )
+    grade_links: Mapped[List["Grade"]] = relationship(
+        "Grade",
+        secondary="student_grade_links",
+        back_populates="student_links",
+        default_factory=list,
+        repr=False,
+    )
+    section_links: Mapped[List["Section"]] = relationship(
+        "Section",
+        secondary="student_section_links",
+        back_populates="student_links",
         default_factory=list,
         repr=False,
     )

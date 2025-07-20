@@ -8,6 +8,13 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import {
     AlertDialog,
     AlertDialogContent,
     AlertDialogHeader,
@@ -17,9 +24,12 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Plus, X, BookOpen, Filter, CheckCircle, Edit } from "lucide-react"
+import { Plus, X, BookOpen, Filter, CheckCircle, Edit, Trash2, GraduationCap, Users, MoreHorizontal, Eye } from "lucide-react"
 import type { Subject } from "@/lib/academic-year"
 import { GradeLevelEnum } from "@/lib/enums"
+import { SubjectCard } from "./subject-card"
+import { SubjectFormDialog } from "./subject-form-dialog"
+import { SubjectDetailDialog } from "./subject-detail-dialog"
 
 interface SubjectManagementProps {
     suggestedSubjects: Subject[]
@@ -35,6 +45,15 @@ export default function SubjectManagement({ suggestedSubjects, subjects, onUpdat
     })
     const [editingSubject, setEditingSubject] = useState<Subject | null>(null)
     const [isAddingSubject, setIsAddingSubject] = useState(false)
+    const [searchTerm, setSearchTerm] = useState("")
+    const [categoryFilter, setCategoryFilter] = useState<string>("all")
+    const [gradeFilter, setGradeFilter] = useState<string>("all")
+    const [formDialogOpen, setFormDialogOpen] = useState(false)
+    const [detailDialogOpen, setDetailDialogOpen] = useState(false)
+    const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+    const [selectedSubject, setSelectedSubject] = useState<Subject | null>(null)
+    const [formMode, setFormMode] = useState<"create" | "edit">("create")
+
 
     const filteredSuggestions = useMemo(() => {
         if (selectedCategory === "all") {
@@ -97,6 +116,28 @@ export default function SubjectManagement({ suggestedSubjects, subjects, onUpdat
         }
     }
 
+    const handleCreate = () => {
+        setSelectedSubject(null)
+        setFormMode("create")
+        setFormDialogOpen(true)
+    }
+
+    const handleEdit = (subject: Subject) => {
+        setSelectedSubject(subject)
+        setFormMode("edit")
+        setFormDialogOpen(true)
+    }
+
+    const handleView = (subject: Subject) => {
+        setSelectedSubject(subject)
+        setDetailDialogOpen(true)
+    }
+
+    const handleDelete = (subject: Subject) => {
+        setSelectedSubject(subject)
+        setDeleteDialogOpen(true)
+    }
+
     return (
         <div className="space-y-6">
             <Card>
@@ -132,69 +173,44 @@ export default function SubjectManagement({ suggestedSubjects, subjects, onUpdat
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                         {filteredSuggestions.map((subject) => {
-                            const isAdded = subjects.find((s) => s.id === subject.id)
                             return (
-                                <Card
+                                <SubjectCard
                                     key={subject.id}
-                                    className={`p-3 transition-colors relative ${isAdded ? "bg-green-50 border-green-200" : "hover:bg-gray-50"
-                                        }`}
-                                >
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-1">
-                                                <Badge className="text-xs bg-purple-100 text-purple-800">
-                                                    <h4 className="font-medium text-sm">{subject.name}</h4>
-                                                </Badge>
-                                            </div>
-                                        </div>
-                                        <div className="flex gap-2">
-                                            <Button
-                                                size="sm"
-                                                variant={isAdded ? "outline" : "default"}
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    toggleSubject(subject)
-                                                }}
-                                            >
-                                                {isAdded ? <X className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    handleEditSubject(subject)
-                                                }}
-                                            >
-                                                <Edit className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2 flex-wrap mt-2">
-                                        {subject.grades.map((grade) => (
-                                            <Badge
-                                                key={grade}
-                                                variant="outline"
-                                                className="text-xs bg-gray-100 text-gray-800"
-                                            >
-                                                Grade {grade}
-                                            </Badge>
-                                        ))}
-                                    </div>
-                                    {isAdded && (
-                                        <div className="absolute bottom-2 right-2">
-                                            <CheckCircle className="h-5 w-5 text-green-500" />
-                                        </div>
-                                    )}
-                                </Card>
+                                    subject={subject}
+                                    grades={subject.grades}
+                                    onEdit={() => handleEdit(subject)}
+                                    onDelete={() => handleDelete(subject)}
+                                    onView={() => handleView(subject)}
+                                />
                             )
                         })}
                     </div>
                 </CardContent>
             </Card>
 
+            {/* Dialogs */}
+            <SubjectFormDialog
+                open={formDialogOpen}
+                onOpenChange={setFormDialogOpen}
+                subject={selectedSubject}
+                grades={subject.grade}
+                onSave={handleSave}
+                mode={formMode}
+            />
+
+            <SubjectDetailDialog
+                open={detailDialogOpen}
+                onOpenChange={setDetailDialogOpen}
+                subject={selectedSubject}
+                grades={mockGrades}
+                onEdit={() => {
+                    setDetailDialogOpen(false)
+                    handleEdit(selectedSubject!)
+                }}
+            />
+
             {/* Add Subject Dialog */}
-            <AlertDialog open={isAddingSubject} onOpenChange={setIsAddingSubject}>
+            {/* <AlertDialog open={isAddingSubject} onOpenChange={setIsAddingSubject}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Add Custom Subject</AlertDialogTitle>
@@ -235,10 +251,10 @@ export default function SubjectManagement({ suggestedSubjects, subjects, onUpdat
                         <Button onClick={addCustomSubject}>Add Subject</Button>
                     </AlertDialogFooter>
                 </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog> */}
 
             {/* Edit Subject Dialog */}
-            <AlertDialog open={!!editingSubject} onOpenChange={(isOpen) => !isOpen && setEditingSubject(null)}>
+            {/* <AlertDialog open={!!editingSubject} onOpenChange={(isOpen) => !isOpen && setEditingSubject(null)}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Edit Subject</AlertDialogTitle>
@@ -282,7 +298,7 @@ export default function SubjectManagement({ suggestedSubjects, subjects, onUpdat
                         </div>
                     )}
                 </AlertDialogContent>
-            </AlertDialog>
+            </AlertDialog> */}
         </div>
     )
 }

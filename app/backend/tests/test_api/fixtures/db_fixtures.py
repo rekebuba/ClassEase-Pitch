@@ -57,5 +57,7 @@ def mock_student(db_session: scoped_session[Session]) -> None:
     from tests.factories.models.student_factory import StudentFactory
 
     # Create a mock student
-    # UserFactory.create_batch(role=RoleEnum.STUDENT, admin=None, teacher=None, size=5)
-    StudentFactory.create_batch(user=None, size=5)
+    student_user = UserFactory.create(
+        role=RoleEnum.STUDENT, admin=None, teacher=None, size=5
+    )
+    student = StudentFactory.create(user=student_user)
