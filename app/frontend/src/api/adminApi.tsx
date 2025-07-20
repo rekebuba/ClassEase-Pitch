@@ -39,6 +39,7 @@ export const adminApi = {
     fetchTeachersApplications: () => api.get('/admin/teacher/applications'),
     detailTeachersApplications: (applicationId: string) => api.get(`/admin/teacher/applications/${applicationId}`),
     updateTeacherApplicationStatus: (applicationId: string, newStatus: string) => api.put(`/admin/teacher/applications/${applicationId}`, { status: newStatus }),
+    
 };
 
 export const getStudents = async (validQuery: SearchParams) => {

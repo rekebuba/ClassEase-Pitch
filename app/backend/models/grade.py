@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, List
 
 from models.base.column_type import UUIDType
 import uuid
+
 if TYPE_CHECKING:
     from models.stream import Stream
     from models.student import Student
@@ -93,6 +94,14 @@ class Grade(BaseModel):
         "Subject",
         back_populates="grade_links",
         secondary="subject_grade_links",
+        default_factory=list,
+        repr=False,
+    )
+
+    student_links: Mapped[List["Student"]] = relationship(
+        "Student",
+        secondary="student_grade_links",
+        back_populates="grade_links",
         default_factory=list,
         repr=False,
     )

@@ -9,12 +9,15 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.column_type import UUIDType
 import uuid
+
+
 if TYPE_CHECKING:
     from models.yearly_subject import YearlySubject
     from models.grade import Grade
     from models.student_year_record import StudentYearRecord
     from models.subject import Subject
     from models.year import Year
+    from models.student import Student
 
 
 class Stream(BaseModel):
@@ -55,6 +58,14 @@ class Stream(BaseModel):
         "Subject",
         back_populates="stream_links",
         secondary="subject_stream_links",
+        default_factory=list,
+        repr=False,
+    )
+
+    student_links: Mapped[List["Student"]] = relationship(
+        "Student",
+        secondary="student_stream_links",
+        back_populates="stream_links",
         default_factory=list,
         repr=False,
     )

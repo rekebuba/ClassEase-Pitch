@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from models.section import Section
     from models.stream import Stream
     from models.subject import Subject
+    from models.student import Student
 
 
 class Year(BaseModel):
@@ -94,4 +95,12 @@ class Year(BaseModel):
         back_populates="year",
         repr=False,
         default_factory=list,
+    )
+
+    student_links: Mapped[List["Student"]] = relationship(
+        "Student",
+        secondary="student_year_links",
+        back_populates="year_links",
+        default_factory=list,
+        repr=False,
     )

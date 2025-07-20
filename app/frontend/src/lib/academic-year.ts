@@ -16,7 +16,7 @@ export interface AcademicYear {
 export interface Grade {
     id: string
     name: string
-    level: number
+    level: string | number
     hasStreams: boolean
     streams: Stream[]
     maxSections: number
@@ -35,7 +35,7 @@ export interface Stream {
 export interface Subject {
     id: string
     name: string
-    code: string[]
+    code: string
     grades: string[]
 }
 
@@ -56,7 +56,14 @@ type Suggestion = {
     defaultSubjects: string[];
 };
 
-export const GRADE_SUGGESTIONS: Suggestion[] = Object.values(
+export const subjects = AllSubjects.map((subject) => ({
+    id: crypto.randomUUID(),
+    name: subject.subject,
+    code: subject.codes,
+    grades: subject.grades,
+}))
+
+export const GRADE_SUGGESTIONS: Grade[] = Object.values(
     allSubjectsData.reduce((acc, subject) => {
         const gradeKey = subject.grade.toString();
 
@@ -65,18 +72,18 @@ export const GRADE_SUGGESTIONS: Suggestion[] = Object.values(
                 name: `Grade ${subject.grade}`,
                 level: gradeKey,
                 hasStreams: false,
-                defaultSubjects: [],
+                subjects: [],
             };
         }
 
         if (subject.stream) {
             acc[gradeKey].hasStreams = true;
         } else {
-            acc[gradeKey].defaultSubjects.push(subject.subject);
+            acc[gradeKey].subjects.push(subject);
         }
 
         return acc;
-    }, {} as Record<string, Suggestion>)
+    }, {} as Record<string, Grade>)
 );
 
 

@@ -8,11 +8,14 @@ from models.base.base_model import BaseModel
 
 from models.base.column_type import UUIDType
 import uuid
+
+
 if TYPE_CHECKING:
     from models.student_term_record import StudentTermRecord
     from models.teacher_record import TeachersRecord
     from models.grade import Grade
     from models.year import Year
+    from models.student import Student
 
 
 class Section(BaseModel):
@@ -54,6 +57,14 @@ class Section(BaseModel):
         "Grade",
         back_populates="sections_link",
         secondary="grade_section_links",
+        default_factory=list,
+        repr=False,
+    )
+
+    student_links: Mapped[List["Student"]] = relationship(
+        "Student",
+        secondary="student_section_links",
+        back_populates="section_links",
         default_factory=list,
         repr=False,
     )

@@ -4,9 +4,13 @@ import { zodApiHandler } from './zod-api-handler';
 import { z } from 'zod';
 import { TeacherRegistrationFormData } from '@/lib/form-validation';
 import { RoleEnumType } from '@/lib/enums';
-import { UserWithAdminSchema, UserWithTeacherSchema, UserWithStudentSchema, UserProfile } from "@/lib/api-response-validation";
+import { UserWithAdminSchema, UserWithTeacherSchema, UserWithStudentSchema, UserProfile, SubjectSchema, GradeSchema, YearSchema, StreamSchema } from "@/lib/api-response-validation";
 const sharedApi = {
     getDashboardData: () => api.get('/'),
+    getAcademicYears: async () => zodApiHandler(() => api.get('/academic_years'), YearSchema.array()),
+    getSubjects: async () => zodApiHandler(() => api.get('/subjects'), SubjectSchema.array()),
+    getGrades: async () => zodApiHandler(() => api.get('/grades'), GradeSchema.array()),
+    getStreams: async () => zodApiHandler(() => api.get('/streams'), StreamSchema.array()),
     getStudentAssessment: (requirements) => api.get('/student/assessment', { params: requirements }),
     getStudentAssessmentDetail: (requirements) => api.get('/student/assessment/detail', { params: requirements }),
     updateProfile: (data) => api.post('/upload/profile', data, { headers: { 'Content-Type': 'multipart/form-data' } }),

@@ -50,6 +50,18 @@ export const GenderEnum = z.enum([
     "female",
 ]);
 
+export const BloodTypeEnum = z.enum([
+    "A+",
+    "A-",
+    "B+",
+    "B-",
+    "AB+",
+    "AB-",
+    "O+",
+    "O-",
+    "unknown",
+]);
+
 export const MaritalStatusEnum = z.enum([
     "single",
     "married",
@@ -126,6 +138,12 @@ export const AcademicTermTypeEnum = z.enum([
     "Quarter"
 ]);
 
+export const AcademicYearStatusEnum = z.enum([
+    "upcoming",
+    "active",
+    "completed",
+    "archived",
+])
 
 export type RoleEnumType = z.infer<typeof RoleEnum>;
 export type TableEnumType = z.infer<typeof TableEnum>;
@@ -140,3 +158,5 @@ export type ScheduleEnumType = z.infer<typeof ScheduleEnum>;
 export type GradeLevelEnumType = z.infer<typeof GradeLevelEnum>;
 export type StatusEnumType = z.infer<typeof StatusEnum>;
 export type HighestDegreeEnumType = z.infer<typeof HighestDegreeEnum>;
+export type AcademicTermEnumType = z.infer<typeof AcademicTermTypeEnum>;
+export type AcademicYearStatusEnumType = z.infer<typeof AcademicYearStatusEnum>;
