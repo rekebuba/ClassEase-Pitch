@@ -26,7 +26,7 @@ COPY --from=builder /opt/.venv .venv
 COPY . .
 
 # Activate venv globally for this container
-ENV PATH="/ClassEase-Pitch/.venv/bin:$PATH"
+ENV PATH="/ClassEase-Pitch/app/backend/.venv/bin:$PATH"
 
 # Expose Flask port
 EXPOSE 5000
