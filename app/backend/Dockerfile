@@ -1,32 +1,19 @@
-# Stage 1: Builder
-FROM python:3.12-bookworm AS builder
-
-# Install uv globally
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-
-# Set working directory for building dependencies
-WORKDIR /opt
-
-# Copy only dependency files (to leverage Docker cache)
-COPY pyproject.toml .
-
-# Sync dependencies (this creates `.venv` in /build/.venv)
-RUN uv sync -v
-
-# Stage 2: Runtime
 FROM python:3.12-bookworm
 
 # Set working directory for the app
 WORKDIR /ClassEase-Pitch
 
-# Copy only the `.venv` from builder
-COPY --from=builder /opt/.venv .venv
+# Install uv globally
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # Copy the actual app source
 COPY . .
 
+# Sync dependencies (this creates `.venv`)
+RUN uv sync
+
 # Activate venv globally for this container
-ENV PATH="/ClassEase-Pitch/app/backend/.venv/bin:$PATH"
+ENV PATH="/ClassEase-Pitch/.venv/bin:$PATH"
 
 # Expose Flask port
 EXPOSE 5000
