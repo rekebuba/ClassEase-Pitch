@@ -32,6 +32,14 @@ class AcademicTermSchema(BaseModel):
     registration_start: Optional[date] = None
     registration_end: Optional[date] = None
 
+    @classmethod
+    def default_fields(cls) -> set[str]:
+        """
+        Returns a list of default fields to be used when no specific fields are requested.
+        This can be overridden in subclasses if needed.
+        """
+        return {"id", "name", "start_date", "end_date"}
+
 
 class AcademicTermRelationshipSchema(BaseModel):
     """This model represents the relationships of a AcademicTermSchema."""

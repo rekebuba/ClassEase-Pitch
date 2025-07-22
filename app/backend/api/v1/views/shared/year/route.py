@@ -7,9 +7,9 @@ from api.v1.views.shared import auths as auth
 from api.v1.views.utils import student_teacher_or_admin_required
 from extension.pydantic.response.schema import success_response
 from models import storage
+from models.student import Student
 from models.year import Year
 from sqlalchemy import select
-from sqlalchemy.exc import SQLAlchemyError
 from extension.pydantic.models.year_schema import YearSchema
 from api.v1.views import errors
 
@@ -53,3 +53,31 @@ def get_year_by_id(
     valid_year = year_schema.model_dump(by_alias=True, include=fields, mode="json")
 
     return success_response(data=valid_year)
+
+
+@auth.route("/students/<uuid:student_id>/years", methods=["GET"])
+@student_teacher_or_admin_required
+@validate_fields(YearSchema, YearSchema.default_fields())
+def get_years_for_student(
+    user: UserT,
+    fields: Set[str],
+    student_id: uuid.UUID,
+) -> Tuple[Response, int]:
+    """
+    Returns all academic years associated with a specific student.
+    """
+    student = storage.session.scalar(select(Student).where(Student.id == student_id))
+
+    if not student:
+        return errors.handle_not_found_error(
+            message=f"No years found for student with ID {student_id}."
+        )
+
+    year_schemas = [YearSchema.model_validate(year) for year in student.year_links]
+
+    valid_years = [
+        schema.model_dump(by_alias=True, include=fields, mode="json")
+        for schema in year_schemas
+    ]
+
+    return success_response(data=valid_years)

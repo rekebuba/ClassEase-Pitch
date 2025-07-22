@@ -1,11 +1,14 @@
 from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, Optional, List
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from datetime import date
 
 from extension.enums.enum import BloodTypeEnum, GenderEnum, StudentApplicationStatusEnum
 from extension.functions.helper import to_camel
+from extension.pydantic.models.academic_term_schema import AcademicTermSchema
+from extension.pydantic.models.academic_term_schema import AcademicTermSchema
+from extension.pydantic.models.year_schema import YearSchema
 
 if TYPE_CHECKING:
     from .grade_schema import GradeSchema
@@ -62,6 +65,14 @@ class StudentSchema(BaseModel):
     status: StudentApplicationStatusEnum = StudentApplicationStatusEnum.PENDING
     user_id: Optional[uuid.UUID] = None
 
+    @classmethod
+    def default_fields(cls) -> set[str]:
+        """
+        Returns a list of default fields to be used when no specific fields are requested.
+        This can be overridden in subclasses if needed.
+        """
+        return {"id", "first_name", "father_name", "date_of_birth"}
+
 
 class StudentRelationshipSchema(BaseModel):
     """This model represents the relationships of a StudentSchema."""
@@ -72,6 +83,17 @@ class StudentRelationshipSchema(BaseModel):
     student_year_records: Optional[List[StudentYearRecordSchema]] = None
     subject_yearly_averages: Optional[List[SubjectYearlyAverageSchema]] = None
     assessments: Optional[List[AssessmentSchema]] = None
+
+    years: Optional[List[YearSchema]] = Field(
+        default=None,
+        description="List of years the student is associated with.",
+        alias="year_links",
+    )
+    academic_terms: Optional[List[AcademicTermSchema]] = Field(
+        default=None,
+        description="List of academic terms the student is associated with.",
+        alias="academic_term_links",
+    )
 
 
 class StudentWithRelationshipsSchema(StudentSchema, StudentRelationshipSchema):

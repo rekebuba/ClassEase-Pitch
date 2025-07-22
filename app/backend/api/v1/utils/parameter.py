@@ -27,6 +27,7 @@ class InvalidFieldsResponse(BaseModel):
 def validate_fields(
     allowed_model: Type[M],
     default_fields: Set[str],
+    field_name: str = "fields",
 ) -> Callable[
     [Callable[..., Tuple[Response, int]]], Callable[..., Tuple[Response, int]]
 ]:
@@ -50,7 +51,7 @@ def validate_fields(
         @wraps(f)
         def wrapped(*args: Any, **kwargs: Any) -> Tuple[Response, int]:
             # Extract fields from query params
-            requested_fields_str: str = request.args.get("fields", "")
+            requested_fields_str: str = request.args.get(field_name, "")
 
             requested_fields: Set[str] = {
                 to_snake(field.strip())
@@ -81,7 +82,9 @@ def validate_fields(
 
             requested_fields.add("id")  # Ensure 'id' is always included
 
-            return f(*args, requested_fields, **kwargs)
+            dict_form = {field: ... for field in requested_fields}
+
+            return f(*args, dict_form, **kwargs)
 
         return wrapped
 

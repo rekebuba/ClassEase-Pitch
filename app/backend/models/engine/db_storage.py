@@ -42,7 +42,7 @@ from models.student_academic_term_link import StudentAcademicTermLink  # noqa: F
 from models.student_grade_link import StudentGradeLink  # noqa: F401
 from models.student_stream_link import StudentStreamLink  # noqa: F401
 from models.student_section_link import StudentSectionLink  # noqa: F401
-from models.student_subject_link import StudentSubjectLink  # noqa: F401
+from models.student_subject_link import StudentTermSubject  # noqa: F401
 from models.yearly_subject import YearlySubject  # noqa: F401
 from contextlib import contextmanager
 
