@@ -1,10 +1,12 @@
-from typing import Any
-from factory import LazyAttribute, SubFactory, RelatedFactoryList
+from typing import Any, List
+from factory import LazyAttribute, SubFactory, RelatedFactoryList, post_generation
 from faker import Faker
 from models.student import Student
+from models.student_year_link import StudentYearLink
 from tests.factories.models.grade_factory import GradeFactory
+from tests.factories.models.student_year_link_factory import StudentYearLinkFactory
+from tests.factories.models.year_factory import YearFactory
 from .base_factory import BaseFactory
-from .user_factory import UserFactory
 from extension.enums.enum import (
     BloodTypeEnum,
     GenderEnum,
@@ -32,6 +34,26 @@ class StudentFactory(BaseFactory[Student]):
         factory_related_name="student",
         size=1,
     )
+    year_links: Any = RelatedFactoryList(
+        "tests.factories.models.StudentYearLinkFactory",
+        factory_related_name="student",
+        size=1,
+    )
+
+    # @post_generation
+    # def student_links(self, create, extracted, **kwargs):
+    #     if not create:
+    #         return
+
+    #     if extracted:
+    #         for link in extracted:
+    #             self.student_year_records.append(link)
+
+    #     else:
+    #         # Create a default student year record if none are provided
+    #         self.year_links.append(
+    #             StudentYearLinkFactory.create(student=self, year=YearFactory.create())
+    #         )
 
     # Personal Information
     first_name: Any = LazyAttribute(lambda x: fake.first_name())

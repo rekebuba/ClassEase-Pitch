@@ -32,6 +32,7 @@ from ..api.search_params_factory import SearchParamsFactory, SearchParams
 from ..api.query_factory import QueryFactory, QueryResponse
 from .yearly_subject_factory import YearlySubjectFactory
 from .stream_factory import StreamFactory
+from .student_year_link_factory import StudentYearLinkFactory
 
 __all__ = [
     "DefaultFelids",
@@ -49,6 +50,7 @@ __all__ = [
     "SectionFactory",
     "StudentTermRecordFactory",
     "StudentYearRecordFactory",
+    "StudentYearLinkFactory",
     "AssessmentFactory",
     "SubjectsFactory",
     "AvailableSubject",

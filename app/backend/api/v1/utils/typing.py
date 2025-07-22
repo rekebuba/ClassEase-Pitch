@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Callable, List, Optional, TypeVar, TypedDict, Union
+from typing import Any, Callable, Dict, List, Optional, Set, TypeVar, TypedDict, Union
 from sqlalchemy import ColumnElement, UnaryExpression
 from extension.enums.enum import RoleEnum
 from models.user import User
@@ -9,6 +9,9 @@ T = TypeVar("T")  # Fully generic
 
 UserT = TypeVar("UserT", bound="User")  # User is your user model class
 BaseT = TypeVar("BaseT", bound="Base")
+
+# Define the recursive type
+IncEx = Union[Set[str], Dict[str, Union["IncEx", Set[str]]]]
 
 
 class AuthType(TypedDict):

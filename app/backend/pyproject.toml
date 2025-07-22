@@ -1,6 +1,7 @@
  [project]
 name = "classEase-Pitch"
 version = "0.1.0"
+requires-python = ">=3.12"
 dependencies = [
     "bcrypt>=4.3.0",
     "debugpy>=1.8.14",
@@ -18,6 +19,7 @@ dependencies = [
     "mysqlclient>=2.2.7",
     "num2words>=0.5.14",
     "pillow>=11.2.1",
+    "posting>=2.7.0",
     "pre-commit>=4.2.0",
     "pydantic>=2.11.5",
     "pyethiodate>=1.0.6",

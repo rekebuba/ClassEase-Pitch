@@ -47,11 +47,11 @@ class UserFactory(BaseFactory[User]):
         factory_related_name="user",
     )
     student: Any = RelatedFactory(
-        "tests.factories.models.teacher_factory.TeacherFactory",
+        "tests.factories.models.student_factory.StudentFactory",
         factory_related_name="user",
     )
     teacher: Any = RelatedFactory(
-        "tests.factories.models.student_factory.StudentFactory",
+        "tests.factories.models.teacher_factory.TeacherFactory",
         factory_related_name="user",
     )
 

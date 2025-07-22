@@ -49,10 +49,20 @@ class YearSchema(BaseModel):
 class YearRelationshipSchema(BaseModel):
     """This model represents the relationships of a YearSchema."""
 
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
     student_year_records: List[StudentYearRecordSchema] = []
     events: List[EventSchema] = []
     academic_terms: List[AcademicTermSchema] = []
     yearly_subjects: List[YearlySubjectSchema] = []
     grades: List[GradeSchema] = []
-    sections: List[str] = []
-    streams: List[str] = []
+
+
+class YearSchemaWithRelationships(YearSchema, YearRelationshipSchema):
+    """This model represents a YearSchema with its relationships."""
+
+    pass

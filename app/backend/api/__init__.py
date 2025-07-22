@@ -55,6 +55,7 @@ def create_app(config_name: str) -> Flask:
     from api.v1.views.teachers import teach
     from api.v1.views.shared_access import shared
     from api.v1.views.errors import errors
+    from api.v1.views import base_api
 
     app.register_blueprint(auths)
     app.register_blueprint(admins)
@@ -62,5 +63,6 @@ def create_app(config_name: str) -> Flask:
     app.register_blueprint(teach)
     app.register_blueprint(shared)
     app.register_blueprint(errors)
+    app.register_blueprint(base_api)
 
     return app
