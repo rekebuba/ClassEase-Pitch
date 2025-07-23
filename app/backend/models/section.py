@@ -61,10 +61,10 @@ class Section(BaseModel):
         repr=False,
     )
 
-    student_links: Mapped[List["Student"]] = relationship(
+    students: Mapped[List["Student"]] = relationship(
         "Student",
         secondary="student_section_links",
-        back_populates="section_links",
+        back_populates="sections",
         default_factory=list,
         repr=False,
     )

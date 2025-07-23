@@ -14,7 +14,6 @@ import uuid
 if TYPE_CHECKING:
     from models.yearly_subject import YearlySubject
     from models.grade import Grade
-    from models.student_year_record import StudentYearRecord
     from models.subject import Subject
     from models.year import Year
     from models.student import Student
@@ -48,24 +47,18 @@ class Stream(BaseModel):
         repr=False,
         default_factory=list,
     )
-    students: Mapped[List["StudentYearRecord"]] = relationship(
-        "StudentYearRecord",
-        back_populates="stream",
-        repr=False,
-        default_factory=list,
-    )
-    subject_links: Mapped[List["Subject"]] = relationship(
+    subjects: Mapped[List["Subject"]] = relationship(
         "Subject",
-        back_populates="stream_links",
+        back_populates="streams",
         secondary="subject_stream_links",
         default_factory=list,
         repr=False,
     )
 
-    student_links: Mapped[List["Student"]] = relationship(
+    students: Mapped[List["Student"]] = relationship(
         "Student",
         secondary="student_stream_links",
-        back_populates="stream_links",
+        back_populates="streams",
         default_factory=list,
         repr=False,
     )

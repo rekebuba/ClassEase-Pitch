@@ -62,7 +62,7 @@ class GradeRelationshipSchema(BaseModel):
     student_year_records: List[StudentYearRecordSchema] = []
     students: List[StudentSchema] = []
     sections_link: List[SectionSchema] = Field(alias="sections")
-    subject_links: List[SubjectSchema] = Field(alias="subjects")
+    subjects: List[SubjectSchema] = Field(alias="subjects")
 
 
 class GradeWithRelationshipsSchema(GradeSchema, GradeRelationshipSchema):

@@ -45,9 +45,3 @@ class SubjectYearlyAverage(BaseModel):
         init=False,
         repr=False,
     )
-    student_year_record: Mapped["StudentYearRecord"] = relationship(
-        "StudentYearRecord",
-        back_populates="subject_yearly_averages",
-        init=False,
-        repr=False,
-    )

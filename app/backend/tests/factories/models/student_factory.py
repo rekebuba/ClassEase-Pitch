@@ -34,7 +34,7 @@ class StudentFactory(BaseFactory[Student]):
         factory_related_name="student",
         size=1,
     )
-    year_links: Any = RelatedFactoryList(
+    years: Any = RelatedFactoryList(
         "tests.factories.models.StudentYearLinkFactory",
         factory_related_name="student",
         size=1,

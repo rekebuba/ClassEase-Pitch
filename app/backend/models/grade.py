@@ -15,7 +15,6 @@ if TYPE_CHECKING:
     from models.stream import Stream
     from models.student import Student
     from models.yearly_subject import YearlySubject
-    from models.student_year_record import StudentYearRecord
     from models.teacher import Teacher
     from models.section import Section
     from models.subject import Subject
@@ -71,18 +70,6 @@ class Grade(BaseModel):
         repr=False,
         default_factory=list,
     )
-    student_year_records: Mapped[list["StudentYearRecord"]] = relationship(
-        "StudentYearRecord",
-        back_populates="grade",
-        repr=False,
-        default_factory=list,
-    )
-    students: Mapped[List["Student"]] = relationship(
-        "Student",
-        back_populates="starting_grade",
-        repr=False,
-        default_factory=list,
-    )
     sections_link: Mapped[List["Section"]] = relationship(
         "Section",
         back_populates="grades_link",
@@ -90,18 +77,17 @@ class Grade(BaseModel):
         default_factory=list,
         repr=False,
     )
-    subject_links: Mapped[List["Subject"]] = relationship(
+    subjects: Mapped[List["Subject"]] = relationship(
         "Subject",
-        back_populates="grade_links",
+        back_populates="grades",
         secondary="subject_grade_links",
         default_factory=list,
         repr=False,
     )
-
-    student_links: Mapped[List["Student"]] = relationship(
+    students: Mapped[List["Student"]] = relationship(
         "Student",
         secondary="student_grade_links",
-        back_populates="grade_links",
+        back_populates="grades",
         default_factory=list,
         repr=False,
     )

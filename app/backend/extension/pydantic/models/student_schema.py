@@ -87,12 +87,14 @@ class StudentRelationshipSchema(BaseModel):
     years: Optional[List[YearSchema]] = Field(
         default=None,
         description="List of years the student is associated with.",
-        alias="year_links",
     )
     academic_terms: Optional[List[AcademicTermSchema]] = Field(
         default=None,
         description="List of academic terms the student is associated with.",
-        alias="academic_term_links",
+    )
+    grades: Optional[List[GradeSchema]] = Field(
+        default=None,
+        description="List of grades the student is associated with.",
     )
 
 

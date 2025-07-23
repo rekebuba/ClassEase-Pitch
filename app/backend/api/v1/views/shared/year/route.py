@@ -1,16 +1,19 @@
 from typing import Set, Tuple
 import uuid
 from flask import Response
-from api.v1.utils.parameter import validate_fields
-from api.v1.utils.typing import UserT
+from api.v1.utils.parameter import validate_expand, validate_fields
+from api.v1.utils.typing import IncEx, UserT
 from api.v1.views.shared import auths as auth
 from api.v1.views.utils import student_teacher_or_admin_required
 from extension.pydantic.response.schema import success_response
 from models import storage
-from models.student import Student
 from models.year import Year
 from sqlalchemy import select
-from extension.pydantic.models.year_schema import YearSchema
+from extension.pydantic.models.year_schema import (
+    YearRelationshipSchema,
+    YearSchema,
+    YearSchemaWithRelationships,
+)
 from api.v1.views import errors
 
 
@@ -35,9 +38,11 @@ def get_years(user: UserT, fields: Set[str]) -> Tuple[Response, int]:
 @auth.route("/years/<uuid:year_id>", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(YearSchema, YearSchema.default_fields())
+@validate_expand(YearRelationshipSchema)
 def get_year_by_id(
     user: UserT,
-    fields: Set[str],
+    year_fields: dict[str, IncEx],
+    related_fields: dict[str, IncEx],
     year_id: uuid.UUID,
 ) -> Tuple[Response, int]:
     """
@@ -49,35 +54,13 @@ def get_year_by_id(
             message=f"Year with ID {year_id} not found."
         )
 
-    year_schema = YearSchema.model_validate(year)
-    valid_year = year_schema.model_dump(by_alias=True, include=fields, mode="json")
+    response = YearSchemaWithRelationships.model_validate(year).model_dump(
+        by_alias=True,
+        include={
+            **year_fields,
+            **related_fields,
+        },
+        mode="json",
+    )
 
-    return success_response(data=valid_year)
-
-
-@auth.route("/students/<uuid:student_id>/years", methods=["GET"])
-@student_teacher_or_admin_required
-@validate_fields(YearSchema, YearSchema.default_fields())
-def get_years_for_student(
-    user: UserT,
-    fields: Set[str],
-    student_id: uuid.UUID,
-) -> Tuple[Response, int]:
-    """
-    Returns all academic years associated with a specific student.
-    """
-    student = storage.session.scalar(select(Student).where(Student.id == student_id))
-
-    if not student:
-        return errors.handle_not_found_error(
-            message=f"No years found for student with ID {student_id}."
-        )
-
-    year_schemas = [YearSchema.model_validate(year) for year in student.year_links]
-
-    valid_years = [
-        schema.model_dump(by_alias=True, include=fields, mode="json")
-        for schema in year_schemas
-    ]
-
-    return success_response(data=valid_years)
+    return success_response(data=response)

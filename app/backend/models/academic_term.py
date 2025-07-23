@@ -61,10 +61,10 @@ class AcademicTerm(BaseModel):
         repr=False,
     )
 
-    student_links: Mapped[List["Student"]] = relationship(
+    students: Mapped[List["Student"]] = relationship(
         "Student",
         secondary="student_academic_term_links",
-        back_populates="academic_term_links",
+        back_populates="academic_terms",
         default_factory=list,
         repr=False,
     )
