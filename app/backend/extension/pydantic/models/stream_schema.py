@@ -43,4 +43,4 @@ class StreamRelationshipSchema(BaseModel):
     grades: Optional[List[GradeSchema]] = None
     yearly_subjects: Optional[List[YearlySubjectSchema]] = None
     students: Optional[List[StudentYearRecordSchema]] = None
-    subject_links: List[SubjectSchema] = Field(alias="subjects")
+    subjects: List[SubjectSchema] = Field(alias="subjects")

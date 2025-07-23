@@ -159,12 +159,6 @@ class Student(BaseModel):
         default_factory=list,
         repr=False,
     )
-    student_year_records: Mapped[List["StudentYearRecord"]] = relationship(
-        "StudentYearRecord",
-        back_populates="student",
-        default_factory=list,
-        repr=False,
-    )
     subject_yearly_averages: Mapped[List["SubjectYearlyAverage"]] = relationship(
         "SubjectYearlyAverage",
         back_populates="student",
@@ -178,38 +172,38 @@ class Student(BaseModel):
         repr=False,
     )
 
-    year_links: Mapped[List["Year"]] = relationship(
+    years: Mapped[List["Year"]] = relationship(
         "Year",
         secondary="student_year_links",
-        back_populates="student_links",
+        back_populates="students",
         default_factory=list,
         repr=False,
     )
-    academic_term_links: Mapped[List["AcademicTerm"]] = relationship(
+    academic_terms: Mapped[List["AcademicTerm"]] = relationship(
         "AcademicTerm",
         secondary="student_academic_term_links",
-        back_populates="student_links",
+        back_populates="students",
         default_factory=list,
         repr=False,
     )
-    stream_links: Mapped[List["Stream"]] = relationship(
+    streams: Mapped[List["Stream"]] = relationship(
         "Stream",
         secondary="student_stream_links",
-        back_populates="student_links",
+        back_populates="students",
         default_factory=list,
         repr=False,
     )
-    grade_links: Mapped[List["Grade"]] = relationship(
+    grades: Mapped[List["Grade"]] = relationship(
         "Grade",
         secondary="student_grade_links",
-        back_populates="student_links",
+        back_populates="students",
         default_factory=list,
         repr=False,
     )
-    section_links: Mapped[List["Section"]] = relationship(
+    sections: Mapped[List["Section"]] = relationship(
         "Section",
         secondary="student_section_links",
-        back_populates="student_links",
+        back_populates="students",
         default_factory=list,
         repr=False,
     )

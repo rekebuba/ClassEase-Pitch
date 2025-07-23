@@ -48,17 +48,17 @@ class Subject(BaseModel):
         default_factory=list,
         repr=False,
     )
-    grade_links: Mapped[List["Grade"]] = relationship(
+    grades: Mapped[List["Grade"]] = relationship(
         "Grade",
         secondary="subject_grade_links",
-        back_populates="subject_links",
+        back_populates="subjects",
         default_factory=list,
         repr=False,
     )
-    stream_links: Mapped[List["Stream"]] = relationship(
+    streams: Mapped[List["Stream"]] = relationship(
         "Stream",
         secondary="subject_stream_links",
-        back_populates="subject_links",
+        back_populates="subjects",
         default_factory=list,
         repr=False,
     )

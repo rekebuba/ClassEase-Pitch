@@ -44,11 +44,6 @@ class StudentTermRecord(BaseModel):
         back_populates="student_term_records",
         init=False,
     )
-    student_year_record: Mapped["StudentYearRecord"] = relationship(
-        "StudentYearRecord",
-        back_populates="student_term_records",
-        init=False,
-    )
     academic_term: Mapped["AcademicTerm"] = relationship(
         "AcademicTerm",
         back_populates="student_term_records",

@@ -48,12 +48,6 @@ class Year(BaseModel):
     )
 
     # Relationships
-    student_year_records: Mapped[List["StudentYearRecord"]] = relationship(
-        "StudentYearRecord",
-        back_populates="year",
-        default_factory=list,
-        repr=False,
-    )
     events: Mapped[List["Event"]] = relationship(
         "Event",
         back_populates="year",
@@ -97,10 +91,10 @@ class Year(BaseModel):
         default_factory=list,
     )
 
-    student_links: Mapped[List["Student"]] = relationship(
+    students: Mapped[List["Student"]] = relationship(
         "Student",
         secondary="student_year_links",
-        back_populates="year_links",
+        back_populates="years",
         default_factory=list,
         repr=False,
     )
