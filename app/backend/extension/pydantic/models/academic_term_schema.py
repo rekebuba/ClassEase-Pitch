@@ -44,6 +44,20 @@ class AcademicTermSchema(BaseModel):
 class AcademicTermRelationshipSchema(BaseModel):
     """This model represents the relationships of a AcademicTermSchema."""
 
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
     year: Optional[YearSchema] = None
     student_term_records: Optional[List[StudentTermRecordSchema]] = None
     teacher_records: Optional[List[TeacherRecordSchema]] = None
+
+
+class AcademicTermSchemaWithRelationships(
+    AcademicTermSchema, AcademicTermRelationshipSchema
+    ):
+    """This model represents an AcademicTermSchema with its relationships."""
+
+    pass

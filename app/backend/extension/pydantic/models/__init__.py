@@ -1,6 +1,7 @@
 from .academic_term_schema import (
     AcademicTermRelationshipSchema,
     AcademicTermSchema,
+    AcademicTermSchemaWithRelationships,
 )
 from .admin_schema import (
     AdminRelationshipSchema,
@@ -75,6 +76,7 @@ from .yearly_subject_schema import (
 __all__ = [
     "AcademicTermSchema",
     "AcademicTermRelationshipSchema",
+    "AcademicTermSchemaWithRelationships",
     "AdminSchema",
     "AdminRelationshipSchema",
     "AdminWithRelationshipsSchema",
@@ -128,6 +130,7 @@ __all__ = [
 
 AcademicTermSchema.model_rebuild()
 AcademicTermRelationshipSchema.model_rebuild()
+AcademicTermSchemaWithRelationships.model_rebuild()
 AdminSchema.model_rebuild()
 AdminRelationshipSchema.model_rebuild()
 AdminWithRelationshipsSchema.model_rebuild()

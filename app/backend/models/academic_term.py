@@ -47,6 +47,7 @@ class AcademicTerm(BaseModel):
         "Year",
         back_populates="academic_terms",
         init=False,
+        repr=False,
     )
     student_term_records: Mapped[List["StudentTermRecord"]] = relationship(
         "StudentTermRecord",
