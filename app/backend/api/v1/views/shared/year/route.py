@@ -41,7 +41,7 @@ def get_years(user: UserT, fields: Set[str]) -> Tuple[Response, int]:
 @validate_expand(YearRelationshipSchema)
 def get_year_by_id(
     user: UserT,
-    year_fields: dict[str, IncEx],
+    fields: dict[str, IncEx],
     related_fields: dict[str, IncEx],
     year_id: uuid.UUID,
 ) -> Tuple[Response, int]:
@@ -57,7 +57,7 @@ def get_year_by_id(
     response = YearSchemaWithRelationships.model_validate(year).model_dump(
         by_alias=True,
         include={
-            **year_fields,
+            **fields,
             **related_fields,
         },
         mode="json",

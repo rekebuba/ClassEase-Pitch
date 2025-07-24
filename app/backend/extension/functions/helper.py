@@ -1,4 +1,4 @@
-from typing import Any, Type, List, Union, get_origin, get_args, Annotated
+from typing import Any, Tuple, Type, List, Union, get_origin, get_args, Annotated
 from datetime import datetime
 import re
 from pyethiodate import EthDate  # type: ignore
@@ -34,16 +34,21 @@ def academic_year(ethiopian_year: int) -> str:
     return f"{ethiopian_year} E.C/{gregorian_year} G.C"
 
 
-def extract_inner_model(annotation: Any) -> Type[BaseModel]:
+def extract_inner_model(annotation: Any) -> Tuple[bool, Type[BaseModel]]:
     """
     Extract the inner Pydantic model class from a possibly nested type annotation.
+    Returns a tuple (is_list, model) where:
+    - is_list: bool indicating if the original annotation was a List type
+    - model: the extracted BaseModel subclass
+
     Raises ValueError if the annotation doesn't resolve to a BaseModel subclass.
 
     Handles:
-    - List[Model]
-    - Optional[List[Model]] or Union[List[Model], None]
-    - Annotated[List[Model], ...]
-    - Direct Model reference
+    - List[Model] → (True, Model)
+    - Optional[List[Model]] → (True, Model)
+    - Optional[Model] → (False, Model)
+    - Annotated[List[Model], ...] → (True, Model)
+    - Direct Model reference → (False, Model)
     """
     origin = get_origin(annotation)
     args = get_args(annotation)
@@ -54,9 +59,10 @@ def extract_inner_model(annotation: Any) -> Type[BaseModel]:
         if non_none_args:
             return extract_inner_model(non_none_args[0])
 
-    # Handle List types
+    # Handle List types - return True for is_list
     if origin in (list, List):
-        return extract_inner_model(args[0])
+        is_list, model = extract_inner_model(args[0])
+        return (True, model)
 
     # Handle Annotated types
     if origin is Annotated:
@@ -64,7 +70,7 @@ def extract_inner_model(annotation: Any) -> Type[BaseModel]:
 
     # Base case - must be a BaseModel subclass
     if isinstance(annotation, type) and issubclass(annotation, BaseModel):
-        return annotation
+        return (False, annotation)
 
     raise ValueError(
         f"Type annotation does not resolve to a Pydantic model. "

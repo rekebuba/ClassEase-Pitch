@@ -2,11 +2,15 @@ from typing import Tuple
 import uuid
 from flask import Response, jsonify
 from sqlalchemy import select
-from api.v1.utils.parameter import validate_fields
-from api.v1.utils.typing import UserT
+from api.v1.utils.parameter import validate_expand, validate_fields
+from api.v1.utils.typing import IncEx, UserT
 from api.v1.views import base_api
 from api.v1.views.utils import student_teacher_or_admin_required
-from extension.pydantic.models.academic_term_schema import AcademicTermSchema
+from extension.pydantic.models.academic_term_schema import (
+    AcademicTermRelationshipSchema,
+    AcademicTermSchema,
+    AcademicTermSchemaWithRelationships,
+)
 from extension.pydantic.response.schema import success_response
 from models.academic_term import AcademicTerm
 from models import storage
@@ -48,9 +52,11 @@ def get_academic_terms(
 @base_api.route("/academic_terms/<uuid:term_id>", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(AcademicTermSchema, AcademicTermSchema.default_fields())
+@validate_expand(AcademicTermRelationshipSchema)
 def get_academic_term_by_id(
     user: UserT,
-    fields: set[str],
+    fields: dict[str, IncEx],
+    related_fields: dict[str, IncEx],
     term_id: uuid.UUID,
 ) -> Tuple[Response, int]:
     """
@@ -60,7 +66,14 @@ def get_academic_term_by_id(
     if not academic_term:
         return jsonify({"error": f"Academic term with ID {term_id} not found"}), 404
 
-    term_schema = AcademicTermSchema.model_validate(academic_term)
-    valid_term = term_schema.model_dump(by_alias=True, include=fields, mode="json")
+    term_schema = AcademicTermSchemaWithRelationships.model_validate(academic_term)
+    valid_term = term_schema.model_dump(
+        by_alias=True,
+        include={
+            **fields,
+            **related_fields,
+        },
+        mode="json",
+    )
 
     return success_response(data=valid_term)

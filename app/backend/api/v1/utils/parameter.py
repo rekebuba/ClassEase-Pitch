@@ -108,21 +108,22 @@ def _process_expand(
     """Processing function for `validate_expand`."""
     nested_fields: Dict[str, Any] = {}
     for field in requested_expand:
-        extracted_model = extract_inner_model(
+        is_list, model = extract_inner_model(
             allowed_model.model_fields[field].annotation
         )
         valid_fields = _extract_and_validate_fields(
-            extracted_model, f"{field}_fields", "Invalid fields requested"
+            model, f"{field}_fields", "Invalid fields requested"
         )
-        nested_fields[field] = {
-            "__all__": _process_fields(
-                valid_fields if isinstance(valid_fields, set) else set(),
-                extracted_model,
-                extracted_model.default_fields()
-                if hasattr(extracted_model, "default_fields")
-                else default_fields,
-            )
-        }
+        processed = _process_fields(
+            valid_fields if isinstance(valid_fields, set) else set(),
+            model,
+            model.default_fields()
+            if hasattr(model, "default_fields")
+            else default_fields,
+        )
+
+        nested_fields[field] = {"__all__": processed} if is_list else processed
+
     return nested_fields
 
 
