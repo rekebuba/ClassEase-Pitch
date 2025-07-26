@@ -1,15 +1,16 @@
 #!/usr/bin/python3
 
+from dataclasses import dataclass
 from sqlalchemy import Float, Integer
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlmodel import ForeignKey
-from models.base.base_model import BaseModel
+from models.base.base_model import Base
 from models.base.column_type import UUIDType
 import uuid
 
-
-class StudentTermSubject(BaseModel):
-    __tablename__ = "student_term_subjects"
+@dataclass
+class StudentSubjectLink(Base):
+    __tablename__ = "student_subject_links"
 
     student_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),
@@ -19,11 +20,6 @@ class StudentTermSubject(BaseModel):
     subject_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),
         ForeignKey("subjects.id"),
-        primary_key=True,
-    )
-    academic_term_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(),
-        ForeignKey("academic_terms.id"),
         primary_key=True,
     )
 

@@ -13,7 +13,9 @@ class StudentYearLinkFactory(BaseFactory[StudentYearLink]):
         model = StudentYearLink
         exclude = ("student", "year")
 
-    student: Any = SubFactory("tests.factories.models.student_factory.StudentFactory")
+    student: Any = SubFactory(
+        "tests.factories.models.student_factory.StudentFactory", years=[]
+    )
     year: Any = SubFactory("tests.factories.models.year_factory.YearFactory")
 
     student_id: Any = LazyAttribute(lambda x: x.student.id if x.student else None)

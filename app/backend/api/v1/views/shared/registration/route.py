@@ -17,7 +17,9 @@ from extension.enums.enum import RoleEnum
 from extension.pydantic.models.admin_schema import AdminSchema
 from extension.pydantic.models.grade_schema import GradeSchema
 from extension.pydantic.models.student_schema import (
+    StudentRelationshipSchema,
     StudentSchema,
+    StudentWithRelationshipsSchema,
 )
 
 from extension.pydantic.models.subject_schema import SubjectSchema
@@ -93,16 +95,16 @@ def register_new_student() -> Tuple[Response, int]:
     """Registers a new student in the system."""
 
     # Validate and parse the incoming JSON
-    student_data = StudentSchema.model_validate(request.json)
+    student_data = StudentWithRelationshipsSchema.model_validate(request.json)
 
-    grades = storage.session.scalar(
-        select(Grade).where(Grade.id == student_data.starting_grade_id)
-    )
+    # grades = storage.session.scalar(
+    #     select(Grade).where(Grade.id == student_data.starting_grade_id)
+    # )
 
-    if not grades:
-        raise ValueError(
-            f"Invalid starting grade {student_data.starting_grade_id} provided."
-        )
+    # if not grades:
+    #     raise ValueError(
+    #         f"Invalid starting grade {student_data.starting_grade_id} provided."
+    #     )
 
     # Convert to dictionary before unpacking
     student_dict = student_data.model_dump(exclude_none=True)

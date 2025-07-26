@@ -1,6 +1,7 @@
 from enum import Enum
 import random
 from typing import Dict, List, Optional, Type
+import uuid
 
 from faker import Faker
 from sqlalchemy import select
@@ -231,45 +232,6 @@ class BaseAction:
         return stream
 
     @staticmethod
-    def _create_yearly_subject_if_not_exists(
-        year: Year,
-        subject: Subject,
-        grade: Grade,
-        stream: Optional[Stream] = None,
-    ) -> None:
-        """
-        Creates a YearlySubject if it doesn't already exist for the given
-        year, subject, grade, and optional stream.
-        """
-        query = storage.session.query(YearlySubject).filter_by(
-            year_id=year.id,
-            subject_id=subject.id,
-            grade_id=grade.id,
-            stream_id=stream.id if stream else None,
-        )
-
-        if query.first():
-            return None
-        # Generate a unique subject code
-        subject_code = BaseAction._generate_subject_code(
-            subject=subject.name,
-            grade=grade.grade,
-            year_id=year.id,
-            stream=stream.name if stream else None,
-        )
-
-        new_yearly_subject = YearlySubject(
-            year_id=year.id,
-            subject_id=subject.id,
-            grade_id=grade.id,
-            stream_id=stream.id if stream else None,
-            subject_code=subject_code,
-        )
-
-        storage.new(new_yearly_subject)
-        storage.session.commit()
-
-    @staticmethod
     def _is_subject_invalid_for_stream(subject_name: str, stream: StreamEnum) -> bool:
         if stream == StreamEnum.SOCIAL:
             return subject_name in NaturalStreamSubjectsEnum._value2member_map_
@@ -281,7 +243,7 @@ class BaseAction:
     def _generate_subject_code(
         subject: str,
         grade: str,
-        year_id: str,
+        year_id: uuid.UUID,
         stream: Optional[str],
     ) -> str:
         """
@@ -350,30 +312,7 @@ class BaseAction:
             for subject_enum in subject_enum_class:
                 subject = BaseAction._get_subject(subject_enum)
 
-                # 3. Handle streamed vs. non-streamed grades
-                if grade_level in ["11", "12"]:
-                    for stream_enum in StreamEnum:
-                        stream = BaseAction._get_stream(stream_enum)
-
-                        # Skip subjects not in the current stream
-                        if BaseAction._is_subject_invalid_for_stream(
-                            subject.name, StreamEnum(stream.name)
-                        ):
-                            continue
-                        BaseAction._create_yearly_subject_if_not_exists(
-                            year=year,
-                            subject=subject,
-                            grade=grade,
-                            stream=stream,
-                        )
-                else:
-                    BaseAction._create_yearly_subject_if_not_exists(
-                        year=year,
-                        subject=subject,
-                        grade=grade,
-                    )
-
-                subject.grade_links.append(grade)
+                subject.grades.append(grade)
 
         # 4. Handle the stream-specific subjects
         for stream_enum, subject_enum_class in BaseAction.grade_streams_map.items():
@@ -382,6 +321,6 @@ class BaseAction:
             for subject_stream_enum in subject_enum_class:
                 stream_subject = BaseAction._get_subject(subject_stream_enum)
 
-                stream_subject.stream_links.append(stream)
+                stream_subject.streams.append(stream)
 
         storage.save()

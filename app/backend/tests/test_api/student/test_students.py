@@ -23,13 +23,12 @@ class TestStudents:
     tests for the student-related API endpoints.
     """
 
-    def test_register_success(self, client: FlaskClient, mock_student: None) -> None:
+    def test_register_success(self, client: FlaskClient) -> None:
         """
         Test the student registration endpoint for successful registration.
         """
         student = StudentFactory.build(
             user=None,
-            student_year_records=[],
         )
         # form_data = prepare_form_data(student)
         student_schema = StudentSchema.model_validate(student)
@@ -38,7 +37,6 @@ class TestStudents:
             exclude={
                 "id",
                 "user_id",
-                "student_year_records",
             },
             exclude_none=True,
             mode="json",

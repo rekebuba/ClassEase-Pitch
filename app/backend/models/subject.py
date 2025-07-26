@@ -8,12 +8,15 @@ from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
 import uuid
 
+
 if TYPE_CHECKING:
+    from models.mark_list import MarkList
     from models.teacher import Teacher
     from models.year import Year
     from models.grade import Grade
     from models.stream import Stream
     from models.yearly_subject import YearlySubject
+    from models.student import Student
 
 
 class Subject(BaseModel):
@@ -59,6 +62,19 @@ class Subject(BaseModel):
         "Stream",
         secondary="subject_stream_links",
         back_populates="subjects",
+        default_factory=list,
+        repr=False,
+    )
+    students: Mapped[List["Student"]] = relationship(
+        "Student",
+        secondary="student_subject_links",
+        back_populates="subjects",
+        default_factory=list,
+        repr=False,
+    )
+    mark_lists: Mapped[List["MarkList"]] = relationship(
+        "MarkList",
+        back_populates="subject",
         default_factory=list,
         repr=False,
     )
