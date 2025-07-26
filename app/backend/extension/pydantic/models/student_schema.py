@@ -6,9 +6,6 @@ from datetime import date
 
 from extension.enums.enum import BloodTypeEnum, GenderEnum, StudentApplicationStatusEnum
 from extension.functions.helper import to_camel
-from extension.pydantic.models.academic_term_schema import AcademicTermSchema
-from extension.pydantic.models.academic_term_schema import AcademicTermSchema
-from extension.pydantic.models.year_schema import YearSchema
 
 if TYPE_CHECKING:
     from .grade_schema import GradeSchema
@@ -17,6 +14,10 @@ if TYPE_CHECKING:
     from .student_year_record_schema import StudentYearRecordSchema
     from .subject_yearly_average_schema import SubjectYearlyAverageSchema
     from .assessment_schema import AssessmentSchema
+    from .mark_list_schema import MarkListSchema
+    from .subject_schema import SubjectSchema
+    from .academic_term_schema import AcademicTermSchema
+    from .year_schema import YearSchema
 
 
 class StudentSchema(BaseModel):
@@ -31,7 +32,6 @@ class StudentSchema(BaseModel):
     )
 
     id: Optional[uuid.UUID] = None
-    starting_grade_id: uuid.UUID
     first_name: str
     father_name: str
     date_of_birth: date
@@ -95,6 +95,14 @@ class StudentRelationshipSchema(BaseModel):
     grades: Optional[List[GradeSchema]] = Field(
         default=None,
         description="List of grades the student is associated with.",
+    )
+    subjects: Optional[List[SubjectSchema]] = Field(
+        default=None,
+        description="List of subjects the student is associated with.",
+    )
+    mark_lists: Optional[List[MarkListSchema]] = Field(
+        default=None,
+        description="List of mark lists associated with the student.",
     )
 
 

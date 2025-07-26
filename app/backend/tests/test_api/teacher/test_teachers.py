@@ -21,7 +21,7 @@ class TestTeachers:
         """
 
         # form_data = prepare_form_data(teacher)
-        teacher = TeacherFactory.stub(
+        teacher = TeacherFactory.build(
             user=None,
             teacher_records=[],
         )

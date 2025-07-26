@@ -2,6 +2,13 @@
 This package contains the factories for creating test data.
 """
 
+from .student_academic_term_link_factory import StudentAcademicTermLinkFactory
+from .student_grade_link_factory import StudentGradeLinkFactory
+from .student_section_link_factory import StudentSectionLinkFactory
+from .student_stream_link_factory import StudentStreamLinkFactory
+from .student_subject_link_factory import StudentSubjectLinkFactory
+from .teacher_subject_link_factory import TeacherSubjectLinkFactory
+from .teacher_grade_link_factory import TeacherGradeLinkFactory
 from .default_felids import DefaultFelids
 from .base_factory import BaseFactory
 from .year_factory import YearFactory
@@ -44,8 +51,15 @@ __all__ = [
     "UserFactory",
     "AdminFactory",
     "StudentFactory",
+    "StudentAcademicTermLinkFactory",
+    "StudentGradeLinkFactory",
+    "StudentSectionLinkFactory",
+    "StudentStreamLinkFactory",
+    "StudentSubjectLinkFactory",
     "TeacherFactory",
     "TeacherRecordFactory",
+    "TeacherSubjectLinkFactory",
+    "TeacherGradeLinkFactory",
     "SubjectFactory",
     "SectionFactory",
     "StudentTermRecordFactory",

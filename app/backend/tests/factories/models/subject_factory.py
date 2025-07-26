@@ -12,7 +12,7 @@ from .base_factory import BaseFactory
 class SubjectFactory(BaseFactory[Subject]):
     class Meta:
         model = Subject
-        exclude = ("words", "prefix_length")
+        exclude = ("year", "words", "prefix_length")
 
     year: Any = SubFactory("tests.factories.models.year_factory.YearFactory")
     words: Any = LazyAttribute(lambda x: x.name.split())

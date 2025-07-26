@@ -6,7 +6,6 @@ from faker import Faker
 from models.teacher import Teacher
 from .subject_factory import SubjectFactory
 from .base_factory import BaseFactory
-from .user_factory import UserFactory
 from extension.enums.enum import (
     ExperienceYearEnum,
     GenderEnum,
@@ -30,21 +29,16 @@ class TeacherFactory(BaseFactory[Teacher]):
         size=1,
     )
 
-    subjects_to_teach: Any = LazyAttribute(
-        lambda _: SubjectFactory.create_batch(size=random.randint(1, 3))
+    subjects_to_teach: Any = RelatedFactoryList(
+        "tests.factories.models.TeacherSubjectLinkFactory",
+        factory_related_name="teacher",
+        size=2,
     )
-    selected_yearly_subjects: Any = LazyAttribute(
-        lambda x: random.choices(
-            list(
-                chain.from_iterable(
-                    subject.yearly_subjects for subject in x.subjects_to_teach
-                )
-            ),
-            k=random.randint(1, len(x.subjects_to_teach) or 1),
-        )
-    )
-    grade_to_teach: Any = LazyAttribute(
-        lambda x: [selected.grade for selected in x.selected_yearly_subjects]
+
+    grade_to_teach: Any = RelatedFactoryList(
+        "tests.factories.models.TeacherGradeLinkFactory",
+        factory_related_name="teacher",
+        size=1,
     )
 
     user: Any = SubFactory(

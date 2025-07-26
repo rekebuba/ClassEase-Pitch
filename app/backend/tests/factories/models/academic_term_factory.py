@@ -1,11 +1,10 @@
 #!/usr/bin/python3
 
-import random
 from typing import Any
 from factory import SubFactory, LazyAttribute, Iterator
 from faker import Faker
 from models.academic_term import AcademicTerm
-from extension.enums.enum import AcademicTermEnum, AcademicTermTypeEnum
+from extension.enums.enum import AcademicTermEnum
 from models import storage
 from .year_factory import YearFactory
 from .base_factory import BaseFactory

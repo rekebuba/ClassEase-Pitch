@@ -20,40 +20,51 @@ fake = Faker()
 class StudentFactory(BaseFactory[Student]):
     class Meta:
         model = Student
-        exclude = ("user", "starting_grade")
+        exclude = ("user",)
 
     user: Any = SubFactory(
         "tests.factories.models.user_factory.UserFactory",
         role=RoleEnum.STUDENT,
     )
     user_id: Any = LazyAttribute(lambda x: x.user.id if x.user else None)
-    starting_grade: Any = LazyAttribute(lambda _: GradeFactory.create())
-    starting_grade_id: Any = LazyAttribute(lambda x: x.starting_grade.id)
-    student_year_records: Any = RelatedFactoryList(
-        "tests.factories.models.StudentYearRecordFactory",
-        factory_related_name="student",
-        size=1,
-    )
+
     years: Any = RelatedFactoryList(
         "tests.factories.models.StudentYearLinkFactory",
         factory_related_name="student",
         size=1,
     )
+    academic_terms: Any = RelatedFactoryList(
+        "tests.factories.models.StudentAcademicTermLinkFactory",
+        factory_related_name="student",
+        size=1,
+    )
+    grades: Any = RelatedFactoryList(
+        "tests.factories.models.StudentGradeLinkFactory",
+        factory_related_name="student",
+        size=1,
+    )
 
-    # @post_generation
-    # def student_links(self, create, extracted, **kwargs):
-    #     if not create:
-    #         return
+    sections: Any = RelatedFactoryList(
+        "tests.factories.models.StudentSectionLinkFactory",
+        factory_related_name="student",
+        size=1,
+    )
 
-    #     if extracted:
-    #         for link in extracted:
-    #             self.student_year_records.append(link)
-
-    #     else:
-    #         # Create a default student year record if none are provided
-    #         self.year_links.append(
-    #             StudentYearLinkFactory.create(student=self, year=YearFactory.create())
-    #         )
+    streams: Any = RelatedFactoryList(
+        "tests.factories.models.StudentStreamLinkFactory",
+        factory_related_name="student",
+        size=1,
+    )
+    subjects: Any = RelatedFactoryList(
+        "tests.factories.models.StudentSubjectLinkFactory",
+        factory_related_name="student",
+        size=1,
+    )
+    mark_lists: Any = RelatedFactoryList(
+        "tests.factories.models.MarkListFactory",
+        factory_related_name="student",
+        size=1,
+    )
 
     # Personal Information
     first_name: Any = LazyAttribute(lambda x: fake.first_name())

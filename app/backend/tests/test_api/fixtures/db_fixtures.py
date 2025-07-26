@@ -58,6 +58,6 @@ def mock_student(db_session: scoped_session[Session]) -> None:
 
     # Create a mock student
     student_user = UserFactory.create(
-        role=RoleEnum.STUDENT, admin=None, teacher=None, size=5
+        role=RoleEnum.STUDENT, admin=None, teacher=None
     )
-    student = StudentFactory.create(user=student_user)
+    StudentFactory.create(user=student_user)

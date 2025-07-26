@@ -20,6 +20,7 @@ import uuid
 if TYPE_CHECKING:
     from models.grade import Grade
     from models.student_term_record import StudentTermRecord
+    from models.mark_list import MarkList
     from models.student_year_record import StudentYearRecord
     from models.subject_yearly_average import SubjectYearlyAverage
     from models.user import User
@@ -28,6 +29,7 @@ if TYPE_CHECKING:
     from models.section import Section
     from models.stream import Stream
     from models.academic_term import AcademicTerm
+    from models.subject import Subject
 
 
 class Student(BaseModel):
@@ -38,9 +40,6 @@ class Student(BaseModel):
     __tablename__ = "students"
 
     # Personal Information
-    starting_grade_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("grades.id"), nullable=False
-    )
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
     father_name: Mapped[str] = mapped_column(String(50), nullable=False)
     date_of_birth: Mapped[Date] = mapped_column(Date, nullable=False)
@@ -141,16 +140,16 @@ class Student(BaseModel):
     )
 
     # Relationships
-    starting_grade: Mapped["Grade"] = relationship(
-        "Grade",
-        back_populates="students",
-        init=False,
-        repr=False,
-    )
     user: Mapped["User"] = relationship(
         "User",
         back_populates="student",
         init=False,
+        repr=False,
+    )
+    mark_lists: Mapped[List["MarkList"]] = relationship(
+        "MarkList",
+        back_populates="student",
+        default_factory=list,
         repr=False,
     )
     student_term_records: Mapped[List["StudentTermRecord"]] = relationship(
@@ -203,6 +202,13 @@ class Student(BaseModel):
     sections: Mapped[List["Section"]] = relationship(
         "Section",
         secondary="student_section_links",
+        back_populates="students",
+        default_factory=list,
+        repr=False,
+    )
+    subjects: Mapped[List["Subject"]] = relationship(
+        "Subject",
+        secondary="student_subject_links",
         back_populates="students",
         default_factory=list,
         repr=False,
