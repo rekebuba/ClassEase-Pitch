@@ -10,7 +10,6 @@ from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
 
 if TYPE_CHECKING:
-    from models.teacher_record import TeachersRecord
     from models.subject_yearly_average import SubjectYearlyAverage
     from models.subject import Subject
     from models.grade import Grade
@@ -67,15 +66,6 @@ class YearlySubject(BaseModel):
     subject_yearly_averages: Mapped[List["SubjectYearlyAverage"]] = relationship(
         "SubjectYearlyAverage",
         back_populates="yearly_subject",
-        default_factory=list,
-        repr=False,
-    )
-
-    # Many-to-many relationships
-    teacher_records_link: Mapped[List["TeachersRecord"]] = relationship(
-        "TeachersRecord",
-        back_populates="yearly_subjects_link",
-        secondary="teacher_yearly_subject_links",
         default_factory=list,
         repr=False,
     )

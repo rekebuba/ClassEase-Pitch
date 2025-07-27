@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from .subject_schema import SubjectSchema
     from .academic_term_schema import AcademicTermSchema
     from .year_schema import YearSchema
+    from .section_schema import SectionSchema
 
 
 class StudentSchema(BaseModel):
@@ -99,6 +100,10 @@ class StudentRelationshipSchema(BaseModel):
     subjects: Optional[List[SubjectSchema]] = Field(
         default=None,
         description="List of subjects the student is associated with.",
+    )
+    sections: Optional[List[SectionSchema]] = Field(
+        default=None,
+        description="List of sections the student is associated with.",
     )
     mark_lists: Optional[List[MarkListSchema]] = Field(
         default=None,

@@ -11,7 +11,7 @@ from extension.enums.enum import GradeLevelEnum
 class GradeFactory(BaseFactory[Grade]):
     class Meta:
         model = Grade
-        exclude = "year"
+        exclude = ("year",)
 
     # preload IDs
     _existing_ids = storage.session.execute(select(Grade.grade, Grade.id)).all()

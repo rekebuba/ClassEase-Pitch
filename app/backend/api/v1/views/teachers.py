@@ -14,7 +14,6 @@ from models.assessment import Assessment
 from models.mark_list import MarkList
 from models.student_term_record import StudentTermRecord
 from models.subject_yearly_average import SubjectYearlyAverage
-from models.teacher_record import TeachersRecord
 from models.student_year_record import StudentYearRecord
 from urllib.parse import urlparse, parse_qs
 from sqlalchemy import update, and_

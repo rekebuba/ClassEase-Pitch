@@ -39,8 +39,7 @@ class StreamSchema(BaseModel):
 class StreamRelationshipSchema(BaseModel):
     """This model represents the relationships of a StreamSchema."""
 
-    year: Optional[str] = None
-    grades: Optional[List[GradeSchema]] = None
+    grade: Optional[GradeSchema] = None
     yearly_subjects: Optional[List[YearlySubjectSchema]] = None
     students: Optional[List[StudentYearRecordSchema]] = None
     subjects: List[SubjectSchema] = Field(alias="subjects")

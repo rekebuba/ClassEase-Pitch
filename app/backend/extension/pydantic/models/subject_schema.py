@@ -47,9 +47,8 @@ class SubjectRelationshipSchema(BaseModel):
     )
 
     teachers: List[TeacherSchema] = []
-    yearly_subjects: List[YearlySubjectSchema] = []
-    grades: List[GradeSchema] = Field(alias="grades")
-    streams: List[StreamSchema] = Field(alias="streams")
+    grades: List[GradeSchema] = []
+    streams: List[StreamSchema] = []
 
 
 class SubjectWithRelationshipsSchema(SubjectSchema, SubjectRelationshipSchema):

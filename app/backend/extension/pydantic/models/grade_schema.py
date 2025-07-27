@@ -9,8 +9,6 @@ from extension.functions.helper import to_camel
 if TYPE_CHECKING:
     from .teacher_schema import TeacherSchema
     from .stream_schema import StreamSchema
-    from .yearly_subject_schema import YearlySubjectSchema
-    from .student_year_record_schema import StudentYearRecordSchema
     from .student_schema import StudentSchema
     from .year_schema import YearSchema
     from .section_schema import SectionSchema
@@ -58,11 +56,9 @@ class GradeRelationshipSchema(BaseModel):
     year: YearSchema
     teachers: List[TeacherSchema] = []
     streams: List[StreamSchema] = []
-    yearly_subjects: List[YearlySubjectSchema] = Field(alias="subjects")
-    student_year_records: List[StudentYearRecordSchema] = []
     students: List[StudentSchema] = []
-    sections_link: List[SectionSchema] = Field(alias="sections")
-    subjects: List[SubjectSchema] = Field(alias="subjects")
+    sections: List[SectionSchema] = []
+    subjects: List[SubjectSchema] = []
 
 
 class GradeWithRelationshipsSchema(GradeSchema, GradeRelationshipSchema):

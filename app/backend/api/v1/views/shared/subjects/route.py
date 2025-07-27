@@ -1,13 +1,17 @@
 from typing import Set, Tuple
 import uuid
 from sqlalchemy import select
-from api.v1.utils.parameter import validate_fields
-from api.v1.utils.typing import UserT
+from api.v1.utils.parameter import validate_expand, validate_fields
+from api.v1.utils.typing import IncEx, UserT
 from api.v1.views import errors
 from api.v1.views.shared import auths as auth
 from api.v1.views.utils import student_teacher_or_admin_required
 from extension.pydantic.models.grade_schema import GradeSchema
-from extension.pydantic.models.subject_schema import SubjectSchema
+from extension.pydantic.models.subject_schema import (
+    SubjectRelationshipSchema,
+    SubjectSchema,
+    SubjectWithRelationshipsSchema,
+)
 from extension.pydantic.response.schema import success_response
 from models import storage
 from models.grade import Grade
@@ -40,42 +44,26 @@ def get_available_subjects(
 @auth.route("/subjects/<uuid:subject_id>", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(SubjectSchema, SubjectSchema.default_fields())
+@validate_expand(SubjectRelationshipSchema)
 def get_subject_by_id(
     user: UserT,
-    fields: Set[str],
+    fields: dict[str, IncEx],
+    related_fields: dict[str, IncEx],
     subject_id: uuid.UUID,
 ) -> Tuple[Response, int]:
     """Returns Subject model based on subject_id"""
-    subject = storage.session.scalar(select(Subject).where(Subject.id == subject_id))
+    subject = storage.session.get(Subject, subject_id)
     if not subject:
         return jsonify({"error": "Subject not found"}), 404
 
-    subject_schema = SubjectSchema.model_validate(subject)
-    valid_subject = subject_schema.model_dump(by_alias=True, include=fields)
+    subject_schema = SubjectWithRelationshipsSchema.model_validate(subject)
+    valid_subject = subject_schema.model_dump(
+        by_alias=True,
+        include={
+            **fields,
+            **related_fields,
+        },
+        mode="json",
+    )
 
     return success_response(data=valid_subject)
-
-
-@auth.route("/subjects/<uuid:subject_id>/grades", methods=["GET"])
-@student_teacher_or_admin_required
-def get_subject_grade(user: UserT, subject_id: uuid.UUID) -> Tuple[Response, int]:
-    """
-    Returns the grades associated with a specific subject.
-    """
-    grades = storage.session.scalars(
-        select(Grade)
-        .select_from(YearlySubject)
-        .join(Subject, Subject.id == YearlySubject.subject_id)
-        .join(Grade, Grade.id == YearlySubject.grade_id)
-        .where(Subject.id == subject_id)
-    ).all()
-
-    if not grades:
-        return errors.handle_not_found_error(
-            message=f"Subject with id {subject_id} not found."
-        )
-
-    grade_schemas = [GradeSchema.model_validate(grade) for grade in grades]
-    valid_grades = [schema.model_dump(by_alias=True) for schema in grade_schemas]
-
-    return jsonify(valid_grades), 200

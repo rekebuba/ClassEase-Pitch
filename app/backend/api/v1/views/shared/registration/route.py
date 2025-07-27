@@ -135,13 +135,13 @@ def register_new_teacher() -> Tuple[Response, int]:
     subjects = storage.session.scalars(
         select(Subject).where(
             Subject.id.in_(
-                [subject.id for subject in teacher_data.subjects_to_teach or []]
+                [subject.id for subject in teacher_data.subjects or []]
             )
         )
     ).all()
     grades = storage.session.scalars(
         select(Grade).where(
-            Grade.id.in_([grade.id for grade in teacher_data.grade_to_teach or []])
+            Grade.id.in_([grade.id for grade in teacher_data.grades or []])
         )
     ).all()
     subject_schemas = [SubjectSchema.model_validate(subject) for subject in subjects]
@@ -152,17 +152,17 @@ def register_new_teacher() -> Tuple[Response, int]:
 
     # Validate all subjects/grades exist
     _validate_relations(
-        requested_subjects=teacher_data.subjects_to_teach,
+        requested_subjects=teacher_data.subjects,
         found_subjects=subject_schemas,
-        requested_grades=teacher_data.grade_to_teach,
+        requested_grades=teacher_data.grades,
         found_grades=grade_schemas,
     )
 
     # Convert to dictionary before unpacking
     teacher_dict = teacher_data.model_dump(
         exclude={
-            "grade_to_teach",
-            "subjects_to_teach",
+            "grades",
+            "subjects",
         },
         exclude_none=True,
     )
@@ -173,8 +173,8 @@ def register_new_teacher() -> Tuple[Response, int]:
     storage.session.add(new_teacher)
 
     # Add relationships after creation
-    new_teacher.subjects_to_teach = list(subjects)
-    new_teacher.grade_to_teach = list(grades)
+    new_teacher.subjects = list(subjects)
+    new_teacher.grades = list(grades)
 
     storage.session.commit()
 

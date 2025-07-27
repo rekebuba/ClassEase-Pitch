@@ -15,7 +15,7 @@ class TeacherSubjectLinkFactory(BaseFactory[TeacherSubjectLink]):
         exclude = ("teacher", "subject")
 
     teacher: Any = SubFactory(
-        "tests.factories.models.teacher_factory.TeacherFactory", subjects_to_teach=[]
+        "tests.factories.models.teacher_factory.TeacherFactory", subjects=[]
     )
     subject: Any = SubFactory("tests.factories.models.subject_factory.SubjectFactory")
 

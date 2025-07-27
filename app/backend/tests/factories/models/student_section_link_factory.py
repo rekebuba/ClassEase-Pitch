@@ -15,9 +15,7 @@ class StudentSectionLinkFactory(BaseFactory[StudentSectionLink]):
         exclude = ("student", "section")
 
     student: Any = SubFactory("tests.factories.models.student_factory.StudentFactory")
-    section: Any = SubFactory(
-        "tests.factories.models.section_factory.SectionFactory", student_term_records=[]
-    )
+    section: Any = SubFactory("tests.factories.models.section_factory.SectionFactory")
 
-    student_id: Any = LazyAttribute(lambda x: x.student.id if x.student else None)
-    section_id: Any = LazyAttribute(lambda x: x.section.id if x.section else None)
+    student_id: Any = LazyAttribute(lambda x: x.student.id)
+    section_id: Any = LazyAttribute(lambda x: x.section.id)

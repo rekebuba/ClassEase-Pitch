@@ -24,15 +24,17 @@ from extension.enums.enum import (
     StatusEnum,
 )
 from models.base.base_model import BaseModel
-
-
 from models.base.column_type import UUIDType
 import uuid
+
+
 if TYPE_CHECKING:
     from models.user import User  # Avoid circular import
     from models.subject import Subject
     from models.grade import Grade
-    from models.teacher_record import TeachersRecord
+    from models.year import Year
+    from models.academic_term import AcademicTerm
+    from models.section import Section
 
 
 class Teacher(BaseModel):
@@ -235,24 +237,40 @@ class Teacher(BaseModel):
         init=False,
         repr=False,
     )
-    # Relationship with Out Default
-    subjects_to_teach: Mapped[List["Subject"]] = relationship(
+
+    # Many-to-Many Relationship
+    years: Mapped[List["Year"]] = relationship(
+        "Year",
+        back_populates="teachers",
+        secondary="teacher_year_links",
+        default_factory=list,
+        repr=False,
+    )
+    academic_terms: Mapped[List["AcademicTerm"]] = relationship(
+        "AcademicTerm",
+        back_populates="teachers",
+        secondary="teacher_academic_term_links",
+        default_factory=list,
+        repr=False,
+    )
+    subjects: Mapped[List["Subject"]] = relationship(
         "Subject",
         back_populates="teachers",
         secondary="teacher_subject_links",
         default_factory=list,
         repr=False,
     )
-    grade_to_teach: Mapped[List["Grade"]] = relationship(
+    grades: Mapped[List["Grade"]] = relationship(
         "Grade",
         back_populates="teachers",
         secondary="teacher_grade_links",
         default_factory=list,
         repr=False,
     )
-    teacher_records: Mapped[List["TeachersRecord"]] = relationship(
-        "TeachersRecord",
-        back_populates="teacher",
+    sections: Mapped[List["Section"]] = relationship(
+        "Section",
+        back_populates="teachers",
+        secondary="teacher_section_links",
         default_factory=list,
         repr=False,
     )

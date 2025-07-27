@@ -13,6 +13,11 @@ if TYPE_CHECKING:
     from .academic_term_schema import AcademicTermSchema
     from .yearly_subject_schema import YearlySubjectSchema
     from .grade_schema import GradeSchema
+    from .section_schema import SectionSchema
+    from .stream_schema import StreamSchema
+    from .student_schema import StudentSchema
+    from .subject_schema import SubjectSchema
+    from .teacher_schema import TeacherSchema
 
 
 class YearSchema(BaseModel):
@@ -60,6 +65,9 @@ class YearRelationshipSchema(BaseModel):
     academic_terms: List[AcademicTermSchema] = []
     yearly_subjects: List[YearlySubjectSchema] = []
     grades: List[GradeSchema] = []
+    students: List[StudentSchema] = []
+    teachers: List[TeacherSchema] = []
+    subjects: List[SubjectSchema] = []
 
 
 class YearSchemaWithRelationships(YearSchema, YearRelationshipSchema):

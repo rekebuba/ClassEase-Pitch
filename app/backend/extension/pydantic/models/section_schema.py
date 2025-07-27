@@ -6,9 +6,9 @@ from pydantic import BaseModel, ConfigDict
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
-    from .student_term_record_schema import StudentTermRecordSchema
-    from .teacher_record_schema import TeacherRecordSchema
     from .grade_schema import GradeSchema
+    from .student_schema import StudentSchema
+    from .teacher_schema import TeacherSchema
 
 
 class SectionSchema(BaseModel):
@@ -38,13 +38,12 @@ class SectionSchema(BaseModel):
 class SectionRelationshipSchema(BaseModel):
     """This model represents the relationships of a SectionSchema."""
 
-    year: Optional[str] = None
-    student_term_records: List[StudentTermRecordSchema] = []
-    teacher_records_link: List[TeacherRecordSchema] = []
-    grades_link: List[GradeSchema] = []
+    grade: Optional[GradeSchema] = None
+    students: Optional[List[StudentSchema]] = []
+    teachers: Optional[List[TeacherSchema]] = []
 
 
-class SectionSchemaWithRelationships(SectionSchema):
+class SectionSchemaWithRelationships(SectionSchema, SectionRelationshipSchema):
     """This model represents a SectionSchema with its relationships."""
 
     pass
