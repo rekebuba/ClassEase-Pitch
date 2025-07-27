@@ -102,7 +102,7 @@ def detail_teacher_application(admin_data: UserT, id: str) -> Tuple[Response, in
             storage.session.query(Teacher)
             .options(
                 joinedload(Teacher.user),
-                joinedload(Teacher.subjects_to_teach),
+                joinedload(Teacher.subjects),
                 joinedload(Teacher.grade_level),
             )
             .filter(Teacher.id == id)
@@ -115,8 +115,8 @@ def detail_teacher_application(admin_data: UserT, id: str) -> Tuple[Response, in
         # Convert the SQLAlchemy model to a Pydantic schema
         teacher_schema = DetailApplicationResponse.model_validate(
             {
-                "subjects_to_teach": [
-                    subject.name for subject in teacher.subjects_to_teach
+                "subjects": [
+                    subject.name for subject in teacher.subjects
                 ],
                 "grade_levels_to_teach": [grade.grade for grade in teacher.grade_level],
             }

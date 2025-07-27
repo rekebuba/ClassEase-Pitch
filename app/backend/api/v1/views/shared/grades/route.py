@@ -1,15 +1,20 @@
 from typing import Set, Tuple
 import uuid
 from sqlalchemy import select
-from api.v1.utils.parameter import validate_fields
-from api.v1.utils.typing import UserT
+from api.v1.utils.parameter import validate_expand, validate_fields
+from api.v1.utils.typing import IncEx, UserT
 from api.v1.views.shared import auths as auth
 from api.v1.views.utils import student_teacher_or_admin_required
-from extension.pydantic.models.grade_schema import GradeSchema
+from extension.pydantic.models.grade_schema import (
+    GradeRelationshipSchema,
+    GradeSchema,
+    GradeWithRelationshipsSchema,
+)
 from extension.pydantic.response.schema import success_response
 from models import storage
 from models.grade import Grade
 from flask import Response, jsonify
+
 
 @auth.route("/years/<uuid:year_id>/grades", methods=["GET"])
 @student_teacher_or_admin_required
@@ -35,9 +40,11 @@ def grades(user: UserT, fields: Set[str], year_id: uuid.UUID) -> Tuple[Response,
 @auth.route("/grades/<uuid:grade_id>", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(GradeSchema, GradeSchema.default_fields())
+@validate_expand(GradeRelationshipSchema)
 def get_grade_by_id(
     user: UserT,
-    fields: Set[str],
+    fields: dict[str, IncEx],
+    related_fields: dict[str, IncEx],
     grade_id: uuid.UUID,
 ) -> Tuple[Response, int]:
     """Returns Grade model based on grade_id"""
@@ -45,7 +52,14 @@ def get_grade_by_id(
     if not grade:
         return jsonify({"error": "Grade not found"}), 404
 
-    grade_schema = GradeSchema.model_validate(grade)
-    valid_grade = grade_schema.model_dump(by_alias=True, include=fields)
+    grade_schema = GradeWithRelationshipsSchema.model_validate(grade)
+    valid_grade = grade_schema.model_dump(
+        by_alias=True,
+        include={
+            **fields,
+            **related_fields,
+        },
+        mode="json",
+    )
 
     return success_response(data=valid_grade)

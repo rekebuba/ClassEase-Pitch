@@ -13,12 +13,11 @@ from models.base.column_type import UUIDType
 import uuid
 
 
-
 if TYPE_CHECKING:
     from models.student_term_record import StudentTermRecord
     from models.year import Year
-    from models.teacher_record import TeachersRecord
     from models.student import Student
+    from models.teacher import Teacher
     from models.mark_list import MarkList
 
 
@@ -63,16 +62,17 @@ class AcademicTerm(BaseModel):
         default_factory=list,
         repr=False,
     )
-    teacher_records: Mapped[List["TeachersRecord"]] = relationship(
-        "TeachersRecord",
-        back_populates="academic_term",
-        default_factory=list,
-        repr=False,
-    )
 
     students: Mapped[List["Student"]] = relationship(
         "Student",
         secondary="student_academic_term_links",
+        back_populates="academic_terms",
+        default_factory=list,
+        repr=False,
+    )
+    teachers: Mapped[List["Teacher"]] = relationship(
+        "Teacher",
+        secondary="teacher_academic_term_links",
         back_populates="academic_terms",
         default_factory=list,
         repr=False,

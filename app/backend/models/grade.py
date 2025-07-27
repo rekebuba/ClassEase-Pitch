@@ -42,7 +42,7 @@ class Grade(BaseModel):
     )
     has_stream: Mapped[bool] = mapped_column(nullable=False, default=False)
 
-    # Relationships
+    # One-To-Many Relationships
     year: Mapped["Year"] = relationship(
         "Year",
         back_populates="grades",
@@ -50,16 +50,24 @@ class Grade(BaseModel):
         init=False,
     )
 
+    # Many-To-One Relationships
+    sections: Mapped[List["Section"]] = relationship(
+        "Section",
+        back_populates="grade",
+        default_factory=list,
+        repr=False,
+    )
     streams: Mapped[List["Stream"]] = relationship(
         "Stream",
-        back_populates="grades",
-        secondary="grade_stream_links",
+        back_populates="grade",
+        default_factory=list,
         repr=False,
-        init=False,
     )
+
+    # Many-To-Many Relationships
     teachers: Mapped[List["Teacher"]] = relationship(
         "Teacher",
-        back_populates="grade_to_teach",
+        back_populates="grades",
         secondary="teacher_grade_links",
         repr=False,
         default_factory=list,
@@ -69,13 +77,6 @@ class Grade(BaseModel):
         back_populates="grade",
         repr=False,
         default_factory=list,
-    )
-    sections_link: Mapped[List["Section"]] = relationship(
-        "Section",
-        back_populates="grades_link",
-        secondary="grade_section_links",
-        default_factory=list,
-        repr=False,
     )
     subjects: Mapped[List["Subject"]] = relationship(
         "Subject",

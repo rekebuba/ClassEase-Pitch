@@ -1,6 +1,5 @@
 from enum import Enum
-import random
-from typing import Dict, List, Optional, Type
+from typing import Dict, Optional, Type
 import uuid
 
 from faker import Faker
@@ -36,7 +35,6 @@ from models.stream import Stream
 from models.subject import Subject
 from models.year import Year
 from models.yearly_subject import YearlySubject
-from models.grade_section_link import GradeSectionLink
 
 fake = Faker()
 
@@ -91,23 +89,11 @@ class BaseAction:
         storage.save()
 
     @staticmethod
-    def create_grades(year: Year, sections: List[Section]) -> None:
+    def create_grade_stream_and_section(year: Year) -> None:
         """Populates the grades table with all grades from 1 to 12."""
         if storage.session.query(Grade).count() > 0:
             return
 
-        social_stream = (
-            storage.session.query(Stream)
-            .filter_by(name=StreamEnum.SOCIAL.value)
-            .first()
-        )
-        natural_stream = (
-            storage.session.query(Stream)
-            .filter_by(name=StreamEnum.NATURAL.value)
-            .first()
-        )
-
-        grade_link = []
         for grade_level in range(1, 13):
             grade = Grade(
                 year_id=year.id,
@@ -122,54 +108,22 @@ class BaseAction:
                 has_stream=grade_level in [11, 12],
             )
 
-            if grade_level > 10:
-                if not social_stream or not natural_stream:
-                    continue  # Ensure streams exist before assigning
-
-                # Assign streams to grades 11 and 12
-                grade.streams = [social_stream, natural_stream]
-
             storage.new(grade)
-            storage.session.flush()  # Ensure the new Grade is saved
-
-            grade_link.extend(
-                [
-                    GradeSectionLink(
-                        section_id=section.id,
+            if grade_level > 10:
+                # For grades 11 and 12, create streams
+                for stream_name in StreamEnum:
+                    stream = Stream(
+                        name=stream_name.value,
                         grade_id=grade.id,
                     )
-                    for section in sections[: random.randint(1, len(sections))]
-                ]
-            )
+                    storage.new(stream)
 
-        storage.session.bulk_save_objects(grade_link)
-        storage.save()
-
-    @staticmethod
-    def create_streams(year: Year) -> None:
-        """Populates the streams table with 'natural' and 'social' streams."""
-        if storage.session.query(Stream).count() == len(StreamEnum):
-            return
-
-        for stream_name in StreamEnum:
-            if (
-                not storage.session.query(Stream)
-                .filter_by(name=stream_name.value)
-                .first()
-            ):
-                stream = Stream(year_id=year.id, name=stream_name.value)
-                storage.new(stream)
-        storage.save()
-
-    @staticmethod
-    def create_section(year: Year) -> None:
-        """Populates the section table with 'A', 'B', and 'C' sections."""
-        if storage.session.query(Section).count() > 0:
-            return
-
-        for section_name in SectionEnum:
-            section = Section(year_id=year.id, section=section_name.value)
-            storage.new(section)
+            for section_name in SectionEnum:
+                section = Section(
+                    section=section_name.value,
+                    grade_id=grade.id,
+                )
+                storage.new(section)
 
         storage.save()
 
@@ -298,12 +252,8 @@ class BaseAction:
         """
         # 1. Ensure all prerequisite data exists
         BaseAction.create_academic_term(year)
-        BaseAction.create_streams(year)  # Order Maters
-        BaseAction.create_section(year)
         BaseAction.create_subjects(year)
-
-        sections = storage.session.scalars(select(Section)).all()
-        BaseAction.create_grades(year, list(sections))
+        BaseAction.create_grade_stream_and_section(year)
 
         # 2. Iterate through the grade-to-subject mapping
         for grade_level, subject_enum_class in BaseAction.grade_subjects_map.items():

@@ -21,7 +21,8 @@ from models.mark_list import MarkList  # noqa: F401
 from models.student_term_record import StudentTermRecord  # noqa: F401
 from models.subject_yearly_average import SubjectYearlyAverage  # noqa: F401
 from models.student_year_record import StudentYearRecord  # noqa: F401
-from models.teacher_record import TeachersRecord  # noqa: F401
+from models.teacher_academic_term_link import TeacherAcademicTermLink  # noqa: F401
+from models.teacher_section_link import TeacherSectionLink  # noqa: F401
 from models.blacklist_token import BlacklistToken  # noqa: F401
 from models.event import Event  # noqa: F401
 from models.academic_term import AcademicTerm  # noqa: F401
@@ -30,10 +31,9 @@ from models.year import Year  # noqa: F401
 from models.stream import Stream  # noqa: F401
 from models.table import Table, seed_table  # noqa: F401
 from models.grade_stream_link import GradeStreamLink  # noqa: F401
+from models.teacher_year_link import TeacherYearLink  # noqa: F401
 from models.teacher_subject_link import TeacherSubjectLink  # noqa: F401
 from models.teacher_grade_link import TeacherGradeLink  # noqa: F401
-from models.teacher_yearly_subject_link import TeacherYearlySubjectLink  # noqa: F401
-from models.teacher_record_section_link import TeacherRecordSectionLink  # noqa: F401
 from models.grade_section_link import GradeSectionLink  # noqa: F401
 from models.subject_grade_link import SubjectGradeLink  # noqa: F401
 from models.subject_stream_link import SubjectStreamLink  # noqa: F401

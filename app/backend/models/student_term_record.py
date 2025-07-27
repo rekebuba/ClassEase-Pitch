@@ -29,16 +29,20 @@ class StudentTermRecord(BaseModel):
     academic_term_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(), ForeignKey("academic_terms.id"), nullable=False
     )
+    grade_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(), ForeignKey("grades.id"), nullable=False
+    )
     section_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(), ForeignKey("sections.id"), nullable=False
     )
-    student_year_record_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("student_year_records.id"), nullable=True, default=None
+    stream_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(), ForeignKey("streams.id"), nullable=True, default=None
     )
+
     average: Mapped[float] = mapped_column(Float, nullable=True, default=None)
     rank: Mapped[int] = mapped_column(Integer, nullable=True, default=None)
 
-    # Relationships
+    # One-To-Many Relationships
     student: Mapped["Student"] = relationship(
         "Student",
         back_populates="student_term_records",
@@ -46,11 +50,6 @@ class StudentTermRecord(BaseModel):
     )
     academic_term: Mapped["AcademicTerm"] = relationship(
         "AcademicTerm",
-        back_populates="student_term_records",
-        init=False,
-    )
-    section: Mapped["Section"] = relationship(
-        "Section",
         back_populates="student_term_records",
         init=False,
     )

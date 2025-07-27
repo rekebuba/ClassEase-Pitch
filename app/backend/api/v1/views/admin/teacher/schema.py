@@ -16,7 +16,7 @@ from models import storage
 class DetailApplicationResponse(BaseModel):
     model_config = dict(populate_by_name=True, from_attributes=True)
 
-    subjects_to_teach: List[str]
+    subjects: List[str]
     grade_levels_to_teach: List[int]
 
 

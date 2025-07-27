@@ -1,11 +1,7 @@
-from typing import Any, List
+from typing import Any
 from factory import LazyAttribute, SubFactory, RelatedFactoryList, post_generation
 from faker import Faker
 from models.student import Student
-from models.student_year_link import StudentYearLink
-from tests.factories.models.grade_factory import GradeFactory
-from tests.factories.models.student_year_link_factory import StudentYearLinkFactory
-from tests.factories.models.year_factory import YearFactory
 from .base_factory import BaseFactory
 from extension.enums.enum import (
     BloodTypeEnum,
@@ -33,6 +29,13 @@ class StudentFactory(BaseFactory[Student]):
         factory_related_name="student",
         size=1,
     )
+
+    student_term_records: Any = RelatedFactoryList(
+        "tests.factories.models.StudentTermRecordFactory",
+        factory_related_name="student",
+        size=1,
+    )
+
     academic_terms: Any = RelatedFactoryList(
         "tests.factories.models.StudentAcademicTermLinkFactory",
         factory_related_name="student",

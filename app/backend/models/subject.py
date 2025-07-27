@@ -40,7 +40,7 @@ class Subject(BaseModel):
     )
     teachers: Mapped[List["Teacher"]] = relationship(
         "Teacher",
-        back_populates="subjects_to_teach",
+        back_populates="subjects",
         secondary="teacher_subject_links",
         default_factory=list,
         repr=False,

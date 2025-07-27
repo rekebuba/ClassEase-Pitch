@@ -1,10 +1,13 @@
-from itertools import chain
 import random
-from typing import Any
-from factory import LazyAttribute, SubFactory, RelatedFactoryList
+from sqlalchemy import select
+from models import storage
+from typing import Any, List
+from factory import LazyAttribute, SubFactory, RelatedFactoryList, post_generation
 from faker import Faker
+from models.grade import Grade
+from models.subject import Subject
+from models.subject_grade_link import SubjectGradeLink
 from models.teacher import Teacher
-from .subject_factory import SubjectFactory
 from .base_factory import BaseFactory
 from extension.enums.enum import (
     ExperienceYearEnum,
@@ -23,23 +26,50 @@ class TeacherFactory(BaseFactory[Teacher]):
         model = Teacher
         exclude = ("user", "selected_yearly_subjects")
 
-    teacher_records: Any = RelatedFactoryList(
-        "tests.factories.models.TeacherRecordFactory",
+    years: Any = RelatedFactoryList(
+        "tests.factories.models.TeacherYearLinkFactory",
         factory_related_name="teacher",
         size=1,
     )
-
-    subjects_to_teach: Any = RelatedFactoryList(
-        "tests.factories.models.TeacherSubjectLinkFactory",
-        factory_related_name="teacher",
-        size=2,
-    )
-
-    grade_to_teach: Any = RelatedFactoryList(
-        "tests.factories.models.TeacherGradeLinkFactory",
+    academic_terms: Any = RelatedFactoryList(
+        "tests.factories.models.TeacherAcademicTermLinkFactory",
         factory_related_name="teacher",
         size=1,
     )
+    sections: Any = RelatedFactoryList(
+        "tests.factories.models.TeacherSectionLinkFactory",
+        factory_related_name="teacher",
+        size=1,
+    )
+    subjects: List[Subject] = []
+    grades: List[Grade] = []
+
+    @post_generation
+    def subject_and_grades(self, create, extracted, **kwargs):
+        if not create:
+            return
+        count = storage.session.query(SubjectGradeLink).count()
+        if count < 2:
+            raise ValueError("Not enough SubjectGradeLink records to choose from.")
+
+        offset = random.randint(1, 3)
+
+        # Create 2 subject-grade links and attach them to the instance
+        subject_and_grades = storage.session.execute(
+            select(Subject, Grade)
+            .select_from(SubjectGradeLink)
+            .join(Subject, Subject.id == SubjectGradeLink.subject_id)
+            .join(Grade, Grade.id == SubjectGradeLink.grade_id)
+            .offset(offset)
+            .limit(2)
+        ).all()
+
+        # Attach related subjects
+        for subject, grade in subject_and_grades:
+            self.subjects.append(subject)
+            self.grades.append(grade)
+
+        storage.session.commit()
 
     user: Any = SubFactory(
         "tests.factories.models.user_factory.UserFactory",

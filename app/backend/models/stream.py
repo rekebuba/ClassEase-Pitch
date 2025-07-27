@@ -15,31 +15,23 @@ if TYPE_CHECKING:
     from models.yearly_subject import YearlySubject
     from models.grade import Grade
     from models.subject import Subject
-    from models.year import Year
     from models.student import Student
 
 
 class Stream(BaseModel):
     __tablename__ = "streams"
 
-    year_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("years.id"), nullable=False, index=True
+    grade_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(), ForeignKey("grades.id"), nullable=False
     )
     name: Mapped[str] = mapped_column(String(10), nullable=False)
 
-    # Relationships
-    year: Mapped["Year"] = relationship(
-        "Year",
+    # One-To-Many Relationships
+    grade: Mapped["Grade"] = relationship(
+        "Grade",
         back_populates="streams",
         repr=False,
         init=False,
-    )
-    grades: Mapped[List["Grade"]] = relationship(
-        "Grade",
-        back_populates="streams",
-        secondary="grade_stream_links",
-        repr=False,
-        default_factory=list,
     )
     yearly_subjects: Mapped[List["YearlySubject"]] = relationship(
         "YearlySubject",

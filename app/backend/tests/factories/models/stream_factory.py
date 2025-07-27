@@ -12,17 +12,20 @@ class StreamFactory(BaseFactory[Stream]):
 
     class Meta:
         model = Stream
-        exclude = ("year",)
+        exclude = ("grade",)
 
-    year: Any = SubFactory("tests.factories.models.YearFactory")
+    grade: Any = SubFactory("tests.factories.models.GradeFactory")
 
-    year_id: Any = LazyAttribute(lambda x: x.year.id)
+    grade_id: Any = LazyAttribute(lambda x: x.grade.id if x.grade.has_stream else None)
     name: Any = LazyAttribute(
         lambda x: random.choice(list(StreamEnum._value2member_map_))
     )
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
+        if not kwargs.get("grade_id"):
+            return None
+
         # Check if stream with the same name already exists
         existing = storage.session.query(Stream).filter_by(**kwargs).first()
         return existing or super()._create(model_class, *args, **kwargs)

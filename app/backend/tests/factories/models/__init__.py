@@ -9,6 +9,9 @@ from .student_stream_link_factory import StudentStreamLinkFactory
 from .student_subject_link_factory import StudentSubjectLinkFactory
 from .teacher_subject_link_factory import TeacherSubjectLinkFactory
 from .teacher_grade_link_factory import TeacherGradeLinkFactory
+from .teacher_section_link_factory import TeacherSectionLinkFactory
+from .teacher_year_link_factory import TeacherYearLinkFactory
+from .subject_grade_link_factory import SubjectGradeLinkFactory
 from .default_felids import DefaultFelids
 from .base_factory import BaseFactory
 from .year_factory import YearFactory
@@ -19,7 +22,7 @@ from .user_factory import UserFactory
 from .admin_factory import AdminFactory
 from .student_factory import StudentFactory
 from .teacher_factory import TeacherFactory
-from .teacher_record_factory import TeacherRecordFactory
+from .teacher_academic_term_link_factory import TeacherAcademicTermLinkFactory
 from .subject_factory import SubjectFactory
 from .section_factory import SectionFactory
 from .student_term_record_factory import StudentTermRecordFactory
@@ -57,10 +60,13 @@ __all__ = [
     "StudentStreamLinkFactory",
     "StudentSubjectLinkFactory",
     "TeacherFactory",
-    "TeacherRecordFactory",
+    "TeacherAcademicTermLinkFactory",
+    "TeacherYearLinkFactory",
     "TeacherSubjectLinkFactory",
     "TeacherGradeLinkFactory",
+    "TeacherSectionLinkFactory",
     "SubjectFactory",
+    "SubjectGradeLinkFactory",
     "SectionFactory",
     "StudentTermRecordFactory",
     "StudentYearRecordFactory",

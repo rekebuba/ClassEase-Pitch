@@ -20,4 +20,4 @@ class StudentStreamLinkFactory(BaseFactory[StudentStreamLink]):
     stream: Any = SubFactory("tests.factories.models.stream_factory.StreamFactory")
 
     student_id: Any = LazyAttribute(lambda x: x.student.id if x.student else None)
-    stream_id: Any = LazyAttribute(lambda x: x.stream.id if x.stream else None)
+    stream_id: Any = LazyAttribute(lambda x: x.stream.id)

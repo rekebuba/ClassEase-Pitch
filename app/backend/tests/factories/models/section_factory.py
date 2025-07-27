@@ -9,17 +9,11 @@ from .base_factory import BaseFactory
 class SectionFactory(BaseFactory[Section]):
     class Meta:
         model = Section
-        exclude = ("year",)
+        exclude = ("grade",)
 
-    year: Any = SubFactory("tests.factories.models.YearFactory")
+    grade: Any = SubFactory("tests.factories.models.GradeFactory")
 
-    student_term_records: Any = RelatedFactoryList(
-        "tests.factories.models.StudentTermRecordFactory",
-        factory_related_name="section",
-        size=2,
-    )
-
-    year_id: Any = LazyAttribute(lambda x: x.year.id)
+    grade_id: Any = LazyAttribute(lambda x: x.grade.id)
     section: Any = LazyAttribute(lambda _: random.choice(["A", "B", "C"]))
 
     @classmethod

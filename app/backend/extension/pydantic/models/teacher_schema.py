@@ -2,7 +2,7 @@ from __future__ import annotations
 import uuid
 from datetime import date
 from typing import TYPE_CHECKING, List, Optional
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from extension.enums.enum import (
     ExperienceYearEnum,
@@ -13,12 +13,14 @@ from extension.enums.enum import (
     StatusEnum,
 )
 from extension.functions.helper import to_camel
+from extension.pydantic.models.academic_term_schema import AcademicTermSchema
 
 if TYPE_CHECKING:
     from .user_schema import UserSchema
     from .subject_schema import SubjectSchema
     from .grade_schema import GradeSchema
-    from .teacher_record_schema import TeacherRecordSchema
+    from .year_schema import YearSchema
+    from .section_schema import SectionSchema
 
 
 class TeacherSchema(BaseModel):
@@ -98,6 +100,14 @@ class TeacherSchema(BaseModel):
     user_id: Optional[uuid.UUID] = None
     status: StatusEnum = StatusEnum.PENDING
 
+    @classmethod
+    def default_fields(cls) -> set[str]:
+        """
+        Returns a list of default fields to be used when no specific fields are requested.
+        This can be overridden in subclasses if needed.
+        """
+        return {"id", "first_name", "father_name", "date_of_birth"}
+
 
 class TeacherRelationshipSchema(BaseModel):
     """This model represents the relationships of a TeacherSchema.
@@ -111,11 +121,26 @@ class TeacherRelationshipSchema(BaseModel):
     )
 
     user: Optional[UserSchema] = None
-    subjects_to_teach: Optional[List[SubjectSchema]] = []
-    grade_to_teach: Optional[List[GradeSchema]] = []
-    teacher_records: Optional[List[TeacherRecordSchema]] = []
+    sections: Optional[List[SectionSchema]] = []
+    years: Optional[List[YearSchema]] = Field(
+        default=None,
+        description="List of years the teacher is associated with.",
+    )
+    academic_terms: Optional[List[AcademicTermSchema]] = Field(
+        default=None,
+        description="List of academic terms the teacher is associated with.",
+    )
+    grades: Optional[List[GradeSchema]] = Field(
+        default=None,
+        description="List of grades the teacher is associated with.",
+    )
+    subjects: Optional[List[SubjectSchema]] = Field(
+        default=None,
+        description="List of subjects the teacher is associated with.",
+    )
 
 
 class TeacherWithRelationshipsSchema(TeacherSchema, TeacherRelationshipSchema):
     """This model extends TeacherSchema to include relationships."""
+
     pass

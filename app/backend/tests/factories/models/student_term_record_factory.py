@@ -1,67 +1,25 @@
-import random
 from typing import Any
-from factory import (
-    LazyAttribute,
-    SubFactory,
-    SelfAttribute,
-    post_generation,
-)
+from factory import LazyAttribute, SubFactory
 from models.student_term_record import StudentTermRecord
-from .assessment_factory import AssessmentFactory
 from .base_factory import BaseFactory
-from models import storage
-from models.yearly_subject import YearlySubject
 
 
 class StudentTermRecordFactory(BaseFactory[StudentTermRecord]):
     class Meta:
         model = StudentTermRecord
-        exclude = ("student", "academic_term", "section", "student_year_record")
+        exclude = ("student", "academic_term", "section", "grade", "stream")
 
-    student: Any = SubFactory(
-        "tests.factories.models.StudentFactory", student_year_records=[]
-    )
+    student: Any = SubFactory("tests.factories.models.StudentFactory", years=[])
     academic_term: Any = SubFactory("tests.factories.models.AcademicTermFactory")
-    section: Any = SubFactory(
-        "tests.factories.models.SectionFactory", student_term_records=[]
-    )
-
-    student_year_record: Any = SubFactory(
-        "tests.factories.models.StudentYearRecordFactory",
-        student=SelfAttribute("..student"),
-        student_term_records=[],
-    )
-
-    @post_generation
-    def assessments(self, create, extracted, **kwargs):
-        if not create:
-            return
-
-        # Get all YearlySubjects for the given grade
-        grade = self.student_year_record.grade
-        stream_id = (
-            self.student_year_record.stream.id
-            if self.student_year_record.stream
-            else None
-        )
-
-        yearly_subjects = (
-            storage.session.query(YearlySubject)
-            .filter_by(grade_id=grade.id, stream_id=stream_id)
-            .all()
-        )
-
-        for ys in yearly_subjects:
-            AssessmentFactory(
-                student=self.student,
-                student_term_record=self,
-                yearly_subject=ys,
-            )
+    grade: Any = SubFactory("tests.factories.models.GradeFactory")
+    section: Any = SubFactory("tests.factories.models.SectionFactory")
+    stream: Any = SubFactory("tests.factories.models.StreamFactory", grade=grade)
 
     student_id: Any = LazyAttribute(lambda x: x.student.id)
     academic_term_id: Any = LazyAttribute(lambda x: x.academic_term.id)
+    grade_id: Any = LazyAttribute(lambda x: x.grade.id)
     section_id: Any = LazyAttribute(lambda x: x.section.id)
-    student_year_record_id: Any = LazyAttribute(lambda x: x.student_year_record.id)
+    stream_id: Any = LazyAttribute(lambda x: x.stream.id if x.stream else None)
 
-    average: Any = LazyAttribute(lambda _: random.uniform(40.0, 100.0))
-    rank: Any = LazyAttribute(lambda _: random.randint(1, 50))
+    average: Any = None
+    rank: Any = None

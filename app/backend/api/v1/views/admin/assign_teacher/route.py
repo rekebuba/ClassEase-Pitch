@@ -11,7 +11,6 @@ from models.mark_list import MarkList
 from models.section import Section
 from models.subject import Subject
 from models.teacher import Teacher
-from models.teacher_record import TeachersRecord
 from api.v1.views.admin import admins as admin
 from models import storage
 
