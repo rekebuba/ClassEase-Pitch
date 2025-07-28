@@ -1,12 +1,12 @@
 from __future__ import annotations
 import uuid
-from typing import TYPE_CHECKING, List
-from pydantic import BaseModel, ConfigDict, Field
+from typing import TYPE_CHECKING, List, Optional
+from pydantic import BaseModel, ConfigDict
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
+    from .teacher_term_record_schema import TeacherTermRecordSchema
     from .teacher_schema import TeacherSchema
-    from .yearly_subject_schema import YearlySubjectSchema
     from .grade_schema import GradeSchema
     from .stream_schema import StreamSchema
 
@@ -46,6 +46,7 @@ class SubjectRelationshipSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    teacher_term_records: Optional[List[TeacherTermRecordSchema]] = []
     teachers: List[TeacherSchema] = []
     grades: List[GradeSchema] = []
     streams: List[StreamSchema] = []

@@ -1,10 +1,8 @@
 import random
 from typing import Any
 from factory import LazyAttribute, SubFactory
-from sqlalchemy import select
 from extension.enums.enum import AllSubjectsEnum
 from models.subject import Subject
-from models.grade import Grade
 from models import storage
 from .base_factory import BaseFactory
 

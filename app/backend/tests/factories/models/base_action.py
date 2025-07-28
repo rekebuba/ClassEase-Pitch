@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, Optional, Type
+from typing import Dict, List, Optional, Sequence, Type
 import uuid
 
 from faker import Faker
@@ -54,9 +54,9 @@ class BaseAction:
         "11": GradeElevenSubjectsEnum,
         "12": GradeTwelveSubjectsEnum,
     }
-    grade_streams_map: Dict[StreamEnum, Type[Enum]] = {
-        StreamEnum.SOCIAL: SocialStreamSubjectsEnum,
-        StreamEnum.NATURAL: NaturalStreamSubjectsEnum,
+    grade_streams_map: Dict[str, Type[Enum]] = {
+        StreamEnum.SOCIAL.value: SocialStreamSubjectsEnum,
+        StreamEnum.NATURAL.value: NaturalStreamSubjectsEnum,
     }
 
     @staticmethod
@@ -178,11 +178,13 @@ class BaseAction:
         return subject
 
     @staticmethod
-    def _get_stream(stream_enum: StreamEnum) -> Stream:
+    def _get_stream(grade_id: uuid.UUID) -> Sequence[Stream]:
         """Fetches a stream by its enum value, raising an error if not found."""
-        stream = storage.session.query(Stream).filter_by(name=stream_enum.value).first()
+        stream = storage.session.scalars(
+            select(Stream).where(Stream.grade_id == grade_id)
+        ).all()
         if not stream:
-            raise ValueError(f"Stream '{stream_enum.value}' not found in the database")
+            raise ValueError(f"Stream for Grade '{grade_id}' not found in the database")
         return stream
 
     @staticmethod
@@ -264,13 +266,10 @@ class BaseAction:
 
                 subject.grades.append(grade)
 
-        # 4. Handle the stream-specific subjects
-        for stream_enum, subject_enum_class in BaseAction.grade_streams_map.items():
-            stream = BaseAction._get_stream(stream_enum)
+            for stream in grade.streams:
+                for stream_subject_enum in BaseAction.grade_streams_map[stream.name]:
+                    stream_subject = BaseAction._get_subject(stream_subject_enum)
 
-            for subject_stream_enum in subject_enum_class:
-                stream_subject = BaseAction._get_subject(subject_stream_enum)
-
-                stream_subject.streams.append(stream)
+                    stream_subject.streams.append(stream)
 
         storage.save()

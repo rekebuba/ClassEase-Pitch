@@ -1,12 +1,13 @@
 from __future__ import annotations
 import uuid
-from typing import TYPE_CHECKING, List, Set
+from typing import TYPE_CHECKING, List, Optional, Set
 from pydantic import BaseModel, ConfigDict, Field
 
 from extension.enums.enum import GradeLevelEnum
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
+    from .teacher_term_record_schema import TeacherTermRecordSchema
     from .teacher_schema import TeacherSchema
     from .stream_schema import StreamSchema
     from .student_schema import StudentSchema
@@ -54,6 +55,7 @@ class GradeRelationshipSchema(BaseModel):
     )
 
     year: YearSchema
+    teacher_term_records: Optional[List[TeacherTermRecordSchema]] = []
     teachers: List[TeacherSchema] = []
     streams: List[StreamSchema] = []
     students: List[StudentSchema] = []

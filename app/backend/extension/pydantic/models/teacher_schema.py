@@ -16,6 +16,7 @@ from extension.functions.helper import to_camel
 from extension.pydantic.models.academic_term_schema import AcademicTermSchema
 
 if TYPE_CHECKING:
+    from .teacher_term_record_schema import TeacherTermRecordSchema
     from .user_schema import UserSchema
     from .subject_schema import SubjectSchema
     from .grade_schema import GradeSchema
@@ -126,6 +127,7 @@ class TeacherRelationshipSchema(BaseModel):
         default=None,
         description="List of years the teacher is associated with.",
     )
+    term_records: Optional[List[TeacherTermRecordSchema]] = []
     academic_terms: Optional[List[AcademicTermSchema]] = Field(
         default=None,
         description="List of academic terms the teacher is associated with.",

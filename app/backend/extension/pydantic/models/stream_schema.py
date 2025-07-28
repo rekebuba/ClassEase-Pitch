@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
+    from .teacher_term_record_schema import TeacherTermRecordSchema
     from .grade_schema import GradeSchema
     from .yearly_subject_schema import YearlySubjectSchema
     from .student_year_record_schema import StudentYearRecordSchema
@@ -24,7 +25,7 @@ class StreamSchema(BaseModel):
     )
 
     id: uuid.UUID | None = None
-    year_id: uuid.UUID
+    grade_id: uuid.UUID
     name: str
 
     @classmethod
@@ -39,7 +40,18 @@ class StreamSchema(BaseModel):
 class StreamRelationshipSchema(BaseModel):
     """This model represents the relationships of a StreamSchema."""
 
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    teacher_term_records: Optional[List[TeacherTermRecordSchema]] = []
     grade: Optional[GradeSchema] = None
     yearly_subjects: Optional[List[YearlySubjectSchema]] = None
     students: Optional[List[StudentYearRecordSchema]] = None
-    subjects: List[SubjectSchema] = Field(alias="subjects")
+    subjects: Optional[List[SubjectSchema]] = []
+
+
+class StreamWithRelationshipSchema(StreamSchema, StreamRelationshipSchema):
+    pass

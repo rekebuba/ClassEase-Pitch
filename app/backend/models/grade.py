@@ -11,7 +11,9 @@ from typing import TYPE_CHECKING, List
 from models.base.column_type import UUIDType
 import uuid
 
+
 if TYPE_CHECKING:
+    from models.teacher_term_record import TeacherTermRecord
     from models.stream import Stream
     from models.student import Student
     from models.yearly_subject import YearlySubject
@@ -59,6 +61,12 @@ class Grade(BaseModel):
     )
     streams: Mapped[List["Stream"]] = relationship(
         "Stream",
+        back_populates="grade",
+        default_factory=list,
+        repr=False,
+    )
+    teacher_term_records: Mapped[List["TeacherTermRecord"]] = relationship(
+        "TeacherTermRecord",
         back_populates="grade",
         default_factory=list,
         repr=False,

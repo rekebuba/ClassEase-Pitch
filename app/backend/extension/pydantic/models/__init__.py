@@ -1,3 +1,8 @@
+from .teacher_term_record_schema import (
+    TeacherTermRecordRelationshipSchema,
+    TeacherTermRecordSchema,
+    TeacherTermRecordSchemaWithRelationships,
+)
 from .academic_term_schema import (
     AcademicTermRelationshipSchema,
     AcademicTermSchema,
@@ -166,6 +171,9 @@ TeacherRecordRelationshipSchema.model_rebuild()
 TeacherSchema.model_rebuild()
 TeacherRelationshipSchema.model_rebuild()
 TeacherWithRelationshipsSchema.model_rebuild()
+TeacherTermRecordSchema.model_rebuild()
+TeacherTermRecordRelationshipSchema.model_rebuild()
+TeacherTermRecordSchemaWithRelationships.model_rebuild()
 UserSchema.model_rebuild()
 UserRelationshipSchema.model_rebuild()
 UserWithRelationshipsSchema.model_rebuild()
