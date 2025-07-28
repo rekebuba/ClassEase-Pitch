@@ -31,6 +31,13 @@ class TeacherFactory(BaseFactory[Teacher]):
         factory_related_name="teacher",
         size=1,
     )
+
+    teacher_term_records: Any = RelatedFactoryList(
+        "tests.factories.models.TeacherTermRecordFactory",
+        factory_related_name="teacher",
+        size=2,
+    )
+
     academic_terms: Any = RelatedFactoryList(
         "tests.factories.models.TeacherAcademicTermLinkFactory",
         factory_related_name="teacher",

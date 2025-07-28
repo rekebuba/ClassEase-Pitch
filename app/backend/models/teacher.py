@@ -35,6 +35,7 @@ if TYPE_CHECKING:
     from models.year import Year
     from models.academic_term import AcademicTerm
     from models.section import Section
+    from models.teacher_term_record import TeacherTermRecord
 
 
 class Teacher(BaseModel):
@@ -243,6 +244,12 @@ class Teacher(BaseModel):
         "Year",
         back_populates="teachers",
         secondary="teacher_year_links",
+        default_factory=list,
+        repr=False,
+    )
+    term_records: Mapped[List["TeacherTermRecord"]] = relationship(
+        "TeacherTermRecord",
+        back_populates="teacher",
         default_factory=list,
         repr=False,
     )

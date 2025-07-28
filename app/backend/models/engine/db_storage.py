@@ -21,6 +21,7 @@ from models.mark_list import MarkList  # noqa: F401
 from models.student_term_record import StudentTermRecord  # noqa: F401
 from models.subject_yearly_average import SubjectYearlyAverage  # noqa: F401
 from models.student_year_record import StudentYearRecord  # noqa: F401
+from models.teacher_term_record import TeacherTermRecord  # noqa: F401
 from models.teacher_academic_term_link import TeacherAcademicTermLink  # noqa: F401
 from models.teacher_section_link import TeacherSectionLink  # noqa: F401
 from models.blacklist_token import BlacklistToken  # noqa: F401

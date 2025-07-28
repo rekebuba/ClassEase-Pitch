@@ -10,6 +10,7 @@ import uuid
 
 
 if TYPE_CHECKING:
+    from models.teacher_term_record import TeacherTermRecord
     from models.mark_list import MarkList
     from models.teacher import Teacher
     from models.year import Year
@@ -31,13 +32,23 @@ class Subject(BaseModel):
     name: Mapped[str] = mapped_column(String(50), nullable=False)
     code: Mapped[str] = mapped_column(String(25), unique=True, nullable=False)
 
-    # Relationships
+    # One-To-Many Relationships
     year: Mapped["Year"] = relationship(
         "Year",
         back_populates="subjects",
         repr=False,
         init=False,
     )
+
+    # Many-To-One Relationships
+    teacher_term_records: Mapped[List["TeacherTermRecord"]] = relationship(
+        "TeacherTermRecord",
+        back_populates="subject",
+        default_factory=list,
+        repr=False,
+    )
+
+    # Many-To-Many Relationships
     teachers: Mapped[List["Teacher"]] = relationship(
         "Teacher",
         back_populates="subjects",

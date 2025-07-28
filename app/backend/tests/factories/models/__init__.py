@@ -10,6 +10,7 @@ from .student_subject_link_factory import StudentSubjectLinkFactory
 from .teacher_subject_link_factory import TeacherSubjectLinkFactory
 from .teacher_grade_link_factory import TeacherGradeLinkFactory
 from .teacher_section_link_factory import TeacherSectionLinkFactory
+from .teacher_term_record_factory import TeacherTermRecordFactory
 from .teacher_year_link_factory import TeacherYearLinkFactory
 from .subject_grade_link_factory import SubjectGradeLinkFactory
 from .default_felids import DefaultFelids
@@ -61,6 +62,7 @@ __all__ = [
     "StudentSubjectLinkFactory",
     "TeacherFactory",
     "TeacherAcademicTermLinkFactory",
+    "TeacherTermRecordFactory",
     "TeacherYearLinkFactory",
     "TeacherSubjectLinkFactory",
     "TeacherGradeLinkFactory",

@@ -9,6 +9,7 @@ from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
     from .year_schema import YearSchema
+    from .teacher_term_record_schema import TeacherTermRecordSchema
     from .student_term_record_schema import StudentTermRecordSchema
     from .teacher_record_schema import TeacherRecordSchema
 
@@ -51,13 +52,14 @@ class AcademicTermRelationshipSchema(BaseModel):
     )
 
     year: Optional[YearSchema] = None
+    teacher_term_records: Optional[List[TeacherTermRecordSchema]] = []
     student_term_records: Optional[List[StudentTermRecordSchema]] = None
     teacher_records: Optional[List[TeacherRecordSchema]] = None
 
 
 class AcademicTermSchemaWithRelationships(
     AcademicTermSchema, AcademicTermRelationshipSchema
-    ):
+):
     """This model represents an AcademicTermSchema with its relationships."""
 
     pass

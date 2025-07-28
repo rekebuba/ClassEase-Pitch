@@ -12,6 +12,7 @@ import uuid
 
 
 if TYPE_CHECKING:
+    from models.teacher_term_record import TeacherTermRecord
     from models.yearly_subject import YearlySubject
     from models.grade import Grade
     from models.subject import Subject
@@ -33,6 +34,14 @@ class Stream(BaseModel):
         repr=False,
         init=False,
     )
+
+    # Many-To-One Relationships
+    teacher_term_records: Mapped[List["TeacherTermRecord"]] = relationship(
+        "TeacherTermRecord",
+        back_populates="stream",
+        default_factory=list,
+        repr=False,
+    )
     yearly_subjects: Mapped[List["YearlySubject"]] = relationship(
         "YearlySubject",
         back_populates="stream",
@@ -47,6 +56,7 @@ class Stream(BaseModel):
         repr=False,
     )
 
+    # Many-To-Many Relationships
     students: Mapped[List["Student"]] = relationship(
         "Student",
         secondary="student_stream_links",
