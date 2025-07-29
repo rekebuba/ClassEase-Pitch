@@ -1,13 +1,16 @@
 import random
 from sqlalchemy import select
 from models import storage
-from typing import Any, List
+from typing import Any, Dict, List
 from factory import LazyAttribute, SubFactory, RelatedFactoryList, post_generation
 from faker import Faker
 from models.grade import Grade
+from models.student_term_record import StudentTermRecord
 from models.subject import Subject
 from models.subject_grade_link import SubjectGradeLink
 from models.teacher import Teacher
+from models.teacher_term_record import TeacherTermRecord
+from tests.factories.models.mark_list_factory import MarkListFactory
 from .base_factory import BaseFactory
 from extension.enums.enum import (
     ExperienceYearEnum,
@@ -32,51 +35,48 @@ class TeacherFactory(BaseFactory[Teacher]):
         size=1,
     )
 
-    teacher_term_records: Any = RelatedFactoryList(
+    term_records: Any = RelatedFactoryList(
         "tests.factories.models.TeacherTermRecordFactory",
         factory_related_name="teacher",
         size=2,
     )
 
-    academic_terms: Any = RelatedFactoryList(
-        "tests.factories.models.TeacherAcademicTermLinkFactory",
-        factory_related_name="teacher",
-        size=1,
-    )
-    sections: Any = RelatedFactoryList(
-        "tests.factories.models.TeacherSectionLinkFactory",
-        factory_related_name="teacher",
-        size=1,
-    )
-    subjects: List[Subject] = []
-    grades: List[Grade] = []
-
     @post_generation
-    def subject_and_grades(self, create, extracted, **kwargs):
+    def mark_list(self, create, extracted, **kwargs):
         if not create:
             return
-        count = storage.session.query(SubjectGradeLink).count()
-        if count < 2:
-            raise ValueError("Not enough SubjectGradeLink records to choose from.")
+        record: List[TeacherTermRecord] = self.term_records
+        filters: Dict[str, Any] = {}
+        for r in record:
+            filters.setdefault("academic_term_id", []).append(r.academic_term_id)
+            filters.setdefault("grade_id", []).append(r.grade_id)
+            filters.setdefault("section_id", []).append(r.section_id)
+            filters.setdefault("stream_id", []).append(r.stream_id)
+            filters.setdefault("subject", []).append(r.subject)
 
-        offset = random.randint(1, 3)
-
-        # Create 2 subject-grade links and attach them to the instance
-        subject_and_grades = storage.session.execute(
-            select(Subject, Grade)
-            .select_from(SubjectGradeLink)
-            .join(Subject, Subject.id == SubjectGradeLink.subject_id)
-            .join(Grade, Grade.id == SubjectGradeLink.grade_id)
-            .offset(offset)
-            .limit(2)
+        student_records = storage.session.scalars(
+            select(StudentTermRecord).where(
+                StudentTermRecord.academic_term_id.in_(filters["academic_term_id"]),
+                StudentTermRecord.grade_id.in_(filters["grade_id"]),
+                StudentTermRecord.section_id.in_(filters["section_id"]),
+                StudentTermRecord.stream_id.in_(filters["stream_id"]),
+            )
         ).all()
 
-        # Attach related subjects
-        for subject, grade in subject_and_grades:
-            self.subjects.append(subject)
-            self.grades.append(grade)
+        if not student_records:
+            print("Skipping Mark List Factory Not enough Student")
+            return
 
-        storage.session.commit()
+        for student_term_record in student_records:
+            for subject in filters["subject"]:
+                MarkListFactory.create_batch(
+                    student=student_term_record.student,
+                    student_term_record=student_term_record,
+                    subject=subject,
+                    size=5,
+                )
+
+                storage.session.commit()
 
     user: Any = SubFactory(
         "tests.factories.models.user_factory.UserFactory",

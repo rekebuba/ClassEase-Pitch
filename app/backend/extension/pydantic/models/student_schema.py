@@ -80,7 +80,7 @@ class StudentRelationshipSchema(BaseModel):
 
     starting_grade: Optional[GradeSchema] = None
     user: Optional[UserSchema] = None
-    student_term_records: Optional[List[StudentTermRecordSchema]] = None
+    term_records: Optional[List[StudentTermRecordSchema]] = None
     student_year_records: Optional[List[StudentYearRecordSchema]] = None
     subject_yearly_averages: Optional[List[SubjectYearlyAverageSchema]] = None
     assessments: Optional[List[AssessmentSchema]] = None

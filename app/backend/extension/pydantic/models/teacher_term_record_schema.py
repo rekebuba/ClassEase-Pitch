@@ -53,6 +53,9 @@ class TeacherTermRecordRelationshipSchema(BaseModel):
 class TeacherTermRecordSchemaWithRelationships(
     TeacherTermRecordSchema, TeacherTermRecordRelationshipSchema
 ):
+    """
+    This model combines the TeacherTermRecordSchema with its relationships.
+    It is used to provide a complete view of a teacher's term record along with related entities.
+    """
+
     pass
-
-

@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
+    from .student_term_record_schema import StudentTermRecordSchema
     from .teacher_term_record_schema import TeacherTermRecordSchema
     from .grade_schema import GradeSchema
     from .yearly_subject_schema import YearlySubjectSchema
@@ -47,6 +48,7 @@ class StreamRelationshipSchema(BaseModel):
     )
 
     teacher_term_records: Optional[List[TeacherTermRecordSchema]] = []
+    student_term_records: Optional[List[StudentTermRecordSchema]] = []
     grade: Optional[GradeSchema] = None
     yearly_subjects: Optional[List[YearlySubjectSchema]] = None
     students: Optional[List[StudentYearRecordSchema]] = None

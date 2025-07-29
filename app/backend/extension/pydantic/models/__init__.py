@@ -36,7 +36,11 @@ from .section_schema import (
     SectionSchema,
     SectionSchemaWithRelationships,
 )
-from .stream_schema import StreamRelationshipSchema, StreamSchema
+from .stream_schema import (
+    StreamRelationshipSchema,
+    StreamSchema,
+    StreamWithRelationshipSchema,
+)
 from .student_schema import (
     StudentRelationshipSchema,
     StudentSchema,
@@ -154,6 +158,7 @@ SectionRelationshipSchema.model_rebuild()
 SectionSchemaWithRelationships.model_rebuild()
 StreamSchema.model_rebuild()
 StreamRelationshipSchema.model_rebuild()
+StreamWithRelationshipSchema.model_rebuild()
 StudentSchema.model_rebuild()
 StudentWithRelationshipsSchema.model_rebuild()
 StudentRelationshipSchema.model_rebuild()

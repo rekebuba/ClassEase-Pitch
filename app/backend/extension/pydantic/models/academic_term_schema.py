@@ -53,8 +53,8 @@ class AcademicTermRelationshipSchema(BaseModel):
 
     year: Optional[YearSchema] = None
     teacher_term_records: Optional[List[TeacherTermRecordSchema]] = []
-    student_term_records: Optional[List[StudentTermRecordSchema]] = None
-    teacher_records: Optional[List[TeacherRecordSchema]] = None
+    student_term_records: Optional[List[StudentTermRecordSchema]] = []
+    teacher_records: Optional[List[TeacherRecordSchema]] = []
 
 
 class AcademicTermSchemaWithRelationships(

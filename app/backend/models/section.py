@@ -11,6 +11,7 @@ import uuid
 
 
 if TYPE_CHECKING:
+    from models.student_term_record import StudentTermRecord
     from models.teacher_term_record import TeacherTermRecord
     from models.grade import Grade
     from models.student import Student
@@ -41,6 +42,12 @@ class Section(BaseModel):
     # Many-To-One Relationships
     teacher_term_records: Mapped[List["TeacherTermRecord"]] = relationship(
         "TeacherTermRecord",
+        back_populates="section",
+        default_factory=list,
+        repr=False,
+    )
+    student_term_records: Mapped[List["StudentTermRecord"]] = relationship(
+        "StudentTermRecord",
         back_populates="section",
         default_factory=list,
         repr=False,

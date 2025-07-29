@@ -16,13 +16,13 @@ from models import storage
 from models.section import Section
 
 
-@auth.route("/years/<uuid:year_id>/sections", methods=["GET"])
+@auth.route("/years/<uuid:grade_id>/sections", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(SectionSchema, SectionSchema.default_fields())
 def get_sections(
     user: UserT,
     fields: Set[str],
-    year_id: uuid.UUID,
+    grade_id: uuid.UUID,
 ) -> Tuple[Response, int]:
     """
     Get all sections.
@@ -31,7 +31,7 @@ def get_sections(
         Tuple[Response, int]: JSON response with sections and status code.
     """
     sections = storage.session.scalars(
-        select(Section).where(Section.year_id == year_id)
+        select(Section).where(Section.grade_id == grade_id)
     ).all()
 
     sections_schema = [SectionSchema.model_validate(section) for section in sections]
