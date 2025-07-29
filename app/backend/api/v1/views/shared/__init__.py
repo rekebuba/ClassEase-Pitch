@@ -13,3 +13,4 @@ from api.v1.views.shared.subjects import route  # noqa: E402
 from api.v1.views.shared.year import route  # noqa: E402
 from api.v1.views.shared.section import route  # noqa: E402
 from api.v1.views.shared.stream import route  # noqa: E402
+from api.v1.views.shared.suggestion import route  # noqa: E402

@@ -51,12 +51,6 @@ class AcademicTerm(BaseModel):
         init=False,
         repr=False,
     )
-    mark_lists: Mapped[List["MarkList"]] = relationship(
-        "MarkList",
-        back_populates="academic_term",
-        default_factory=list,
-        repr=False,
-    )
     student_term_records: Mapped[List["StudentTermRecord"]] = relationship(
         "StudentTermRecord",
         back_populates="academic_term",

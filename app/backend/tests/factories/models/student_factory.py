@@ -30,41 +30,8 @@ class StudentFactory(BaseFactory[Student]):
         size=1,
     )
 
-    student_term_records: Any = RelatedFactoryList(
+    term_records: Any = RelatedFactoryList(
         "tests.factories.models.StudentTermRecordFactory",
-        factory_related_name="student",
-        size=1,
-    )
-
-    # academic_terms: Any = RelatedFactoryList(
-    #     "tests.factories.models.StudentAcademicTermLinkFactory",
-    #     factory_related_name="student",
-    #     size=1,
-    # )
-    # grades: Any = RelatedFactoryList(
-    #     "tests.factories.models.StudentGradeLinkFactory",
-    #     factory_related_name="student",
-    #     size=1,
-    # )
-
-    # sections: Any = RelatedFactoryList(
-    #     "tests.factories.models.StudentSectionLinkFactory",
-    #     factory_related_name="student",
-    #     size=1,
-    # )
-
-    # streams: Any = RelatedFactoryList(
-    #     "tests.factories.models.StudentStreamLinkFactory",
-    #     factory_related_name="student",
-    #     size=1,
-    # )
-    # subjects: Any = RelatedFactoryList(
-    #     "tests.factories.models.StudentSubjectLinkFactory",
-    #     factory_related_name="student",
-    #     size=1,
-    # )
-    mark_lists: Any = RelatedFactoryList(
-        "tests.factories.models.MarkListFactory",
         factory_related_name="student",
         size=1,
     )

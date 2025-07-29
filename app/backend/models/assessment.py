@@ -41,12 +41,6 @@ class Assessment(BaseModel):
         init=False,
         repr=False,
     )
-    student_term_record: Mapped["StudentTermRecord"] = relationship(
-        "StudentTermRecord",
-        back_populates="assessments",
-        init=False,
-        repr=False,
-    )
     yearly_subject: Mapped["YearlySubject"] = relationship(
         "YearlySubject",
         back_populates="assessments",

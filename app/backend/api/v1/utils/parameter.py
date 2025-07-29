@@ -6,7 +6,6 @@ from types import EllipsisType
 from typing import Any, Dict, Tuple, TypeVar, Callable, Type, Set
 from flask import request, Response
 from pydantic import BaseModel, ConfigDict
-
 from extension.functions.helper import extract_inner_model, to_camel, to_snake
 from extension.pydantic.response.schema import error_response
 

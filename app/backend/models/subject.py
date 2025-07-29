@@ -9,7 +9,9 @@ from models.base.column_type import UUIDType
 import uuid
 
 
+
 if TYPE_CHECKING:
+    from models.student_term_record import StudentTermRecord
     from models.teacher_term_record import TeacherTermRecord
     from models.mark_list import MarkList
     from models.teacher import Teacher

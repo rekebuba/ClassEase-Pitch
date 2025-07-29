@@ -9,6 +9,8 @@ from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
 import uuid
 
+from models.student_term_record import StudentTermRecord
+
 if TYPE_CHECKING:
     from models.academic_term import AcademicTerm
     from models.student import Student
@@ -25,8 +27,8 @@ class MarkList(BaseModel):
     student_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(), ForeignKey("students.id"), nullable=False
     )
-    academic_term_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("academic_terms.id"), nullable=False
+    student_term_record_id: Mapped[uuid.UUID] = mapped_column(
+        UUIDType(), ForeignKey("student_term_records.id"), nullable=False
     )
     subject_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(), ForeignKey("subjects.id"), nullable=False
@@ -50,8 +52,8 @@ class MarkList(BaseModel):
         repr=False,
         init=False,
     )
-    academic_term: Mapped["AcademicTerm"] = relationship(
-        "AcademicTerm",
+    student_term_record: Mapped["StudentTermRecord"] = relationship(
+        "StudentTermRecord",
         back_populates="mark_lists",
         repr=False,
         init=False,

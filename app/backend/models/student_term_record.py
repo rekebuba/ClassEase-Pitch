@@ -3,14 +3,18 @@
 
 from typing import TYPE_CHECKING, List
 from sqlalchemy import Integer, ForeignKey, Float
-from models.assessment import Assessment
 from models.base.base_model import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.column_type import UUIDType
 import uuid
 
+
 if TYPE_CHECKING:
+    from models.grade import Grade
+    from models.mark_list import MarkList
+    from models.section import Section
+    from models.stream import Stream
     from models.academic_term import AcademicTerm
     from models.student import Student
 
@@ -43,7 +47,7 @@ class StudentTermRecord(BaseModel):
     # One-To-Many Relationships
     student: Mapped["Student"] = relationship(
         "Student",
-        back_populates="student_term_records",
+        back_populates="term_records",
         init=False,
     )
     academic_term: Mapped["AcademicTerm"] = relationship(
@@ -51,8 +55,28 @@ class StudentTermRecord(BaseModel):
         back_populates="student_term_records",
         init=False,
     )
-    assessments: Mapped[List["Assessment"]] = relationship(
-        "Assessment",
+    section: Mapped["Section"] = relationship(
+        "Section",
+        back_populates="student_term_records",
+        init=False,
+        repr=False,
+    )
+    grade: Mapped["Grade"] = relationship(
+        "Grade",
+        back_populates="student_term_records",
+        init=False,
+        repr=False,
+    )
+    stream: Mapped["Stream"] = relationship(
+        "Stream",
+        back_populates="student_term_records",
+        init=False,
+        repr=False,
+    )
+
+    # Many-To-One Relationships
+    mark_lists: Mapped[List["MarkList"]] = relationship(
+        "MarkList",
         back_populates="student_term_record",
         default_factory=list,
         repr=False,

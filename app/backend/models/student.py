@@ -152,7 +152,7 @@ class Student(BaseModel):
         default_factory=list,
         repr=False,
     )
-    student_term_records: Mapped[List["StudentTermRecord"]] = relationship(
+    term_records: Mapped[List["StudentTermRecord"]] = relationship(
         "StudentTermRecord",
         back_populates="student",
         default_factory=list,

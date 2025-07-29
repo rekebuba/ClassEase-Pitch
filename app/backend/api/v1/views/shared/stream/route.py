@@ -1,24 +1,27 @@
 from typing import Set, Tuple
 import uuid
 from flask import Response
-from pydantic import ValidationError
 from sqlalchemy import select
-from api.v1.utils.parameter import validate_fields
-from api.v1.utils.typing import UserT
+from api.v1.utils.parameter import validate_expand, validate_fields
+from api.v1.utils.typing import IncEx, UserT
 from api.v1.views import errors
 from api.v1.views.shared import auths as auth
 from api.v1.views.utils import student_teacher_or_admin_required
-from extension.pydantic.models.stream_schema import StreamSchema
+from extension.pydantic.models.stream_schema import (
+    StreamRelationshipSchema,
+    StreamSchema,
+    StreamWithRelationshipSchema,
+)
 from extension.pydantic.response.schema import success_response
 from models import storage
 from models.stream import Stream
 
 
-@auth.route("/years/<uuid:year_id>/streams", methods=["GET"])
+@auth.route("/years/<uuid:grade_id>/streams", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(StreamSchema, StreamSchema.default_fields())
 def get_streams(
-    user: UserT, fields: Set[str], year_id: uuid.UUID
+    user: UserT, fields: Set[str], grade_id: uuid.UUID
 ) -> Tuple[Response, int]:
     """
     Get all streams.
@@ -26,36 +29,32 @@ def get_streams(
     Returns:
         Tuple[Response, int]: JSON response with streams and status code.
     """
-    try:
-        streams = storage.session.scalars(
-            select(Stream).where(Stream.year_id == year_id)
-        ).all()
+    streams = storage.session.scalars(
+        select(Stream).where(Stream.grade_id == grade_id)
+    ).all()
 
-        streams_schema = [StreamSchema.model_validate(stream) for stream in streams]
-        stream_response = [
-            stream_schema.model_dump(
-                by_alias=True,
-                exclude_none=True,
-                include=fields,
-                mode="json",
-            )
-            for stream_schema in streams_schema
-        ]
+    streams_schema = [StreamSchema.model_validate(stream) for stream in streams]
+    stream_response = [
+        stream_schema.model_dump(
+            by_alias=True,
+            exclude_none=True,
+            include=fields,
+            mode="json",
+        )
+        for stream_schema in streams_schema
+    ]
 
-        return success_response(data=stream_response)
-
-    except ValidationError as e:
-        return errors.handle_validation_error(error=e)
-    except Exception as e:
-        return errors.handle_internal_error(error=e)
+    return success_response(data=stream_response)
 
 
 @auth.route("/streams/<uuid:stream_id>", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(StreamSchema, StreamSchema.default_fields())
+@validate_expand(StreamRelationshipSchema)
 def get_stream_by_id(
     user: UserT,
-    fields: Set[str],
+    fields: dict[str, IncEx],
+    related_fields: dict[str, IncEx],
     stream_id: uuid.UUID,
 ) -> Tuple[Response, int]:
     """
@@ -68,11 +67,14 @@ def get_stream_by_id(
     if not stream:
         return errors.handle_not_found_error(message="Stream not found")
 
-    stream_schema = StreamSchema.model_validate(stream)
+    stream_schema = StreamWithRelationshipSchema.model_validate(stream)
     stream_response = stream_schema.model_dump(
         by_alias=True,
         exclude_none=True,
-        include=fields,
+        include={
+            **fields,
+            **related_fields,
+        },
         mode="json",
     )
 

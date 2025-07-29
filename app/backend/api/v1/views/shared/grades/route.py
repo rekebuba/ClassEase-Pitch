@@ -32,8 +32,6 @@ def grades(user: UserT, fields: Set[str], year_id: uuid.UUID) -> Tuple[Response,
         schema.model_dump(by_alias=True, include=fields) for schema in grade_schemas
     ]
 
-    print(valid_grades)
-
     return success_response(data=valid_grades)
 
 

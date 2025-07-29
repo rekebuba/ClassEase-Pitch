@@ -7,6 +7,7 @@ from extension.enums.enum import GradeLevelEnum
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
+    from .student_term_record_schema import StudentTermRecordSchema
     from .teacher_term_record_schema import TeacherTermRecordSchema
     from .teacher_schema import TeacherSchema
     from .stream_schema import StreamSchema
@@ -56,6 +57,7 @@ class GradeRelationshipSchema(BaseModel):
 
     year: YearSchema
     teacher_term_records: Optional[List[TeacherTermRecordSchema]] = []
+    student_term_records: Optional[List[StudentTermRecordSchema]] = []
     teachers: List[TeacherSchema] = []
     streams: List[StreamSchema] = []
     students: List[StudentSchema] = []
