@@ -1,5 +1,6 @@
 import logging
 from typing import List, Tuple
+import uuid
 from flask import Response, request
 from sqlalchemy import select
 from api.v1.utils.typing import UserT
@@ -174,3 +175,32 @@ def set_up_academic_year(user: UserT) -> Tuple[Response, int]:
             message="Unexpected error occurred during academic year setup",
             status=500,
         )
+
+
+@admin.route("/academic_year/setup/<uuid:year_id>", methods=["DELETE"])
+@admin_required
+def delete_academic_year(user: UserT, year_id: uuid.UUID) -> Tuple[Response, int]:
+    """
+    Delete an academic year and all associated records.
+
+    Args:
+        year_id: ID of the academic year to delete
+        user: Authenticated admin user
+    Returns:
+        Response with success message or error details
+    """
+    year = storage.session.scalar(select(Year).where(Year.id == year_id))
+    if not year:
+        return error_response(
+            message="Academic year not found",
+            status=404,
+        )
+
+    storage.session.delete(year)
+    storage.session.commit()
+
+    return success_response(
+        message="Academic year deleted successfully.",
+        data={"id": str(year_id)},
+        status=200,
+    )

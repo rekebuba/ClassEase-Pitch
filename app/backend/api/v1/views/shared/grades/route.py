@@ -10,10 +10,12 @@ from extension.pydantic.models.grade_schema import (
     GradeSchema,
     GradeWithRelationshipsSchema,
 )
-from extension.pydantic.response.schema import success_response
+from extension.pydantic.response.schema import error_response, success_response
 from models import storage
 from models.grade import Grade
 from flask import Response, jsonify
+
+from models.year import Year
 
 
 @auth.route("/years/<uuid:year_id>/grades", methods=["GET"])
@@ -23,6 +25,9 @@ def grades(user: UserT, fields: Set[str], year_id: uuid.UUID) -> Tuple[Response,
     """
     Returns a list of all available grades in the system.
     """
+    if not storage.session.get(Year, year_id):
+        return error_response(message=f"Year with ID {year_id} not found.", status=404)
+
     grades = storage.session.scalars(
         select(Grade).where(Grade.year_id == year_id)
     ).all()

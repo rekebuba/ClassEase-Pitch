@@ -11,12 +11,13 @@ from extension.pydantic.models.section_schema import (
     SectionSchema,
     SectionSchemaWithRelationships,
 )
-from extension.pydantic.response.schema import success_response
+from extension.pydantic.response.schema import error_response, success_response
 from models import storage
+from models.grade import Grade
 from models.section import Section
 
 
-@auth.route("/years/<uuid:grade_id>/sections", methods=["GET"])
+@auth.route("/grades/<uuid:grade_id>/sections", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(SectionSchema, SectionSchema.default_fields())
 def get_sections(
@@ -30,6 +31,11 @@ def get_sections(
     Returns:
         Tuple[Response, int]: JSON response with sections and status code.
     """
+    if not storage.session.get(Grade, grade_id):
+        return error_response(
+            message=f"Grade with ID {grade_id} not found.", status=404
+        )
+
     sections = storage.session.scalars(
         select(Section).where(Section.grade_id == grade_id)
     ).all()

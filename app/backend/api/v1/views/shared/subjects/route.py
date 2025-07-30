@@ -12,13 +12,12 @@ from extension.pydantic.models.subject_schema import (
     SubjectSchema,
     SubjectWithRelationshipsSchema,
 )
-from extension.pydantic.response.schema import success_response
+from extension.pydantic.response.schema import error_response, success_response
 from models import storage
-from models.grade import Grade
 from models.subject import Subject
 from flask import Response, jsonify
 
-from models.yearly_subject import YearlySubject
+from models.year import Year
 
 
 @auth.route("/years/<uuid:year_id>/subjects", methods=["GET"])
@@ -30,6 +29,9 @@ def get_available_subjects(
     """
     Returns a list of all available subjects in the system.
     """
+    if not storage.session.get(Year, year_id):
+        return error_response(message=f"Year with ID {year_id} not found.", status=404)
+
     subjects = storage.session.scalars(
         select(Subject).where(Subject.year_id == year_id)
     ).all()
