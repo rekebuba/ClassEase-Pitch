@@ -133,7 +133,7 @@ class Student(BaseModel):
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),
-        ForeignKey("users.id"),
+        ForeignKey("users.id", ondelete='CASCADE'),
         unique=True,
         nullable=True,
         default=None,
@@ -145,30 +145,35 @@ class Student(BaseModel):
         back_populates="student",
         init=False,
         repr=False,
+        passive_deletes=True,
     )
     mark_lists: Mapped[List["MarkList"]] = relationship(
         "MarkList",
         back_populates="student",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     term_records: Mapped[List["StudentTermRecord"]] = relationship(
         "StudentTermRecord",
         back_populates="student",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     subject_yearly_averages: Mapped[List["SubjectYearlyAverage"]] = relationship(
         "SubjectYearlyAverage",
         back_populates="student",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     assessments: Mapped[List["Assessment"]] = relationship(
         "Assessment",
         back_populates="student",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
 
     years: Mapped[List["Year"]] = relationship(
@@ -177,6 +182,7 @@ class Student(BaseModel):
         back_populates="students",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     academic_terms: Mapped[List["AcademicTerm"]] = relationship(
         "AcademicTerm",
@@ -184,6 +190,7 @@ class Student(BaseModel):
         back_populates="students",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     streams: Mapped[List["Stream"]] = relationship(
         "Stream",
@@ -191,6 +198,7 @@ class Student(BaseModel):
         back_populates="students",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     grades: Mapped[List["Grade"]] = relationship(
         "Grade",
@@ -198,6 +206,7 @@ class Student(BaseModel):
         back_populates="students",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     sections: Mapped[List["Section"]] = relationship(
         "Section",
@@ -205,6 +214,7 @@ class Student(BaseModel):
         back_populates="students",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     subjects: Mapped[List["Subject"]] = relationship(
         "Subject",
@@ -212,4 +222,5 @@ class Student(BaseModel):
         back_populates="students",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )

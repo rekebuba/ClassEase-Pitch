@@ -14,8 +14,12 @@ class GradeStreamLink(Base):
     __tablename__ = "grade_stream_links"
 
     grade_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("grades.id"), primary_key=True
+        UUIDType(),
+        ForeignKey("grades.id", ondelete='CASCADE'),
+        primary_key=True,
     )
     stream_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("streams.id"), primary_key=True
+        UUIDType(),
+        ForeignKey("streams.id", ondelete='CASCADE'),
+        primary_key=True,
     )

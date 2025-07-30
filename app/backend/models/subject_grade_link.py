@@ -17,12 +17,12 @@ class SubjectGradeLink(Base):
     subject_id: Mapped[uuid.UUID] = mapped_column(
         "subject_id",
         UUIDType(),
-        ForeignKey("subjects.id"),
+        ForeignKey("subjects.id", ondelete='CASCADE'),
         primary_key=True,
     )
     grade_id: Mapped[uuid.UUID] = mapped_column(
         "grade_id",
         UUIDType(),
-        ForeignKey("grades.id"),
+        ForeignKey("grades.id", ondelete='CASCADE'),
         primary_key=True,
     )

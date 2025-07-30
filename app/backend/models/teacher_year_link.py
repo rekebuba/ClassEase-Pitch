@@ -14,11 +14,11 @@ class TeacherYearLink(Base):
 
     teacher_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),
-        ForeignKey("teachers.id"),
+        ForeignKey("teachers.id", ondelete='CASCADE'),
         primary_key=True,
     )
     year_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),
-        ForeignKey("years.id"),
+        ForeignKey("years.id", ondelete='CASCADE'),
         primary_key=True,
     )

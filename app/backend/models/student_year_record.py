@@ -24,17 +24,17 @@ class StudentYearRecord(BaseModel):
 
     __tablename__ = "student_year_records"
     student_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("students.id"), nullable=False
+        UUIDType(), ForeignKey("students.id", ondelete='CASCADE'), nullable=False
     )
     grade_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("grades.id"), nullable=False
+        UUIDType(), ForeignKey("grades.id", ondelete='CASCADE'), nullable=False
     )
     year_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("years.id"), nullable=False
+        UUIDType(), ForeignKey("years.id", ondelete='CASCADE'), nullable=False
     )
     stream_id: Mapped[Optional[str]] = mapped_column(
         UUIDType(),
-        ForeignKey("streams.id"),
+        ForeignKey("streams.id", ondelete='CASCADE'),
         nullable=True,
         default=None,
     )

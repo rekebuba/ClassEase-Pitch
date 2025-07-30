@@ -14,11 +14,11 @@ class GradeSectionLink(Base):
 
     section_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),
-        ForeignKey("sections.id"),
+        ForeignKey("sections.id", ondelete='CASCADE'),
         primary_key=True,
     )
     grade_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),
-        ForeignKey("grades.id"),
+        ForeignKey("grades.id", ondelete='CASCADE'),
         primary_key=True,
     )

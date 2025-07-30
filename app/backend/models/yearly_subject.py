@@ -21,12 +21,12 @@ class YearlySubject(BaseModel):
     __tablename__ = "yearly_subjects"
 
     subject_code: Mapped[str] = mapped_column(String(25), nullable=False)
-    year_id: Mapped[uuid.UUID] = mapped_column(UUIDType(), ForeignKey("years.id"))
-    subject_id: Mapped[uuid.UUID] = mapped_column(UUIDType(), ForeignKey("subjects.id"))
-    grade_id: Mapped[uuid.UUID] = mapped_column(UUIDType(), ForeignKey("grades.id"))
+    year_id: Mapped[uuid.UUID] = mapped_column(UUIDType(), ForeignKey("years.id", ondelete='CASCADE'))
+    subject_id: Mapped[uuid.UUID] = mapped_column(UUIDType(), ForeignKey("subjects.id", ondelete='CASCADE'))
+    grade_id: Mapped[uuid.UUID] = mapped_column(UUIDType(), ForeignKey("grades.id", ondelete='CASCADE'))
     stream_id: Mapped[Optional[str]] = mapped_column(
         UUIDType(),
-        ForeignKey("streams.id"),
+        ForeignKey("streams.id", ondelete='CASCADE'),
         nullable=True,
         default=None,
     )
@@ -37,6 +37,7 @@ class YearlySubject(BaseModel):
         back_populates="yearly_subjects",
         init=False,
         repr=False,
+        passive_deletes=True,
     )
 
     subject: Mapped["Subject"] = relationship(
@@ -44,28 +45,33 @@ class YearlySubject(BaseModel):
         back_populates="yearly_subjects",
         init=False,
         repr=False,
+        passive_deletes=True,
     )
     grade: Mapped["Grade"] = relationship(
         "Grade",
         back_populates="yearly_subjects",
         init=False,
         repr=False,
+        passive_deletes=True,
     )
     stream: Mapped["Stream"] = relationship(
         "Stream",
         back_populates="yearly_subjects",
         init=False,
         repr=False,
+        passive_deletes=True,
     )
     assessments: Mapped[List["Assessment"]] = relationship(
         "Assessment",
         back_populates="yearly_subject",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     subject_yearly_averages: Mapped[List["SubjectYearlyAverage"]] = relationship(
         "SubjectYearlyAverage",
         back_populates="yearly_subject",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )

@@ -13,12 +13,12 @@ class Registration(BaseModel):
 
     __tablename__ = "registrations"
     student_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("students.id"), nullable=False
+        UUIDType(), ForeignKey("students.id", ondelete='CASCADE'), nullable=False
     )
     subject_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("subjects.id"), nullable=False
+        UUIDType(), ForeignKey("subjects.id", ondelete='CASCADE'), nullable=False
     )
     semester_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("semesters.id"), nullable=False
+        UUIDType(), ForeignKey("semesters.id", ondelete='CASCADE'), nullable=False
     )
     registration_date: Mapped[DateTime] = mapped_column(DateTime, nullable=False)

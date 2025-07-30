@@ -15,12 +15,12 @@ class StudentAcademicTermLink(Base):
 
     student_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),
-        ForeignKey("students.id"),
+        ForeignKey("students.id", ondelete='CASCADE'),
         primary_key=True,
     )
     academic_term_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),
-        ForeignKey("academic_terms.id"),
+        ForeignKey("academic_terms.id", ondelete='CASCADE'),
         primary_key=True,
     )
 

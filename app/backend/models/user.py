@@ -42,6 +42,7 @@ class User(BaseModel):
         uselist=False,
         init=False,
         repr=False,
+        passive_deletes=True,
     )
     teacher: Mapped["Teacher"] = relationship(
         "Teacher",
@@ -49,6 +50,7 @@ class User(BaseModel):
         uselist=False,
         init=False,
         repr=False,
+        passive_deletes=True,
     )
     student: Mapped["Student"] = relationship(
         "Student",
@@ -56,6 +58,7 @@ class User(BaseModel):
         uselist=False,
         init=False,
         repr=False,
+        passive_deletes=True,
     )
     saved_query_views: Mapped["SavedQueryView"] = relationship(
         "SavedQueryView",
@@ -63,4 +66,5 @@ class User(BaseModel):
         cascade="all, delete-orphan",
         init=False,
         repr=False,
+        passive_deletes=True,
     )

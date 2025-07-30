@@ -16,13 +16,14 @@ class TeacherAcademicTermLink(Base):
     """
 
     __tablename__ = "teacher_academic_term_links"
+
     teacher_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),
-        ForeignKey("teachers.id"),
+        ForeignKey("teachers.id", ondelete="CASCADE"),
         primary_key=True,
     )
     academic_term_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),
-        ForeignKey("academic_terms.id"),
+        ForeignKey("academic_terms.id", ondelete="CASCADE"),
         primary_key=True,
     )

@@ -34,7 +34,7 @@ class Event(BaseModel):
 
     __tablename__ = "events"
     year_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("years.id"), nullable=False
+        UUIDType(), ForeignKey("years.id", ondelete='CASCADE'), nullable=False
     )
 
     title: Mapped[str] = mapped_column(String(100), nullable=False)
@@ -99,6 +99,7 @@ class Event(BaseModel):
         back_populates="events",
         default=None,
         repr=False,
+        passive_deletes=True,
     )
 
     __table_args__ = (

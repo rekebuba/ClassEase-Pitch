@@ -27,7 +27,7 @@ class AcademicTerm(BaseModel):
 
     __tablename__ = "academic_terms"
     year_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("years.id"), nullable=False
+        UUIDType(), ForeignKey("years.id", ondelete='CASCADE'), nullable=False
     )
     name: Mapped[AcademicTermEnum] = mapped_column(
         Enum(
@@ -50,18 +50,21 @@ class AcademicTerm(BaseModel):
         back_populates="academic_terms",
         init=False,
         repr=False,
+        passive_deletes=True,
     )
     student_term_records: Mapped[List["StudentTermRecord"]] = relationship(
         "StudentTermRecord",
         back_populates="academic_term",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     teacher_term_records: Mapped[List["TeacherTermRecord"]] = relationship(
         "TeacherTermRecord",
         back_populates="academic_term",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
 
     students: Mapped[List["Student"]] = relationship(
@@ -70,6 +73,7 @@ class AcademicTerm(BaseModel):
         back_populates="academic_terms",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     teachers: Mapped[List["Teacher"]] = relationship(
         "Teacher",
@@ -77,6 +81,7 @@ class AcademicTerm(BaseModel):
         back_populates="academic_terms",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
 
     __table_args__ = (

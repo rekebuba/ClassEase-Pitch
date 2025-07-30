@@ -25,13 +25,13 @@ class MarkList(BaseModel):
     __tablename__ = "mark_lists"
 
     student_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("students.id"), nullable=False
+        UUIDType(), ForeignKey("students.id", ondelete='CASCADE'), nullable=False
     )
     student_term_record_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("student_term_records.id"), nullable=False
+        UUIDType(), ForeignKey("student_term_records.id", ondelete='CASCADE'), nullable=False
     )
     subject_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("subjects.id"), nullable=False
+        UUIDType(), ForeignKey("subjects.id", ondelete='CASCADE'), nullable=False
     )
     type: Mapped[MarkListTypeEnum] = mapped_column(
         Enum(
@@ -50,17 +50,20 @@ class MarkList(BaseModel):
         "Student",
         back_populates="mark_lists",
         repr=False,
+        passive_deletes=True,
         init=False,
     )
     student_term_record: Mapped["StudentTermRecord"] = relationship(
         "StudentTermRecord",
         back_populates="mark_lists",
         repr=False,
+        passive_deletes=True,
         init=False,
     )
     subject: Mapped["Subject"] = relationship(
         "Subject",
         back_populates="mark_lists",
         repr=False,
+        passive_deletes=True,
         init=False,
     )

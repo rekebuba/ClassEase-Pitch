@@ -38,7 +38,7 @@ class Admin(BaseModel):
     address: Mapped[str] = mapped_column(Text, nullable=False)
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),
-        ForeignKey("users.id"),
+        ForeignKey("users.id", ondelete='CASCADE'),
         nullable=True,
         default=None,
     )
@@ -48,4 +48,5 @@ class Admin(BaseModel):
         back_populates="admin",
         init=False,
         repr=False,
+        passive_deletes=True,
     )
