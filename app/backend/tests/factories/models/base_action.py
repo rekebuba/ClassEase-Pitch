@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Dict, List, Optional, Sequence, Type
+from typing import Dict, Optional, Sequence, Type
 import uuid
 
 from faker import Faker

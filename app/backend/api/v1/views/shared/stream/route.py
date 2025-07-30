@@ -1,6 +1,6 @@
 from typing import Set, Tuple
 import uuid
-from flask import Response
+from flask import Response, jsonify
 from sqlalchemy import select
 from api.v1.utils.parameter import validate_expand, validate_fields
 from api.v1.utils.typing import IncEx, UserT
@@ -12,12 +12,13 @@ from extension.pydantic.models.stream_schema import (
     StreamSchema,
     StreamWithRelationshipSchema,
 )
-from extension.pydantic.response.schema import success_response
+from extension.pydantic.response.schema import error_response, success_response
 from models import storage
+from models.grade import Grade
 from models.stream import Stream
 
 
-@auth.route("/years/<uuid:grade_id>/streams", methods=["GET"])
+@auth.route("/grades/<uuid:grade_id>/streams", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(StreamSchema, StreamSchema.default_fields())
 def get_streams(
@@ -29,6 +30,11 @@ def get_streams(
     Returns:
         Tuple[Response, int]: JSON response with streams and status code.
     """
+    if not storage.session.get(Grade, grade_id):
+        return error_response(
+            message=f"Grade with ID {grade_id} not found.", status=404
+        )
+
     streams = storage.session.scalars(
         select(Stream).where(Stream.grade_id == grade_id)
     ).all()

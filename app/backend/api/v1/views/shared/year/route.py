@@ -5,7 +5,7 @@ from api.v1.utils.parameter import validate_expand, validate_fields
 from api.v1.utils.typing import IncEx, UserT
 from api.v1.views.shared import auths as auth
 from api.v1.views.utils import student_teacher_or_admin_required
-from extension.pydantic.response.schema import success_response
+from extension.pydantic.response.schema import error_response, success_response
 from models import storage
 from models.year import Year
 from sqlalchemy import select
@@ -50,9 +50,7 @@ def get_year_by_id(
     """
     year = storage.session.get(Year, year_id)
     if not year:
-        return errors.handle_not_found_error(
-            message=f"Year with ID {year_id} not found."
-        )
+        return error_response(message=f"Year with ID {year_id} not found.", status=404)
 
     response = YearSchemaWithRelationships.model_validate(year).model_dump(
         by_alias=True,
