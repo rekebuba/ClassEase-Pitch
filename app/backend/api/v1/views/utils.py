@@ -123,7 +123,7 @@ def admin_required(
 
         Returns:
             T: The decorated function with user data as the first argument.
-        """
+        """        
         if "apiKey" in request.headers:
             token = request.headers["apiKey"].split()[1]  # Bearer token
 

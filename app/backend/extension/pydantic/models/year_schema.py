@@ -33,9 +33,7 @@ class YearSchema(BaseModel):
 
     id: uuid.UUID | None = None
     calendar_type: AcademicTermTypeEnum
-    academic_year: str
-    ethiopian_year: str
-    gregorian_year: str
+    name: str
     start_date: date
     end_date: date
     status: AcademicYearStatusEnum
@@ -48,7 +46,7 @@ class YearSchema(BaseModel):
         Returns a list of default fields to be used when no specific fields are requested.
         This can be overridden in subclasses if needed.
         """
-        return {"id", "academic_year", "status"}
+        return {"id", "name", "status"}
 
 
 class YearRelationshipSchema(BaseModel):

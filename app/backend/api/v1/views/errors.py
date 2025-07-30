@@ -4,6 +4,7 @@ import logging
 from pydantic_core import ErrorDetails
 from sqlalchemy.exc import SQLAlchemyError
 from pydantic import ValidationError
+from models import storage
 
 from extension.pydantic.response.schema import ValidationErrorSchema, error_response
 
@@ -23,6 +24,7 @@ def handle_database_error(
     """
     Handle database-related errors.
     """
+    storage.session.rollback()
     logging.error(f"{message}: {error}")
     return error_response(
         message=str(message),
@@ -86,6 +88,7 @@ def handle_internal_error(
     message: str = "Internal Server Error",
     error: Optional[Exception] = None,
 ) -> tuple[Response, int]:
+    storage.session.rollback()
     logging.error(f"handle_internal_error => {message}: {error}")
     return error_response(
         message=str(message),

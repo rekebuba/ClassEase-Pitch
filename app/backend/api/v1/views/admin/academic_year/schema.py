@@ -1,14 +1,14 @@
 from datetime import date
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel, ConfigDict
 
-from extension.enums.enum import AcademicTermTypeEnum
+from extension.enums.enum import (
+    AcademicTermEnum,
+    AcademicTermTypeEnum,
+    AcademicYearStatusEnum,
+    GradeLevelEnum,
+)
 from extension.functions.helper import to_camel
-from extension.pydantic.models.academic_term_schema import AcademicTermSchema
-from extension.pydantic.models.grade_schema import GradeSchema
-from extension.pydantic.models.section_schema import SectionSchema
-from extension.pydantic.models.stream_schema import StreamSchema
-from extension.pydantic.models.subject_schema import SubjectSchema
 
 
 class YearDetailSchema(BaseModel):
@@ -19,17 +19,52 @@ class YearDetailSchema(BaseModel):
     )
 
     calendar_type: AcademicTermTypeEnum
-    academic_year: str
-    ethiopian_year: str
-    gregorian_year: str
+    name: str
     start_date: date
     end_date: date
+    status: AcademicYearStatusEnum
 
 
-class NestedGradeSetupSchema(GradeSchema):
-    streams: List[StreamSchema] | None = None
-    sections: List[SectionSchema]
-    subjects: SubjectSchema
+class AcademicTermDetail(BaseModel):
+    """
+    This model represents an academic term in the system.
+    """
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    name: AcademicTermEnum
+    start_date: date
+    end_date: date
+    registration_start: Optional[date] = None
+    registration_end: Optional[date] = None
+
+class StreamDetailSchema(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+    
+    name: str
+    subjects: List[str]
+
+class NestedGradeSetupSchema(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    grade: str
+    level: GradeLevelEnum
+    has_stream: bool = False
+    streams: List[StreamDetailSchema] | None = None
+    sections: List[str]
+    subjects: List[str]
 
 
 class AcademicYearSetupSchema(BaseModel):
@@ -40,6 +75,6 @@ class AcademicYearSetupSchema(BaseModel):
     )
 
     year: YearDetailSchema
-    academic_term: AcademicTermSchema
-    subjects: List[SubjectSchema]
+    academic_term: List[AcademicTermDetail]
+    subjects: List[str]
     grades: List[NestedGradeSetupSchema]

@@ -2,7 +2,7 @@
 """Module for AcademicTerm class"""
 
 from datetime import date
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Optional
 from sqlalchemy import ForeignKey, Date, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from extension.enums.enum import AcademicTermEnum
@@ -41,8 +41,8 @@ class AcademicTerm(BaseModel):
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     end_date: Mapped[date] = mapped_column(Date, nullable=False)
 
-    registration_start: Mapped[date] = mapped_column(Date, nullable=True)
-    registration_end: Mapped[date] = mapped_column(Date, nullable=True)
+    registration_start: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    registration_end: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
 
     # Relationships
     year: Mapped["Year"] = relationship(

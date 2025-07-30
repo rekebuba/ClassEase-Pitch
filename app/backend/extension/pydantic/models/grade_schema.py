@@ -55,7 +55,7 @@ class GradeRelationshipSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    year: YearSchema
+    year: Optional[YearSchema]
     teacher_term_records: Optional[List[TeacherTermRecordSchema]] = []
     student_term_records: Optional[List[StudentTermRecordSchema]] = []
     teachers: List[TeacherSchema] = []
