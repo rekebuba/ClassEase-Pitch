@@ -14,8 +14,12 @@ class TeacherGradeLink(Base):
     __tablename__ = "teacher_grade_links"
 
     teacher_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("teachers.id"), primary_key=True
+        UUIDType(),
+        ForeignKey("teachers.id", ondelete='CASCADE'),
+        primary_key=True,
     )
     grade_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("grades.id"), primary_key=True
+        UUIDType(),
+        ForeignKey("grades.id", ondelete='CASCADE'),
+        primary_key=True,
     )

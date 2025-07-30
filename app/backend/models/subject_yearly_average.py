@@ -18,14 +18,14 @@ if TYPE_CHECKING:
 class SubjectYearlyAverage(BaseModel):
     __tablename__ = "subject_yearly_averages"
     student_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("students.id"), nullable=False
+        UUIDType(), ForeignKey("students.id", ondelete='CASCADE'), nullable=False
     )
     yearly_subject_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("yearly_subjects.id"), nullable=False
+        UUIDType(), ForeignKey("yearly_subjects.id", ondelete='CASCADE'), nullable=False
     )
     student_year_record_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),
-        ForeignKey("student_year_records.id"),
+        ForeignKey("student_year_records.id", ondelete='CASCADE'),
         nullable=True,
     )
     # The actual average score of the student in this for all subject
@@ -38,10 +38,12 @@ class SubjectYearlyAverage(BaseModel):
         back_populates="subject_yearly_averages",
         init=False,
         repr=False,
+        passive_deletes=True,
     )
     yearly_subject: Mapped["YearlySubject"] = relationship(
         "YearlySubject",
         back_populates="subject_yearly_averages",
         init=False,
         repr=False,
+        passive_deletes=True,
     )

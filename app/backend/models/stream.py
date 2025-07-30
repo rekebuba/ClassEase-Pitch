@@ -24,7 +24,7 @@ class Stream(BaseModel):
     __tablename__ = "streams"
 
     grade_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("grades.id"), nullable=False
+        UUIDType(), ForeignKey("grades.id", ondelete='CASCADE'), nullable=False
     )
     name: Mapped[str] = mapped_column(String(10), nullable=False)
 
@@ -33,6 +33,7 @@ class Stream(BaseModel):
         "Grade",
         back_populates="streams",
         repr=False,
+        passive_deletes=True,
         init=False,
     )
 
@@ -42,17 +43,20 @@ class Stream(BaseModel):
         back_populates="stream",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     student_term_records: Mapped[List["StudentTermRecord"]] = relationship(
         "StudentTermRecord",
         back_populates="stream",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     yearly_subjects: Mapped[List["YearlySubject"]] = relationship(
         "YearlySubject",
         back_populates="stream",
         repr=False,
+        passive_deletes=True,
         default_factory=list,
     )
     subjects: Mapped[List["Subject"]] = relationship(
@@ -61,6 +65,7 @@ class Stream(BaseModel):
         secondary="subject_stream_links",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
 
     # Many-To-Many Relationships
@@ -70,4 +75,5 @@ class Stream(BaseModel):
         back_populates="streams",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )

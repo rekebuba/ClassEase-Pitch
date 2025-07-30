@@ -50,29 +50,34 @@ class Year(BaseModel):
         back_populates="year",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     academic_terms: Mapped[List["AcademicTerm"]] = relationship(
         "AcademicTerm",
         back_populates="year",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     yearly_subjects: Mapped[List["YearlySubject"]] = relationship(
         "YearlySubject",
         back_populates="year",
         repr=False,
+        passive_deletes=True,
         default_factory=list,
     )
     grades: Mapped[List["Grade"]] = relationship(
         "Grade",
         back_populates="year",
         repr=False,
+        passive_deletes=True,
         default_factory=list,
     )
     subjects: Mapped[List["Subject"]] = relationship(
         "Subject",
         back_populates="year",
         repr=False,
+        passive_deletes=True,
         default_factory=list,
     )
 
@@ -82,6 +87,7 @@ class Year(BaseModel):
         back_populates="years",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     teachers: Mapped[List["Teacher"]] = relationship(
         "Teacher",
@@ -89,4 +95,5 @@ class Year(BaseModel):
         back_populates="years",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )

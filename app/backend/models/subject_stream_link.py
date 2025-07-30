@@ -17,12 +17,12 @@ class SubjectStreamLink(Base):
     subject_id: Mapped[uuid.UUID] = mapped_column(
         "subject_id",
         UUIDType(),
-        ForeignKey("subjects.id"),
+        ForeignKey("subjects.id", ondelete='CASCADE'),
         primary_key=True,
     )
     stream_id: Mapped[uuid.UUID] = mapped_column(
         "stream_id",
         UUIDType(),
-        ForeignKey("streams.id"),
+        ForeignKey("streams.id", ondelete='CASCADE'),
         primary_key=True,
     )

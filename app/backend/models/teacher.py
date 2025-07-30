@@ -217,7 +217,7 @@ class Teacher(BaseModel):
     agree_to_background_check: Mapped[bool] = mapped_column(Boolean, default=False)
 
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("users.id"), unique=True, nullable=True, default=None
+        UUIDType(), ForeignKey("users.id", ondelete='CASCADE'), unique=True, nullable=True, default=None
     )
 
     status: Mapped[StatusEnum] = mapped_column(
@@ -237,6 +237,7 @@ class Teacher(BaseModel):
         back_populates="teacher",
         init=False,
         repr=False,
+        passive_deletes=True,
     )
 
     # Many-to-Many Relationship
@@ -246,12 +247,14 @@ class Teacher(BaseModel):
         secondary="teacher_year_links",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     term_records: Mapped[List["TeacherTermRecord"]] = relationship(
         "TeacherTermRecord",
         back_populates="teacher",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     academic_terms: Mapped[List["AcademicTerm"]] = relationship(
         "AcademicTerm",
@@ -259,6 +262,7 @@ class Teacher(BaseModel):
         secondary="teacher_academic_term_links",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     subjects: Mapped[List["Subject"]] = relationship(
         "Subject",
@@ -266,6 +270,7 @@ class Teacher(BaseModel):
         secondary="teacher_subject_links",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     grades: Mapped[List["Grade"]] = relationship(
         "Grade",
@@ -273,6 +278,7 @@ class Teacher(BaseModel):
         secondary="teacher_grade_links",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     sections: Mapped[List["Section"]] = relationship(
         "Section",
@@ -280,6 +286,7 @@ class Teacher(BaseModel):
         secondary="teacher_section_links",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
 
     __table_args__ = (

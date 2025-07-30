@@ -15,12 +15,12 @@ class StudentYearLink(Base):
 
     student_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),
-        ForeignKey("students.id"),
+        ForeignKey("students.id", ondelete='CASCADE'),
         primary_key=True,
     )
     year_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),
-        ForeignKey("years.id"),
+        ForeignKey("years.id", ondelete='CASCADE'),
         primary_key=True,
     )
 

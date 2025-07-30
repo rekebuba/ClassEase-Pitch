@@ -25,7 +25,7 @@ class Section(BaseModel):
 
     __tablename__ = "sections"
     grade_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("grades.id"), nullable=False
+        UUIDType(), ForeignKey("grades.id", ondelete='CASCADE'), nullable=False
     )
     section: Mapped[str] = mapped_column(
         String(1), nullable=True, default=None
@@ -36,6 +36,7 @@ class Section(BaseModel):
         "Grade",
         back_populates="sections",
         repr=False,
+        passive_deletes=True,
         init=False,
     )
 
@@ -45,12 +46,14 @@ class Section(BaseModel):
         back_populates="section",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     student_term_records: Mapped[List["StudentTermRecord"]] = relationship(
         "StudentTermRecord",
         back_populates="section",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
 
     # Many-to-many relationships
@@ -60,6 +63,7 @@ class Section(BaseModel):
         secondary="teacher_section_links",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
 
     students: Mapped[List["Student"]] = relationship(
@@ -68,4 +72,5 @@ class Section(BaseModel):
         back_populates="sections",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )

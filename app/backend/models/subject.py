@@ -29,7 +29,7 @@ class Subject(BaseModel):
 
     __tablename__ = "subjects"
     year_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("years.id"), nullable=False, index=True
+        UUIDType(), ForeignKey("years.id", ondelete='CASCADE'), nullable=False, index=True
     )
     name: Mapped[str] = mapped_column(String(50), nullable=False)
     code: Mapped[str] = mapped_column(String(25), nullable=False)
@@ -39,6 +39,7 @@ class Subject(BaseModel):
         "Year",
         back_populates="subjects",
         repr=False,
+        passive_deletes=True,
         init=False,
     )
 
@@ -48,6 +49,7 @@ class Subject(BaseModel):
         back_populates="subject",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
 
     # Many-To-Many Relationships
@@ -57,12 +59,14 @@ class Subject(BaseModel):
         secondary="teacher_subject_links",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     yearly_subjects: Mapped[List["YearlySubject"]] = relationship(
         "YearlySubject",
         back_populates="subject",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     grades: Mapped[List["Grade"]] = relationship(
         "Grade",
@@ -70,6 +74,7 @@ class Subject(BaseModel):
         back_populates="subjects",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     streams: Mapped[List["Stream"]] = relationship(
         "Stream",
@@ -77,6 +82,7 @@ class Subject(BaseModel):
         back_populates="subjects",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     students: Mapped[List["Student"]] = relationship(
         "Student",
@@ -84,10 +90,12 @@ class Subject(BaseModel):
         back_populates="subjects",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )
     mark_lists: Mapped[List["MarkList"]] = relationship(
         "MarkList",
         back_populates="subject",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )

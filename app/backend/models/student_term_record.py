@@ -26,19 +26,19 @@ class StudentTermRecord(BaseModel):
 
     __tablename__ = "student_term_records"
     student_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("students.id"), nullable=False
+        UUIDType(), ForeignKey("students.id", ondelete='CASCADE'), nullable=False
     )
     academic_term_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("academic_terms.id"), nullable=False
+        UUIDType(), ForeignKey("academic_terms.id", ondelete='CASCADE'), nullable=False
     )
     grade_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("grades.id"), nullable=False
+        UUIDType(), ForeignKey("grades.id", ondelete='CASCADE'), nullable=False
     )
     section_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("sections.id"), nullable=False
+        UUIDType(), ForeignKey("sections.id", ondelete='CASCADE'), nullable=False
     )
     stream_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("streams.id"), nullable=True, default=None
+        UUIDType(), ForeignKey("streams.id", ondelete='CASCADE'), nullable=True, default=None
     )
 
     average: Mapped[float] = mapped_column(Float, nullable=True, default=None)
@@ -60,18 +60,21 @@ class StudentTermRecord(BaseModel):
         back_populates="student_term_records",
         init=False,
         repr=False,
+        passive_deletes=True,
     )
     grade: Mapped["Grade"] = relationship(
         "Grade",
         back_populates="student_term_records",
         init=False,
         repr=False,
+        passive_deletes=True,
     )
     stream: Mapped["Stream"] = relationship(
         "Stream",
         back_populates="student_term_records",
         init=False,
         repr=False,
+        passive_deletes=True,
     )
 
     # Many-To-One Relationships
@@ -80,4 +83,5 @@ class StudentTermRecord(BaseModel):
         back_populates="student_term_record",
         default_factory=list,
         repr=False,
+        passive_deletes=True,
     )

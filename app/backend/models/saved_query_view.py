@@ -20,7 +20,7 @@ class SavedQueryView(BaseModel):
 
     # Columns
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("users.id"), nullable=False
+        UUIDType(), ForeignKey("users.id", ondelete='CASCADE'), nullable=False
     )
     name: Mapped[str] = mapped_column(String(50), nullable=False)
     table_name: Mapped[TableEnum] = mapped_column(
