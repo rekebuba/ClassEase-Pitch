@@ -1,5 +1,5 @@
 from typing import Any, Tuple, Type, List, Union, get_origin, get_args, Annotated
-from datetime import datetime
+from datetime import date, datetime
 import re
 from pyethiodate import EthDate  # type: ignore
 from pydantic import BaseModel
@@ -21,8 +21,8 @@ def to_snake(s: str) -> str:
     return s.lower()
 
 
-def current_EC_year() -> EthDate:
-    return EthDate.date_to_ethiopian(datetime.now()).year
+def current_EC_year(date: date | datetime = datetime.now()) -> EthDate:
+    return EthDate.date_to_ethiopian(date).year
 
 
 def current_GC_year(ethiopian_year: int) -> str:

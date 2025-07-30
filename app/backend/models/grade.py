@@ -33,7 +33,7 @@ class Grade(BaseModel):
     year_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(), ForeignKey("years.id"), nullable=False, index=True
     )
-    grade: Mapped[str] = mapped_column(String(25), unique=True, nullable=False)
+    grade: Mapped[str] = mapped_column(String(25), nullable=False)
     level: Mapped[GradeLevelEnum] = mapped_column(
         Enum(
             GradeLevelEnum,

@@ -32,7 +32,7 @@ class Subject(BaseModel):
         UUIDType(), ForeignKey("years.id"), nullable=False, index=True
     )
     name: Mapped[str] = mapped_column(String(50), nullable=False)
-    code: Mapped[str] = mapped_column(String(25), unique=True, nullable=False)
+    code: Mapped[str] = mapped_column(String(25), nullable=False)
 
     # One-To-Many Relationships
     year: Mapped["Year"] = relationship(
