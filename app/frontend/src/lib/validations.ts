@@ -44,9 +44,7 @@ const roleSchema = z.preprocess(
 );
 
 export const loginSchema = z.object({
-    id: z.string(),
     apiKey: z.string(),
-    role: roleSchema,
 });
 export type LoginSchema = z.infer<typeof loginSchema>;
 

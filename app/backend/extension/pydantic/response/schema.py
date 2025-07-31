@@ -73,7 +73,10 @@ def success_response(
     return (
         jsonify(
             SuccessResponseSchema(
-                data=data, message=message, meta=meta, links=links
+                data=data,
+                message=message,
+                meta=meta,
+                links=links,
             ).model_dump(exclude_none=True, by_alias=True, mode="json"),
         ),
         status,

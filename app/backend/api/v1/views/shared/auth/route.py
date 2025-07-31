@@ -28,39 +28,30 @@ def login() -> Tuple[Response, int]:
     """
     Handle user login by validating credentials and generating an access token.
     """
-    try:
-        user_auth_schema = AuthSchema.model_validate(request.get_json())
-        user = storage.session.scalar(
-            select(User).where(
-                User.identification == user_auth_schema.identification,
-            )
+    user_auth_schema = AuthSchema.model_validate(request.get_json())
+    user = storage.session.scalar(
+        select(User).where(
+            User.identification == user_auth_schema.identification,
         )
-        if not user:
-            raise InvalidCredentialsError("User not found.")
+    )
+    if not user:
+        raise InvalidCredentialsError("User not found.")
 
-        # Validate the password
-        if not check_password(user.password, user_auth_schema.password):
-            raise InvalidCredentialsError("Invalid password.")
+    # Validate the password
+    if not check_password(user.password, user_auth_schema.password):
+        raise InvalidCredentialsError("Invalid password.")
 
-        user_schema = UserSchema.model_validate(user)
+    user_schema = UserSchema.model_validate(user)
 
-        # Generate an api_key token based on the user's role
-        api_key = create_token(user_schema.id, user_schema.role)
+    # Generate an api_key token based on the user's role
+    api_key = create_token(user_schema.id, user_schema.role)
 
-        auth_response = AuthResponseSchema(
-            api_key=api_key,
-            id=user_schema.id,
-        )
-        return success_response(
-            message="logged in Successful.",
-            data=auth_response,
-        )
-    except ValidationError as e:
-        return errors.handle_validation_error(error=e)
-    except InvalidCredentialsError as e:
-        return errors.handle_invalid_credentials_error(error=e)
-    except Exception as e:
-        return errors.handle_internal_error(error=e)
+    auth_response = AuthResponseSchema(api_key=api_key)
+    return success_response(
+        message="logged in Successful.",
+        data=auth_response,
+        status=201,
+    )
 
 
 @auth.route("auth/logout", methods=["POST"])

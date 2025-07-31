@@ -13,6 +13,7 @@ import { GraduationCap, EyeIcon, EyeOffIcon, AlertCircle, CheckCircle } from "lu
 import { Progress } from "@/components/ui/progress"
 import { LoginSchema, loginSchema } from "@/lib/validations"
 import { login } from "@/api/authApi";
+import { decodeToken } from "@/context/auth-context";
 
 const AuthPage = () => {
   const [activeTab, setActiveTab] = useState("login")
@@ -74,9 +75,16 @@ const AuthPage = () => {
         new Promise((_, reject) => setTimeout(() => reject(new Error("Request timed out")), timeout))
       ]) as LoginSchema;
 
+      const decodedToken = decodeToken(response.apiKey)
+      if (!decodedToken) {
+        setLoginStatus("timeout");
+        setIsLoading(false);
+        return
+      }
+
       localStorage.setItem("apiKey", response.apiKey);
       setLoginStatus("success")
-      window.location.href = `/${response.role}/dashboard`
+      window.location.href = `/${decodedToken.role}/dashboard`
 
       setIsLoading(false)
     } catch (error) {

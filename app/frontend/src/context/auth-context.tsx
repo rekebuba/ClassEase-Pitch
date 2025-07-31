@@ -79,7 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 }
 
 // Helper function to decode the JWT token
-const decodeToken = (token: string): JwtPayloadType | null => {
+export const decodeToken = (token: string): JwtPayloadType | null => {
     try {
         // JWT tokens are in the format: header.payload.signature
         const payload = token.split('.')[1]; // Get the payload part

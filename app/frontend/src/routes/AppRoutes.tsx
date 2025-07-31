@@ -61,7 +61,7 @@ const router = createBrowserRouter([
     },
     {
         path: "/auth",
-        element: <AuthPage />,
+        element: <AuthProvider><AuthPage /></AuthProvider>,
     },
     {
         path: "/admin",

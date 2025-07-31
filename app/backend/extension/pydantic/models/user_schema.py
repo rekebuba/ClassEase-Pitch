@@ -26,6 +26,15 @@ class UserSchema(BaseModel):
     role: RoleEnum
     image_path: Optional[str] = None
 
+    @classmethod
+    def default_fields(cls) -> set[str]:
+        return {
+            "id",
+            "identification",
+            "role",
+            "imagePath",
+        }
+
 
 class UserRelationshipSchema(BaseModel):
     """This model represents the relationships of a UserSchema.
