@@ -33,6 +33,15 @@ class AdminSchema(BaseModel):
     phone: str
     address: str
 
+    @classmethod
+    def default_fields(cls) -> set[str]:
+        return {
+            "id",
+            "first_name",
+            "father_name",
+            "grand_father_name",
+        }
+
 
 class AdminRelationshipSchema(BaseModel):
     """This model represents the relationships of an AdminSchema."""

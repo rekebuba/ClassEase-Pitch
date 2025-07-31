@@ -35,9 +35,10 @@ import { NavUser } from "@/components/nav-user"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAuth } from "@/context/auth-context";
 import FadeIn from "@/components/fade-in";
-import { type UserProfile } from "@/lib/api-response-validation";
-import { getDashboardData } from "@/api/sharedApi";
+import { UserSchema, type UserProfile } from "@/lib/api-response-validation";
+import sharedApi, { getDashboardData } from "@/api/sharedApi";
 import { toast } from "sonner";
+import { z } from "zod";
 
 const data = {
     admin: {
@@ -125,15 +126,28 @@ const data = {
 
 type AppSidebarProps = React.ComponentProps<typeof Sidebar>;
 
+function pickFields<T extends z.ZodRawShape>(
+    schema: z.ZodObject<T>,
+    fields: (keyof T)[]
+): z.ZodObject<Pick<T, (keyof T & string)>> {
+    const shape = Object.fromEntries(
+        fields.map((key) => [key, schema.shape[key]])
+    ) as Pick<T, (keyof T & string)>;
+    return z.object(shape);
+}
+
 export function AppSidebar({ ...props }: AppSidebarProps) {
     const [userData, setUserData] = useState<UserProfile | null>(null);
-    const { userRole } = useAuth();
+    const { userRole, userId } = useAuth();
+
 
     useEffect(() => {
         const fetchUserData = async () => {
-            if (!userRole) return;
+            if (!userRole || !userId) return; // Prevent rendering if userRole is not set
+            const selectedSchema = pickFields(UserSchema, ["id", "role", "imagePath"]);
 
-            const response = await getDashboardData(userRole);
+            const response = await sharedApi.getUser(userId, selectedSchema);
+
             if (!response.success) {
                 toast.error(response.error.message, {
                     style: { color: "red" },
@@ -144,7 +158,7 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
         };
 
         fetchUserData();
-    }, [userRole]);
+    }, [userRole, userId]);
 
     return (
         <Sidebar collapsible="icon" {...props}>

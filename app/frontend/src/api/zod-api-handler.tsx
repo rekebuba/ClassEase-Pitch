@@ -1,12 +1,25 @@
-import { z, ZodError } from "zod";
+import { z, ZodError, ZodTypeAny } from "zod";
 import axios from "axios";
 import { ApiHandlerResponse } from "@/lib/types";
 
+export const MetaSchema = z.record(z.any()).optional();
+export const LinksSchema = z.record(z.any()).optional();
+
+export function createSuccessResponseSchema<T extends ZodTypeAny>(dataSchema: T) {
+    return z.object({
+        message: z.string().default("Success"),
+        data: dataSchema,
+        meta: MetaSchema,
+        links: LinksSchema,
+    });
+}
+
+
 /**
- * Handles API calls with Zod validation and error handling
- * @param request - API call function (e.g., axios.get, axios.post)
- * @param schema - Zod schema for validation
- * @param options - Custom error messages or status codes
+ * Enhanced API handler with URLSearchParams support
+ * @param endpoint - API endpoint URL
+ * @param schema - Zod schema for response validation
+ * @param options - Field selection, expansion, and error handling
  */
 export async function zodApiHandler<T>(
     request: () => Promise<any>,
@@ -20,16 +33,21 @@ export async function zodApiHandler<T>(
         // Execute API request
         const response = await request();
 
+        const responseSchema = createSuccessResponseSchema(schema);
         // Validate response data
-        const parsedResult = schema.safeParse(response.data);
+        const parsedResult = responseSchema.safeParse(response.data);
 
         if (!parsedResult.success) {
             throw new ZodError(parsedResult.error.errors);
         }
 
+        if (!parsedResult.data || !parsedResult.data.data) {
+            throw new Error("Data is missing in the parsed result");
+        }
+
         return {
             success: true,
-            data: parsedResult.data,
+            data: parsedResult.data.data,
         };
 
     } catch (error) {

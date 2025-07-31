@@ -36,7 +36,6 @@ class AuthResponseSchema(BaseModel):
     )
 
     api_key: str
-    id: uuid.UUID
 
 
 # class AuthSchema(BaseSchema):

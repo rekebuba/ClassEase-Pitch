@@ -5,7 +5,65 @@ import { z } from 'zod';
 import { TeacherRegistrationFormData } from '@/lib/form-validation';
 import { RoleEnumType } from '@/lib/enums';
 import { UserWithAdminSchema, UserWithTeacherSchema, UserWithStudentSchema, UserProfile, SubjectSchema, GradeSchema, YearSchema, StreamSchema } from "@/lib/api-response-validation";
+
+type ApiOptions = {
+    /**
+     * Fields to select (e.g., ["id", "name"])
+    */
+    fields?: string[];
+    /**
+     * Relationships to expand (e.g., ["author", "comments"])
+     */
+    expand?: string[];
+    /**
+     * Nested field selection for expanded relationships
+     * (e.g., { author: ["id", "name"], comments: ["id"] })
+     */
+    nestedFields?: Record<string, string[]>;
+    /**
+     * Additional query parameters
+     */
+    params?: Record<string, string | number | boolean>;
+};
+
+const buildQueryParams = (options?: ApiOptions) => {
+    // Build URL with query parameters
+    const params: Record<string, string> = {};
+
+    if (!options) return params;
+
+    // Add fields
+    if (options?.fields?.length) {
+        params.fields = options.fields.join(",");
+    }
+
+    // Add expands
+    if (options?.expand?.length) {
+        params.expand = options.expand.join(",");
+    }
+
+    // Add nested fields
+    if (options?.nestedFields) {
+        for (const [key, fields] of Object.entries(options.nestedFields)) {
+            params[`${key}Fields`] = fields.join(",");
+        }
+    }
+
+    // Add additional params
+    if (options?.params) {
+        for (const [key, value] of Object.entries(options.params)) {
+            params[key] = String(value);
+        }
+    }
+
+    return params;
+};
+
 const sharedApi = {
+    getUser: (userId: string, schema: z.ZodSchema<any>, params?: ApiOptions) => {
+        zodApiHandler(() =>
+            api.get(`/users/${userId}`, { params: buildQueryParams(params) }), schema)
+    },
     getDashboardData: () => api.get('/'),
     getAcademicYears: async () => zodApiHandler(() => api.get('/academic_years'), YearSchema.array()),
     getSubjects: async () => zodApiHandler(() => api.get('/subjects'), SubjectSchema.array()),
