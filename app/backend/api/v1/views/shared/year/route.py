@@ -14,7 +14,6 @@ from extension.pydantic.models.year_schema import (
     YearSchema,
     YearSchemaWithRelationships,
 )
-from api.v1.views import errors
 
 
 @auth.route("/years", methods=["GET"])

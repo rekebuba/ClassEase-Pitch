@@ -1,18 +1,5 @@
 import { AllSubjects, allSubjectsData, GradeOneSubjects } from "@/config/suggestion"
 
-export interface AcademicYear {
-    id: string
-    name: string
-    startDate: string
-    endDate: string
-    termSystem: "quarterly" | "semesterly"
-    status: "draft" | "active" | "completed"
-    grades: Grade[]
-    subjects: Subject[]
-    createdAt: string
-    updatedAt: string
-}
-
 export interface Grade {
     id: string
     name: string

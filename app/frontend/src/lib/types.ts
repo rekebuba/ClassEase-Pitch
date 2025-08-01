@@ -39,6 +39,27 @@ export type SuccessResponse<T> = {
 export type ApiHandlerResponse<T> = SuccessResponse<T> | ErrorResponse;
 
 
+export type QueryParams = {
+    /**
+     * Fields to select (e.g., ["id", "name"])
+    */
+    fields?: string[];
+    /**
+     * Relationships to expand (e.g., ["author", "comments"])
+     */
+    expand?: string[];
+    /**
+     * Nested field selection for expanded relationships
+     * (e.g., { author: ["id", "name"], comments: ["id"] })
+     */
+    nestedFields?: Record<string, string[]>;
+    /**
+     * Additional query parameters
+     */
+    params?: Record<string, string | number | boolean>;
+};
+
+
 export type NavItem = {
     title: string;
     href: string;

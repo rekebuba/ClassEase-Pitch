@@ -21,17 +21,22 @@ export type JwtPayloadType = z.infer<typeof jwtPayloadSchema>;
 
 export const DOBSchema = z
     .string()
+    .datetime()
     .transform((dobStr) => {
         const dob = new Date(dobStr);
         const today = new Date();
-
         let age = today.getFullYear() - dob.getFullYear();
         const m = today.getMonth() - dob.getMonth();
         if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
             age--;
         }
-
         return age;
+    });
+
+export const ISODateString = z
+    .string()
+    .refine((val) => !isNaN(Date.parse(val)), {
+        message: "Invalid datetime format",
     });
 
 export const logoutSchema = z.object({
