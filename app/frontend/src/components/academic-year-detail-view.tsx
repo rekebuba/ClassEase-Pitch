@@ -1,17 +1,46 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Calendar, GraduationCap, BookOpen, Users, Layers, ArrowLeft, Edit } from "lucide-react"
-import type { AcademicYear } from "@/lib/academic-year"
+import { Calendar, GraduationCap, BookOpen, Trash2, MoreHorizontal, Eye, Users, Layers, ArrowLeft, Edit } from "lucide-react"
+import type { AcademicYear } from "@/pages/admin/academic-year-management"
 import { AcademicYearStatusBadge } from "@/components"
+import { z } from "zod"
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { AcademicTermSchema, EventSchema, GradeSchema, SectionSchema, StreamSchema, SubjectSchema } from "@/lib/api-response-validation"
+import { pickFields } from "@/utils/pick-zod-fields"
+import { sharedApi } from "@/api"
+import { toast } from "sonner"
+import { useEffect, useRef, useState } from "react"
+import { DetailAcademicYear } from "./academic-year-view-card"
+import { Grade, Section, Stream, Subject } from "@/lib/api-response-type"
+import { Skeleton } from "./ui/skeleton"
+import FadeIn from "./fade-in"
 
 interface AcademicYearDetailViewProps {
-    academicYear: AcademicYear
+    detailAcademicYears: DetailAcademicYear
     onBack: () => void
     onEdit: () => void
 }
 
-export default function AcademicYearDetailView({ academicYear, onBack, onEdit }: AcademicYearDetailViewProps) {
+type DetailGrade = Pick<Grade, "id" | "grade" | "level" | "hasStream"> & {
+    sections: Pick<Section, "id" | "section">[]
+    streams: Pick<Stream, "id" | "name">[],
+    subjects: Pick<Subject, "id" | "name" | "code">[]
+}
+
+type DetailSubject = Pick<Subject, "id" | "name" | "code"> & {
+    streams: Pick<Stream, "id" | "name">[]
+    grades: Pick<Grade, "id" | "grade">[]
+}
+
+export default function AcademicYearDetailView({ detailAcademicYears, onBack, onEdit }: AcademicYearDetailViewProps) {
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString("en-US", {
             year: "numeric",
@@ -21,8 +50,8 @@ export default function AcademicYearDetailView({ academicYear, onBack, onEdit }:
     }
 
     const getDuration = () => {
-        const start = new Date(academicYear.startDate)
-        const end = new Date(academicYear.endDate)
+        const start = new Date(detailAcademicYears.startDate)
+        const end = new Date(detailAcademicYears.endDate)
         const diffTime = Math.abs(end.getTime() - start.getTime())
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
         return `${diffDays} days`
@@ -50,11 +79,11 @@ export default function AcademicYearDetailView({ academicYear, onBack, onEdit }:
                         Back
                     </Button>
                     <div>
-                        <h1 className="text-2xl font-bold">{academicYear.name}</h1>
+                        <h1 className="text-2xl font-bold">{detailAcademicYears.name}</h1>
                         <div className="flex items-center gap-3 mt-1">
-                            <AcademicYearStatusBadge status={academicYear.status} />
+                            <AcademicYearStatusBadge status={detailAcademicYears.status} />
                             <span className="text-sm text-gray-600">
-                                {formatDate(academicYear.startDate)} - {formatDate(academicYear.endDate)}
+                                {formatDate(detailAcademicYears.startDate)} - {formatDate(detailAcademicYears.endDate)}
                             </span>
                         </div>
                     </div>
@@ -77,7 +106,7 @@ export default function AcademicYearDetailView({ academicYear, onBack, onEdit }:
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div>
                             <h4 className="font-medium text-sm text-gray-600 mb-1">Academic Year</h4>
-                            <p className="font-medium">{academicYear.name}</p>
+                            <p className="font-medium">{detailAcademicYears.name}</p>
                         </div>
                         <div>
                             <h4 className="font-medium text-sm text-gray-600 mb-1">Duration</h4>
@@ -85,165 +114,37 @@ export default function AcademicYearDetailView({ academicYear, onBack, onEdit }:
                         </div>
                         <div>
                             <h4 className="font-medium text-sm text-gray-600 mb-1">Term System</h4>
-                            <p className="font-medium capitalize">{academicYear.termSystem}</p>
+                            <p className="font-medium capitalize">{detailAcademicYears.calendarType}</p>
                         </div>
                         <div>
                             <h4 className="font-medium text-sm text-gray-600 mb-1">Start Date</h4>
-                            <p className="font-medium">{formatDate(academicYear.startDate)}</p>
+                            <p className="font-medium">{formatDate(detailAcademicYears.startDate)}</p>
                         </div>
                         <div>
                             <h4 className="font-medium text-sm text-gray-600 mb-1">End Date</h4>
-                            <p className="font-medium">{formatDate(academicYear.endDate)}</p>
+                            <p className="font-medium">{formatDate(detailAcademicYears.endDate)}</p>
                         </div>
                         <div>
                             <h4 className="font-medium text-sm text-gray-600 mb-1">Status</h4>
-                            <AcademicYearStatusBadge status={academicYear.status} />
+                            <AcademicYearStatusBadge status={detailAcademicYears.status} />
                         </div>
                     </div>
                 </CardContent>
             </Card>
 
-            {/* Grades and Streams */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <GraduationCap className="h-5 w-5" />
-                        Grades & Academic Streams ({academicYear.grades.length})
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        {academicYear.grades.map((grade) => (
-                            <Card key={grade.id} className="border-l-4 border-l-blue-500">
-                                <CardContent className="p-4">
-                                    <div className="flex items-start justify-between mb-3">
-                                        <div>
-                                            <h4 className="font-medium text-lg">{grade.name}</h4>
-                                            <p className="text-sm text-gray-600">Level {grade.level}</p>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <Badge variant="outline" className="flex items-center gap-1">
-                                                <Users className="h-3 w-3" />
-                                                {grade.sections.length} Sections
-                                            </Badge>
-                                            {grade.hasStreams && (
-                                                <Badge variant="secondary" className="flex items-center gap-1">
-                                                    <Layers className="h-3 w-3" />
-                                                    {grade.streams.length} Streams
-                                                </Badge>
-                                            )}
-                                        </div>
-                                    </div>
 
-                                    {/* Sections */}
-                                    <div className="mb-3">
-                                        <h5 className="font-medium text-sm mb-2">Sections:</h5>
-                                        <div className="flex flex-wrap gap-1">
-                                            {grade.sections.map((section) => (
-                                                <Badge key={section} variant="outline" className="text-xs">
-                                                    Section {section}
-                                                </Badge>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Streams */}
-                                    {grade.hasStreams && grade.streams.length > 0 && (
-                                        <div className="mb-3">
-                                            <h5 className="font-medium text-sm mb-2">Academic Streams:</h5>
-                                            <div className="space-y-2">
-                                                {grade.streams.map((stream) => (
-                                                    <div key={stream.id} className="bg-gray-50 p-3 rounded-lg">
-                                                        <div className="flex items-center justify-between mb-2">
-                                                            <div>
-                                                                <h6 className="font-medium">{stream.name}</h6>
-                                                                <p className="text-sm text-gray-600">{stream.description}</p>
-                                                            </div>
-                                                            <Badge variant="outline">{stream.code}</Badge>
-                                                        </div>
-                                                        <div>
-                                                            <span className="text-sm font-medium">Subjects: </span>
-                                                            <div className="flex flex-wrap gap-1 mt-1">
-                                                                {stream.subjects.map((subject) => (
-                                                                    <Badge key={subject} variant="secondary" className="text-xs">
-                                                                        {subject}
-                                                                    </Badge>
-                                                                ))}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-
-                                    {/* Grade Subjects (for non-stream grades) */}
-                                    {!grade.hasStreams && (
-                                        <div>
-                                            <h5 className="font-medium text-sm mb-2">Subjects:</h5>
-                                            <div className="flex flex-wrap gap-1">
-                                                {grade.subjects.map((subject) => (
-                                                    <Badge key={subject} variant="secondary" className="text-xs">
-                                                        {subject}
-                                                    </Badge>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                </CardContent>
-            </Card>
-
-            {/* Subjects */}
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <BookOpen className="h-5 w-5" />
-                        Subjects ({academicYear.subjects.length})
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="space-y-4">
-                        {/* Subject Categories */}
-                        {Array.from(new Set(academicYear.subjects.map((s) => s.category))).map((category) => {
-                            const categorySubjects = academicYear.subjects.filter((s) => s.category === category)
-                            return (
-                                <div key={category}>
-                                    <h4 className="font-medium mb-3 capitalize flex items-center gap-2">
-                                        <Badge className={getCategoryColor(category)}>{category}</Badge>
-                                        <span>({categorySubjects.length} subjects)</span>
-                                    </h4>
-                                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                        {categorySubjects.map((subject) => (
-                                            <Card key={subject.id} className="p-3">
-                                                <div className="flex items-start justify-between">
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2 mb-1">
-                                                            <h5 className="font-medium text-sm">{subject.name}</h5>
-                                                            <Badge variant="outline" className="text-xs">
-                                                                {subject.code}
-                                                            </Badge>
-                                                        </div>
-                                                        <p className="text-xs text-gray-600 mb-2">{subject.description}</p>
-                                                        {subject.isRequired && (
-                                                            <Badge variant="destructive" className="text-xs">
-                                                                Required
-                                                            </Badge>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </Card>
-                                        ))}
-                                    </div>
-                                </div>
-                            )
-                        })}
-                    </div>
-                </CardContent>
-            </Card>
+            <Tabs defaultValue="grades" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="grades">Grades</TabsTrigger>
+                    <TabsTrigger value="subjects">Subjects</TabsTrigger>
+                </TabsList>
+                <TabsContent value="grades" className="flex-1">
+                    <GradeDetails detailAcademicYears={detailAcademicYears} />
+                </TabsContent>
+                <TabsContent value="subjects" className="flex-1">
+                    <SubjectDetails detailAcademicYears={detailAcademicYears} />
+                </TabsContent>
+            </Tabs>
 
             {/* Metadata */}
             <Card>
@@ -254,15 +155,370 @@ export default function AcademicYearDetailView({ academicYear, onBack, onEdit }:
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         <div>
                             <span className="text-gray-600">Created:</span>
-                            <div className="font-medium">{formatDate(academicYear.createdAt)}</div>
+                            <div className="font-medium">{formatDate(detailAcademicYears.createdAt)}</div>
                         </div>
                         <div>
                             <span className="text-gray-600">Last Updated:</span>
-                            <div className="font-medium">{formatDate(academicYear.updatedAt)}</div>
+                            <div className="font-medium">{formatDate(detailAcademicYears.updatedAt)}</div>
                         </div>
                     </div>
                 </CardContent>
             </Card>
         </div>
     )
+}
+
+function GradeDetails({ detailAcademicYears }: { detailAcademicYears: DetailAcademicYear }) {
+    const [detailGrade, setDetailGrade] = useState<DetailGrade[]>([])
+    const fetched = useRef(false)
+
+    useEffect(() => {
+        if (fetched.current) return;
+        fetched.current = true;
+        const fetchGrade = async (gradeId: string) => {
+            const sectionFields = ["id", "section"] as const
+            const subjectFields = ["id", "name", "code"] as const
+            const streamFields = ["id", "name",] as const
+            const selectedSchema = z.object({
+                sections: z.array(pickFields(SectionSchema, sectionFields)),
+                subjects: z.array(pickFields(SubjectSchema, subjectFields)),
+                streams: z.array(pickFields(StreamSchema, streamFields)),
+            });
+
+            const response = await sharedApi.getGradeDetail(gradeId, selectedSchema, {
+                expand: ["sections", "subjects", "streams"],
+                nestedFields: { "sections": [...sectionFields], "subjects": [...subjectFields], "streams": [...streamFields] },
+            });
+
+            if (!response.success) {
+                toast.error(response.error.message, {
+                    style: { color: "red" },
+                });
+                return;
+            }
+            return response.data;
+        };
+
+        detailAcademicYears.grades.forEach((grade) => {
+            fetchGrade(grade.id).then((fetchedGrade) => {
+                if (fetchedGrade) {
+                    setDetailGrade((prev) => [...prev, { ...fetchedGrade, ...grade }]);
+                }
+            });
+        });
+
+    }, []);
+
+    return <Card>
+        <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+                <GraduationCap className="h-5 w-5" />
+                Grades & Academic Streams ({detailAcademicYears.grades.length})
+            </CardTitle>
+        </CardHeader>
+        <FadeIn isLoading={!(detailAcademicYears.grades.length === detailGrade.length)} loader={<CardSkeleton />}>
+            <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {detailGrade.map((grade) => (
+                        <Card key={grade.id} className="border-l-4 border-l-blue-500">
+                            <CardHeader className="pb-1">
+                                <CardTitle className="flex items-center gap-2">
+                                    <GraduationCap className="h-5 w-5" />
+                                    Grade {grade.grade}
+                                </CardTitle>
+                                <div className="flex items-center gap-1">
+                                    <Badge variant="outline" className="flex items-center gap-1">
+                                        <Users className="h-3 w-3" />
+                                        {grade.level}
+                                    </Badge>
+                                    <Badge variant="outline" className="flex items-center gap-1">
+                                        <Users className="h-3 w-3" />
+                                        {grade.sections.length} Sections
+                                    </Badge>
+                                    {grade.hasStream && (
+                                        <Badge variant="destructive" className="flex items-center gap-1">
+                                            <Layers className="h-3 w-3" />
+                                            {grade.streams.length} Streams
+                                        </Badge>
+                                    )}
+                                </div>
+                            </CardHeader>
+                            <CardContent className="p-4">
+                                {/* Sections */}
+                                <div className="mb-3">
+                                    <h5 className="font-medium text-sm mb-2">Sections:</h5>
+                                    <div className="flex flex-wrap gap-1">
+                                        {grade.sections.map((section) => (
+                                            <Badge key={section.id} variant="outline" className="text-xs">
+                                                Section {section.section}
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                </div>
+                                {/* Streams */}
+                                {grade.hasStream && grade.streams.length > 0 && (
+                                    <div>
+                                        <h5 className="font-medium text-sm mb-2">Academic Streams:</h5>
+                                        <div className="space-y-2">
+                                            {grade.streams.map((stream) => (
+                                                <Card key={stream.id} className="border-l-4 border-l-red-400">
+                                                    <div className="bg-gray-50 p-3 rounded-lg">
+                                                        <div className="flex items-center justify-between mb-2">
+                                                            <div>
+                                                                <h6 className="font-medium">{stream.name}</h6>
+                                                                {/* <p className="text-sm text-gray-600">{stream.description}</p> */}
+                                                            </div>
+                                                            <Badge variant="outline">{stream.name}</Badge>
+                                                        </div>
+                                                    </div>
+                                                </Card>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                                {/* Grade Subjects (for non-stream grades) */}
+                                {!grade.hasStream && (
+                                    <div>
+                                        <h5 className="font-medium text-sm mb-2">Subjects:</h5>
+                                        <div className="flex flex-wrap gap-1">
+                                            {grade.subjects.map((subject) => (
+                                                <Badge key={subject.id} variant="secondary" className="text-xs">
+                                                    {subject.name}
+                                                </Badge>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            </CardContent>
+        </FadeIn>
+    </Card>
+}
+
+
+
+function SubjectDetails({ detailAcademicYears }: { detailAcademicYears: DetailAcademicYear }) {
+    const [detailSubject, setDetailSubject] = useState<DetailSubject[]>([])
+    const fetched = useRef(false)
+
+    useEffect(() => {
+        if (fetched.current) return;
+        fetched.current = true;
+
+        const fetchSubject = async (subjectId: string) => {
+            const gradeFields = ["id", "grade"] as const
+            const streamFields = ["id", "name"] as const
+            const selectedSchema = z.object({
+                grades: z.array(pickFields(GradeSchema, gradeFields)),
+                streams: z.array(pickFields(StreamSchema, streamFields)),
+            });
+
+            const response = await sharedApi.getSubjectDetail(subjectId, selectedSchema, {
+                expand: ["grades", "streams"],
+                nestedFields: { "grades": [...gradeFields], "streams": [...streamFields] },
+            });
+
+            if (!response.success) {
+                toast.error(response.error.message, {
+                    style: { color: "red" },
+                });
+                return;
+            }
+            return response.data;
+        };
+
+        detailAcademicYears.subjects.forEach((subject) => {
+            fetchSubject(subject.id).then((fetchedSubject) => {
+                if (fetchedSubject) {
+                    setDetailSubject((prev) => [...prev, { ...fetchedSubject, ...subject }]);
+                }
+            });
+        });
+
+
+    }, []);
+
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                    <BookOpen className="h-5 w-5" />
+                    Subjects ({detailAcademicYears.subjects.length})
+                </CardTitle>
+            </CardHeader>
+            <FadeIn isLoading={!(detailAcademicYears.subjects.length === detailSubject.length)} loader={<CardSkeleton />}>
+                <CardContent className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {detailSubject.map((subject) => (
+                            <Card
+                                key={subject.id}
+                                className="hover:shadow-lg transition-shadow flex flex-col">
+                                <CardHeader className="pb-3">
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex-1">
+                                            <CardTitle className="flex items-center gap-2 mb-2">
+                                                <BookOpen className="h-5 w-5" />
+                                                {subject.name}
+                                            </CardTitle>
+                                        </div>
+                                        <Badge variant="outline" className="flex items-center gap-1">
+                                            {subject.code}
+                                        </Badge>
+                                        {/* <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="sm">
+                                        <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => onView(subject)}>
+                                        <Eye className="h-4 w-4 mr-2" />
+                                        View Details
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => onEdit(subject)}>
+                                        <Edit className="h-4 w-4 mr-2" />
+                                        Edit Subject
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => onDelete(subject)} className="text-red-600">
+                                        <Trash2 className="h-4 w-4 mr-2" />
+                                        Delete Subject
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu> */}
+                                    </div>
+                                </CardHeader>
+                                <CardContent className="space-y-4 flex-grow">
+                                    {/* Assignment Stats */}
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div className="text-center p-2 bg-blue-50 rounded-lg">
+                                            <GraduationCap className="h-4 w-4 text-blue-600 mx-auto mb-1" />
+                                            <div className="text-sm font-semibold text-blue-900">{subject.grades.length}</div>
+                                            <div className="text-xs text-blue-700">Grades</div>
+                                        </div>
+                                        <div className="text-center p-2 bg-purple-50 rounded-lg">
+                                            <Users className="h-4 w-4 text-purple-600 mx-auto mb-1" />
+                                            <div className="text-sm font-semibold text-purple-900">{2}</div>
+                                            <div className="text-xs text-purple-700">Streams</div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex-col items-center gap-2 flex-wrap mt-2">
+                                            <h4 className="text-sm font-medium mb-2">Taught In:</h4>
+                                            <div className="flex flex-wrap gap-1">
+                                                {subject.grades.map((grade) => (
+                                                    <Badge
+                                                        key={grade.id}
+                                                        variant="secondary"
+                                                    >
+                                                        Grade {grade.grade}
+                                                    </Badge>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </CardContent>
+                                <CardFooter>
+                                    <div className="flex flex-col gap-2 w-full">
+                                        {/* Last Updated */}
+                                        <div className="text-xs text-gray-500 pt-2 border-t">
+                                            Updated: {new Date().toLocaleDateString()}
+                                        </div>
+                                        {/* Action Buttons */}
+                                        <div className="flex gap-2 bottom-0">
+                                            <Button variant="outline" size="sm" onClick={() => { }} className="flex-1 bg-transparent">
+                                                <Eye className="h-4 w-4 mr-2" />
+                                                View
+                                            </Button>
+                                            <Button variant="outline" size="sm" onClick={() => { }} className="flex-1 bg-transparent">
+                                                <Edit className="h-4 w-4 mr-2" />
+                                                Edit
+                                            </Button>
+                                        </div>
+                                    </div>
+                                </CardFooter>
+                            </Card>
+                        ))}
+                    </div>
+                </CardContent>
+            </FadeIn>
+        </Card>
+    )
+}
+
+
+function CardSkeleton() {
+    return (
+        <Card>
+            <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[...Array(6)].map((_, i) => (
+                        <Card key={i}>
+                            <CardHeader className="pb-1 space-y-2">
+                                <CardTitle className="flex items-center gap-2">
+                                    <Skeleton className="h-5 w-24" />
+                                </CardTitle>
+                                <div className="flex items-center gap-1 flex-wrap">
+                                    <Skeleton className="h-6 w-20 rounded" />
+                                    <Skeleton className="h-6 w-24 rounded" />
+                                    <Skeleton className="h-6 w-24 rounded" />
+                                </div>
+                            </CardHeader>
+
+                            <CardContent className="p-4 space-y-4">
+                                {/* Sections */}
+                                <div>
+                                    <Skeleton className="h-4 w-24 mb-2" />
+                                    <div className="flex flex-wrap gap-1">
+                                        {[...Array(3)].map((_, j) => (
+                                            <Skeleton key={j} className="h-5 w-16 rounded" />
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Streams */}
+                                <div>
+                                    <Skeleton className="h-4 w-32 mb-2" />
+                                    <div className="space-y-2">
+                                        {[...Array(0)].map((_, k) => (
+                                            <Card key={k}>
+                                                <div className="p-3 rounded-lg space-y-2">
+                                                    <div className="flex items-center justify-between">
+                                                        <Skeleton className="h-4 w-24" />
+                                                        <Skeleton className="h-5 w-16 rounded" />
+                                                    </div>
+                                                    <div>
+                                                        <Skeleton className="h-4 w-20 mb-1" />
+                                                        <div className="flex flex-wrap gap-1">
+                                                            {[...Array(2)].map((_, m) => (
+                                                                <Skeleton key={m} className="h-5 w-20 rounded" />
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </Card>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* Subjects (non-stream) */}
+                                <div>
+                                    <Skeleton className="h-4 w-24 mb-2" />
+                                    <div className="flex flex-wrap gap-1">
+                                        {[...Array(3)].map((_, j) => (
+                                            <Skeleton key={j} className="h-5 w-20 rounded" />
+                                        ))}
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            </CardContent>
+        </Card>
+    );
 }

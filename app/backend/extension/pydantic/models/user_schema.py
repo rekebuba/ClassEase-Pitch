@@ -25,6 +25,7 @@ class UserSchema(BaseModel):
     identification: str
     role: RoleEnum
     image_path: Optional[str] = None
+    created_at: datetime
 
     @classmethod
     def default_fields(cls) -> set[str]:

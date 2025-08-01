@@ -145,18 +145,21 @@ export const AcademicYearStatusEnum = z.enum([
     "archived",
 ])
 
-export type RoleEnumType = z.infer<typeof RoleEnum>;
-export type TableEnumType = z.infer<typeof TableEnum>;
-export type EventPurposeEnumType = z.infer<typeof EventPurposeEnum>;
-export type EventOrganizerEnumType = z.infer<typeof EventOrganizerEnum>;
-export type EventLocationEnumType = z.infer<typeof EventLocationEnum>;
-export type EventEligibilityEnumType = z.infer<typeof EventEligibilityEnum>;
-export type GenderEnumType = z.infer<typeof GenderEnum>;
-export type MaritalStatusEnumType = z.infer<typeof MaritalStatusEnum>;
-export type ExperienceYearEnumType = z.infer<typeof ExperienceYearEnum>;
-export type ScheduleEnumType = z.infer<typeof ScheduleEnum>;
-export type GradeLevelEnumType = z.infer<typeof GradeLevelEnum>;
-export type StatusEnumType = z.infer<typeof StatusEnum>;
-export type HighestDegreeEnumType = z.infer<typeof HighestDegreeEnum>;
-export type AcademicTermEnumType = z.infer<typeof AcademicTermTypeEnum>;
-export type AcademicYearStatusEnumType = z.infer<typeof AcademicYearStatusEnum>;
+export type RoleType = z.infer<typeof RoleEnum>;
+export type TableType = z.infer<typeof TableEnum>;
+export type EventPurposeType = z.infer<typeof EventPurposeEnum>;
+export type EventOrganizerType = z.infer<typeof EventOrganizerEnum>;
+export type EventLocationType = z.infer<typeof EventLocationEnum>;
+export type EventEligibilityType = z.infer<typeof EventEligibilityEnum>;
+export type GenderType = z.infer<typeof GenderEnum>;
+export type MaritalStatusType = z.infer<typeof MaritalStatusEnum>;
+export type ExperienceYearType = z.infer<typeof ExperienceYearEnum>;
+export type ScheduleType = z.infer<typeof ScheduleEnum>;
+export type GradeLevelType = z.infer<typeof GradeLevelEnum>;
+export type StatusType = z.infer<typeof StatusEnum>;
+export type HighestDegreeType = z.infer<typeof HighestDegreeEnum>;
+export type AcademicTermType = z.infer<typeof AcademicTermEnum>;
+export type AcademicYearStatusType = z.infer<typeof AcademicYearStatusEnum>;
+export type StudentApplicationStatusType = z.infer<typeof StudentApplicationStatusEnum>;
+export type MarkListType = z.infer<typeof MarkListTypeEnum>;
+export type AcademicTermName = z.infer<typeof AcademicTermTypeEnum>;
