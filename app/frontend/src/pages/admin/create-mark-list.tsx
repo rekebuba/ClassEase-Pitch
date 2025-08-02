@@ -5,8 +5,6 @@ import { Layout } from "@/components";
 import { FaPlus } from 'react-icons/fa';
 import { adminApi } from "@/api";
 import { toast } from "sonner"
-import '../../styles/AdminDashboard.css';
-import '../../styles/Table.css';
 
 /**
  * AdminCreateMarkList component for creating a mark list for students.

@@ -3,7 +3,6 @@ import { FaUserCircle } from "react-icons/fa";
 import { Layout } from "@/components";
 import { toast } from "sonner"
 import { adminApi, sharedApi } from "@/api";
-import '../../styles/updateProfile.css';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 /**

@@ -1,10 +1,10 @@
 import { LoadingSpinner } from "@/components";
 import useAuth from "@/context/auth-context";
-import { RoleEnumType } from "@/lib/enums";
+import { RoleType } from "@/lib/enums";
 import { Navigate, Outlet } from "react-router-dom";
 
 interface ProtectedRouteProps {
-  allowedRoles?: RoleEnumType[];
+  allowedRoles?: RoleType[];
 }
 /**
  * This component checks if a JWT token is present in the local storage.

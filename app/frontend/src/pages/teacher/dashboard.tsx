@@ -1,6 +1,4 @@
 import { Layout } from "@/components";
-import "../../styles/TeacherDashboard.css";
-import "../../styles/Dashboard.css";
 
 /**
  * TeacherDashboard component

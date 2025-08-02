@@ -3,7 +3,6 @@ import { FaUserCircle } from "react-icons/fa";
 import { Layout } from "@/components";
 import { studentApi } from "@/api";
 import { toast } from "sonner"
-import '../../styles/updateProfile.css';
 
 /**
  * Component for updating student profile.

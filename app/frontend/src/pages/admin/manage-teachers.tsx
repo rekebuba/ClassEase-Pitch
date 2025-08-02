@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Layout } from "@/components";
 import { AdminTeacherProfile, AdminTeacherList, AdminAssignTeacher } from "@/features/admin";
-import "../../styles/AdminManageStudents.css";
 
 /**
  * AdminManageTeacher component manages the state and rendering of the admin panel for managing teachers.

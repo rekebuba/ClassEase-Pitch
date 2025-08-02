@@ -27,30 +27,13 @@ import {
     useSidebar,
 } from "@/components/ui/sidebar"
 import { Logout } from "@/components";
-import { UserProfile } from "@/lib/api-response-validation";
+import type { PartialUser, PartialAdmin, PartialStudent, PartialTeacher } from "@/components/app-sidebar"
 
-function getRoleSpecificData(user: UserProfile) {
-    if ("admin" in user && user.admin) {
-        return user.admin;
-    }
-    if ("teacher" in user && user.teacher) {
-        return user.teacher;
-    }
-    if ("student" in user && user.student) {
-        return user.student;
-    }
-    return null;
-}
 
-export function NavUser({ user }: { user: UserProfile }) {
+export function NavUser({ user, roleData }: { user: PartialUser, roleData: PartialAdmin | PartialStudent | PartialTeacher }) {
     const { isMobile } = useSidebar()
-    const profileData = getRoleSpecificData(user);
 
-    if (!profileData) {
-        return null; // Or a loading/error state
-    }
-
-    const { firstName, fatherName, grandFatherName } = profileData;
+    const { firstName, fatherName, grandFatherName } = roleData;
     const { imagePath, role, identification } = user;
 
     return (
@@ -64,7 +47,7 @@ export function NavUser({ user }: { user: UserProfile }) {
                         >
                             <Avatar className="h-8 w-8 rounded-lg">
                                 <AvatarImage src={imagePath} alt={firstName} />
-                                <AvatarFallback className="rounded-lg">{firstName.charAt(0).toUpperCase() + fatherName.charAt(0).toUpperCase()}</AvatarFallback>
+                                {(firstName && fatherName) && <AvatarFallback className="rounded-lg">{firstName.charAt(0).toUpperCase() + fatherName.charAt(0).toUpperCase()}</AvatarFallback>}
                             </Avatar>
                             <div className="grid flex-1 text-left text-sm leading-tight">
                                 <span className="truncate font-semibold">Mr. {firstName} {fatherName}</span>
@@ -83,7 +66,7 @@ export function NavUser({ user }: { user: UserProfile }) {
                             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                                 <Avatar className="h-8 w-8 rounded-lg">
                                     <AvatarImage src={imagePath} alt={firstName} />
-                                    <AvatarFallback className="rounded-lg">{firstName.charAt(0).toUpperCase() + fatherName.charAt(0).toUpperCase()}</AvatarFallback>
+                                    {(firstName && fatherName) && <AvatarFallback className="rounded-lg">{firstName.charAt(0).toUpperCase() + fatherName.charAt(0).toUpperCase()}</AvatarFallback>}
                                 </Avatar>
                                 <div className="grid flex-1 text-left text-sm leading-tight">
                                     <span className="truncate font-semibold">Mr. {firstName} {fatherName} {grandFatherName}</span>

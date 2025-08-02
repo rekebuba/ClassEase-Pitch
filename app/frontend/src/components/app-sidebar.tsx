@@ -35,10 +35,13 @@ import { NavUser } from "@/components/nav-user"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useAuth } from "@/context/auth-context";
 import FadeIn from "@/components/fade-in";
-import { UserSchema, type UserProfile } from "@/lib/api-response-validation";
-import sharedApi, { getDashboardData } from "@/api/sharedApi";
+import { AdminSchema, StudentSchema, TeacherSchema, UserSchema } from "@/lib/api-response-validation";
+import sharedApi from "@/api/sharedApi";
 import { toast } from "sonner";
 import { z } from "zod";
+import { adminApi, studentApi, teacherApi } from "@/api";
+import type { Admin, Student, Teacher, User } from "@/lib/api-response-type";
+import { pickFields } from "@/utils/pick-zod-fields";
 
 const data = {
     admin: {
@@ -126,27 +129,25 @@ const data = {
 
 type AppSidebarProps = React.ComponentProps<typeof Sidebar>;
 
-function pickFields<T extends z.ZodRawShape>(
-    schema: z.ZodObject<T>,
-    fields: (keyof T)[]
-): z.ZodObject<Pick<T, (keyof T & string)>> {
-    const shape = Object.fromEntries(
-        fields.map((key) => [key, schema.shape[key]])
-    ) as Pick<T, (keyof T & string)>;
-    return z.object(shape);
-}
+export type PartialUser = Pick<User, "id" | "role" | "identification" | "imagePath">;
+export type PartialAdmin = Pick<Admin, "firstName" | "fatherName" | "grandFatherName">;
+export type PartialTeacher = Pick<Teacher, "firstName" | "fatherName" | "grandFatherName">;
+export type PartialStudent = Pick<Student, "firstName" | "fatherName" | "grandFatherName">;
 
 export function AppSidebar({ ...props }: AppSidebarProps) {
-    const [userData, setUserData] = useState<UserProfile | null>(null);
     const { userRole, userId } = useAuth();
-
+    const [userData, setUserData] = useState<PartialUser | null>(null);
+    const [roleData, setRoleData] = useState<PartialAdmin | PartialStudent | PartialTeacher | null>(null);
 
     useEffect(() => {
         const fetchUserData = async () => {
             if (!userRole || !userId) return; // Prevent rendering if userRole is not set
-            const selectedSchema = pickFields(UserSchema, ["id", "role", "imagePath"]);
 
-            const response = await sharedApi.getUser(userId, selectedSchema);
+            const userFields = ["id", "role", "identification"] as const
+            const selectSchema = pickFields(UserSchema, userFields);
+            const response = await sharedApi.getUser(userId, selectSchema, {
+                fields: [...userFields],
+            });
 
             if (!response.success) {
                 toast.error(response.error.message, {
@@ -154,11 +155,56 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
                 });
                 return;
             }
+
+            if (userRole === 'admin') {
+                const fields = ["id", "firstName", "fatherName", "grandFatherName"] as const;
+                const selectAdminSchema = pickFields(AdminSchema, fields);
+                const adminResponse = await adminApi.getUser(userId, selectAdminSchema, {
+                    fields: [...fields],
+                });
+
+                if (!adminResponse.success) {
+                    toast.error(adminResponse.error.message, {
+                        style: { color: "red" },
+                    });
+                    return;
+                }
+                setRoleData(adminResponse.data);
+            } else if (userRole === 'student') {
+                const fields = ["id", "firstName", "fatherName", "grandFatherName"] as const;
+                const selectStudentSchema = pickFields(StudentSchema, fields);
+                const studentResponse = await studentApi.getUser(userId, selectStudentSchema, {
+                    fields: [...fields],
+                });
+
+                if (!studentResponse.success) {
+                    toast.error(studentResponse.error.message, {
+                        style: { color: "red" },
+                    });
+                    return;
+                }
+                setRoleData(studentResponse.data);
+            } else if (userRole === 'teacher') {
+                const fields = ["id", "firstName", "fatherName", "grandFatherName"] as const;
+                const selectTeacherSchema = pickFields(TeacherSchema, fields);
+                const teacherResponse = await teacherApi.getUser(userId, selectTeacherSchema, {
+                    fields: [...fields],
+                });
+
+                if (!teacherResponse.success) {
+                    toast.error(teacherResponse.error.message, {
+                        style: { color: "red" },
+                    });
+                    return;
+                }
+                setRoleData(teacherResponse.data);
+            }
+
             setUserData(response.data);
         };
 
         fetchUserData();
-    }, [userRole, userId]);
+    }, []);
 
     return (
         <Sidebar collapsible="icon" {...props}>
@@ -178,48 +224,29 @@ export function AppSidebar({ ...props }: AppSidebarProps) {
                 </SidebarMenu>
             </SidebarHeader>
             <SidebarContent>
-                <FadeIn isLoading={!userRole} loader={<SidebarSkeleton {...props} />}>
-                    {userRole && (
-                        <>
-                            <NavMain items={data[userRole].navMain} />
-                            <NavSidebar items={data[userRole].system} />
-                        </>
-                    )}
-                </FadeIn>
+                {userRole && (
+                    <>
+                        <NavMain items={data[userRole].navMain} />
+                        <NavSidebar items={data[userRole].system} />
+                    </>
+                )}
             </SidebarContent>
             <SidebarFooter className="border-t p-4">
-                <FadeIn isLoading={!userData} loader={<SidebarSkeleton {...props} />}>
-                    {userData && <NavUser user={userData} />}
+                <FadeIn isLoading={!userData} loader={
+                    <SidebarFooter className="p-0">
+                        <div className="flex items-center space-x-2">
+                            <Skeleton className="h-10 w-10 rounded-full" />
+                            <div className="space-y-2">
+                                <Skeleton className="h-4 w-[100px]" />
+                                <Skeleton className="h-4 w-[70px]" />
+                            </div>
+                        </div>
+                    </SidebarFooter>
+                }>
+                    {(userData && roleData) && <NavUser user={userData} roleData={roleData} />}
                 </FadeIn>
             </SidebarFooter>
             <SidebarRail />
         </Sidebar>
     )
-}
-
-function SidebarSkeleton({ ...props }) {
-    return (
-        <Sidebar collapsible="icon" {...props}>
-            <SidebarHeader className="flex h-14 items-center border-b px-4">
-                <Skeleton className="h-8 w-32" />
-            </SidebarHeader>
-            <SidebarContent>
-                <div className="space-y-4 p-4">
-                    <Skeleton className="h-8 w-full" />
-                    <Skeleton className="h-8 w-full" />
-                    <Skeleton className="h-8 w-full" />
-                </div>
-            </SidebarContent>
-            <SidebarFooter className="border-t p-4">
-                <div className="flex items-center space-x-4">
-                    <Skeleton className="h-10 w-10 rounded-full" />
-                    <div className="space-y-2">
-                        <Skeleton className="h-4 w-[100px]" />
-                        <Skeleton className="h-4 w-[70px]" />
-                    </div>
-                </div>
-            </SidebarFooter>
-            <SidebarRail />
-        </Sidebar>
-    );
 }

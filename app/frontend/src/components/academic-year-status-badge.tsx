@@ -1,6 +1,6 @@
 
 import { Badge } from "@/components/ui/badge"
-import type { AcademicYear } from "@/lib/academic-year"
+import { AcademicYear } from "@/pages/admin/academic-year-management"
 
 interface AcademicYearStatusBadgeProps {
     status: AcademicYear["status"]

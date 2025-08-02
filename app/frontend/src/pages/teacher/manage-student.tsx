@@ -1,6 +1,5 @@
 import { Layout } from "@/components";
 import { TeacherStudentList } from "@/features/teacher";
-import "../../styles/AdminManageStudents.css";
 
 
 /**

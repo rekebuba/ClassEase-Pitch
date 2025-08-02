@@ -1,5 +1,3 @@
-import { AllSubjects, allSubjectsData, GradeOneSubjects } from "@/config/suggestion"
-
 export interface Grade {
     id: string
     name: string
@@ -43,36 +41,6 @@ type Suggestion = {
     defaultSubjects: string[];
 };
 
-export const subjects = AllSubjects.map((subject) => ({
-    id: crypto.randomUUID(),
-    name: subject.subject,
-    code: subject.codes,
-    grades: subject.grades,
-}))
-
-export const GRADE_SUGGESTIONS: Grade[] = Object.values(
-    allSubjectsData.reduce((acc, subject) => {
-        const gradeKey = subject.grade.toString();
-
-        if (!acc[gradeKey]) {
-            acc[gradeKey] = {
-                name: `Grade ${subject.grade}`,
-                level: gradeKey,
-                hasStreams: false,
-                subjects: [],
-            };
-        }
-
-        if (subject.stream) {
-            acc[gradeKey].hasStreams = true;
-        } else {
-            acc[gradeKey].subjects.push(subject);
-        }
-
-        return acc;
-    }, {} as Record<string, Grade>)
-);
-
 
 export const STREAM_SUGGESTIONS = [
     {
@@ -86,17 +54,5 @@ export const STREAM_SUGGESTIONS = [
         code: "SS",
         description: "Focus on humanities and social studies",
         subjects: ["History", "Geography", "Psychology", "Business Studies"],
-    },
-    {
-        name: "Arts",
-        code: "ART",
-        description: "Focus on creative and performing arts",
-        subjects: ["Art", "Music", "Drama", "English Language"],
-    },
-    {
-        name: "Technical",
-        code: "TECH",
-        description: "Focus on technical and vocational skills",
-        subjects: ["Computer Science", "Information Technology", "Business Studies"],
     },
 ]
