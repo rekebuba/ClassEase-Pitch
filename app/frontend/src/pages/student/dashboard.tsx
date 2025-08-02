@@ -4,8 +4,6 @@ import { Layout } from "@/components";
 import { StudentPopupScore, StudentSubjectList, StudentEventPanel, StudentScorePanel } from "@/features/student";
 import { studentApi } from "@/api";
 import { toast } from "sonner"
-import '../../styles/StudDashboard.css';
-import '../../styles/Dashboard.css';
 import {
   Card,
   CardContent,

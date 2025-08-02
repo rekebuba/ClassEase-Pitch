@@ -9,7 +9,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import '../../styles/Table.css';
 import { StudentTable } from '@/features/admin/tables';
 
 /**

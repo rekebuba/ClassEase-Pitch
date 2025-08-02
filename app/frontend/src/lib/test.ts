@@ -19,14 +19,6 @@ import {
     AcademicTermTypeEnum,
 } from './enums';
 
-/********************** Flat Schema ************************/
-export const UserSchema = z.object({
-    id: z.string(),
-    identification: z.string(),
-    role: RoleEnum,
-    imagePath: z.string().optional(),
-});
-
 export const AdminSchema = z.object({
     id: z.string(),
     userId: z.string().optional(),
@@ -149,16 +141,29 @@ export const TeacherSchema = z.object({
     status: StatusEnum,
 });
 
-export const GradeSchema = z.object({
+export const UserSchema = z.object({
     id: z.string(),
-    yearId: z.string(),
+    identification: z.string(),
+    role: RoleEnum,
+    imagePath: z.string().optional(),
+    createdAt: ISODateString
+});
+
+
+
+export const GradeSchema = z.object({
+    id: z.string().optional(),
+    gradeId: z.string(),
     grade: z.string(),
     level: GradeLevelEnum,
     hasStream: z.boolean(),
 });
 
+
+
+
 export const SubjectSchema = z.object({
-    id: z.string(),
+    id: z.string().optional(),
     name: z.string(),
     code: z.string(),
 });
@@ -172,6 +177,8 @@ export const AcademicTermSchema = z.object({
     registrationStart: ISODateString.optional(),
     registrationEnd: ISODateString.optional(),
 });
+
+
 
 export const AssessmentSchema = z.object({
     id: z.string().optional(),
@@ -220,14 +227,13 @@ export const RegistrationSchema = z.object({
 });
 
 export const SectionSchema = z.object({
-    id: z.string(),
-    gradeId: z.string(),
-    section: z.string(),
+    id: z.string().optional(),
+    section: z.string().optional(),
 });
 
 export const StreamSchema = z.object({
-    id: z.string(),
-    gradeId: z.string(),
+    id: z.string().optional(),
+    yearId: z.string(),
     name: z.string(),
 });
 
@@ -286,8 +292,14 @@ export const YearSchema = z.object({
     status: z.string(),
     createdAt: ISODateString,
     updatedAt: ISODateString,
-});
 
+    events: z.array(EventSchema),
+    academicTerms: z.array(AcademicTermSchema),
+    grades: z.array(GradeSchema),
+    students: z.array(StudentSchema),
+    teachers: z.array(TeacherSchema),
+    subjects: z.array(SubjectSchema),
+});
 
 export const YearlySubjectSchema = z.object({
     id: z.string().optional(),
@@ -307,17 +319,6 @@ export const TeacherGradeLinkSchema = z.object({
     id: z.string().optional(),
     teacherId: z.string(),
     gradeId: z.string(),
-});
-
-
-/********************** Schema Relationship ************************/
-export const YearRelationSchema = z.object({
-    events: z.array(EventSchema),
-    academicTerms: z.array(AcademicTermSchema),
-    grades: z.array(GradeSchema),
-    students: z.array(StudentSchema),
-    teachers: z.array(TeacherSchema),
-    subjects: z.array(SubjectSchema),
 });
 
 export const GradeRelationSchema = z.object({
@@ -354,26 +355,8 @@ export const AcademicTermRelationSchema = z.object({
     teacher_records: z.array(TeacherRecordSchema).optional(),
 });
 
-/********************** Schema With Relationship ************************/
-export const YearWithRelationSchema = YearSchema.extend(YearRelationSchema.shape);
-export const GradeWithRelationSchema = GradeSchema.extend(GradeRelationSchema.shape);
-export const StreamWithRelationSchema = StreamSchema.extend(StreamRelationSchema.shape);
-export const SubjectWithRelationSchema = SubjectSchema.extend(SubjectRelationSchema.shape);
-export const AcademicTermWithRelationSchema = AcademicTermSchema.extend(AcademicTermRelationSchema.shape);
 
-export const YearSetupSchema = z.object({
-    year: YearSchema,
-    // grades: z.array(GradeSchema.extend(SubjectSchema.shape).extend(SectionSchema.shape).extend(StreamSchema.shape)),
-    grades: z.array(
-        GradeSchema.extend({
-            subjects: z.array(SubjectSchema),
-            sections: z.array(SectionSchema),
-            streams: z.array(StreamSchema.extend({
-                subjects: z.array(SubjectSchema),
-            })),
-        })
-    ),
-    streams: z.array(StreamSchema),
-    subjects: z.array(SubjectSchema),
-    academicTerms: z.array(AcademicTermSchema),
-})
+// export type User = Partial<z.infer<typeof UserSchema>>
+// export type Admin = Partial<z.infer<typeof AdminSchema>>;
+// export type Student = Partial<z.infer<typeof StudentSchema>>;
+// export type Teacher = Partial<z.infer<typeof TeacherSchema>>;

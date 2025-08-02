@@ -3,67 +3,75 @@ import api from './api';
 import { zodApiHandler } from './zod-api-handler';
 import { z } from 'zod';
 import { TeacherRegistrationFormData } from '@/lib/form-validation';
-import { RoleEnumType } from '@/lib/enums';
-import { UserWithAdminSchema, UserWithTeacherSchema, UserWithStudentSchema, UserProfile, SubjectSchema, GradeSchema, YearSchema, StreamSchema } from "@/lib/api-response-validation";
+import { ApiHandlerResponse, QueryParams } from '@/lib/types';
+import { buildQueryParams } from '@/utils/build-query-params';
 
-type ApiOptions = {
-    /**
-     * Fields to select (e.g., ["id", "name"])
-    */
-    fields?: string[];
-    /**
-     * Relationships to expand (e.g., ["author", "comments"])
-     */
-    expand?: string[];
-    /**
-     * Nested field selection for expanded relationships
-     * (e.g., { author: ["id", "name"], comments: ["id"] })
-     */
-    nestedFields?: Record<string, string[]>;
-    /**
-     * Additional query parameters
-     */
-    params?: Record<string, string | number | boolean>;
-};
-
-const buildQueryParams = (options?: ApiOptions) => {
-    // Build URL with query parameters
-    const params: Record<string, string> = {};
-
-    if (!options) return params;
-
-    // Add fields
-    if (options?.fields?.length) {
-        params.fields = options.fields.join(",");
-    }
-
-    // Add expands
-    if (options?.expand?.length) {
-        params.expand = options.expand.join(",");
-    }
-
-    // Add nested fields
-    if (options?.nestedFields) {
-        for (const [key, fields] of Object.entries(options.nestedFields)) {
-            params[`${key}Fields`] = fields.join(",");
-        }
-    }
-
-    // Add additional params
-    if (options?.params) {
-        for (const [key, value] of Object.entries(options.params)) {
-            params[key] = String(value);
-        }
-    }
-
-    return params;
-};
 
 const sharedApi = {
-    getUser: (userId: string, schema: z.ZodSchema<any>, params?: ApiOptions) => {
-        zodApiHandler(() =>
-            api.get(`/users/${userId}`, { params: buildQueryParams(params) }), schema)
+    getUser: <T extends z.ZodTypeAny>(
+        userId: string,
+        schema: T,
+        params?: QueryParams
+    ): Promise<ApiHandlerResponse<z.infer<T>>> => {
+        return zodApiHandler(() => api.get(`/users/${userId}`, { params: buildQueryParams(params) }), schema)
     },
+    getYear: <T extends z.ZodTypeAny>(
+        schema: T,
+        params?: QueryParams
+    ): Promise<ApiHandlerResponse<z.infer<T>>> => {
+        return zodApiHandler(() => api.get('/years', { params: buildQueryParams(params) }), schema)
+    },
+    getYearDetail: <T extends z.ZodTypeAny>(
+        yearId: string,
+        schema: T,
+        params?: QueryParams
+    ): Promise<ApiHandlerResponse<z.infer<T>>> => {
+        return zodApiHandler(() => api.get(`/years/${yearId}`, { params: buildQueryParams(params) }), schema)
+    },
+    getSubject: <T extends z.ZodTypeAny>(
+        yearId: string,
+        schema: T,
+        params?: QueryParams
+    ): Promise<ApiHandlerResponse<z.infer<T>>> => {
+        return zodApiHandler(() => api.get(`/years/${yearId}/subjects`, { params: buildQueryParams(params) }), schema)
+    },
+    getSubjectDetail: <T extends z.ZodTypeAny>(
+        subjectId: string,
+        schema: T,
+        params?: QueryParams
+    ): Promise<ApiHandlerResponse<z.infer<T>>> => {
+        return zodApiHandler(() => api.get(`/subjects/${subjectId}`, { params: buildQueryParams(params) }), schema)
+    },
+    getGrade: <T extends z.ZodTypeAny>(
+        yearId: string,
+        schema: T,
+        params?: QueryParams
+    ): Promise<ApiHandlerResponse<z.infer<T>>> => {
+        return zodApiHandler(() => api.get(`/years/${yearId}/grades`, { params: buildQueryParams(params) }), schema)
+    },
+    getGradeDetail: <T extends z.ZodTypeAny>(
+        gradeId: string,
+        schema: T,
+        params?: QueryParams
+    ): Promise<ApiHandlerResponse<z.infer<T>>> => {
+        return zodApiHandler(() => api.get(`/grades/${gradeId}`, { params: buildQueryParams(params) }), schema)
+    },
+    getStream: <T extends z.ZodTypeAny>(
+        yearId: string,
+        schema: T,
+        params?: QueryParams
+    ): Promise<ApiHandlerResponse<z.infer<T>>> => {
+        return zodApiHandler(() => api.get(`/years/${yearId}/streams`, { params: buildQueryParams(params) }), schema)
+    },
+    getStreamDetail: <T extends z.ZodTypeAny>(
+        streamId: string,
+        schema: T,
+        params?: QueryParams
+    ): Promise<ApiHandlerResponse<z.infer<T>>> => {
+        return zodApiHandler(() => api.get(`/streams/${streamId}`, { params: buildQueryParams(params) }), schema)
+    },
+
+
     getDashboardData: () => api.get('/'),
     getAcademicYears: async () => zodApiHandler(() => api.get('/academic_years'), YearSchema.array()),
     getSubjects: async () => zodApiHandler(() => api.get('/subjects'), SubjectSchema.array()),
@@ -79,30 +87,6 @@ const sharedApi = {
 
 export default sharedApi;
 
-export const getDashboardData = async (userRole: RoleEnumType) => {
-
-    let schema: z.ZodSchema<UserProfile>;
-    switch (userRole) {
-        case 'admin':
-            schema = UserWithAdminSchema;
-            break;
-        case 'teacher':
-            schema = UserWithTeacherSchema;
-            break;
-        case 'student':
-            schema = UserWithStudentSchema;
-            break;
-        default:
-            throw new Error("Invalid user role");
-    }
-
-    const response = await zodApiHandler(
-        () => sharedApi.getDashboardData(),
-        schema
-    );
-
-    return response;
-};
 
 export const availableSubjects = async () => {
     const response = await zodApiHandler(

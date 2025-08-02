@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Layout } from "@/components";
 import { teacherApi } from '@/api';
 import { toast } from "sonner"
-import '../../styles/updateProfile.css';
 
 /**
  * TeacherUpdateProfile component allows teachers to update their profile information.

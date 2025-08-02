@@ -1,4 +1,4 @@
-import { renameViewData, SearchParams, StudentsViews, View } from "@/lib/types";
+import { ApiHandlerResponse, QueryParams, renameViewData, SearchParams, StudentsViews, View } from "@/lib/types";
 import { api, zodApiHandler } from "@/api";
 import { toast } from 'sonner';
 import {
@@ -14,8 +14,16 @@ import { z } from 'zod';
 import qs from "qs";
 import { create } from "domain";
 import { DetailTeacherAPPlicationSchema, TeacherApplicationSchema } from "@/lib/api-validation";
+import { buildQueryParams } from "@/utils/build-query-params";
 
 export const adminApi = {
+    getUser: <T extends z.ZodObject<any>>(
+        userId: string,
+        schema: T,
+        params?: QueryParams
+    ): Promise<ApiHandlerResponse<z.infer<T>>> => {
+        return zodApiHandler(() => api.get(`/users/${userId}/admin`, { params: buildQueryParams(params) }), schema)
+    },
     getDashboardData: () => api.get('/admin/dashboard'),
     getSchoolOverview: () => api.get('/admin/overview'),
     getStudents: (validQuery: SearchParams) => api.post('/admin/students', validQuery),
@@ -39,7 +47,7 @@ export const adminApi = {
     fetchTeachersApplications: () => api.get('/admin/teacher/applications'),
     detailTeachersApplications: (applicationId: string) => api.get(`/admin/teacher/applications/${applicationId}`),
     updateTeacherApplicationStatus: (applicationId: string, newStatus: string) => api.put(`/admin/teacher/applications/${applicationId}`, { status: newStatus }),
-    
+
 };
 
 export const getStudents = async (validQuery: SearchParams) => {

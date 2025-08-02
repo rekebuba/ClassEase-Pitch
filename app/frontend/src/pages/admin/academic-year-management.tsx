@@ -1,176 +1,72 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Search, Filter, Calendar, Edit } from "lucide-react"
-import type { AcademicYear } from "@/lib/academic-year"
+// import type { AcademicYear } from "@/lib/academic-year"
 import { AcademicYearViewCard, AcademicYearDetailView } from "@/components"
 import { AcademicYearSetup } from "@/pages/admin"
+import { GradeSchema, YearSchema } from "@/lib/api-response-validation"
+import { sharedApi } from "@/api"
+import { Year } from "@/lib/api-response-type"
+import { pickFields } from "@/utils/pick-zod-fields"
+import { toast } from "sonner"
+import { z } from "zod"
+import { DetailAcademicYear } from "@/components/academic-year-view-card"
 
-// Mock data for demonstration
-const mockAcademicYears: AcademicYear[] = [
-    {
-        id: "1",
-        name: "2024-2025 Academic Year",
-        startDate: "2024-09-01",
-        endDate: "2025-06-30",
-        termSystem: "semesterly",
-        status: "active",
-        grades: [
-            {
-                id: "g1",
-                name: "Grade 9",
-                level: 9,
-                hasStreams: false,
-                streams: [],
-                maxSections: 3,
-                sections: ["A", "B", "C"],
-                subjects: ["Mathematics", "English Language", "Physics", "Chemistry", "Biology", "History"],
-            },
-            {
-                id: "g2",
-                name: "Grade 11",
-                level: 11,
-                hasStreams: true,
-                streams: [
-                    {
-                        id: "s1",
-                        name: "Natural Science",
-                        code: "NS",
-                        description: "Focus on sciences and mathematics",
-                        subjects: ["Physics", "Chemistry", "Biology", "Mathematics"],
-                    },
-                    {
-                        id: "s2",
-                        name: "Social Science",
-                        code: "SS",
-                        description: "Focus on humanities and social studies",
-                        subjects: ["History", "Geography", "Psychology", "Business Studies"],
-                    },
-                ],
-                maxSections: 4,
-                sections: ["A", "B", "C", "D"],
-                subjects: [],
-            },
-        ],
-        subjects: [
-            {
-                id: "1",
-                name: "Mathematics",
-                code: "MATH",
-                grades: [],
-            },
-            {
-                id: "2",
-                name: "English Language",
-                code: "ENG",
-                grades: [],
-            },
-            {
-                id: "3",
-                name: "Physics",
-                code: "PHY",
-                grades: [],
-            },
-            {
-                id: "4",
-                name: "Chemistry",
-                code: "CHEM",
-                grades: [],
-            },
-            {
-                id: "5",
-                name: "Biology",
-                code: "BIO",
-                grades: [],
-            },
-            {
-                id: "6",
-                name: "History",
-                code: "HIST",
-                grades: [],
-            },
-        ],
-        createdAt: "2024-08-15",
-        updatedAt: "2024-08-20",
-    },
-    {
-        id: "2",
-        name: "2023-2024 Academic Year",
-        startDate: "2023-09-01",
-        endDate: "2024-06-30",
-        termSystem: "quarterly",
-        status: "completed",
-        grades: [
-            {
-                id: "g3",
-                name: "Grade 10",
-                level: 10,
-                hasStreams: false,
-                streams: [],
-                maxSections: 2,
-                sections: ["A", "B"],
-                subjects: ["Mathematics", "English Language", "Science", "Social Studies"],
-            },
-        ],
-        subjects: [
-            {
-                id: "7",
-                name: "Mathematics",
-                code: "MATH",
-                grades: [],
-            },
-            {
-                id: "8",
-                name: "English Language",
-                code: "ENG",
-                grades: [],
-            },
-            {
-                id: "9",
-                name: "Science",
-                code: "SCI",
-                grades: [],
-            },
-        ],
-        createdAt: "2023-08-10",
-        updatedAt: "2024-06-30",
-    },
-    {
-        id: "3",
-        name: "2025-2026 Academic Year",
-        startDate: "2025-09-01",
-        endDate: "2026-06-30",
-        termSystem: "semesterly",
-        status: "draft",
-        grades: [],
-        subjects: [],
-        createdAt: "2024-12-01",
-        updatedAt: "2024-12-01",
-    },
-]
+export type AcademicYear = Pick<Year, "id" | "calendarType" | "name" | "startDate" | "endDate" | "status" | "createdAt" | "updatedAt">;
 
 export default function AcademicYearManagement() {
-    const [academicYears, setAcademicYears] = useState<AcademicYear[]>(mockAcademicYears)
+    const [academicYears, setAcademicYears] = useState<AcademicYear[]>([])
     const [searchTerm, setSearchTerm] = useState("")
     const [statusFilter, setStatusFilter] = useState<string>("all")
     const [currentView, setCurrentView] = useState<"list" | "detail" | "edit" | "create">("list")
-    const [selectedAcademicYear, setSelectedAcademicYear] = useState<AcademicYear | null>(null)
+    const [selectedAcademicYear, setSelectedAcademicYear] = useState<DetailAcademicYear | null>(null)
 
+    useEffect(() => {
+        const fetchAcademicYear = async () => {
+            const fields = [
+                "id",
+                "calendarType",
+                "name",
+                "startDate",
+                "endDate",
+                "status",
+                "createdAt",
+                "updatedAt",
+            ] as const
+            const selectYearSchema = pickFields(YearSchema, fields);
+
+            const response = await sharedApi.getYear(z.array(selectYearSchema), {
+                fields: [...fields],
+            });
+
+            if (!response.success) {
+                toast.error(response.error.message, {
+                    style: { color: "red" },
+                });
+                return;
+            }
+
+            setAcademicYears(response.data);
+        };
+
+        fetchAcademicYear();
+    }, []);
     const filteredAcademicYears = academicYears.filter((year) => {
         const matchesSearch = year.name.toLowerCase().includes(searchTerm.toLowerCase())
         const matchesStatus = statusFilter === "all" || year.status === statusFilter
         return matchesSearch && matchesStatus
     })
 
-    const handleView = (academicYear: AcademicYear) => {
-        setSelectedAcademicYear(academicYear)
+    const handleView = (detailAcademicYear: DetailAcademicYear) => {
+        setSelectedAcademicYear(detailAcademicYear)
         setCurrentView("detail")
     }
 
-    const handleEdit = (academicYear: AcademicYear) => {
-        setSelectedAcademicYear(academicYear)
+    const handleEdit = (detailAcademicYear: DetailAcademicYear) => {
+        setSelectedAcademicYear(detailAcademicYear)
         setCurrentView("edit")
     }
 
@@ -258,7 +154,7 @@ export default function AcademicYearManagement() {
             <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
                 <div className="max-w-7xl mx-auto">
                     <AcademicYearDetailView
-                        academicYear={selectedAcademicYear}
+                        detailAcademicYears={selectedAcademicYear}
                         onBack={handleBack}
                         onEdit={() => handleEdit(selectedAcademicYear)}
                     />
@@ -397,11 +293,11 @@ export default function AcademicYearManagement() {
                             <AcademicYearViewCard
                                 key={academicYear.id}
                                 academicYear={academicYear}
-                                onView={() => handleView(academicYear)}
-                                onEdit={() => handleEdit(academicYear)}
-                                onActivate={() => handleActivate(academicYear)}
-                                onArchive={() => handleArchive(academicYear)}
-                                onDuplicate={() => handleDuplicate(academicYear)}
+                                onView={handleView}
+                                onEdit={handleEdit}
+                                onActivate={handleActivate}
+                                onArchive={handleArchive}
+                                onDuplicate={handleDuplicate}
                             />
                         ))
                     ) : (

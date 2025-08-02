@@ -2,9 +2,6 @@ import React, { useState, useEffect } from "react";
 import { api } from "@/api";
 import { toast } from "sonner"
 import PropTypes from 'prop-types';
-import '../../styles/StudDashboard.css';
-import '../../styles/Table.css';
-import '../../styles/Dashboard.css';
 
 
 export function SubjectList({ studentAssessment, student, toggleAssessment, assessmentSummary }) {

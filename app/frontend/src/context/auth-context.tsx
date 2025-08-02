@@ -1,4 +1,4 @@
-import { RoleEnumType } from '@/lib/enums';
+import { RoleType } from '@/lib/enums';
 import { jwtPayloadSchema, JwtPayloadType } from '@/lib/validations';
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -7,9 +7,9 @@ import { useNavigate } from 'react-router-dom';
 interface AuthContextType {
     isAuthenticated: boolean;
     userId: string | null;
-    userRole: RoleEnumType | null;
+    userRole: RoleType | null;
     isLoading: boolean;
-    login: (token: string, role: RoleEnumType) => void;
+    login: (token: string, role: RoleType) => void;
     logout: () => void;
 }
 
@@ -17,7 +17,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [userRole, setUserRole] = useState<RoleEnumType | null>(null);
+    const [userRole, setUserRole] = useState<RoleType | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
@@ -50,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setIsLoading(false);
     }, []);
 
-    const login = (token: string, role: RoleEnumType) => {
+    const login = (token: string, role: RoleType) => {
         localStorage.setItem('token', token);
         localStorage.setItem('role', role);
         setIsAuthenticated(true);

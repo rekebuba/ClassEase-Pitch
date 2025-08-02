@@ -1,9 +1,9 @@
-import { RoleEnumType } from "@/lib/enums";
+import { RoleType } from "@/lib/enums";
 import { createContext, useContext, useState } from "react";
 
 
 interface AppSidebarContextType {
-    role: RoleEnumType;
+    role: RoleType;
     isCollapsed: boolean;
     toggleSidebar: () => void;
 }
@@ -14,7 +14,7 @@ export function AppSidebarProvider({
     role,
     children
 }: {
-    role: RoleEnumType;
+    role: RoleType;
     children: React.ReactNode
 }) {
     const [isCollapsed, setIsCollapsed] = useState(false);
