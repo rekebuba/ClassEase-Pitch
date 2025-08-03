@@ -22,7 +22,10 @@ import { useFieldArray, UseFormReturn } from "react-hook-form"
 import { SelectWithLabel } from "./inputs/select-labeled"
 import { SwitchWithLabel } from "./inputs/switch-labeled"
 import { CheckboxForObject } from "./inputs/checkbox-for-object"
-import { getStreamsByGrade, getSubjectsByGrade, hasStreamByGrade } from "@/config/suggestion"
+import { getDefaultSections, getStreamsByGrade, getSubjectsByGrade, hasStreamByGrade } from "@/config/suggestion"
+import { SelectForObject } from "./inputs/select-for-object"
+import { toast } from "sonner"
+import { InputWithLabel } from "./inputs/input-labeled"
 
 type Grade = YearSetupType["grades"] extends Array<infer G> ? G : never
 type Subject = YearSetupType["subjects"] extends Array<infer G> ? G : never
@@ -63,7 +66,7 @@ export default function GradeSetupCard({ form }: GradeSetupCardProps) {
                                         level: "primary",
                                         hasStream: hasStreamByGrade(i + 1),
                                         streams: getStreamsByGrade(i + 1),
-                                        sections: [],
+                                        sections: getDefaultSections(),
                                         subjects: getSubjectsByGrade(i + 1),
                                     })
                                 }
@@ -105,39 +108,116 @@ interface GradeCardProps {
     index: number
 }
 
+interface StreamsManagementProps {
+    form: UseFormReturn<YearSetupType>
+    formIndex: number
+}
 
-function CustomStreamDialog() {
+function StreamsManagement({ form, formIndex }: StreamsManagementProps) {
     const [isOpen, setIsOpen] = useState(false)
+    const { fields: streamFields, append: appendStream, prepend: prependStream, remove: removeStream } = useFieldArray({
+        control: form.control,
+        name: `grades.${formIndex}.streams`,
+    })
+    const watchForm = form.watch()
+
+    const handleSave = () => {
+        toast.success("New Stream Added To the List", {
+            style: { color: "green" },
+        });
+        setIsOpen(false);
+    };
+
+    const handleCancel = () => {
+        removeStream(0);
+        setIsOpen(false);
+    };
+
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="text-sm">
-                    <Plus className="h-4 w-4 mr-1" />
-                    Custom stream name
-                </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <div className="relative">
-                    <DialogHeader>
-                        <DialogTitle>Custom Stream Name</DialogTitle>
-                        <DialogDescription>
-                            Enter a name for the custom stream you want to create.
-                        </DialogDescription>
-                    </DialogHeader>
-                </div>
-                <div>
-                    <Input id="stream-name" placeholder="Enter stream name" className="col-span-3" />
-                </div>
-                <DialogFooter>
-                    <Button className="mt-0" variant="outline" onClick={() => setIsOpen(false)}>Cancel</Button>
-                    <Button onClick={() => {
-                        // Handle adding the custom stream
-                        setIsOpen(false);
-                    }}>Add Stream</Button>
-                </DialogFooter>
-            </DialogContent>
-        </Dialog>
+        <div className="space-y-4">
+            <div className="flex items-center gap-2">
+                <Layers className="h-4 w-4" />
+                <Label>Academic Streams</Label>
+            </div>
+            <div className="flex flex-wrap gap-2">
+                {["Natural Science", "Social Science"].map((stream, streamIndex) => (
+                    <Button
+                        key={streamIndex}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => appendStream({
+                            id: "",
+                            gradeId: "",
+                            name: stream,
+                            subjects: [],
+                        })}
+                        disabled={watchForm.grades[formIndex].streams.some((s) => s.name === stream)}
+                    >
+                        <Plus className="h-4 w-4 mr-1" />
+                        {stream}
+                    </Button>
+                ))}
+                {/* Add Custom Stream */}
+                <Dialog open={isOpen} onOpenChange={setIsOpen}>
+                    <DialogTrigger asChild>
+                        <Button variant="outline" size="sm" className="text-sm" onClick={() => prependStream({ id: "", gradeId: "", name: "", subjects: [] })}>
+                            <Plus className="h-4 w-4 mr-1" />
+                            Custom stream name
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent className="sm:max-w-[425px]">
+                        <div className="relative">
+                            <DialogHeader>
+                                <DialogTitle>Custom Stream Name</DialogTitle>
+                                <DialogDescription>
+                                    Enter a name for the custom stream you want to create.
+                                </DialogDescription>
+                            </DialogHeader>
+                        </div>
+                        <div>
+                            <InputWithLabel
+                                fieldTitle="Enter stream name *"
+                                nameInSchema={`grades.${formIndex}.streams.${0}.name`}
+                                placeholder="e.g., Art"
+                            />
+                        </div>
+                        <DialogFooter>
+                            <Button className="mt-0" variant="outline" onClick={() => handleCancel()}>Cancel</Button>
+                            <Button onClick={() => handleSave()}>Add Stream</Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+            </div>
+            {/* Stream List */}
+            <div className="space-y-3">
+                {watchForm.grades[formIndex].streams.map((stream, streamIndex) => (
+                    <Card key={stream.id} className="p-4">
+                        <div className="flex items-start justify-between mb-3">
+                            <div>
+                                <h4 className="font-medium">{stream.name}</h4>
+                            </div>
+                            <Button variant="outline" size="sm"
+                                onClick={() => removeStream(streamIndex)} className="ml-2"
+                            >
+                                <X className="h-4 w-4" />
+                            </Button>
+                        </div>
+                        <div className="mt-3">
+                            <Label className="text-sm">Stream Subjects</Label>
+                            <div className="flex flex-wrap gap-2 mt-2">
+                                {watchForm.grades[formIndex].streams[streamIndex].subjects.length === 0 && (
+                                    <Badge variant="outline" className="text-sm">
+                                        No subjects added yet
+                                    </Badge>
+                                )}
+                            </div>
+                        </div>
+                    </Card>
+                ))}
+            </div>
+        </div>
+
     );
 }
 
@@ -172,6 +252,22 @@ function GradeCard({ form, index }: GradeCardProps) {
         return sections
     }
 
+    const getSectionObjects = (index: string) => {
+        const sectionCount = parseInt(index, 10);
+
+        if (isNaN(sectionCount) || sectionCount < 1 || sectionCount > 26) {
+            console.error("Invalid section count. Must be a number between 1 and 26.");
+            return [];
+        }
+
+        return Array.from({ length: sectionCount }, (_, i) => ({
+            id: crypto.randomUUID(),
+            gradeId: "",
+            section: String.fromCharCode(65 + i), // A, B, C, D...
+        }))
+    }
+
+
     return (
         <Card className="w-full transition-all duration-300">
             <CardHeader
@@ -200,18 +296,17 @@ function GradeCard({ form, index }: GradeCardProps) {
             {!isCollapsed && (
                 <CardContent className="space-y-6 pt-4 border-t">
                     {/* Sections */}
-                    {sectionFields.map((section, sectionIndex) => (
-                        <SelectWithLabel
-                            fieldTitle="Sections"
-                            nameInSchema={`grades.${index}.sections.${sectionIndex}.section`}
-                        >
-                            {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
-                                <SelectItem key={num} value={num.toString()}>
-                                    {num} Section{num > 1 ? "s" : ""} ({generateSections(num).join(", ")})
-                                </SelectItem>
-                            ))}
-                        </SelectWithLabel>
-                    ))}
+                    <SelectForObject<YearSetupType["grades"][number]["sections"]>
+                        fieldTitle="Sections"
+                        nameInSchema={`grades.${index}.sections`}
+                        getObjects={(index) => getSectionObjects(index)}
+                    >
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+                            <SelectItem key={num} value={num.toString()}>
+                                {num} Section{num > 1 ? "s" : ""} ({generateSections(num).join(", ")})
+                            </SelectItem>
+                        ))}
+                    </SelectForObject>
                     <div className="flex gap-1 mt-2">
                         {watchForm.grades[index].sections.map((section) => (
                             <Badge key={section.id} variant="outline">
@@ -231,60 +326,7 @@ function GradeCard({ form, index }: GradeCardProps) {
                     </div>
                     {/* Streams Management */}
                     {watchForm.grades[index].hasStream && (
-                        <div className="space-y-4">
-                            <div className="flex items-center gap-2">
-                                <Layers className="h-4 w-4" />
-                                <Label>Academic Streams</Label>
-                            </div>
-                            <div className="flex flex-wrap gap-2">
-                                {["Natural Science", "Social Science"].map((stream, streamIndex) => (
-                                    <Button
-                                        key={streamIndex}
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => appendStream({
-                                            id: "",
-                                            gradeId: "",
-                                            name: stream,
-                                            subjects: [],
-                                        })}
-                                        disabled={watchForm.grades[index].streams.some((s) => s.name === stream)}
-                                    >
-                                        <Plus className="h-4 w-4 mr-1" />
-                                        {stream}
-                                    </Button>
-                                ))}
-                                {/* Add Custom Stream */}
-                                <CustomStreamDialog />
-                            </div>
-                            {/* Stream List */}
-                            <div className="space-y-3">
-                                {watchForm.grades[index].streams.map((stream, streamIndex) => (
-                                    <Card key={stream.id} className="p-4">
-                                        <div className="flex items-start justify-between mb-3">
-                                            <div>
-                                                <h4 className="font-medium">{stream.name}</h4>
-                                            </div>
-                                            <Button variant="outline" size="sm"
-                                                onClick={() => removeStream(watchForm.grades[index].streams.findIndex((s) => s.name === stream.name))} className="ml-2"
-                                            >
-                                                <X className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                        <div className="mt-3">
-                                            <Label className="text-sm">Stream Subjects</Label>
-                                            <div className="flex flex-wrap gap-2 mt-2">
-                                                {watchForm.grades[index].streams[streamIndex].subjects.length === 0 && (
-                                                    <Badge variant="outline" className="text-sm">
-                                                        No subjects added yet
-                                                    </Badge>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </Card>
-                                ))}
-                            </div>
-                        </div>
+                        <StreamsManagement form={form} formIndex={index} />
                     )}
                     {/* Grade Subjects (for non-stream grades) */}
                     {!watchForm.grades[index].hasStream && (
