@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar, GraduationCap, BookOpen, Settings, Plus, Save, Eye } from "lucide-react"
 import { GradeSetupCard } from "@/components"
 import { SubjectManagement } from "@/components"
-import { allSubjects, allSubjectsData, getStreamsByGrade, getSubjectsByGrade, hasStreamByGrade } from "@/config/suggestion"
+import { allSubjects, allSubjectsData, getDefaultSections, getStreamsByGrade, getSubjectsByGrade, hasStreamByGrade } from "@/config/suggestion"
 import { DetailAcademicYear } from "@/components/academic-year-view-card"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useFieldArray, useForm } from "react-hook-form"
@@ -115,20 +115,6 @@ export default function AcademicYearSetup({
         // Here you would show a preview modal or navigate to preview page
     }
 
-    function generateDefaultSection(): Section {
-        return {
-            id: "",
-            gradeId: "",
-            section: "",
-        }
-    }
-    function generateDefaultSubject(): Subject[] {
-        return allSubjects
-    }
-    function generateDefaultStream(): YearSetupType["grades"][number]["streams"] {
-        return []
-    }
-
     function generateDefaultGrades(): YearSetupType["grades"] {
         return Array.from({ length: 12 }, (_, i) => ({
             id: "",
@@ -137,7 +123,7 @@ export default function AcademicYearSetup({
             level: "" as "primary",
             hasStream: hasStreamByGrade(i + 1),
             streams: getStreamsByGrade(i + 1),
-            sections: [generateDefaultSection()],
+            sections: getDefaultSections(),
             subjects: getSubjectsByGrade(i + 1),
         }))
     }
@@ -153,7 +139,7 @@ export default function AcademicYearSetup({
             updatedAt: ""
         },
         grades: generateDefaultGrades(),
-        subjects: generateDefaultSubject(),
+        subjects: allSubjects,
     }
 
     const form = useForm<YearSetupType>({
@@ -347,9 +333,7 @@ export default function AcademicYearSetup({
 
                             {/* Subjects Tab */}
                             <TabsContent value="subjects" className="space-y-6">
-                                <SubjectManagement
-                                    form={form}
-                                />
+                                <SubjectManagement form={form} />
                             </TabsContent>
                             {/* Deleted Tabs */}
                         </Tabs>

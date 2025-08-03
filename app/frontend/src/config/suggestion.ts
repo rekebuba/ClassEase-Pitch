@@ -148,12 +148,6 @@ export const allSubjectsData: SubjectInfo[] = [
     { id: crypto.randomUUID(), name: "Information Technology", code: "INF12", grade: 12 },
 ];
 
-// const getSubjectsByGrade = (grade: number) => {
-//     return allSubjectsData
-//         .filter((s) => s.grade === grade)
-//         .map(({ name, code, grade, stream }) => ({ name, code, grade, hasStreams: !!stream, stream }));
-// };
-
 export const getSubjectsByGrade = (grade: number) => {
     return allSubjectsData
         .filter((s) => s.grade === grade)
@@ -183,18 +177,13 @@ export const hasStreamByGrade = (grade: number) => {
     return grade >= 11;
 };
 
-// export const GradeOneSubjects = getSubjectsByGrade(1);
-// export const GradeTwoSubjects = getSubjectsByGrade(2);
-// export const GradeThreeSubjects = getSubjectsByGrade(3);
-// export const GradeFourSubjects = getSubjectsByGrade(4);
-// export const GradeFiveSubjects = getSubjectsByGrade(5);
-// export const GradeSixSubjects = getSubjectsByGrade(6);
-// export const GradeSevenSubjects = getSubjectsByGrade(7);
-// export const GradeEightSubjects = getSubjectsByGrade(8);
-// export const GradeNineSubjects = getSubjectsByGrade(9);
-// export const GradeTenSubjects = getSubjectsByGrade(10);
-// export const GradeElevenSubjects = getSubjectsByGrade(11);
-// export const GradeTwelveSubjects = getSubjectsByGrade(12);
+export const getDefaultSections = () => {
+    return [
+        { id: crypto.randomUUID(), gradeId: "", section: "A" },
+        { id: crypto.randomUUID(), gradeId: "", section: "B" },
+        { id: crypto.randomUUID(), gradeId: "", section: "C" },
+    ];
+};
 
 export const SocialStreamSubjects = Object.values(
     allSubjectsData.filter((s) => s.stream === "Natural")
