@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar, GraduationCap, BookOpen, Settings, Plus, Save, Eye } from "lucide-react"
 import { GradeSetupCard } from "@/components"
 import { SubjectManagement } from "@/components"
-import { allSubjects } from "@/config/suggestion"
+import { allSubjects, allSubjectsData, getStreamsByGrade, getSubjectsByGrade, hasStreamByGrade } from "@/config/suggestion"
 import { DetailAcademicYear } from "@/components/academic-year-view-card"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useFieldArray, useForm } from "react-hook-form"
@@ -130,15 +130,15 @@ export default function AcademicYearSetup({
     }
 
     function generateDefaultGrades(): YearSetupType["grades"] {
-        return Array.from({ length: 6 }, (_, i) => ({
+        return Array.from({ length: 12 }, (_, i) => ({
             id: "",
             yearId: "",
             grade: `Grade ${i + 1}`,
             level: "" as "primary",
-            hasStream: false,
-            streams: generateDefaultStream(),
+            hasStream: hasStreamByGrade(i + 1),
+            streams: getStreamsByGrade(i + 1),
             sections: [generateDefaultSection()],
-            subjects: [],
+            subjects: getSubjectsByGrade(i + 1),
         }))
     }
 
@@ -186,7 +186,7 @@ export default function AcademicYearSetup({
         }
     }, [watchForm.year.startDate, watchForm.year.endDate]);
 
-    // console.log("watchForm:", watchForm)
+    console.log("watchForm:", watchForm)
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
@@ -334,74 +334,15 @@ export default function AcademicYearSetup({
 
                             {/* Grades & Streams Tab */}
                             <TabsContent value="grades" className="space-y-6">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>Grade Levels & Academic Streams</CardTitle>
-                                        <p className="text-sm text-gray-600">Configure the grade levels and academic tracks for your school</p>
-                                    </CardHeader>
-                                    <CardContent>
-                                        {/* Quick Add Grades */}
-                                        <div className="mb-6">
-                                            <Label className="text-base font-medium">Quick Add Grades</Label>
-                                            <p className="text-sm text-gray-600 mb-3">Add common grade levels with pre-configured subjects</p>
-                                            <div className="flex flex-wrap gap-2">
-                                                {Array.from({ length: 12 }, (_, i) => (
-                                                    <Button
-                                                        key={i}
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={() =>
-                                                            appendGrade({
-                                                                id: "",
-                                                                yearId: "",
-                                                                grade: `Grade ${i + 1}`,
-                                                                level: "primary",
-                                                                hasStream: false,
-                                                                streams: generateDefaultStream(),
-                                                                sections: [generateDefaultSection()],
-                                                                subjects: [],
-                                                            })
-                                                        }
-                                                        disabled={watchForm.grades.some((g) => g.grade === `Grade ${(i + 1)}`)}
-                                                    >
-                                                        <Plus className="h-4 w-4 mr-1" />
-                                                        Grade {i + 1}
-                                                    </Button>
-                                                ))}
-                                            </div>
-                                        </div>
+                                {/* Grades List */}
+                                <GradeSetupCard form={form} />
 
-                                        {/* Custom Grade */}
-                                        <div className="mb-6">
-                                            <Button variant="outline">
-                                                <Plus className="h-4 w-4 mr-2" />
-                                                Add Custom Grade
-                                            </Button>
-                                        </div>
-
-                                        {/* Grades List */}
-                                        <div className="space-y-4">
-                                            {gradeFields.map((grade, index) => (
-                                                <GradeSetupCard
-                                                    key={grade.id}
-                                                    form={form}
-                                                    watchForm={watchForm}
-                                                    index={index}
-                                                    grade={grade}
-                                                    removeGrade={(index) => removeGrade(index)}
-                                                    availableSubjects={academicYear.subjects?.map((s) => s.name) || []}
-                                                />
-                                            ))}
-                                        </div>
-
-                                        {academicYear.grades?.length === 0 && (
-                                            <div className="text-center py-12 text-gray-500">
-                                                <GraduationCap className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                                                <p>No grades configured yet. Add your first grade level above.</p>
-                                            </div>
-                                        )}
-                                    </CardContent>
-                                </Card>
+                                {academicYear.grades?.length === 0 && (
+                                    <div className="text-center py-12 text-gray-500">
+                                        <GraduationCap className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                                        <p>No grades configured yet. Add your first grade level above.</p>
+                                    </div>
+                                )}
                             </TabsContent>
 
                             {/* Subjects Tab */}
