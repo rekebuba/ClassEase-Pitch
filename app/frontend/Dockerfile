@@ -1,41 +1,36 @@
 # --- Stage 1: Builder ---
-FROM node:24-alpine AS builder
+FROM node:18-alpine AS builder
 
 # Install git and other build tools
 RUN apk add --no-cache git
 
-# Enable pnpm via corepack
-RUN corepack enable pnpm
+# Enable Corepack for pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Set working directory
 WORKDIR /app
 
-# Copy only the necessary files for dependency resolution
+# Copy package files
 COPY package.json pnpm-lock.yaml ./
 
-# Install dependencies
+# Install dependencies (Corepack will auto-use pnpm)
 RUN pnpm install
 
-# Copy the rest of the frontend source code
+# Copy the rest and build
 COPY . ./
 
 # Build the app
 RUN pnpm run build
 
 # --- Stage 2: Runtime ---
-FROM node:24-alpine
+FROM node:18-alpine
 
-# Enable pnpm via corepack
-RUN corepack enable pnpm
+# Enable Corepack in runtime
+RUN corepack enable
 
-# Set working directory
 WORKDIR /ClassEase-Pitch
 
-# Copy only the built output from the builder
-COPY --from=builder /app/ ./
+# Copy built files
+COPY --from=builder /app ./
 
-# Expose Vite default port
 EXPOSE 5173
-
-# Start development server
 CMD ["pnpm", "run", "dev"]
