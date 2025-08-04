@@ -4,7 +4,10 @@ FROM node:18-alpine AS builder
 # Install git and other build tools
 RUN apk add --no-cache git
 
-# Enable Corepack for pnpm
+# Disable Corepack prompt
+ENV COREPACK_ENABLE_PROMPT=0
+
+# Enable Corepack and prepare pnpm (auto-accepts download)
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 WORKDIR /app
