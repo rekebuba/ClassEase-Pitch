@@ -1,13 +1,13 @@
-"use client"
-
 import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, BookOpen, Search } from "lucide-react"
+import { Plus, BookOpen, Search, Edit, Trash } from "lucide-react"
 import { SubjectFormDialog } from "./subject-form-dialog"
 import { YearSetupType } from "@/lib/api-response-type"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
+import { Badge } from "./ui/badge"
+import { Separator } from "./ui/separator"
 
 interface SubjectManagementProps {
     form: UseFormReturn<YearSetupType>
@@ -84,29 +84,39 @@ export default function SubjectManagement({ form }: SubjectManagementProps) {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {filteredSubjects.map((subject, index) => (
-                            <Card key={subject.id} className="hover:shadow-md transition-shadow">
+                            <Card key={subject.id} className="p-4 hover:shadow-md transition-shadow">
+                                <CardTitle className="flex items-center gap-2 mb-2 text-md">
+                                    <BookOpen className="text-blue-600" />
+                                    {subject.name}
+                                    <Badge className="text-[13px] px-2" variant={"outline"}>
+                                        {subject.code}
+                                    </Badge>
+                                </CardTitle>
                                 <CardContent className="p-4">
-                                    <div className="flex items-start justify-between mb-2">
-                                        <div>
-                                            <h5 className="font-medium">{subject.name}</h5>
-                                            <p className="text-sm text-gray-500">{subject.code}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex gap-1">
-                                            <Button variant="outline" size="sm"
-                                                onClick={() => {
-                                                    setFormDialogOpen(true)
-                                                    setFormMode("edit")
-                                                    setFormIndex(index)
-                                                }}
-                                            >
-                                                Edit
-                                            </Button>
-                                            <Button variant="outline" size="sm" onClick={() => removeSubject(index)}>
-                                                Remove
-                                            </Button>
-                                        </div>
+                                    <Separator />
+                                    <div className="flex gap-2 mt-4 flex-wrap">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => removeSubject(index)}
+                                            className="flex-1 bg-transparent"
+                                        >
+                                            <Trash className="h-4 w-4 mr-2" />
+                                            Remove
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="flex-1 bg-transparent"
+                                            onClick={() => {
+                                                setFormDialogOpen(true)
+                                                setFormMode("edit")
+                                                setFormIndex(index)
+                                            }}
+                                        >
+                                            <Edit className="h-4 w-4 mr-2" />
+                                            Edit
+                                        </Button>
                                     </div>
                                 </CardContent>
                             </Card>

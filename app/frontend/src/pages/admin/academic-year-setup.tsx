@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar, GraduationCap, BookOpen, Settings, Plus, Save, Eye } from "lucide-react"
 import { GradeSetupCard } from "@/components"
 import { SubjectManagement } from "@/components"
-import { allSubjects, allSubjectsData, getDefaultSections, getStreamsByGrade, getSubjectsByGrade, hasStreamByGrade } from "@/config/suggestion"
+import { allSubjects, allSubjectsData, getDefaultSections, getGradeLevel, getStreamsByGrade, getSubjectsByGrade, hasStreamByGrade } from "@/config/suggestion"
 import { DetailAcademicYear } from "@/components/academic-year-view-card"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useFieldArray, useForm } from "react-hook-form"
@@ -17,8 +17,11 @@ import { YearSetupSchema, YearSchema } from "@/lib/api-response-validation"
 import { Grade, Subject, Stream, Section, Year, YearSetupType } from "@/lib/api-response-type"
 import { Form } from "@/components/ui/form"
 import { InputWithLabel } from "@/components/inputs/input-labeled"
+import { DateWithLabel } from "@/components/inputs/date-labeled"
 import { SelectWithLabel } from "@/components/inputs/select-labeled"
 import { CheckboxWithLabel } from "@/components/inputs/checkbox-labeled"
+import GradeManagement from "@/components/grade-management"
+import { watch } from "fs"
 
 interface AcademicYearSetupProps {
     initialData: DetailAcademicYear
@@ -117,20 +120,20 @@ export default function AcademicYearSetup({
 
     function generateDefaultGrades(): YearSetupType["grades"] {
         return Array.from({ length: 12 }, (_, i) => ({
-            id: "",
+            id: crypto.randomUUID(),
             yearId: "",
             grade: `Grade ${i + 1}`,
-            level: "" as "primary",
+            level: getGradeLevel(i + 1),
             hasStream: hasStreamByGrade(i + 1),
             streams: getStreamsByGrade(i + 1),
             sections: getDefaultSections(),
-            subjects: getSubjectsByGrade(i + 1),
+            subjects: i + 1 < 11 ? getSubjectsByGrade(i + 1) : [],
         }))
     }
 
     const defaultValues = {
         year: {
-            id: "",
+            id: crypto.randomUUID(),
             calendarType: "" as "Semester",
             name: "",
             startDate: "",
@@ -167,6 +170,9 @@ export default function AcademicYearSetup({
             const end = new Date(watchForm.year.endDate);
             const diffInDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
             setDayDifference(diffInDays);
+            if (watchForm.year.startDate > watchForm.year.endDate) {
+                form.setValue("year.endDate", "");
+            }
         } else {
             setDayDifference(null);
         }
@@ -270,33 +276,6 @@ export default function AcademicYearSetup({
                                         <p className="text-sm text-gray-600">Set up the fundamental details of your academic year</p>
                                     </CardHeader>
                                     <CardContent className="space-y-6">
-                                        <div className="flex items-center gap-3 flex-wrap">
-                                            <div className="flex-1 min-w-0">
-                                                <InputWithLabel
-                                                    fieldTitle="Academic Year Start Date"
-                                                    type="date"
-                                                    nameInSchema="year.startDate"
-                                                />
-                                            </div>
-
-                                            {/* Calculate Date Range */}
-                                            <Badge
-                                                variant={dayDifference && dayDifference < 0 ? "destructive" : "outline"}
-                                                className="whitespace-nowrap mt-7"
-                                            >
-                                                {dayDifference !== null ? `${dayDifference} d` : '--'}
-                                            </Badge>
-
-                                            <div className="flex-1 min-w-0">
-                                                <InputWithLabel
-                                                    fieldTitle="Academic Year End Date"
-                                                    type="date"
-                                                    nameInSchema="year.endDate"
-                                                    className="flex-1 min-w-0"
-                                                />
-                                            </div>
-                                        </div>
-
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <InputWithLabel
                                                 fieldTitle="Academic Year Name"
@@ -313,7 +292,31 @@ export default function AcademicYearSetup({
                                             </SelectWithLabel>
                                         </div>
 
+                                        <div className="flex items-center gap-3 flex-wrap">
+                                            <div className="flex-1 min-w-0">
+                                                <DateWithLabel
+                                                    fieldTitle="Academic Year Start Date"
+                                                    nameInSchema="year.startDate"
+                                                />
+                                            </div>
 
+                                            {/* Calculate Date Range */}
+                                            <Badge
+                                                variant={dayDifference && dayDifference < 0 ? "destructive" : "outline"}
+                                                className="whitespace-nowrap mt-7"
+                                            >
+                                                {dayDifference !== null ? `${dayDifference} d` : '--'}
+                                            </Badge>
+
+                                            <div className="flex-1 min-w-0">
+                                                <DateWithLabel
+                                                    fieldTitle="Academic Year End Date"
+                                                    nameInSchema="year.endDate"
+                                                    className="flex-1 min-w-0"
+                                                    disableFrom={watchForm.year.startDate ? new Date(watchForm.year.startDate) : new Date("1900-01-01")}
+                                                />
+                                            </div>
+                                        </div>
                                     </CardContent>
                                 </Card>
                             </TabsContent>
@@ -321,7 +324,8 @@ export default function AcademicYearSetup({
                             {/* Grades & Streams Tab */}
                             <TabsContent value="grades" className="space-y-6">
                                 {/* Grades List */}
-                                <GradeSetupCard form={form} />
+                                <GradeManagement form={form} />
+                                {/* <GradeSetupCard form={form} /> */}
 
                                 {academicYear.grades?.length === 0 && (
                                     <div className="text-center py-12 text-gray-500">

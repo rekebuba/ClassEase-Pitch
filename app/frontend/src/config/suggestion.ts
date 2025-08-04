@@ -1,9 +1,11 @@
+import { GradeLevelType } from "@/lib/enums";
+
 type SubjectInfo = {
     id: string;
     name: string;
     code: string;
     grade: string | number;
-    stream?: "Natural" | "Social";
+    stream?: "Natural Science" | "Social Science";
 };
 
 export const allSubjectsData: SubjectInfo[] = [
@@ -114,14 +116,14 @@ export const allSubjectsData: SubjectInfo[] = [
     { id: crypto.randomUUID(), name: "History", code: "HIS10", grade: 10 },
 
     // Grade 11
-    { id: crypto.randomUUID(), name: "Biology", code: "BIO11-N", grade: 11, stream: "Natural" },
-    { id: crypto.randomUUID(), name: "Physics", code: "PHY11-N", grade: 11, stream: "Natural" },
-    { id: crypto.randomUUID(), name: "Chemistry", code: "CHE11-N", grade: 11, stream: "Natural" },
-    { id: crypto.randomUUID(), name: "Geography", code: "GEO11-S", grade: 11, stream: "Social" },
-    { id: crypto.randomUUID(), name: "History", code: "HIS11-S", grade: 11, stream: "Social" },
-    { id: crypto.randomUUID(), name: "Economics", code: "ECO11-S", grade: 11, stream: "Social" },
-    { id: crypto.randomUUID(), name: "Technical Drawing", code: "TEC11-N", grade: 11, stream: "Natural" },
-    { id: crypto.randomUUID(), name: "General Business", code: "GEN11-S", grade: 11, stream: "Social" },
+    { id: crypto.randomUUID(), name: "Biology", code: "BIO11-N", grade: 11, stream: "Natural Science" },
+    { id: crypto.randomUUID(), name: "Physics", code: "PHY11-N", grade: 11, stream: "Natural Science" },
+    { id: crypto.randomUUID(), name: "Chemistry", code: "CHE11-N", grade: 11, stream: "Natural Science" },
+    { id: crypto.randomUUID(), name: "Geography", code: "GEO11-S", grade: 11, stream: "Social Science" },
+    { id: crypto.randomUUID(), name: "History", code: "HIS11-S", grade: 11, stream: "Social Science" },
+    { id: crypto.randomUUID(), name: "Economics", code: "ECO11-S", grade: 11, stream: "Social Science" },
+    { id: crypto.randomUUID(), name: "Technical Drawing", code: "TEC11-N", grade: 11, stream: "Natural Science" },
+    { id: crypto.randomUUID(), name: "General Business", code: "GEN11-S", grade: 11, stream: "Social Science" },
     { id: crypto.randomUUID(), name: "English", code: "ENG11", grade: 11 },
     { id: crypto.randomUUID(), name: "Mathematics", code: "MAT11", grade: 11 },
     { id: crypto.randomUUID(), name: "Mother Tongue", code: "MOT11", grade: 11 },
@@ -131,14 +133,14 @@ export const allSubjectsData: SubjectInfo[] = [
     { id: crypto.randomUUID(), name: "Information Technology", code: "INF11", grade: 11 },
 
     // Grade 12
-    { id: crypto.randomUUID(), name: "Biology", code: "BIO12-N", grade: 12, stream: "Natural" },
-    { id: crypto.randomUUID(), name: "Physics", code: "PHY12-N", grade: 12, stream: "Natural" },
-    { id: crypto.randomUUID(), name: "Chemistry", code: "CHE12-N", grade: 12, stream: "Natural" },
-    { id: crypto.randomUUID(), name: "Geography", code: "GEO12-S", grade: 12, stream: "Social" },
-    { id: crypto.randomUUID(), name: "History", code: "HIS12-S", grade: 12, stream: "Social" },
-    { id: crypto.randomUUID(), name: "Economics", code: "ECO12-S", grade: 12, stream: "Social" },
-    { id: crypto.randomUUID(), name: "Technical Drawing", code: "TEC12-N", grade: 12, stream: "Natural" },
-    { id: crypto.randomUUID(), name: "General Business", code: "GEN12-S", grade: 12, stream: "Social" },
+    { id: crypto.randomUUID(), name: "Biology", code: "BIO12-N", grade: 12, stream: "Natural Science" },
+    { id: crypto.randomUUID(), name: "Physics", code: "PHY12-N", grade: 12, stream: "Natural Science" },
+    { id: crypto.randomUUID(), name: "Chemistry", code: "CHE12-N", grade: 12, stream: "Natural Science" },
+    { id: crypto.randomUUID(), name: "Geography", code: "GEO12-S", grade: 12, stream: "Social Science" },
+    { id: crypto.randomUUID(), name: "History", code: "HIS12-S", grade: 12, stream: "Social Science" },
+    { id: crypto.randomUUID(), name: "Economics", code: "ECO12-S", grade: 12, stream: "Social Science" },
+    { id: crypto.randomUUID(), name: "Technical Drawing", code: "TEC12-N", grade: 12, stream: "Natural Science" },
+    { id: crypto.randomUUID(), name: "General Business", code: "GEN12-S", grade: 12, stream: "Social Science" },
     { id: crypto.randomUUID(), name: "English", code: "ENG12", grade: 12 },
     { id: crypto.randomUUID(), name: "Mathematics", code: "MAT12", grade: 12 },
     { id: crypto.randomUUID(), name: "Mother Tongue", code: "MOT12", grade: 12 },
@@ -154,6 +156,12 @@ export const getSubjectsByGrade = (grade: number) => {
         .map(({ id, name, code }) => ({ id, name, code }));
 };
 
+const getSubjectsForStream = (grade: number, stream: "Natural Science" | "Social Science") => {
+    return allSubjectsData
+        .filter((s) => s.grade === grade && s.stream === stream)
+        .map(({ id, name, code }) => ({ id, name, code }));
+};
+
 export const getStreamsByGrade = (grade: number) => {
     if (grade < 11) {
         return [];
@@ -164,11 +172,15 @@ export const getStreamsByGrade = (grade: number) => {
         return [];
     }
 
+    const gradeSubjects = getSubjectsByGrade(grade);
+
     return ["Natural Science", "Social Science"].map((stream) => ({
         id: crypto.randomUUID(),
         gradeId: "",
         name: stream,
-        subjects: getSubjectsByGrade(grade),
+        subjects: gradeSubjects.filter(
+            (gradeSubj) => !getSubjectsForStream(grade, stream as "Natural Science" | "Social Science").some(streamSubj => streamSubj.id === gradeSubj.id)
+        ),
     }));
 };
 
@@ -185,8 +197,18 @@ export const getDefaultSections = () => {
     ];
 };
 
+export const getGradeLevel = (grade: number): GradeLevelType => {
+    if (grade >= 1 && grade <= 5) {
+        return "primary";
+    } else if (grade >= 6 && grade <= 8) {
+        return "middle school";
+    } else {
+        return "high school";
+    }
+}
+
 export const SocialStreamSubjects = Object.values(
-    allSubjectsData.filter((s) => s.stream === "Natural")
+    allSubjectsData.filter((s) => s.stream === "Natural Science")
         .reduce((acc, { name, code, grade }) => {
             if (!acc[name]) {
                 acc[name] = { name, codes: [], grades: [] };
@@ -198,7 +220,7 @@ export const SocialStreamSubjects = Object.values(
 );
 
 export const NaturalStreamSubjects = Object.values(
-    allSubjectsData.filter((s) => s.stream === "Natural")
+    allSubjectsData.filter((s) => s.stream === "Natural Science")
         .reduce((acc, { name, code, grade }) => {
             if (!acc[name]) {
                 acc[name] = { name, codes: [], grades: [] };
