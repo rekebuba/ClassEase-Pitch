@@ -70,6 +70,20 @@ const sharedApi = {
     ): Promise<ApiHandlerResponse<z.infer<T>>> => {
         return zodApiHandler(() => api.get(`/streams/${streamId}`, { params: buildQueryParams(params) }), schema)
     },
+    getSection: <T extends z.ZodTypeAny>(
+        yearId: string,
+        schema: T,
+        params?: QueryParams
+    ): Promise<ApiHandlerResponse<z.infer<T>>> => {
+        return zodApiHandler(() => api.get(`/years/${yearId}/sections`, { params: buildQueryParams(params) }), schema)
+    },
+    getSectionDetail: <T extends z.ZodTypeAny>(
+        sectionId: string,
+        schema: T,
+        params?: QueryParams
+    ): Promise<ApiHandlerResponse<z.infer<T>>> => {
+        return zodApiHandler(() => api.get(`/sections/${sectionId}`, { params: buildQueryParams(params) }), schema)
+    },
 
 
     getDashboardData: () => api.get('/'),
