@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { YearSetupSchema, GradeSchema, StreamSchema, SubjectSchema, YearSchema } from "./api-response-validation";
+import { YearSetupSchema, GradeSchema, StreamSchema, SubjectSchema, YearSchema, GradeRelationSchema } from "./api-response-validation";
 
 import {
     AdminSchema,

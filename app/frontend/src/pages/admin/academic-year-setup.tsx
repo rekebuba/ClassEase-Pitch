@@ -1,27 +1,26 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { SelectItem } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar, GraduationCap, BookOpen, Settings, Plus, Save, Eye } from "lucide-react"
-import { GradeSetupCard } from "@/components"
 import { SubjectManagement } from "@/components"
-import { allSubjects, allSubjectsData, getDefaultSections, getGradeLevel, getStreamsByGrade, getSubjectsByGrade, hasStreamByGrade } from "@/config/suggestion"
+import { allSubjects, getDefaultSections, getGradeLevel, getStreamsByGrade, getSubjectsByGrade, hasStreamByGrade } from "@/config/suggestion"
 import { DetailAcademicYear } from "@/components/academic-year-view-card"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useFieldArray, useForm } from "react-hook-form"
-import { YearSetupSchema, YearSchema } from "@/lib/api-response-validation"
-import { Grade, Subject, Stream, Section, Year, YearSetupType } from "@/lib/api-response-type"
+import { useForm } from "react-hook-form"
+import { GradeSchema, SectionSchema, StreamSchema, SubjectSchema, YearSetupSchema } from "@/lib/api-response-validation"
+import type { Stream, Grade, Section, YearSetupType, Subject } from "@/lib/api-response-type"
 import { Form } from "@/components/ui/form"
 import { InputWithLabel } from "@/components/inputs/input-labeled"
 import { DateWithLabel } from "@/components/inputs/date-labeled"
 import { SelectWithLabel } from "@/components/inputs/select-labeled"
-import { CheckboxWithLabel } from "@/components/inputs/checkbox-labeled"
 import GradeManagement from "@/components/grade-management"
-import { watch } from "fs"
+import z from "zod"
+import { pickFields } from "@/utils/pick-zod-fields"
+import sharedApi from "@/api/sharedApi"
+import { toast } from "sonner"
 
 interface AcademicYearSetupProps {
     initialData: DetailAcademicYear
@@ -30,119 +29,140 @@ interface AcademicYearSetupProps {
     mode?: "create" | "edit"
 }
 
+type PickSubject = Pick<Subject, "id" | "name" | "code">
+type PickStream = Pick<Stream, "id" | "name">
+type PickSection = Pick<Section, "id" | "section">
+type GradeRelation = {
+    sections: PickSection[]
+    streams: PickStream[]
+    subjects: PickSubject[]
+}
+
+type StreamRelation = {
+    subjects: PickSubject[]
+}
+
 export default function AcademicYearSetup({
     initialData,
     onSave,
     onCancel,
     mode = "create",
 }: AcademicYearSetupProps) {
-    // const [suggestedSubjects, setSuggestedSubjects] = useState<Subject[]>(AllSubjects.map((subject) => ({
-    //     id: crypto.randomUUID(),
-    //     name: subject.subject,
-    //     code: subject.codes,
-    //     grades: subject.grades,
-    // })))
     const [academicYear, setAcademicYear] = useState<Partial<DetailAcademicYear>>(initialData);
     const [dayDifference, setDayDifference] = useState<number | null>(null);
 
     const [activeTab, setActiveTab] = useState("basic")
 
-    const updateAcademicYear = (updates: Partial<DetailAcademicYear>) => {
-        setAcademicYear({ ...academicYear, ...updates })
-    }
+    const [defaultNestedGrade, setDefaultNestedGrade] = useState<YearSetupType["grades"]>([])
 
-    const updateGrade = (gradeId: string, updatedGrade: Grade) => {
-        console.log("Updating grade:", gradeId, updatedGrade)
-        // updateAcademicYear({
-        //     grades: academicYear.grades?.map((g) => (g.id === gradeId ? updatedGrade : g)) || [],
-        // })
-    }
+    // --- Util functions
+    const getDetailStream = async (streamId: string): Promise<StreamRelation | undefined> => {
+        // const subjectFields = ["id", "name", "code"] as const
+        const schema = z.object({
+            subjects: z.array(SubjectSchema),
+        })
 
-    // const removeGrade = (gradeId: string) => {
-    //     console.log("Removing grade:", gradeId)
-    //     // updateAcademicYear({
-    //     //     grades: academicYear.grades?.filter((g) => g.id !== gradeId) || [],
-    //     // })
-    // }
+        const response = await sharedApi.getStreamDetail(streamId, schema, {
+            expand: ["subjects"],
+            nestedFields: { subjects: SubjectSchema.keyof().options },
+        })
 
-    const generateAcademicYearName = () => {
-        if (academicYear.startDate) {
-            const startYear = new Date(academicYear.startDate).getFullYear()
-            const endYear = startYear + 1
-            return `${startYear}-${endYear} Academic Year`
+        if (!response.success) {
+            toast.error(response.error.message, { style: { color: "red" } })
+            return
         }
-        return ""
+
+        return response.data
     }
 
-    const validateForm = () => {
-        return !!(
-            academicYear.name &&
-            academicYear.startDate &&
-            academicYear.endDate &&
-            academicYear.grades?.length &&
-            academicYear.subjects?.length
+    const fetchGrade = async (gradeId: string): Promise<GradeRelation | undefined> => {
+        // const sectionFields = ["id", "section"] as const
+        // const subjectFields = ["id", "name", "code"] as const
+        // const streamFields = ["id", "name"] as const
+
+        const schema = z.object({
+            sections: z.array(SectionSchema),
+            subjects: z.array(SubjectSchema),
+            streams: z.array(StreamSchema),
+        })
+
+        const response = await sharedApi.getGradeDetail(gradeId, schema, {
+            expand: ["sections", "subjects", "streams"],
+            nestedFields: {
+                sections: SectionSchema.keyof().options,
+                subjects: SubjectSchema.keyof().options,
+                streams: StreamSchema.keyof().options,
+            },
+        })
+
+        if (!response.success) {
+            toast.error(response.error.message, { style: { color: "red" } })
+            return
+        }
+
+        return response.data
+    }
+
+
+    const generateDefaultGrades = async () => {
+        if (!initialData?.grades) return
+
+        const results = await Promise.all(
+            initialData.grades.map(async (grade) => {
+                const fetchedGrade = await fetchGrade(grade.id)
+                if (!fetchedGrade) return null
+
+                const detailedStreams = await Promise.all(
+                    fetchedGrade.streams.map(async (stream) => {
+                        const detailed = await getDetailStream(stream.id)
+                        return { ...stream, ...detailed }
+                    })
+                )
+
+                return {
+                    ...fetchedGrade,
+                    ...grade,
+                    streams: detailedStreams,
+                }
+            })
         )
+
+        const cleaned = results.filter(Boolean) as YearSetupType["grades"]
+        setDefaultNestedGrade(cleaned)
     }
 
-    const saveAcademicYear = () => {
-        console.log("Saving academic year:", academicYear)
-        // if (validateForm()) {
-        //     const completeAcademicYear: DetailAcademicYear = {
-        //         id: initialData?.id || Date.now().toString(),
-        //         name: academicYear.name!,
-        //         startDate: academicYear.startDate!,
-        //         endDate: academicYear.endDate!,
-        //         termSystem: academicYear.termSystem!,
-        //         status: academicYear.status || "draft",
-        //         grades: academicYear.grades || [],
-        //         subjects: academicYear.subjects || [],
-        //         createdAt: initialData?.createdAt || new Date().toISOString(),
-        //         updatedAt: new Date().toISOString(),
-        //     }
+    useEffect(() => {
+        if (initialData?.grades && mode !== "create") {
+            generateDefaultGrades()
+        } else {
+            // fallback: generate 12 empty grades
+            const grades = Array.from({ length: 12 }, (_, i) => ({
+                id: crypto.randomUUID(),
+                yearId: "",
+                grade: `Grade ${i + 1}`,
+                level: getGradeLevel(i + 1),
+                hasStream: hasStreamByGrade(i + 1),
+                streams: getStreamsByGrade(i + 1),
+                sections: getDefaultSections(),
+                subjects: i + 1 < 11 ? getSubjectsByGrade(i + 1) : [],
+            }))
+            setDefaultNestedGrade(grades)
+        }
+    }, [])
 
-        //     if (onSave) {
-        //         onSave(completeAcademicYear)
-        //     } else {
-        //         console.log("Saving Academic Year:", completeAcademicYear)
-        //         alert("Academic Year setup saved successfully!")
-        //     }
-        // } else {
-        //     alert("Please fill in all required fields")
-        // }
-    }
-
-
-
-    const previewAcademicYear = () => {
-        console.log("Academic Year Preview:", academicYear)
-        // Here you would show a preview modal or navigate to preview page
-    }
-
-    function generateDefaultGrades(): YearSetupType["grades"] {
-        return Array.from({ length: 12 }, (_, i) => ({
-            id: crypto.randomUUID(),
-            yearId: "",
-            grade: `Grade ${i + 1}`,
-            level: getGradeLevel(i + 1),
-            hasStream: hasStreamByGrade(i + 1),
-            streams: getStreamsByGrade(i + 1),
-            sections: getDefaultSections(),
-            subjects: i + 1 < 11 ? getSubjectsByGrade(i + 1) : [],
-        }))
-    }
-
-    const defaultValues = {
+    const defaultValues: YearSetupType = {
         year: {
-            id: crypto.randomUUID(),
-            calendarType: "" as "Semester",
-            name: "",
-            startDate: "",
-            endDate: "",
-            createdAt: "",
-            updatedAt: ""
+            id: initialData ? initialData.id : crypto.randomUUID(),
+            calendarType: initialData ? initialData.calendarType : "" as "Semester",
+            name: initialData ? initialData.name : "",
+            startDate: initialData ? initialData.startDate : "",
+            endDate: initialData ? initialData.endDate : "",
+            status: initialData ? initialData.status : "",
+            createdAt: initialData ? initialData.createdAt : "",
+            updatedAt: initialData ? initialData.updatedAt : ""
         },
-        grades: generateDefaultGrades(),
-        subjects: allSubjects,
+        grades: defaultNestedGrade,
+        subjects: initialData ? initialData.subjects : allSubjects,
     }
 
     const form = useForm<YearSetupType>({
@@ -150,15 +170,6 @@ export default function AcademicYearSetup({
         defaultValues
     })
     const watchForm = form.watch()
-
-    const {
-        fields: gradeFields,
-        append: appendGrade,
-        remove: removeGrade,
-    } = useFieldArray({
-        control: form.control,
-        name: "grades",
-    })
 
     function submitForm(values: YearSetupType) {
         console.log("Submitted values:", values)
@@ -179,6 +190,7 @@ export default function AcademicYearSetup({
     }, [watchForm.year.startDate, watchForm.year.endDate]);
 
     console.log("watchForm:", watchForm)
+    console.log("defaultNestedGrade: ", defaultNestedGrade)
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
@@ -201,46 +213,16 @@ export default function AcademicYearSetup({
                                 Cancel
                             </Button>
                         )}
-                        <Button variant="outline" onClick={previewAcademicYear}>
+                        <Button variant="outline">
                             <Eye className="h-4 w-4 mr-2" />
                             Preview
                         </Button>
-                        <Button onClick={saveAcademicYear} disabled={!validateForm()}>
+                        <Button>
                             <Save className="h-4 w-4 mr-2" />
                             {mode === "edit" ? "Update Academic Year" : "Save Academic Year"}
                         </Button>
                     </div>
                 </div>
-
-                {/* Progress Indicator */}
-                <Card>
-                    <CardContent className="p-4">
-                        <div className="flex items-center justify-between text-sm">
-                            <div className="flex items-center gap-2">
-                                <div
-                                    className={`w-3 h-3 rounded-full ${academicYear.name && academicYear.startDate && academicYear.endDate ? "bg-green-500" : "bg-gray-300"}`}
-                                />
-                                <span>Basic Info</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div
-                                    className={`w-3 h-3 rounded-full ${academicYear.subjects?.length ? "bg-green-500" : "bg-gray-300"}`}
-                                />
-                                <span>Subjects</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div
-                                    className={`w-3 h-3 rounded-full ${academicYear.grades?.length ? "bg-green-500" : "bg-gray-300"}`}
-                                />
-                                <span>Grades & Streams</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <div className={`w-3 h-3 rounded-full ${validateForm() ? "bg-green-500" : "bg-gray-300"}`} />
-                                <span>Complete</span>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
 
                 <Form {...form}>
                     <form
@@ -249,7 +231,7 @@ export default function AcademicYearSetup({
                     >
                         {/* Main Content */}
                         <Tabs value={activeTab} onValueChange={setActiveTab}>
-                            <TabsList className="grid w-full grid-cols-4">
+                            <TabsList className="grid w-full grid-cols-3">
                                 <TabsTrigger value="basic" className="flex items-center gap-2">
                                     <Calendar className="h-4 w-4" />
                                     Basic Info
@@ -261,10 +243,6 @@ export default function AcademicYearSetup({
                                 <TabsTrigger value="grades" className="flex items-center gap-2">
                                     <GraduationCap className="h-4 w-4" />
                                     Grades & Streams
-                                </TabsTrigger>
-                                <TabsTrigger value="review" className="flex items-center gap-2">
-                                    <Settings className="h-4 w-4" />
-                                    Review & Finalize
                                 </TabsTrigger>
                             </TabsList>
 
