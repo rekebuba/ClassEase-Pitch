@@ -14,46 +14,53 @@ import { pickFields } from "@/utils/pick-zod-fields"
 import { toast } from "sonner"
 import { z } from "zod"
 import { DetailAcademicYear } from "@/components/academic-year-view-card"
+import { useQuery } from "@tanstack/react-query"
 
 export type AcademicYear = Pick<Year, "id" | "calendarType" | "name" | "startDate" | "endDate" | "status" | "createdAt" | "updatedAt">;
 
 export default function AcademicYearManagement() {
-    const [academicYears, setAcademicYears] = useState<AcademicYear[]>([])
+    // const [academicYears, setAcademicYears] = useState<AcademicYear[]>([])
     const [searchTerm, setSearchTerm] = useState("")
     const [statusFilter, setStatusFilter] = useState<string>("all")
     const [currentView, setCurrentView] = useState<"list" | "detail" | "edit" | "create">("list")
     const [selectedAcademicYear, setSelectedAcademicYear] = useState<DetailAcademicYear | null>(null)
 
-    useEffect(() => {
-        const fetchAcademicYear = async () => {
-            const fields = [
-                "id",
-                "calendarType",
-                "name",
-                "startDate",
-                "endDate",
-                "status",
-                "createdAt",
-                "updatedAt",
-            ] as const
-            const selectYearSchema = pickFields(YearSchema, fields);
+    const fetchAcademicYear = async () => {
+        const fields = [
+            "id",
+            "calendarType",
+            "name",
+            "startDate",
+            "endDate",
+            "status",
+            "createdAt",
+            "updatedAt",
+        ] as const
+        const selectYearSchema = pickFields(YearSchema, fields);
 
-            const response = await sharedApi.getYear(z.array(selectYearSchema), {
-                fields: [...fields],
+        const response = await sharedApi.getYear(z.array(selectYearSchema), {
+            fields: [...fields],
+        });
+
+        if (!response.success) {
+            toast.error(response.error.message, {
+                style: { color: "red" },
             });
+            throw new Error(response.error.message);
+        }
 
-            if (!response.success) {
-                toast.error(response.error.message, {
-                    style: { color: "red" },
-                });
-                return;
-            }
+        return response.data;
+    };
 
-            setAcademicYears(response.data);
-        };
+    const { data: academicYears, error, isLoading } = useQuery({
+        queryKey: ["academicYears"],
+        queryFn: fetchAcademicYear,
+    })
 
-        fetchAcademicYear();
-    }, []);
+    if (error) return <div>Error loading academic years: {error.message}</div>
+    if (isLoading) return <div>Loading academic years...</div>
+    if (!academicYears) return <div>No academic years found.</div>
+
     const filteredAcademicYears = academicYears.filter((year) => {
         const matchesSearch = year.name.toLowerCase().includes(searchTerm.toLowerCase())
         const matchesStatus = statusFilter === "all" || year.status === statusFilter
@@ -92,7 +99,7 @@ export default function AcademicYearManagement() {
             year.id === academicYear.id ? { ...year, status: "active" as const, updatedAt: new Date().toISOString() } : year,
         )
 
-        setAcademicYears(finalYears)
+        // setAcademicYears(finalYears)
     }
 
     const handleArchive = (academicYear: AcademicYear) => {
@@ -101,7 +108,7 @@ export default function AcademicYearManagement() {
                 ? { ...year, status: "completed" as const, updatedAt: new Date().toISOString() }
                 : year,
         )
-        setAcademicYears(updatedYears)
+        // setAcademicYears(updatedYears)
     }
 
     const handleDuplicate = (academicYear: AcademicYear) => {
@@ -113,7 +120,7 @@ export default function AcademicYearManagement() {
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
         }
-        setAcademicYears([newYear, ...academicYears])
+        // setAcademicYears([newYear, ...academicYears])
     }
 
     const handleSave = (academicYear: AcademicYear) => {
@@ -122,7 +129,7 @@ export default function AcademicYearManagement() {
             const updatedYears = academicYears.map((year) =>
                 year.id === selectedAcademicYear.id ? { ...academicYear, updatedAt: new Date().toISOString() } : year,
             )
-            setAcademicYears(updatedYears)
+            // setAcademicYears(updatedYears)
         } else {
             // Create new
             const newYear: AcademicYear = {
@@ -131,7 +138,7 @@ export default function AcademicYearManagement() {
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString(),
             }
-            setAcademicYears([newYear, ...academicYears])
+            // setAcademicYears([newYear, ...academicYears])
         }
         setCurrentView("list")
         setSelectedAcademicYear(null)
