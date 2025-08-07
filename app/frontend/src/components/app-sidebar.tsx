@@ -42,6 +42,7 @@ import { z } from "zod";
 import { adminApi, studentApi, teacherApi } from "@/api";
 import type { Admin, Student, Teacher, User } from "@/lib/api-response-type";
 import { pickFields } from "@/utils/pick-zod-fields";
+import { useQuery } from "@tanstack/react-query";
 
 const data = {
     admin: {
@@ -136,75 +137,64 @@ export type PartialStudent = Pick<Student, "firstName" | "fatherName" | "grandFa
 
 export function AppSidebar({ ...props }: AppSidebarProps) {
     const { userRole, userId } = useAuth();
-    const [userData, setUserData] = useState<PartialUser | null>(null);
-    const [roleData, setRoleData] = useState<PartialAdmin | PartialStudent | PartialTeacher | null>(null);
+    // const [userData, setUserData] = useState<PartialUser | null>(null);
+    // const [roleData, setRoleData] = useState<PartialAdmin | PartialStudent | PartialTeacher | null>(null);
 
-    useEffect(() => {
-        const fetchUserData = async () => {
-            if (!userRole || !userId) return; // Prevent rendering if userRole is not set
+    const userFields = ["id", "role", "identification"] as const
 
-            const userFields = ["id", "role", "identification"] as const
-            const selectSchema = pickFields(UserSchema, userFields);
-            const response = await sharedApi.getUser(userId, selectSchema, {
+    const {
+        data: userData,
+        isError: isUserError,
+        error: userError,
+    } = useQuery({
+        queryKey: ['user', userId],
+        enabled: !!userId,
+        queryFn: async () => {
+            const selectSchema = pickFields(UserSchema, userFields)
+            const res = await sharedApi.getUser(userId!, selectSchema, {
                 fields: [...userFields],
-            });
-
-            if (!response.success) {
-                toast.error(response.error.message, {
-                    style: { color: "red" },
-                });
-                return;
+            })
+            if (!res.success) {
+                throw new Error(res.error.message)
             }
+            return res.data
+        }
+    })
+
+    const {
+        data: roleData,
+        isError: isRoleError,
+        error: roleError,
+    } = useQuery({
+        queryKey: ['role', userRole, userId],
+        enabled: !!userId && !!userRole,
+        queryFn: async () => {
+            const fields = ["id", "firstName", "fatherName", "grandFatherName"] as const
 
             if (userRole === 'admin') {
-                const fields = ["id", "firstName", "fatherName", "grandFatherName"] as const;
-                const selectAdminSchema = pickFields(AdminSchema, fields);
-                const adminResponse = await adminApi.getUser(userId, selectAdminSchema, {
-                    fields: [...fields],
-                });
-
-                if (!adminResponse.success) {
-                    toast.error(adminResponse.error.message, {
-                        style: { color: "red" },
-                    });
-                    return;
-                }
-                setRoleData(adminResponse.data);
-            } else if (userRole === 'student') {
-                const fields = ["id", "firstName", "fatherName", "grandFatherName"] as const;
-                const selectStudentSchema = pickFields(StudentSchema, fields);
-                const studentResponse = await studentApi.getUser(userId, selectStudentSchema, {
-                    fields: [...fields],
-                });
-
-                if (!studentResponse.success) {
-                    toast.error(studentResponse.error.message, {
-                        style: { color: "red" },
-                    });
-                    return;
-                }
-                setRoleData(studentResponse.data);
-            } else if (userRole === 'teacher') {
-                const fields = ["id", "firstName", "fatherName", "grandFatherName"] as const;
-                const selectTeacherSchema = pickFields(TeacherSchema, fields);
-                const teacherResponse = await teacherApi.getUser(userId, selectTeacherSchema, {
-                    fields: [...fields],
-                });
-
-                if (!teacherResponse.success) {
-                    toast.error(teacherResponse.error.message, {
-                        style: { color: "red" },
-                    });
-                    return;
-                }
-                setRoleData(teacherResponse.data);
+                const schema = pickFields(AdminSchema, fields)
+                const res = await adminApi.getUser(userId!, schema, { fields: [...fields] })
+                if (!res.success) throw new Error(res.error.message)
+                return res.data
             }
 
-            setUserData(response.data);
-        };
+            if (userRole === 'student') {
+                const schema = pickFields(StudentSchema, fields)
+                const res = await studentApi.getUser(userId!, schema, { fields: [...fields] })
+                if (!res.success) throw new Error(res.error.message)
+                return res.data
+            }
 
-        fetchUserData();
-    }, []);
+            if (userRole === 'teacher') {
+                const schema = pickFields(TeacherSchema, fields)
+                const res = await teacherApi.getUser(userId!, schema, { fields: [...fields] })
+                if (!res.success) throw new Error(res.error.message)
+                return res.data
+            }
+
+            throw new Error('Invalid role')
+        }
+    })
 
     return (
         <Sidebar collapsible="icon" {...props}>

@@ -22,6 +22,7 @@ import { DetailAcademicYear } from "./academic-year-view-card"
 import { Grade, Section, Stream, Subject } from "@/lib/api-response-type"
 import { Skeleton } from "./ui/skeleton"
 import FadeIn from "./fade-in"
+import { useQueries } from "@tanstack/react-query"
 
 interface AcademicYearDetailViewProps {
     detailAcademicYears: DetailAcademicYear
@@ -169,45 +170,47 @@ export default function AcademicYearDetailView({ detailAcademicYears, onBack, on
 }
 
 function GradeDetails({ detailAcademicYears }: { detailAcademicYears: DetailAcademicYear }) {
-    const [detailGrade, setDetailGrade] = useState<DetailGrade[]>([])
-    const fetched = useRef(false)
-
-    useEffect(() => {
-        if (fetched.current) return;
-        fetched.current = true;
-        const fetchGrade = async (gradeId: string) => {
-            const sectionFields = ["id", "section"] as const
-            const subjectFields = ["id", "name", "code"] as const
-            const streamFields = ["id", "name",] as const
-            const selectedSchema = z.object({
-                sections: z.array(pickFields(SectionSchema, sectionFields)),
-                subjects: z.array(pickFields(SubjectSchema, subjectFields)),
-                streams: z.array(pickFields(StreamSchema, streamFields)),
-            });
-
-            const response = await sharedApi.getGradeDetail(gradeId, selectedSchema, {
-                expand: ["sections", "subjects", "streams"],
-                nestedFields: { "sections": [...sectionFields], "subjects": [...subjectFields], "streams": [...streamFields] },
-            });
-
-            if (!response.success) {
-                toast.error(response.error.message, {
-                    style: { color: "red" },
-                });
-                return;
-            }
-            return response.data;
-        };
-
-        detailAcademicYears.grades.forEach((grade) => {
-            fetchGrade(grade.id).then((fetchedGrade) => {
-                if (fetchedGrade) {
-                    setDetailGrade((prev) => [...prev, { ...fetchedGrade, ...grade }]);
-                }
-            });
+    const fetchGrade = async (gradeId: string) => {
+        const sectionFields = ["id", "section"] as const
+        const subjectFields = ["id", "name", "code"] as const
+        const streamFields = ["id", "name",] as const
+        const selectedSchema = z.object({
+            sections: z.array(pickFields(SectionSchema, sectionFields)),
+            subjects: z.array(pickFields(SubjectSchema, subjectFields)),
+            streams: z.array(pickFields(StreamSchema, streamFields)),
         });
 
-    }, []);
+        const response = await sharedApi.getGradeDetail(gradeId, selectedSchema, {
+            expand: ["sections", "subjects", "streams"],
+            nestedFields: { "sections": [...sectionFields], "subjects": [...subjectFields], "streams": [...streamFields] },
+        });
+
+        if (!response.success) {
+            toast.error(response.error.message, {
+                style: { color: "red" },
+            });
+            throw new Error("Failed to fetch Grade detail: " + response.error.message);
+
+        }
+        return response.data;
+    };
+
+    const gradeQueries = useQueries({
+        queries: detailAcademicYears.grades.map((grade) => ({
+            queryKey: ['grade-detail', grade.id],
+            queryFn: () => fetchGrade(grade.id),
+            onError: (err: any) => {
+                toast.error(err.message || 'Failed to fetch Grade detail', {
+                    style: { color: 'red' },
+                })
+            },
+            enabled: !!detailAcademicYears.grades.length,
+        })),
+    });
+
+    const detailGrade: DetailGrade[] = gradeQueries
+        .map((query) => query.data)
+        .filter(Boolean) as DetailGrade[];
 
     return <Card>
         <CardHeader>
@@ -301,46 +304,45 @@ function GradeDetails({ detailAcademicYears }: { detailAcademicYears: DetailAcad
 
 
 function SubjectDetails({ detailAcademicYears }: { detailAcademicYears: DetailAcademicYear }) {
-    const [detailSubject, setDetailSubject] = useState<DetailSubject[]>([])
-    const fetched = useRef(false)
-
-    useEffect(() => {
-        if (fetched.current) return;
-        fetched.current = true;
-
-        const fetchSubject = async (subjectId: string) => {
-            const gradeFields = ["id", "grade"] as const
-            const streamFields = ["id", "name"] as const
-            const selectedSchema = z.object({
-                grades: z.array(pickFields(GradeSchema, gradeFields)),
-                streams: z.array(pickFields(StreamSchema, streamFields)),
-            });
-
-            const response = await sharedApi.getSubjectDetail(subjectId, selectedSchema, {
-                expand: ["grades", "streams"],
-                nestedFields: { "grades": [...gradeFields], "streams": [...streamFields] },
-            });
-
-            if (!response.success) {
-                toast.error(response.error.message, {
-                    style: { color: "red" },
-                });
-                return;
-            }
-            return response.data;
-        };
-
-        detailAcademicYears.subjects.forEach((subject) => {
-            fetchSubject(subject.id).then((fetchedSubject) => {
-                if (fetchedSubject) {
-                    setDetailSubject((prev) => [...prev, { ...fetchedSubject, ...subject }]);
-                }
-            });
+    const fetchSubject = async (subjectId: string) => {
+        const gradeFields = ["id", "grade"] as const
+        const streamFields = ["id", "name"] as const
+        const selectedSchema = z.object({
+            grades: z.array(pickFields(GradeSchema, gradeFields)),
+            streams: z.array(pickFields(StreamSchema, streamFields)),
         });
 
+        const response = await sharedApi.getSubjectDetail(subjectId, selectedSchema, {
+            expand: ["grades", "streams"],
+            nestedFields: { "grades": [...gradeFields], "streams": [...streamFields] },
+        });
 
-    }, []);
+        if (!response.success) {
+            toast.error(response.error.message, {
+                style: { color: "red" },
+            });
+            throw new Error(response.error.message);
+        }
+        return response.data;
+    };
 
+
+    const subjectQueries = useQueries({
+        queries: detailAcademicYears.subjects.map((subject) => ({
+            queryKey: ['subject-detail', subject.id],
+            queryFn: () => fetchSubject(subject.id),
+            onError: (err: any) => {
+                toast.error(err.message || 'Failed to fetch subject detail', {
+                    style: { color: 'red' },
+                })
+            },
+            enabled: !!detailAcademicYears.subjects.length,
+        })),
+    })
+
+    const detailSubject: DetailSubject[] = subjectQueries
+        .map((query) => query.data)
+        .filter(Boolean) as DetailSubject[]
 
     return (
         <Card>

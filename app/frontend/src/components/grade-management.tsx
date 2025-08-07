@@ -4,10 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { BookOpen, ChevronDown, ChevronUp, Edit, GraduationCap, Plus, Search, Trash, Users } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
 import GradeSetupCard from "./grade-setup-card";
+import z from "zod";
+import { pickFields } from "@/utils/pick-zod-fields";
+import { GradeSchema, SectionSchema, StreamSchema, SubjectSchema } from "@/lib/api-response-validation";
+import { sharedApi } from "@/api";
+import { toast } from "sonner";
+import { useQueries } from "@tanstack/react-query";
 
 interface GradeManagementProps {
     form: UseFormReturn<YearSetupType>
@@ -20,12 +26,83 @@ export default function GradeManagement({ form }: GradeManagementProps) {
     const [formMode, setFormMode] = useState<"create" | "edit">("create")
     const [formIndex, setFormIndex] = useState<number>(0)
 
-
     const { fields: gradeFields, prepend: prependGrade, remove: removeGrade, } = useFieldArray({
         control: form.control,
         name: "grades",
     })
     const watchForm = form.watch()
+
+    const fetchGrade = async (gradeId: string) => {
+        // const sectionFields = ["id", "section"] as const
+        // const subjectFields = ["id", "name", "code"] as const
+        // const streamFields = ["id", "name"] as const
+        const gradeFields = ["id", "grade", "level", "hasStream"] as const
+        const schema = pickFields(GradeSchema, gradeFields).extend({
+            sections: z.array(SectionSchema),
+            subjects: z.array(SubjectSchema),
+            streams: z.array(StreamSchema),
+        })
+
+        const response = await sharedApi.getGradeDetail(gradeId, schema, {
+            fields: [...gradeFields],
+            expand: ["sections", "subjects", "streams"],
+            nestedFields: {
+                sections: SectionSchema.keyof().options,
+                subjects: SubjectSchema.keyof().options,
+                streams: StreamSchema.keyof().options,
+            },
+        })
+
+        if (!response.success) {
+            toast.error(response.error.message, { style: { color: "red" } })
+            throw new Error("Failed to fetch Grade detail: " + response.error.message);
+        }
+
+        return response.data
+    };
+
+    const gradeQueries = useQueries({
+        queries: watchForm.grades.map((grade) => ({
+            queryKey: ['new-grade-detail', grade.id],
+            queryFn: () => fetchGrade(grade.id),
+            onError: (err: any) => {
+                toast.error(err.message || 'Failed to fetch Grade detail', {
+                    style: { color: 'red' },
+                })
+            },
+            enabled: !!gradeFields.length,
+        })),
+    });
+
+    useEffect(() => {
+        gradeQueries.forEach((query, index) => {
+            if (query.isSuccess && query.data) {
+                const { id, grade, level, hasStream, subjects, sections, streams } = query.data;
+
+                form.setValue(`grades.${index}`, {
+                    id,
+                    grade,
+                    level,
+                    hasStream,
+                    subjects: subjects.map((subject) => ({
+                        id: subject.id,
+                        name: subject.name,
+                        code: subject.code,
+                    })),
+                    sections: sections.map((section) => ({
+                        id: section.id,
+                        gradeId: section.gradeId,
+                        section: section.section,
+                    })),
+                    streams: streams.map((stream) => ({
+                        id: stream.id,
+                        gradeId: stream.gradeId,
+                        name: stream.name,
+                    })),
+                });
+            }
+        });
+    }, [gradeQueries, form]);
 
     const filteredGrades = watchForm.grades.filter((grade) => grade.grade.toLowerCase().includes(searchTerm.toLowerCase()))
 
@@ -44,6 +121,8 @@ export default function GradeManagement({ form }: GradeManagementProps) {
         setFormIndex(0); // Always edit the first grade in the list
         setFormDialogOpen(true);
     };
+
+    return (<div>loading....</div>)
 
     return (
         <Card>

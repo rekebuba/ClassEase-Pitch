@@ -8,6 +8,12 @@ import { YearSetupType } from "@/lib/api-response-type"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
 import { Badge } from "./ui/badge"
 import { Separator } from "./ui/separator"
+import { useQueries, useQuery } from "@tanstack/react-query"
+import { pickFields } from "@/utils/pick-zod-fields"
+import { toast } from "sonner"
+import { sharedApi } from "@/api"
+import { GradeSchema, StreamSchema } from "@/lib/api-response-validation"
+import z from "zod"
 
 interface SubjectManagementProps {
     form: UseFormReturn<YearSetupType>
@@ -29,6 +35,44 @@ export default function SubjectManagement({ form }: SubjectManagementProps) {
         name: "subjects",
     })
     const watchForm = form.watch()
+
+    const fetchSubject = async (subjectId: string) => {
+        const gradeFields = ["id", "grade"] as const
+        const streamFields = ["id", "name"] as const
+        const selectedSchema = z.object({
+            grades: z.array(pickFields(GradeSchema, gradeFields)),
+            streams: z.array(pickFields(StreamSchema, streamFields)),
+        });
+
+        const response = await sharedApi.getSubjectDetail(subjectId, selectedSchema, {
+            expand: ["grades", "streams"],
+            nestedFields: { "grades": [...gradeFields], "streams": [...streamFields] },
+        });
+
+        if (!response.success) {
+            toast.error(response.error.message, {
+                style: { color: "red" },
+            });
+            throw new Error(response.error.message);
+        }
+        return response.data;
+    };
+
+    // TODO:
+    // const subjectQueries = useQueries({
+    //     queries: subjectFields.map((subject) => ({
+    //         queryKey: ['new-subject-detail', subject.id],
+    //         queryFn: () => fetchSubject(subject.id),
+    //         onError: (err: any) => {
+    //             toast.error(err.message || 'Failed to fetch subject detail', {
+    //                 style: { color: 'red' },
+    //             })
+    //         },
+    //         enabled: !!subjectFields.length,
+    //     })),
+    // })
+
+
 
     const filteredSubjects = watchForm.subjects.filter((subject) => {
         const matchesSearch =

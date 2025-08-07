@@ -21,6 +21,7 @@ import z from "zod"
 import { pickFields } from "@/utils/pick-zod-fields"
 import sharedApi from "@/api/sharedApi"
 import { toast } from "sonner"
+import { useQuery } from "@tanstack/react-query"
 
 interface AcademicYearSetupProps {
     initialData: DetailAcademicYear
@@ -53,7 +54,7 @@ export default function AcademicYearSetup({
 
     const [activeTab, setActiveTab] = useState("basic")
 
-    const [defaultNestedGrade, setDefaultNestedGrade] = useState<YearSetupType["grades"]>([])
+    // const [defaultNestedGrade, setDefaultNestedGrade] = useState<YearSetupType["grades"]>([])
 
     // --- Util functions
     const getDetailStream = async (streamId: string): Promise<StreamRelation | undefined> => {
@@ -97,7 +98,7 @@ export default function AcademicYearSetup({
 
         if (!response.success) {
             toast.error(response.error.message, { style: { color: "red" } })
-            return
+            throw new Error("Failed to fetch Grade detail: " + response.error.message);
         }
 
         return response.data
@@ -105,38 +106,32 @@ export default function AcademicYearSetup({
 
 
     const generateDefaultGrades = async () => {
-        if (!initialData?.grades) return
 
-        const results = await Promise.all(
-            initialData.grades.map(async (grade) => {
-                const fetchedGrade = await fetchGrade(grade.id)
-                if (!fetchedGrade) return null
-
-                const detailedStreams = await Promise.all(
-                    fetchedGrade.streams.map(async (stream) => {
-                        const detailed = await getDetailStream(stream.id)
-                        return { ...stream, ...detailed }
-                    })
-                )
-
-                return {
-                    ...fetchedGrade,
-                    ...grade,
-                    streams: detailedStreams,
-                }
-            })
-        )
-
-        const cleaned = results.filter(Boolean) as YearSetupType["grades"]
-        setDefaultNestedGrade(cleaned)
-    }
-
-    useEffect(() => {
         if (initialData?.grades && mode !== "create") {
-            generateDefaultGrades()
+            const results = await Promise.all(
+                initialData.grades.map(async (grade) => {
+                    const fetchedGrade = await fetchGrade(grade.id);
+                    if (!fetchedGrade) return null;
+
+                    const detailedStreams = await Promise.all(
+                        fetchedGrade.streams.map(async (stream) => {
+                            const detailed = await getDetailStream(stream.id);
+                            return { ...stream, ...detailed };
+                        })
+                    );
+
+                    return {
+                        ...fetchedGrade,
+                        ...grade,
+                        streams: detailedStreams,
+                    };
+                })
+            );
+
+            return results.filter(Boolean) as YearSetupType["grades"];
         } else {
             // fallback: generate 12 empty grades
-            const grades = Array.from({ length: 12 }, (_, i) => ({
+            return Array.from({ length: 12 }, (_, i) => ({
                 id: crypto.randomUUID(),
                 yearId: "",
                 grade: `Grade ${i + 1}`,
@@ -145,10 +140,21 @@ export default function AcademicYearSetup({
                 streams: getStreamsByGrade(i + 1),
                 sections: getDefaultSections(),
                 subjects: i + 1 < 11 ? getSubjectsByGrade(i + 1) : [],
-            }))
-            setDefaultNestedGrade(grades)
+            }));
         }
-    }, [])
+    }
+
+    // const { data: defaultNestedGrade, isLoading: isGradesLoading } = useQuery({
+    //     queryKey: ['defaultNestedGrade', mode, initialData?.grades],
+    //     queryFn: generateDefaultGrades,
+    //     enabled: !!initialData, // Only run when initialData is available
+    // });
+
+    // if (isGradesLoading || !defaultNestedGrade) return (
+    //     <div className="flex items-center justify-center min-h-screen">
+    //         <div className="text-gray-500">Loading grades...</div>
+    //     </div>
+    // );
 
     const defaultValues: YearSetupType = {
         year: {
@@ -161,8 +167,8 @@ export default function AcademicYearSetup({
             createdAt: initialData ? initialData.createdAt : "",
             updatedAt: initialData ? initialData.updatedAt : ""
         },
-        grades: defaultNestedGrade,
-        subjects: initialData ? initialData.subjects : allSubjects,
+        grades: initialData.grades,
+        subjects: initialData.subjects,
     }
 
     const form = useForm<YearSetupType>({
@@ -190,7 +196,7 @@ export default function AcademicYearSetup({
     }, [watchForm.year.startDate, watchForm.year.endDate]);
 
     console.log("watchForm:", watchForm)
-    console.log("defaultNestedGrade: ", defaultNestedGrade)
+    // console.log("defaultNestedGrade: ", defaultNestedGrade)
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">

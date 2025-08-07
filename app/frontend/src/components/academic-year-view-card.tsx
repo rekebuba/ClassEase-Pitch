@@ -14,6 +14,7 @@ import { sharedApi } from "@/api"
 import { z } from "zod"
 import { toast } from "sonner"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useQuery } from "@tanstack/react-query"
 
 interface AcademicYearViewCardProps {
     academicYear: AcademicYear
@@ -39,53 +40,40 @@ export default function AcademicYearViewCard({
     onArchive,
     onDuplicate,
 }: AcademicYearViewCardProps) {
-    const [detailAcademicYears, setDetailAcademicYears] = useState<DetailAcademicYear | null>(null)
-    
-    useEffect(() => {
-        const fetchAcademicYear = async () => {
-            const gradeFields = [
-                "id",
-                "grade",
-                "level",
-                "hasStream",
-            ] as const
-            const subjectFields = [
-                "id",
-                "name",
-                "code",
-            ] as const
-            const academicTermFields = [
-                "id",
-                "name",
-            ] as const
-            const eventFields = [
-                "id",
-                "title",
-            ] as const
-            const selectedSchema = z.object({
-                grades: z.array(pickFields(GradeSchema, gradeFields)),
-                subjects: z.array(pickFields(SubjectSchema, subjectFields)),
-                academicTerms: z.array(pickFields(AcademicTermSchema, academicTermFields)),
-                events: z.array(pickFields(EventSchema, eventFields)),
+    const fetchAcademicYear = async (yearId: string): Promise<DetailAcademicYear> => {
+        const gradeFields = ["id", "grade", "level", "hasStream"] as const
+        const subjectFields = ["id", "name", "code"] as const
+        const academicTermFields = ["id", "name"] as const
+        const eventFields = ["id", "title"] as const
+
+        const selectedSchema = z.object({
+            grades: z.array(pickFields(GradeSchema, gradeFields)),
+            subjects: z.array(pickFields(SubjectSchema, subjectFields)),
+            academicTerms: z.array(pickFields(AcademicTermSchema, academicTermFields)),
+            events: z.array(pickFields(EventSchema, eventFields)),
+        });
+
+        const response = await sharedApi.getYearDetail(yearId, selectedSchema, {
+            expand: ["grades", "subjects", "academicTerms", "events"],
+            nestedFields: { "grades": [...gradeFields], "subjects": [...subjectFields], "academicTerms": [...academicTermFields], "events": [...eventFields] },
+        });
+
+        if (!response.success) {
+            toast.error(response.error.message, {
+                style: { color: "red" },
             });
+            throw new Error(response.error.message);
+        }
 
-            const response = await sharedApi.getYearDetail(academicYear.id, selectedSchema, {
-                expand: ["grades", "subjects", "academicTerms", "events"],
-                nestedFields: { "grades": [...gradeFields], "subjects": [...subjectFields], "academicTerms": [...academicTermFields], "events": [...eventFields] },
-            });
+        return { ...academicYear, ...response.data }
+    };
 
-            if (!response.success) {
-                toast.error(response.error.message, {
-                    style: { color: "red" },
-                });
-                return;
-            }
-
-            setDetailAcademicYears({ ...academicYear, ...response.data });
-        };
-
-        fetchAcademicYear();
-    }, []);
+    const { data: detailAcademicYears, error, isLoading } = useQuery({
+        queryKey: ["academicYearDetail", academicYear.id],
+        queryFn: () => fetchAcademicYear(academicYear.id),
+        enabled: !!academicYear.id,
+        refetchOnWindowFocus: false,
+    })
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString("en-US", {
@@ -116,7 +104,7 @@ export default function AcademicYearViewCard({
         return 0
     }
 
-    if (!detailAcademicYears) {
+    if (isLoading || !detailAcademicYears) {
         return (
             <Card className="w-full hover:shadow-md transition-shadow">
                 <CardHeader className="pb-4">
@@ -283,7 +271,7 @@ export default function AcademicYearViewCard({
 
                 {/* Subject Categories */}
                 <div>
-                    <h4 className="font-medium mb-3 text-sm">Subject</h4>
+                    <h4 className="font-medium mb-3 text-sm">Subjects</h4>
                     <div className="flex flex-wrap gap-2">
                         {detailAcademicYears.subjects.map((subjects) => (
                             <div key={subjects.id} className="flex items-center gap-1">

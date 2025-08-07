@@ -7,17 +7,21 @@ import router from "./routes/AppRoutes";
 import { NuqsAdapter } from 'nuqs/adapters/react';
 import { LoadingSpinner } from "./components";
 import '../src/globals.css';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
+const queryClient = new QueryClient()
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <RootLayout>
-      <NuqsAdapter>
-        <Suspense fallback={<LoadingSpinner />}>
-          <RouterProvider router={router} />
-        </Suspense>
-      </NuqsAdapter>
-      <Toaster />
-    </RootLayout>
+    <QueryClientProvider client={queryClient}>
+      <RootLayout>
+        <NuqsAdapter>
+          <Suspense fallback={<LoadingSpinner />}>
+            <RouterProvider router={router} />
+          </Suspense>
+        </NuqsAdapter>
+        <Toaster />
+      </RootLayout>
+    </QueryClientProvider>
   </StrictMode>
 );
