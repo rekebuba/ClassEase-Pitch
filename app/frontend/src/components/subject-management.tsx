@@ -1,8 +1,8 @@
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Plus, BookOpen, Search, Edit, Trash } from "lucide-react"
+import { Plus, BookOpen, Search, Edit, Trash, GraduationCap } from "lucide-react"
 import { SubjectFormDialog } from "./subject-form-dialog"
 import { YearSetupType } from "@/lib/api-response-type"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
@@ -14,10 +14,13 @@ import { toast } from "sonner"
 import { sharedApi } from "@/api"
 import { GradeSchema, StreamSchema } from "@/lib/api-response-validation"
 import z from "zod"
+import FadeIn from "./fade-in"
 
 interface SubjectManagementProps {
     form: UseFormReturn<YearSetupType>
 }
+const GRADE_FIELDS = GradeSchema.keyof().options;
+const STREAM_FIELDS = StreamSchema.keyof().options;
 
 export default function SubjectManagement({ form }: SubjectManagementProps) {
     const [searchTerm, setSearchTerm] = useState("")
@@ -33,46 +36,63 @@ export default function SubjectManagement({ form }: SubjectManagementProps) {
     } = useFieldArray({
         control: form.control,
         name: "subjects",
+        keyName: "rhfId", // Prevents overriding `id`
     })
     const watchForm = form.watch()
 
-    const fetchSubject = async (subjectId: string) => {
-        const gradeFields = ["id", "grade"] as const
-        const streamFields = ["id", "name"] as const
-        const selectedSchema = z.object({
-            grades: z.array(pickFields(GradeSchema, gradeFields)),
-            streams: z.array(pickFields(StreamSchema, streamFields)),
-        });
+    const fetchSubject = useCallback(async (subjectId: string) => {
+        try {
 
-        const response = await sharedApi.getSubjectDetail(subjectId, selectedSchema, {
-            expand: ["grades", "streams"],
-            nestedFields: { "grades": [...gradeFields], "streams": [...streamFields] },
-        });
-
-        if (!response.success) {
-            toast.error(response.error.message, {
-                style: { color: "red" },
+            const selectedSchema = z.object({
+                grades: z.array(GradeSchema),
+                streams: z.array(StreamSchema),
             });
-            throw new Error(response.error.message);
+
+            const response = await sharedApi.getSubjectDetail(subjectId, selectedSchema, {
+                expand: ["grades", "streams"],
+                nestedFields: { "grades": GRADE_FIELDS, "streams": STREAM_FIELDS },
+            });
+
+            if (!response.success) {
+                toast.error(response.error.message, {
+                    style: { color: "red" },
+                });
+                throw new Error(response.error.message);
+            }
+            return response.data;
+        } catch (error) {
+            toast.error("Failed to fetch grade details", {
+                description: error instanceof Error ? error.message : "Unknown error occurred",
+            });
+            throw error;
         }
-        return response.data;
-    };
+    }, []);
 
-    // TODO:
-    // const subjectQueries = useQueries({
-    //     queries: subjectFields.map((subject) => ({
-    //         queryKey: ['new-subject-detail', subject.id],
-    //         queryFn: () => fetchSubject(subject.id),
-    //         onError: (err: any) => {
-    //             toast.error(err.message || 'Failed to fetch subject detail', {
-    //                 style: { color: 'red' },
-    //             })
-    //         },
-    //         enabled: !!subjectFields.length,
-    //     })),
-    // })
+    const subjectQueries = useQueries({
+        queries: subjectFields.map((subject) => ({
+            queryKey: ['new-subject-detail', subject.id],
+            queryFn: () => fetchSubject(subject.id),
+            enabled: !!subject.id,
+            staleTime: 5 * 60 * 1000, // 5 minutes cache
+        })),
+    })
 
+    // Update form values when data is fetched
+    useEffect(() => {
+        if (subjectQueries.some(q => q.isFetching)) return;
 
+        subjectQueries.forEach((query, index) => {
+            if (query.isSuccess && query.data && index < subjectFields.length) {
+                const { grades, streams } = query.data;
+
+                form.setValue(`subjects.${index}.grades`, grades);
+                form.setValue(`subjects.${index}.streams`, streams);
+            }
+        });
+    }, [subjectQueries.every(q => q.isFetched)]);
+
+    // Loading state
+    const isLoading = subjectQueries.some(query => query.isLoading);
 
     const filteredSubjects = watchForm.subjects.filter((subject) => {
         const matchesSearch =
@@ -82,7 +102,7 @@ export default function SubjectManagement({ form }: SubjectManagementProps) {
     })
 
     const handleCreateSubject = () => {
-        prependSubject({ id: "", name: "", code: "" }); // Add empty subject
+        prependSubject({ id: "", name: "", code: "", grades: [], streams: [] }); // Add empty subject
         setFormMode("create");
         setFormIndex(0); // Always edit the first subject in the list
         setFormDialogOpen(true);
@@ -136,33 +156,45 @@ export default function SubjectManagement({ form }: SubjectManagementProps) {
                                         {subject.code}
                                     </Badge>
                                 </CardTitle>
-                                <CardContent className="p-4">
-                                    <Separator />
-                                    <div className="flex gap-2 mt-4 flex-wrap">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => removeSubject(index)}
-                                            className="flex-1 bg-transparent"
-                                        >
-                                            <Trash className="h-4 w-4 mr-2" />
-                                            Remove
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="flex-1 bg-transparent"
-                                            onClick={() => {
-                                                setFormDialogOpen(true)
-                                                setFormMode("edit")
-                                                setFormIndex(index)
-                                            }}
-                                        >
-                                            <Edit className="h-4 w-4 mr-2" />
-                                            Edit
-                                        </Button>
+
+                                {/* Grade Categories */}
+                                <div className="mb-4 mt-4">
+                                    <h4 className="font-medium mb-3 text-sm">Taught In:</h4>
+                                    <div className="flex flex-wrap gap-2">
+                                        {subject.grades.map((grade) => (
+                                            <div key={grade.id} className="flex items-center gap-1">
+                                                <Badge variant="secondary" className="text-xs">
+                                                    Grade {grade.grade}
+                                                </Badge>
+                                            </div>
+                                        ))}
                                     </div>
-                                </CardContent>
+                                </div>
+                                <Separator />
+                                <div className="flex gap-2 mt-4 flex-wrap">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => removeSubject(index)}
+                                        className="flex-1 bg-transparent"
+                                    >
+                                        <Trash className="h-4 w-4 mr-2" />
+                                        Remove
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="flex-1 bg-transparent"
+                                        onClick={() => {
+                                            setFormDialogOpen(true)
+                                            setFormMode("edit")
+                                            setFormIndex(index)
+                                        }}
+                                    >
+                                        <Edit className="h-4 w-4 mr-2" />
+                                        Edit
+                                    </Button>
+                                </div>
                             </Card>
                         ))}
                     </div>

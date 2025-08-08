@@ -7,8 +7,9 @@ import { BookOpen } from "lucide-react"
 import { YearSetupType } from "@/lib/api-response-type"
 import { InputWithLabel } from "./inputs/input-labeled"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import { CheckboxForObject } from "./inputs/checkbox-for-object"
 
 interface SubjectFormDialogProps {
     form: UseFormReturn<YearSetupType>
@@ -17,10 +18,23 @@ interface SubjectFormDialogProps {
     formIndex: number
     mode: "create" | "edit"
 }
+type Grade = YearSetupType["subjects"][number]["grades"] extends Array<infer G> ? G : never
+
 
 export function SubjectFormDialog({ form, open, onOpenChange, mode, formIndex }: SubjectFormDialogProps) {
     const { fields: subjectFields, remove: removeSubject } = useFieldArray({ control: form.control, name: "subjects" })
-    const [defaultData] = useState(subjectFields[formIndex] || { id: "", name: "", code: "" });
+    const [defaultData, setDefaultData] = useState();
+
+    const watchForm = form.watch()
+
+    useEffect(() => {
+        if (open && mode === "edit") {
+            const subjectData = form.getValues().subjects[formIndex];
+            if (subjectData) {
+                setDefaultData(JSON.parse(JSON.stringify(subjectData)));
+            }
+        }
+    }, [open, formIndex, form, mode]);
 
     const handleSave = () => {
         if (mode === "create") {
@@ -39,10 +53,13 @@ export function SubjectFormDialog({ form, open, onOpenChange, mode, formIndex }:
         if (mode === "create") {
             removeSubject(formIndex);
         } else {
-            form.setValue(`subjects.${formIndex}`, defaultData);
+            if (defaultData) {
+                form.setValue(`subjects.${formIndex}`, defaultData);
+            }
         }
         onOpenChange(false);
     };
+
 
     return (
         <Dialog open={open} onOpenChange={handleCancel}>
@@ -86,6 +103,22 @@ export function SubjectFormDialog({ form, open, onOpenChange, mode, formIndex }:
                                     placeholder="Brief description of the subject..."
                                     rows={3}
                                 />
+                            </div>
+
+                            <div>
+                                <Label>Taught in Grades:</Label>
+                                <p className="text-sm text-gray-500 mb-3">Selected Grade for this Subject</p>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    {watchForm.grades.map((grade, subjectIndex) => (
+                                        <div key={grade.id} className="flex items-center space-x-2">
+                                            <CheckboxForObject<Grade>
+                                                fieldTitle={`Grade ${grade.grade}`}
+                                                nameInSchema={`subjects.${formIndex}.grades`}
+                                                value={watchForm.subjects[formIndex].grades.find((g) => g.grade === grade.grade) || grade}
+                                                className="w-4 h-4" />
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </CardContent>
                     </Card>

@@ -167,8 +167,25 @@ export default function AcademicYearSetup({
             createdAt: initialData ? initialData.createdAt : "",
             updatedAt: initialData ? initialData.updatedAt : ""
         },
-        grades: initialData.grades,
-        subjects: initialData.subjects,
+        grades: initialData.grades.map((grade) => ({
+            ...grade,
+            yearId: "",
+            sections: [],
+            subjects: [],
+            streams: [
+                {
+                    id: "",
+                    gradeId: "",
+                    name: "",
+                    subjects: [],
+                }
+            ],
+        })),
+        subjects: initialData.subjects.map((subject) => ({
+            ...subject,
+            grades: [],
+            streams: [],
+        })),
     }
 
     const form = useForm<YearSetupType>({
