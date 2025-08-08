@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { BookOpen, ChevronDown, ChevronUp, Edit, GraduationCap, Plus, Search, Trash, Users } from "lucide-react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Badge } from "./ui/badge";
 import { Separator } from "./ui/separator";
 import GradeSetupCard from "./grade-setup-card";
@@ -13,116 +13,137 @@ import { pickFields } from "@/utils/pick-zod-fields";
 import { GradeSchema, SectionSchema, StreamSchema, SubjectSchema } from "@/lib/api-response-validation";
 import { sharedApi } from "@/api";
 import { toast } from "sonner";
-import { useQueries } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
+import FadeIn from "./fade-in";
+import { json } from "stream/consumers";
 
 interface GradeManagementProps {
     form: UseFormReturn<YearSetupType>
 }
 type Stream = YearSetupType["grades"][number]["streams"][number];
 
-export default function GradeManagement({ form }: GradeManagementProps) {
-    const [searchTerm, setSearchTerm] = useState("")
-    const [formDialogOpen, setFormDialogOpen] = useState(false)
-    const [formMode, setFormMode] = useState<"create" | "edit">("create")
-    const [formIndex, setFormIndex] = useState<number>(0)
+const GRADE_FIELDS = GradeSchema.keyof().options;
+const SECTION_KEYS = SectionSchema.keyof().options;
+const SUBJECT_KEYS = SubjectSchema.keyof().options;
+const STREAM_KEYS = StreamSchema.keyof().options;
 
-    const { fields: gradeFields, prepend: prependGrade, remove: removeGrade, } = useFieldArray({
+export default function GradeManagement({ form }: GradeManagementProps) {
+    // State management
+    const [searchTerm, setSearchTerm] = useState("");
+    const [formDialogOpen, setFormDialogOpen] = useState(false);
+    const [formMode, setFormMode] = useState<"create" | "edit">("create");
+    const [formIndex, setFormIndex] = useState<number>(0);
+
+    // Form field array management
+    const {
+        fields: gradeFields,
+        prepend: prependGrade,
+        remove: removeGrade
+    } = useFieldArray({
         control: form.control,
         name: "grades",
-    })
-    const watchForm = form.watch()
+        keyName: "rhfId", // Prevents overriding `id`
+    });
 
-    const fetchGrade = async (gradeId: string) => {
-        // const sectionFields = ["id", "section"] as const
-        // const subjectFields = ["id", "name", "code"] as const
-        // const streamFields = ["id", "name"] as const
-        const gradeFields = ["id", "grade", "level", "hasStream"] as const
-        const schema = pickFields(GradeSchema, gradeFields).extend({
-            sections: z.array(SectionSchema),
-            subjects: z.array(SubjectSchema),
-            streams: z.array(StreamSchema),
-        })
+    const watchForm = form.watch();
 
-        const response = await sharedApi.getGradeDetail(gradeId, schema, {
-            fields: [...gradeFields],
-            expand: ["sections", "subjects", "streams"],
-            nestedFields: {
-                sections: SectionSchema.keyof().options,
-                subjects: SubjectSchema.keyof().options,
-                streams: StreamSchema.keyof().options,
-            },
-        })
+    // Memoized fetch function with error handling
+    const fetchGrade = useCallback(async (gradeId: string) => {
+        try {
+            const schema = pickFields(GradeSchema, GRADE_FIELDS).extend({
+                sections: z.array(SectionSchema),
+                subjects: z.array(SubjectSchema),
+                streams: z.array(StreamSchema),
+            });
 
-        if (!response.success) {
-            toast.error(response.error.message, { style: { color: "red" } })
-            throw new Error("Failed to fetch Grade detail: " + response.error.message);
+            const response = await sharedApi.getGradeDetail(gradeId, schema, {
+                fields: GRADE_FIELDS,
+                expand: ["sections", "subjects", "streams"],
+                nestedFields: {
+                    sections: SECTION_KEYS,
+                    subjects: SUBJECT_KEYS,
+                    streams: STREAM_KEYS,
+                },
+            });
+
+            if (!response.success) {
+                throw new Error(response.error.message);
+            }
+
+            return response.data;
+        } catch (error) {
+            toast.error("Failed to fetch grade details", {
+                description: error instanceof Error ? error.message : "Unknown error occurred",
+            });
+            throw error;
         }
+    }, []);
 
-        return response.data
-    };
-
+    // Fetch grade details for each grade
     const gradeQueries = useQueries({
-        queries: watchForm.grades.map((grade) => ({
-            queryKey: ['new-grade-detail', grade.id],
+        queries: gradeFields.map((grade) => ({
+            queryKey: ['grade-detail', grade.id],
             queryFn: () => fetchGrade(grade.id),
-            onError: (err: any) => {
-                toast.error(err.message || 'Failed to fetch Grade detail', {
-                    style: { color: 'red' },
-                })
-            },
-            enabled: !!gradeFields.length,
+            enabled: !!grade.id, // Only fetch if grade has an ID
+            staleTime: 5 * 60 * 1000, // 5 minutes cache
         })),
     });
 
+
+    // Update form values when data is fetched
     useEffect(() => {
+        if (gradeQueries.some(q => q.isFetching)) return;
+
         gradeQueries.forEach((query, index) => {
-            if (query.isSuccess && query.data) {
-                const { id, grade, level, hasStream, subjects, sections, streams } = query.data;
+            if (query.isSuccess && query.data && index < gradeFields.length) {
+                const { id, grade, level, yearId, hasStream, subjects, sections, streams } = query.data;
 
                 form.setValue(`grades.${index}`, {
                     id,
+                    yearId,
                     grade,
                     level,
                     hasStream,
-                    subjects: subjects.map((subject) => ({
-                        id: subject.id,
-                        name: subject.name,
-                        code: subject.code,
-                    })),
-                    sections: sections.map((section) => ({
-                        id: section.id,
-                        gradeId: section.gradeId,
-                        section: section.section,
-                    })),
-                    streams: streams.map((stream) => ({
-                        id: stream.id,
-                        gradeId: stream.gradeId,
-                        name: stream.name,
-                    })),
+                    subjects: subjects.map(({ id, name, code }) => ({ id, name, code })),
+                    sections: sections.map(({ id, gradeId, section }) => ({ id, gradeId, section })),
+                    streams: streams.map(({ id, gradeId, name }) => ({ id, gradeId, name, subjects: [] })),
                 });
             }
         });
-    }, [gradeQueries, form]);
+    }, [gradeQueries.every(q => q.isFetched)]);
 
     const filteredGrades = watchForm.grades.filter((grade) => grade.grade.toLowerCase().includes(searchTerm.toLowerCase()))
 
-    const handleCreateGrade = () => {
+    // Handlers
+    const handleCreateGrade = useCallback(() => {
         prependGrade({
             id: "",
             yearId: "",
             grade: "",
-            level: "" as "primary",
+            level: "primary",
             hasStream: false,
             streams: [],
             sections: [],
             subjects: [],
-        }); // Add empty grade
+        });
         setFormMode("create");
-        setFormIndex(0); // Always edit the first grade in the list
+        setFormIndex(0);
         setFormDialogOpen(true);
-    };
+    }, [prependGrade]);
 
-    return (<div>loading....</div>)
+    const handleEditGrade = useCallback((index: number) => {
+        setFormMode("edit");
+        setFormIndex(index);
+        setFormDialogOpen(true);
+    }, []);
+
+    const handleRemoveGrade = useCallback((index: number) => {
+        removeGrade(index);
+        toast.success("Grade removed successfully");
+    }, [removeGrade]);
+
+    // Loading state
+    const isLoading = gradeQueries.some(query => query.isLoading);
 
     return (
         <Card>
@@ -149,15 +170,12 @@ export default function GradeManagement({ form }: GradeManagementProps) {
                     </Button>
                 </div>
 
+                {/* Empty State */}
                 {filteredGrades.length === 0 && (
-                    <div className="text-center py-12 text-gray-500">
-                        <GraduationCap className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                        <p>
-                            {gradeFields.length === 0
-                                ? "No grades added yet. Add your first grade above."
-                                : "No grades match your search criteria."}
-                        </p>
-                    </div>
+                    <EmptyState
+                        hasGrades={gradeFields.length > 0}
+                        searchTerm={searchTerm}
+                    />
                 )}
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -165,7 +183,7 @@ export default function GradeManagement({ form }: GradeManagementProps) {
                         <Card key={grade.id} className="p-4 hover:shadow-md transition-shadow">
                             <CardTitle className="flex items-center gap-2 mb-2">
                                 <GraduationCap className="text-blue-600" />
-                                {grade.grade}
+                                Grade {grade.grade}
                                 {grade.level && (
                                     <Badge className="text-[13px] px-2" variant={"outline"}>
                                         {grade.level}
@@ -176,12 +194,16 @@ export default function GradeManagement({ form }: GradeManagementProps) {
                                 <div className="grid grid-cols-3 gap-3">
                                     <div className="text-center p-2 bg-blue-50 rounded-lg">
                                         <GraduationCap className="h-4 w-4 text-blue-600 mx-auto mb-1" />
-                                        <div className="text-sm font-semibold text-blue-900">{grade.sections.length}</div>
+                                        <FadeIn isLoading={isLoading} loader={<div className="h-4 w-4 animate-spin border-2 border-blue-500 rounded-full"></div>}>
+                                            <div className="text-sm font-semibold text-blue-900">{grade.sections.length}</div>
+                                        </FadeIn>
                                         <div className="text-xs text-blue-700">Sections</div>
                                     </div>
                                     <div className="text-center p-2 bg-purple-50 rounded-lg">
                                         <Users className="h-4 w-4 text-purple-600 mx-auto mb-1" />
-                                        <div className="text-sm font-semibold text-purple-900">{grade.streams.length}</div>
+                                        <FadeIn isLoading={isLoading} loader={<div className="h-4 w-4 animate-spin border-2 border-blue-500 rounded-full"></div>}>
+                                            <div className="text-sm font-semibold text-purple-900">{grade.streams.length}</div>
+                                        </FadeIn>
                                         <div className="text-xs text-purple-700">Streams</div>
                                     </div>
                                     <div className="text-center p-2 bg-red-50 rounded-lg">
@@ -190,7 +212,7 @@ export default function GradeManagement({ form }: GradeManagementProps) {
                                             {grade.hasStream ? grade.streams.reduce(
                                                 (sum, stream) => sum + (stream.subjects?.length || 0),
                                                 0
-                                            ) : grade.subjects.length}
+                                            ) + grade.subjects.length : grade.subjects.length}
                                         </div>
                                         <div className="text-xs text-red-700">Subjects</div>
                                     </div>
@@ -200,23 +222,25 @@ export default function GradeManagement({ form }: GradeManagementProps) {
                             {/* Subject Categories */}
                             <div className="mb-4">
                                 <h4 className="font-medium mb-3 text-sm">Subjects:</h4>
-                                {!grade.hasStream ? (
-                                    <div className="flex flex-wrap gap-2">
-                                        {grade.subjects.map((subject) => (
-                                            <div key={subject.id} className="flex items-center gap-1">
-                                                <Badge variant="secondary" className="text-xs">
-                                                    {subject.name}
-                                                </Badge>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="mb-4">
-                                        {grade.streams.map((stream, streamIndex) => (
-                                            <CollapsibleStreamCard key={streamIndex} stream={stream} />
-                                        ))}
-                                    </div>
-                                )}
+                                <div className="mb-4">
+                                    {grade.streams.map((stream, streamIndex) => (
+                                        <CollapsibleStreamCard
+                                            key={streamIndex}
+                                            form={form}
+                                            formIndex={index}
+                                            stream={stream}
+                                            streamIndex={streamIndex} />
+                                    ))}
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                    {grade.subjects.map((subject) => (
+                                        <div key={subject.id} className="flex items-center gap-1">
+                                            <Badge variant="secondary" className="text-xs">
+                                                {subject.name}
+                                            </Badge>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                             <Separator />
 
@@ -257,9 +281,57 @@ export default function GradeManagement({ form }: GradeManagementProps) {
     );
 }
 
+interface CollapsibleStreamCardProps {
+    form: UseFormReturn<YearSetupType>;
+    stream: Stream;
+    formIndex: number;
+    streamIndex: number;
+}
 
-const CollapsibleStreamCard = ({ stream }: { stream: Stream }) => {
-    const [isExpanded, setIsExpanded] = useState(false);
+const CollapsibleStreamCard = ({ form, stream, formIndex, streamIndex }: CollapsibleStreamCardProps) => {
+    const [isExpanded, setIsExpanded] = useState(true);
+
+    // Memoized fetch function with error handling
+    const fetchStream = useCallback(async (streamId: string) => {
+        try {
+            const schema = z.object({ subjects: z.array(SubjectSchema) });
+
+            const response = await sharedApi.getStreamDetail(streamId, schema, {
+                expand: ["subjects"],
+                nestedFields: { subjects: SUBJECT_KEYS },
+            });
+
+            if (!response.success) {
+                throw new Error(response.error.message);
+            }
+
+            return response.data;
+        } catch (error) {
+            toast.error("Failed to fetch grade details", {
+                description: error instanceof Error ? error.message : "Unknown error occurred",
+            });
+            throw error;
+        }
+    }, []);
+
+    // Fetch stream details for each grade
+    const streamQueries = useQuery({
+        queryKey: ['stream-detail', stream.id],
+        queryFn: () => fetchStream(stream.id),
+        enabled: !!stream.id, // Only fetch if grade has an ID
+        staleTime: 5 * 60 * 1000, // 5 minutes cache
+    });
+
+    // Update form values when data is fetched
+    useEffect(() => {
+        if (streamQueries.isFetching) return;
+
+        if (streamQueries.isSuccess && streamQueries.data) {
+            const { subjects } = streamQueries.data;
+
+            form.setValue(`grades.${formIndex}.streams.${streamIndex}.subjects`, subjects);
+        }
+    }, [streamQueries.isFetching]);
 
     return (
         <Card className="p-2 bg-gray-50 hover:bg-gray-100 transition-colors border-l-4 border-l-purple-300 mb-3">
@@ -303,3 +375,17 @@ const CollapsibleStreamCard = ({ stream }: { stream: Stream }) => {
         </Card>
     );
 };
+
+
+function EmptyState({ hasGrades, searchTerm }: { hasGrades: boolean; searchTerm: string }) {
+    return (
+        <div className="text-center py-12 text-gray-500">
+            <GraduationCap className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <p>
+                {hasGrades
+                    ? `No grades match "${searchTerm}"`
+                    : "No grades added yet. Add your first grade above."}
+            </p>
+        </div>
+    );
+}

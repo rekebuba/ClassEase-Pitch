@@ -373,5 +373,9 @@ export const YearSetupSchema = z.object({
             })),
         })
     ),
-    subjects: z.array(SubjectSchema),
+    subjects: z.array(
+        SubjectSchema.extend({
+            grades: z.array(GradeSchema),
+            streams: z.array(StreamSchema),
+        })),
 })

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,14 +22,17 @@ import { useFieldArray, UseFormReturn } from "react-hook-form"
 import { SelectWithLabel } from "./inputs/select-labeled"
 import { SwitchWithLabel } from "./inputs/switch-labeled"
 import { CheckboxForObject } from "./inputs/checkbox-for-object"
-import { getDefaultSections, getStreamsByGrade, getSubjectsByGrade, hasStreamByGrade } from "@/config/suggestion"
 import { SelectForObject } from "./inputs/select-for-object"
 import { toast } from "sonner"
 import { InputWithLabel } from "./inputs/input-labeled"
 import { GradeLevelEnum } from "@/lib/enums"
+import z from "zod"
+import { sharedApi } from "@/api"
+import { SubjectSchema } from "@/lib/api-response-validation"
+import { useQueries } from "@tanstack/react-query";
 
 type Grade = YearSetupType["grades"] extends Array<infer G> ? G : never
-type Subject = YearSetupType["subjects"] extends Array<infer G> ? G : never
+type Subject = YearSetupType["grades"][number]["subjects"] extends Array<infer G> ? G : never
 
 interface GradeSetupCardProps {
     form: UseFormReturn<YearSetupType>
@@ -99,8 +102,6 @@ export default function GradeSetupCard({ form, open, onOpenChange, mode, formInd
             removeGrade(formIndex);
         } else {
             if (defaultData) {
-                console.log("formIndex: ", formIndex)
-                console.log("Resetting to default data:", defaultData);
                 form.setValue(`grades.${formIndex}`, defaultData);
             }
         }
@@ -178,23 +179,22 @@ export default function GradeSetupCard({ form, open, onOpenChange, mode, formInd
                                 <StreamsManagement form={form} formIndex={formIndex} />
                             )}
                             {/* Grade Subjects (for non-stream grades) */}
-                            {!watchForm.grades[formIndex].hasStream && (
-                                <div>
-                                    <Label>Grade Subjects</Label>
-                                    <p className="text-sm text-gray-500 mb-3">Selected subjects for this grade</p>
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                        {watchForm.subjects.map((subject, subjectIndex) => (
-                                            <div key={subject.id} className="flex items-center space-x-2">
-                                                <CheckboxForObject<Subject>
-                                                    fieldTitle={subject.name}
-                                                    nameInSchema={`grades.${formIndex}.subjects`}
-                                                    value={watchForm.grades[formIndex].subjects.find((s) => s.name === subject.name) || subject}
-                                                    className="w-4 h-4" />
-                                            </div>
-                                        ))}
-                                    </div>
+                            <div>
+                                <Label>Grade Subjects</Label>
+                                <p className="text-sm text-gray-500 mb-3">Selected subjects for this grade</p>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    {watchForm.subjects.map((subject, subjectIndex) => (
+                                        <div key={subject.id} className="flex items-center space-x-2">
+                                            <CheckboxForObject<Subject>
+                                                fieldTitle={subject.name}
+                                                nameInSchema={`grades.${formIndex}.subjects`}
+                                                value={watchForm.grades[formIndex].subjects.find((s) => s.name === subject.name) || subject}
+                                                className="w-4 h-4" />
+                                        </div>
+                                    ))}
                                 </div>
-                            )}
+                            </div>
+
                             {/* Grade Summary */}
                             <div className="bg-gray-50 p-3 rounded-lg">
                                 <h3 className="font-medium mb-2">Configuration Summary</h3>
@@ -223,13 +223,69 @@ interface StreamsManagementProps {
     formIndex: number
 }
 
+const SUBJECT_KEYS = SubjectSchema.keyof().options;
+
 function StreamsManagement({ form, formIndex }: StreamsManagementProps) {
     const [isOpen, setIsOpen] = useState(false)
-    const { fields: streamFields, append: appendStream, prepend: prependStream, remove: removeStream } = useFieldArray({
+    const { fields: streamFields,
+        append: appendStream,
+        prepend: prependStream,
+        remove: removeStream,
+    } = useFieldArray({
         control: form.control,
         name: `grades.${formIndex}.streams`,
+        keyName: "rhfId", // Prevents overriding `id`
     })
     const watchForm = form.watch()
+
+    // Memoized fetch function with error handling
+    const fetchStream = useCallback(async (streamId: string) => {
+        try {
+            const schema = z.object({ subjects: z.array(SubjectSchema) });
+
+            const response = await sharedApi.getStreamDetail(streamId, schema, {
+                expand: ["subjects"],
+                nestedFields: { subjects: SUBJECT_KEYS },
+            });
+
+            if (!response.success) {
+                throw new Error(response.error.message);
+            }
+
+            return response.data;
+        } catch (error) {
+            toast.error("Failed to fetch grade details", {
+                description: error instanceof Error ? error.message : "Unknown error occurred",
+            });
+            throw error;
+        }
+    }, []);
+
+    // Fetch stream details for each grade
+    const streamQueries = useQueries({
+        queries: streamFields.map((stream) => ({
+            queryKey: ['stream-detail', stream.id],
+            queryFn: () => fetchStream(stream.id),
+            enabled: !!stream.id, // Only fetch if grade has an ID
+            staleTime: 5 * 60 * 1000, // 5 minutes cache
+        })),
+    });
+
+    // Update form values when data is fetched
+    useEffect(() => {
+        if (streamQueries.some(q => q.isFetching)) return;
+
+        streamQueries.forEach((query, index) => {
+            if (query.isSuccess && query.data && index < streamFields.length) {
+                const { subjects } = query.data;
+
+                form.setValue(`grades.${formIndex}.streams.${index}.subjects`, subjects);
+            }
+        });
+    }, [streamQueries.every(q => q.isFetched)]);
+
+    // Loading state
+    const isLoading = streamQueries.some(query => query.isLoading);
 
     const handleSave = () => {
         toast.success("New Stream Added To the List", {
@@ -242,7 +298,6 @@ function StreamsManagement({ form, formIndex }: StreamsManagementProps) {
         removeStream(0);
         setIsOpen(false);
     };
-
 
     return (
         <div className="space-y-4">
@@ -317,15 +372,16 @@ function StreamsManagement({ form, formIndex }: StreamsManagementProps) {
                             <Label className="text-sm">Stream Subjects</Label>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {watchForm.subjects.map((subject, subjectIndex) => (
-                                <div key={subject.id} className="flex items-center space-x-2">
-                                    <CheckboxForObject<Subject>
-                                        fieldTitle={subject.name}
-                                        nameInSchema={`grades.${formIndex}.streams.${streamIndex}.subjects`}
-                                        value={watchForm.grades[formIndex].streams[streamIndex].subjects.find((s) => s.name === subject.name) || subject}
-                                        className="w-4 h-4" />
-                                </div>
-                            ))}
+                            {watchForm.subjects.filter((subject) => !watchForm.grades[formIndex].subjects.find((s) => s.name === subject.name))
+                                .map((subject, subjectIndex) => (
+                                    <div key={subject.id} className="flex items-center space-x-2">
+                                        <CheckboxForObject<Subject>
+                                            fieldTitle={subject.name}
+                                            nameInSchema={`grades.${formIndex}.streams.${streamIndex}.subjects`}
+                                            value={watchForm.grades[formIndex].streams[streamIndex].subjects.find((s) => s.name === subject.name) || subject}
+                                            className="w-4 h-4" />
+                                    </div>
+                                ))}
                         </div>
                     </Card>
                 ))}
