@@ -3,7 +3,6 @@ import {
     FormControl,
     FormField,
     FormItem,
-    FormLabel,
     FormMessage,
 } from '@/components/ui/form'
 
@@ -23,19 +22,19 @@ export function CheckboxForObject<T>({
     nameInSchema,
     value,
     disabled = false,
-    className
+    className,
 }: Props<T>) {
-    const form = useFormContext()
-    const values = useWatch({ control: form.control, name: nameInSchema }) || []
+    const { setValue, getValues, control } = useFormContext()
+    const values = useWatch({ control: control, name: nameInSchema }) || []
 
     const checked = values.some((v: T) => isEqual(v, value))
 
     const toggle = (checked: boolean) => {
-        const current = form.getValues(nameInSchema) || []
+        const current = getValues(nameInSchema) || []
         if (checked) {
-            form.setValue(nameInSchema, [...current, value], { shouldValidate: true })
+            setValue(nameInSchema, [...current, value], { shouldValidate: true })
         } else {
-            form.setValue(
+            setValue(
                 nameInSchema,
                 current.filter((item: T) => !isEqual(item, value)),
                 { shouldValidate: true }
@@ -43,9 +42,10 @@ export function CheckboxForObject<T>({
         }
     }
 
+
     return (
         <FormField
-            control={form.control}
+            control={control}
             name={nameInSchema}
             render={() => (
                 <FormItem className="w-full flex items-center gap-2">
