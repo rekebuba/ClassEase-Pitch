@@ -34,7 +34,7 @@ class StudentYearRecordSchema(BaseModel):
     rank: Optional[int] = None
 
 
-class StudentYearRecordRelationshipSchema(BaseModel):
+class StudentYearRecordRelatedSchema(BaseModel):
     """This model represents the relationships of a StudentYearRecordSchema."""
 
     student: Optional[StudentSchema] = None
@@ -43,3 +43,11 @@ class StudentYearRecordRelationshipSchema(BaseModel):
     stream: Optional[StreamSchema] = None
     student_term_records: Optional[List[StudentTermRecordSchema]] = None
     subject_yearly_averages: Optional[List[SubjectYearlyAverageSchema]] = None
+
+
+class StudentYearRecordWithRelatedSchema(
+    StudentYearRecordSchema, StudentYearRecordRelatedSchema
+):
+    """This model represents a student's yearly academic record with related entities."""
+
+    pass

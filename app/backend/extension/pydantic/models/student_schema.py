@@ -75,7 +75,7 @@ class StudentSchema(BaseModel):
         return {"id", "first_name", "father_name", "date_of_birth"}
 
 
-class StudentRelationshipSchema(BaseModel):
+class StudentRelatedSchema(BaseModel):
     """This model represents the relationships of a StudentSchema."""
 
     starting_grade: Optional[GradeSchema] = None
@@ -111,5 +111,5 @@ class StudentRelationshipSchema(BaseModel):
     )
 
 
-class StudentWithRelationshipsSchema(StudentSchema, StudentRelationshipSchema):
+class StudentWithRelatedSchema(StudentSchema, StudentRelatedSchema):
     pass

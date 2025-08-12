@@ -110,7 +110,7 @@ class TeacherSchema(BaseModel):
         return {"id", "first_name", "father_name", "date_of_birth"}
 
 
-class TeacherRelationshipSchema(BaseModel):
+class TeacherRelatedSchema(BaseModel):
     """This model represents the relationships of a TeacherSchema.
     It is used to define the relationships between the TeacherSchema and other schemas.
     """
@@ -142,7 +142,7 @@ class TeacherRelationshipSchema(BaseModel):
     )
 
 
-class TeacherWithRelationshipsSchema(TeacherSchema, TeacherRelationshipSchema):
+class TeacherWithRelatedSchema(TeacherSchema, TeacherRelatedSchema):
     """This model extends TeacherSchema to include relationships."""
 
     pass

@@ -1,4 +1,14 @@
-from typing import Any, Tuple, Type, List, Union, get_origin, get_args, Annotated
+from typing import (
+    Any,
+    Tuple,
+    Type,
+    List,
+    TypedDict,
+    Union,
+    get_origin,
+    get_args,
+    Annotated,
+)
 from datetime import date, datetime
 import re
 from pyethiodate import EthDate  # type: ignore
@@ -76,3 +86,46 @@ def extract_inner_model(annotation: Any) -> Tuple[bool, Type[BaseModel]]:
         f"Type annotation does not resolve to a Pydantic model. "
         f"Got {annotation} which is not a BaseModel subclass."
     )
+
+
+class ModelClassification(TypedDict):
+    model_class: List[str]
+    model_sub_class: List[str]
+
+
+def classify_model_fields(model: Type[BaseModel]) -> ModelClassification:
+    """
+    Analyze a Pydantic model and classify its fields into:
+    - model_class: List of field names that are BaseModel subclasses
+    - model_sub_class: List of field names that are not BaseModel subclasses
+
+    Returns a dictionary with these two keys containing lists of field names.
+    """
+    result: ModelClassification = {"model_class": [], "model_sub_class": []}
+
+    # Handle Pydantic v2 models
+    if hasattr(model, "model_fields"):
+        for field_name, field_info in model.model_fields.items():
+            annotation = field_info.annotation
+
+            try:
+                _, model_type = extract_inner_model(annotation)
+                if isinstance(model_type, type) and issubclass(model_type, BaseModel):
+                    result["model_sub_class"].append(field_name)
+                else:
+                    result["model_class"].append(field_name)
+            except ValueError:
+                result["model_class"].append(field_name)
+    # Fallback to __annotations__ for other cases
+    elif hasattr(model, "__annotations__"):
+        for field_name, annotation in model.__annotations__.items():
+            try:
+                _, model_type = extract_inner_model(annotation)
+                if isinstance(model_type, type) and issubclass(model_type, BaseModel):
+                    result["model_sub_class"].append(field_name)
+                else:
+                    result["model_class"].append(field_name)
+            except ValueError:
+                result["model_class"].append(field_name)
+
+    return result

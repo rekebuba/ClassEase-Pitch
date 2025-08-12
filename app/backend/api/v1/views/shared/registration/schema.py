@@ -30,7 +30,7 @@ from extension.enums.enum import GradeLevelEnum, RoleEnum
 from extension.pydantic.models.grade_schema import GradeSchema
 from extension.pydantic.models.subject_schema import SubjectSchema
 from extension.pydantic.models.teacher_schema import (
-    TeacherRelationshipSchema,
+    TeacherRelatedSchema,
     TeacherSchema,
 )
 from extension.pydantic.models.student_schema import (

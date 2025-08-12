@@ -45,7 +45,14 @@ class EventSchema(BaseModel):
     description: Optional[str] = None
 
 
-class EventRelationshipSchema(BaseModel):
+class EventRelatedSchema(BaseModel):
     """This model represents the relationships of a EventSchema."""
 
     year: Optional[YearSchema] = None
+
+class EventWithRelatedSchema(EventSchema, EventRelatedSchema):
+    """
+    This model combines the EventSchema with its relationships.
+    It is used to provide a complete view of an event along with related entities.
+    """
+    pass

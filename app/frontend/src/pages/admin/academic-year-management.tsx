@@ -1,46 +1,35 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Search, Filter, Calendar, Edit } from "lucide-react"
-// import type { AcademicYear } from "@/lib/academic-year"
 import { AcademicYearViewCard, AcademicYearDetailView } from "@/components"
 import { AcademicYearSetup } from "@/pages/admin"
-import { GradeSchema, YearSchema } from "@/lib/api-response-validation"
+import { AcademicTermSchema, EventSchema, GradeSchema, SubjectSchema, YearSchema } from "@/lib/api-response-validation"
 import { sharedApi } from "@/api"
-import { Year } from "@/lib/api-response-type"
-import { pickFields } from "@/utils/pick-zod-fields"
 import { toast } from "sonner"
 import { z } from "zod"
 import { DetailAcademicYear } from "@/components/academic-year-view-card"
 import { useQuery } from "@tanstack/react-query"
 
-export type AcademicYear = Pick<Year, "id" | "calendarType" | "name" | "startDate" | "endDate" | "status" | "createdAt" | "updatedAt">;
+const AcademicYearSchema = YearSchema.extend({
+    grades: z.array(GradeSchema),
+    subjects: z.array(SubjectSchema),
+    academicTerms: z.array(AcademicTermSchema),
+    events: z.array(EventSchema),
+});
+
+export type AcademicYear = z.infer<typeof AcademicYearSchema>
 
 export default function AcademicYearManagement() {
-    // const [academicYears, setAcademicYears] = useState<AcademicYear[]>([])
     const [searchTerm, setSearchTerm] = useState("")
     const [statusFilter, setStatusFilter] = useState<string>("all")
     const [currentView, setCurrentView] = useState<"list" | "detail" | "edit" | "create">("list")
-    const [selectedAcademicYear, setSelectedAcademicYear] = useState<DetailAcademicYear | null>(null)
+    const [selectedAcademicYear, setSelectedAcademicYear] = useState<AcademicYear | null>(null)
 
-    const fetchAcademicYear = async () => {
-        const fields = [
-            "id",
-            "calendarType",
-            "name",
-            "startDate",
-            "endDate",
-            "status",
-            "createdAt",
-            "updatedAt",
-        ] as const
-        const selectYearSchema = pickFields(YearSchema, fields);
-
-        const response = await sharedApi.getYear(z.array(selectYearSchema), {
-            fields: [...fields],
-        });
+    const fetchAcademicYear = async (): Promise<AcademicYear[]> => {
+        const response = await sharedApi.getYear(z.array(AcademicYearSchema));
 
         if (!response.success) {
             toast.error(response.error.message, {

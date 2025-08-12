@@ -30,7 +30,7 @@ class AssessmentSchema(BaseModel):
     rank: Optional[int] = None
 
 
-class AssessmentRelationshipSchema(BaseModel):
+class AssessmentRelatedSchema(BaseModel):
     """This model represents the relationships of a AssessmentSchema."""
 
     student: Optional[StudentSchema] = None

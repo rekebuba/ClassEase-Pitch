@@ -30,7 +30,7 @@ class SubjectYearlyAverageSchema(BaseModel):
     rank: Optional[int] = None
 
 
-class SubjectYearlyAverageRelationshipSchema(BaseModel):
+class SubjectYearlyAverageRelatedSchema(BaseModel):
     """This model represents the relationships of a SubjectYearlyAverageSchema."""
 
     student: Optional[StudentSchema] = None

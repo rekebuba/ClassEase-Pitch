@@ -18,11 +18,11 @@ import { useQuery } from "@tanstack/react-query"
 
 interface AcademicYearViewCardProps {
     academicYear: AcademicYear
-    onEdit: (detailAcademicYear: DetailAcademicYear) => void
-    onView: (detailAcademicYear: DetailAcademicYear) => void
-    onActivate?: (detailAcademicYear: DetailAcademicYear) => void
-    onArchive?: (detailAcademicYear: DetailAcademicYear) => void
-    onDuplicate?: (detailAcademicYear: DetailAcademicYear) => void
+    onEdit: (academicYear: AcademicYear) => void
+    onView: (academicYear: AcademicYear) => void
+    onActivate?: (academicYear: AcademicYear) => void
+    onArchive?: (academicYear: AcademicYear) => void
+    onDuplicate?: (academicYear: AcademicYear) => void
 }
 
 export type DetailAcademicYear = Pick<Year, "id" | "calendarType" | "name" | "startDate" | "endDate" | "status" | "createdAt" | "updatedAt"> & {
@@ -40,41 +40,6 @@ export default function AcademicYearViewCard({
     onArchive,
     onDuplicate,
 }: AcademicYearViewCardProps) {
-    const fetchAcademicYear = async (yearId: string): Promise<DetailAcademicYear> => {
-        const gradeFields = ["id", "grade", "level", "hasStream"] as const
-        const subjectFields = ["id", "name", "code"] as const
-        const academicTermFields = ["id", "name"] as const
-        const eventFields = ["id", "title"] as const
-
-        const selectedSchema = z.object({
-            grades: z.array(pickFields(GradeSchema, gradeFields)),
-            subjects: z.array(pickFields(SubjectSchema, subjectFields)),
-            academicTerms: z.array(pickFields(AcademicTermSchema, academicTermFields)),
-            events: z.array(pickFields(EventSchema, eventFields)),
-        });
-
-        const response = await sharedApi.getYearDetail(yearId, selectedSchema, {
-            expand: ["grades", "subjects", "academicTerms", "events"],
-            nestedFields: { "grades": [...gradeFields], "subjects": [...subjectFields], "academicTerms": [...academicTermFields], "events": [...eventFields] },
-        });
-
-        if (!response.success) {
-            toast.error(response.error.message, {
-                style: { color: "red" },
-            });
-            throw new Error(response.error.message);
-        }
-
-        return { ...academicYear, ...response.data }
-    };
-
-    const { data: detailAcademicYears, error, isLoading } = useQuery({
-        queryKey: ["academicYearDetail", academicYear.id],
-        queryFn: () => fetchAcademicYear(academicYear.id),
-        enabled: !!academicYear.id,
-        refetchOnWindowFocus: false,
-    })
-
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString("en-US", {
             year: "numeric",
@@ -91,20 +56,11 @@ export default function AcademicYearViewCard({
         return `${diffDays} days`
     }
 
-    // const getTotalSubjectsInGrades = () => {
-    //     return detailAcademicYears.grades.reduce((total, grade) => {
-    //         if (grade.hasStreams) {
-    //             return total + grade.streams.reduce((streamTotal, stream) => streamTotal + stream.subjects.length, 0)
-    //         }
-    //         return total + grade.subjects.length
-    //     }, 0)
-    // }
-
     const getTotalSections = () => {
         return 0
     }
 
-    if (isLoading || !detailAcademicYears) {
+    if (!academicYear) {
         return (
             <Card className="w-full hover:shadow-md transition-shadow">
                 <CardHeader className="pb-4">
@@ -183,14 +139,14 @@ export default function AcademicYearViewCard({
                 <div className="flex items-start justify-between">
                     <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                            <CardTitle className="text-lg">{detailAcademicYears.name}</CardTitle>
-                            <AcademicYearStatusBadge status={detailAcademicYears.status} />
+                            <CardTitle className="text-lg">{academicYear.name}</CardTitle>
+                            <AcademicYearStatusBadge status={academicYear.status} />
                         </div>
                         <div className="flex items-center gap-4 text-sm text-gray-600">
                             <div className="flex items-center gap-1">
                                 <Calendar className="h-4 w-4" />
                                 <span>
-                                    {formatDate(detailAcademicYears.startDate)} - {formatDate(detailAcademicYears.endDate)}
+                                    {formatDate(academicYear.startDate)} - {formatDate(academicYear.endDate)}
                                 </span>
                             </div>
                             <div className="flex items-center gap-1">
@@ -199,15 +155,15 @@ export default function AcademicYearViewCard({
                             </div>
                             <div className="flex items-center gap-1">
                                 <span>•</span>
-                                <span className="capitalize">{detailAcademicYears.calendarType}</span>
+                                <span className="capitalize">{academicYear.calendarType}</span>
                             </div>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={() => onView(detailAcademicYears)}>
+                        <Button variant="outline" size="sm" onClick={() => onView(academicYear)}>
                             <Eye className="h-4 w-4" />
                         </Button>
-                        <Button variant="outline" size="sm" onClick={() => onEdit(detailAcademicYears)}>
+                        <Button variant="outline" size="sm" onClick={() => onEdit(academicYear)}>
                             <Edit className="h-4 w-4" />
                         </Button>
                     </div>
@@ -221,14 +177,14 @@ export default function AcademicYearViewCard({
                         <div className="flex items-center justify-center mb-1">
                             <GraduationCap className="h-5 w-5 text-blue-600" />
                         </div>
-                        <div className="text-2xl font-bold text-blue-600">{detailAcademicYears.grades.length}</div>
+                        <div className="text-2xl font-bold text-blue-600">{academicYear.grades.length}</div>
                         <div className="text-xs text-blue-600">Grades</div>
                     </div>
                     <div className="text-center p-3 bg-green-50 rounded-lg">
                         <div className="flex items-center justify-center mb-1">
                             <BookOpen className="h-5 w-5 text-green-600" />
                         </div>
-                        <div className="text-2xl font-bold text-green-600">{detailAcademicYears.subjects.length}</div>
+                        <div className="text-2xl font-bold text-green-600">{academicYear.subjects.length}</div>
                         <div className="text-xs text-green-600">Subjects</div>
                     </div>
                     <div className="text-center p-3 bg-purple-50 rounded-lg">
@@ -237,7 +193,7 @@ export default function AcademicYearViewCard({
                                 <span className="text-white text-xs font-bold">T</span>
                             </div>
                         </div>
-                        <div className="text-2xl font-bold text-purple-600">{detailAcademicYears.academicTerms.length}</div>
+                        <div className="text-2xl font-bold text-purple-600">{academicYear.academicTerms.length}</div>
                         <div className="text-xs text-purple-600">Terms</div>
                     </div>
                     <div className="text-center p-3 bg-orange-50 rounded-lg">
@@ -246,7 +202,7 @@ export default function AcademicYearViewCard({
                                 <span className="text-white text-xs font-bold">E</span>
                             </div>
                         </div>
-                        <div className="text-2xl font-bold text-orange-600">{detailAcademicYears.events.length}</div>
+                        <div className="text-2xl font-bold text-orange-600">{academicYear.events.length}</div>
                         <div className="text-xs text-orange-600">Events</div>
                     </div>
                 </div>
@@ -257,7 +213,7 @@ export default function AcademicYearViewCard({
                 <div>
                     <h4 className="font-medium mb-3 text-sm">Grade Levels</h4>
                     <div className="flex flex-wrap gap-2">
-                        {[...detailAcademicYears.grades]
+                        {[...academicYear.grades]
                             .sort((a, b) => Number(a.grade) - Number(b.grade))
                             .map((grade) => (
                                 <div key={grade.id} className="flex items-center gap-1">
@@ -273,7 +229,7 @@ export default function AcademicYearViewCard({
                 <div>
                     <h4 className="font-medium mb-3 text-sm">Subjects</h4>
                     <div className="flex flex-wrap gap-2">
-                        {detailAcademicYears.subjects.map((subjects) => (
+                        {academicYear.subjects.map((subjects) => (
                             <div key={subjects.id} className="flex items-center gap-1">
                                 <Badge variant="secondary" className="text-xs">
                                     {subjects.name}
@@ -286,22 +242,22 @@ export default function AcademicYearViewCard({
 
                 {/* Action Buttons */}
                 <div className="flex items-center justify-between">
-                    <div className="text-xs text-gray-500">Last updated: {formatDate(detailAcademicYears.updatedAt)}</div>
+                    <div className="text-xs text-gray-500">Last updated: {formatDate(academicYear.updatedAt)}</div>
                     <div className="flex items-center gap-2">
                         {onDuplicate && (
-                            <Button variant="outline" size="sm" onClick={() => onDuplicate(detailAcademicYears)}>
+                            <Button variant="outline" size="sm" onClick={() => onDuplicate(academicYear)}>
                                 <Copy className="h-4 w-4 mr-1" />
                                 Duplicate
                             </Button>
                         )}
-                        {detailAcademicYears.status === "draft" && onActivate && (
-                            <Button variant="default" size="sm" onClick={() => onActivate(detailAcademicYears)}>
+                        {academicYear.status === "draft" && onActivate && (
+                            <Button variant="default" size="sm" onClick={() => onActivate(academicYear)}>
                                 <Play className="h-4 w-4 mr-1" />
                                 Activate
                             </Button>
                         )}
-                        {detailAcademicYears.status === "active" && onArchive && (
-                            <Button variant="outline" size="sm" onClick={() => onArchive(detailAcademicYears)}>
+                        {academicYear.status === "active" && onArchive && (
+                            <Button variant="outline" size="sm" onClick={() => onArchive(academicYear)}>
                                 <Archive className="h-4 w-4 mr-1" />
                                 Archive
                             </Button>

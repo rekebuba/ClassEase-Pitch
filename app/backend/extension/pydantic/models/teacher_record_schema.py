@@ -28,7 +28,7 @@ class TeacherRecordSchema(BaseModel):
     academic_term_id: uuid.UUID
 
 
-class TeacherRecordRelationshipSchema(BaseModel):
+class TeacherRecordRelatedSchema(BaseModel):
     """This model represents the relationships of a TeacherRecordSchema."""
 
     teacher: Optional[TeacherSchema] = None

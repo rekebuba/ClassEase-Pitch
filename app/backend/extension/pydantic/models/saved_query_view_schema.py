@@ -28,7 +28,7 @@ class SavedQueryViewSchema(BaseModel):
     query_json: Dict[str, Any]
 
 
-class SavedQueryViewRelationshipSchema(BaseModel):
+class SavedQueryViewRelatedSchema(BaseModel):
     """This model represents the relationships of a SavedQueryViewSchema."""
 
     user: Optional[UserSchema] = None

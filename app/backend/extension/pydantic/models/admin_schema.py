@@ -43,11 +43,11 @@ class AdminSchema(BaseModel):
         }
 
 
-class AdminRelationshipSchema(BaseModel):
+class AdminRelatedSchema(BaseModel):
     """This model represents the relationships of an AdminSchema."""
 
     user: Optional[UserSchema] = None
 
 
-class AdminWithRelationshipsSchema(AdminSchema, AdminRelationshipSchema):
+class AdminWithRelatedSchema(AdminSchema, AdminRelatedSchema):
     pass

@@ -9,19 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { GradeSetupCard } from "@/components/academic-year/form-setup";
 import z from "zod";
-import { pickFields } from "@/utils/pick-zod-fields";
-import { GradeSchema, SectionSchema, StreamSchema, SubjectSchema } from "@/lib/api-response-validation";
-import { sharedApi } from "@/api";
-import { toast } from "sonner";
-import { useQueries, useQuery } from "@tanstack/react-query";
-import FadeIn from "@/components/fade-in";
+import { SubjectSchema } from "@/lib/api-response-validation";
 
 type Stream = YearSetupType["grades"][number]["streams"][number];
-
-const GRADE_FIELDS = GradeSchema.keyof().options;
-const SECTION_KEYS = SectionSchema.keyof().options;
-const SUBJECT_KEYS = SubjectSchema.keyof().options;
-const STREAM_KEYS = StreamSchema.keyof().options;
 
 export default function GradesTab({
     onDirty,
@@ -48,68 +38,6 @@ export default function GradesTab({
 
     const watchGrades = watch("grades")
 
-    // Fetch a single grade detail
-    const fetchGrade = useCallback(async (gradeId: string) => {
-        try {
-            const schema = pickFields(GradeSchema, GRADE_FIELDS).extend({
-                sections: z.array(SectionSchema),
-                subjects: z.array(SubjectSchema),
-                streams: z.array(StreamSchema),
-            })
-
-            const response = await sharedApi.getGradeDetail(gradeId, schema, {
-                fields: GRADE_FIELDS,
-                expand: ["sections", "subjects", "streams"],
-                nestedFields: {
-                    sections: SECTION_KEYS,
-                    subjects: SUBJECT_KEYS,
-                    streams: STREAM_KEYS,
-                },
-            })
-
-            if (!response.success) throw new Error(response.error.message)
-
-            return response.data
-        } catch (error) {
-            toast.error("Failed to fetch grade details", {
-                description: error instanceof Error ? error.message : "Unknown error occurred",
-            })
-            throw error
-        }
-    }, [])
-
-    // Queries for all grades
-    const gradeQueries = useQueries({
-        queries: gradeFields.map((grade) => ({
-            queryKey: ["grade-detail", grade.id],
-            queryFn: () => fetchGrade(grade.id),
-            enabled: !!grade.id,
-            staleTime: 5 * 60 * 1000,
-        })),
-    })
-
-    // Sync fetched data to form
-    useEffect(() => {
-        if (gradeQueries.some((q) => q.isFetching)) return
-
-        gradeQueries.forEach((query, index) => {
-            if (query.isSuccess && query.data && index < gradeFields.length) {
-                const { id, grade, level, yearId, hasStream, subjects, sections, streams } = query.data
-
-                setValue(`grades.${index}`, {
-                    id,
-                    yearId,
-                    grade,
-                    level,
-                    hasStream,
-                    subjects: subjects.map(({ id, name, code }) => ({ id, name, code })),
-                    sections: sections.map(({ id, gradeId, section }) => ({ id, gradeId, section })),
-                    streams: streams.map(({ id, gradeId, name }) => ({ id, gradeId, name, subjects: [] })),
-                }, { shouldDirty: false }) // Avoid marking as dirty on API load
-            }
-        })
-    }, [gradeQueries.map((q) => q.data).join("|")]) // Track data changes
-
     const filteredGrades = watchGrades.filter((grade) =>
         grade.grade.toLowerCase().includes(searchTerm.toLowerCase())
     )
@@ -129,8 +57,6 @@ export default function GradesTab({
         setFormIndex(0)
         setFormDialogOpen(true)
     }, [prependGrade])
-
-    const isLoading = gradeQueries.some((q) => q.isLoading)
 
     return (
         <Card>
@@ -191,23 +117,13 @@ export default function GradesTab({
                                 <div className="grid grid-cols-3 gap-3 mb-4">
                                     <div className="text-center p-2 bg-blue-50 rounded-lg">
                                         <GraduationCap className="h-4 w-4 text-blue-600 mx-auto mb-1" />
-                                        <FadeIn
-                                            isLoading={isLoading}
-                                            loader={<div className="h-4 w-4 animate-spin border-2 border-blue-500 rounded-full"></div>}
-                                        >
-                                            <div className="text-sm font-semibold text-blue-900">{grade.sections.length}</div>
-                                        </FadeIn>
+                                        <div className="text-sm font-semibold text-blue-900">{grade.sections.length}</div>
                                         <div className="text-xs text-blue-700">Sections</div>
                                     </div>
 
                                     <div className="text-center p-2 bg-purple-50 rounded-lg">
                                         <Users className="h-4 w-4 text-purple-600 mx-auto mb-1" />
-                                        <FadeIn
-                                            isLoading={isLoading}
-                                            loader={<div className="h-4 w-4 animate-spin border-2 border-blue-500 rounded-full"></div>}
-                                        >
-                                            <div className="text-sm font-semibold text-purple-900">{grade.streams.length}</div>
-                                        </FadeIn>
+                                        <div className="text-sm font-semibold text-purple-900">{grade.streams.length}</div>
                                         <div className="text-xs text-purple-700">Streams</div>
                                     </div>
 
@@ -311,51 +227,7 @@ interface CollapsibleStreamCardProps {
 }
 
 const CollapsibleStreamCard = ({ stream, formIndex, streamIndex }: CollapsibleStreamCardProps) => {
-    const { control, watch, setValue } = useFormContext<YearSetupType>()
     const [isExpanded, setIsExpanded] = useState(true);
-
-
-    // Memoized fetch function with error handling
-    const fetchStream = useCallback(async (streamId: string) => {
-        try {
-            const schema = z.object({ subjects: z.array(SubjectSchema) });
-
-            const response = await sharedApi.getStreamDetail(streamId, schema, {
-                expand: ["subjects"],
-                nestedFields: { subjects: SUBJECT_KEYS },
-            });
-
-            if (!response.success) {
-                throw new Error(response.error.message);
-            }
-
-            return response.data;
-        } catch (error) {
-            toast.error("Failed to fetch grade details", {
-                description: error instanceof Error ? error.message : "Unknown error occurred",
-            });
-            throw error;
-        }
-    }, []);
-
-    // Fetch stream details for each grade
-    const streamQueries = useQuery({
-        queryKey: ['stream-detail', stream.id],
-        queryFn: () => fetchStream(stream.id),
-        enabled: !!stream.id, // Only fetch if grade has an ID
-        staleTime: 5 * 60 * 1000, // 5 minutes cache
-    });
-
-    // Update form values when data is fetched
-    useEffect(() => {
-        if (streamQueries.isFetching) return;
-
-        if (streamQueries.isSuccess && streamQueries.data) {
-            const { subjects } = streamQueries.data;
-
-            setValue(`grades.${formIndex}.streams.${streamIndex}.subjects`, subjects);
-        }
-    }, [streamQueries.isFetching]);
 
     return (
         <Card className="p-2 bg-gray-50 hover:bg-gray-100 transition-colors border-l-4 border-l-purple-300 mb-3">

@@ -1,12 +1,20 @@
 from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, List, Optional, Set
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 from extension.enums.enum import GradeLevelEnum
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
+    from .section_schema import SectionWithRelatedSchema
+    from .stream_schema import StreamWithRelatedSchema
+    from .student_schema import StudentWithRelatedSchema
+    from .student_term_record_schema import StudentTermRecordWithRelatedSchema
+    from .subject_schema import SubjectWithRelatedSchema
+    from .teacher_schema import TeacherWithRelatedSchema
+    from .teacher_term_record_schema import TeacherTermRecordWithRelatedSchema
+    from .year_schema import YearWithRelatedSchema
     from .student_term_record_schema import StudentTermRecordSchema
     from .teacher_term_record_schema import TeacherTermRecordSchema
     from .teacher_schema import TeacherSchema
@@ -44,7 +52,7 @@ class GradeSchema(BaseModel):
         return {"id", "grade"}
 
 
-class GradeRelationshipSchema(BaseModel):
+class GradeRelatedSchema(BaseModel):
     """This model represents the relationships of a GradeSchema.
     It is used to define the relationships between the GradeSchema and other schemas.
     """
@@ -65,5 +73,26 @@ class GradeRelationshipSchema(BaseModel):
     subjects: List[SubjectSchema] = []
 
 
-class GradeWithRelationshipsSchema(GradeSchema, GradeRelationshipSchema):
+class GradeNestedSchema(GradeSchema):
+    """This model represents the relationships of a GradeSchema.
+    It is used to define the relationships between the GradeSchema and other schemas.
+    """
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    year: Optional[YearWithRelatedSchema]
+    teacher_term_records: Optional[List[TeacherTermRecordWithRelatedSchema]] = []
+    student_term_records: Optional[List[StudentTermRecordWithRelatedSchema]] = []
+    teachers: List[TeacherWithRelatedSchema] = []
+    streams: List[StreamWithRelatedSchema] = []
+    students: List[StudentWithRelatedSchema] = []
+    sections: List[SectionWithRelatedSchema] = []
+    subjects: List[SubjectWithRelatedSchema] = []
+
+
+class GradeWithRelatedSchema(GradeSchema, GradeRelatedSchema):
     pass

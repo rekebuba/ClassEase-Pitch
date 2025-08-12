@@ -7,9 +7,9 @@ from api.v1.utils.typing import IncEx, UserT
 from api.v1.views.utils import student_teacher_or_admin_required
 from api.v1.views.student import stud
 from extension.pydantic.models.student_schema import (
-    StudentRelationshipSchema,
+    StudentRelatedSchema,
     StudentSchema,
-    StudentWithRelationshipsSchema,
+    StudentWithRelatedSchema,
 )
 from extension.pydantic.response.schema import success_response
 from models.student import Student
@@ -56,7 +56,7 @@ def get_student_info(
 @stud.route("/students/<uuid:student_id>", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(StudentSchema, StudentSchema.default_fields())
-@validate_expand(StudentRelationshipSchema)
+@validate_expand(StudentRelatedSchema)
 def get_student_by_id(
     user: UserT,
     fields: dict[str, IncEx],
@@ -79,7 +79,7 @@ def get_student_by_id(
     if not student:
         return jsonify({"error": f"Student with the id {student_id} not found"}), 404
 
-    student_schema = StudentWithRelationshipsSchema.model_validate(student)
+    student_schema = StudentWithRelatedSchema.model_validate(student)
     response = student_schema.model_dump(
         by_alias=True,
         exclude_none=True,

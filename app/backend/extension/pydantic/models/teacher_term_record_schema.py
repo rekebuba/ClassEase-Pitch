@@ -31,7 +31,7 @@ class TeacherTermRecordSchema(BaseModel):
     stream_id: uuid.UUID | None
 
 
-class TeacherTermRecordRelationshipSchema(BaseModel):
+class TeacherTermRecordRelatedSchema(BaseModel):
     """
     This model represents a TeacherTermRecordSchema with its relationships.
     """
@@ -50,8 +50,8 @@ class TeacherTermRecordRelationshipSchema(BaseModel):
     stream: Optional[StreamSchema] = None
 
 
-class TeacherTermRecordSchemaWithRelationships(
-    TeacherTermRecordSchema, TeacherTermRecordRelationshipSchema
+class TeacherTermRecordWithRelatedSchema(
+    TeacherTermRecordSchema, TeacherTermRecordRelatedSchema
 ):
     """
     This model combines the TeacherTermRecordSchema with its relationships.

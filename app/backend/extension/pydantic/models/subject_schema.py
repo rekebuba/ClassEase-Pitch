@@ -5,6 +5,10 @@ from pydantic import BaseModel, ConfigDict
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
+    from .stream_schema import StreamWithRelatedSchema
+    from .teacher_schema import TeacherWithRelatedSchema
+    from .teacher_term_record_schema import TeacherTermRecordWithRelatedSchema
+    from .grade_schema import GradeWithRelatedSchema
     from .teacher_term_record_schema import TeacherTermRecordSchema
     from .teacher_schema import TeacherSchema
     from .grade_schema import GradeSchema
@@ -23,6 +27,7 @@ class SubjectSchema(BaseModel):
     )
 
     id: uuid.UUID | None = None
+    year_id: uuid.UUID
     name: str
     code: str
 
@@ -35,7 +40,7 @@ class SubjectSchema(BaseModel):
         return {"id", "name", "code"}
 
 
-class SubjectRelationshipSchema(BaseModel):
+class SubjectRelatedSchema(BaseModel):
     """This model represents the relationships of a SubjectSchema.
     It is used to define the relationships between the SubjectSchema and other schemas.
     """
@@ -48,9 +53,26 @@ class SubjectRelationshipSchema(BaseModel):
 
     teacher_term_records: Optional[List[TeacherTermRecordSchema]] = []
     teachers: List[TeacherSchema] = []
-    grades: List[GradeSchema] = []
     streams: List[StreamSchema] = []
+    grades: List[GradeSchema] = []
 
 
-class SubjectWithRelationshipsSchema(SubjectSchema, SubjectRelationshipSchema):
+class SubjectNestedSchema(SubjectSchema):
+    """This model represents the relationships of a SubjectSchema.
+    It is used to define the relationships between the SubjectSchema and other schemas.
+    """
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    teacher_term_records: Optional[List[TeacherTermRecordWithRelatedSchema]] = []
+    teachers: List[TeacherWithRelatedSchema] = []
+    streams: List[StreamWithRelatedSchema] = []
+    grades: List[GradeWithRelatedSchema] = []
+
+
+class SubjectWithRelatedSchema(SubjectSchema, SubjectRelatedSchema):
     pass

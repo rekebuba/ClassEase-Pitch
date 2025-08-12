@@ -32,7 +32,7 @@ class MarkListSchema(BaseModel):
     score: Optional[float] = None
 
 
-class MarkListRelationshipSchema(BaseModel):
+class MarkListRelatedSchema(BaseModel):
     """
     This model represents the relationships associated with a MarkList.
     """

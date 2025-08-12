@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react"
+import { useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,15 +8,7 @@ import { YearSetupType } from "@/lib/api-response-type"
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { useQueries } from "@tanstack/react-query"
-import { toast } from "sonner"
-import { sharedApi } from "@/api"
-import { GradeSchema, StreamSchema } from "@/lib/api-response-validation"
-import z from "zod"
 
-
-const GRADE_FIELDS = GradeSchema.keyof().options;
-const STREAM_FIELDS = StreamSchema.keyof().options;
 
 export default function SubjectsTab({
     onDirty,
@@ -42,60 +34,6 @@ export default function SubjectsTab({
     })
     const watchForm = watch()
 
-    const fetchSubject = useCallback(async (subjectId: string) => {
-        try {
-
-            const selectedSchema = z.object({
-                grades: z.array(GradeSchema),
-                streams: z.array(StreamSchema),
-            });
-
-            const response = await sharedApi.getSubjectDetail(subjectId, selectedSchema, {
-                expand: ["grades", "streams"],
-                nestedFields: { "grades": GRADE_FIELDS, "streams": STREAM_FIELDS },
-            });
-
-            if (!response.success) {
-                toast.error(response.error.message, {
-                    style: { color: "red" },
-                });
-                throw new Error(response.error.message);
-            }
-            return response.data;
-        } catch (error) {
-            toast.error("Failed to fetch grade details", {
-                description: error instanceof Error ? error.message : "Unknown error occurred",
-            });
-            throw error;
-        }
-    }, []);
-
-    const subjectQueries = useQueries({
-        queries: subjectFields.map((subject) => ({
-            queryKey: ['new-subject-detail', subject.id],
-            queryFn: () => fetchSubject(subject.id),
-            enabled: !!subject.id,
-            staleTime: 5 * 60 * 1000, // 5 minutes cache
-        })),
-    })
-
-    // Update form values when data is fetched
-    useEffect(() => {
-        if (subjectQueries.some(q => q.isFetching)) return;
-
-        subjectQueries.forEach((query, index) => {
-            if (query.isSuccess && query.data && index < subjectFields.length) {
-                const { grades, streams } = query.data;
-
-                setValue(`subjects.${index}.grades`, grades);
-                setValue(`subjects.${index}.streams`, streams);
-            }
-        });
-    }, [subjectQueries.every(q => q.isFetched)]);
-
-    // Loading state
-    const isLoading = subjectQueries.some(query => query.isLoading);
-
     const filteredSubjects = watchForm.subjects.filter((subject) => {
         const matchesSearch =
             subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -104,7 +42,13 @@ export default function SubjectsTab({
     })
 
     const handleCreateSubject = () => {
-        prependSubject({ id: "", name: "", code: "", grades: [], streams: [] }); // Add empty subject
+        prependSubject({
+            id: "",
+            name: "",
+            code: "",
+            grades: [],
+            streams: []
+        }); // Add empty subject
         setFormMode("create");
         setFormIndex(0); // Always edit the first subject in the list
         setFormDialogOpen(true);

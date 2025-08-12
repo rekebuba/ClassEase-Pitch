@@ -6,9 +6,9 @@ from api.v1.utils.parameter import validate_expand, validate_fields
 from api.v1.utils.typing import IncEx, UserT
 from api.v1.views.utils import student_teacher_or_admin_required
 from extension.pydantic.models.teacher_schema import (
-    TeacherRelationshipSchema,
+    TeacherRelatedSchema,
     TeacherSchema,
-    TeacherWithRelationshipsSchema,
+    TeacherWithRelatedSchema,
 )
 from extension.pydantic.response.schema import success_response
 from models.teacher import Teacher
@@ -55,7 +55,7 @@ def get_teacher_info(
 @base_api.route("/teachers/<uuid:teacher_id>", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(TeacherSchema, TeacherSchema.default_fields())
-@validate_expand(TeacherRelationshipSchema)
+@validate_expand(TeacherRelatedSchema)
 def get_teacher_by_id(
     user: UserT,
     fields: dict[str, IncEx],
@@ -78,7 +78,7 @@ def get_teacher_by_id(
     if not teacher:
         return jsonify({"error": f"Teacher with the id {teacher_id} not found"}), 404
 
-    teacher_schema = TeacherWithRelationshipsSchema.model_validate(teacher)
+    teacher_schema = TeacherWithRelatedSchema.model_validate(teacher)
     response = teacher_schema.model_dump(
         by_alias=True,
         exclude_none=True,
