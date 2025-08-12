@@ -7,9 +7,9 @@ from api.v1.utils.typing import IncEx, UserT
 from api.v1.views.shared import auths as auth
 from api.v1.views.utils import student_teacher_or_admin_required
 from extension.pydantic.models.section_schema import (
-    SectionRelationshipSchema,
+    SectionRelatedSchema,
     SectionSchema,
-    SectionSchemaWithRelationships,
+    SectionWithRelatedSchema,
 )
 from extension.pydantic.response.schema import error_response, success_response
 from models import storage
@@ -57,7 +57,7 @@ def get_sections(
 @auth.route("/sections/<uuid:section_id>", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(SectionSchema, SectionSchema.default_fields())
-@validate_expand(SectionRelationshipSchema)
+@validate_expand(SectionRelatedSchema)
 def get_section_by_id(
     user: UserT,
     fields: dict[str, IncEx],
@@ -75,7 +75,7 @@ def get_section_by_id(
     if not section:
         return jsonify({"error": "Section not found"}), 404
 
-    section_schema = SectionSchemaWithRelationships.model_validate(section)
+    section_schema = SectionWithRelatedSchema.model_validate(section)
     section_response = section_schema.model_dump(
         by_alias=True,
         include={

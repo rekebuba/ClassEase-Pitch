@@ -8,9 +8,9 @@ from api.v1.views import errors
 from api.v1.views.shared import auths as auth
 from api.v1.views.utils import student_teacher_or_admin_required
 from extension.pydantic.models.stream_schema import (
-    StreamRelationshipSchema,
+    StreamRelatedSchema,
     StreamSchema,
-    StreamWithRelationshipSchema,
+    StreamWithRelatedSchema,
 )
 from extension.pydantic.response.schema import error_response, success_response
 from models import storage
@@ -56,7 +56,7 @@ def get_streams(
 @auth.route("/streams/<uuid:stream_id>", methods=["GET"])
 @student_teacher_or_admin_required
 @validate_fields(StreamSchema, StreamSchema.default_fields())
-@validate_expand(StreamRelationshipSchema)
+@validate_expand(StreamRelatedSchema)
 def get_stream_by_id(
     user: UserT,
     fields: dict[str, IncEx],
@@ -73,7 +73,7 @@ def get_stream_by_id(
     if not stream:
         return errors.handle_not_found_error(message="Stream not found")
 
-    stream_schema = StreamWithRelationshipSchema.model_validate(stream)
+    stream_schema = StreamWithRelatedSchema.model_validate(stream)
     stream_response = stream_schema.model_dump(
         by_alias=True,
         exclude_none=True,

@@ -1,16 +1,22 @@
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Save, Eye } from "lucide-react"
 import { DetailAcademicYear } from "@/components/academic-year-view-card"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { FormProvider, useForm } from "react-hook-form"
-import { YearSetupSchema } from "@/lib/api-response-validation"
+import { GradeSchema, SectionSchema, StreamSchema, SubjectSchema, YearSetupSchema } from "@/lib/api-response-validation"
 import type { YearSetupType } from "@/lib/api-response-type"
 import { UnsavedChangesDialog } from "@/components/unsaved-changes-dialog"
 import { AcademicYearTabs } from "@/components/academic-year/academic-year-tabs"
+import type { AcademicYear } from "./academic-year-management"
+import z from "zod"
+import sharedApi from "@/api/sharedApi"
+import { toast } from "sonner"
+import { debounce } from "lodash"
+import { useQuery } from "@tanstack/react-query"
 
 interface AcademicYearSetupProps {
-    initialData?: DetailAcademicYear
+    initialData?: AcademicYear
     onSave?: (academicYear: DetailAcademicYear) => void
     onCancel?: () => void
     mode?: "create" | "edit"
@@ -27,39 +33,103 @@ export default function AcademicYearSetup({
     const [pendingTab, setPendingTab] = useState<string | null>(null)
     const [dialogOpen, setDialogOpen] = useState(false)
 
-    // const [defaultNestedGrade, setDefaultNestedGrade] = useState<YearSetupType["grades"]>([])
+    const [defaultValues] = useState<YearSetupType>({
+        id: crypto.randomUUID(),
+        calendarType: "" as "Semester",
+        name: "",
+        startDate: "",
+        endDate: "",
+        status: "",
+        createdAt: "",
+        updatedAt: "",
+        grades: [],
+        subjects: [],
+    })
 
-    const defaultValues: YearSetupType = {
-        year: {
-            id: initialData ? initialData.id : crypto.randomUUID(),
-            calendarType: initialData ? initialData.calendarType : "" as "Semester",
-            name: initialData ? initialData.name : "",
-            startDate: initialData ? initialData.startDate : "",
-            endDate: initialData ? initialData.endDate : "",
-            status: initialData ? initialData.status : "",
-            createdAt: initialData ? initialData.createdAt : "",
-            updatedAt: initialData ? initialData.updatedAt : ""
-        },
-        grades: initialData ? initialData.grades.map((grade) => ({
-            ...grade,
-            yearId: "",
-            sections: [],
-            subjects: [],
-            streams: [],
-        }))
-            : [],
-        subjects: initialData ? initialData.subjects.map((subject) => ({
-            ...subject,
-            grades: [],
-            streams: [],
-        })) : [],
-    }
+    // Fetch grade detail
+    const fetchGrade = useCallback(async (yearId: string): Promise<YearSetupType['grades']> => {
+        try {
+            const schema = z.array(
+                GradeSchema.extend({
+                    subjects: z.array(SubjectSchema),
+                    sections: z.array(SectionSchema),
+                    streams: z.array(StreamSchema.extend({
+                        subjects: z.array(SubjectSchema),
+                    })),
+                })
+            )
+
+            const response = await sharedApi.getGrade(yearId, schema)
+
+            if (!response.success) throw new Error(response.error.message)
+
+            return response.data
+        } catch (error) {
+            toast.error("Failed to fetch grade details", {
+                description: error instanceof Error ? error.message : "Unknown error occurred",
+            })
+            throw error
+        }
+    }, [])
+
+    // Fetch subject detail
+    const fetchSubject = useCallback(async (yearId: string): Promise<YearSetupType['subjects']> => {
+        try {
+            const schema = z.array(
+                SubjectSchema.extend({
+                    grades: z.array(GradeSchema),
+                    streams: z.array(StreamSchema),
+                }))
+
+            const response = await sharedApi.getSubject(yearId, schema)
+
+            if (!response.success) throw new Error(response.error.message)
+
+            return response.data
+        } catch (error) {
+            toast.error("Failed to fetch grade details", {
+                description: error instanceof Error ? error.message : "Unknown error occurred",
+            })
+            throw error
+        }
+    }, [])
 
     const form = useForm<YearSetupType>({
         resolver: zodResolver(YearSetupSchema),
         defaultValues
     })
     const watchForm = form.watch()
+
+    const gradeQuery = useQuery({
+        queryKey: ['grades', initialData?.id],
+        queryFn: () => initialData?.id ? fetchGrade(initialData.id) : null,
+        enabled: !!initialData?.id,
+        staleTime: 0,
+        gcTime: 0,
+    });
+
+    const subjectQuery = useQuery({
+        queryKey: ['subjects', initialData?.id],
+        queryFn: () => initialData?.id ? fetchSubject(initialData.id) : null,
+        enabled: !!initialData?.id,
+        staleTime: 0,
+        gcTime: 0,
+    });
+
+    // Combined effect
+    useEffect(() => {
+        if (
+            gradeQuery.isSuccess && gradeQuery.data &&
+            subjectQuery.isSuccess && subjectQuery.data &&
+            initialData
+        ) {
+            form.reset({
+                ...initialData,
+                grades: gradeQuery.data,
+                subjects: subjectQuery.data,
+            });
+        }
+    }, [gradeQuery.isSuccess, subjectQuery.isSuccess, initialData, form]);
 
     function requestTabChange(nextTab: string) {
         if (unsavedChanges) {

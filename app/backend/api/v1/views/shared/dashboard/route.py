@@ -3,14 +3,14 @@ import uuid
 from flask import Response
 from sqlalchemy import select
 from extension.pydantic.models.student_schema import (
-    StudentRelationshipSchema,
+    StudentRelatedSchema,
     StudentSchema,
-    StudentWithRelationshipsSchema,
+    StudentWithRelatedSchema,
 )
 from extension.pydantic.models.teacher_schema import (
-    TeacherRelationshipSchema,
+    TeacherRelatedSchema,
     TeacherSchema,
-    TeacherWithRelationshipsSchema,
+    TeacherWithRelatedSchema,
 )
 from extension.pydantic.response.schema import error_response, success_response
 from models import storage
@@ -24,9 +24,9 @@ from api.v1.views.utils import (
     teacher_required,
 )
 from extension.pydantic.models.admin_schema import (
-    AdminRelationshipSchema,
+    AdminRelatedSchema,
     AdminSchema,
-    AdminWithRelationshipsSchema,
+    AdminWithRelatedSchema,
 )
 from extension.pydantic.models.user_schema import UserSchema
 from models.admin import Admin
@@ -54,7 +54,7 @@ def user(
 @auth.route("/users/<uuid:user_id>/admin", methods=["GET"])
 @admin_required
 @validate_fields(AdminSchema, AdminSchema.default_fields())
-@validate_expand(AdminRelationshipSchema)
+@validate_expand(AdminRelatedSchema)
 def admin_data(
     user: UserT,
     fields: dict[str, IncEx],
@@ -66,7 +66,7 @@ def admin_data(
     if not admin:
         return error_response(message=f"User with ID {user_id} not found.", status=404)
 
-    admin_schema = AdminWithRelationshipsSchema.model_validate(admin)
+    admin_schema = AdminWithRelatedSchema.model_validate(admin)
     response = admin_schema.model_dump(
         by_alias=True,
         include={
@@ -82,7 +82,7 @@ def admin_data(
 @auth.route("/users/<uuid:user_id>/student", methods=["GET"])
 @student_required
 @validate_fields(StudentSchema, StudentSchema.default_fields())
-@validate_expand(StudentRelationshipSchema)
+@validate_expand(StudentRelatedSchema)
 def student_data(
     user: UserT,
     fields: dict[str, IncEx],
@@ -94,7 +94,7 @@ def student_data(
     if not student:
         return error_response(message=f"User with ID {user_id} not found.", status=404)
 
-    student_schema = StudentWithRelationshipsSchema.model_validate(student)
+    student_schema = StudentWithRelatedSchema.model_validate(student)
     response = student_schema.model_dump(
         by_alias=True,
         include={
@@ -110,7 +110,7 @@ def student_data(
 @auth.route("/users/<uuid:user_id>/teacher", methods=["GET"])
 @teacher_required
 @validate_fields(TeacherSchema, TeacherSchema.default_fields())
-@validate_expand(TeacherRelationshipSchema)
+@validate_expand(TeacherRelatedSchema)
 def teacher_data(
     user: UserT,
     fields: dict[str, IncEx],
@@ -122,7 +122,7 @@ def teacher_data(
     if not teacher:
         return error_response(message=f"User with ID {user_id} not found.", status=404)
 
-    teacher_schema = TeacherWithRelationshipsSchema.model_validate(teacher)
+    teacher_schema = TeacherWithRelatedSchema.model_validate(teacher)
     response = teacher_schema.model_dump(
         by_alias=True,
         include={

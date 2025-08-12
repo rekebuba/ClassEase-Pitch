@@ -8,6 +8,13 @@ from extension.enums.enum import AcademicTermTypeEnum, AcademicYearStatusEnum
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
+    from .academic_term_schema import AcademicTermWithRelatedSchema
+    from .event_schema import EventWithRelatedSchema
+    from .grade_schema import GradeWithRelatedSchema
+    from .student_schema import StudentWithRelatedSchema
+    from .student_year_record_schema import StudentYearRecordWithRelatedSchema
+    from .subject_schema import SubjectWithRelatedSchema
+    from .teacher_schema import TeacherWithRelatedSchema
     from .student_year_record_schema import StudentYearRecordSchema
     from .event_schema import EventSchema
     from .academic_term_schema import AcademicTermSchema
@@ -49,7 +56,7 @@ class YearSchema(BaseModel):
         return {"id", "name", "status"}
 
 
-class YearRelationshipSchema(BaseModel):
+class YearRelatedSchema(BaseModel):
     """This model represents the relationships of a YearSchema."""
 
     model_config = ConfigDict(
@@ -68,7 +75,25 @@ class YearRelationshipSchema(BaseModel):
     subjects: List[SubjectSchema] = []
 
 
-class YearSchemaWithRelationships(YearSchema, YearRelationshipSchema):
+class YearNestedSchema(YearSchema):
+    """This model represents the relationships of a YearSchema."""
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    student_year_records: List[StudentYearRecordWithRelatedSchema] = []
+    events: List[EventWithRelatedSchema] = []
+    academic_terms: List[AcademicTermWithRelatedSchema] = []
+    grades: List[GradeWithRelatedSchema] = []
+    students: List[StudentWithRelatedSchema] = []
+    teachers: List[TeacherWithRelatedSchema] = []
+    subjects: List[SubjectWithRelatedSchema] = []
+
+
+class YearWithRelatedSchema(YearSchema, YearRelatedSchema):
     """This model represents a YearSchema with its relationships."""
 
     pass

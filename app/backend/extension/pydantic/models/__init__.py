@@ -1,189 +1,217 @@
 from .teacher_term_record_schema import (
-    TeacherTermRecordRelationshipSchema,
+    TeacherTermRecordRelatedSchema,
     TeacherTermRecordSchema,
-    TeacherTermRecordSchemaWithRelationships,
+    TeacherTermRecordWithRelatedSchema,
 )
 from .academic_term_schema import (
-    AcademicTermRelationshipSchema,
+    AcademicTermRelatedSchema,
     AcademicTermSchema,
-    AcademicTermSchemaWithRelationships,
+    AcademicTermWithRelatedSchema,
 )
 from .admin_schema import (
-    AdminRelationshipSchema,
+    AdminRelatedSchema,
     AdminSchema,
-    AdminWithRelationshipsSchema,
+    AdminWithRelatedSchema,
 )
 from .assessment_schema import (
-    AssessmentRelationshipSchema,
+    AssessmentRelatedSchema,
     AssessmentSchema,
 )
 from .blacklist_token_schema import BlacklistTokenSchema
-from .event_schema import EventRelationshipSchema, EventSchema
+from .event_schema import EventRelatedSchema, EventSchema, EventWithRelatedSchema
 from .grade_schema import (
-    GradeRelationshipSchema,
+    GradeNestedSchema,
+    GradeRelatedSchema,
     GradeSchema,
-    GradeWithRelationshipsSchema,
+    GradeWithRelatedSchema,
 )
 from .grade_stream_link_schema import GradeStreamLinkSchema
 from .mark_list_schema import MarkListSchema
 from .registration_schema import RegistrationSchema
 from .saved_query_view_schema import (
-    SavedQueryViewRelationshipSchema,
+    SavedQueryViewRelatedSchema,
     SavedQueryViewSchema,
 )
 from .section_schema import (
-    SectionRelationshipSchema,
+    SectionRelatedSchema,
     SectionSchema,
-    SectionSchemaWithRelationships,
+    SectionWithRelatedSchema,
 )
 from .stream_schema import (
-    StreamRelationshipSchema,
+    StreamRelatedSchema,
     StreamSchema,
-    StreamWithRelationshipSchema,
+    StreamWithRelatedSchema,
 )
 from .student_schema import (
-    StudentRelationshipSchema,
+    StudentRelatedSchema,
     StudentSchema,
-    StudentWithRelationshipsSchema,
+    StudentWithRelatedSchema,
 )
 from .student_term_record_schema import (
-    StudentTermRecordRelationshipSchema,
+    StudentTermRecordRelatedSchema,
     StudentTermRecordSchema,
+    StudentTermRecordWithRelatedSchema,
 )
 from .student_year_record_schema import (
-    StudentYearRecordRelationshipSchema,
+    StudentYearRecordRelatedSchema,
     StudentYearRecordSchema,
+    StudentYearRecordWithRelatedSchema,
 )
 from .subject_schema import (
-    SubjectRelationshipSchema,
+    SubjectNestedSchema,
+    SubjectRelatedSchema,
     SubjectSchema,
-    SubjectWithRelationshipsSchema,
+    SubjectWithRelatedSchema,
 )
 from .subject_yearly_average_schema import (
-    SubjectYearlyAverageRelationshipSchema,
+    SubjectYearlyAverageRelatedSchema,
     SubjectYearlyAverageSchema,
 )
 from .table_schema import TableSchema
 from .teacher_grade_link_schema import TeacherGradeLinkSchema
 from .teacher_record_schema import (
-    TeacherRecordRelationshipSchema,
+    TeacherRecordRelatedSchema,
     TeacherRecordSchema,
 )
 from .teacher_schema import (
-    TeacherRelationshipSchema,
+    TeacherRelatedSchema,
     TeacherSchema,
-    TeacherWithRelationshipsSchema,
+    TeacherWithRelatedSchema,
 )
 from .teacher_subject_link_schema import TeacherSubjectLinkSchema
-from .user_schema import UserRelationshipSchema, UserSchema, UserWithRelationshipsSchema
-from .year_schema import YearRelationshipSchema, YearSchema, YearSchemaWithRelationships
+from .user_schema import UserRelatedSchema, UserSchema, UserWithRelatedSchema
+from .year_schema import (
+    YearNestedSchema,
+    YearRelatedSchema,
+    YearSchema,
+    YearWithRelatedSchema,
+)
 from .yearly_subject_schema import (
-    YearlySubjectRelationshipSchema,
+    YearlySubjectRelatedSchema,
     YearlySubjectSchema,
 )
 
 __all__ = [
     "AcademicTermSchema",
-    "AcademicTermRelationshipSchema",
-    "AcademicTermSchemaWithRelationships",
+    "AcademicTermRelatedSchema",
+    "AcademicTermWithRelatedSchema",
     "AdminSchema",
-    "AdminRelationshipSchema",
-    "AdminWithRelationshipsSchema",
+    "AdminRelatedSchema",
+    "AdminWithRelatedSchema",
     "AssessmentSchema",
-    "AssessmentRelationshipSchema",
+    "AssessmentRelatedSchema",
     "BlacklistTokenSchema",
     "EventSchema",
-    "EventRelationshipSchema",
+    "EventRelatedSchema",
+    "EventWithRelatedSchema",
     "GradeSchema",
-    "GradeRelationshipSchema",
-    "GradeWithRelationshipsSchema",
+    "GradeRelatedSchema",
+    "GradeNestedSchema",
+    "GradeWithRelatedSchema",
     "GradeStreamLinkSchema",
     "MarkListSchema",
     "RegistrationSchema",
     "SavedQueryViewSchema",
-    "SavedQueryViewRelationshipSchema",
+    "SavedQueryViewRelatedSchema",
     "SectionSchema",
-    "SectionRelationshipSchema",
-    "SectionSchemaWithRelationships",
+    "SectionRelatedSchema",
+    "SectionWithRelatedSchema",
     "StreamSchema",
-    "StreamRelationshipSchema",
+    "StreamRelatedSchema",
     "StudentSchema",
-    "StudentWithRelationshipsSchema",
-    "StudentRelationshipSchema",
+    "StudentWithRelatedSchema",
+    "StudentRelatedSchema",
     "StudentTermRecordSchema",
-    "StudentTermRecordRelationshipSchema",
+    "StudentTermRecordRelatedSchema",
+    "StudentTermRecordWithRelatedSchema",
     "StudentYearRecordSchema",
-    "StudentYearRecordRelationshipSchema",
+    "StudentYearRecordRelatedSchema",
+    "StudentYearRecordWithRelatedSchema",
     "SubjectSchema",
-    "SubjectRelationshipSchema",
-    "SubjectWithRelationshipsSchema",
+    "SubjectRelatedSchema",
+    "SubjectNestedSchema",
+    "SubjectWithRelatedSchema",
     "SubjectYearlyAverageSchema",
-    "SubjectYearlyAverageRelationshipSchema",
+    "SubjectYearlyAverageRelatedSchema",
     "TableSchema",
     "TeacherGradeLinkSchema",
     "TeacherRecordSchema",
-    "TeacherRecordRelationshipSchema",
+    "TeacherRecordRelatedSchema",
     "TeacherSchema",
-    "TeacherRelationshipSchema",
-    "TeacherWithRelationshipsSchema",
+    "TeacherRelatedSchema",
+    "TeacherWithRelatedSchema",
     "TeacherSubjectLinkSchema",
     "UserSchema",
-    "UserRelationshipSchema",
-    "UserWithRelationshipsSchema",
+    "UserRelatedSchema",
+    "UserWithRelatedSchema",
     "YearSchema",
-    "YearRelationshipSchema",
-    "YearSchemaWithRelationships",
+    "YearRelatedSchema",
+    "YearNestedSchema",
+    "YearWithRelatedSchema",
     "YearlySubjectSchema",
-    "YearlySubjectRelationshipSchema",
+    "YearlySubjectRelatedSchema",
 ]
 
 AcademicTermSchema.model_rebuild()
-AcademicTermRelationshipSchema.model_rebuild()
-AcademicTermSchemaWithRelationships.model_rebuild()
+AcademicTermRelatedSchema.model_rebuild()
+AcademicTermWithRelatedSchema.model_rebuild()
 AdminSchema.model_rebuild()
-AdminRelationshipSchema.model_rebuild()
-AdminWithRelationshipsSchema.model_rebuild()
+AdminRelatedSchema.model_rebuild()
+AdminWithRelatedSchema.model_rebuild()
 AssessmentSchema.model_rebuild()
-AssessmentRelationshipSchema.model_rebuild()
+AssessmentRelatedSchema.model_rebuild()
+
 EventSchema.model_rebuild()
-EventRelationshipSchema.model_rebuild()
+EventRelatedSchema.model_rebuild()
+EventWithRelatedSchema.model_rebuild()
+
 GradeSchema.model_rebuild()
-GradeRelationshipSchema.model_rebuild()
-GradeWithRelationshipsSchema.model_rebuild()
+GradeRelatedSchema.model_rebuild()
+GradeNestedSchema.model_rebuild()
+GradeWithRelatedSchema.model_rebuild()
+
 MarkListSchema.model_rebuild()
 SavedQueryViewSchema.model_rebuild()
-SavedQueryViewRelationshipSchema.model_rebuild()
+SavedQueryViewRelatedSchema.model_rebuild()
 SectionSchema.model_rebuild()
-SectionRelationshipSchema.model_rebuild()
-SectionSchemaWithRelationships.model_rebuild()
+SectionRelatedSchema.model_rebuild()
+SectionWithRelatedSchema.model_rebuild()
 StreamSchema.model_rebuild()
-StreamRelationshipSchema.model_rebuild()
-StreamWithRelationshipSchema.model_rebuild()
+StreamRelatedSchema.model_rebuild()
+StreamWithRelatedSchema.model_rebuild()
 StudentSchema.model_rebuild()
-StudentWithRelationshipsSchema.model_rebuild()
-StudentRelationshipSchema.model_rebuild()
+StudentWithRelatedSchema.model_rebuild()
+StudentRelatedSchema.model_rebuild()
 StudentTermRecordSchema.model_rebuild()
-StudentTermRecordRelationshipSchema.model_rebuild()
+StudentTermRecordRelatedSchema.model_rebuild()
+StudentTermRecordWithRelatedSchema.model_rebuild()
+
 StudentYearRecordSchema.model_rebuild()
-StudentYearRecordRelationshipSchema.model_rebuild()
+StudentYearRecordRelatedSchema.model_rebuild()
+StudentYearRecordWithRelatedSchema.model_rebuild()
+
 SubjectSchema.model_rebuild()
-SubjectRelationshipSchema.model_rebuild()
-SubjectWithRelationshipsSchema.model_rebuild()
+SubjectRelatedSchema.model_rebuild()
+SubjectNestedSchema.model_rebuild()
+SubjectWithRelatedSchema.model_rebuild()
 SubjectYearlyAverageSchema.model_rebuild()
-SubjectYearlyAverageRelationshipSchema.model_rebuild()
+SubjectYearlyAverageRelatedSchema.model_rebuild()
 TeacherRecordSchema.model_rebuild()
-TeacherRecordRelationshipSchema.model_rebuild()
+TeacherRecordRelatedSchema.model_rebuild()
 TeacherSchema.model_rebuild()
-TeacherRelationshipSchema.model_rebuild()
-TeacherWithRelationshipsSchema.model_rebuild()
+TeacherRelatedSchema.model_rebuild()
+TeacherWithRelatedSchema.model_rebuild()
 TeacherTermRecordSchema.model_rebuild()
-TeacherTermRecordRelationshipSchema.model_rebuild()
-TeacherTermRecordSchemaWithRelationships.model_rebuild()
+TeacherTermRecordRelatedSchema.model_rebuild()
+TeacherTermRecordWithRelatedSchema.model_rebuild()
 UserSchema.model_rebuild()
-UserRelationshipSchema.model_rebuild()
-UserWithRelationshipsSchema.model_rebuild()
+UserRelatedSchema.model_rebuild()
+UserWithRelatedSchema.model_rebuild()
+
 YearSchema.model_rebuild()
-YearRelationshipSchema.model_rebuild()
-YearSchemaWithRelationships.model_rebuild()
+YearRelatedSchema.model_rebuild()
+YearNestedSchema.model_rebuild()
+YearWithRelatedSchema.model_rebuild()
+
 YearlySubjectSchema.model_rebuild()
-YearlySubjectRelationshipSchema.model_rebuild()
+YearlySubjectRelatedSchema.model_rebuild()

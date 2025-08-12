@@ -34,7 +34,7 @@ class YearlySubjectSchema(BaseModel):
     subject_code: str
 
 
-class YearlySubjectRelationshipSchema(BaseModel):
+class YearlySubjectRelatedSchema(BaseModel):
     """This model represents the relationships of a YearlySubjectSchema."""
 
     year: Optional[YearSchema] = None

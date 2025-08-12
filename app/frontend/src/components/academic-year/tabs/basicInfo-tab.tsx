@@ -15,8 +15,8 @@ export default function BasicInfoTab({
 }) {
     const [dayDifference, setDayDifference] = useState<number | null>(null);
     const { register, formState, watch, setValue } = useFormContext()
-    const startDate = watch("year.startDate")
-    const endDate = watch("year.endDate")
+    const startDate = watch("startDate")
+    const endDate = watch("endDate")
 
     useEffect(() => {
         if (startDate && endDate) {
@@ -25,7 +25,7 @@ export default function BasicInfoTab({
             const diffInDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
             setDayDifference(diffInDays);
             if (startDate > endDate) {
-                setValue("year.endDate", "");
+                setValue("endDate", "");
             }
         } else {
             setDayDifference(null);
@@ -45,12 +45,12 @@ export default function BasicInfoTab({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <InputWithLabel
                         fieldTitle="Academic Year Name"
-                        nameInSchema="year.name"
+                        nameInSchema="name"
                         placeholder="e.g., 2024-2025 Academic Year"
                     />
                     <SelectWithLabel
                         fieldTitle="Term System"
-                        nameInSchema="year.calendarType"
+                        nameInSchema="calendarType"
                     >
                         <SelectItem value="Semester">Semester (2 Terms)</SelectItem>
                         <SelectItem value="Quarter">Quarterly (4 Terms)</SelectItem>
@@ -60,7 +60,7 @@ export default function BasicInfoTab({
                     <div className="flex-1 min-w-0">
                         <DateWithLabel
                             fieldTitle="Academic Year Start Date"
-                            nameInSchema="year.startDate"
+                            nameInSchema="startDate"
                         />
                     </div>
                     {/* Calculate Date Range */}
@@ -73,7 +73,7 @@ export default function BasicInfoTab({
                     <div className="flex-1 min-w-0">
                         <DateWithLabel
                             fieldTitle="Academic Year End Date"
-                            nameInSchema="year.endDate"
+                            nameInSchema="endDate"
                             className="flex-1 min-w-0"
                             disableFrom={startDate ? new Date(startDate) : new Date("1900-01-01")}
                         />

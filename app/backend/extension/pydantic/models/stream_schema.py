@@ -38,7 +38,7 @@ class StreamSchema(BaseModel):
         return {"id", "name"}
 
 
-class StreamRelationshipSchema(BaseModel):
+class StreamRelatedSchema(BaseModel):
     """This model represents the relationships of a StreamSchema."""
 
     model_config = ConfigDict(
@@ -55,5 +55,5 @@ class StreamRelationshipSchema(BaseModel):
     subjects: Optional[List[SubjectSchema]] = []
 
 
-class StreamWithRelationshipSchema(StreamSchema, StreamRelationshipSchema):
+class StreamWithRelatedSchema(StreamSchema, StreamRelatedSchema):
     pass

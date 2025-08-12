@@ -2,7 +2,7 @@ import json
 import pytest
 from api.v1.views.shared.auth.schema import AuthResponseSchema
 from api.v1.views.shared.registration.schema import RegistrationResponse
-from extension.pydantic.models.teacher_schema import TeacherWithRelationshipsSchema
+from extension.pydantic.models.teacher_schema import TeacherWithRelatedSchema
 from flask.testing import FlaskClient
 from extension.pydantic.response.schema import SuccessResponseSchema
 from models.user import User
@@ -27,7 +27,7 @@ class TestTeachers:
             user=None,
         )
 
-        teacher_schema = TeacherWithRelationshipsSchema.model_validate(teacher)
+        teacher_schema = TeacherWithRelatedSchema.model_validate(teacher)
         data = teacher_schema.model_dump(
             by_alias=True,
             exclude={

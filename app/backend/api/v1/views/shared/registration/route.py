@@ -17,13 +17,13 @@ from extension.enums.enum import RoleEnum
 from extension.pydantic.models.admin_schema import AdminSchema
 from extension.pydantic.models.grade_schema import GradeSchema
 from extension.pydantic.models.student_schema import (
-    StudentRelationshipSchema,
+    StudentRelatedSchema,
     StudentSchema,
-    StudentWithRelationshipsSchema,
+    StudentWithRelatedSchema,
 )
 
 from extension.pydantic.models.subject_schema import SubjectSchema
-from extension.pydantic.models.teacher_schema import TeacherWithRelationshipsSchema
+from extension.pydantic.models.teacher_schema import TeacherWithRelatedSchema
 from extension.pydantic.response.schema import success_response
 from models import storage
 from models.admin import Admin
@@ -95,7 +95,7 @@ def register_new_student() -> Tuple[Response, int]:
     """Registers a new student in the system."""
 
     # Validate and parse the incoming JSON
-    student_data = StudentWithRelationshipsSchema.model_validate(request.json)
+    student_data = StudentWithRelatedSchema.model_validate(request.json)
 
     # grades = storage.session.scalar(
     #     select(Grade).where(Grade.id == student_data.starting_grade_id)
@@ -130,7 +130,7 @@ def register_new_teacher() -> Tuple[Response, int]:
     Registers a new user (Admin, Student, Teacher) in the system.
     """
     # Validate and parse the incoming JSON
-    teacher_data = TeacherWithRelationshipsSchema.model_validate(request.json)
+    teacher_data = TeacherWithRelatedSchema.model_validate(request.json)
 
     subjects = storage.session.scalars(
         select(Subject).where(

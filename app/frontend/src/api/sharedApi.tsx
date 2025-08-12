@@ -13,76 +13,76 @@ const sharedApi = {
         schema: T,
         params?: QueryParams
     ): Promise<ApiHandlerResponse<z.infer<T>>> => {
-        return zodApiHandler(() => api.get(`/users/${userId}`, { params: buildQueryParams(params) }), schema)
+        return zodApiHandler(() => api.get(`/users/${userId}`, { params: buildQueryParams(schema, params) }), schema)
     },
     getYear: <T extends z.ZodTypeAny>(
         schema: T,
         params?: QueryParams
     ): Promise<ApiHandlerResponse<z.infer<T>>> => {
-        return zodApiHandler(() => api.get('/years', { params: buildQueryParams(params) }), schema)
+        return zodApiHandler(() => api.get('/years', { params: buildQueryParams(schema, params) }), schema)
     },
     getYearDetail: <T extends z.ZodTypeAny>(
         yearId: string,
         schema: T,
         params?: QueryParams
     ): Promise<ApiHandlerResponse<z.infer<T>>> => {
-        return zodApiHandler(() => api.get(`/years/${yearId}`, { params: buildQueryParams(params) }), schema)
+        return zodApiHandler(() => api.get(`/years/${yearId}`, { params: buildQueryParams(schema, params) }), schema)
     },
     getSubject: <T extends z.ZodTypeAny>(
         yearId: string,
         schema: T,
         params?: QueryParams
     ): Promise<ApiHandlerResponse<z.infer<T>>> => {
-        return zodApiHandler(() => api.get(`/years/${yearId}/subjects`, { params: buildQueryParams(params) }), schema)
+        return zodApiHandler(() => api.get(`/years/${yearId}/subjects`, { params: buildQueryParams(schema, params) }), schema)
     },
     getSubjectDetail: <T extends z.ZodTypeAny>(
         subjectId: string,
         schema: T,
         params?: QueryParams
     ): Promise<ApiHandlerResponse<z.infer<T>>> => {
-        return zodApiHandler(() => api.get(`/subjects/${subjectId}`, { params: buildQueryParams(params) }), schema)
+        return zodApiHandler(() => api.get(`/subjects/${subjectId}`, { params: buildQueryParams(schema, params) }), schema)
     },
     getGrade: <T extends z.ZodTypeAny>(
         yearId: string,
         schema: T,
         params?: QueryParams
     ): Promise<ApiHandlerResponse<z.infer<T>>> => {
-        return zodApiHandler(() => api.get(`/years/${yearId}/grades`, { params: buildQueryParams(params) }), schema)
+        return zodApiHandler(() => api.get(`/years/${yearId}/grades`, { params: buildQueryParams(schema, params) }), schema)
     },
     getGradeDetail: <T extends z.ZodTypeAny>(
         gradeId: string,
         schema: T,
         params?: QueryParams
     ): Promise<ApiHandlerResponse<z.infer<T>>> => {
-        return zodApiHandler(() => api.get(`/grades/${gradeId}`, { params: buildQueryParams(params) }), schema)
+        return zodApiHandler(() => api.get(`/grades/${gradeId}`, { params: buildQueryParams(schema, params) }), schema)
     },
     getStream: <T extends z.ZodTypeAny>(
         yearId: string,
         schema: T,
         params?: QueryParams
     ): Promise<ApiHandlerResponse<z.infer<T>>> => {
-        return zodApiHandler(() => api.get(`/years/${yearId}/streams`, { params: buildQueryParams(params) }), schema)
+        return zodApiHandler(() => api.get(`/years/${yearId}/streams`, { params: buildQueryParams(schema, params) }), schema)
     },
     getStreamDetail: <T extends z.ZodTypeAny>(
         streamId: string,
         schema: T,
         params?: QueryParams
     ): Promise<ApiHandlerResponse<z.infer<T>>> => {
-        return zodApiHandler(() => api.get(`/streams/${streamId}`, { params: buildQueryParams(params) }), schema)
+        return zodApiHandler(() => api.get(`/streams/${streamId}`, { params: buildQueryParams(schema, params) }), schema)
     },
     getSection: <T extends z.ZodTypeAny>(
         yearId: string,
         schema: T,
         params?: QueryParams
     ): Promise<ApiHandlerResponse<z.infer<T>>> => {
-        return zodApiHandler(() => api.get(`/years/${yearId}/sections`, { params: buildQueryParams(params) }), schema)
+        return zodApiHandler(() => api.get(`/years/${yearId}/sections`, { params: buildQueryParams(schema, params) }), schema)
     },
     getSectionDetail: <T extends z.ZodTypeAny>(
         sectionId: string,
         schema: T,
         params?: QueryParams
     ): Promise<ApiHandlerResponse<z.infer<T>>> => {
-        return zodApiHandler(() => api.get(`/sections/${sectionId}`, { params: buildQueryParams(params) }), schema)
+        return zodApiHandler(() => api.get(`/sections/${sectionId}`, { params: buildQueryParams(schema, params) }), schema)
     },
 
 

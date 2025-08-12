@@ -37,7 +37,7 @@ class SectionSchema(BaseModel):
         return {"id", "section"}
 
 
-class SectionRelationshipSchema(BaseModel):
+class SectionRelatedSchema(BaseModel):
     """This model represents the relationships of a SectionSchema."""
 
     teacher_term_records: Optional[List[TeacherTermRecordSchema]] = []
@@ -47,7 +47,7 @@ class SectionRelationshipSchema(BaseModel):
     teachers: Optional[List[TeacherSchema]] = []
 
 
-class SectionSchemaWithRelationships(SectionSchema, SectionRelationshipSchema):
+class SectionWithRelatedSchema(SectionSchema, SectionRelatedSchema):
     """This model represents a SectionSchema with its relationships."""
 
     pass

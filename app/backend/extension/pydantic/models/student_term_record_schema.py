@@ -36,7 +36,7 @@ class StudentTermRecordSchema(BaseModel):
     rank: Optional[int] = None
 
 
-class StudentTermRecordRelationshipSchema(BaseModel):
+class StudentTermRecordRelatedSchema(BaseModel):
     """This model represents the relationships of a StudentTermRecordSchema."""
 
     model_config = ConfigDict(
@@ -53,8 +53,8 @@ class StudentTermRecordRelationshipSchema(BaseModel):
     mark_lists: Optional[List[MarkListSchema]]
 
 
-class StudentTermRecordSchemaWithRelationships(
-    StudentTermRecordSchema, StudentTermRecordRelationshipSchema
+class StudentTermRecordWithRelatedSchema(
+    StudentTermRecordSchema, StudentTermRecordRelatedSchema
 ):
     """
     This model combines the StudentTermRecordSchema with its relationships.

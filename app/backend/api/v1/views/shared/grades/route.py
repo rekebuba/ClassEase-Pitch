@@ -1,27 +1,26 @@
-from typing import Set, Tuple
+from typing import Any, Dict, Tuple
 import uuid
 from sqlalchemy import select
-from api.v1.utils.parameter import validate_expand, validate_fields
-from api.v1.utils.typing import IncEx, UserT
+from api.v1.utils.test_parameter import query_parameters
+from api.v1.utils.typing import UserT
 from api.v1.views.shared import auths as auth
 from api.v1.views.utils import student_teacher_or_admin_required
-from extension.pydantic.models.grade_schema import (
-    GradeRelationshipSchema,
-    GradeSchema,
-    GradeWithRelationshipsSchema,
-)
+from extension.pydantic.models.grade_schema import GradeNestedSchema
 from extension.pydantic.response.schema import error_response, success_response
 from models import storage
 from models.grade import Grade
-from flask import Response, jsonify
-
 from models.year import Year
+from flask import Response, jsonify
 
 
 @auth.route("/years/<uuid:year_id>/grades", methods=["GET"])
 @student_teacher_or_admin_required
-@validate_fields(GradeSchema, GradeSchema.default_fields())
-def grades(user: UserT, fields: Set[str], year_id: uuid.UUID) -> Tuple[Response, int]:
+@query_parameters(GradeNestedSchema)
+def grades(
+    user: UserT,
+    include_params: Dict[str, Any],
+    year_id: uuid.UUID,
+) -> Tuple[Response, int]:
     """
     Returns a list of all available grades in the system.
     """
@@ -32,22 +31,24 @@ def grades(user: UserT, fields: Set[str], year_id: uuid.UUID) -> Tuple[Response,
         select(Grade).where(Grade.year_id == year_id)
     ).all()
 
-    grade_schemas = [GradeSchema.model_validate(grade) for grade in grades]
-    valid_grades = [
-        schema.model_dump(by_alias=True, include=fields) for schema in grade_schemas
+    grade_schemas = [
+        GradeNestedSchema.model_validate(grade).model_dump(
+            by_alias=True,
+            include=include_params,
+            mode="json",
+        )
+        for grade in grades
     ]
 
-    return success_response(data=valid_grades)
+    return success_response(data=grade_schemas)
 
 
 @auth.route("/grades/<uuid:grade_id>", methods=["GET"])
 @student_teacher_or_admin_required
-@validate_fields(GradeSchema, GradeSchema.default_fields())
-@validate_expand(GradeRelationshipSchema)
+@query_parameters(GradeNestedSchema)
 def get_grade_by_id(
     user: UserT,
-    fields: dict[str, IncEx],
-    related_fields: dict[str, IncEx],
+    include_params: Dict[str, Any],
     grade_id: uuid.UUID,
 ) -> Tuple[Response, int]:
     """Returns Grade model based on grade_id"""
@@ -55,13 +56,10 @@ def get_grade_by_id(
     if not grade:
         return jsonify({"error": "Grade not found"}), 404
 
-    grade_schema = GradeWithRelationshipsSchema.model_validate(grade)
+    grade_schema = GradeNestedSchema.model_validate(grade)
     valid_grade = grade_schema.model_dump(
         by_alias=True,
-        include={
-            **fields,
-            **related_fields,
-        },
+        include=include_params,
         mode="json",
     )
 

@@ -1,11 +1,13 @@
-from pydantic import BaseModel
+from typing import List
 
-from extension.pydantic.models.subject_schema import SubjectSchema
+from extension.pydantic.models.grade_schema import (
+    GradeWithRelatedSchema,
+)
+from extension.pydantic.models.subject_schema import (
+    SubjectSchema,
+    SubjectWithRelatedSchema,
+)
 
 
-class SubjectResponse(BaseModel):
-    """
-    Schema for the list of subjects.
-    """
-
-    subjects: list[SubjectSchema] = []
+class SubjectLightSchema(SubjectSchema):
+    grades: List[GradeWithRelatedSchema] = []

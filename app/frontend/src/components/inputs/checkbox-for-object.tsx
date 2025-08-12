@@ -12,7 +12,7 @@ import isEqual from "lodash/isEqual"
 type Props<T> = {
     fieldTitle: string
     nameInSchema: string
-    value: T             // the object this checkbox represents
+    value: T
     disabled?: boolean
     className?: string
 }
@@ -32,16 +32,15 @@ export function CheckboxForObject<T>({
     const toggle = (checked: boolean) => {
         const current = getValues(nameInSchema) || []
         if (checked) {
-            setValue(nameInSchema, [...current, value], { shouldValidate: true })
+            setValue(nameInSchema, [...current, value], { shouldValidate: true, shouldDirty: true })
         } else {
             setValue(
                 nameInSchema,
                 current.filter((item: T) => !isEqual(item, value)),
-                { shouldValidate: true }
+                { shouldValidate: true, shouldDirty: true }
             )
         }
     }
-
 
     return (
         <FormField

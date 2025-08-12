@@ -152,14 +152,14 @@ export const TeacherSchema = z.object({
 export const GradeSchema = z.object({
     id: z.string(),
     yearId: z.string(),
-    grade: z.string(),
+    grade: z.string().min(1),
     level: GradeLevelEnum,
     hasStream: z.boolean(),
 });
 
 export const SubjectSchema = z.object({
     id: z.string(),
-    name: z.string(),
+    name: z.string().min(1),
     code: z.string(),
 });
 
@@ -361,9 +361,7 @@ export const StreamWithRelationSchema = StreamSchema.extend(StreamRelationSchema
 export const SubjectWithRelationSchema = SubjectSchema.extend(SubjectRelationSchema.shape);
 export const AcademicTermWithRelationSchema = AcademicTermSchema.extend(AcademicTermRelationSchema.shape);
 
-export const YearSetupSchema = z.object({
-    year: YearSchema,
-    // grades: z.array(GradeSchema.extend(SubjectSchema.shape).extend(SectionSchema.shape).extend(StreamSchema.shape)),
+export const YearSetupSchema = YearSchema.extend({
     grades: z.array(
         GradeSchema.extend({
             subjects: z.array(SubjectSchema),

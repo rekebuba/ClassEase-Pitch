@@ -37,7 +37,7 @@ class UserSchema(BaseModel):
         }
 
 
-class UserRelationshipSchema(BaseModel):
+class UserRelatedSchema(BaseModel):
     """This model represents the relationships of a UserSchema.
     It is used to define the relationships between the UserSchema and other schemas.
     """
@@ -48,5 +48,5 @@ class UserRelationshipSchema(BaseModel):
     saved_query_views: Optional[List[SavedQueryViewSchema]] = None
 
 
-class UserWithRelationshipsSchema(UserSchema, UserRelationshipSchema):
+class UserWithRelatedSchema(UserSchema, UserRelatedSchema):
     pass

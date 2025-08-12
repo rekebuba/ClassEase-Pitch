@@ -42,7 +42,7 @@ export type ApiHandlerResponse<T> = SuccessResponse<T> | ErrorResponse;
 export type QueryParams = {
     /**
      * Fields to select (e.g., ["id", "name"])
-    */
+     */
     fields?: string[];
     /**
      * Relationships to expand (e.g., ["author", "comments"])
@@ -58,6 +58,7 @@ export type QueryParams = {
      */
     params?: Record<string, string | number | boolean>;
 };
+
 
 
 export type NavItem = {

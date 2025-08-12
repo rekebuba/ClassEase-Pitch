@@ -42,7 +42,7 @@ class AcademicTermSchema(BaseModel):
         return {"id", "name", "start_date", "end_date"}
 
 
-class AcademicTermRelationshipSchema(BaseModel):
+class AcademicTermRelatedSchema(BaseModel):
     """This model represents the relationships of a AcademicTermSchema."""
 
     model_config = ConfigDict(
@@ -57,9 +57,7 @@ class AcademicTermRelationshipSchema(BaseModel):
     teacher_records: Optional[List[TeacherRecordSchema]] = []
 
 
-class AcademicTermSchemaWithRelationships(
-    AcademicTermSchema, AcademicTermRelationshipSchema
-):
+class AcademicTermWithRelatedSchema(AcademicTermSchema, AcademicTermRelatedSchema):
     """This model represents an AcademicTermSchema with its relationships."""
 
     pass
