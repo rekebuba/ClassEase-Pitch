@@ -49,7 +49,7 @@ export function SelectForObject<T>({
                         value={value}
                         onValueChange={(val) => {
                             const obj = getObjects(val);
-                            form.setValue(nameInSchema, obj, { shouldValidate: true });
+                            form.setValue(nameInSchema, obj, { shouldValidate: true, shouldDirty: true });
                             setValue(val);
                         }}
                         disabled={disabled}

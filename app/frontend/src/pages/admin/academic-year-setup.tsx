@@ -131,15 +131,6 @@ export default function AcademicYearSetup({
         }
     }, [gradeQuery.isSuccess, subjectQuery.isSuccess, initialData, form]);
 
-    function requestTabChange(nextTab: string) {
-        if (unsavedChanges) {
-            setPendingTab(nextTab)
-            setDialogOpen(true)
-        } else {
-            setActiveTab(nextTab)
-        }
-    }
-
     function discardAndContinue() {
         setUnsavedChanges(false)
         if (pendingTab) {
@@ -154,7 +145,7 @@ export default function AcademicYearSetup({
         setUnsavedChanges(false)
     }
 
-    console.log("watchForm:", watchForm)
+    // console.log("watchForm:", watchForm)
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
@@ -200,7 +191,7 @@ export default function AcademicYearSetup({
                     >
                         <AcademicYearTabs
                             activeTab={activeTab}
-                            onTabChange={requestTabChange}
+                            onTabChange={setActiveTab}
                             onUnsavedChange={setUnsavedChanges}
                         />
 

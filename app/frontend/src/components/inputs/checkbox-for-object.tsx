@@ -29,18 +29,36 @@ export function CheckboxForObject<T>({
 
     const checked = values.some((v: T) => isEqual(v, value))
 
+    // If items are objects, provide a stable key (e.g., id, value, name).
+    type Primitive = string | number | boolean;
+
+    // sort by a stable object key
+    const getKey = (x: T): Primitive => (x as any).id;
+
+    const sortValues = (arr: T[], key?: (x: T) => Primitive) => {
+        const cmp = (a: T, b: T) => {
+            const ak = key ? key(a) : (a as unknown as Primitive);
+            const bk = key ? key(b) : (b as unknown as Primitive);
+            return ak < bk ? -1 : ak > bk ? 1 : 0;
+        };
+        return [...arr].sort(cmp); // don't mutate original
+    };
+
     const toggle = (checked: boolean) => {
-        const current = getValues(nameInSchema) || []
+        const current: T[] = getValues(nameInSchema) || [];
+
         if (checked) {
-            setValue(nameInSchema, [...current, value], { shouldValidate: true, shouldDirty: true })
+            const next = sortValues([...current, value], getKey);
+            setValue(nameInSchema, next, { shouldValidate: true, shouldDirty: true });
         } else {
-            setValue(
-                nameInSchema,
+            const next = sortValues(
                 current.filter((item: T) => !isEqual(item, value)),
-                { shouldValidate: true, shouldDirty: true }
-            )
+                getKey
+            );
+            setValue(nameInSchema, next, { shouldValidate: true, shouldDirty: true });
         }
-    }
+    };
+
 
     return (
         <FormField

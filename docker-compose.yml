@@ -34,7 +34,7 @@ services:
   backend:
     container_name: backend_container
     image: ghcr.io/rekebuba/backend:latest
-    working_dir: /ClassEase-Pitch
+    working_dir: /ClassEase-Pitch/app/backend
     ports:
       - "5000:5000"
       - "5678:5678"
@@ -43,7 +43,7 @@ services:
     environment:
       - IS_DOCKER=true
     volumes:
-      - /ClassEase-Pitch/app/backend:/ClassEase-Pitch/app/backend:cached
+      - .:/ClassEase-Pitch:cached
     depends_on:
       db:
         condition: service_healthy

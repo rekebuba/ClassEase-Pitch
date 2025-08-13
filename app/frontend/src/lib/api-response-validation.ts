@@ -228,7 +228,7 @@ export const SectionSchema = z.object({
 export const StreamSchema = z.object({
     id: z.string(),
     gradeId: z.string(),
-    name: z.string(),
+    name: z.string().min(1),
 });
 
 export const StudentTermRecordSchema = z.object({
