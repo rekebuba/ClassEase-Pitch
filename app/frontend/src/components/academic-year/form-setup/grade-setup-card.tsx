@@ -29,33 +29,35 @@ import { SubjectSchema, YearSetupSchema } from "@/lib/api-response-validation"
 import { useQueries } from "@tanstack/react-query";
 import { debounce } from "lodash"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { hasStreamByGrade } from "@/config/suggestion"
 
 type Grade = YearSetupType["grades"][number]
 type Subject = YearSetupType["grades"][number]["subjects"][number]
 type Stream = YearSetupType["grades"][number]["streams"][number]
+type Section = YearSetupType["grades"][number]["sections"]
 
 interface GradeSetupCardProps {
     open: boolean
     onOpenChange: (open: boolean) => void
     formIndex: number
     mode: "create" | "edit"
-    onDirty: (dirty: boolean) => void
 }
 
-export default function GradeSetupCard({ open, onOpenChange, mode, formIndex, onDirty }: GradeSetupCardProps) {
+export default function GradeSetupCard({ open, onOpenChange, mode, formIndex }: GradeSetupCardProps) {
     const { control, watch: parentWatch, setValue, getValues } = useFormContext<YearSetupType>()
 
     const { remove: removeGrade } = useFieldArray({
         control,
         name: "grades",
     })
+    const gradeForm = getValues(`grades.${formIndex}`)
 
     // Isolated sub-form for modal
     const subForm = useForm<Grade>({
         resolver: zodResolver(YearSetupSchema.shape.grades.element), // validate single subject
-        defaultValues: getValues(`grades.${formIndex}`),
+        defaultValues: gradeForm,
     })
-    const { formState: { isDirty }, handleSubmit, watch: subWatch, reset } = subForm
+    const { formState: { isDirty, dirtyFields }, handleSubmit, watch: subWatch, reset } = subForm
 
     // Sync between parent and sub-form
     useEffect(() => {
@@ -79,41 +81,55 @@ export default function GradeSetupCard({ open, onOpenChange, mode, formIndex, on
             return []
         }
 
+        const watchSection = watchParentForm.grades[formIndex].sections
         return Array.from({ length: sectionCount }, (_, i) => ({
-            id: crypto.randomUUID(),
-            gradeId: "",
-            section: String.fromCharCode(65 + i),
+            id: watchSection[i]?.id || crypto.randomUUID(),
+            gradeId: watchSection[i]?.gradeId || "",
+            section: watchSection[i]?.section || String.fromCharCode(65 + i),
         }))
     }
 
-    // Grade-subject sync logic
+    // Subject-grade sync logic
     const syncSubjectsFromGrades = useCallback(() => {
-        const grade = watchSubForm
-        const subjects = watchParentForm.subjects || []
+        const grade = watchSubForm || {};
+        const subjects = watchParentForm.subjects || [];
 
-        if (!grade) return
+        const updatedSubjects = subjects.map((subject) => {
+            const hasThisGrade = grade.subjects?.some((s) => s.id === subject.id);
 
-        const updatedSubjects = subjects.map(subject => {
-            const hasThisGrade = grade.subjects?.some(s => s.id === subject.id)
+            // Extract minimal grade info for insertion
+            const gradeEntry = grade.id
+                ? {
+                    id: grade.id,
+                    yearId: grade.yearId,
+                    grade: grade.grade,
+                    level: grade.level,
+                    hasStream: grade.hasStream,
+                }
+                : null;
 
             const updatedGrades = hasThisGrade
-                ? [...(subject.grades || []), grade].filter(
-                    (g, i, arr) => arr.findIndex(item => item.id === g.id) === i
+                ? [
+                    ...(subject.grades || []),
+                    gradeEntry!,
+                ].filter(
+                    (g, i, arr) => g && arr.findIndex((item) => item.id === g.id) === i
                 )
-                : (subject.grades || []).filter(g => g.id !== grade.id)
+                : (subject.grades || []).filter((g) => g.id !== grade.id);
 
-            return { ...subject, grades: updatedGrades }
-        })
-
-        setValue("subjects", updatedSubjects, { shouldValidate: false })
-    }, [formIndex, watchParentForm?.grades, setValue]);
-
+            return { ...subject, grades: updatedGrades };
+        });
+        setValue("subjects", updatedSubjects, { shouldValidate: false, shouldDirty: true });
+    }, [watchSubForm, watchParentForm?.subjects, setValue]);
 
     // Form submission
     const handleSave = handleSubmit((data) => {
-        setValue(`grades.${formIndex}`, data);
-        syncSubjectsFromGrades();
-        onDirty(isDirty); // Report dirty state
+        setValue(`grades.${formIndex}`, data, { shouldDirty: true });
+        if (dirtyFields.subjects) {
+            syncSubjectsFromGrades();
+            toast.success(mode === "create" ? "New Subject Added" : "Subject updated");
+        }
+        if (!watchSubForm.hasStream) setValue(`grades.${formIndex}.streams`, [], { shouldDirty: true })
         onOpenChange(false);
         toast.success(mode === "create" ? "New Grade Added" : "Grade updated");
     });
@@ -126,6 +142,8 @@ export default function GradeSetupCard({ open, onOpenChange, mode, formIndex, on
         }
         onOpenChange(false)
     }
+
+    console.log(watchSubForm)
 
     return (
         <Dialog open={open} onOpenChange={handleCancel}>
@@ -166,7 +184,7 @@ export default function GradeSetupCard({ open, onOpenChange, mode, formIndex, on
                                 </div>
 
                                 {/* Sections */}
-                                <SelectForObject<YearSetupType["grades"][number]["sections"]>
+                                <SelectForObject<Section>
                                     fieldTitle="Sections *"
                                     nameInSchema={`sections`}
                                     getObjects={(index) => getSectionObjects(index)}
@@ -192,11 +210,14 @@ export default function GradeSetupCard({ open, onOpenChange, mode, formIndex, on
                                     </div>
                                     <SwitchWithLabel
                                         fieldTitle=""
-                                        nameInSchema={`hasStream`} />
+                                        nameInSchema={`hasStream`}
+                                    />
                                 </div>
                                 {/* Streams Management */}
                                 {watchSubForm.hasStream && (
-                                    <StreamsManagement formIndex={formIndex} />
+                                    <StreamsManagement
+                                        subjects={watchParentForm.subjects.map(({ id, name, code }) => ({ id, name, code }))}
+                                    />
                                 )}
                                 {/* Grade Subjects (for non-stream grades) */}
                                 <div>
@@ -251,24 +272,27 @@ export default function GradeSetupCard({ open, onOpenChange, mode, formIndex, on
 }
 
 interface StreamsManagementProps {
-    formIndex: number
+    subjects: Subject[]
 }
 
-function StreamsManagement({ formIndex }: StreamsManagementProps) {
-    const { control, watch, setValue, getValues } = useFormContext<Grade>()
+function StreamsManagement({ subjects }: StreamsManagementProps) {
+    const { control, watch, formState: { dirtyFields }, trigger } = useFormContext<Grade>();
 
-    const [isOpen, setIsOpen] = useState(false)
-    const { append: appendStream, prepend: prependStream, remove: removeStream, } = useFieldArray({
-        control: control,
+    const [isOpen, setIsOpen] = useState(false);
+
+    const { prepend: prependStream, remove: removeStream } = useFieldArray({
+        control,
         name: `streams`,
-        keyName: "rhfId", // Prevents overriding `id`
-    })
-    const watchForm = watch()
+        keyName: "rhfId",
+    });
 
-    const handleSave = () => {
-        toast.success("New Stream Added To the List", {
-            style: { color: "green" },
-        });
+    const watchGrade = watch(); // watch only this grade
+
+    const handleSave = async () => {
+        const result = await trigger("streams.0.name")
+        if (!result) return;
+
+        toast.success("New Stream Added To the List");
         setIsOpen(false);
     };
 
@@ -283,32 +307,22 @@ function StreamsManagement({ formIndex }: StreamsManagementProps) {
                 <Layers className="h-4 w-4" />
                 <Label>Academic Streams</Label>
             </div>
+
             <div className="flex flex-wrap gap-2">
-                {["Natural Science", "Social Science"].map((stream, streamIndex) => (
-                    <Button
-                        key={streamIndex}
-                        variant="outline"
-                        size="sm"
-                        onClick={() => appendStream({
-                            id: "",
-                            gradeId: "",
-                            name: stream,
-                            subjects: [],
-                        })}
-                        disabled={watchForm.streams.some((s) => s.name === stream)}
-                    >
-                        <Plus className="h-4 w-4 mr-1" />
-                        {stream}
-                    </Button>
-                ))}
                 {/* Add Custom Stream */}
                 <Dialog open={isOpen} onOpenChange={setIsOpen}>
                     <DialogTrigger asChild>
-                        <Button variant="outline" size="sm" className="text-sm" onClick={() => prependStream({ id: "", gradeId: "", name: "", subjects: [] })}>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-sm"
+                            onClick={() => prependStream({ id: "", gradeId: "", name: "", subjects: [] })}
+                        >
                             <Plus className="h-4 w-4 mr-1" />
                             Custom stream name
                         </Button>
                     </DialogTrigger>
+
                     <DialogContent className="sm:max-w-[425px]">
                         <div className="relative">
                             <DialogHeader>
@@ -318,50 +332,75 @@ function StreamsManagement({ formIndex }: StreamsManagementProps) {
                                 </DialogDescription>
                             </DialogHeader>
                         </div>
+
                         <div>
                             <InputWithLabel
                                 fieldTitle="Enter stream name *"
-                                nameInSchema={`grades.${formIndex}.streams.${0}.name`}
+                                nameInSchema={`streams.0.name`} // fixed path
                                 placeholder="e.g., Art"
                             />
                         </div>
+
                         <DialogFooter>
-                            <Button className="mt-0" variant="outline" onClick={() => handleCancel()}>Cancel</Button>
-                            <Button onClick={() => handleSave()}>Add Stream</Button>
+                            <Button
+                                className="mt-0"
+                                variant="outline"
+                                onClick={handleCancel}
+                            >
+                                Cancel
+                            </Button>
+
+                            <Button
+                                disabled={watchGrade.streams[0]?.name?.length < 1}
+                                type="submit"
+                                onClick={handleSave}
+                                className="bg-blue-600 text-white hover:bg-blue-700 disabled:pointer-events-auto disabled:cursor-not-allowed"
+                            >
+                                Add Stream
+                            </Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
             </div>
+
             {/* Stream List */}
             <div className="space-y-3">
-                {watchForm.streams.map((stream, streamIndex) => (
+                {watchGrade.streams.map((stream, streamIndex) => (
                     <Card key={stream.id} className="p-4">
                         <div className="flex items-start justify-between mb-1">
                             <div>
                                 <h4 className="font-medium">{stream.name}</h4>
                             </div>
-                            <Button variant="outline" size="sm"
-                                onClick={() => removeStream(streamIndex)} className="ml-2"
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => removeStream(streamIndex)}
+                                className="ml-2"
                             >
                                 <X className="h-4 w-4" />
                             </Button>
                         </div>
+
                         <div className="mb-4">
                             <Label className="text-sm">Stream Subjects</Label>
                         </div>
+
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {watchForm.subjects.filter((subject) => !watchForm.subjects.find((s) => s.name === subject.name))
-                                .map((subject, subjectIndex) => (
+                            {subjects.filter((subject) => !watchGrade.subjects.find((s) => s.name === subject.name))
+                                .map((subject) => (
                                     <div key={subject.id} className="flex items-center space-x-2">
                                         <CheckboxForObject<Subject>
                                             fieldTitle={subject.name}
-                                            nameInSchema={`grades.${formIndex}.streams.${streamIndex}.subjects`}
-                                            value={watchForm.streams[streamIndex].subjects.find((s) => s.name === subject.name) || {
-                                                id: subject.id,
-                                                name: subject.name,
-                                                code: subject.code,
-                                            }}
-                                            className="w-4 h-4" />
+                                            nameInSchema={`streams.${streamIndex}.subjects`}
+                                            value={
+                                                watchGrade.streams[streamIndex].subjects.find((s) => s.name === subject.name) || {
+                                                    id: subject.id,
+                                                    name: subject.name,
+                                                    code: subject.code,
+                                                }
+                                            }
+                                            className="w-4 h-4"
+                                        />
                                     </div>
                                 ))}
                         </div>
@@ -369,6 +408,5 @@ function StreamsManagement({ formIndex }: StreamsManagementProps) {
                 ))}
             </div>
         </div>
-
     );
 }

@@ -18,7 +18,7 @@ export default function GradesTab({
 }: {
     onDirty: (dirty: boolean) => void
 }) {
-    const { control, watch, setValue } = useFormContext<YearSetupType>()
+    const { formState: { isDirty }, control, watch, setValue } = useFormContext<YearSetupType>()
 
     const [searchTerm, setSearchTerm] = useState("")
     const [formDialogOpen, setFormDialogOpen] = useState(false)
@@ -57,6 +57,11 @@ export default function GradesTab({
         setFormIndex(0)
         setFormDialogOpen(true)
     }, [prependGrade])
+
+    // Report dirty state
+    onDirty(isDirty);
+
+    // console.log("watchForm: ", JSON.stringify(watch()))
 
     return (
         <Card>
@@ -212,7 +217,6 @@ export default function GradesTab({
                         onOpenChange={setFormDialogOpen}
                         formIndex={formIndex}
                         mode={formMode}
-                        onDirty={onDirty}
                     />
                 )
             }

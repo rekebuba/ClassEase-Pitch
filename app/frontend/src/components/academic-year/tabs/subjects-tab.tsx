@@ -15,7 +15,7 @@ export default function SubjectsTab({
 }: {
     onDirty: (dirty: boolean) => void
 }) {
-    const { formState, control, watch, setValue, getValues } = useFormContext<YearSetupType>()
+    const { formState: { isDirty }, control, watch } = useFormContext<YearSetupType>()
 
     const [searchTerm, setSearchTerm] = useState("")
     const [formDialogOpen, setFormDialogOpen] = useState(false)
@@ -24,7 +24,6 @@ export default function SubjectsTab({
 
     const {
         fields: subjectFields,
-        append: appendSubject,
         prepend: prependSubject,
         remove: removeSubject,
     } = useFieldArray({
@@ -53,6 +52,9 @@ export default function SubjectsTab({
         setFormIndex(0); // Always edit the first subject in the list
         setFormDialogOpen(true);
     };
+
+    // Report dirty state
+    onDirty(isDirty);
 
     return (
         <div className="space-y-6">
@@ -173,7 +175,6 @@ export default function SubjectsTab({
                 onOpenChange={setFormDialogOpen}
                 formIndex={formIndex}
                 mode={formMode}
-                onDirty={onDirty}
             />
         </div>
     )
