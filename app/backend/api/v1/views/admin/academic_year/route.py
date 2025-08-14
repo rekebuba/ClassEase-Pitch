@@ -1,21 +1,22 @@
-import logging
-from typing import List, Tuple
-import uuid
-from flask import Response, request
-from sqlalchemy import select
 from api.v1.utils.typing import UserT
 from api.v1.views.admin import admins as admin
 from api.v1.views.admin.academic_year.schema import AcademicYearSetupSchema
 from api.v1.views.utils import admin_required
-from sqlalchemy.exc import SQLAlchemyError
 from extension.pydantic.response.schema import error_response, success_response
+from flask import Response, request
 from models import storage
 from models.academic_term import AcademicTerm
 from models.grade import Grade
+from models.grade_stream_subject import GradeStreamSubject
 from models.section import Section
 from models.stream import Stream
 from models.subject import Subject
 from models.year import Year
+from sqlalchemy import select
+from sqlalchemy.exc import SQLAlchemyError
+from typing import List, Tuple
+import logging
+import uuid
 
 
 def generate_subject_code(subject: str) -> str:
@@ -111,13 +112,21 @@ def set_up_academic_year(user: UserT) -> Tuple[Response, int]:
             storage.session.add_all(sections)
 
             # Add subjects to grade
-            for subject_name in grade_data.subjects:
+            for subject_name in grade_data.subjects if grade_data.subjects else []:
                 subject = storage.session.scalar(
                     select(Subject).where(Subject.name == subject_name)
                 )
                 if not subject:
                     raise ValueError(f"Subject '{subject_name}' not found")
                 grade.subjects.append(subject)
+
+                storage.session.add(
+                    GradeStreamSubject(
+                        grade_id=grade.id,
+                        stream_id=None,
+                        subject_id=subject.id,
+                    )
+                )
 
             # Add streams if exists
             if grade_data.streams:
@@ -139,6 +148,14 @@ def set_up_academic_year(user: UserT) -> Tuple[Response, int]:
                                 f"Stream subject '{subject_name}' not found"
                             )
                         stream.subjects.append(subject)
+
+                        storage.session.add(
+                            GradeStreamSubject(
+                                grade_id=grade.id,
+                                stream_id=stream.id,
+                                subject_id=subject.id,
+                            )
+                        )
 
         # Commit all changes
         storage.session.commit()

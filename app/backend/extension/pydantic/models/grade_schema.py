@@ -7,6 +7,7 @@ from extension.enums.enum import GradeLevelEnum
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
+    from .grade_stream_subject_schema import GradeStreamSubjectSchema
     from .section_schema import SectionWithRelatedSchema
     from .stream_schema import StreamWithRelatedSchema
     from .student_schema import StudentWithRelatedSchema
@@ -71,6 +72,7 @@ class GradeRelatedSchema(BaseModel):
     students: List[StudentSchema] = []
     sections: List[SectionSchema] = []
     subjects: List[SubjectSchema] = []
+    grade_stream_subjects: List[GradeStreamSubjectSchema] = []
 
 
 class GradeNestedSchema(GradeSchema):
@@ -92,6 +94,7 @@ class GradeNestedSchema(GradeSchema):
     students: List[StudentWithRelatedSchema] = []
     sections: List[SectionWithRelatedSchema] = []
     subjects: List[SubjectWithRelatedSchema] = []
+    grade_stream_subjects: List[GradeStreamSubjectSchema] = []
 
 
 class GradeWithRelatedSchema(GradeSchema, GradeRelatedSchema):

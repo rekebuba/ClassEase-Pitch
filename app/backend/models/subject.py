@@ -11,7 +11,7 @@ import uuid
 
 
 if TYPE_CHECKING:
-    from models.student_term_record import StudentTermRecord
+    from models.grade_stream_subject import GradeStreamSubject
     from models.teacher_term_record import TeacherTermRecord
     from models.mark_list import MarkList
     from models.teacher import Teacher
@@ -29,7 +29,10 @@ class Subject(BaseModel):
 
     __tablename__ = "subjects"
     year_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("years.id", ondelete='CASCADE'), nullable=False, index=True
+        UUIDType(),
+        ForeignKey("years.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     name: Mapped[str] = mapped_column(String(50), nullable=False)
     code: Mapped[str] = mapped_column(String(25), nullable=False)
@@ -46,6 +49,13 @@ class Subject(BaseModel):
     # Many-To-One Relationships
     teacher_term_records: Mapped[List["TeacherTermRecord"]] = relationship(
         "TeacherTermRecord",
+        back_populates="subject",
+        default_factory=list,
+        repr=False,
+        passive_deletes=True,
+    )
+    grade_stream_subjects: Mapped[List["GradeStreamSubject"]] = relationship(
+        "GradeStreamSubject",
         back_populates="subject",
         default_factory=list,
         repr=False,
