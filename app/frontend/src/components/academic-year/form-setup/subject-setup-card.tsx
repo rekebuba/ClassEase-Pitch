@@ -39,7 +39,7 @@ export default function SubjectSetupCard({ open, onOpenChange, mode, formIndex }
 
     const watchParentForm = parentWatch()
     const watchSubForm = subWatch()
-
+    console.log(watchParentForm)
     // Sync between parent and sub-form
     useEffect(() => {
         if (open) {
@@ -160,20 +160,20 @@ export default function SubjectSetupCard({ open, onOpenChange, mode, formIndex }
                                         <p className="text-sm text-gray-600 mt-1">Select grades and their streams for this subject</p>
                                     </div>
 
-                                    <Card>
-                                        <CardContent className="space-y-4 mt-4">
-                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <Card className="shadow-sm">
+                                        <CardContent className="p-6">
+                                            <h3 className="text-lg font-medium mb-4">Select Grades & Streams</h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                                 {watchParentForm.grades.map((grade) => (
                                                     <div
                                                         key={grade.id}
-                                                        className="rounded-lg overflow-hidden"
+                                                        className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
                                                     >
-                                                        <div className="flex">
-
-                                                            <div className="flex items-center space-x-2 mb-2">
+                                                        {!grade.hasStream ? (
+                                                            <div className="flex flex-col space-x-4 space-y-4">
                                                                 <CheckboxForObject<Grade>
                                                                     fieldTitle={`Grade ${grade.grade}`}
-                                                                    nameInSchema={`grades`}
+                                                                    nameInSchema="grades"
                                                                     value={
                                                                         watchSubForm.grades?.find((g) => g.grade === grade.grade) || {
                                                                             grade: grade.grade,
@@ -183,45 +183,49 @@ export default function SubjectSetupCard({ open, onOpenChange, mode, formIndex }
                                                                             yearId: grade.yearId,
                                                                         }
                                                                     }
-                                                                    className="w-4 h-4"
+                                                                    className="h-5 w-5 text-primary"
                                                                 />
+                                                                <Label className="text-sm font-medium">
+                                                                    <p className="text-xs text-gray-400 italic">No Stream assigned</p>
+                                                                </Label>
                                                             </div>
-                                                            {grade.hasStream && grade.streams.length > 0 && (
-                                                                <div className="pl-4">
-                                                                    <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                                                                        {watchSubForm.streams?.filter((s) => grade.streams.find((gs) => gs.id === s.id)).length}{" "}
-                                                                        stream(s) selected
-                                                                    </span>
-                                                                    <Collapsible open={true} onOpenChange={() => toggleGrade(grade.id)}>
-                                                                        <CollapsibleTrigger className="p-1 hover:bg-gray-200 rounded">
-                                                                            {true ? (
-                                                                                <ChevronDown className="h-4 w-4 text-gray-500" />
-                                                                            ) : (
-                                                                                <ChevronRight className="h-4 w-4 text-gray-500" />
-                                                                            )}
-                                                                        </CollapsibleTrigger>
-                                                                    </Collapsible>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        {grade.hasStream && (
-                                                            <div className="ml-3 pl-4 border-l border-gray-600 space-y-2">
-                                                                {grade.streams.map((stream) => (
-                                                                    <div key={stream.id} className="flex items-center space-x-2">
-                                                                        <CheckboxForObject<Stream>
-                                                                            fieldTitle={stream.name}
-                                                                            nameInSchema={`streams`}
-                                                                            value={
-                                                                                watchSubForm.streams?.find((s) => s.id === stream.id) || {
-                                                                                    id: stream.id,
-                                                                                    gradeId: stream.gradeId,
-                                                                                    name: stream.name,
-                                                                                }
+                                                        ) : (
+                                                            <div className="space-y-3">
+                                                                <div className="flex items-center space-x-3">
+                                                                    <CheckboxForObject<Grade>
+                                                                        fieldTitle={`Grade ${grade.grade} (All Streams)`}
+                                                                        nameInSchema="grades"
+                                                                        value={
+                                                                            watchSubForm.grades?.find((g) => g.grade === grade.grade) || {
+                                                                                grade: grade.grade,
+                                                                                hasStream: grade.hasStream,
+                                                                                id: grade.id,
+                                                                                level: grade.level,
+                                                                                yearId: grade.yearId,
                                                                             }
-                                                                            className="w-4 h-4"
-                                                                        />
-                                                                    </div>
-                                                                ))}
+                                                                        }
+                                                                        className="h-5 w-5 text-primary"
+                                                                    />
+                                                                </div>
+
+                                                                <div className="ml-8 space-y-2">
+                                                                    {grade.streams.map((stream) => (
+                                                                        <div key={stream.id} className="flex items-center space-x-3">
+                                                                            <CheckboxForObject<Stream>
+                                                                                fieldTitle={`Grade ${grade.grade} (${stream.name})`}
+                                                                                nameInSchema="streams"
+                                                                                value={
+                                                                                    watchSubForm.streams?.find((s) => s.id === stream.id) || {
+                                                                                        id: stream.id,
+                                                                                        gradeId: stream.gradeId,
+                                                                                        name: stream.name,
+                                                                                    }
+                                                                                }
+                                                                                className="h-4 w-4 text-primary"
+                                                                            />
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
                                                             </div>
                                                         )}
                                                     </div>
