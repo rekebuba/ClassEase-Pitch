@@ -12,7 +12,9 @@ from models.base.column_type import UUIDType
 import uuid
 
 
+
 if TYPE_CHECKING:
+    from models.grade_stream_subject import GradeStreamSubject
     from models.student_term_record import StudentTermRecord
     from models.teacher_term_record import TeacherTermRecord
     from models.stream import Stream
@@ -31,7 +33,10 @@ class Grade(BaseModel):
 
     # Database column
     year_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("years.id", ondelete='CASCADE'), nullable=False, index=True
+        UUIDType(),
+        ForeignKey("years.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
     )
     grade: Mapped[str] = mapped_column(String(25), nullable=False)
     level: Mapped[GradeLevelEnum] = mapped_column(
@@ -78,6 +83,13 @@ class Grade(BaseModel):
     )
     student_term_records: Mapped[List["StudentTermRecord"]] = relationship(
         "StudentTermRecord",
+        back_populates="grade",
+        default_factory=list,
+        repr=False,
+        passive_deletes=True,
+    )
+    grade_stream_subjects: Mapped[List["GradeStreamSubject"]] = relationship(
+        "GradeStreamSubject",
         back_populates="grade",
         default_factory=list,
         repr=False,

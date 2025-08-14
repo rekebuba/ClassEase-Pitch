@@ -45,6 +45,7 @@ from models.student_stream_link import StudentStreamLink  # noqa: F401
 from models.student_section_link import StudentSectionLink  # noqa: F401
 from models.student_subject_link import StudentSubjectLink  # noqa: F401
 from models.yearly_subject import YearlySubject  # noqa: F401
+from models.grade_stream_subject import GradeStreamSubject  # noqa: F401
 from contextlib import contextmanager
 
 

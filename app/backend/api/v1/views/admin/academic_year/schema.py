@@ -64,7 +64,7 @@ class NestedGradeSetupSchema(BaseModel):
     has_stream: bool = False
     streams: List[StreamDetailSchema] | None = None
     sections: List[str]
-    subjects: List[str]
+    subjects: List[str] | None = []
 
 
 class AcademicYearSetupSchema(BaseModel):

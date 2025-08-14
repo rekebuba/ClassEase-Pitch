@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
+    from .grade_stream_subject_schema import GradeStreamSubjectSchema
     from .stream_schema import StreamWithRelatedSchema
     from .teacher_schema import TeacherWithRelatedSchema
     from .teacher_term_record_schema import TeacherTermRecordWithRelatedSchema
@@ -55,6 +56,7 @@ class SubjectRelatedSchema(BaseModel):
     teachers: List[TeacherSchema] = []
     streams: List[StreamSchema] = []
     grades: List[GradeSchema] = []
+    grade_stream_subjects: List[GradeStreamSubjectSchema] = []
 
 
 class SubjectNestedSchema(SubjectSchema):

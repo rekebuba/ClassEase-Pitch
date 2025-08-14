@@ -12,6 +12,7 @@ import uuid
 
 
 if TYPE_CHECKING:
+    from models.grade_stream_subject import GradeStreamSubject
     from models.student_term_record import StudentTermRecord
     from models.teacher_term_record import TeacherTermRecord
     from models.yearly_subject import YearlySubject
@@ -24,7 +25,7 @@ class Stream(BaseModel):
     __tablename__ = "streams"
 
     grade_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("grades.id", ondelete='CASCADE'), nullable=False
+        UUIDType(), ForeignKey("grades.id", ondelete="CASCADE"), nullable=False
     )
     name: Mapped[str] = mapped_column(String(10), nullable=False)
 
@@ -59,6 +60,15 @@ class Stream(BaseModel):
         passive_deletes=True,
         default_factory=list,
     )
+    grade_stream_subjects: Mapped[List["GradeStreamSubject"]] = relationship(
+        "GradeStreamSubject",
+        back_populates="stream",
+        default_factory=list,
+        repr=False,
+        passive_deletes=True,
+    )
+
+    # Many-To-Many Relationships
     subjects: Mapped[List["Subject"]] = relationship(
         "Subject",
         back_populates="streams",
@@ -67,8 +77,6 @@ class Stream(BaseModel):
         repr=False,
         passive_deletes=True,
     )
-
-    # Many-To-Many Relationships
     students: Mapped[List["Student"]] = relationship(
         "Student",
         secondary="student_stream_links",
