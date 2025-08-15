@@ -10,7 +10,7 @@ from extension.enums.enum import (
     HighestDegreeEnum,
     MaritalStatusEnum,
     ScheduleEnum,
-    StatusEnum,
+    TeacherApplicationStatus,
 )
 from extension.functions.helper import to_camel
 from extension.pydantic.models.academic_term_schema import AcademicTermSchema
@@ -99,7 +99,7 @@ class TeacherSchema(BaseModel):
     agree_to_terms: bool = False
     agree_to_background_check: bool = False
     user_id: Optional[uuid.UUID] = None
-    status: StatusEnum = StatusEnum.PENDING
+    status: TeacherApplicationStatus = TeacherApplicationStatus.PENDING
 
     @classmethod
     def default_fields(cls) -> set[str]:

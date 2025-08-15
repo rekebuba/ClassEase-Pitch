@@ -1,4 +1,4 @@
-import { useFormContext } from "react-hook-form"
+import { FieldValues, Path, useFormContext } from "react-hook-form"
 
 import {
     FormControl,
@@ -10,15 +10,15 @@ import {
 import { Switch } from '@/components/ui/switch'
 
 
-type Props = {
+type SwitchWithLabelProps<T extends FieldValues> = {
     fieldTitle: string,
-    nameInSchema: string,
+    nameInSchema: Path<T>,
     className?: string,
 }
 
-export function SwitchWithLabel({
+export function SwitchWithLabel<T extends FieldValues>({
     fieldTitle, nameInSchema, className, ...props
-}: Props) {
+}: SwitchWithLabelProps<T>) {
     const form = useFormContext()
 
     return (

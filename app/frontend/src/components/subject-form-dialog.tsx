@@ -9,7 +9,7 @@ import { InputWithLabel } from "./inputs/input-labeled"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { CheckboxForObject } from "./inputs/checkbox-for-object"
+import { CheckboxWithLabel } from "./inputs/checkbox-labeled"
 
 interface SubjectFormDialogProps {
     form: UseFormReturn<YearSetupType>
@@ -111,7 +111,7 @@ export function SubjectFormDialog({ form, open, onOpenChange, mode, formIndex }:
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     {watchForm.grades.map((grade, subjectIndex) => (
                                         <div key={grade.id} className="flex items-center space-x-2">
-                                            <CheckboxForObject<Grade>
+                                            <CheckboxWithLabel<Grade>
                                                 fieldTitle={`Grade ${grade.grade}`}
                                                 nameInSchema={`subjects.${formIndex}.grades`}
                                                 value={watchForm.subjects[formIndex].grades.find((g) => g.grade === grade.grade) || grade}

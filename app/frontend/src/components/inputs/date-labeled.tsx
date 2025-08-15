@@ -1,17 +1,12 @@
-import { zodResolver } from "@hookform/resolvers/zod"
 import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
-import { useForm, useFormContext } from "react-hook-form"
-import { toast } from "sonner"
-import { z } from "zod"
+import { FieldValues, Path, useForm, useFormContext } from "react-hook-form"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import {
-    Form,
     FormControl,
-    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -25,23 +20,23 @@ import {
 import { InputHTMLAttributes } from "react"
 import React from "react"
 
-type Props = {
+type DateWithLabelProps<T extends FieldValues> = {
     fieldTitle: string,
-    nameInSchema: string,
+    nameInSchema: Path<T>,
     className?: string,
     disableFrom?: Date,
     disableTo?: Date,
 } & InputHTMLAttributes<HTMLInputElement>
 
 
-export function DateWithLabel({
+export function DateWithLabel<T extends FieldValues>({
     fieldTitle,
     nameInSchema,
     className,
     disableFrom = new Date("1900-01-01"),
     disableTo = new Date("2035-12-31"),
     ...props
-}: Props) {
+}: DateWithLabelProps<T>) {
     const form = useFormContext()
     const [date] = React.useState<Date | undefined>(undefined)
     const [month, setMonth] = React.useState<Date | undefined>(date)

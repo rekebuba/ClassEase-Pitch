@@ -2,7 +2,7 @@ import json
 from typing import Tuple
 from urllib.parse import parse_qs, urlparse
 
-from extension.enums.enum import RoleEnum, StatusEnum
+from extension.enums.enum import RoleEnum, TeacherApplicationStatus
 from extension.pydantic.models.teacher_schema import (
     TeacherSchema,
 )
@@ -145,10 +145,10 @@ def update_teacher_application_status(
             return jsonify({"message": "Invalid request data"}), 400
 
         status = data["status"]
-        if status not in StatusEnum._value2member_map_:
+        if status not in TeacherApplicationStatus._value2member_map_:
             return jsonify({"message": "Invalid status"}), 400
 
-        status_enum = StatusEnum(status)
+        status_enum = TeacherApplicationStatus(status)
 
         teacher = storage.session.query(Teacher).filter(Teacher.id == id).first()
         if not teacher:
@@ -156,7 +156,7 @@ def update_teacher_application_status(
 
         teacher.status = status_enum
 
-        if status_enum == StatusEnum.APPROVED and teacher.user is None:
+        if status_enum == TeacherApplicationStatus.APPROVED and teacher.user is None:
             # If accepted, set the teacher's user
             user_data = UserCreateSchema.model_validate(
                 {

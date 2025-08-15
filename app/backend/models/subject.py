@@ -4,10 +4,10 @@
 from typing import TYPE_CHECKING, List
 from sqlalchemy import String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.ext.associationproxy import association_proxy, AssociationProxy
 from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
 import uuid
-
 
 
 if TYPE_CHECKING:
@@ -54,13 +54,6 @@ class Subject(BaseModel):
         repr=False,
         passive_deletes=True,
     )
-    grade_stream_subjects: Mapped[List["GradeStreamSubject"]] = relationship(
-        "GradeStreamSubject",
-        back_populates="subject",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
 
     # Many-To-Many Relationships
     teachers: Mapped[List["Teacher"]] = relationship(
@@ -74,22 +67,6 @@ class Subject(BaseModel):
     yearly_subjects: Mapped[List["YearlySubject"]] = relationship(
         "YearlySubject",
         back_populates="subject",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
-    grades: Mapped[List["Grade"]] = relationship(
-        "Grade",
-        secondary="subject_grade_links",
-        back_populates="subjects",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
-    streams: Mapped[List["Stream"]] = relationship(
-        "Stream",
-        secondary="subject_stream_links",
-        back_populates="subjects",
         default_factory=list,
         repr=False,
         passive_deletes=True,
@@ -109,3 +86,46 @@ class Subject(BaseModel):
         repr=False,
         passive_deletes=True,
     )
+
+    # Association Object
+    grade_stream_subjects: Mapped[List["GradeStreamSubject"]] = relationship(
+        "GradeStreamSubject",
+        back_populates="subject",
+        default_factory=list,
+        repr=False,
+        passive_deletes=True,
+    )
+
+    # Association proxy
+    _grades: AssociationProxy[List["Grade"]] = association_proxy(
+        "grade_stream_subjects",
+        "grade",
+        default_factory=list,
+    )
+    _streams: AssociationProxy[List["Stream"]] = association_proxy(
+        "grade_stream_subjects",
+        "stream",
+        default_factory=list,
+    )
+
+    @property
+    def grades(self) -> List["Grade"]:
+        """Return unique, non-null grades."""
+        seen = set()
+        result = []
+        for g in self._grades:
+            if g is not None and g.id not in seen:
+                seen.add(g.id)
+                result.append(g)
+        return result
+
+    @property
+    def streams(self) -> List["Stream"]:
+        """Return unique, non-null streams."""
+        seen = set()
+        result = []
+        for s in self._streams:
+            if s is not None and s.id not in seen:
+                seen.add(s.id)
+                result.append(s)
+        return result

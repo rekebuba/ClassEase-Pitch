@@ -118,7 +118,6 @@ def set_up_academic_year(user: UserT) -> Tuple[Response, int]:
                 )
                 if not subject:
                     raise ValueError(f"Subject '{subject_name}' not found")
-                grade.subjects.append(subject)
 
                 storage.session.add(
                     GradeStreamSubject(
@@ -147,7 +146,6 @@ def set_up_academic_year(user: UserT) -> Tuple[Response, int]:
                             raise ValueError(
                                 f"Stream subject '{subject_name}' not found"
                             )
-                        stream.subjects.append(subject)
 
                         storage.session.add(
                             GradeStreamSubject(

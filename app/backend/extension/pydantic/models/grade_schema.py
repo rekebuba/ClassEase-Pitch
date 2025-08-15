@@ -72,7 +72,6 @@ class GradeRelatedSchema(BaseModel):
     students: List[StudentSchema] = []
     sections: List[SectionSchema] = []
     subjects: List[SubjectSchema] = []
-    grade_stream_subjects: List[GradeStreamSubjectSchema] = []
 
 
 class GradeNestedSchema(GradeSchema):
@@ -94,7 +93,6 @@ class GradeNestedSchema(GradeSchema):
     students: List[StudentWithRelatedSchema] = []
     sections: List[SectionWithRelatedSchema] = []
     subjects: List[SubjectWithRelatedSchema] = []
-    grade_stream_subjects: List[GradeStreamSubjectSchema] = []
 
 
 class GradeWithRelatedSchema(GradeSchema, GradeRelatedSchema):

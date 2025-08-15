@@ -36,8 +36,6 @@ from models.teacher_year_link import TeacherYearLink  # noqa: F401
 from models.teacher_subject_link import TeacherSubjectLink  # noqa: F401
 from models.teacher_grade_link import TeacherGradeLink  # noqa: F401
 from models.grade_section_link import GradeSectionLink  # noqa: F401
-from models.subject_grade_link import SubjectGradeLink  # noqa: F401
-from models.subject_stream_link import SubjectStreamLink  # noqa: F401
 from models.student_year_link import StudentYearLink  # noqa: F401
 from models.student_academic_term_link import StudentAcademicTermLink  # noqa: F401
 from models.student_grade_link import StudentGradeLink  # noqa: F401

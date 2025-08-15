@@ -2,18 +2,16 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BookOpen, ChevronDown, ChevronRight } from "lucide-react"
-import { Year, YearSetupType } from "@/lib/api-response-type"
+import { Card, CardContent } from "@/components/ui/card"
+import { BookOpen } from "lucide-react"
+import { YearSetupType } from "@/lib/api-response-type"
 import { InputWithLabel } from "@/components/inputs/input-labeled"
 import { FormProvider, useFieldArray, useForm, useFormContext } from "react-hook-form"
 import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
-import { CheckboxForObject } from "@/components/inputs/checkbox-for-object"
-import { debounce } from "lodash"
+import { CheckboxWithLabel } from "@/components/inputs/checkbox-labeled"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { YearSetupSchema } from "@/lib/api-response-validation"
-import { Collapsible, CollapsibleTrigger } from "@/components/ui/collapsible"
 
 interface SubjectSetupCardProps {
     open: boolean
@@ -39,7 +37,7 @@ export default function SubjectSetupCard({ open, onOpenChange, mode, formIndex }
 
     const watchParentForm = parentWatch()
     const watchSubForm = subWatch()
-    console.log(watchParentForm)
+
     // Sync between parent and sub-form
     useEffect(() => {
         if (open) {
@@ -48,29 +46,41 @@ export default function SubjectSetupCard({ open, onOpenChange, mode, formIndex }
         }
     }, [open, formIndex, getValues, reset]);
 
-    // Grade-subject sync logic
+    // Utility: dedupe and sort by id
+    // A process of eliminating redundant copies of data.
+    const dedupeAndSort = <T extends { id: string }>(arr: T[]) =>
+        arr.filter((v, i, a) => a.findIndex(x => x.id === v.id) === i)
+            .sort((a, b) => a.id.localeCompare(b.id));
+
     const syncGradesFromSubjects = useCallback(() => {
         const subject = watchSubForm || {};
         const grades = watchParentForm.grades || [];
 
+        if (!subject.id) return; // No valid subject to sync
+
+        const subjectEntry = { id: subject.id, name: subject.name, code: subject.code };
+
         const updatedGrades = grades.map((grade) => {
-            const hasThisSubject = subject.grades?.some((g) => g.id === grade.id);
-
-            // Extract minimal subject info for insertion
-            const subjectEntry = subject.id
-                ? { id: subject.id, name: subject.name, code: subject.code }
-                : null;
-
-            const updatedSubjects = hasThisSubject
-                ? [
-                    ...(grade.subjects || []),
-                    subjectEntry!,
-                ].filter(
-                    (s, i, arr) => s && arr.findIndex((item) => item.id === s.id) === i
+            const hasThisSubjectInGrade = subject.grades?.some(g => g.id === grade.id);
+            const updatedSubjects = !grade.hasStream
+                ? dedupeAndSort(
+                    hasThisSubjectInGrade
+                        ? [...(grade.subjects || []), subjectEntry]
+                        : (grade.subjects || []).filter(s => s.id !== subject.id)
                 )
-                : (grade.subjects || []).filter((s) => s.id !== subject.id);
+                : grade.subjects || [];
 
-            return { ...grade, subjects: updatedSubjects };
+            const updatedStreams = (grade.streams || []).map(stream => {
+                const hasThisSubjectInStream = subject.streams?.some(st => st.id === stream.id);
+                const updatedStreamSubjects = dedupeAndSort(
+                    hasThisSubjectInStream
+                        ? [...(stream.subjects || []), subjectEntry]
+                        : (stream.subjects || []).filter(s => s.id !== subject.id)
+                );
+                return { ...stream, subjects: updatedStreamSubjects };
+            });
+
+            return { ...grade, subjects: updatedSubjects, streams: updatedStreams };
         });
 
         setValue("grades", updatedGrades, { shouldValidate: false, shouldDirty: true });
@@ -79,7 +89,7 @@ export default function SubjectSetupCard({ open, onOpenChange, mode, formIndex }
     // Form submission
     const handleSave = handleSubmit((data) => {
         setValue(`subjects.${formIndex}`, data, { shouldDirty: true });
-        if (dirtyFields.grades) {
+        if (dirtyFields.grades || dirtyFields.streams) {
             syncGradesFromSubjects();
             toast.success(mode === "create" ? "New Grade Added" : "Grade updated");
         }
@@ -95,18 +105,6 @@ export default function SubjectSetupCard({ open, onOpenChange, mode, formIndex }
         }
         onOpenChange(false);
     };
-
-    const [expandedGrades, setExpandedGrades] = useState<Set<string>>(new Set())
-
-    const toggleGrade = (gradeId: string) => {
-        const newExpanded = new Set(expandedGrades)
-        if (newExpanded.has(gradeId)) {
-            newExpanded.delete(gradeId)
-        } else {
-            newExpanded.add(gradeId)
-        }
-        setExpandedGrades(newExpanded)
-    }
 
     return (
         <Dialog open={open} onOpenChange={handleCancel} >
@@ -171,7 +169,7 @@ export default function SubjectSetupCard({ open, onOpenChange, mode, formIndex }
                                                     >
                                                         {!grade.hasStream ? (
                                                             <div className="flex flex-col space-x-4 space-y-4">
-                                                                <CheckboxForObject<Grade>
+                                                                <CheckboxWithLabel<Subject, Grade>
                                                                     fieldTitle={`Grade ${grade.grade}`}
                                                                     nameInSchema="grades"
                                                                     value={
@@ -192,26 +190,13 @@ export default function SubjectSetupCard({ open, onOpenChange, mode, formIndex }
                                                         ) : (
                                                             <div className="space-y-3">
                                                                 <div className="flex items-center space-x-3">
-                                                                    <CheckboxForObject<Grade>
-                                                                        fieldTitle={`Grade ${grade.grade} (All Streams)`}
-                                                                        nameInSchema="grades"
-                                                                        value={
-                                                                            watchSubForm.grades?.find((g) => g.grade === grade.grade) || {
-                                                                                grade: grade.grade,
-                                                                                hasStream: grade.hasStream,
-                                                                                id: grade.id,
-                                                                                level: grade.level,
-                                                                                yearId: grade.yearId,
-                                                                            }
-                                                                        }
-                                                                        className="h-5 w-5 text-primary"
-                                                                    />
+                                                                    <label>{`Grade ${grade.grade}`}</label>
                                                                 </div>
 
                                                                 <div className="ml-8 space-y-2">
                                                                     {grade.streams.map((stream) => (
                                                                         <div key={stream.id} className="flex items-center space-x-3">
-                                                                            <CheckboxForObject<Stream>
+                                                                            <CheckboxWithLabel<Subject, Stream>
                                                                                 fieldTitle={`Grade ${grade.grade} (${stream.name})`}
                                                                                 nameInSchema="streams"
                                                                                 value={

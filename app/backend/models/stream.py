@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, List
 from sqlalchemy import ForeignKey, String
 from models.base.base_model import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
+from sqlalchemy.ext.associationproxy import association_proxy
 
 from models.base.column_type import UUIDType
 import uuid
@@ -17,7 +17,6 @@ if TYPE_CHECKING:
     from models.teacher_term_record import TeacherTermRecord
     from models.yearly_subject import YearlySubject
     from models.grade import Grade
-    from models.subject import Subject
     from models.student import Student
 
 
@@ -60,23 +59,8 @@ class Stream(BaseModel):
         passive_deletes=True,
         default_factory=list,
     )
-    grade_stream_subjects: Mapped[List["GradeStreamSubject"]] = relationship(
-        "GradeStreamSubject",
-        back_populates="stream",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
 
     # Many-To-Many Relationships
-    subjects: Mapped[List["Subject"]] = relationship(
-        "Subject",
-        back_populates="streams",
-        secondary="subject_stream_links",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
     students: Mapped[List["Student"]] = relationship(
         "Student",
         secondary="student_stream_links",
@@ -85,3 +69,15 @@ class Stream(BaseModel):
         repr=False,
         passive_deletes=True,
     )
+
+    # Association Object
+    grade_stream_subjects: Mapped[List["GradeStreamSubject"]] = relationship(
+        "GradeStreamSubject",
+        back_populates="stream",
+        default_factory=list,
+        repr=False,
+        passive_deletes=True,
+    )
+
+    # Association proxy
+    subjects = association_proxy("grade_stream_subjects", "subject")
