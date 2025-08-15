@@ -3,6 +3,7 @@
 
 from sqlalchemy import Enum, String, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.ext.associationproxy import association_proxy, AssociationProxy
 from extension.enums.enum import GradeLevelEnum
 from models.base.base_model import BaseModel
 from typing import TYPE_CHECKING, List
@@ -10,7 +11,6 @@ from typing import TYPE_CHECKING, List
 
 from models.base.column_type import UUIDType
 import uuid
-
 
 
 if TYPE_CHECKING:
@@ -88,13 +88,6 @@ class Grade(BaseModel):
         repr=False,
         passive_deletes=True,
     )
-    grade_stream_subjects: Mapped[List["GradeStreamSubject"]] = relationship(
-        "GradeStreamSubject",
-        back_populates="grade",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
 
     # Many-To-Many Relationships
     teachers: Mapped[List["Teacher"]] = relationship(
@@ -112,14 +105,7 @@ class Grade(BaseModel):
         passive_deletes=True,
         default_factory=list,
     )
-    subjects: Mapped[List["Subject"]] = relationship(
-        "Subject",
-        back_populates="grades",
-        secondary="subject_grade_links",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
+
     students: Mapped[List["Student"]] = relationship(
         "Student",
         secondary="student_grade_links",
@@ -128,3 +114,30 @@ class Grade(BaseModel):
         repr=False,
         passive_deletes=True,
     )
+
+    # Association Object
+    grade_stream_subjects: Mapped[List["GradeStreamSubject"]] = relationship(
+        "GradeStreamSubject",
+        back_populates="grade",
+        default_factory=list,
+        repr=False,
+        passive_deletes=True,
+    )
+
+    # Association proxy
+    _subjects: AssociationProxy[List["Subject"]] = association_proxy(
+        "grade_stream_subjects",
+        "subject",
+        default_factory=list,
+    )
+
+    @property
+    def subjects(self) -> List["Subject"]:
+        """Return unique, non-null subjects."""
+        seen = set()
+        result = []
+        for s in self._subjects:
+            if s is not None and s.id not in seen:
+                seen.add(s.id)
+                result.append(s)
+        return result

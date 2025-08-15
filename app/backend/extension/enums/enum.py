@@ -108,7 +108,7 @@ class GradeLevelEnum(str, Enum):
     HIGH_SCHOOL = "high school"
 
 
-class StatusEnum(str, Enum):
+class TeacherApplicationStatus(str, Enum):
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"

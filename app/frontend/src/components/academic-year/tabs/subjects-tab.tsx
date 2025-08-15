@@ -122,14 +122,29 @@ export default function SubjectsTab({
                                         {subject.grades.length > 0 || subject.streams.length > 0 ? (
                                             <div className="flex flex-wrap gap-2">
                                                 {subject.grades.map((grade) => (
-                                                    <Badge key={grade.id} variant="secondary" className="text-xs">
-                                                        Grade {grade.grade}
-                                                    </Badge>
-                                                ))}
-                                                {subject.streams.map((stream) => (
-                                                    <Badge key={stream.id} variant="default" className="text-xs">
-                                                        {stream.name}
-                                                    </Badge>
+                                                    <div key={`grade-${grade.id}`}>
+                                                        {grade.hasStream ? (
+                                                            subject.streams
+                                                                .filter(stream => stream.gradeId === grade.id)
+                                                                .map((stream) => (
+                                                                    <Badge
+                                                                        key={`stream-${stream.id}`}
+                                                                        variant="default"
+                                                                        className="text-xs"
+                                                                    >
+                                                                        Grade {grade.grade} ({stream.name})
+                                                                    </Badge>
+                                                                ))
+                                                        ) : (
+                                                            <Badge
+                                                                key={`grade-only-${grade.id}`}
+                                                                variant="secondary"
+                                                                className="text-xs"
+                                                            >
+                                                                Grade {grade.grade}
+                                                            </Badge>
+                                                        )}
+                                                    </div>
                                                 ))}
                                             </div>
                                         ) : (
@@ -138,32 +153,33 @@ export default function SubjectsTab({
                                     </div>
                                 </div>
 
-                                <Separator />
-
                                 {/* Actions */}
-                                <div className="flex gap-2 mt-6">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => removeSubject(index)}
-                                        className="flex-1 border-gray-300 hover:bg-red-50"
-                                    >
-                                        <Trash className="h-4 w-4 mr-1" />
-                                        Remove
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => {
-                                            setFormDialogOpen(true);
-                                            setFormMode("edit");
-                                            setFormIndex(index);
-                                        }}
-                                        className="flex-1 border-gray-300 hover:bg-blue-50"
-                                    >
-                                        <Edit className="h-4 w-4 mr-1" />
-                                        Edit
-                                    </Button>
+                                <div className="flex flex-col gap-2 mt-4">
+                                    <Separator />
+                                    <div className="flex gap-2 mt-4">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => removeSubject(index)}
+                                            className="flex-1 border-gray-300 hover:bg-red-50"
+                                        >
+                                            <Trash className="h-4 w-4 mr-1" />
+                                            Remove
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                setFormDialogOpen(true);
+                                                setFormMode("edit");
+                                                setFormIndex(index);
+                                            }}
+                                            className="flex-1 border-gray-300 hover:bg-blue-50"
+                                        >
+                                            <Edit className="h-4 w-4 mr-1" />
+                                            Edit
+                                        </Button>
+                                    </div>
                                 </div>
                             </Card>
                         ))}

@@ -21,8 +21,7 @@ import { YearSetupType } from "@/lib/api-response-type"
 import { useFieldArray, UseFormReturn } from "react-hook-form"
 import { SelectWithLabel } from "./inputs/select-labeled"
 import { SwitchWithLabel } from "./inputs/switch-labeled"
-import { CheckboxForObject } from "./inputs/checkbox-for-object"
-import { SelectForObject } from "./inputs/select-for-object"
+import { CheckboxWithLabel } from "./inputs/checkbox-labeled"
 import { toast } from "sonner"
 import { InputWithLabel } from "./inputs/input-labeled"
 import { GradeLevelEnum } from "@/lib/enums"
@@ -146,7 +145,7 @@ export default function GradeSetupCard({ form, open, onOpenChange, mode, formInd
                             </div>
 
                             {/* Sections */}
-                            <SelectForObject<YearSetupType["grades"][number]["sections"]>
+                            <SelectWithLabel<YearSetupType["grades"][number]["sections"]>
                                 fieldTitle="Sections *"
                                 nameInSchema={`grades.${formIndex}.sections`}
                                 getObjects={(index) => getSectionObjects(index)}
@@ -156,7 +155,7 @@ export default function GradeSetupCard({ form, open, onOpenChange, mode, formInd
                                         {num} Section{num > 1 ? "s" : ""} ({generateSections(num).join(", ")})
                                     </SelectItem>
                                 ))}
-                            </SelectForObject>
+                            </SelectWithLabel>
                             <div className="flex gap-1 mt-2">
                                 {watchForm.grades[formIndex].sections.map((section) => (
                                     <Badge key={section.id} variant="outline">
@@ -185,7 +184,7 @@ export default function GradeSetupCard({ form, open, onOpenChange, mode, formInd
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                     {watchForm.subjects.map((subject, subjectIndex) => (
                                         <div key={subject.id} className="flex items-center space-x-2">
-                                            <CheckboxForObject<Subject>
+                                            <CheckboxWithLabel<Subject>
                                                 fieldTitle={subject.name}
                                                 nameInSchema={`grades.${formIndex}.subjects`}
                                                 value={watchForm.grades[formIndex].subjects.find((s) => s.name === subject.name) || subject}
@@ -375,7 +374,7 @@ function StreamsManagement({ form, formIndex }: StreamsManagementProps) {
                             {watchForm.subjects.filter((subject) => !watchForm.grades[formIndex].subjects.find((s) => s.name === subject.name))
                                 .map((subject, subjectIndex) => (
                                     <div key={subject.id} className="flex items-center space-x-2">
-                                        <CheckboxForObject<Subject>
+                                        <CheckboxWithLabel<Subject>
                                             fieldTitle={subject.name}
                                             nameInSchema={`grades.${formIndex}.streams.${streamIndex}.subjects`}
                                             value={watchForm.grades[formIndex].streams[streamIndex].subjects.find((s) => s.name === subject.name) || subject}

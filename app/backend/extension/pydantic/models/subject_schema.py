@@ -56,7 +56,6 @@ class SubjectRelatedSchema(BaseModel):
     teachers: List[TeacherSchema] = []
     streams: List[StreamSchema] = []
     grades: List[GradeSchema] = []
-    grade_stream_subjects: List[GradeStreamSubjectSchema] = []
 
 
 class SubjectNestedSchema(SubjectSchema):

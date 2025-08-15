@@ -41,6 +41,7 @@ from .section_schema import (
     SectionWithRelatedSchema,
 )
 from .stream_schema import (
+    StreamNestedSchema,
     StreamRelatedSchema,
     StreamSchema,
     StreamWithRelatedSchema,
@@ -154,6 +155,7 @@ __all__ = [
     "YearWithRelatedSchema",
     "YearlySubjectRelatedSchema",
     "YearlySubjectSchema",
+    "StreamNestedSchema",
 ]
 
 AcademicTermSchema.model_rebuild()
@@ -180,9 +182,12 @@ SavedQueryViewRelatedSchema.model_rebuild()
 SectionSchema.model_rebuild()
 SectionRelatedSchema.model_rebuild()
 SectionWithRelatedSchema.model_rebuild()
+
 StreamSchema.model_rebuild()
 StreamRelatedSchema.model_rebuild()
+StreamNestedSchema.model_rebuild()
 StreamWithRelatedSchema.model_rebuild()
+
 StudentSchema.model_rebuild()
 StudentWithRelatedSchema.model_rebuild()
 StudentRelatedSchema.model_rebuild()

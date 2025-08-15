@@ -6,6 +6,7 @@ import { SelectWithLabel } from "@/components/inputs/select-labeled"
 import { SelectItem } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
 import { useEffect, useState } from "react"
+import { YearSetupType } from "@/lib/api-response-type"
 
 
 export default function BasicInfoTab({
@@ -14,7 +15,7 @@ export default function BasicInfoTab({
     onDirty: (dirty: boolean) => void
 }) {
     const [dayDifference, setDayDifference] = useState<number | null>(null);
-    const { register, formState, watch, setValue } = useFormContext()
+    const { register, formState, watch, setValue } = useFormContext<YearSetupType>()
     const startDate = watch("startDate")
     const endDate = watch("endDate")
 
@@ -43,12 +44,12 @@ export default function BasicInfoTab({
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <InputWithLabel
+                    <InputWithLabel<YearSetupType>
                         fieldTitle="Academic Year Name"
                         nameInSchema="name"
                         placeholder="e.g., 2024-2025 Academic Year"
                     />
-                    <SelectWithLabel
+                    <SelectWithLabel<YearSetupType>
                         fieldTitle="Term System"
                         nameInSchema="calendarType"
                     >
@@ -58,7 +59,7 @@ export default function BasicInfoTab({
                 </div>
                 <div className="flex items-center gap-3 flex-wrap">
                     <div className="flex-1 min-w-0">
-                        <DateWithLabel
+                        <DateWithLabel<YearSetupType>
                             fieldTitle="Academic Year Start Date"
                             nameInSchema="startDate"
                         />
@@ -71,7 +72,7 @@ export default function BasicInfoTab({
                         {dayDifference !== null ? `${dayDifference} d` : '--'}
                     </Badge>
                     <div className="flex-1 min-w-0">
-                        <DateWithLabel
+                        <DateWithLabel<YearSetupType>
                             fieldTitle="Academic Year End Date"
                             nameInSchema="endDate"
                             className="flex-1 min-w-0"

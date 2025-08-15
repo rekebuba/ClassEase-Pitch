@@ -21,7 +21,7 @@ from extension.enums.enum import (
     HighestDegreeEnum,
     MaritalStatusEnum,
     ScheduleEnum,
-    StatusEnum,
+    TeacherApplicationStatus,
 )
 from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
@@ -220,15 +220,15 @@ class Teacher(BaseModel):
         UUIDType(), ForeignKey("users.id", ondelete='CASCADE'), unique=True, nullable=True, default=None
     )
 
-    status: Mapped[StatusEnum] = mapped_column(
+    status: Mapped[TeacherApplicationStatus] = mapped_column(
         Enum(
-            StatusEnum,
+            TeacherApplicationStatus,
             name="status_enum",
             values_callable=lambda x: [e.value for e in x],
             native_enum=False,
         ),
         nullable=False,
-        default=StatusEnum.PENDING,
+        default=TeacherApplicationStatus.PENDING,
     )
 
     # Relationship with Default

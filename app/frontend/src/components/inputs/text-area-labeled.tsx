@@ -1,4 +1,4 @@
-import { useFormContext } from "react-hook-form"
+import { FieldValues, Path, useFormContext } from "react-hook-form"
 
 import {
     FormControl,
@@ -11,15 +11,15 @@ import {
 import { Textarea } from "@/components/ui/textarea"
 import { TextareaHTMLAttributes } from "react"
 
-type Props = {
+type TextAreaWithLabelProps<T extends FieldValues> = {
     fieldTitle: string,
-    nameInSchema: string,
+    nameInSchema: Path<T>,
     className?: string,
 } & TextareaHTMLAttributes<HTMLTextAreaElement>
 
-export function TextAreaWithLabel({
+export function TextAreaWithLabel<T extends FieldValues>({
     fieldTitle, nameInSchema, className, ...props
-}: Props) {
+}: TextAreaWithLabelProps<T>) {
     const form = useFormContext()
 
     return (

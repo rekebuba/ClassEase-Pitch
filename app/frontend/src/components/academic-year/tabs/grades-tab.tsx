@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { GradeSetupCard } from "@/components/academic-year/form-setup";
 import z from "zod";
 import { SubjectSchema } from "@/lib/api-response-validation";
+import { GradeEnum } from "@/lib/enums";
 
 type Stream = YearSetupType["grades"][number]["streams"][number];
 
@@ -87,7 +88,8 @@ export default function GradesTab({
                     </div>
                     <Button
                         onClick={() => handleCreateGrade()}
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                        disabled={GradeEnum.options.length <= gradeFields.length}
+                        className="bg-blue-600 text-white hover:bg-blue-700 disabled:pointer-events-auto disabled:cursor-not-allowed"
                     >
                         <Plus className="h-4 w-4 mr-2" />
                         Add Grade
@@ -136,10 +138,7 @@ export default function GradesTab({
                                         <BookOpen className="h-4 w-4 text-red-600 mx-auto mb-1" />
                                         <div className="text-sm font-semibold text-red-900">
                                             {grade.hasStream
-                                                ? grade.streams.reduce(
-                                                    (sum, stream) => sum + (stream.subjects?.length || 0),
-                                                    0
-                                                ) + grade.subjects.length
+                                                ? new Set(grade.streams.flatMap(stream => stream.subjects || []).map(subject => subject.id)).size
                                                 : grade.subjects.length}
                                         </div>
                                         <div className="text-xs text-red-700">Subjects</div>
@@ -154,25 +153,29 @@ export default function GradesTab({
                                     ) :
                                         (
                                             <>
-                                                <div className="mb-3 space-y-2">
-                                                    {grade.streams.map((stream, streamIndex) => (
-                                                        <CollapsibleStreamCard
-                                                            key={streamIndex}
-                                                            formIndex={index}
-                                                            stream={stream}
-                                                            streamIndex={streamIndex}
-                                                        />
-                                                    ))}
-                                                </div>
-                                                <div className="flex flex-wrap gap-2">
-                                                    {grade.subjects.map((subject) => (
-                                                        <Badge key={subject.id} variant="secondary" className="text-xs">
-                                                            {subject.name}
-                                                        </Badge>
-                                                    ))}
-                                                </div>
+                                                {grade.hasStream && grade.streams.length > 0 ?
+                                                    (<div className="mb-3 space-y-2">
+                                                        {grade.streams.map((stream, streamIndex) => (
+                                                            <CollapsibleStreamCard
+                                                                key={streamIndex}
+                                                                formIndex={index}
+                                                                stream={stream}
+                                                                streamIndex={streamIndex}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                    ) :
+                                                    (<div className="flex flex-wrap gap-2">
+                                                        {grade.subjects.map((subject) => (
+                                                            <Badge key={subject.id} variant="secondary" className="text-xs">
+                                                                {subject.name}
+                                                            </Badge>
+                                                        ))}
+                                                    </div>
+                                                    )}
                                             </>
-                                        )}
+                                        )
+                                    }
                                 </div>
                             </div>
 

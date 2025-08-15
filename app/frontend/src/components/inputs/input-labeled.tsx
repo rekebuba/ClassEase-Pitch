@@ -1,4 +1,4 @@
-import { useFormContext } from "react-hook-form"
+import { FieldValues, Path, useFormContext } from "react-hook-form"
 
 import {
     FormControl,
@@ -10,15 +10,15 @@ import {
 import { Input } from '@/components/ui/input'
 import { InputHTMLAttributes } from "react"
 
-type Props = {
+type InputWithLabelProps<T extends FieldValues> = {
     fieldTitle: string,
-    nameInSchema: string,
+    nameInSchema: Path<T>,
     className?: string,
 } & InputHTMLAttributes<HTMLInputElement>
 
-export function InputWithLabel({
+export function InputWithLabel<T extends FieldValues>({
     fieldTitle, nameInSchema, className, ...props
-}: Props) {
+}: InputWithLabelProps<T>) {
     const form = useFormContext()
 
     return (
