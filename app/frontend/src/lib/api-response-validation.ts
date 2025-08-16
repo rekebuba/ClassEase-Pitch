@@ -373,7 +373,8 @@ export const YearSetupSchema = YearSchema.extend({
     ),
     subjects: z.array(
         SubjectSchema.extend({
-            grades: z.array(GradeSchema),
-            streams: z.array(StreamSchema),
-        })),
+            grades: z.array(GradeSchema.pick({ id: true })),
+            streams: z.array(StreamSchema.pick({ id: true, gradeId: true })),
+        })
+    ),
 })

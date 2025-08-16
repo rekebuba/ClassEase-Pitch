@@ -77,9 +77,10 @@ export default function AcademicYearSetup({
         try {
             const schema = z.array(
                 SubjectSchema.extend({
-                    grades: z.array(GradeSchema),
-                    streams: z.array(StreamSchema),
-                }))
+                    grades: z.array(GradeSchema.pick({ id: true })),
+                    streams: z.array(StreamSchema.pick({ id: true, gradeId: true })),
+                })
+            )
 
             const response = await sharedApi.getSubject(yearId, schema)
 

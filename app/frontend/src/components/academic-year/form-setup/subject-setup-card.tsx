@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent } from "@/components/ui/card"
-import { BookOpen } from "lucide-react"
+import { BookOpen, GraduationCap } from "lucide-react"
 import { YearSetupType } from "@/lib/api-response-type"
 import { InputWithLabel } from "@/components/inputs/input-labeled"
 import { FormProvider, useFieldArray, useForm, useFormContext } from "react-hook-form"
@@ -160,7 +160,15 @@ export default function SubjectSetupCard({ open, onOpenChange, mode, formIndex }
 
                                     <Card className="shadow-sm">
                                         <CardContent className="p-6">
-                                            <h3 className="text-lg font-medium mb-4">Select Grades & Streams</h3>
+
+                                            {/* Empty State */}
+                                            {watchParentForm.grades.length === 0 && (
+                                                <div className="text-center py-12 text-gray-500">
+                                                    <GraduationCap className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                                                    <p>No grades added yet. Add your first grade in the 'Grades & Streams' Tab</p>
+                                                </div>
+                                            )}
+
                                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                                 {watchParentForm.grades.map((grade) => (
                                                     <div
@@ -172,15 +180,7 @@ export default function SubjectSetupCard({ open, onOpenChange, mode, formIndex }
                                                                 <CheckboxWithLabel<Subject, Grade>
                                                                     fieldTitle={`Grade ${grade.grade}`}
                                                                     nameInSchema="grades"
-                                                                    value={
-                                                                        watchSubForm.grades?.find((g) => g.grade === grade.grade) || {
-                                                                            grade: grade.grade,
-                                                                            hasStream: grade.hasStream,
-                                                                            id: grade.id,
-                                                                            level: grade.level,
-                                                                            yearId: grade.yearId,
-                                                                        }
-                                                                    }
+                                                                    value={watchSubForm.grades?.find((g) => g.id === grade.id) || { id: grade.id }}
                                                                     className="h-5 w-5 text-primary"
                                                                 />
                                                                 <Label className="text-sm font-medium">
@@ -203,7 +203,6 @@ export default function SubjectSetupCard({ open, onOpenChange, mode, formIndex }
                                                                                     watchSubForm.streams?.find((s) => s.id === stream.id) || {
                                                                                         id: stream.id,
                                                                                         gradeId: stream.gradeId,
-                                                                                        name: stream.name,
                                                                                     }
                                                                                 }
                                                                                 className="h-4 w-4 text-primary"

@@ -1,15 +1,16 @@
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Plus, BookOpen, Search, Edit, Trash } from "lucide-react"
 import { SubjectSetupCard } from "@/components/academic-year/form-setup"
-import { YearSetupType } from "@/lib/api-response-type"
+import { Year, YearSetupType } from "@/lib/api-response-type"
 import { useFieldArray, useFormContext } from "react-hook-form"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 
+type Subject = YearSetupType["subjects"][number]
 
 export default function SubjectsTab({
     onDirty,
@@ -32,9 +33,11 @@ export default function SubjectsTab({
         name: "subjects",
         keyName: "rhfId", // Prevents overriding `id`
     })
-    const watchForm = watch()
 
-    const filteredSubjects = watchForm.subjects.filter((subject) => {
+    const watchGrades = watch("grades")
+    const watchSubjects = watch("subjects")
+
+    const filteredSubjects = watchSubjects.filter((subject) => {
         const matchesSearch =
             subject.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
             subject.code.toLowerCase().includes(searchTerm.toLowerCase())
@@ -43,7 +46,7 @@ export default function SubjectsTab({
 
     const handleCreateSubject = () => {
         prependSubject({
-            id: "",
+            id: crypto.randomUUID(),
             name: "",
             code: "",
             grades: [],
@@ -92,9 +95,9 @@ export default function SubjectsTab({
                         <div className="text-center py-12 text-gray-500">
                             <BookOpen className="h-12 w-12 mx-auto mb-4 opacity-50" />
                             <p>
-                                {subjectFields.length === 0
-                                    ? "No subjects added yet. Add your first subject above."
-                                    : "No subjects match your search criteria."}
+                                {subjectFields.length > 0 && searchTerm !== ""
+                                    ? `No subjects match your search ${searchTerm}.`
+                                    : "No subjects added yet. Add your first subject above."}
                             </p>
                         </div>
                     )}
@@ -102,86 +105,15 @@ export default function SubjectsTab({
                     {/* Grid */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {filteredSubjects.map((subject, index) => (
-                            <Card
+                            <GradeSubjectsCard
                                 key={subject.id}
-                                className="flex flex-col justify-between min-h-[220px] p-4 border border-gray-200 hover:shadow-lg transition-shadow"
-                            >
-                                {/* Title */}
-                                <div>
-                                    <CardTitle className="flex items-center gap-2 mb-2 text-md">
-                                        <BookOpen className="text-blue-600 shrink-0" />
-                                        <span className="truncate">{subject.name}</span>
-                                        <Badge className="text-[13px] px-2" variant="outline">
-                                            {subject.code}
-                                        </Badge>
-                                    </CardTitle>
+                                subject={subject}
+                                index={index}
+                                setFormMode={setFormMode}
+                                setFormIndex={setFormIndex}
+                                setFormDialogOpen={setFormDialogOpen}
+                            />
 
-                                    {/* Grades */}
-                                    <div className="mt-3">
-                                        <h4 className="font-medium mb-3 text-sm text-gray-600">Taught In</h4>
-                                        {subject.grades.length > 0 || subject.streams.length > 0 ? (
-                                            <div className="flex flex-wrap gap-2">
-                                                {subject.grades.map((grade) => (
-                                                    <div key={`grade-${grade.id}`}>
-                                                        {grade.hasStream ? (
-                                                            subject.streams
-                                                                .filter(stream => stream.gradeId === grade.id)
-                                                                .map((stream) => (
-                                                                    <Badge
-                                                                        key={`stream-${stream.id}`}
-                                                                        variant="default"
-                                                                        className="text-xs"
-                                                                    >
-                                                                        Grade {grade.grade} ({stream.name})
-                                                                    </Badge>
-                                                                ))
-                                                        ) : (
-                                                            <Badge
-                                                                key={`grade-only-${grade.id}`}
-                                                                variant="secondary"
-                                                                className="text-xs"
-                                                            >
-                                                                Grade {grade.grade}
-                                                            </Badge>
-                                                        )}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <p className="text-xs text-gray-400 italic">No grades assigned</p>
-                                        )}
-                                    </div>
-                                </div>
-
-                                {/* Actions */}
-                                <div className="flex flex-col gap-2 mt-4">
-                                    <Separator />
-                                    <div className="flex gap-2 mt-4">
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => removeSubject(index)}
-                                            className="flex-1 border-gray-300 hover:bg-red-50"
-                                        >
-                                            <Trash className="h-4 w-4 mr-1" />
-                                            Remove
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            onClick={() => {
-                                                setFormDialogOpen(true);
-                                                setFormMode("edit");
-                                                setFormIndex(index);
-                                            }}
-                                            className="flex-1 border-gray-300 hover:bg-blue-50"
-                                        >
-                                            <Edit className="h-4 w-4 mr-1" />
-                                            Edit
-                                        </Button>
-                                    </div>
-                                </div>
-                            </Card>
                         ))}
                     </div>
                 </CardContent>
@@ -194,5 +126,108 @@ export default function SubjectsTab({
                 mode={formMode}
             />
         </div>
+    )
+}
+
+interface GradeSubjectsCardProps {
+    subject: Subject
+    index: number
+    setFormMode: (mode: "create" | "edit") => void
+    setFormIndex: (index: number) => void
+    setFormDialogOpen: (open: boolean) => void
+}
+
+const GradeSubjectsCard = ({ subject, index, setFormMode, setFormIndex, setFormDialogOpen }: GradeSubjectsCardProps) => {
+    const { control, watch } = useFormContext<YearSetupType>()
+
+    // Grades field array
+    const { remove: removeSubject } = useFieldArray({ control, name: "subjects", keyName: "rhfId" })
+    const watchGrades = watch("grades")
+
+    const filteredGrades = useMemo(() => {
+        return watchGrades.filter((grade) => grade.subjects.some(s => s.id === subject.id))
+    }, [watchGrades, subject.id])
+
+    return (
+        <Card
+            key={subject.id}
+            className="flex flex-col justify-between min-h-[220px] p-4 border border-gray-200 hover:shadow-lg transition-shadow"
+        >
+            {/* Title */}
+            <div>
+                <CardTitle className="flex items-center gap-2 mb-2 text-md">
+                    <BookOpen className="text-blue-600 shrink-0" />
+                    <span className="truncate">{subject.name}</span>
+                    <Badge className="text-[13px] px-2" variant="outline">
+                        {subject.code}
+                    </Badge>
+                </CardTitle>
+
+                {/* Grades */}
+                <div className="mt-3">
+                    <h4 className="font-medium mb-3 text-sm text-gray-600">Taught In</h4>
+                    {subject.grades.length > 0 || subject.streams.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                            {filteredGrades.map((grade) => (
+                                <div key={`grade-${grade.id}`}>
+                                    {grade.hasStream ? (
+                                        grade.streams
+                                            .filter((stream) => stream.subjects.some(s => s.id === subject.id))
+                                            .map((stream) => (
+                                                <Badge
+                                                    key={`stream-${stream.id}`}
+                                                    variant="default"
+                                                    className="text-xs"
+                                                >
+                                                    Grade {grade.grade} ({stream.name})
+                                                </Badge>
+                                            ))
+                                    ) : (
+                                        <Badge
+                                            key={`grade-only-${grade.id}`}
+                                            variant="secondary"
+                                            className="text-xs"
+                                        >
+                                            Grade {grade.grade}
+                                        </Badge>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <p className="text-xs text-gray-400 italic">No grades assigned</p>
+                    )}
+                </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-col gap-2 mt-4">
+                <Separator />
+                <div className="flex gap-2 mt-4">
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeSubject(index)}
+                        className="flex-1 border-gray-300 hover:bg-red-50"
+                    >
+                        <Trash className="h-4 w-4 mr-1" />
+                        Remove
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                            setFormDialogOpen(true);
+                            setFormMode("edit");
+                            setFormIndex(index);
+                        }}
+                        className="flex-1 border-gray-300 hover:bg-blue-50"
+                    >
+                        <Edit className="h-4 w-4 mr-1" />
+                        Edit
+                    </Button>
+                </div>
+            </div>
+        </Card>
     )
 }

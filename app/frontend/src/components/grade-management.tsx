@@ -117,7 +117,7 @@ export default function GradeManagement({ form }: GradeManagementProps) {
     // Handlers
     const handleCreateGrade = useCallback(() => {
         prependGrade({
-            id: "",
+            id: crypto.randomUUID(),
             yearId: "",
             grade: "",
             level: "primary",
