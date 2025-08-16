@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import { Layout } from "@/components";
 import { studentApi } from "@/api";
-import { toast } from "sonner"
+import { toast } from "sonner";
 
 /**
  * Component for updating student profile.
@@ -30,208 +30,224 @@ import { toast } from "sonner"
  * @property {boolean} alert.show - Boolean indicating if the alert is visible.
  */
 const StudentUpdateProfile = () => {
-    const [formData, setFormData] = useState({});
-    const [previewImage, setPreviewImage] = useState('');
-    const [editMode, setEditMode] = useState(false);
+  const [formData, setFormData] = useState({});
+  const [previewImage, setPreviewImage] = useState("");
+  const [editMode, setEditMode] = useState(false);
 
-    /**
-     * @function handleChange
-     * @description Handles changes to form inputs and updates the state.
-     * @param {Event} e - The event object.
-     * @returns {void}
-     */
-    const handleChange = (e) => {
-        const { name, value, files } = e.target;
-        if (name === 'profilePicture' && files.length) {
-            const imageUrl = URL.createObjectURL(files[0]);
-            setPreviewImage(imageUrl);
-            setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
-        } else {
-            setFormData((prevData) => ({ ...prevData, [name]: value }));
-        }
-    };
+  /**
+   * @function handleChange
+   * @description Handles changes to form inputs and updates the state.
+   * @param {Event} e - The event object.
+   * @returns {void}
+   */
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === "profilePicture" && files.length) {
+      const imageUrl = URL.createObjectURL(files[0]);
+      setPreviewImage(imageUrl);
+      setFormData((prevData) => ({ ...prevData, [name]: files[0] }));
+    } else {
+      setFormData((prevData) => ({ ...prevData, [name]: value }));
+    }
+  };
 
-    /**
-         * @function loadStudentData
-         * @description Fetches student data from the API and updates the state.
-         * @returns {void}
-         * @async
-         * @throws {error} Any error while fetching data.
-        */
-    const loadStudentData = async () => {
-        try {
-            const response = await studentApi.getDashboardData();
-            const data = response.data;
-            setFormData(data);
-            if (data.profilePicture) {
-                setPreviewImage(data.profilePicture);
-            }
-        } catch (error) {
-            if (error.response && error.response.data) {
-                console.log(error.response.data.message);
-            }
-        }
-    };
+  /**
+   * @function loadStudentData
+   * @description Fetches student data from the API and updates the state.
+   * @returns {void}
+   * @async
+   * @throws {error} Any error while fetching data.
+   */
+  const loadStudentData = async () => {
+    try {
+      const response = await studentApi.getDashboardData();
+      const data = response.data;
+      setFormData(data);
+      if (data.profilePicture) {
+        setPreviewImage(data.profilePicture);
+      }
+    } catch (error) {
+      if (error.response && error.response.data) {
+        console.log(error.response.data.message);
+      }
+    }
+  };
 
-    /**
-     * @function saveStudentData
-     * @description Sends updated student data to the API to save changes.
-     * @returns {void}
-     * @async
-     * @throws {error} Any error while saving data.
-     * @throws {error} An error if the form submission fails.
-     * @throws {error} An unexpected error occurred.
-     */
-    const saveStudentData = async () => {
-        try {
-            const response = await studentApi.updateProfile(formData);
-            toast.success(response.data['message'], {
-                description: currentTime,
-                style: { color: 'green' }
-            });
-        } catch (error) {
-            if (error.response && error.response.data && error.response.data['error']) {
-                toast.error(error.response.data['error'], {
-                    description: "Please try again later, if the problem persists, contact the administrator.",
-                    style: { color: 'red' }
-                });
-            } else {
-                toast.error("An unexpected error occurred.", {
-                    description: "Please try again later, if the problem persists, contact the administrator.",
-                    style: { color: 'red' }
-                });
-            }
-        }
-        await loadStudentData();
-    };
+  /**
+   * @function saveStudentData
+   * @description Sends updated student data to the API to save changes.
+   * @returns {void}
+   * @async
+   * @throws {error} Any error while saving data.
+   * @throws {error} An error if the form submission fails.
+   * @throws {error} An unexpected error occurred.
+   */
+  const saveStudentData = async () => {
+    try {
+      const response = await studentApi.updateProfile(formData);
+      toast.success(response.data["message"], {
+        description: currentTime,
+        style: { color: "green" },
+      });
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data["error"]
+      ) {
+        toast.error(error.response.data["error"], {
+          description:
+            "Please try again later, if the problem persists, contact the administrator.",
+          style: { color: "red" },
+        });
+      } else {
+        toast.error("An unexpected error occurred.", {
+          description:
+            "Please try again later, if the problem persists, contact the administrator.",
+          style: { color: "red" },
+        });
+      }
+    }
+    await loadStudentData();
+  };
 
-    /**
-     * @function handleSave
-     * @description Handles the save button click, toggles edit mode off, and saves student data.
-     * @returns {void}
-     */
-    const handleSave = () => {
-        setEditMode(false);
-        saveStudentData();
-    };
+  /**
+   * @function handleSave
+   * @description Handles the save button click, toggles edit mode off, and saves student data.
+   * @returns {void}
+   */
+  const handleSave = () => {
+    setEditMode(false);
+    saveStudentData();
+  };
 
-    /**
-     * @hook useEffect
-     * @description Loads student data on component mount.
-     * @returns {void}
-     */
-    useEffect(() => {
-        loadStudentData();
-    }, []);
+  /**
+   * @hook useEffect
+   * @description Loads student data on component mount.
+   * @returns {void}
+   */
+  useEffect(() => {
+    loadStudentData();
+  }, []);
 
-    return (
-        <div className="user-profile">
-            <div className="profile-details">
-                <div className="profile-picture">
-                    {formData.profile ?
-                        <img src={previewImage} alt="Profile" /> :
-                        <FaUserCircle className="w-36 h-36 text-gray-500 cursor-pointer" />
-                    }
-                    <img src={previewImage} alt="Profile" />
-                    {editMode && (
-                        <input type="file" name="profilePicture" onChange={handleChange} />
-                    )}
-                </div>
-                <div className='profile-data'>
-                    <div className="profile-form-group">
-                        <label>Name</label>
-                        <p>{formData.name} {formData.father_name} {formData.grand_father_name}</p>
-                    </div>
-                    <div className="profile-form-group">
-                        <label htmlFor="dateOfBirth">Date of Birth</label>
-                        {editMode ? (
-                            <input
-                                type="date"
-                                id="dateOfBirth"
-                                name="date_of_birth"
-                                value={formData.date_of_birth || ''}
-                                onChange={handleChange}
-                                required
-                            />
-                        ) : (
-                            <p>{formData.date_of_birth}</p>
-                        )}
-                    </div>
-
-                    <div className="profile-form-group" style={{ marginBottom: '15px' }}>
-                        <label>Father Phone</label>
-                        {editMode ? (
-                            <input
-                                type="tel"
-                                name="father_phone"
-                                value={formData.father_phone || ''}
-                                onChange={handleChange}
-                            />
-                        ) : (
-                            <p>{formData.father_phone}</p>
-                        )}
-                    </div>
-
-                    <div className="profile-form-group" style={{ marginBottom: '15px' }}>
-                        <label>Mother Phone</label>
-                        {editMode ? (
-                            <input
-                                type="tel"
-                                name="mother_phone"
-                                value={formData.mother_phone || ''}
-                                onChange={handleChange}
-                            />
-                        ) : (
-                            <p>{formData.mother_phone}</p>
-                        )}
-                    </div>
-
-                    {editMode &&
-                        <div className="profile-form-group" style={{ marginBottom: '15px' }}>
-                            <label>Current Password</label>
-                            <input
-                                type="password"
-                                name="current_password"
-                                placeholder="Enter current password"
-                                onChange={handleChange}
-                            />
-                        </div>
-                    }
-
-                    <div className="profile-form-group" style={{ marginBottom: '15px' }}>
-                        <label>Password</label>
-                        {editMode ? (
-                            <input
-                                type="password"
-                                name="new_password"
-                                placeholder="Enter new password"
-                                onChange={handleChange}
-                            />
-                        ) : (
-                            <p>********</p>
-                        )}
-                    </div>
-                </div>
-            </div>
-
-            <div className="button-group">
-                {editMode ? (
-                    <>
-                        <button className="save-button" onClick={handleSave}>
-                            Save Changes
-                        </button>
-                        <button className="cancel-button" onClick={() => setEditMode(false)}>
-                            Cancel
-                        </button>
-                    </>
-                ) : (
-                    <button className="edit-button" onClick={() => setEditMode(true)}>
-                        Edit Profile
-                    </button>
-                )}
-            </div>
+  return (
+    <div className="user-profile">
+      <div className="profile-details">
+        <div className="profile-picture">
+          {formData.profile ? (
+            <img src={previewImage} alt="Profile" />
+          ) : (
+            <FaUserCircle className="w-36 h-36 text-gray-500 cursor-pointer" />
+          )}
+          <img src={previewImage} alt="Profile" />
+          {editMode && (
+            <input type="file" name="profilePicture" onChange={handleChange} />
+          )}
         </div>
-    );
+        <div className="profile-data">
+          <div className="profile-form-group">
+            <label>Name</label>
+            <p>
+              {formData.name} {formData.father_name}{" "}
+              {formData.grand_father_name}
+            </p>
+          </div>
+          <div className="profile-form-group">
+            <label htmlFor="dateOfBirth">Date of Birth</label>
+            {editMode ? (
+              <input
+                type="date"
+                id="dateOfBirth"
+                name="date_of_birth"
+                value={formData.date_of_birth || ""}
+                onChange={handleChange}
+                required
+              />
+            ) : (
+              <p>{formData.date_of_birth}</p>
+            )}
+          </div>
+
+          <div className="profile-form-group" style={{ marginBottom: "15px" }}>
+            <label>Father Phone</label>
+            {editMode ? (
+              <input
+                type="tel"
+                name="father_phone"
+                value={formData.father_phone || ""}
+                onChange={handleChange}
+              />
+            ) : (
+              <p>{formData.father_phone}</p>
+            )}
+          </div>
+
+          <div className="profile-form-group" style={{ marginBottom: "15px" }}>
+            <label>Mother Phone</label>
+            {editMode ? (
+              <input
+                type="tel"
+                name="mother_phone"
+                value={formData.mother_phone || ""}
+                onChange={handleChange}
+              />
+            ) : (
+              <p>{formData.mother_phone}</p>
+            )}
+          </div>
+
+          {editMode && (
+            <div
+              className="profile-form-group"
+              style={{ marginBottom: "15px" }}
+            >
+              <label>Current Password</label>
+              <input
+                type="password"
+                name="current_password"
+                placeholder="Enter current password"
+                onChange={handleChange}
+              />
+            </div>
+          )}
+
+          <div className="profile-form-group" style={{ marginBottom: "15px" }}>
+            <label>Password</label>
+            {editMode ? (
+              <input
+                type="password"
+                name="new_password"
+                placeholder="Enter new password"
+                onChange={handleChange}
+              />
+            ) : (
+              <p>********</p>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="button-group">
+        {editMode ? (
+          <>
+            <button className="save-button" onClick={handleSave}>
+              Save Changes
+            </button>
+            <button
+              className="cancel-button"
+              onClick={() => setEditMode(false)}
+            >
+              Cancel
+            </button>
+          </>
+        ) : (
+          <button className="edit-button" onClick={() => setEditMode(true)}>
+            Edit Profile
+          </button>
+        )}
+      </div>
+    </div>
+  );
 };
 
 export default StudentUpdateProfile;

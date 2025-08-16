@@ -27,17 +27,22 @@ import { useFilters } from "@/utils/filter-context";
 import { dataTableConfig } from "@/config/data-table";
 import { useState } from "react";
 import { DataTableFilterOption } from "@/types";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 interface DataTableFacetedFilterProps<TData> {
-  column: Column<TData>
-  title: string
-  options: any[]
-  multiple?: boolean
-  onFilterChange?: (value: any) => void
-  isActive?: boolean
-  isAdvancedMode?: boolean
+  column: Column<TData>;
+  title: string;
+  options: any[];
+  multiple?: boolean;
+  onFilterChange?: (value: any) => void;
+  isActive?: boolean;
+  isAdvancedMode?: boolean;
 }
 
 export function DataTableFacetedFilter<TData>({
@@ -47,7 +52,7 @@ export function DataTableFacetedFilter<TData>({
   multiple,
   onFilterChange,
   isActive,
-  isAdvancedMode
+  isAdvancedMode,
 }: DataTableFacetedFilterProps<TData>) {
   const { removeFilter, getFilter } = useFilters();
 
@@ -61,13 +66,14 @@ export function DataTableFacetedFilter<TData>({
 
   const operator = React.useMemo(
     () =>
-      comparisonOperators.find(
-        (op) => op.value === columnFilter?.toString()
-      ) ?? comparisonOperators[0],
-    [column, comparisonOperators]
+      comparisonOperators.find((op) => op.value === columnFilter?.toString()) ??
+      comparisonOperators[0],
+    [column, comparisonOperators],
   );
 
-  const [selectedOperator, setSelectedOperator] = useState<string>(operator.value);
+  const [selectedOperator, setSelectedOperator] = useState<string>(
+    operator.value,
+  );
 
   const onItemSelect = React.useCallback(
     (option: Option, isSelected: boolean) => {
@@ -81,9 +87,9 @@ export function DataTableFacetedFilter<TData>({
           newSelectedValues.add(option.value);
         }
         const filterValues = Array.from(newSelectedValues);
-        onFilterChange?.({ value: filterValues, operator: selectedOperator })
+        onFilterChange?.({ value: filterValues, operator: selectedOperator });
       } else {
-        removeFilter(column.id)
+        removeFilter(column.id);
       }
     },
     [column, multiple, selectedValues, selectedOperator, isAdvancedMode],
@@ -95,7 +101,7 @@ export function DataTableFacetedFilter<TData>({
 
       setSelectedOperator(value);
       const filterValues = Array.from(selectedValues);
-      onFilterChange?.({ value: filterValues, operator: selectedOperator })
+      onFilterChange?.({ value: filterValues, operator: selectedOperator });
     },
     [column, selectedValues],
   );
@@ -103,7 +109,10 @@ export function DataTableFacetedFilter<TData>({
   return (
     <>
       {isAdvancedMode && (
-        <Select value={selectedOperator} onValueChange={value => onOperatorSelect(value)}>
+        <Select
+          value={selectedOperator}
+          onValueChange={(value) => onOperatorSelect(value)}
+        >
           <SelectTrigger className="h-9 w-[150px] bg-white border-2 hover:border-blue-300 transition-colors">
             <SelectValue placeholder="Select filter" />
           </SelectTrigger>
@@ -120,11 +129,17 @@ export function DataTableFacetedFilter<TData>({
       <Popover>
         <PopoverTrigger asChild>
           <div className="relative">
-            <Button variant="outline" size="sm" className={cn(
-              "h-9 min-w-[180px] rounded-md border border-input bg-background text-sm ring-offset-background transition-all duration-200",
-              "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-              isActive && selectedValues && "ring-2 ring-blue-500/20 border-blue-300",
-            )}>
+            <Button
+              variant="outline"
+              size="sm"
+              className={cn(
+                "h-9 min-w-[180px] rounded-md border border-input bg-background text-sm ring-offset-background transition-all duration-200",
+                "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                isActive &&
+                  selectedValues &&
+                  "ring-2 ring-blue-500/20 border-blue-300",
+              )}
+            >
               <PlusCircle />
               <span>{title}</span>
               {selectedValues?.size > 0 && (
@@ -216,7 +231,7 @@ export function DataTableFacetedFilter<TData>({
             </CommandList>
           </Command>
         </PopoverContent>
-      </Popover >
+      </Popover>
     </>
   );
 }

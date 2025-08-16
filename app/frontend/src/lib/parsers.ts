@@ -14,7 +14,6 @@ const tableIdValue = z.union([
   z.array(z.tuple([z.string(), z.string()])),
 ]);
 
-
 const sortingItemSchema = z.object({
   id: z.string(),
   desc: z.boolean(),
@@ -60,7 +59,6 @@ export const getSortingStateParser = <TData>(
       ),
   });
 };
-
 
 export type FilterItemSchema = z.infer<typeof filterItemSchema>;
 

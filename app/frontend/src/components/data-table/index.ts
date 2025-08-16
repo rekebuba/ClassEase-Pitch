@@ -18,5 +18,5 @@ export * from "./data-table-columns-visibility";
 export * from "./data-table";
 export * from "./dynamic-container";
 export * from "./icons";
-export * from "./table-instance-provider"
+export * from "./table-instance-provider";
 export * from "./data-table-filter-combobox";

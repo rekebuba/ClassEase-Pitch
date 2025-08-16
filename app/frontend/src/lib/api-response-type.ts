@@ -1,26 +1,33 @@
 import { z } from "zod";
-import { YearSetupSchema, GradeSchema, StreamSchema, SubjectSchema, YearSchema, GradeRelationSchema } from "./api-response-validation";
+import {
+  YearSetupSchema,
+  GradeSchema,
+  StreamSchema,
+  SubjectSchema,
+  YearSchema,
+  GradeRelationSchema,
+} from "./api-response-validation";
 
 import {
-    AdminSchema,
-    StudentSchema,
-    TeacherSchema,
-    UserSchema,
-    AcademicTermSchema,
-    AssessmentSchema,
-    EventSchema,
-    MarkListSchema,
-    RegistrationSchema,
-    SectionSchema,
-    StudentTermRecordSchema,
-    TeacherTermRecordSchema,
-    StudentYearRecordSchema,
-    SubjectYearlyAverageSchema,
-    TeacherRecordSchema,
-    YearlySubjectSchema,
-    TeacherSubjectLinkSchema,
-    TeacherGradeLinkSchema
-} from './api-response-validation';
+  AdminSchema,
+  StudentSchema,
+  TeacherSchema,
+  UserSchema,
+  AcademicTermSchema,
+  AssessmentSchema,
+  EventSchema,
+  MarkListSchema,
+  RegistrationSchema,
+  SectionSchema,
+  StudentTermRecordSchema,
+  TeacherTermRecordSchema,
+  StudentYearRecordSchema,
+  SubjectYearlyAverageSchema,
+  TeacherRecordSchema,
+  YearlySubjectSchema,
+  TeacherSubjectLinkSchema,
+  TeacherGradeLinkSchema,
+} from "./api-response-validation";
 
 export type YearSchema = z.infer<typeof YearSchema>;
 export type GradeSchema = z.infer<typeof GradeSchema>;

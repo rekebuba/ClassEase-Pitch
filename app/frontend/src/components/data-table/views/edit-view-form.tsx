@@ -1,64 +1,74 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useEffect, useRef, useState } from "react"
-import { ChevronLeftIcon } from "@radix-ui/react-icons"
-import { toast } from "sonner"
+import { useEffect, useRef, useState } from "react";
+import { ChevronLeftIcon } from "@radix-ui/react-icons";
+import { toast } from "sonner";
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Separator } from "@/components/ui/separator"
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
 
-import { DeleteViewForm } from "./delete-view-form"
-import { LoaderIcon } from "lucide-react"
-import { renameViewData, StudentsViews } from "@/lib/types"
-import { renameView } from "@/api/adminApi"
+import { DeleteViewForm } from "./delete-view-form";
+import { LoaderIcon } from "lucide-react";
+import { renameViewData, StudentsViews } from "@/lib/types";
+import { renameView } from "@/api/adminApi";
 
 interface EditViewFormProps {
-  view: StudentsViews
-  setIsEditViewFormOpen: React.Dispatch<React.SetStateAction<boolean>>
-  refetchViews: () => void
-  onDelete: (viewId: string) => void
+  view: StudentsViews;
+  setIsEditViewFormOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  refetchViews: () => void;
+  onDelete: (viewId: string) => void;
 }
 
-export function EditViewForm({ view, setIsEditViewFormOpen, refetchViews, onDelete }: EditViewFormProps) {
-  const nameInputRef = useRef<HTMLInputElement>(null)
-  const [name, setName] = useState(view.name)
-  const [pending, setPending] = useState(false)
+export function EditViewForm({
+  view,
+  setIsEditViewFormOpen,
+  refetchViews,
+  onDelete,
+}: EditViewFormProps) {
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const [name, setName] = useState(view.name);
+  const [pending, setPending] = useState(false);
 
   useEffect(() => {
-    nameInputRef.current?.focus()
-  }, [])
+    nameInputRef.current?.focus();
+  }, []);
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
     if (name.trim() === "") {
-      toast.error("Name cannot be empty.")
-      return
+      toast.error("Name cannot be empty.");
+      return;
     }
 
-    setPending(true)
+    setPending(true);
 
     // Simulate API call
     setTimeout(async () => {
-      const updatedView: renameViewData = { viewId: view.viewId, name: name }
+      const updatedView: renameViewData = { viewId: view.viewId, name: name };
       const result = await renameView(updatedView);
-      setIsEditViewFormOpen(false)
+      setIsEditViewFormOpen(false);
 
       toast.error(result.message, {
         style: { color: "green" },
       });
-      refetchViews()
+      refetchViews();
 
-      setPending(false)
-    }, 500)
-  }
+      setPending(false);
+    }, 500);
+  };
 
   return (
     <div>
       <div className="flex items-center gap-1 px-1 py-1.5">
-        <Button variant="ghost" size="icon" className="size-6" onClick={() => setIsEditViewFormOpen(false)}>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="size-6"
+          onClick={() => setIsEditViewFormOpen(false)}
+        >
           <span className="sr-only">Close edit view form</span>
           <ChevronLeftIcon aria-hidden="true" className="size-4" />
         </Button>
@@ -78,13 +88,21 @@ export function EditViewForm({ view, setIsEditViewFormOpen, refetchViews, onDele
           autoComplete="off"
         />
         <Button disabled={pending} size="sm" type="submit">
-          {pending ? <LoaderIcon aria-hidden="true" className="size-3.5 animate-spin" /> : "Save"}
+          {pending ? (
+            <LoaderIcon aria-hidden="true" className="size-3.5 animate-spin" />
+          ) : (
+            "Save"
+          )}
         </Button>
       </form>
 
       <Separator />
 
-      <DeleteViewForm viewId={view.viewId} setIsEditViewFormOpen={setIsEditViewFormOpen} onDelete={onDelete} />
+      <DeleteViewForm
+        viewId={view.viewId}
+        setIsEditViewFormOpen={setIsEditViewFormOpen}
+        onDelete={onDelete}
+      />
     </div>
-  )
+  );
 }

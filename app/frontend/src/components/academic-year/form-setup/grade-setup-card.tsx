@@ -95,7 +95,7 @@ export default function GradeSetupCard({
 
     if (isNaN(sectionCount) || sectionCount < 1 || sectionCount > 26) {
       console.error(
-        "Invalid section count. Must be a number between 1 and 26."
+        "Invalid section count. Must be a number between 1 and 26.",
       );
       return [];
     }
@@ -117,7 +117,7 @@ export default function GradeSetupCard({
 
     // Filter out already selected grades
     return GradeEnum.options.filter(
-      (gradeOption) => !otherSelectedGrades.includes(gradeOption)
+      (gradeOption) => !otherSelectedGrades.includes(gradeOption),
     );
   }, [watchParentForm.grades, watchSubForm]);
 
@@ -150,14 +150,14 @@ export default function GradeSetupCard({
         ? dedupeAndSort(
             hasThisGrade
               ? [...(subject.grades || []), gradeEntry]
-              : (subject.grades || []).filter((g) => g.id !== grade.id)
+              : (subject.grades || []).filter((g) => g.id !== grade.id),
           )
         : subject.grades || [];
 
       // Stream-level sync
       const updatedStreams = (() => {
         const withoutGradeStreams = (subject.streams || []).filter(
-          (st) => st.gradeId !== grade.id
+          (st) => st.gradeId !== grade.id,
         );
         const streamsFromGrade = (grade.streams || [])
           .filter((stream) => stream.subjects?.some((s) => s.id === subject.id))
@@ -184,7 +184,7 @@ export default function GradeSetupCard({
       ...new Map(
         grade.streams
           .flatMap((stream) => stream.subjects) // gather all subjects
-          .map((subject) => [subject.id, subject]) // map by id
+          .map((subject) => [subject.id, subject]), // map by id
       ).values(),
     ] as Subject[];
 
@@ -206,7 +206,7 @@ export default function GradeSetupCard({
     if (dirtyFields.subjects || dirtyFields.streams || dirtyFields.hasStream) {
       syncSubjectsFromGrades();
       toast.success(
-        mode === "create" ? "New Subject Added" : "Subject updated"
+        mode === "create" ? "New Subject Added" : "Subject updated",
       );
     }
     if (!watchSubForm.hasStream) {
@@ -306,7 +306,7 @@ export default function GradeSetupCard({
                 {watchSubForm.hasStream && (
                   <StreamsManagement
                     subjects={watchParentForm.subjects.map(
-                      ({ id, name, code }) => ({ id, name, code })
+                      ({ id, name, code }) => ({ id, name, code }),
                     )}
                   />
                 )}
@@ -343,7 +343,7 @@ export default function GradeSetupCard({
                                   nameInSchema={`subjects`}
                                   value={
                                     watchSubForm.subjects.find(
-                                      (s) => s.id === subject.id
+                                      (s) => s.id === subject.id,
                                     ) || {
                                       id: subject.id,
                                       name: subject.name,
@@ -353,7 +353,7 @@ export default function GradeSetupCard({
                                   className="w-4 h-4"
                                 />
                               </div>
-                            )
+                            ),
                           )}
                         </div>
                       </CardContent>
@@ -520,7 +520,7 @@ function StreamsManagement({ subjects }: StreamsManagementProps) {
                     nameInSchema={`streams.${streamIndex}.subjects`}
                     value={
                       watchGrade.streams[streamIndex].subjects.find(
-                        (s) => s.name === subject.name
+                        (s) => s.name === subject.name,
                       ) || {
                         id: subject.id,
                         name: subject.name,

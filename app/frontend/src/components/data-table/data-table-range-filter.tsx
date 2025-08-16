@@ -44,8 +44,8 @@ export function DataTableRangeFilter<TData>({
       return Number.isNaN(numValue)
         ? ""
         : numValue.toLocaleString(undefined, {
-          maximumFractionDigits: 0,
-        });
+            maximumFractionDigits: 0,
+          });
     },
     [],
   );

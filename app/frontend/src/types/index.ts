@@ -21,19 +21,19 @@ export interface QueryBuilderOpts {
 }
 
 export interface Option {
-  label: string
-  value: string
-  icon?: React.ComponentType<{ className?: string }>
-  withCount?: boolean
+  label: string;
+  value: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  withCount?: boolean;
 }
 
 export interface DataTableFilterOption {
-  id: string
-  label: string
-  value: string
-  variant: string
-  options: Option[]
-  filterValues?: string[]
-  filterOperator?: string
-  isMulti?: boolean
+  id: string;
+  label: string;
+  value: string;
+  variant: string;
+  options: Option[];
+  filterValues?: string[];
+  filterOperator?: string;
+  isMulti?: boolean;
 }

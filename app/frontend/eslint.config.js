@@ -1,10 +1,10 @@
 // eslint.config.js
-import parser from "@typescript-eslint/parser";
 import tsPlugin from "@typescript-eslint/eslint-plugin";
-import reactPlugin from "eslint-plugin-react";
-import reactHooks from "eslint-plugin-react-hooks";
+import parser from "@typescript-eslint/parser";
 import jsxA11y from "eslint-plugin-jsx-a11y";
 import prettier from "eslint-plugin-prettier";
+import reactPlugin from "eslint-plugin-react";
+import reactHooks from "eslint-plugin-react-hooks";
 
 export default [
   {
@@ -12,26 +12,29 @@ export default [
     languageOptions: {
       parser,
       ecmaVersion: "latest",
-      sourceType: "module"
+      sourceType: "module",
     },
     plugins: {
       "@typescript-eslint": tsPlugin,
       react: reactPlugin,
       "react-hooks": reactHooks,
       "jsx-a11y": jsxA11y,
-      prettier: prettier
+      prettier: prettier,
     },
     rules: {
       "prettier/prettier": "warn",
       "react/react-in-jsx-scope": "off",
-      "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        { argsIgnorePattern: "^_", vars: "all", varsIgnorePattern: "^_" },
+      ],
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": "warn",
-      "eqeqeq": "warn",
-      "semi": ["error", "always"]
+      eqeqeq: "warn",
+      semi: ["error", "always"],
     },
     settings: {
-      react: { version: "detect" }
-    }
-  }
+      react: { version: "detect" },
+    },
+  },
 ];
