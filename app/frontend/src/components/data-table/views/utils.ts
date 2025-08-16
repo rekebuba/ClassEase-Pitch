@@ -1,18 +1,18 @@
-import type { DataTableFilterOption } from "@/types"
-import type { FilterParams } from "@/lib/validations"
+import type { DataTableFilterOption } from "@/types";
+import type { FilterParams } from "@/lib/validations";
 
 export function calcFilterParams<T>(
   selectedOptions: DataTableFilterOption<T>[],
   searchParams: URLSearchParams,
 ): FilterParams {
-  const filterParams: FilterParams = {}
+  const filterParams: FilterParams = {};
 
   // Process selected filter options
   selectedOptions.forEach((option) => {
     if (option.value) {
-      filterParams[option.id] = option.value
+      filterParams[option.id] = option.value;
     }
-  })
+  });
 
   // Add any other search params that might be relevant
   searchParams.forEach((value, key) => {
@@ -20,29 +20,29 @@ export function calcFilterParams<T>(
       try {
         // Try to parse as JSON if it looks like an object/array
         if (value.startsWith("{") || value.startsWith("[")) {
-          filterParams[key] = JSON.parse(value)
+          filterParams[key] = JSON.parse(value);
         } else {
-          filterParams[key] = value
+          filterParams[key] = value;
         }
       } catch {
-        filterParams[key] = value
+        filterParams[key] = value;
       }
     }
-  })
+  });
 
-  return filterParams
+  return filterParams;
 }
 
 export function calcViewSearchParamsURL(filterParams: FilterParams): string {
-  const params = new URLSearchParams()
+  const params = new URLSearchParams();
 
   Object.entries(filterParams).forEach(([key, value]) => {
     if (typeof value === "object") {
-      params.set(key, JSON.stringify(value))
+      params.set(key, JSON.stringify(value));
     } else {
-      params.set(key, String(value))
+      params.set(key, String(value));
     }
-  })
+  });
 
-  return params.toString()
+  return params.toString();
 }

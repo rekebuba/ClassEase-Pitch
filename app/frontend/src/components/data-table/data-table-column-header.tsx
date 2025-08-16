@@ -39,17 +39,23 @@ export function DataTableColumnHeader<TData, TValue>({
   }
 
   const [sorting, setSorting] = useQueryState(
-    'sort',
-    getSortingStateParser()
-      .withDefault([]),
+    "sort",
+    getSortingStateParser().withDefault([]),
   );
 
-  const onSortAdd = React.useCallback((value: boolean) => {
-    const tableId = column.columnDef.meta?.tableId ?? "";
-    setSorting(() => [
-      { id: column.id, desc: value, tableId: tableId } as ExtendedColumnSort<unknown>,
-    ]);
-  }, [column]);
+  const onSortAdd = React.useCallback(
+    (value: boolean) => {
+      const tableId = column.columnDef.meta?.tableId ?? "";
+      setSorting(() => [
+        {
+          id: column.id,
+          desc: value,
+          tableId: tableId,
+        } as ExtendedColumnSort<unknown>,
+      ]);
+    },
+    [column],
+  );
 
   return (
     <DropdownMenu>

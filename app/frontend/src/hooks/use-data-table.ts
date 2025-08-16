@@ -42,15 +42,15 @@ const THROTTLE_MS = 50;
 
 interface UseDataTableProps<TData>
   extends Omit<
-    TableOptions<TData>,
-    | "state"
-    | "pageCount"
-    | "getCoreRowModel"
-    | "manualFiltering"
-    | "manualPagination"
-    | "manualSorting"
-  >,
-  Required<Pick<TableOptions<TData>, "pageCount">> {
+      TableOptions<TData>,
+      | "state"
+      | "pageCount"
+      | "getCoreRowModel"
+      | "manualFiltering"
+      | "manualPagination"
+      | "manualSorting"
+    >,
+    Required<Pick<TableOptions<TData>, "pageCount">> {
   initialState?: Omit<Partial<TableState>, "sorting"> & {
     sorting?: ExtendedColumnSort<TData>[];
   };
@@ -157,7 +157,7 @@ export function useDataTable<TData>(props: UseDataTableProps<TData>) {
   const onSortingChange = React.useCallback(
     (updaterOrValue: Updater<SortingState>) => {
       if (typeof updaterOrValue === "function") {
-        const newSorting = updaterOrValue(sorting)
+        const newSorting = updaterOrValue(sorting);
         setSorting(newSorting as ExtendedColumnSort<TData>[]);
       } else {
         setSorting(updaterOrValue as ExtendedColumnSort<TData>[]);

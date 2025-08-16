@@ -1,31 +1,47 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { CaretDownIcon, Pencil1Icon, PlusIcon } from "@radix-ui/react-icons"
-import { useHotkeys } from "react-hotkeys-hook"
+import { useState } from "react";
+import { CaretDownIcon, Pencil1Icon, PlusIcon } from "@radix-ui/react-icons";
+import { useHotkeys } from "react-hotkeys-hook";
 
-import { getIsMacOS } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Separator } from "@/components/ui/separator"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Kbd } from "@/components/kbd"
+import { getIsMacOS } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Kbd } from "@/components/kbd";
 
-import { CreateViewForm } from "./create-view-form"
-import { EditViewForm } from "./edit-view-form"
-import { SearchParams, StudentsViews, View } from "@/lib/types"
-import { createNewView, deleteView, updateView } from "@/api/adminApi"
-import { toast } from "sonner"
-import { useTableInstanceContext } from "../table-instance-provider"
+import { CreateViewForm } from "./create-view-form";
+import { EditViewForm } from "./edit-view-form";
+import { SearchParams, StudentsViews, View } from "@/lib/types";
+import { createNewView, deleteView, updateView } from "@/api/adminApi";
+import { toast } from "sonner";
+import { useTableInstanceContext } from "../table-instance-provider";
 
 interface DataTableViewsDropdownProps {
-  views: StudentsViews[]
-  SearchParams: SearchParams
-  setSearchParams: (params: SearchParams) => void
-  refetchViews: () => void
-  currentViewId: string | null
-  setCurrentViewId: (viewId: string | null) => void
+  views: StudentsViews[];
+  SearchParams: SearchParams;
+  setSearchParams: (params: SearchParams) => void;
+  refetchViews: () => void;
+  currentViewId: string | null;
+  setCurrentViewId: (viewId: string | null) => void;
 }
 
 export function DataTableViewsDropdown({
@@ -34,30 +50,36 @@ export function DataTableViewsDropdown({
   setSearchParams,
   refetchViews,
   currentViewId,
-  setCurrentViewId
+  setCurrentViewId,
 }: DataTableViewsDropdownProps) {
-  const [open, setOpen] = useState(false)
-  const [isCreateViewFormOpen, setIsCreateViewFormOpen] = useState(false)
-  const [isEditViewFormOpen, setIsEditViewFormOpen] = useState(false)
-  const [selectedView, setSelectedView] = useState<StudentsViews | null>(null)
-  const currentView = views.find((view) => view.viewId === currentViewId)
+  const [open, setOpen] = useState(false);
+  const [isCreateViewFormOpen, setIsCreateViewFormOpen] = useState(false);
+  const [isEditViewFormOpen, setIsEditViewFormOpen] = useState(false);
+  const [selectedView, setSelectedView] = useState<StudentsViews | null>(null);
+  const currentView = views.find((view) => view.viewId === currentViewId);
 
-  const { tableInstance: table } = useTableInstanceContext()
+  const { tableInstance: table } = useTableInstanceContext();
   const visibleColumns =
     table
       ?.getVisibleFlatColumns()
-      .filter((column) => typeof column.accessorFn !== "undefined" && column.getCanHide())
-      .map((column) => column.id) || []
+      .filter(
+        (column) =>
+          typeof column.accessorFn !== "undefined" && column.getCanHide(),
+      )
+      .map((column) => column.id) || [];
 
   const [defaultColumnState] = useState<string[]>(visibleColumns);
 
   // Update visibility to match defaultColumnState
   const setColumns = (columns: string[]) => {
     const allColumns = table.getAllLeafColumns();
-    const visibility = allColumns.reduce((acc, col) => {
-      acc[col.id] = columns.includes(col.id);
-      return acc;
-    }, {} as Record<string, boolean>);
+    const visibility = allColumns.reduce(
+      (acc, col) => {
+        acc[col.id] = columns.includes(col.id);
+        return acc;
+      },
+      {} as Record<string, boolean>,
+    );
 
     table.setColumnVisibility(visibility);
   };
@@ -65,9 +87,9 @@ export function DataTableViewsDropdown({
   function selectView(view: StudentsViews | null) {
     if (view) {
       // Update state
-      setCurrentViewId(view.viewId)
-      setSearchParams(view.searchParams)
-      setColumns(view.columns)
+      setCurrentViewId(view.viewId);
+      setSearchParams(view.searchParams);
+      setColumns(view.columns);
     } else {
       // Clear view selection
       setSearchParams({
@@ -77,65 +99,74 @@ export function DataTableViewsDropdown({
         filters: [],
         joinOperator: "and",
       });
-      setCurrentViewId(null)
-      setColumns(defaultColumnState)
+      setCurrentViewId(null);
+      setColumns(defaultColumnState);
     }
   }
 
-  const isMac = getIsMacOS()
+  const isMac = getIsMacOS();
   useHotkeys(`${isMac ? "meta" : "ctrl"}+v`, () => {
-    setTimeout(() => setOpen(true), 100)
-  })
+    setTimeout(() => setOpen(true), 100);
+  });
 
   const handleCreateView = async (newView: View) => {
-    const result = await createNewView(newView)
+    const result = await createNewView(newView);
     toast.error(result.message, {
       style: { color: "green" },
     });
-    refetchViews()
-    setCurrentViewId(result?.viewId)
-    setColumns(newView.columns)
-  }
+    refetchViews();
+    setCurrentViewId(result?.viewId);
+    setColumns(newView.columns);
+  };
 
   const handleUpdateView = async (updatedView: StudentsViews) => {
-    const result = await updateView(updatedView)
+    const result = await updateView(updatedView);
     toast.error(result.message, {
       style: { color: "green" },
     });
-    refetchViews()
-    setCurrentViewId(result?.viewId)
-  }
+    refetchViews();
+    setCurrentViewId(result?.viewId);
+  };
 
   const handleDeleteView = async (viewId: string) => {
-    const result = await deleteView(viewId)
+    const result = await deleteView(viewId);
 
     toast.error(result.message, {
       style: { color: "green" },
     });
-    refetchViews()
+    refetchViews();
 
     if (currentViewId === viewId) {
-      selectView(null)
+      selectView(null);
     }
-  }
+  };
 
   return (
     <>
       <Popover
         open={open}
         onOpenChange={(value) => {
-          setOpen(value)
-          setIsCreateViewFormOpen(false)
-          setIsEditViewFormOpen(false)
+          setOpen(value);
+          setIsCreateViewFormOpen(false);
+          setIsEditViewFormOpen(false);
         }}
       >
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm" className="flex w-36 shrink-0 justify-between">
-                  <span className="truncate">{currentView?.name || "All Items"}</span>
-                  <CaretDownIcon aria-hidden="true" className="size-4 shrink-0" />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex w-36 shrink-0 justify-between"
+                >
+                  <span className="truncate">
+                    {currentView?.name || "All Items"}
+                  </span>
+                  <CaretDownIcon
+                    aria-hidden="true"
+                    className="size-4 shrink-0"
+                  />
                 </Button>
               </PopoverTrigger>
             </TooltipTrigger>
@@ -182,10 +213,10 @@ export function DataTableViewsDropdown({
                   <CommandItem
                     value="All Items"
                     onSelect={() => {
-                      refetchViews()
-                      selectView(null)
-                      setOpen(false)
-                      setColumns(defaultColumnState)
+                      refetchViews();
+                      selectView(null);
+                      setOpen(false);
+                      setColumns(defaultColumnState);
                     }}
                   >
                     All Items
@@ -196,8 +227,8 @@ export function DataTableViewsDropdown({
                       value={view.name}
                       className="group justify-between"
                       onSelect={() => {
-                        selectView(view)
-                        setOpen(false)
+                        selectView(view);
+                        setOpen(false);
                       }}
                     >
                       <span className="truncate">{view.name}</span>
@@ -206,9 +237,9 @@ export function DataTableViewsDropdown({
                         size="icon"
                         className="invisible size-5 shrink-0 hover:bg-neutral-200 group-hover:visible dark:hover:bg-neutral-700"
                         onClick={(e) => {
-                          e.stopPropagation()
-                          setIsEditViewFormOpen(true)
-                          setSelectedView(view)
+                          e.stopPropagation();
+                          setIsEditViewFormOpen(true);
+                          setSelectedView(view);
                         }}
                       >
                         <Pencil1Icon className="size-3" />
@@ -229,5 +260,5 @@ export function DataTableViewsDropdown({
         </PopoverContent>
       </Popover>
     </>
-  )
+  );
 }

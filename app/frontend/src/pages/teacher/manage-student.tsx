@@ -1,7 +1,6 @@
 import { Layout } from "@/components";
 import { TeacherStudentList } from "@/features/teacher";
 
-
 /**
  * TeacherManageStudents component
  * @component
@@ -10,9 +9,7 @@ import { TeacherStudentList } from "@/features/teacher";
  * return <TeacherManageStudents />
  */
 const TeacherManageStudent = () => {
-    return (
-        <TeacherStudentList />
-    );
+  return <TeacherStudentList />;
 };
 
 export default TeacherManageStudent;

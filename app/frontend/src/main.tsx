@@ -4,12 +4,12 @@ import { Toaster } from "sonner";
 import RootLayout from "./RootLayout";
 import { RouterProvider } from "react-router-dom";
 import router from "./routes/AppRoutes";
-import { NuqsAdapter } from 'nuqs/adapters/react';
+import { NuqsAdapter } from "nuqs/adapters/react";
 import { LoadingSpinner } from "./components";
-import '../src/globals.css';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import "../src/globals.css";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-const queryClient = new QueryClient()
+const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -23,5 +23,5 @@ createRoot(document.getElementById("root")).render(
         <Toaster />
       </RootLayout>
     </QueryClientProvider>
-  </StrictMode>
+  </StrictMode>,
 );

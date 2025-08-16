@@ -1,4 +1,4 @@
-import _ from 'lodash';
+import _ from "lodash";
 
 /**
  * Converts the keys of an object to snake_case.
@@ -7,11 +7,11 @@ import _ from 'lodash';
  * @returns {Object} A new object with the keys converted to snake_case.
  */
 const convertKeysToSnakeCase = (obj) => {
-    const newObj = {};
-    Object.keys(obj).forEach((key) => {
-        newObj[_.snakeCase(key)] = obj[key];
-    });
-    return newObj;
+  const newObj = {};
+  Object.keys(obj).forEach((key) => {
+    newObj[_.snakeCase(key)] = obj[key];
+  });
+  return newObj;
 };
 
 export default convertKeysToSnakeCase;

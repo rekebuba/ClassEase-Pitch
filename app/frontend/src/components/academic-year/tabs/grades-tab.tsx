@@ -14,12 +14,10 @@ import {
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { GradeSetupCard } from "@/components/academic-year/form-setup";
-import z from "zod";
-import { SubjectSchema } from "@/lib/api-response-validation";
 import { GradeEnum } from "@/lib/enums";
 
 type Grade = YearSetupType["grades"][number];
@@ -34,7 +32,6 @@ export default function GradesTab({
     formState: { isDirty },
     control,
     watch,
-    setValue,
   } = useFormContext<YearSetupType>();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -43,11 +40,7 @@ export default function GradesTab({
   const [formIndex, setFormIndex] = useState<number>(0);
 
   // Grades field array
-  const {
-    fields: gradeFields,
-    prepend: prependGrade,
-    remove: removeGrade,
-  } = useFieldArray({
+  const { fields: gradeFields, prepend: prependGrade } = useFieldArray({
     control,
     name: "grades",
     keyName: "rhfId",
@@ -57,7 +50,7 @@ export default function GradesTab({
   const watchGrades = watch("grades");
 
   const filteredGrades = watchGrades.filter((grade) =>
-    grade.grade.toLowerCase().includes(searchTerm.toLowerCase())
+    grade.grade.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   const handleCreateGrade = useCallback(() => {
@@ -175,7 +168,7 @@ const GradeSubjectsCard = ({
 
   const filteredSubjects = useMemo(() => {
     return watchSubjects.filter((subject) =>
-      subject.grades.some((g) => g.id === grade.id)
+      subject.grades.some((g) => g.id === grade.id),
     );
   }, [watchSubjects, grade.id]);
 
@@ -221,7 +214,7 @@ const GradeSubjectsCard = ({
                 ? new Set(
                     grade.streams
                       .flatMap((stream) => stream.subjects || [])
-                      .map((subject) => subject.id)
+                      .map((subject) => subject.id),
                   ).size
                 : grade.subjects.length}
             </div>

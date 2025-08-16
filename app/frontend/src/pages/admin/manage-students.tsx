@@ -1,6 +1,6 @@
 import { Layout } from "@/components";
 import { Shell } from "@/components/shell";
-import { StudentsTable } from "@/components/data-table/data-table-students"
+import { StudentsTable } from "@/components/data-table/data-table-students";
 
 interface SearchParams {
   [key: string]: string | string[] | undefined;

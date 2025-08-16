@@ -1,9 +1,14 @@
-import classEaseImage from '../assets/images/ClassEase-no-slogan.png';
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import classEaseImage from "../assets/images/ClassEase-no-slogan.png";
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   CheckCircle,
   GraduationCap,
@@ -29,11 +34,11 @@ import {
   Twitter,
   Instagram,
   Linkedin,
-} from "lucide-react"
+} from "lucide-react";
 
 export default function LandingPage() {
-  const [activeTestimonial, setActiveTestimonial] = useState(0)
-  const [isVisible, setIsVisible] = useState(false)
+  const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
 
   // For the counter animation
   const [counts, setCounts] = useState({
@@ -41,67 +46,67 @@ export default function LandingPage() {
     students: 0,
     teachers: 0,
     countries: 0,
-  })
+  });
 
   const targetCounts = {
     schools: 500,
     students: 250000,
     teachers: 15000,
     countries: 25,
-  }
+  };
 
   // For testimonial auto-rotation
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveTestimonial((prev) => (prev + 1) % 3)
-    }, 5000)
-    return () => clearInterval(interval)
-  }, [])
+      setActiveTestimonial((prev) => (prev + 1) % 3);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   // For counter animation when section is visible
   useEffect(() => {
     const handleScroll = () => {
-      const statsSection = document.getElementById("stats-section")
+      const statsSection = document.getElementById("stats-section");
       if (statsSection) {
-        const rect = statsSection.getBoundingClientRect()
-        const isVisible = rect.top < window.innerHeight && rect.bottom >= 0
-        setIsVisible(isVisible)
+        const rect = statsSection.getBoundingClientRect();
+        const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
+        setIsVisible(isVisible);
       }
-    }
+    };
 
-    window.addEventListener("scroll", handleScroll)
-    handleScroll() // Check on initial load
+    window.addEventListener("scroll", handleScroll);
+    handleScroll(); // Check on initial load
 
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Animate the counters when section becomes visible
   useEffect(() => {
     if (isVisible) {
-      const duration = 2000 // 2 seconds
-      const interval = 20 // Update every 20ms
-      const steps = duration / interval
+      const duration = 2000; // 2 seconds
+      const interval = 20; // Update every 20ms
+      const steps = duration / interval;
 
-      let step = 0
+      let step = 0;
       const timer = setInterval(() => {
-        step++
-        const progress = step / steps
+        step++;
+        const progress = step / steps;
 
         setCounts({
           schools: Math.floor(targetCounts.schools * progress),
           students: Math.floor(targetCounts.students * progress),
           teachers: Math.floor(targetCounts.teachers * progress),
           countries: Math.floor(targetCounts.countries * progress),
-        })
+        });
 
         if (step >= steps) {
-          clearInterval(timer)
+          clearInterval(timer);
         }
-      }, interval)
+      }, interval);
 
-      return () => clearInterval(timer)
+      return () => clearInterval(timer);
     }
-  }, [isVisible])
+  }, [isVisible]);
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -112,22 +117,40 @@ export default function LandingPage() {
             <span className="text-xl font-bold text-sky-500">ClassEase</span>
           </div>
           <nav className="hidden md:flex gap-6">
-            <a href="#features" className="text-sm font-medium transition-colors hover:text-primary">
+            <a
+              href="#features"
+              className="text-sm font-medium transition-colors hover:text-primary"
+            >
               Features
             </a>
-            <a href="#solutions" className="text-sm font-medium transition-colors hover:text-primary">
+            <a
+              href="#solutions"
+              className="text-sm font-medium transition-colors hover:text-primary"
+            >
               Solutions
             </a>
-            <a href="#testimonials" className="text-sm font-medium transition-colors hover:text-primary">
+            <a
+              href="#testimonials"
+              className="text-sm font-medium transition-colors hover:text-primary"
+            >
               Testimonials
             </a>
-            <a href="#pricing" className="text-sm font-medium transition-colors hover:text-primary">
+            <a
+              href="#pricing"
+              className="text-sm font-medium transition-colors hover:text-primary"
+            >
               Pricing
             </a>
-            <a href="#faq" className="text-sm font-medium transition-colors hover:text-primary">
+            <a
+              href="#faq"
+              className="text-sm font-medium transition-colors hover:text-primary"
+            >
               FAQ
             </a>
-            <a href="#contact" className="text-sm font-medium transition-colors hover:text-primary">
+            <a
+              href="#contact"
+              className="text-sm font-medium transition-colors hover:text-primary"
+            >
               Contact
             </a>
           </nav>
@@ -151,8 +174,9 @@ export default function LandingPage() {
                     Simplify School Management with ClassEase
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    The all-in-one platform for administrators, teachers, and students to streamline education workflows
-                    and enhance learning outcomes.
+                    The all-in-one platform for administrators, teachers, and
+                    students to streamline education workflows and enhance
+                    learning outcomes.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
@@ -183,7 +207,9 @@ export default function LandingPage() {
                     ))}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    Trusted by <span className="font-medium text-foreground">2,000+</span> schools worldwide
+                    Trusted by{" "}
+                    <span className="font-medium text-foreground">2,000+</span>{" "}
+                    schools worldwide
                   </div>
                 </div>
               </div>
@@ -204,11 +230,18 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="stats-section" className="w-full py-20 bg-gray-50 text-gray-800">
+        <section
+          id="stats-section"
+          className="w-full py-20 bg-gray-50 text-gray-800"
+        >
           <div className="container mx-auto px-4 md:px-6 flex flex-col items-center justify-center">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold mb-2">Empowering Education Everywhere</h2>
-              <p className="text-gray-500 text-lg">Trusted globally by schools, students, and educators</p>
+              <h2 className="text-3xl md:text-4xl font-bold mb-2">
+                Empowering Education Everywhere
+              </h2>
+              <p className="text-gray-500 text-lg">
+                Trusted globally by schools, students, and educators
+              </p>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 w-full max-w-5xl text-center">
@@ -222,7 +255,9 @@ export default function LandingPage() {
                   key={i}
                   className="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition-shadow duration-300"
                 >
-                  <h3 className="text-4xl font-bold text-blue-600">{stat.value.toLocaleString()}+</h3>
+                  <h3 className="text-4xl font-bold text-blue-600">
+                    {stat.value.toLocaleString()}+
+                  </h3>
                   <p className="mt-2 text-gray-600">{stat.label}</p>
                 </div>
               ))}
@@ -234,13 +269,16 @@ export default function LandingPage() {
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <div className="inline-block rounded-lg bg-sky-100 px-3 py-1 text-sm text-sky-700">Features</div>
+                <div className="inline-block rounded-lg bg-sky-100 px-3 py-1 text-sm text-sky-700">
+                  Features
+                </div>
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
                   Everything you need to manage your school
                 </h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl">
-                  ClassEase provides powerful tools for administrators, teachers, and students to streamline education
-                  workflows and enhance learning outcomes.
+                  ClassEase provides powerful tools for administrators,
+                  teachers, and students to streamline education workflows and
+                  enhance learning outcomes.
                 </p>
               </div>
             </div>
@@ -249,56 +287,70 @@ export default function LandingPage() {
                 {
                   icon: Users,
                   title: "User Management",
-                  description: "Easily manage students, teachers, and staff accounts with role-based access control.",
+                  description:
+                    "Easily manage students, teachers, and staff accounts with role-based access control.",
                 },
                 {
                   icon: BookOpen,
                   title: "Curriculum Planning",
-                  description: "Create, organize, and distribute curriculum materials across departments.",
+                  description:
+                    "Create, organize, and distribute curriculum materials across departments.",
                 },
                 {
                   icon: BarChart3,
                   title: "Performance Analytics",
-                  description: "Track student performance with detailed analytics and customizable reports.",
+                  description:
+                    "Track student performance with detailed analytics and customizable reports.",
                 },
                 {
                   icon: Calendar,
                   title: "Scheduling",
-                  description: "Manage class schedules, events, and appointments with an intuitive calendar.",
+                  description:
+                    "Manage class schedules, events, and appointments with an intuitive calendar.",
                 },
                 {
                   icon: Clock,
                   title: "Attendance Tracking",
-                  description: "Monitor student and teacher attendance with automated reporting.",
+                  description:
+                    "Monitor student and teacher attendance with automated reporting.",
                 },
                 {
                   icon: FileText,
                   title: "Assessment Tools",
-                  description: "Create, distribute, and grade assessments with powerful analytics.",
+                  description:
+                    "Create, distribute, and grade assessments with powerful analytics.",
                 },
                 {
                   icon: MessageSquare,
                   title: "Communication",
-                  description: "Connect teachers, students, and parents with integrated messaging.",
+                  description:
+                    "Connect teachers, students, and parents with integrated messaging.",
                 },
                 {
                   icon: Shield,
                   title: "Security & Privacy",
-                  description: "Protect sensitive data with enterprise-grade security and compliance.",
+                  description:
+                    "Protect sensitive data with enterprise-grade security and compliance.",
                 },
                 {
                   icon: Settings,
                   title: "Customizable",
-                  description: "Tailor the platform to your school's specific needs with flexible settings.",
+                  description:
+                    "Tailor the platform to your school's specific needs with flexible settings.",
                 },
               ].map((feature, index) => (
-                <Card key={index} className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300">
+                <Card
+                  key={index}
+                  className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300"
+                >
                   <CardContent className="p-6 flex flex-col items-center text-center space-y-2">
                     <div className="rounded-full bg-sky-100 p-3 mb-2">
                       <feature.icon className="h-6 w-6 text-sky-500" />
                     </div>
                     <h3 className="text-xl font-bold">{feature.title}</h3>
-                    <p className="text-muted-foreground">{feature.description}</p>
+                    <p className="text-muted-foreground">
+                      {feature.description}
+                    </p>
                   </CardContent>
                 </Card>
               ))}
@@ -306,21 +358,30 @@ export default function LandingPage() {
           </div>
         </section>
 
-        <section id="solutions" className="w-full py-12 md:py-24 lg:py-32 bg-sky-50">
+        <section
+          id="solutions"
+          className="w-full py-12 md:py-24 lg:py-32 bg-sky-50"
+        >
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <div className="inline-block rounded-lg bg-sky-100 px-3 py-1 text-sm text-sky-700">Solutions</div>
+                <div className="inline-block rounded-lg bg-sky-100 px-3 py-1 text-sm text-sky-700">
+                  Solutions
+                </div>
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
                   Tailored for every role in education
                 </h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl">
-                  ClassEase offers specialized solutions for administrators, teachers, students, and parents.
+                  ClassEase offers specialized solutions for administrators,
+                  teachers, students, and parents.
                 </p>
               </div>
             </div>
 
-            <Tabs defaultValue="administrators" className="w-full max-w-4xl mx-auto mt-12">
+            <Tabs
+              defaultValue="administrators"
+              className="w-full max-w-4xl mx-auto mt-12"
+            >
               <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="administrators">Administrators</TabsTrigger>
                 <TabsTrigger value="teachers">Teachers</TabsTrigger>
@@ -331,7 +392,9 @@ export default function LandingPage() {
               <TabsContent value="administrators" className="mt-6">
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                   <div>
-                    <h3 className="text-2xl font-bold mb-4">Streamline School Administration</h3>
+                    <h3 className="text-2xl font-bold mb-4">
+                      Streamline School Administration
+                    </h3>
                     <ul className="space-y-3">
                       {[
                         "Comprehensive dashboard with real-time analytics",
@@ -364,7 +427,9 @@ export default function LandingPage() {
               <TabsContent value="teachers" className="mt-6">
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                   <div>
-                    <h3 className="text-2xl font-bold mb-4">Empower Your Teaching</h3>
+                    <h3 className="text-2xl font-bold mb-4">
+                      Empower Your Teaching
+                    </h3>
                     <ul className="space-y-3">
                       {[
                         "Intuitive lesson planning and curriculum management",
@@ -397,7 +462,9 @@ export default function LandingPage() {
               <TabsContent value="students" className="mt-6">
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                   <div>
-                    <h3 className="text-2xl font-bold mb-4">Enhance Your Learning Journey</h3>
+                    <h3 className="text-2xl font-bold mb-4">
+                      Enhance Your Learning Journey
+                    </h3>
                     <ul className="space-y-3">
                       {[
                         "Personalized student dashboard with upcoming assignments",
@@ -430,7 +497,9 @@ export default function LandingPage() {
               <TabsContent value="parents" className="mt-6">
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                   <div>
-                    <h3 className="text-2xl font-bold mb-4">Stay Connected with Your Child&apos;s Education</h3>
+                    <h3 className="text-2xl font-bold mb-4">
+                      Stay Connected with Your Child&apos;s Education
+                    </h3>
                     <ul className="space-y-3">
                       {[
                         "Real-time access to grades and attendance",
@@ -451,7 +520,11 @@ export default function LandingPage() {
                     </Button>
                   </div>
                   <div className="rounded-lg overflow-hidden shadow-xl">
-                    <img src="/placeholder.svg?height=300&width=400" alt="Parent Dashboard" className="w-full h-auto" />
+                    <img
+                      src="/placeholder.svg?height=300&width=400"
+                      alt="Parent Dashboard"
+                      className="w-full h-auto"
+                    />
                   </div>
                 </div>
               </TabsContent>
@@ -470,8 +543,9 @@ export default function LandingPage() {
                   Transform your school with modern technology
                 </h2>
                 <p className="text-muted-foreground md:text-lg mb-6">
-                  ClassEase brings together the best of educational technology to create a seamless, integrated platform
-                  that addresses the unique challenges of school management.
+                  ClassEase brings together the best of educational technology
+                  to create a seamless, integrated platform that addresses the
+                  unique challenges of school management.
                 </p>
 
                 <div className="grid gap-4">
@@ -485,12 +559,14 @@ export default function LandingPage() {
                     {
                       icon: Globe,
                       title: "Improved Communication",
-                      description: "Connect all stakeholders with integrated messaging and notification systems.",
+                      description:
+                        "Connect all stakeholders with integrated messaging and notification systems.",
                     },
                     {
                       icon: Award,
                       title: "Enhanced Learning Outcomes",
-                      description: "Use data-driven insights to identify areas for improvement and track progress.",
+                      description:
+                        "Use data-driven insights to identify areas for improvement and track progress.",
                     },
                   ].map((item, i) => (
                     <div key={i} className="flex gap-4">
@@ -499,7 +575,9 @@ export default function LandingPage() {
                       </div>
                       <div>
                         <h3 className="font-bold">{item.title}</h3>
-                        <p className="text-muted-foreground">{item.description}</p>
+                        <p className="text-muted-foreground">
+                          {item.description}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -524,8 +602,10 @@ export default function LandingPage() {
           </div>
         </section>
 
-
-        <section id="testimonials" className="w-full py-12 md:py-24 lg:py-32 bg-sky-50 overflow-hidden">
+        <section
+          id="testimonials"
+          className="w-full py-12 md:py-24 lg:py-32 bg-sky-50 overflow-hidden"
+        >
           <div className="max-w-5xl mx-auto px-4 md:px-6 text-center">
             <div className="inline-block rounded-lg bg-sky-100 px-3 py-1 text-sm text-sky-700 mb-4">
               Testimonials
@@ -534,7 +614,8 @@ export default function LandingPage() {
               Trusted by educators worldwide
             </h2>
             <p className="max-w-2xl mx-auto mt-4 text-muted-foreground md:text-xl">
-              See what school administrators and teachers are saying about ClassEase.
+              See what school administrators and teachers are saying about
+              ClassEase.
             </p>
 
             {/* Testimonial Card */}
@@ -546,8 +627,11 @@ export default function LandingPage() {
                     {[0, 1, 2].map((i) => (
                       <button
                         key={i}
-                        className={`h-2 rounded-full transition-all ${activeTestimonial === i ? "w-8 bg-sky-500" : "w-2 bg-sky-200"
-                          }`}
+                        className={`h-2 rounded-full transition-all ${
+                          activeTestimonial === i
+                            ? "w-8 bg-sky-500"
+                            : "w-2 bg-sky-200"
+                        }`}
                         onClick={() => setActiveTestimonial(i)}
                         aria-label={`View testimonial ${i + 1}`}
                       />
@@ -581,17 +665,25 @@ export default function LandingPage() {
                   ].map((testimonial, index) => (
                     <div
                       key={index}
-                      className={`absolute top-0 left-0 w-full transition-opacity duration-500 ${activeTestimonial === index ? "opacity-100 z-10" : "opacity-0 z-0"
-                        }`}
+                      className={`absolute top-0 left-0 w-full transition-opacity duration-500 ${
+                        activeTestimonial === index
+                          ? "opacity-100 z-10"
+                          : "opacity-0 z-0"
+                      }`}
                     >
                       <div className="flex flex-col items-center text-center">
                         <div className="mb-6">
                           <div className="flex justify-center mb-4">
                             {[1, 2, 3, 4, 5].map((star) => (
-                              <Star key={star} className="h-6 w-6 text-yellow-400 fill-yellow-400" />
+                              <Star
+                                key={star}
+                                className="h-6 w-6 text-yellow-400 fill-yellow-400"
+                              />
                             ))}
                           </div>
-                          <p className="text-lg italic text-muted-foreground mb-6">&quot;{testimonial.quote}&quot;</p>
+                          <p className="text-lg italic text-muted-foreground mb-6">
+                            &quot;{testimonial.quote}&quot;
+                          </p>
                         </div>
                         <div className="flex flex-col items-center">
                           <div className="w-16 h-16 rounded-full overflow-hidden mb-3">
@@ -602,7 +694,9 @@ export default function LandingPage() {
                             />
                           </div>
                           <p className="font-semibold">{testimonial.name}</p>
-                          <p className="text-sm text-muted-foreground">{testimonial.title}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {testimonial.title}
+                          </p>
                         </div>
                       </div>
                     </div>
@@ -616,19 +710,27 @@ export default function LandingPage() {
               {[
                 {
                   stat: "94%",
-                  description: "of schools report improved administrative efficiency",
+                  description:
+                    "of schools report improved administrative efficiency",
                 },
                 {
                   stat: "87%",
-                  description: "of teachers save 5+ hours per week on administrative tasks",
+                  description:
+                    "of teachers save 5+ hours per week on administrative tasks",
                 },
                 {
                   stat: "92%",
-                  description: "of parents feel more connected to their child's education",
+                  description:
+                    "of parents feel more connected to their child's education",
                 },
               ].map((item, i) => (
-                <div key={i} className="bg-white rounded-lg p-6 text-center shadow-md">
-                  <div className="text-4xl font-bold text-sky-500 mb-2">{item.stat}</div>
+                <div
+                  key={i}
+                  className="bg-white rounded-lg p-6 text-center shadow-md"
+                >
+                  <div className="text-4xl font-bold text-sky-500 mb-2">
+                    {item.stat}
+                  </div>
                   <p className="text-muted-foreground">{item.description}</p>
                 </div>
               ))}
@@ -640,8 +742,12 @@ export default function LandingPage() {
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <div className="inline-block rounded-lg bg-sky-100 px-3 py-1 text-sm text-sky-700">Pricing</div>
-                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">Simple, transparent pricing</h2>
+                <div className="inline-block rounded-lg bg-sky-100 px-3 py-1 text-sm text-sky-700">
+                  Pricing
+                </div>
+                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
+                  Simple, transparent pricing
+                </h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl">
                   Choose the plan that is right for your school.
                 </p>
@@ -651,15 +757,25 @@ export default function LandingPage() {
               <Tabs defaultValue="monthly" className="w-full">
                 <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8">
                   <TabsTrigger value="monthly">Monthly</TabsTrigger>
-                  <TabsTrigger value="annually">Annually (Save 20%)</TabsTrigger>
+                  <TabsTrigger value="annually">
+                    Annually (Save 20%)
+                  </TabsTrigger>
                 </TabsList>
-                <TabsContent value="monthly" className="grid gap-6 md:grid-cols-3">
+                <TabsContent
+                  value="monthly"
+                  className="grid gap-6 md:grid-cols-3"
+                >
                   {[
                     {
                       name: "Starter",
                       price: "$99",
                       description: "Perfect for small schools",
-                      features: ["Up to 500 students", "Basic analytics", "Email support", "Core features"],
+                      features: [
+                        "Up to 500 students",
+                        "Basic analytics",
+                        "Email support",
+                        "Core features",
+                      ],
                     },
                     {
                       name: "Professional",
@@ -701,11 +817,17 @@ export default function LandingPage() {
                       <CardContent className="p-6 flex flex-col space-y-4">
                         <div>
                           <h3 className="text-xl font-bold">{plan.name}</h3>
-                          <p className="text-muted-foreground text-sm">{plan.description}</p>
+                          <p className="text-muted-foreground text-sm">
+                            {plan.description}
+                          </p>
                         </div>
                         <div className="flex items-baseline">
-                          <span className="text-3xl font-bold">{plan.price}</span>
-                          <span className="text-muted-foreground ml-1">/month</span>
+                          <span className="text-3xl font-bold">
+                            {plan.price}
+                          </span>
+                          <span className="text-muted-foreground ml-1">
+                            /month
+                          </span>
                         </div>
                         <ul className="space-y-2">
                           {plan.features.map((feature, i) => (
@@ -715,20 +837,31 @@ export default function LandingPage() {
                             </li>
                           ))}
                         </ul>
-                        <Button className="mt-4" variant={plan.popular ? "default" : "outline"}>
+                        <Button
+                          className="mt-4"
+                          variant={plan.popular ? "default" : "outline"}
+                        >
                           {index === 2 ? "Contact Sales" : "Get Started"}
                         </Button>
                       </CardContent>
                     </Card>
                   ))}
                 </TabsContent>
-                <TabsContent value="annually" className="grid gap-6 md:grid-cols-3">
+                <TabsContent
+                  value="annually"
+                  className="grid gap-6 md:grid-cols-3"
+                >
                   {[
                     {
                       name: "Starter",
                       price: "$79",
                       description: "Perfect for small schools",
-                      features: ["Up to 500 students", "Basic analytics", "Email support", "Core features"],
+                      features: [
+                        "Up to 500 students",
+                        "Basic analytics",
+                        "Email support",
+                        "Core features",
+                      ],
                     },
                     {
                       name: "Professional",
@@ -770,11 +903,17 @@ export default function LandingPage() {
                       <CardContent className="p-6 flex flex-col space-y-4">
                         <div>
                           <h3 className="text-xl font-bold">{plan.name}</h3>
-                          <p className="text-muted-foreground text-sm">{plan.description}</p>
+                          <p className="text-muted-foreground text-sm">
+                            {plan.description}
+                          </p>
                         </div>
                         <div className="flex items-baseline">
-                          <span className="text-3xl font-bold">{plan.price}</span>
-                          <span className="text-muted-foreground ml-1">/month</span>
+                          <span className="text-3xl font-bold">
+                            {plan.price}
+                          </span>
+                          <span className="text-muted-foreground ml-1">
+                            /month
+                          </span>
                         </div>
                         <ul className="space-y-2">
                           {plan.features.map((feature, i) => (
@@ -784,7 +923,10 @@ export default function LandingPage() {
                             </li>
                           ))}
                         </ul>
-                        <Button className="mt-4" variant={plan.popular ? "default" : "outline"}>
+                        <Button
+                          className="mt-4"
+                          variant={plan.popular ? "default" : "outline"}
+                        >
                           {index === 2 ? "Contact Sales" : "Get Started"}
                         </Button>
                       </CardContent>
@@ -796,10 +938,13 @@ export default function LandingPage() {
               <div className="mt-12 bg-sky-50 rounded-lg p-6 md:p-8">
                 <div className="flex flex-col md:flex-row md:items-center gap-6">
                   <div className="md:flex-1">
-                    <h3 className="text-xl font-bold mb-2">Need a custom solution?</h3>
+                    <h3 className="text-xl font-bold mb-2">
+                      Need a custom solution?
+                    </h3>
                     <p className="text-muted-foreground">
-                      We offer tailored solutions for school districts, universities, and educational organizations with
-                      specific requirements.
+                      We offer tailored solutions for school districts,
+                      universities, and educational organizations with specific
+                      requirements.
                     </p>
                   </div>
                   <div>
@@ -815,8 +960,12 @@ export default function LandingPage() {
           <div className="container px-4 md:px-6">
             <div className="flex flex-col items-center justify-center space-y-4 text-center">
               <div className="space-y-2">
-                <div className="inline-block rounded-lg bg-sky-100 px-3 py-1 text-sm text-sky-700">FAQ</div>
-                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">Frequently Asked Questions</h2>
+                <div className="inline-block rounded-lg bg-sky-100 px-3 py-1 text-sm text-sky-700">
+                  FAQ
+                </div>
+                <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
+                  Frequently Asked Questions
+                </h2>
                 <p className="max-w-[900px] text-muted-foreground md:text-xl">
                   Find answers to common questions about ClassEase.
                 </p>
@@ -832,12 +981,14 @@ export default function LandingPage() {
                       "Most schools can be fully onboarded within 2-4 weeks, depending on the size of the institution and data migration needs. Our implementation team will work closely with you to ensure a smooth transition.",
                   },
                   {
-                    question: "Is ClassEase compliant with education privacy regulations?",
+                    question:
+                      "Is ClassEase compliant with education privacy regulations?",
                     answer:
                       "Yes, ClassEase is fully compliant with FERPA, COPPA, and other relevant education privacy regulations. We take data security and privacy seriously and implement industry-standard security measures to protect your data.",
                   },
                   {
-                    question: "Can ClassEase integrate with other systems we're already using?",
+                    question:
+                      "Can ClassEase integrate with other systems we're already using?",
                     answer:
                       "ClassEase offers robust API capabilities and pre-built integrations with popular education tools, student information systems, and learning management systems. Our team can help you set up custom integrations as needed.",
                   },
@@ -852,37 +1003,48 @@ export default function LandingPage() {
                       "Yes, we offer comprehensive data migration services to help you transfer student records, course information, and other essential data from your current systems to ClassEase. Our team will work with you to ensure data integrity throughout the process.",
                   },
                   {
-                    question: "Is ClassEase accessible for users with disabilities?",
+                    question:
+                      "Is ClassEase accessible for users with disabilities?",
                     answer:
                       "ClassEase is designed with accessibility in mind and complies with WCAG 2.1 guidelines. We regularly test our platform with assistive technologies to ensure all users can effectively use our system.",
                   },
                 ].map((item, i) => (
                   <AccordionItem key={i} value={`item-${i}`}>
-                    <AccordionTrigger className="text-left">{item.question}</AccordionTrigger>
+                    <AccordionTrigger className="text-left">
+                      {item.question}
+                    </AccordionTrigger>
                     <AccordionContent>{item.answer}</AccordionContent>
                   </AccordionItem>
                 ))}
               </Accordion>
 
               <div className="mt-8 text-center">
-                <p className="text-muted-foreground mb-4">Still have questions? We are here to help.</p>
+                <p className="text-muted-foreground mb-4">
+                  Still have questions? We are here to help.
+                </p>
                 <Button variant="outline">Contact Support</Button>
               </div>
             </div>
           </div>
         </section>
 
-        <section id="contact" className="w-full py-12 md:py-24 lg:py-32 bg-sky-50">
+        <section
+          id="contact"
+          className="w-full py-12 md:py-24 lg:py-32 bg-sky-50"
+        >
           <div className="container px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-2">
-                  <div className="inline-block rounded-lg bg-sky-100 px-3 py-1 text-sm text-sky-700">Contact Us</div>
+                  <div className="inline-block rounded-lg bg-sky-100 px-3 py-1 text-sm text-sky-700">
+                    Contact Us
+                  </div>
                   <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
                     Ready to transform your school?
                   </h2>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Our team is here to answer your questions and help you get started with ClassEase.
+                    Our team is here to answer your questions and help you get
+                    started with ClassEase.
                   </p>
                 </div>
                 <div className="space-y-4 mt-6">
@@ -901,7 +1063,9 @@ export default function LandingPage() {
                     </div>
                     <div className="text-sm">
                       <p className="font-medium">Email</p>
-                      <p className="text-muted-foreground">info@classease.com</p>
+                      <p className="text-muted-foreground">
+                        info@classease.com
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-3">
@@ -910,7 +1074,9 @@ export default function LandingPage() {
                     </div>
                     <div className="text-sm">
                       <p className="font-medium">Address</p>
-                      <p className="text-muted-foreground">123 Education Lane, Suite 400, San Francisco, CA 94107</p>
+                      <p className="text-muted-foreground">
+                        123 Education Lane, Suite 400, San Francisco, CA 94107
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -918,16 +1084,28 @@ export default function LandingPage() {
                 <div className="mt-6">
                   <h3 className="text-lg font-semibold mb-3">Follow Us</h3>
                   <div className="flex space-x-4">
-                    <a href="#" className="rounded-full bg-sky-100 p-2 hover:bg-sky-200 transition-colors">
+                    <a
+                      href="#"
+                      className="rounded-full bg-sky-100 p-2 hover:bg-sky-200 transition-colors"
+                    >
                       <Facebook className="h-5 w-5 text-sky-700" />
                     </a>
-                    <a href="#" className="rounded-full bg-sky-100 p-2 hover:bg-sky-200 transition-colors">
+                    <a
+                      href="#"
+                      className="rounded-full bg-sky-100 p-2 hover:bg-sky-200 transition-colors"
+                    >
                       <Twitter className="h-5 w-5 text-sky-700" />
                     </a>
-                    <a href="#" className="rounded-full bg-sky-100 p-2 hover:bg-sky-200 transition-colors">
+                    <a
+                      href="#"
+                      className="rounded-full bg-sky-100 p-2 hover:bg-sky-200 transition-colors"
+                    >
                       <Instagram className="h-5 w-5 text-sky-700" />
                     </a>
-                    <a href="#" className="rounded-full bg-sky-100 p-2 hover:bg-sky-200 transition-colors">
+                    <a
+                      href="#"
+                      className="rounded-full bg-sky-100 p-2 hover:bg-sky-200 transition-colors"
+                    >
                       <Linkedin className="h-5 w-5 text-sky-700" />
                     </a>
                   </div>
@@ -939,7 +1117,10 @@ export default function LandingPage() {
                     <form className="space-y-4">
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <label htmlFor="first-name" className="text-sm font-medium">
+                          <label
+                            htmlFor="first-name"
+                            className="text-sm font-medium"
+                          >
                             First name
                           </label>
                           <input
@@ -949,7 +1130,10 @@ export default function LandingPage() {
                           />
                         </div>
                         <div className="space-y-2">
-                          <label htmlFor="last-name" className="text-sm font-medium">
+                          <label
+                            htmlFor="last-name"
+                            className="text-sm font-medium"
+                          >
                             Last name
                           </label>
                           <input
@@ -981,7 +1165,10 @@ export default function LandingPage() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <label htmlFor="interest" className="text-sm font-medium">
+                        <label
+                          htmlFor="interest"
+                          className="text-sm font-medium"
+                        >
                           I&apos;m interested in
                         </label>
                         <select
@@ -996,7 +1183,10 @@ export default function LandingPage() {
                         </select>
                       </div>
                       <div className="space-y-2">
-                        <label htmlFor="message" className="text-sm font-medium">
+                        <label
+                          htmlFor="message"
+                          className="text-sm font-medium"
+                        >
                           Message
                         </label>
                         <textarea
@@ -1020,22 +1210,37 @@ export default function LandingPage() {
             <div className="col-span-2 lg:col-span-1">
               <div className="flex items-center gap-2 mb-4">
                 <GraduationCap className="h-6 w-6 text-sky-500" />
-                <span className="text-xl font-bold text-sky-500">ClassEase</span>
+                <span className="text-xl font-bold text-sky-500">
+                  ClassEase
+                </span>
               </div>
               <p className="text-sm text-muted-foreground mb-4">
-                Simplifying school management and enhancing education through innovative technology.
+                Simplifying school management and enhancing education through
+                innovative technology.
               </p>
               <div className="flex space-x-4">
-                <a href="#" className="text-muted-foreground hover:text-sky-500">
+                <a
+                  href="#"
+                  className="text-muted-foreground hover:text-sky-500"
+                >
                   <Facebook className="h-5 w-5" />
                 </a>
-                <a href="#" className="text-muted-foreground hover:text-sky-500">
+                <a
+                  href="#"
+                  className="text-muted-foreground hover:text-sky-500"
+                >
                   <Twitter className="h-5 w-5" />
                 </a>
-                <a href="#" className="text-muted-foreground hover:text-sky-500">
+                <a
+                  href="#"
+                  className="text-muted-foreground hover:text-sky-500"
+                >
                   <Instagram className="h-5 w-5" />
                 </a>
-                <a href="#" className="text-muted-foreground hover:text-sky-500">
+                <a
+                  href="#"
+                  className="text-muted-foreground hover:text-sky-500"
+                >
                   <Linkedin className="h-5 w-5" />
                 </a>
               </div>
@@ -1045,27 +1250,42 @@ export default function LandingPage() {
               <h3 className="font-semibold mb-4">Product</h3>
               <ul className="space-y-2">
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-sky-500">
+                  <a
+                    href="#"
+                    className="text-sm text-muted-foreground hover:text-sky-500"
+                  >
                     Features
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-sky-500">
+                  <a
+                    href="#"
+                    className="text-sm text-muted-foreground hover:text-sky-500"
+                  >
                     Solutions
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-sky-500">
+                  <a
+                    href="#"
+                    className="text-sm text-muted-foreground hover:text-sky-500"
+                  >
                     Pricing
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-sky-500">
+                  <a
+                    href="#"
+                    className="text-sm text-muted-foreground hover:text-sky-500"
+                  >
                     Updates
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-sky-500">
+                  <a
+                    href="#"
+                    className="text-sm text-muted-foreground hover:text-sky-500"
+                  >
                     Roadmap
                   </a>
                 </li>
@@ -1076,27 +1296,42 @@ export default function LandingPage() {
               <h3 className="font-semibold mb-4">Resources</h3>
               <ul className="space-y-2">
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-sky-500">
+                  <a
+                    href="#"
+                    className="text-sm text-muted-foreground hover:text-sky-500"
+                  >
                     Blog
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-sky-500">
+                  <a
+                    href="#"
+                    className="text-sm text-muted-foreground hover:text-sky-500"
+                  >
                     Documentation
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-sky-500">
+                  <a
+                    href="#"
+                    className="text-sm text-muted-foreground hover:text-sky-500"
+                  >
                     Help Center
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-sky-500">
+                  <a
+                    href="#"
+                    className="text-sm text-muted-foreground hover:text-sky-500"
+                  >
                     Webinars
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-sky-500">
+                  <a
+                    href="#"
+                    className="text-sm text-muted-foreground hover:text-sky-500"
+                  >
                     Case Studies
                   </a>
                 </li>
@@ -1107,22 +1342,34 @@ export default function LandingPage() {
               <h3 className="font-semibold mb-4">Company</h3>
               <ul className="space-y-2">
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-sky-500">
+                  <a
+                    href="#"
+                    className="text-sm text-muted-foreground hover:text-sky-500"
+                  >
                     About Us
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-sky-500">
+                  <a
+                    href="#"
+                    className="text-sm text-muted-foreground hover:text-sky-500"
+                  >
                     Careers
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-sky-500">
+                  <a
+                    href="#"
+                    className="text-sm text-muted-foreground hover:text-sky-500"
+                  >
                     Partners
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-sky-500">
+                  <a
+                    href="#"
+                    className="text-sm text-muted-foreground hover:text-sky-500"
+                  >
                     Contact
                   </a>
                 </li>
@@ -1133,29 +1380,40 @@ export default function LandingPage() {
               <h3 className="font-semibold mb-4">Legal</h3>
               <ul className="space-y-2">
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-sky-500">
+                  <a
+                    href="#"
+                    className="text-sm text-muted-foreground hover:text-sky-500"
+                  >
                     Terms of Service
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-sky-500">
+                  <a
+                    href="#"
+                    className="text-sm text-muted-foreground hover:text-sky-500"
+                  >
                     Privacy Policy
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-sky-500">
+                  <a
+                    href="#"
+                    className="text-sm text-muted-foreground hover:text-sky-500"
+                  >
                     Cookie Policy
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:text-sky-500">
+                  <a
+                    href="#"
+                    className="text-sm text-muted-foreground hover:text-sky-500"
+                  >
                     GDPR
                   </a>
                 </li>
               </ul>
             </div>
           </div>
-
         </div>
         <div className="mt-12 pt-8 border-t px-5 md:px-7">
           <div className="flex flex-col md:flex-row justify-between items-center">
@@ -1174,5 +1432,5 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
-  )
+  );
 }

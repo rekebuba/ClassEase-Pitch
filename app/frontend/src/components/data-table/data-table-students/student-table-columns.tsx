@@ -1,15 +1,15 @@
-"use client"
+"use client";
 
-import type * as React from "react"
-import type { ColumnDef } from "@tanstack/react-table"
-import { Badge } from "@/components/ui/badge"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { DataTableColumnHeader } from "@/components/data-table"
-import { Edit, Trash2, Eye, Mail, UserCog, Ellipsis } from "lucide-react"
-import type { DataTableRowAction } from "@/types/data-table"
-import { AverageRange, SectionCounts, Student, TableId } from "@/lib/types"
-import { MoreHorizontal, Pencil, Trash, User } from "lucide-react"
+import type * as React from "react";
+import type { ColumnDef } from "@tanstack/react-table";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DataTableColumnHeader } from "@/components/data-table";
+import { Edit, Trash2, Eye, Mail, UserCog, Ellipsis } from "lucide-react";
+import type { DataTableRowAction } from "@/types/data-table";
+import { AverageRange, SectionCounts, Student, TableId } from "@/lib/types";
+import { MoreHorizontal, Pencil, Trash, User } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -19,20 +19,21 @@ import {
   DropdownMenuShortcut,
   DropdownMenuSub,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
-import { useTransition } from "react"
-import { types } from "util"
-import { number, object } from "zod"
-
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { useTransition } from "react";
+import { types } from "util";
+import { number, object } from "zod";
 
 interface GetStudentsTableColumnsOptions {
-  tableId: TableId
-  statusCounts: Record<string, number>
-  gradeCounts: Record<string, number>
+  tableId: TableId;
+  statusCounts: Record<string, number>;
+  gradeCounts: Record<string, number>;
   sectionCounts: SectionCounts;
-  averageRange: AverageRange,
-  setRowAction: React.Dispatch<React.SetStateAction<DataTableRowAction<Student> | null>>
+  averageRange: AverageRange;
+  setRowAction: React.Dispatch<
+    React.SetStateAction<DataTableRowAction<Student> | null>
+  >;
 }
 
 export function getStudentsTableColumns({
@@ -48,7 +49,10 @@ export function getStudentsTableColumns({
       id: "select",
       header: ({ table }) => (
         <Checkbox
-          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
           onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
         />
@@ -67,30 +71,39 @@ export function getStudentsTableColumns({
     {
       id: "firstName_fatherName_grandFatherName",
       accessorKey: "firstName_fatherName_grandFatherName",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Student" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Student" />
+      ),
       cell: ({ row }) => {
         const initials = row.original.firstName_fatherName_grandFatherName
           .split(" ")
           .slice(0, 2)
           .map((n) => n[0])
           .join("")
-          .toUpperCase()
+          .toUpperCase();
 
         return (
           <div className="flex items-center gap-3">
             <Avatar className="h-8 w-8">
               <AvatarImage
-                src={row.original.imagePath || `/placeholder.svg?height=32&width=32&text=${initials}`}
+                src={
+                  row.original.imagePath ||
+                  `/placeholder.svg?height=32&width=32&text=${initials}`
+                }
                 alt={row.original.firstName_fatherName_grandFatherName}
               />
               <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <span className="font-medium">{row.original.firstName_fatherName_grandFatherName}</span>
-              <span className="text-xs text-muted-foreground">{row.original.identification}</span>
+              <span className="font-medium">
+                {row.original.firstName_fatherName_grandFatherName}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {row.original.identification}
+              </span>
             </div>
           </div>
-        )
+        );
       },
       meta: {
         variant: "text",
@@ -103,7 +116,9 @@ export function getStudentsTableColumns({
     {
       id: "identification",
       accessorKey: "identification",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Student Id" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Student Id" />
+      ),
       cell: ({ row }) => (
         <div className="flex items-center">
           <span>{row.original.identification}</span>
@@ -120,11 +135,16 @@ export function getStudentsTableColumns({
     {
       id: "grade",
       accessorKey: "grade",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Grade" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Grade" />
+      ),
       cell: ({ row }) => (
         <div className="flex flex-col">
           <span className="font-medium">Grade {row.original.grade}</span>
-          <span className="ml-2 text-muted-foreground">({row.original.sectionSemesterOne})-({row.original.sectionSemesterTwo})</span>
+          <span className="ml-2 text-muted-foreground">
+            ({row.original.sectionSemesterOne})-(
+            {row.original.sectionSemesterTwo})
+          </span>
         </div>
       ),
       enableColumnFilter: true,
@@ -142,7 +162,9 @@ export function getStudentsTableColumns({
     {
       id: "sectionSemesterOne",
       accessorKey: "sectionSemesterOne",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Section I" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Section I" />
+      ),
       cell: ({ row }) => <div>{row.original.sectionSemesterOne}</div>,
       enableColumnFilter: true,
       meta: {
@@ -161,7 +183,9 @@ export function getStudentsTableColumns({
     {
       id: "sectionSemesterTwo",
       accessorKey: "sectionSemesterTwo",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="section II" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="section II" />
+      ),
       cell: ({ row }) => <div>{row.original.sectionSemesterTwo}</div>,
       enableColumnFilter: true,
       meta: {
@@ -180,19 +204,21 @@ export function getStudentsTableColumns({
     {
       id: "averageSemesterOne",
       accessorKey: "averageSemesterOne",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Avg. I" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Avg. I" />
+      ),
       cell: ({ row }) => {
-        const score = row.original.averageSemesterOne
-        let color = "text-green-600"
+        const score = row.original.averageSemesterOne;
+        let color = "text-green-600";
         if (typeof score === "number") {
-          if (score < 70) color = "text-red-600"
-          else if (score < 80) color = "text-amber-600"
+          if (score < 70) color = "text-red-600";
+          else if (score < 80) color = "text-amber-600";
         }
         return (
           <div className="flex items-center">
             <span className={color}>{score}%</span>
           </div>
-        )
+        );
       },
       enableColumnFilter: true,
       meta: {
@@ -206,19 +232,21 @@ export function getStudentsTableColumns({
     {
       id: "averageSemesterTwo",
       accessorKey: "averageSemesterTwo",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Avg. II" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Avg. II" />
+      ),
       cell: ({ row }) => {
-        const score = row.original.averageSemesterTwo
-        let color = "text-green-600"
+        const score = row.original.averageSemesterTwo;
+        let color = "text-green-600";
         if (typeof score === "number") {
-          if (score < 70) color = "text-red-600"
-          else if (score < 80) color = "text-amber-600"
+          if (score < 70) color = "text-red-600";
+          else if (score < 80) color = "text-amber-600";
         }
         return (
           <div className="flex items-center">
             <span className={color}>{score}%</span>
           </div>
-        )
+        );
       },
       enableColumnFilter: true,
       meta: {
@@ -232,21 +260,26 @@ export function getStudentsTableColumns({
     {
       id: "finalScore",
       accessorKey: "finalScore",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Avg. Grade" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Avg. Grade" />
+      ),
       cell: ({ row }) => {
-        const score = row.original.finalScore
-        let color = "text-green-600"
+        const score = row.original.finalScore;
+        let color = "text-green-600";
         if (typeof score === "number") {
-          if (score < 70) color = "text-red-600"
-          else if (score < 80) color = "text-amber-600"
+          if (score < 70) color = "text-red-600";
+          else if (score < 80) color = "text-amber-600";
         }
 
         return (
           <div className="flex flex-col">
             <span className={`font-medium ${color}`}>{score}%</span>
-            <span className="text-xs text-muted-foreground">{row.original.averageSemesterOne}%-{row.original.averageSemesterTwo}%</span>
+            <span className="text-xs text-muted-foreground">
+              {row.original.averageSemesterOne}%-
+              {row.original.averageSemesterTwo}%
+            </span>
           </div>
-        )
+        );
       },
       enableColumnFilter: true,
       meta: {
@@ -260,19 +293,21 @@ export function getStudentsTableColumns({
     {
       id: "rankSemesterOne",
       accessorKey: "rankSemesterOne",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Avg. rankI" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Avg. rankI" />
+      ),
       cell: ({ row }) => {
-        const score = row.original.rankSemesterOne
-        let color = "text-green-600"
+        const score = row.original.rankSemesterOne;
+        let color = "text-green-600";
         if (typeof score === "number") {
-          if (score < 70) color = "text-red-600"
-          else if (score < 80) color = "text-amber-600"
+          if (score < 70) color = "text-red-600";
+          else if (score < 80) color = "text-amber-600";
         }
         return (
           <div className="flex items-center">
             <span className={color}>{score}%</span>
           </div>
-        )
+        );
       },
       enableColumnFilter: true,
       meta: {
@@ -285,19 +320,21 @@ export function getStudentsTableColumns({
     {
       id: "rankSemesterTwo",
       accessorKey: "rankSemesterTwo",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Avg. rankII" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Avg. rankII" />
+      ),
       cell: ({ row }) => {
-        const score = row.original.rankSemesterTwo
-        let color = "text-green-600"
+        const score = row.original.rankSemesterTwo;
+        let color = "text-green-600";
         if (typeof score === "number") {
-          if (score < 70) color = "text-red-600"
-          else if (score < 80) color = "text-amber-600"
+          if (score < 70) color = "text-red-600";
+          else if (score < 80) color = "text-amber-600";
         }
         return (
           <div className="flex items-center">
             <span className={color}>{score}%</span>
           </div>
-        )
+        );
       },
       enableColumnFilter: true,
       meta: {
@@ -310,21 +347,24 @@ export function getStudentsTableColumns({
     {
       id: "rank",
       accessorKey: "rank",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Avg. rank" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Avg. rank" />
+      ),
       cell: ({ row }) => {
-        const score = row.original.rank
-        let color = "text-green-600"
+        const score = row.original.rank;
+        let color = "text-green-600";
         if (typeof score === "number") {
-          if (score < 70) color = "text-red-600"
-          else if (score < 80) color = "text-amber-600"
+          if (score < 70) color = "text-red-600";
+          else if (score < 80) color = "text-amber-600";
         }
         return (
           <div className="flex flex-col">
             <span className={`font-medium ${color}`}>{score}</span>
-            <span className="text-xs text-muted-foreground">{row.original.rankSemesterOne}-{row.original.rankSemesterTwo}</span>
-
+            <span className="text-xs text-muted-foreground">
+              {row.original.rankSemesterOne}-{row.original.rankSemesterTwo}
+            </span>
           </div>
-        )
+        );
       },
       enableColumnFilter: true,
       meta: {
@@ -337,11 +377,15 @@ export function getStudentsTableColumns({
     {
       id: "guardianName",
       accessorKey: "guardianName",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="guardian Name" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="guardian Name" />
+      ),
       cell: ({ row }) => (
         <div className="flex flex-col">
           <span>{row.original.guardianName}</span>
-          <span className="text-xs text-muted-foreground">{row.original.guardianPhone}</span>
+          <span className="text-xs text-muted-foreground">
+            {row.original.guardianPhone}
+          </span>
         </div>
       ),
       enableColumnFilter: true,
@@ -355,7 +399,9 @@ export function getStudentsTableColumns({
     {
       id: "guardianPhone",
       accessorKey: "guardianPhone",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="guardian Phone No." />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="guardian Phone No." />
+      ),
       cell: ({ row }) => (
         <div className="flex items-center">
           <span>{row.original.guardianPhone}</span>
@@ -371,7 +417,9 @@ export function getStudentsTableColumns({
     {
       id: "createdAt",
       accessorKey: "createdAt",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Joined" />,
+      header: ({ column }) => (
+        <DataTableColumnHeader column={column} title="Joined" />
+      ),
       cell: ({ row }) => <div>{row.original.createdAt}</div>,
       enableColumnFilter: true,
       meta: {
@@ -415,5 +463,5 @@ export function getStudentsTableColumns({
         );
       },
     },
-  ]
+  ];
 }

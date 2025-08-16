@@ -1,15 +1,21 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { SelectItem } from "@/components/ui/select"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Progress } from "@/components/ui/progress"
-import { Badge } from "@/components/ui/badge"
-import { Separator } from "@/components/ui/separator"
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { SelectItem } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import {
   studentRegistrationSchema,
   step1Schema,
@@ -19,14 +25,27 @@ import {
   step5Schema,
   step6Schema,
   type StudentRegistrationFormData,
-} from "@/lib/form-validation"
-import { FormField, InputWithError, TextareaWithError, SelectWithError } from "@/components/form-field-with-error"
-import { Upload, User, GraduationCap, Heart, MapPin, Users, FileText } from "lucide-react"
-import { z } from "zod"
-import { useFormPersistence } from "@/hooks/use-form-persistence"
-import FormRestorationDialog from "@/components/form-restoration-dialog"
-import AutoSaveIndicator from "@/components/auto-save-indicator"
-import { Checkbox } from "@/components/ui/checkbox"
+} from "@/lib/form-validation";
+import {
+  FormField,
+  InputWithError,
+  TextareaWithError,
+  SelectWithError,
+} from "@/components/form-field-with-error";
+import {
+  Upload,
+  User,
+  GraduationCap,
+  Heart,
+  MapPin,
+  Users,
+  FileText,
+} from "lucide-react";
+import { z } from "zod";
+import { useFormPersistence } from "@/hooks/use-form-persistence";
+import FormRestorationDialog from "@/components/form-restoration-dialog";
+import AutoSaveIndicator from "@/components/auto-save-indicator";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // undefined fields are optional
 const initialFormData: StudentRegistrationFormData = {
@@ -69,8 +88,7 @@ const initialFormData: StudentRegistrationFormData = {
   extracurriculars: [],
   siblingInSchool: false,
   siblingDetails: "",
-}
-
+};
 
 const grades = [
   "KG",
@@ -86,8 +104,8 @@ const grades = [
   "Grade 10",
   "Grade 11",
   "Grade 12",
-]
-const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]
+];
+const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const extracurricularOptions = [
   "Sports",
   "Music",
@@ -99,7 +117,7 @@ const extracurricularOptions = [
   "Debate",
   "Photography",
   "Dance",
-]
+];
 
 const stepNames = {
   1: "Personal Information",
@@ -108,63 +126,76 @@ const stepNames = {
   4: "Guardian & Emergency Contact",
   5: "Medical Information",
   6: "Additional Information & Review",
-}
+};
 
 export default function StudentRegistrationForm() {
-  const [currentStep, setCurrentStep] = useState(1)
-  const [currentStepName, setCurrentStepName] = useState(stepNames[currentStep as keyof typeof stepNames] || "Unknown Step")
-  const [formData, setFormData] = useState<StudentRegistrationFormData>(initialFormData)
-  const [selectedExtracurriculars, setSelectedExtracurriculars] = useState<string[]>([])
+  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStepName, setCurrentStepName] = useState(
+    stepNames[currentStep as keyof typeof stepNames] || "Unknown Step",
+  );
+  const [formData, setFormData] =
+    useState<StudentRegistrationFormData>(initialFormData);
+  const [selectedExtracurriculars, setSelectedExtracurriculars] = useState<
+    string[]
+  >([]);
 
-  const [errors, setErrors] = useState<Record<string, string>>({})
-  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({})
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>(
+    {},
+  );
 
-  const [showRestorationDialog, setShowRestorationDialog] = useState(false)
-  const [lastSaved, setLastSaved] = useState<Date>()
-  const [isOnline, setIsOnline] = useState(true)
-  const { saveFormData, loadFormData, clearFormData, hasSavedData } = useFormPersistence()
+  const [showRestorationDialog, setShowRestorationDialog] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date>();
+  const [isOnline, setIsOnline] = useState(true);
+  const { saveFormData, loadFormData, clearFormData, hasSavedData } =
+    useFormPersistence();
 
   // Handle form restoration on component mount
   useEffect(() => {
     if (hasSavedData()) {
-      const savedData = loadFormData()
+      const savedData = loadFormData();
       if (savedData) {
-        setCurrentStep(savedData.step)
-        setCurrentStepName(stepNames[savedData.step as keyof typeof stepNames] || "Unknown Step")
+        setCurrentStep(savedData.step);
+        setCurrentStepName(
+          stepNames[savedData.step as keyof typeof stepNames] || "Unknown Step",
+        );
       }
-      setShowRestorationDialog(true)
+      setShowRestorationDialog(true);
     }
-  }, [hasSavedData])
+  }, [hasSavedData]);
 
   // Monitor online status
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true)
-    const handleOffline = () => setIsOnline(false)
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
 
-    window.addEventListener("online", handleOnline)
-    window.addEventListener("offline", handleOffline)
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
-      window.removeEventListener("online", handleOnline)
-      window.removeEventListener("offline", handleOffline)
-    }
-  }, [])
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
 
   // Auto-save form data whenever it changes
   useEffect(() => {
     if (formData.firstName || formData.lastName || formData.fatherName) {
       // Only save if form has some data
-      saveFormData(formData, currentStep)
-      setLastSaved(new Date())
+      saveFormData(formData, currentStep);
+      setLastSaved(new Date());
     }
-  }, [formData, currentStep, saveFormData])
+  }, [formData, currentStep, saveFormData]);
 
-  const totalSteps = 6
-  const progress = (currentStep / totalSteps) * 100
+  const totalSteps = 6;
+  const progress = (currentStep / totalSteps) * 100;
 
-  const updateFormData = (field: keyof StudentRegistrationFormData, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }))
-  }
+  const updateFormData = (
+    field: keyof StudentRegistrationFormData,
+    value: any,
+  ) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
 
   const formatPhoneNumber = (value: string) => {
     const cleaned = value.replace(/\D/g, "");
@@ -187,18 +218,18 @@ export default function StudentRegistrationForm() {
   const handleExtracurricularToggle = (activity: string) => {
     const updated = selectedExtracurriculars.includes(activity)
       ? selectedExtracurriculars.filter((item) => item !== activity)
-      : [...selectedExtracurriculars, activity]
-    setSelectedExtracurriculars(updated)
-    updateFormData("extracurriculars", updated)
-  }
+      : [...selectedExtracurriculars, activity];
+    setSelectedExtracurriculars(updated);
+    updateFormData("extracurriculars", updated);
+  };
 
   const validateStep = (stepNumber: number): boolean => {
-    let schema: z.ZodSchema
-    let dataToValidate: any
+    let schema: z.ZodSchema;
+    let dataToValidate: any;
 
     switch (stepNumber) {
       case 1:
-        schema = step1Schema
+        schema = step1Schema;
         dataToValidate = {
           firstName: formData.firstName,
           lastName: formData.lastName,
@@ -210,10 +241,10 @@ export default function StudentRegistrationForm() {
           bloodType: formData.bloodType,
           languageAtHome: formData.languageAtHome,
           studentPhoto: formData.studentPhoto,
-        }
-        break
+        };
+        break;
       case 2:
-        schema = step2Schema
+        schema = step2Schema;
         dataToValidate = {
           grade: formData.grade,
           academicYear: formData.academicYear,
@@ -222,10 +253,10 @@ export default function StudentRegistrationForm() {
           previousGrades: formData.previousGrades,
           transportation: formData.transportation,
           lunchProgram: formData.lunchProgram,
-        }
-        break
+        };
+        break;
       case 3:
-        schema = step3Schema
+        schema = step3Schema;
         dataToValidate = {
           address: formData.address,
           city: formData.city,
@@ -234,10 +265,10 @@ export default function StudentRegistrationForm() {
           fatherPhone: formData.fatherPhone,
           motherPhone: formData.motherPhone,
           parentEmail: formData.parentEmail,
-        }
-        break
+        };
+        break;
       case 4:
-        schema = step4Schema
+        schema = step4Schema;
         dataToValidate = {
           guardianName: formData.guardianName,
           guardianPhone: formData.guardianPhone,
@@ -246,10 +277,10 @@ export default function StudentRegistrationForm() {
           emergencyContactPhone: formData.emergencyContactPhone,
           siblingInSchool: formData.siblingInSchool,
           siblingDetails: formData.siblingDetails,
-        }
-        break
+        };
+        break;
       case 5:
-        schema = step5Schema
+        schema = step5Schema;
         dataToValidate = {
           hasMedicalCondition: formData.hasMedicalCondition,
           medicalDetails: formData.medicalDetails,
@@ -258,135 +289,149 @@ export default function StudentRegistrationForm() {
           requiresAccommodation: formData.requiresAccommodation,
           accommodationDetails: formData.accommodationDetails,
           allergies: formData.allergies,
-        }
-        break
+        };
+        break;
       case 6:
-        schema = step6Schema
+        schema = step6Schema;
         dataToValidate = {
           extracurriculars: formData.extracurriculars,
-        }
-        break
+        };
+        break;
       default:
-        return true
+        return true;
     }
 
     try {
-      schema.parse(dataToValidate)
+      schema.parse(dataToValidate);
       // Clear errors for this step
-      const stepErrors = { ...errors }
+      const stepErrors = { ...errors };
       Object.keys(dataToValidate).forEach((key) => {
-        delete stepErrors[key]
-      })
-      setErrors(stepErrors)
-      return true
+        delete stepErrors[key];
+      });
+      setErrors(stepErrors);
+      return true;
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const newErrors: Record<string, string> = {}
+        const newErrors: Record<string, string> = {};
         error.errors.forEach((err) => {
           if (err.path.length > 0) {
-            newErrors[err.path[0] as string] = err.message
+            newErrors[err.path[0] as string] = err.message;
           }
-        })
-        setErrors((prev) => ({ ...prev, ...newErrors }))
+        });
+        setErrors((prev) => ({ ...prev, ...newErrors }));
       }
-      return false
+      return false;
     }
-  }
+  };
 
-  const validateField = (field: keyof StudentRegistrationFormData, value: any) => {
+  const validateField = (
+    field: keyof StudentRegistrationFormData,
+    value: any,
+  ) => {
     try {
       // Unwrap ZodEffects to access the underlying ZodObject with shape
-      let schema: any = studentRegistrationSchema
+      let schema: any = studentRegistrationSchema;
       while (schema && typeof schema.innerType === "function") {
-        schema = schema.innerType()
+        schema = schema.innerType();
       }
-      const fieldSchema = schema.shape[field]
-      console.log("fieldSchema: ", fieldSchema)
+      const fieldSchema = schema.shape[field];
+      console.log("fieldSchema: ", fieldSchema);
       if (fieldSchema) {
-        fieldSchema.parse(value)
+        fieldSchema.parse(value);
         setErrors((prev) => {
-          const newErrors = { ...prev }
-          delete newErrors[field]
-          return newErrors
-        })
+          const newErrors = { ...prev };
+          delete newErrors[field];
+          return newErrors;
+        });
       }
     } catch (error) {
       if (error instanceof z.ZodError) {
         setErrors((prev) => ({
           ...prev,
           [field]: error.errors[0]?.message || "Invalid input",
-        }))
+        }));
       }
     }
-  }
+  };
 
-  const handleFieldChange = (field: keyof StudentRegistrationFormData, value: any) => {
-    value = value === "" ? undefined : value // Handle empty strings
-    updateFormData(field, value)
-    setTouchedFields((prev) => ({ ...prev, [field]: true }))
+  const handleFieldChange = (
+    field: keyof StudentRegistrationFormData,
+    value: any,
+  ) => {
+    value = value === "" ? undefined : value; // Handle empty strings
+    updateFormData(field, value);
+    setTouchedFields((prev) => ({ ...prev, [field]: true }));
 
     // Validate field after a short delay to avoid validating while typing
     setTimeout(() => {
-      validateField(field, value)
-    }, 300)
-  }
+      validateField(field, value);
+    }, 300);
+  };
 
   const nextStep = () => {
     if (validateStep(currentStep) && currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1)
-      setCurrentStepName(stepNames[currentStep + 1 as keyof typeof stepNames] || "Unknown Step")
+      setCurrentStep(currentStep + 1);
+      setCurrentStepName(
+        stepNames[(currentStep + 1) as keyof typeof stepNames] ||
+          "Unknown Step",
+      );
     }
-  }
+  };
 
   const prevStep = () => {
     if (currentStep > 1) {
-      setCurrentStep(currentStep - 1)
-      setCurrentStepName(stepNames[currentStep - 1 as keyof typeof stepNames] || "Unknown Step")
+      setCurrentStep(currentStep - 1);
+      setCurrentStepName(
+        stepNames[(currentStep - 1) as keyof typeof stepNames] ||
+          "Unknown Step",
+      );
     }
-  }
+  };
 
   const handleRestoreForm = () => {
-    const savedData = loadFormData()
+    const savedData = loadFormData();
     if (savedData) {
-      setFormData((prev) => ({ ...prev, ...savedData.data }))
-      setCurrentStep(savedData.step)
-      setCurrentStepName(stepNames[savedData.step as keyof typeof stepNames] || "Unknown Step")
+      setFormData((prev) => ({ ...prev, ...savedData.data }));
+      setCurrentStep(savedData.step);
+      setCurrentStepName(
+        stepNames[savedData.step as keyof typeof stepNames] || "Unknown Step",
+      );
       if (savedData.data.extracurriculars) {
-        setSelectedExtracurriculars(savedData.data.extracurriculars)
+        setSelectedExtracurriculars(savedData.data.extracurriculars);
       }
     }
-    setShowRestorationDialog(false)
-  }
+    setShowRestorationDialog(false);
+  };
 
   const handleStartFresh = () => {
-    clearFormData()
-    setFormData(initialFormData)
-    setCurrentStep(1)
-    setShowRestorationDialog(false)
-  }
+    clearFormData();
+    setFormData(initialFormData);
+    setCurrentStep(1);
+    setShowRestorationDialog(false);
+  };
 
   const handleSubmit = () => {
     try {
-      const validatedData = studentRegistrationSchema.parse(formData)
-      console.log("Form submitted:", validatedData)
+      const validatedData = studentRegistrationSchema.parse(formData);
+      console.log("Form submitted:", validatedData);
 
       // Clear saved data after successful submission
-      clearFormData()
+      clearFormData();
 
-      alert("Registration submitted successfully!")
+      alert("Registration submitted successfully!");
     } catch (error) {
       if (error instanceof z.ZodError) {
-        const newErrors: Record<string, string> = {}
+        const newErrors: Record<string, string> = {};
         error.errors.forEach((err) => {
           if (err.path.length > 0) {
-            newErrors[err.path[0] as string] = err.message
+            newErrors[err.path[0] as string] = err.message;
           }
-        })
-        setErrors(newErrors)
-        alert("Please fix the errors before submitting.")
+        });
+        setErrors(newErrors);
+        alert("Please fix the errors before submitting.");
       }
     }
-  }
+  };
 
   const renderStep = () => {
     switch (currentStep) {
@@ -409,7 +454,9 @@ export default function StudentRegistrationForm() {
                 <InputWithError
                   id="firstName"
                   value={formData.firstName}
-                  onChange={(e) => handleFieldChange("firstName", e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("firstName", e.target.value)
+                  }
                   placeholder="Enter first name"
                   error={errors.firstName}
                 />
@@ -424,7 +471,9 @@ export default function StudentRegistrationForm() {
                 <InputWithError
                   id="lastName"
                   value={formData.lastName}
-                  onChange={(e) => handleFieldChange("lastName", e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("lastName", e.target.value)
+                  }
                   placeholder="Enter last name"
                   error={errors.lastName}
                 />
@@ -442,7 +491,9 @@ export default function StudentRegistrationForm() {
                 <InputWithError
                   id="fatherName"
                   value={formData.fatherName}
-                  onChange={(e) => handleFieldChange("fatherName", e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("fatherName", e.target.value)
+                  }
                   placeholder="Enter father's name"
                   error={errors.fatherName}
                 />
@@ -459,7 +510,9 @@ export default function StudentRegistrationForm() {
                 <InputWithError
                   id="grandFatherName"
                   value={formData.grandFatherName}
-                  onChange={(e) => handleFieldChange("grandFatherName", e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("grandFatherName", e.target.value)
+                  }
                   placeholder="Enter grandfather's name"
                 />
               </FormField>
@@ -477,7 +530,9 @@ export default function StudentRegistrationForm() {
                   id="dateOfBirth"
                   type="date"
                   value={formData.dateOfBirth}
-                  onChange={(e) => handleFieldChange("dateOfBirth", e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("dateOfBirth", e.target.value)
+                  }
                   error={errors.dateOfBirth}
                 />
               </FormField>
@@ -497,7 +552,9 @@ export default function StudentRegistrationForm() {
                     <Label htmlFor="female">Female</Label>
                   </div>
                 </RadioGroup>
-                {errors.gender && <p className="text-red-500 text-sm">{errors.gender}</p>}
+                {errors.gender && (
+                  <p className="text-red-500 text-sm">{errors.gender}</p>
+                )}
               </div>
               <FormField
                 label="Nationality"
@@ -509,7 +566,9 @@ export default function StudentRegistrationForm() {
                 <InputWithError
                   id="nationality"
                   value={formData.nationality}
-                  onChange={(e) => handleFieldChange("nationality", e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("nationality", e.target.value)
+                  }
                   placeholder="Enter nationality"
                   error={errors.nationality}
                 />
@@ -522,7 +581,9 @@ export default function StudentRegistrationForm() {
                 <SelectWithError
                   placeholder="Select blood type"
                   value={formData.bloodType}
-                  onValueChange={(value) => handleFieldChange("bloodType", value)}
+                  onValueChange={(value) =>
+                    handleFieldChange("bloodType", value)
+                  }
                   error={errors.bloodType}
                 >
                   {bloodTypes.map((type) => (
@@ -531,7 +592,9 @@ export default function StudentRegistrationForm() {
                     </SelectItem>
                   ))}
                 </SelectWithError>
-                {errors.bloodType && <p className="text-red-500 text-sm">{errors.bloodType}</p>}
+                {errors.bloodType && (
+                  <p className="text-red-500 text-sm">{errors.bloodType}</p>
+                )}
               </div>
               <FormField
                 label="Primary Language at Home"
@@ -543,7 +606,9 @@ export default function StudentRegistrationForm() {
                 <InputWithError
                   id="languageAtHome"
                   value={formData.languageAtHome}
-                  onChange={(e) => handleFieldChange("languageAtHome", e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("languageAtHome", e.target.value)
+                  }
                   placeholder="e.g., English, Spanish, etc."
                   error={errors.languageAtHome}
                 />
@@ -556,13 +621,20 @@ export default function StudentRegistrationForm() {
                 <Upload className="mx-auto h-12 w-12 text-gray-400" />
                 <div className="mt-2">
                   <Label htmlFor="studentPhoto" className="cursor-pointer">
-                    <span className="text-blue-600 hover:text-blue-500">Upload a photo</span>
+                    <span className="text-blue-600 hover:text-blue-500">
+                      Upload a photo
+                    </span>
                     <Input
                       id="studentPhoto"
                       type="file"
                       accept="image/*"
                       className="hidden"
-                      onChange={(e) => updateFormData("studentPhoto", e.target.files?.[0] || null)}
+                      onChange={(e) =>
+                        updateFormData(
+                          "studentPhoto",
+                          e.target.files?.[0] || null,
+                        )
+                      }
                     />
                   </Label>
                 </div>
@@ -570,7 +642,7 @@ export default function StudentRegistrationForm() {
               </div>
             </div>
           </div>
-        )
+        );
 
       case 2:
         return (
@@ -595,21 +667,27 @@ export default function StudentRegistrationForm() {
                     </SelectItem>
                   ))}
                 </SelectWithError>
-                {errors.grade && <p className="text-red-500 text-sm">{errors.grade}</p>}
+                {errors.grade && (
+                  <p className="text-red-500 text-sm">{errors.grade}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="academicYear">Academic Year *</Label>
                 <SelectWithError
                   placeholder="Select academic year"
                   value={formData.academicYear}
-                  onValueChange={(value) => handleFieldChange("academicYear", value)}
+                  onValueChange={(value) =>
+                    handleFieldChange("academicYear", value)
+                  }
                   error={errors.academicYear}
                 >
                   <SelectItem value="2024-2025">2024-2025</SelectItem>
                   <SelectItem value="2025-2026">2025-2026</SelectItem>
                   <SelectItem value="2026-2027">2026-2027</SelectItem>
                 </SelectWithError>
-                {errors.academicYear && <p className="text-red-500 text-sm">{errors.academicYear}</p>}
+                {errors.academicYear && (
+                  <p className="text-red-500 text-sm">{errors.academicYear}</p>
+                )}
               </div>
             </div>
 
@@ -618,9 +696,13 @@ export default function StudentRegistrationForm() {
                 <Checkbox
                   id="isTransfer"
                   checked={formData.isTransfer}
-                  onCheckedChange={(checked) => handleFieldChange("isTransfer", checked)}
+                  onCheckedChange={(checked) =>
+                    handleFieldChange("isTransfer", checked)
+                  }
                 />
-                <Label htmlFor="isTransfer">Is the student transferring from another school?</Label>
+                <Label htmlFor="isTransfer">
+                  Is the student transferring from another school?
+                </Label>
               </div>
 
               {formData.isTransfer && (
@@ -630,12 +712,16 @@ export default function StudentRegistrationForm() {
                     id="previousSchool"
                     required
                     error={errors.previousSchool}
-                    success={!errors.previousSchool && touchedFields.previousSchool}
+                    success={
+                      !errors.previousSchool && touchedFields.previousSchool
+                    }
                   >
                     <InputWithError
                       id="previousSchool"
                       value={formData.previousSchool}
-                      onChange={(e) => handleFieldChange("previousSchool", e.target.value)}
+                      onChange={(e) =>
+                        handleFieldChange("previousSchool", e.target.value)
+                      }
                       placeholder="Enter previous school name"
                       error={errors.previousSchool}
                     />
@@ -644,12 +730,16 @@ export default function StudentRegistrationForm() {
                     label="Previous Academic Performance"
                     id="previousGrades"
                     error={errors.previousGrades}
-                    success={!errors.previousGrades && touchedFields.previousGrades}
+                    success={
+                      !errors.previousGrades && touchedFields.previousGrades
+                    }
                   >
                     <TextareaWithError
                       id="previousGrades"
                       value={formData.previousGrades}
-                      onChange={(e) => handleFieldChange("previousGrades", e.target.value)}
+                      onChange={(e) =>
+                        handleFieldChange("previousGrades", e.target.value)
+                      }
                       placeholder="Brief description of academic performance at previous school"
                       rows={3}
                       error={errors.previousGrades}
@@ -664,7 +754,9 @@ export default function StudentRegistrationForm() {
               <SelectWithError
                 placeholder="How will the student get to school?"
                 value={formData.transportation}
-                onValueChange={(value) => handleFieldChange("transportation", value)}
+                onValueChange={(value) =>
+                  handleFieldChange("transportation", value)
+                }
                 error={errors.transportation}
               >
                 <SelectItem value="school-bus">School Bus</SelectItem>
@@ -679,12 +771,16 @@ export default function StudentRegistrationForm() {
               <Checkbox
                 id="lunchProgram"
                 checked={formData.lunchProgram}
-                onCheckedChange={(checked) => handleFieldChange("lunchProgram", checked)}
+                onCheckedChange={(checked) =>
+                  handleFieldChange("lunchProgram", checked)
+                }
               />
-              <Label htmlFor="lunchProgram">Enroll in school lunch program</Label>
+              <Label htmlFor="lunchProgram">
+                Enroll in school lunch program
+              </Label>
             </div>
           </div>
-        )
+        );
 
       case 3:
         return (
@@ -751,7 +847,9 @@ export default function StudentRegistrationForm() {
                 <InputWithError
                   id="postalCode"
                   value={formData.postalCode}
-                  onChange={(e) => handleFieldChange("postalCode", e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("postalCode", e.target.value)
+                  }
                   placeholder="Enter postal code"
                   error={errors.postalCode}
                 />
@@ -771,7 +869,12 @@ export default function StudentRegistrationForm() {
                 <InputWithError
                   id="fatherPhone"
                   value={formData.fatherPhone}
-                  onChange={(e) => handleFieldChange("fatherPhone", formatPhoneNumber(e.target.value))}
+                  onChange={(e) =>
+                    handleFieldChange(
+                      "fatherPhone",
+                      formatPhoneNumber(e.target.value),
+                    )
+                  }
                   placeholder="+251/7xx-xxx-xxx"
                   error={errors.fatherPhone}
                 />
@@ -786,7 +889,12 @@ export default function StudentRegistrationForm() {
                 <InputWithError
                   id="motherPhone"
                   value={formData.motherPhone}
-                  onChange={(e) => handleFieldChange("motherPhone", formatPhoneNumber(e.target.value))}
+                  onChange={(e) =>
+                    handleFieldChange(
+                      "motherPhone",
+                      formatPhoneNumber(e.target.value),
+                    )
+                  }
                   placeholder="+251/7xx-xxx-xxx"
                   error={errors.motherPhone}
                 />
@@ -804,13 +912,15 @@ export default function StudentRegistrationForm() {
                 id="parentEmail"
                 type="email"
                 value={formData.parentEmail}
-                onChange={(e) => handleFieldChange("parentEmail", e.target.value)}
+                onChange={(e) =>
+                  handleFieldChange("parentEmail", e.target.value)
+                }
                 placeholder="parent@example.com"
                 error={errors.parentEmail}
               />
             </FormField>
           </div>
-        )
+        );
 
       case 4:
         return (
@@ -831,17 +941,23 @@ export default function StudentRegistrationForm() {
                 <InputWithError
                   id="guardianName"
                   value={formData.guardianName}
-                  onChange={(e) => handleFieldChange("guardianName", e.target.value)}
+                  onChange={(e) =>
+                    handleFieldChange("guardianName", e.target.value)
+                  }
                   placeholder="Enter guardian name"
                   error={errors.guardianName}
                 />
               </FormField>
               <div className="space-y-2">
-                <Label htmlFor="guardianRelation" aria-required>Relationship to Student</Label>
+                <Label htmlFor="guardianRelation" aria-required>
+                  Relationship to Student
+                </Label>
                 <SelectWithError
                   placeholder="Select relationship"
                   value={formData.guardianRelation}
-                  onValueChange={(value) => handleFieldChange("guardianRelation", value)}
+                  onValueChange={(value) =>
+                    handleFieldChange("guardianRelation", value)
+                  }
                   error={errors.guardianRelation}
                 >
                   <SelectItem value="parent">Parent</SelectItem>
@@ -851,7 +967,11 @@ export default function StudentRegistrationForm() {
                   <SelectItem value="family-friend">Family Friend</SelectItem>
                   <SelectItem value="other">Other</SelectItem>
                 </SelectWithError>
-                {errors.guardianRelation && <p className="text-red-500 text-sm">{errors.guardianRelation}</p>}
+                {errors.guardianRelation && (
+                  <p className="text-red-500 text-sm">
+                    {errors.guardianRelation}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -864,7 +984,12 @@ export default function StudentRegistrationForm() {
               <InputWithError
                 id="guardianPhone"
                 value={formData.guardianPhone}
-                onChange={(e) => handleFieldChange("guardianPhone", formatPhoneNumber(e.target.value))}
+                onChange={(e) =>
+                  handleFieldChange(
+                    "guardianPhone",
+                    formatPhoneNumber(e.target.value),
+                  )
+                }
                 placeholder="+251 9/7xx-xxx-xxx"
                 error={errors.guardianPhone}
               />
@@ -873,32 +998,47 @@ export default function StudentRegistrationForm() {
             <Separator />
 
             <div className="space-y-4">
-              <h4 className="font-medium text-red-600">Emergency Contact (if different from above)</h4>
+              <h4 className="font-medium text-red-600">
+                Emergency Contact (if different from above)
+              </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   label="Emergency Contact Name"
                   id="emergencyContactName"
                   required={false}
                   error={errors.emergencyContactName}
-                  success={!errors.emergencyContactName && touchedFields.emergencyContactName}
+                  success={
+                    !errors.emergencyContactName &&
+                    touchedFields.emergencyContactName
+                  }
                 >
                   <InputWithError
                     id="emergencyContactName"
                     placeholder="Enter emergency contact name"
                     value={formData.emergencyContactName}
-                    onChange={(e) => handleFieldChange("emergencyContactName", e.target.value)}
+                    onChange={(e) =>
+                      handleFieldChange("emergencyContactName", e.target.value)
+                    }
                   />
                 </FormField>
                 <FormField
                   label="Emergency Contact Phone"
                   id="emergencyContactPhone"
                   error={errors.emergencyContactPhone}
-                  success={!errors.emergencyContactPhone && touchedFields.emergencyContactPhone}
+                  success={
+                    !errors.emergencyContactPhone &&
+                    touchedFields.emergencyContactPhone
+                  }
                 >
                   <InputWithError
                     id="emergencyContactPhone"
                     value={formData.emergencyContactPhone}
-                    onChange={(e) => handleFieldChange("emergencyContactPhone", formatPhoneNumber(e.target.value))}
+                    onChange={(e) =>
+                      handleFieldChange(
+                        "emergencyContactPhone",
+                        formatPhoneNumber(e.target.value),
+                      )
+                    }
                     placeholder="+251/7xx-xxx-xxx"
                     error={errors.emergencyContactPhone}
                   />
@@ -913,10 +1053,13 @@ export default function StudentRegistrationForm() {
                 <Checkbox
                   id="siblingInSchool"
                   checked={formData.siblingInSchool}
-                  onCheckedChange={(checked) => handleFieldChange("siblingInSchool", checked)}
+                  onCheckedChange={(checked) =>
+                    handleFieldChange("siblingInSchool", checked)
+                  }
                 />
                 <Label htmlFor="siblingInSchool">
-                  Does the student have siblings currently enrolled in this school?
+                  Does the student have siblings currently enrolled in this
+                  school?
                 </Label>
               </div>
 
@@ -926,12 +1069,16 @@ export default function StudentRegistrationForm() {
                     label="Sibling Information"
                     id="siblingDetails"
                     error={errors.siblingDetails}
-                    success={!errors.siblingDetails && touchedFields.siblingDetails}
+                    success={
+                      !errors.siblingDetails && touchedFields.siblingDetails
+                    }
                   >
                     <TextareaWithError
                       id="siblingDetails"
                       value={formData.siblingDetails}
-                      onChange={(e) => handleFieldChange("siblingDetails", e.target.value)}
+                      onChange={(e) =>
+                        handleFieldChange("siblingDetails", e.target.value)
+                      }
                       placeholder="Please provide names and grades of siblings currently enrolled"
                       rows={3}
                       error={errors.siblingDetails}
@@ -941,7 +1088,7 @@ export default function StudentRegistrationForm() {
               )}
             </div>
           </div>
-        )
+        );
 
       case 5:
         return (
@@ -956,9 +1103,13 @@ export default function StudentRegistrationForm() {
                 <Checkbox
                   id="hasMedicalCondition"
                   checked={formData.hasMedicalCondition}
-                  onCheckedChange={(checked) => handleFieldChange("hasMedicalCondition", checked)}
+                  onCheckedChange={(checked) =>
+                    handleFieldChange("hasMedicalCondition", checked)
+                  }
                 />
-                <Label htmlFor="hasMedicalCondition">Does the student have any medical conditions?</Label>
+                <Label htmlFor="hasMedicalCondition">
+                  Does the student have any medical conditions?
+                </Label>
               </div>
 
               {formData.hasMedicalCondition && (
@@ -968,12 +1119,16 @@ export default function StudentRegistrationForm() {
                     id="medicalDetails"
                     required
                     error={errors.medicalDetails}
-                    success={!errors.medicalDetails && touchedFields.medicalDetails}
+                    success={
+                      !errors.medicalDetails && touchedFields.medicalDetails
+                    }
                   >
                     <TextareaWithError
                       id="medicalDetails"
                       value={formData.medicalDetails}
-                      onChange={(e) => handleFieldChange("medicalDetails", e.target.value)}
+                      onChange={(e) =>
+                        handleFieldChange("medicalDetails", e.target.value)
+                      }
                       placeholder="Please describe the medical condition and any required care"
                       rows={3}
                       error={errors.medicalDetails}
@@ -1006,9 +1161,13 @@ export default function StudentRegistrationForm() {
                 <Checkbox
                   id="hasDisability"
                   checked={formData.hasDisability}
-                  onCheckedChange={(checked) => handleFieldChange("hasDisability", checked)}
+                  onCheckedChange={(checked) =>
+                    handleFieldChange("hasDisability", checked)
+                  }
                 />
-                <Label htmlFor="hasDisability">Does the student have any disabilities?</Label>
+                <Label htmlFor="hasDisability">
+                  Does the student have any disabilities?
+                </Label>
               </div>
 
               {formData.hasDisability && (
@@ -1018,12 +1177,17 @@ export default function StudentRegistrationForm() {
                     id="disabilityDetails"
                     required
                     error={errors.disabilityDetails}
-                    success={!errors.disabilityDetails && touchedFields.disabilityDetails}
+                    success={
+                      !errors.disabilityDetails &&
+                      touchedFields.disabilityDetails
+                    }
                   >
                     <TextareaWithError
                       id="disabilityDetails"
                       value={formData.disabilityDetails}
-                      onChange={(e) => handleFieldChange("disabilityDetails", e.target.value)}
+                      onChange={(e) =>
+                        handleFieldChange("disabilityDetails", e.target.value)
+                      }
                       placeholder="Please describe the disability and any support needed"
                       rows={3}
                       error={errors.disabilityDetails}
@@ -1038,9 +1202,13 @@ export default function StudentRegistrationForm() {
                 <Checkbox
                   id="requiresAccommodation"
                   checked={formData.requiresAccommodation}
-                  onCheckedChange={(checked) => handleFieldChange("requiresAccommodation", checked)}
+                  onCheckedChange={(checked) =>
+                    handleFieldChange("requiresAccommodation", checked)
+                  }
                 />
-                <Label htmlFor="requiresAccommodation">Does the student require special accommodations?</Label>
+                <Label htmlFor="requiresAccommodation">
+                  Does the student require special accommodations?
+                </Label>
               </div>
 
               {formData.requiresAccommodation && (
@@ -1050,12 +1218,20 @@ export default function StudentRegistrationForm() {
                     id="accommodationDetails"
                     required
                     error={errors.accommodationDetails}
-                    success={!errors.accommodationDetails && touchedFields.accommodationDetails}
+                    success={
+                      !errors.accommodationDetails &&
+                      touchedFields.accommodationDetails
+                    }
                   >
                     <TextareaWithError
                       id="accommodationDetails"
                       value={formData.accommodationDetails}
-                      onChange={(e) => handleFieldChange("accommodationDetails", e.target.value)}
+                      onChange={(e) =>
+                        handleFieldChange(
+                          "accommodationDetails",
+                          e.target.value,
+                        )
+                      }
                       placeholder="Please describe the special accommodations needed"
                       rows={3}
                       error={errors.accommodationDetails}
@@ -1065,7 +1241,7 @@ export default function StudentRegistrationForm() {
               )}
             </div>
           </div>
-        )
+        );
 
       case 6:
         return (
@@ -1078,14 +1254,18 @@ export default function StudentRegistrationForm() {
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label>Extracurricular Interests</Label>
-                <p className="text-sm text-gray-600">Select activities the student is interested in:</p>
+                <p className="text-sm text-gray-600">
+                  Select activities the student is interested in:
+                </p>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
                   {extracurricularOptions.map((activity) => (
                     <div key={activity} className="flex items-center space-x-2">
                       <Checkbox
                         id={activity}
                         checked={selectedExtracurriculars.includes(activity)}
-                        onCheckedChange={() => handleExtracurricularToggle(activity)}
+                        onCheckedChange={() =>
+                          handleExtracurricularToggle(activity)
+                        }
                       />
                       <Label htmlFor={activity} className="text-sm">
                         {activity}
@@ -1111,7 +1291,8 @@ export default function StudentRegistrationForm() {
               <h4 className="font-medium">Registration Summary</h4>
               <div className="bg-gray-50 p-4 rounded-lg space-y-2">
                 <p>
-                  <strong>Student:</strong> {formData.firstName} {formData.lastName}
+                  <strong>Student:</strong> {formData.firstName}{" "}
+                  {formData.lastName}
                 </p>
                 <p>
                   <strong>Grade:</strong> {formData.grade}
@@ -1127,7 +1308,8 @@ export default function StudentRegistrationForm() {
                 </p>
                 {formData.isTransfer && (
                   <p>
-                    <strong>Transfer Student:</strong> Yes (from {formData.previousSchool})
+                    <strong>Transfer Student:</strong> Yes (from{" "}
+                    {formData.previousSchool})
                   </p>
                 )}
                 {formData.hasMedicalCondition && (
@@ -1150,26 +1332,30 @@ export default function StudentRegistrationForm() {
 
             <div className="bg-blue-50 p-4 rounded-lg">
               <p className="text-sm text-blue-800">
-                <strong>Note:</strong> Please review all information carefully before submitting. You will receive a
-                confirmation email once the registration is processed.
+                <strong>Note:</strong> Please review all information carefully
+                before submitting. You will receive a confirmation email once
+                the registration is processed.
               </p>
             </div>
           </div>
-        )
+        );
 
       default:
-        return null
+        return null;
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="max-w-4xl mx-auto">
         <Card className="shadow-xl">
           <CardHeader className="text-center">
-            <CardTitle className="text-3xl font-bold text-gray-800">Student Registration Form</CardTitle>
+            <CardTitle className="text-3xl font-bold text-gray-800">
+              Student Registration Form
+            </CardTitle>
             <CardDescription className="text-lg">
-              Complete all steps to register your student for the upcoming academic year
+              Complete all steps to register your student for the upcoming
+              academic year
             </CardDescription>
             <div className="mt-4">
               <Progress value={progress} className="w-full" />
@@ -1186,7 +1372,12 @@ export default function StudentRegistrationForm() {
             <div className="min-h-[600px]">{renderStep()}</div>
 
             <div className="flex justify-between mt-8 pt-6 border-t">
-              <Button variant="outline" onClick={prevStep} disabled={currentStep === 1} className="px-8">
+              <Button
+                variant="outline"
+                onClick={prevStep}
+                disabled={currentStep === 1}
+                className="px-8"
+              >
                 Previous
               </Button>
 
@@ -1195,7 +1386,10 @@ export default function StudentRegistrationForm() {
                   Next Step
                 </Button>
               ) : (
-                <Button onClick={handleSubmit} className="px-8 bg-green-600 hover:bg-green-700">
+                <Button
+                  onClick={handleSubmit}
+                  className="px-8 bg-green-600 hover:bg-green-700"
+                >
                   Submit Registration
                 </Button>
               )}
@@ -1212,5 +1406,5 @@ export default function StudentRegistrationForm() {
         />
       </div>
     </div>
-  )
+  );
 }

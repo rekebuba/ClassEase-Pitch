@@ -53,7 +53,9 @@ export function DataTableColumnsVisibility<TData>({
           <ChevronsUpDown className="ml-auto opacity-50" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="flex w-full max-w-[var(--radix-popover-content-available-width)] origin-[var(--radix-popover-content-transform-origin)] flex-col gap-3.5 p-4 sm:min-w-[380px] align-start"
+      <PopoverContent
+        align="end"
+        className="flex w-full max-w-[var(--radix-popover-content-available-width)] origin-[var(--radix-popover-content-transform-origin)] flex-col gap-3.5 p-4 sm:min-w-[380px] align-start"
       >
         <Command>
           <CommandInput placeholder="Search columns..." />
@@ -81,7 +83,7 @@ export function DataTableColumnsVisibility<TData>({
             </CommandGroup>
           </CommandList>
         </Command>
-      </PopoverContent >
-    </Popover >
+      </PopoverContent>
+    </Popover>
   );
 }

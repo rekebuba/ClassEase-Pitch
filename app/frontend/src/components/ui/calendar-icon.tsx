@@ -7,7 +7,7 @@ const DateDisplay = () => {
     "Wednesday",
     "Thursday",
     "Friday",
-    "Saturday"
+    "Saturday",
   ];
 
   return (

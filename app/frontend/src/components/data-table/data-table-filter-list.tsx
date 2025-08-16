@@ -12,7 +12,10 @@ import {
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import * as React from "react";
 
-import { DataTableRangeFilter, useTableInstanceContext } from "@/components/data-table";
+import {
+  DataTableRangeFilter,
+  useTableInstanceContext,
+} from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -94,8 +97,7 @@ export function DataTableFilterList<TData>({
   const [open, setOpen] = React.useState(false);
   const addButtonRef = React.useRef<HTMLButtonElement>(null);
 
-  const { tableInstance: table } = useTableInstanceContext()
-
+  const { tableInstance: table } = useTableInstanceContext();
 
   const columns = React.useMemo(() => {
     return table
@@ -586,8 +588,9 @@ function onFilterInputRender<TData>({
       <div
         id={inputId}
         role="status"
-        aria-label={`${columnMeta?.label} filter is ${filter.operator === "isEmpty" ? "empty" : "not empty"
-          }`}
+        aria-label={`${columnMeta?.label} filter is ${
+          filter.operator === "isEmpty" ? "empty" : "not empty"
+        }`}
         aria-live="polite"
         className="h-8 w-full rounded border bg-transparent dark:bg-input/30"
       />
@@ -749,8 +752,8 @@ function onFilterInputRender<TData>({
       const displayValue =
         filter.operator === "isBetween"
           ? `${formatDate(new Date(Number(dateValue?.range?.min)))} - ${formatDate(
-            new Date(Number(dateValue?.range?.max)),
-          )}`
+              new Date(Number(dateValue?.range?.max)),
+            )}`
           : dateValue?.value
             ? formatDate(new Date(Number(dateValue?.value)))
             : "Pick a date";
@@ -787,20 +790,24 @@ function onFilterInputRender<TData>({
                 selected={
                   dateValue?.range?.min || dateValue?.range?.max
                     ? {
-                      from: dateValue?.range?.min ? new Date(Number(dateValue.range.min)) : undefined,
-                      to: dateValue?.range?.max ? new Date(Number(dateValue.range.max)) : undefined,
-                    }
+                        from: dateValue?.range?.min
+                          ? new Date(Number(dateValue.range.min))
+                          : undefined,
+                        to: dateValue?.range?.max
+                          ? new Date(Number(dateValue.range.max))
+                          : undefined,
+                      }
                     : undefined
                 }
                 onSelect={(date) => {
-                  const from = date?.from?.getTime()
-                  const to = date?.to?.getTime()
+                  const from = date?.from?.getTime();
+                  const to = date?.to?.getTime();
                   onFilterUpdate(filter.filterId, {
                     value: undefined,
                     range: {
                       min: from,
                       max: to,
-                    }
+                    },
                   });
                 }}
               />
@@ -810,7 +817,9 @@ function onFilterInputRender<TData>({
                 mode="single"
                 initialFocus
                 selected={
-                  dateValue?.value ? new Date(Number(dateValue?.value)) : undefined
+                  dateValue?.value
+                    ? new Date(Number(dateValue?.value))
+                    : undefined
                 }
                 onSelect={(date) => {
                   onFilterUpdate(filter.filterId, {

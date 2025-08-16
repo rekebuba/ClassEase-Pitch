@@ -4,8 +4,8 @@ export const dataTableConfig = {
   textOperators: [
     { label: "Contains", value: "iLike" as const },
     { label: "Does not contain", value: "notLike" as const },
-    { label: "Start With", value: "startsWith" as const},
-    { label: "End With", value: "endWith" as const},
+    { label: "Start With", value: "startsWith" as const },
+    { label: "End With", value: "endWith" as const },
     { label: "Is Exactly", value: "eq" as const },
   ],
   numericOperators: [

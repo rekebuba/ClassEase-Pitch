@@ -1,9 +1,14 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Layout } from "@/components";
-import { StudentPopupScore, StudentSubjectList, StudentEventPanel, StudentScorePanel } from "@/features/student";
+import {
+  StudentPopupScore,
+  StudentSubjectList,
+  StudentEventPanel,
+  StudentScorePanel,
+} from "@/features/student";
 import { studentApi } from "@/api";
-import { toast } from "sonner"
+import { toast } from "sonner";
 import {
   Card,
   CardContent,
@@ -11,7 +16,7 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FaTimes } from "react-icons/fa";
 import { CheckCircle } from "lucide-react";
@@ -53,15 +58,21 @@ const StudentDashboard = () => {
           setYearlyScore(response.data.score);
         }
       } catch (error) {
-        if (error.response && error.response.data && error.response.data['error']) {
-          toast.error(error.response.data['error'], {
-            description: "Please try again later, if the problem persists, contact the administrator.",
-            style: { color: 'red' }
+        if (
+          error.response &&
+          error.response.data &&
+          error.response.data["error"]
+        ) {
+          toast.error(error.response.data["error"], {
+            description:
+              "Please try again later, if the problem persists, contact the administrator.",
+            style: { color: "red" },
           });
         } else {
           toast.error("An unexpected error occurred.", {
-            description: "Please try again later, if the problem persists, contact the administrator.",
-            style: { color: 'red' }
+            description:
+              "Please try again later, if the problem persists, contact the administrator.",
+            style: { color: "red" },
           });
         }
       }
@@ -78,16 +89,21 @@ const StudentDashboard = () => {
     <>
       <div className="flex space-x-10">
         <StudentEventPanel />
-        <StudentScorePanel yearlyScore={yearlyScore} isAssesOpen={toggleAssessment} />
+        <StudentScorePanel
+          yearlyScore={yearlyScore}
+          isAssesOpen={toggleAssessment}
+        />
       </div>
       {isAssesOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <Card className={`bg-white p-2 rounded-lg shadow-lg w-[45rem] transform transition-all duration-300 ease-out ${isAssesOpen ? "opacity-100 scale-100" : "opacity-0 scale-90"}`}>
+          <Card
+            className={`bg-white p-2 rounded-lg shadow-lg w-[45rem] transform transition-all duration-300 ease-out ${isAssesOpen ? "opacity-100 scale-100" : "opacity-0 scale-90"}`}
+          >
             <CardHeader>
               <div className="flex justify-between items-center">
-                <h3 className='text-center text-lg font-bold'>student Score</h3>
+                <h3 className="text-center text-lg font-bold">student Score</h3>
                 <Button
-                  className='bg-opacity-0 text-black hover:bg-opacity-10 hover:text-red-400 hover:scale-150'
+                  className="bg-opacity-0 text-black hover:bg-opacity-10 hover:text-red-400 hover:scale-150"
                   onClick={() => toggleAssessment(false)}
                 >
                   <FaTimes size={24} />
@@ -102,22 +118,35 @@ const StudentDashboard = () => {
                   Object.entries(yearlyScore).map(([key, item]) => (
                     <div key={key}>
                       {/* Parent container for Grade */}
-                      <div className="flex justify-between border-b-2 border-gray-100 pb-2"
-                        onClick={() => studentReportCard({ student_id: item.student_id, grade_id: item.grade_id, year: item.year })}
+                      <div
+                        className="flex justify-between border-b-2 border-gray-100 pb-2"
+                        onClick={() =>
+                          studentReportCard({
+                            student_id: item.student_id,
+                            grade_id: item.grade_id,
+                            year: item.year,
+                          })
+                        }
                       >
                         <p>Grade {item.grade}</p>
                         <p className="flex items-center">
-                          {item.final_score} % <CheckCircle className="h-5 w-5 text-green-500 ml-1" />
+                          {item.final_score} %{" "}
+                          <CheckCircle className="h-5 w-5 text-green-500 ml-1" />
                         </p>
                       </div>
 
                       {/* Nested iteration over semesters */}
-                      {item && Object.keys(item.semester).length > 0 && item.semester.map((sem, index) => (
-                        <div key={index} className="flex justify-between border-b-2 border-gray-100 pb-2 ml-4">
-                          <p>Semester {sem.semester}</p>
-                          <p className="flex items-center">{sem.average} %</p>
-                        </div>
-                      ))}
+                      {item &&
+                        Object.keys(item.semester).length > 0 &&
+                        item.semester.map((sem, index) => (
+                          <div
+                            key={index}
+                            className="flex justify-between border-b-2 border-gray-100 pb-2 ml-4"
+                          >
+                            <p>Semester {sem.semester}</p>
+                            <p className="flex items-center">{sem.average} %</p>
+                          </div>
+                        ))}
                     </div>
                   ))}
               </div>
