@@ -1,3 +1,7 @@
+import { CheckboxWithLabel } from "@/components/inputs/checkbox-labeled";
+import { InputWithLabel } from "@/components/inputs/input-labeled";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -6,24 +10,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
-import { BookOpen, GraduationCap } from "lucide-react";
 import { YearSetupType } from "@/lib/api-response-type";
-import { InputWithLabel } from "@/components/inputs/input-labeled";
+import { YearSetupSchema } from "@/lib/api-response-validation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { BookOpen, GraduationCap } from "lucide-react";
+import { useCallback, useEffect } from "react";
 import {
   FormProvider,
+  SubmitHandler,
   useFieldArray,
   useForm,
   useFormContext,
 } from "react-hook-form";
-import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { CheckboxWithLabel } from "@/components/inputs/checkbox-labeled";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { YearSetupSchema } from "@/lib/api-response-validation";
 
 interface SubjectSetupCardProps {
   open: boolean;
@@ -131,8 +132,14 @@ export default function SubjectSetupCard({
     });
   }, [watchSubForm, watchParentForm?.grades, setValue]);
 
-  // Form submission
-  const handleSave = handleSubmit((data) => {
+  const onError = () => {
+    toast.warning("There is missing information", {
+      style: { color: "brown" },
+      description: "Please Fill all required Fields marked with *",
+    });
+  };
+
+  const onValid: SubmitHandler<Subject> = (data) => {
     setValue(`subjects.${formIndex}`, data, { shouldDirty: true });
     if (dirtyFields.grades || dirtyFields.streams) {
       syncGradesFromSubjects();
@@ -140,7 +147,10 @@ export default function SubjectSetupCard({
     }
     onOpenChange(false);
     toast.success(mode === "create" ? "New Subject Added" : "Subject updated");
-  });
+  };
+
+  // Form submission
+  const handleSave = handleSubmit(onValid, onError);
 
   const handleCancel = () => {
     if (mode === "create") {

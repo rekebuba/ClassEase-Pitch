@@ -1,6 +1,21 @@
-import { YearSetupType } from "@/lib/api-response-type";
-import { useFieldArray, useFormContext } from "react-hook-form";
+import { GradeSetupCard } from "@/components/academic-year/form-setup";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { YearSetupType } from "@/lib/api-response-type";
+import { GradeEnum } from "@/lib/enums";
 import {
   BookOpen,
   ChevronDown,
@@ -12,13 +27,9 @@ import {
   Trash,
   Users,
 } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { useCallback, useMemo, useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { GradeSetupCard } from "@/components/academic-year/form-setup";
-import { GradeEnum } from "@/lib/enums";
+import { useFieldArray, useFormContext } from "react-hook-form";
+import { toast } from "sonner";
 
 type Grade = YearSetupType["grades"][number];
 type Stream = YearSetupType["grades"][number]["streams"][number];
@@ -156,8 +167,9 @@ const GradeSubjectsCard = ({
   setFormIndex,
   setFormDialogOpen,
 }: GradeSubjectsCardProps) => {
-  const { control, watch } = useFormContext<YearSetupType>();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
+  const { control, watch } = useFormContext<YearSetupType>();
   // Grades field array
   const { remove: removeGrade } = useFieldArray({
     control,
@@ -232,12 +244,7 @@ const GradeSubjectsCard = ({
               {grade.hasStream && grade.streams.length > 0 ? (
                 <div className="mb-3 space-y-2">
                   {grade.streams.map((stream, streamIndex) => (
-                    <CollapsibleStreamCard
-                      key={streamIndex}
-                      formIndex={index}
-                      stream={stream}
-                      streamIndex={streamIndex}
-                    />
+                    <CollapsibleStreamCard key={streamIndex} stream={stream} />
                   ))}
                 </div>
               ) : (
@@ -265,8 +272,8 @@ const GradeSubjectsCard = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => removeGrade(index)}
-            className="flex-1 border-gray-300 hover:bg-red-50"
+            onClick={() => setDeleteDialogOpen(true)}
+            className="flex-1 border-gray-300 hover:bg-red-100"
           >
             <Trash className="h-4 w-4 mr-1" />
             Remove
@@ -286,21 +293,21 @@ const GradeSubjectsCard = ({
           </Button>
         </div>
       </div>
+
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onStay={() => setDeleteDialogOpen(false)}
+        onDiscard={() => {
+          removeGrade(index);
+          setDeleteDialogOpen(false);
+          toast.success("Grade removed successfully");
+        }}
+      />
     </Card>
   );
 };
 
-interface CollapsibleStreamCardProps {
-  stream: Stream;
-  formIndex: number;
-  streamIndex: number;
-}
-
-const CollapsibleStreamCard = ({
-  stream,
-  formIndex,
-  streamIndex,
-}: CollapsibleStreamCardProps) => {
+const CollapsibleStreamCard = ({ stream }: { stream: Stream }) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
   return (
@@ -367,5 +374,38 @@ function EmptyState({
           : "No grades added yet. Add your first grade above."}
       </p>
     </div>
+  );
+}
+
+function DeleteConfirmationDialog({
+  open,
+  onStay,
+  onDiscard,
+}: {
+  open: boolean;
+  onStay: () => void;
+  onDiscard: () => void;
+}) {
+  return (
+    <AlertDialog open={open} onOpenChange={onStay}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you Absolutely Sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will Delete the Grade and all its associated data.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={onStay}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={onDiscard}
+            className="bg-red-500 hover:bg-red-400"
+          >
+            <Trash className="h-4 w-4 mr-1" />
+            Remove
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

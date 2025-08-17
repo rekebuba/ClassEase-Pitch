@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Save, Eye } from "lucide-react";
+import sharedApi from "@/api/sharedApi";
 import { DetailAcademicYear } from "@/components/academic-year-view-card";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { FormProvider, useForm } from "react-hook-form";
+import { AcademicYearTabs } from "@/components/academic-year/academic-year-action-bar";
+import { AcademicYearActionBar } from "@/components/academic-year/import-year-data";
+import { UnsavedChangesDialog } from "@/components/unsaved-changes-dialog";
+import type { YearSetupType } from "@/lib/api-response-type";
 import {
   GradeSchema,
   SectionSchema,
@@ -11,15 +11,13 @@ import {
   SubjectSchema,
   YearSetupSchema,
 } from "@/lib/api-response-validation";
-import type { YearSetupType } from "@/lib/api-response-type";
-import { UnsavedChangesDialog } from "@/components/unsaved-changes-dialog";
-import { AcademicYearTabs } from "@/components/academic-year/academic-year-tabs";
-import type { AcademicYear } from "./academic-year-management";
-import z from "zod";
-import sharedApi from "@/api/sharedApi";
-import { toast } from "sonner";
-import { debounce } from "lodash";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
+import { useCallback, useEffect, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { toast } from "sonner";
+import z from "zod";
+import type { AcademicYear } from "./academic-year-management";
 
 interface AcademicYearSetupProps {
   initialData?: AcademicYear;
@@ -181,26 +179,11 @@ export default function AcademicYearSetup({
                 : "Configure your school's academic year structure"}
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            {onCancel && (
-              <Button variant="outline" onClick={onCancel}>
-                Cancel
-              </Button>
-            )}
-            <Button variant="outline">
-              <Eye className="h-4 w-4 mr-2" />
-              Preview
-            </Button>
-            <Button
-              disabled={!unsavedChanges}
-              type="submit"
-              form="academic-year-form"
-              className="bg-blue-600 text-white hover:bg-blue-700 disabled:pointer-events-auto disabled:cursor-not-allowed"
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {mode === "edit" ? "Update Academic Year" : "Save Academic Year"}
-            </Button>
-          </div>
+          <AcademicYearActionBar
+            mode={mode}
+            unsavedChanges={unsavedChanges}
+            onCancel={() => onCancel?.()}
+          />
         </header>
 
         <FormProvider {...form}>

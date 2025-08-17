@@ -1,4 +1,14 @@
 import { SubjectSetupCard } from "@/components/academic-year/form-setup";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,6 +18,7 @@ import { YearSetupType } from "@/lib/api-response-type";
 import { BookOpen, Edit, Plus, Search, Trash } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
+import { toast } from "sonner";
 
 type Subject = YearSetupType["subjects"][number];
 
@@ -107,7 +118,7 @@ export default function SubjectsTab({
           {/* Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredSubjects.map((subject, index) => (
-              <GradeSubjectsCard
+              <SubjectGradesCard
                 key={subject.id}
                 subject={subject}
                 index={index}
@@ -130,7 +141,7 @@ export default function SubjectsTab({
   );
 }
 
-interface GradeSubjectsCardProps {
+interface SubjectGradesCardProps {
   subject: Subject;
   index: number;
   setFormMode: (mode: "create" | "edit") => void;
@@ -138,15 +149,16 @@ interface GradeSubjectsCardProps {
   setFormDialogOpen: (open: boolean) => void;
 }
 
-const GradeSubjectsCard = ({
+const SubjectGradesCard = ({
   subject,
   index,
   setFormMode,
   setFormIndex,
   setFormDialogOpen,
-}: GradeSubjectsCardProps) => {
-  const { control, watch } = useFormContext<YearSetupType>();
+}: SubjectGradesCardProps) => {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
+  const { control, watch } = useFormContext<YearSetupType>();
   // Grades field array
   const { remove: removeSubject } = useFieldArray({
     control,
@@ -222,7 +234,7 @@ const GradeSubjectsCard = ({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => removeSubject(index)}
+            onClick={() => setDeleteDialogOpen(true)}
             className="flex-1 border-gray-300 hover:bg-red-50"
           >
             <Trash className="h-4 w-4 mr-1" />
@@ -243,6 +255,49 @@ const GradeSubjectsCard = ({
           </Button>
         </div>
       </div>
+
+      <DeleteConfirmationDialog
+        open={deleteDialogOpen}
+        onStay={() => setDeleteDialogOpen(false)}
+        onDiscard={() => {
+          removeSubject(index);
+          setDeleteDialogOpen(false);
+          toast.success("Subject removed successfully");
+        }}
+      />
     </Card>
   );
 };
+
+function DeleteConfirmationDialog({
+  open,
+  onStay,
+  onDiscard,
+}: {
+  open: boolean;
+  onStay: () => void;
+  onDiscard: () => void;
+}) {
+  return (
+    <AlertDialog open={open} onOpenChange={onStay}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Are you Absolutely Sure?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will Delete the subject and all its associated data.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={onStay}>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={onDiscard}
+            className="bg-red-500 hover:bg-red-400"
+          >
+            <Trash className="h-4 w-4 mr-1" />
+            Remove
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}

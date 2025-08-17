@@ -1,12 +1,12 @@
-import { useFormContext } from "react-hook-form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { InputWithLabel } from "@/components/inputs/input-labeled";
 import { DateWithLabel } from "@/components/inputs/date-labeled";
+import { InputWithLabel } from "@/components/inputs/input-labeled";
 import { SelectWithLabel } from "@/components/inputs/select-labeled";
-import { SelectItem } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { SelectItem } from "@/components/ui/select";
 import { YearSetupType } from "@/lib/api-response-type";
+import { useEffect, useState } from "react";
+import { useFormContext } from "react-hook-form";
 
 export default function BasicInfoTab({
   onDirty,
@@ -14,8 +14,7 @@ export default function BasicInfoTab({
   onDirty: (dirty: boolean) => void;
 }) {
   const [dayDifference, setDayDifference] = useState<number | null>(null);
-  const { register, formState, watch, setValue } =
-    useFormContext<YearSetupType>();
+  const { formState, watch, setValue } = useFormContext<YearSetupType>();
   const startDate = watch("startDate");
   const endDate = watch("endDate");
 
@@ -53,7 +52,7 @@ export default function BasicInfoTab({
             nameInSchema="name"
             placeholder="e.g., 2024-2025 Academic Year"
           />
-          <SelectWithLabel<YearSetupType>
+          <SelectWithLabel<YearSetupType, string>
             fieldTitle="Term System"
             nameInSchema="calendarType"
           >

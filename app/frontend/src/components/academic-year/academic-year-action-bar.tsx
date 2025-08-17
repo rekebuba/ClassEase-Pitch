@@ -1,11 +1,10 @@
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   BasicInfoTab,
   GradesTab,
   SubjectsTab,
 } from "@/components/academic-year/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BookOpen, Calendar, GraduationCap } from "lucide-react";
-import { useState } from "react";
 
 export function AcademicYearTabs({
   activeTab,

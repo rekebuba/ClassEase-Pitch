@@ -1,6 +1,8 @@
-import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { sharedApi } from "@/api";
+import { AcademicYearDetailView, AcademicYearViewCard } from "@/components";
+import { DetailAcademicYear } from "@/components/academic-year-view-card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -9,9 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Search, Filter, Calendar, Edit } from "lucide-react";
-import { AcademicYearViewCard, AcademicYearDetailView } from "@/components";
-import { AcademicYearSetup } from "@/pages/admin";
 import {
   AcademicTermSchema,
   EventSchema,
@@ -19,11 +18,12 @@ import {
   SubjectSchema,
   YearSchema,
 } from "@/lib/api-response-validation";
-import { sharedApi } from "@/api";
+import { AcademicYearSetup } from "@/pages/admin";
+import { useQuery } from "@tanstack/react-query";
+import { Calendar, Edit, Filter, Plus, Search } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { z } from "zod";
-import { DetailAcademicYear } from "@/components/academic-year-view-card";
-import { useQuery } from "@tanstack/react-query";
 
 const AcademicYearSchema = YearSchema.extend({
   grades: z.array(GradeSchema),

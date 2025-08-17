@@ -16,26 +16,29 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectItem } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { YearSetupType } from "@/lib/api-response-type";
 import { YearSetupSchema } from "@/lib/api-response-validation";
 import { GradeEnum, GradeLevelEnum } from "@/lib/enums";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus, X, Layers, GraduationCap, BookOpen } from "lucide-react";
+import { TooltipArrow } from "@radix-ui/react-tooltip";
+import { BookOpen, GraduationCap, Layers, Plus, Trash } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   FormProvider,
-  SubmitErrorHandler,
   SubmitHandler,
   useFieldArray,
   useForm,
   useFormContext,
-  UseFormReturn,
 } from "react-hook-form";
 import { toast } from "sonner";
 
 type Grade = YearSetupType["grades"][number];
 type Subject = YearSetupType["grades"][number]["subjects"][number];
-type Stream = YearSetupType["grades"][number]["streams"][number];
 type Section = YearSetupType["grades"][number]["sections"];
 
 interface GradeSetupCardProps {
@@ -194,7 +197,7 @@ export default function GradeSetupCard({
     });
   }, [watchSubForm, watchParentForm?.subjects, setValue]);
 
-  const onError: SubmitErrorHandler<Grade> = (error) => {
+  const onError = () => {
     toast.warning("There is missing information", {
       style: { color: "brown" },
       description: "Please Fill all required Fields marked with *",
@@ -332,29 +335,27 @@ export default function GradeSetupCard({
                         )}
 
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                          {watchParentForm.subjects.map(
-                            (subject, subjectIndex) => (
-                              <div
-                                key={subject.id}
-                                className="flex items-center space-x-2"
-                              >
-                                <CheckboxWithLabel<Grade, Subject>
-                                  fieldTitle={subject.name}
-                                  nameInSchema={`subjects`}
-                                  value={
-                                    watchSubForm.subjects.find(
-                                      (s) => s.id === subject.id,
-                                    ) || {
-                                      id: subject.id,
-                                      name: subject.name,
-                                      code: subject.code,
-                                    }
+                          {watchParentForm.subjects.map((subject) => (
+                            <div
+                              key={subject.id}
+                              className="flex items-center space-x-2"
+                            >
+                              <CheckboxWithLabel<Grade, Subject>
+                                fieldTitle={subject.name}
+                                nameInSchema={`subjects`}
+                                value={
+                                  watchSubForm.subjects.find(
+                                    (s) => s.id === subject.id,
+                                  ) || {
+                                    id: subject.id,
+                                    name: subject.name,
+                                    code: subject.code,
                                   }
-                                  className="w-4 h-4"
-                                />
-                              </div>
-                            ),
-                          )}
+                                }
+                                className="w-4 h-4"
+                              />
+                            </div>
+                          ))}
                         </div>
                       </CardContent>
                     </Card>
@@ -395,7 +396,7 @@ interface StreamsManagementProps {
 }
 
 function StreamsManagement({ subjects }: StreamsManagementProps) {
-  const { control, watch, trigger } = useFormContext<Grade>();
+  const { control, watch } = useFormContext<Grade>();
   const [newStreamName, setNewStreamName] = useState("");
 
   const [isOpen, setIsOpen] = useState(false);
@@ -487,14 +488,22 @@ function StreamsManagement({ subjects }: StreamsManagementProps) {
               <div>
                 <h4 className="font-medium">{stream.name}</h4>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => removeStream(streamIndex)}
-                className="ml-2"
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => removeStream(streamIndex)}
+                    className="ml-2"
+                  >
+                    <Trash className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Delete</p>
+                  <TooltipArrow className="fill-white" />
+                </TooltipContent>
+              </Tooltip>
             </div>
 
             <div className="mb-4">
