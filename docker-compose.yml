@@ -50,7 +50,7 @@ services:
     networks:
       - app-network
     entrypoint: ["/ClassEase-Pitch/app/backend/entrypoint.sh"]
-    command: ["flask", "run", "--host=0.0.0.0", "--reload"]
+    command: ["tail", "-f", "/dev/null"]
 
   db:
     container_name: mysql_container
