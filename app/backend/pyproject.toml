@@ -24,7 +24,7 @@ dependencies = [
     "pillow>=11.2.1",
     "pre-commit>=4.2.0",
     "pydantic>=2.11.5",
-    "pydantic-settings>=2.10.1"
+    "pydantic-settings>=2.10.1",
     "pyethiodate>=1.0.6",
     "pyinspect>=0.1.0",
     "pytest>=8.3.5",
@@ -35,6 +35,10 @@ dependencies = [
     "sqlmodel>=0.0.24",
     "types-factory-boy>=0.4.1",
     "types-flask-cors>=6.0.0.20250520",
+    "python-multipart>=0.0.20",
+    "python-jose>=3.5.0",
+    "dnspython>=2.7.0",
+    "email-validator",
 ]
 
 [tool.mypy]
