@@ -15,7 +15,9 @@
                 "streetsidesoftware.code-spell-checker",
                 "yoavbls.pretty-ts-errors",
                 "bradlc.vscode-tailwindcss",
-                "Cardinal90.multi-cursor-case-preserve"
+                "Cardinal90.multi-cursor-case-preserve",
+                "dbaeumer.vscode-eslint",
+                "rvest.vs-code-prettier-eslint"
                 // Add more extensions here
             ]
         }
