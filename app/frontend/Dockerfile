@@ -1,8 +1,5 @@
 # --- Stage 1: Builder ---
-FROM node:18-alpine AS builder
-
-# Install git and other build tools
-RUN apk add --no-cache git
+FROM node:24-alpine AS builder
 
 # Disable Corepack prompt
 ENV COREPACK_ENABLE_PROMPT=0
@@ -25,7 +22,10 @@ COPY . ./
 RUN pnpm run build
 
 # --- Stage 2: Runtime ---
-FROM node:18-alpine
+FROM node:24-alpine
+
+# Install git and other build tools
+RUN apk add --no-cache git
 
 # Enable Corepack in runtime
 RUN corepack enable
