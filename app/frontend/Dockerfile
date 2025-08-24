@@ -6,7 +6,7 @@ RUN corepack enable
 
 WORKDIR /ClassEase-Pitch
 
-COPY package*.json /app/
+COPY package*.json /ClassEase-Pitch/
 
 RUN pnpm install
 
