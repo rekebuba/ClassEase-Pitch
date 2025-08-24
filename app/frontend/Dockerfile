@@ -1,39 +1,18 @@
-# --- Stage 1: Builder ---
-FROM node:18-alpine AS builder
+FROM node:24-alpine
+
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
 
 # Install git and other build tools
 RUN apk add --no-cache git
 
-# Disable Corepack prompt
-ENV COREPACK_ENABLE_PROMPT=0
-
-# Enable Corepack and prepare pnpm (auto-accepts download)
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
-WORKDIR /app
-
-# Copy package files
-COPY package.json pnpm-lock.yaml ./
-
-# Install dependencies (Corepack will auto-use pnpm)
-RUN pnpm install
-
-# Copy the rest and build
-COPY . ./
-
-# Build the app
-RUN pnpm run build
-
-# --- Stage 2: Runtime ---
-FROM node:18-alpine
-
-# Enable Corepack in runtime
-RUN corepack enable
-
 WORKDIR /ClassEase-Pitch
 
-# Copy built files
-COPY --from=builder /app ./
+COPY package*.json /ClassEase-Pitch/
 
-EXPOSE 5173
+RUN pnpm install
+
+COPY ./ /ClassEase-Pitch/
+
 CMD ["pnpm", "run", "dev"]
