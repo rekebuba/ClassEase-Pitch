@@ -39,6 +39,7 @@ dependencies = [
     "python-jose>=3.5.0",
     "dnspython>=2.7.0",
     "email-validator",
+    "emails>=0.6",
 ]
 
 [tool.mypy]
@@ -89,3 +90,6 @@ dev = [
 
 [tool.ruff]
 extend-include = ["*.ipynb"]
+line-length = 88
+select = ["E", "F", "I"] # E: pycodestyle errors, F: Pyflakes errors, I: isort
+fixable = ["ALL"] # Only auto-fix import errors
