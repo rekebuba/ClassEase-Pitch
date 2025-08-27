@@ -1,3 +1,4 @@
+import { YearSetupSchemaOutput } from "@/client/types.gen";
 import { GradeSetupCard } from "@/components/academic-year/form-setup";
 import {
   AlertDialog,
@@ -14,14 +15,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { YearSetupType } from "@/lib/api-response-type";
 import { GradeEnum } from "@/lib/enums";
 import {
   BookOpen,
+  Building,
   ChevronDown,
   ChevronUp,
   Edit,
   GraduationCap,
+  Layers,
   Plus,
   Search,
   Trash,
@@ -31,8 +33,8 @@ import { useCallback, useMemo, useState } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 import { toast } from "sonner";
 
-type Grade = YearSetupType["grades"][number];
-type Stream = YearSetupType["grades"][number]["streams"][number];
+type Grade = YearSetupSchemaOutput["grades"][number];
+type Stream = YearSetupSchemaOutput["grades"][number]["streams"][number];
 
 export default function GradesTab({
   onDirty,
@@ -43,7 +45,7 @@ export default function GradesTab({
     formState: { isDirty },
     control,
     watch,
-  } = useFormContext<YearSetupType>();
+  } = useFormContext<YearSetupSchemaOutput>();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [formDialogOpen, setFormDialogOpen] = useState(false);
@@ -78,7 +80,7 @@ export default function GradesTab({
     setFormMode("create");
     setFormIndex(0);
     setFormDialogOpen(true);
-  }, [prependGrade]);
+  }, [prependGrade, watchYear.id]);
 
   // Report dirty state
   onDirty(isDirty);
@@ -169,7 +171,7 @@ const GradeSubjectsCard = ({
 }: GradeSubjectsCardProps) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
-  const { control, watch } = useFormContext<YearSetupType>();
+  const { control, watch } = useFormContext<YearSetupSchemaOutput>();
   // Grades field array
   const { remove: removeGrade } = useFieldArray({
     control,
@@ -191,59 +193,46 @@ const GradeSubjectsCard = ({
     >
       {/* Header */}
       <div>
-        <CardTitle className="flex items-center gap-2 mb-3 text-md">
+        <CardTitle className="flex items-center gap-2 mb-3 text-lg">
           <GraduationCap className="text-blue-600 shrink-0" />
           Grade {grade.grade}
-          {grade.level && (
+          {/* {grade.level && (
             <Badge className="text-[13px] px-2" variant="outline">
               {grade.level}
             </Badge>
-          )}
+          )} */}
         </CardTitle>
-
-        {/* Info Stats */}
-        <div className="grid grid-cols-3 gap-3 mb-4">
-          <div className="text-center p-2 bg-blue-50 rounded-lg">
-            <GraduationCap className="h-4 w-4 text-blue-600 mx-auto mb-1" />
-            <div className="text-sm font-semibold text-blue-900">
-              {grade.sections.length}
-            </div>
-            <div className="text-xs text-blue-700">Sections</div>
-          </div>
-
-          <div className="text-center p-2 bg-purple-50 rounded-lg">
-            <Users className="h-4 w-4 text-purple-600 mx-auto mb-1" />
-            <div className="text-sm font-semibold text-purple-900">
-              {grade.streams.length}
-            </div>
-            <div className="text-xs text-purple-700">Streams</div>
-          </div>
-
-          <div className="text-center p-2 bg-red-50 rounded-lg">
-            <BookOpen className="h-4 w-4 text-red-600 mx-auto mb-1" />
-            <div className="text-sm font-semibold text-red-900">
-              {grade.hasStream
-                ? new Set(
-                    grade.streams
-                      .flatMap((stream) => stream.subjects || [])
-                      .map((subject) => subject.id),
-                  ).size
-                : grade.subjects.length}
-            </div>
-            <div className="text-xs text-red-700">Subjects</div>
-          </div>
+        <div className="flex items-center gap-3 flex-wrap mb-4">
+          <Badge variant="outline" className="flex items-center gap-1">
+            <Users className="h-3 w-3" />
+            {grade.level}
+          </Badge>
+          <Badge variant="outline" className="flex items-center gap-1">
+            <BookOpen className="h-3 w-3" />
+            {grade.subjects.length} Subjects
+          </Badge>
+          <Badge variant="outline" className="flex items-center gap-1">
+            <Building className="h-3 w-3" />
+            {grade.sections.length} Sections
+          </Badge>
+          {grade.hasStream && (
+            <Badge variant="destructive" className="flex items-center gap-1">
+              <Layers className="h-3 w-3" />
+              {grade.streams.length} Streams
+            </Badge>
+          )}
         </div>
 
         {/* Subject List */}
         <div className="mb-4">
           <h4 className="font-medium mb-3 text-sm text-gray-600">Subjects</h4>
-          {grade.streams.length === 0 && grade.subjects.length === 0 ? (
+          {grade.streams?.length === 0 && grade.subjects.length === 0 ? (
             <p className="text-xs text-gray-400 italic">No subjects assigned</p>
           ) : (
             <>
-              {grade.hasStream && grade.streams.length > 0 ? (
+              {grade.hasStream ? (
                 <div className="mb-3 space-y-2">
-                  {grade.streams.map((stream, streamIndex) => (
+                  {grade.streams?.map((stream, streamIndex) => (
                     <CollapsibleStreamCard key={streamIndex} stream={stream} />
                   ))}
                 </div>
