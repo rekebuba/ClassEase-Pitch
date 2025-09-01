@@ -19,8 +19,8 @@
                 "oderwat.indent-rainbow",
                 "streetsidesoftware.code-spell-checker",
                 "Cardinal90.multi-cursor-case-preserve",
-                "tamasfe.even-better-toml"
-                // Add more extensions here
+                "tamasfe.even-better-toml",
+                "google.geminicodeassist"
             ]
         }
     }
