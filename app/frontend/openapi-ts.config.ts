@@ -5,11 +5,16 @@ export default defineConfig({
   output: {
     path: "./src/client",
     clean: true,
+    format: "prettier",
+    lint: "eslint",
   },
   plugins: [
     {
       name: "@hey-api/sdk",
-      validator: true,
+      validator: {
+        request: false,
+        response: true,
+      },
     },
     "@hey-api/typescript",
     "@hey-api/client-axios",
