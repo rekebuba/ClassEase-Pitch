@@ -1,0 +1,736 @@
+[
+  {
+    "subjects": [
+      {
+        "name": "Geography",
+        "code": "GEO"
+      },
+      {
+        "name": "General Business",
+        "code": "GENBUS"
+      },
+      {
+        "name": "Technical Drawing",
+        "code": "TECDRA"
+      },
+      {
+        "name": "Amharic as second language",
+        "code": "AMHASSECLAN"
+      },
+      {
+        "name": "Visual Arts and Music",
+        "code": "VISARTMUS"
+      },
+      {
+        "name": "History",
+        "code": "HIS"
+      },
+      {
+        "name": "Biology",
+        "code": "BIO"
+      },
+      {
+        "name": "English",
+        "code": "ENG"
+      },
+      {
+        "name": "Information Technology",
+        "code": "INFTEC"
+      },
+      {
+        "name": "Mother Tongue",
+        "code": "MOTTON"
+      },
+      {
+        "name": "Chemistry",
+        "code": "CHE"
+      },
+      {
+        "name": "Physical Education",
+        "code": "PHYEDU"
+      },
+      {
+        "name": "Environmental Science",
+        "code": "ENVSCI"
+      },
+      {
+        "name": "Economics",
+        "code": "ECO"
+      },
+      {
+        "name": "Mathematics",
+        "code": "MAT"
+      },
+      {
+        "name": "Arts and Physical Education",
+        "code": "ARTPHYEDU"
+      },
+      {
+        "name": "Social Study",
+        "code": "SOCSTU"
+      },
+      {
+        "name": "Civics and Ethical Education",
+        "code": "CIVETHEDU"
+      },
+      {
+        "name": "Physics",
+        "code": "PHY"
+      },
+      {
+        "name": "Amharic",
+        "code": "AMH"
+      },
+      {
+        "name": "Integrated Science",
+        "code": "INSC"
+      }
+    ],
+    "grades": [
+      {
+        "grade": "11",
+        "level": "high school",
+        "hasStream": true,
+        "subjects": [],
+        "streams": [
+          {
+            "name": "Social",
+            "subjects": [
+              {
+                "name": "Information Technology",
+                "code": "INFTEC"
+              },
+              {
+                "name": "English",
+                "code": "ENG"
+              },
+              {
+                "name": "Amharic",
+                "code": "AMH"
+              },
+              {
+                "name": "Mathematics",
+                "code": "MAT"
+              },
+              {
+                "name": "Physical Education",
+                "code": "PHYEDU"
+              },
+              {
+                "name": "General Business",
+                "code": "GENBUS"
+              },
+              {
+                "name": "History",
+                "code": "HIS"
+              },
+              {
+                "name": "Economics",
+                "code": "ECO"
+              },
+              {
+                "name": "Civics and Ethical Education",
+                "code": "CIVETHEDU"
+              },
+              {
+                "name": "Mother Tongue",
+                "code": "MOTTON"
+              },
+              {
+                "name": "Geography",
+                "code": "GEO"
+              }
+            ]
+          },
+          {
+            "name": "Natural",
+            "subjects": [
+              {
+                "name": "English",
+                "code": "ENG"
+              },
+              {
+                "name": "Civics and Ethical Education",
+                "code": "CIVETHEDU"
+              },
+              {
+                "name": "Amharic",
+                "code": "AMH"
+              },
+              {
+                "name": "Biology",
+                "code": "BIO"
+              },
+              {
+                "name": "Physical Education",
+                "code": "PHYEDU"
+              },
+              {
+                "name": "Mathematics",
+                "code": "MAT"
+              },
+              {
+                "name": "Chemistry",
+                "code": "CHE"
+              },
+              {
+                "name": "Information Technology",
+                "code": "INFTEC"
+              },
+              {
+                "name": "Technical Drawing",
+                "code": "TECDRA"
+              },
+              {
+                "name": "Mother Tongue",
+                "code": "MOTTON"
+              },
+              {
+                "name": "Physics",
+                "code": "PHY"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "grade": "12",
+        "level": "high school",
+        "hasStream": true,
+        "subjects": [],
+        "streams": [
+          {
+            "name": "Social",
+            "subjects": [
+              {
+                "name": "Physical Education",
+                "code": "PHYEDU"
+              },
+              {
+                "name": "Mathematics",
+                "code": "MAT"
+              },
+              {
+                "name": "Geography",
+                "code": "GEO"
+              },
+              {
+                "name": "Mother Tongue",
+                "code": "MOTTON"
+              },
+              {
+                "name": "Amharic",
+                "code": "AMH"
+              },
+              {
+                "name": "Information Technology",
+                "code": "INFTEC"
+              },
+              {
+                "name": "English",
+                "code": "ENG"
+              },
+              {
+                "name": "History",
+                "code": "HIS"
+              },
+              {
+                "name": "Economics",
+                "code": "ECO"
+              },
+              {
+                "name": "General Business",
+                "code": "GENBUS"
+              },
+              {
+                "name": "Civics and Ethical Education",
+                "code": "CIVETHEDU"
+              }
+            ]
+          },
+          {
+            "name": "Natural",
+            "subjects": [
+              {
+                "name": "Physical Education",
+                "code": "PHYEDU"
+              },
+              {
+                "name": "Biology",
+                "code": "BIO"
+              },
+              {
+                "name": "Civics and Ethical Education",
+                "code": "CIVETHEDU"
+              },
+              {
+                "name": "English",
+                "code": "ENG"
+              },
+              {
+                "name": "Physics",
+                "code": "PHY"
+              },
+              {
+                "name": "Mathematics",
+                "code": "MAT"
+              },
+              {
+                "name": "Chemistry",
+                "code": "CHE"
+              },
+              {
+                "name": "Amharic",
+                "code": "AMH"
+              },
+              {
+                "name": "Mother Tongue",
+                "code": "MOTTON"
+              },
+              {
+                "name": "Information Technology",
+                "code": "INFTEC"
+              },
+              {
+                "name": "Technical Drawing",
+                "code": "TECDRA"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "grade": "6",
+        "level": "primary",
+        "hasStream": false,
+        "subjects": [
+          {
+            "name": "Amharic",
+            "code": "AMH"
+          },
+          {
+            "name": "Civics and Ethical Education",
+            "code": "CIVETHEDU"
+          },
+          {
+            "name": "English",
+            "code": "ENG"
+          },
+          {
+            "name": "Integrated Science",
+            "code": "INSC"
+          },
+          {
+            "name": "Mathematics",
+            "code": "MAT"
+          },
+          {
+            "name": "Mother Tongue",
+            "code": "MOTTON"
+          },
+          {
+            "name": "Physical Education",
+            "code": "PHYEDU"
+          },
+          {
+            "name": "Visual Arts and Music",
+            "code": "VISARTMUS"
+          }
+        ],
+        "streams": []
+      },
+      {
+        "grade": "3",
+        "level": "primary",
+        "hasStream": false,
+        "subjects": [
+          {
+            "name": "Amharic",
+            "code": "AMH"
+          },
+          {
+            "name": "Amharic as second language",
+            "code": "AMHASSECLAN"
+          },
+          {
+            "name": "English",
+            "code": "ENG"
+          },
+          {
+            "name": "Environmental Science",
+            "code": "ENVSCI"
+          },
+          {
+            "name": "Mathematics",
+            "code": "MAT"
+          },
+          {
+            "name": "Mother Tongue",
+            "code": "MOTTON"
+          }
+        ],
+        "streams": []
+      },
+      {
+        "grade": "9",
+        "level": "middle school",
+        "hasStream": false,
+        "subjects": [
+          {
+            "name": "Amharic as second language",
+            "code": "AMHASSECLAN"
+          },
+          {
+            "name": "Biology",
+            "code": "BIO"
+          },
+          {
+            "name": "Chemistry",
+            "code": "CHE"
+          },
+          {
+            "name": "Civics and Ethical Education",
+            "code": "CIVETHEDU"
+          },
+          {
+            "name": "English",
+            "code": "ENG"
+          },
+          {
+            "name": "Geography",
+            "code": "GEO"
+          },
+          {
+            "name": "History",
+            "code": "HIS"
+          },
+          {
+            "name": "Information Technology",
+            "code": "INFTEC"
+          },
+          {
+            "name": "Mathematics",
+            "code": "MAT"
+          },
+          {
+            "name": "Mother Tongue",
+            "code": "MOTTON"
+          },
+          {
+            "name": "Physical Education",
+            "code": "PHYEDU"
+          },
+          {
+            "name": "Physics",
+            "code": "PHY"
+          }
+        ],
+        "streams": []
+      },
+      {
+        "grade": "4",
+        "level": "primary",
+        "hasStream": false,
+        "subjects": [
+          {
+            "name": "Amharic",
+            "code": "AMH"
+          },
+          {
+            "name": "Arts and Physical Education",
+            "code": "ARTPHYEDU"
+          },
+          {
+            "name": "English",
+            "code": "ENG"
+          },
+          {
+            "name": "Environmental Science",
+            "code": "ENVSCI"
+          },
+          {
+            "name": "Mathematics",
+            "code": "MAT"
+          },
+          {
+            "name": "Mother Tongue",
+            "code": "MOTTON"
+          }
+        ],
+        "streams": []
+      },
+      {
+        "grade": "8",
+        "level": "primary",
+        "hasStream": false,
+        "subjects": [
+          {
+            "name": "Amharic",
+            "code": "AMH"
+          },
+          {
+            "name": "Biology",
+            "code": "BIO"
+          },
+          {
+            "name": "Chemistry",
+            "code": "CHE"
+          },
+          {
+            "name": "Civics and Ethical Education",
+            "code": "CIVETHEDU"
+          },
+          {
+            "name": "English",
+            "code": "ENG"
+          },
+          {
+            "name": "Mathematics",
+            "code": "MAT"
+          },
+          {
+            "name": "Mother Tongue",
+            "code": "MOTTON"
+          },
+          {
+            "name": "Physical Education",
+            "code": "PHYEDU"
+          },
+          {
+            "name": "Physics",
+            "code": "PHY"
+          },
+          {
+            "name": "Social Study",
+            "code": "SOCSTU"
+          },
+          {
+            "name": "Visual Arts and Music",
+            "code": "VISARTMUS"
+          }
+        ],
+        "streams": []
+      },
+      {
+        "grade": "5",
+        "level": "middle school",
+        "hasStream": false,
+        "subjects": [
+          {
+            "name": "Amharic",
+            "code": "AMH"
+          },
+          {
+            "name": "Civics and Ethical Education",
+            "code": "CIVETHEDU"
+          },
+          {
+            "name": "English",
+            "code": "ENG"
+          },
+          {
+            "name": "Integrated Science",
+            "code": "INSC"
+          },
+          {
+            "name": "Mathematics",
+            "code": "MAT"
+          },
+          {
+            "name": "Mother Tongue",
+            "code": "MOTTON"
+          },
+          {
+            "name": "Physical Education",
+            "code": "PHYEDU"
+          },
+          {
+            "name": "Visual Arts and Music",
+            "code": "VISARTMUS"
+          }
+        ],
+        "streams": []
+      },
+      {
+        "grade": "1",
+        "level": "primary",
+        "hasStream": false,
+        "subjects": [
+          {
+            "name": "Amharic",
+            "code": "AMH"
+          },
+          {
+            "name": "Arts and Physical Education",
+            "code": "ARTPHYEDU"
+          },
+          {
+            "name": "English",
+            "code": "ENG"
+          },
+          {
+            "name": "Environmental Science",
+            "code": "ENVSCI"
+          },
+          {
+            "name": "Mathematics",
+            "code": "MAT"
+          },
+          {
+            "name": "Mother Tongue",
+            "code": "MOTTON"
+          }
+        ],
+        "streams": []
+      },
+      {
+        "grade": "7",
+        "level": "primary",
+        "hasStream": false,
+        "subjects": [
+          {
+            "name": "Amharic",
+            "code": "AMH"
+          },
+          {
+            "name": "Biology",
+            "code": "BIO"
+          },
+          {
+            "name": "Chemistry",
+            "code": "CHE"
+          },
+          {
+            "name": "Civics and Ethical Education",
+            "code": "CIVETHEDU"
+          },
+          {
+            "name": "English",
+            "code": "ENG"
+          },
+          {
+            "name": "Mathematics",
+            "code": "MAT"
+          },
+          {
+            "name": "Mother Tongue",
+            "code": "MOTTON"
+          },
+          {
+            "name": "Physical Education",
+            "code": "PHYEDU"
+          },
+          {
+            "name": "Physics",
+            "code": "PHY"
+          },
+          {
+            "name": "Social Study",
+            "code": "SOCSTU"
+          },
+          {
+            "name": "Visual Arts and Music",
+            "code": "VISARTMUS"
+          }
+        ],
+        "streams": []
+      },
+      {
+        "grade": "10",
+        "level": "middle school",
+        "hasStream": false,
+        "subjects": [
+          {
+            "name": "Amharic",
+            "code": "AMH"
+          },
+          {
+            "name": "Biology",
+            "code": "BIO"
+          },
+          {
+            "name": "Chemistry",
+            "code": "CHE"
+          },
+          {
+            "name": "Civics and Ethical Education",
+            "code": "CIVETHEDU"
+          },
+          {
+            "name": "English",
+            "code": "ENG"
+          },
+          {
+            "name": "Geography",
+            "code": "GEO"
+          },
+          {
+            "name": "History",
+            "code": "HIS"
+          },
+          {
+            "name": "Information Technology",
+            "code": "INFTEC"
+          },
+          {
+            "name": "Mathematics",
+            "code": "MAT"
+          },
+          {
+            "name": "Mother Tongue",
+            "code": "MOTTON"
+          },
+          {
+            "name": "Physical Education",
+            "code": "PHYEDU"
+          },
+          {
+            "name": "Physics",
+            "code": "PHY"
+          }
+        ],
+        "streams": []
+      },
+      {
+        "grade": "2",
+        "level": "primary",
+        "hasStream": false,
+        "subjects": [
+          {
+            "name": "Amharic",
+            "code": "AMH"
+          },
+          {
+            "name": "Arts and Physical Education",
+            "code": "ARTPHYEDU"
+          },
+          {
+            "name": "English",
+            "code": "ENG"
+          },
+          {
+            "name": "Environmental Science",
+            "code": "ENVSCI"
+          },
+          {
+            "name": "Mathematics",
+            "code": "MAT"
+          },
+          {
+            "name": "Mother Tongue",
+            "code": "MOTTON"
+          }
+        ],
+        "streams": []
+      }
+    ],
+    "sections": [
+      {
+        "section": "B"
+      },
+      {
+        "section": "A"
+      }
+    ]
+  }
+]
