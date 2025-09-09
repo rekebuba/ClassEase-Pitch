@@ -1,10 +1,5 @@
 from fastapi import APIRouter
 
-from api.v1.routers.admin import router as admin_router
-from api.v1.routers.admin.get import route as admin_get_router
-from api.v1.routers.admin.patch import route as admin_patch_router
-from api.v1.routers.admin.post import route as admin_post_router
-
 # from api.v1.routers.admin.post import router as admin_post_router
 from api.v1.routers.grades import route as grade_router
 from api.v1.routers.login import route as auth_router
@@ -27,4 +22,3 @@ api_router.include_router(subject_router.router)
 api_router.include_router(stream_router.router)
 api_router.include_router(section_router.router)
 api_router.include_router(private_router.router)
-api_router.include_router(admin_router)

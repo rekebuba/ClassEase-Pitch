@@ -2,7 +2,7 @@ import uuid
 from typing import List, Sequence
 
 from sqlalchemy import delete, select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session
 
 from api.v1.routers.grades.schema import (
     UpdateGradeSetup,
@@ -201,34 +201,38 @@ def _update_grade_sections(
     existing_sections = session.scalars(
         select(Section).where(Section.grade_id == grade.id)
     ).all()
-    existing_section_map = {section.id: section for section in existing_sections}
-    new_section_ids = {s.id for s in new_sections if s.id}
 
-    sections_to_create = []
-    for section_data in new_sections:
-        if not section_data.id:
-            sections_to_create.append(
-                Section(
-                    grade_id=grade.id,
-                    section=section_data.section,
-                )
-            )
+    existing_sections_by_name = {s.section: s for s in existing_sections}
+    new_sections_by_name = {s.section: s for s in new_sections if s.section}
 
-    if sections_to_create:
-        session.add_all(sections_to_create)
+    sections_to_add: List[Section] = [
+        Section(grade_id=grade.id, section=section.section)
+        for section in new_sections
+        if section.section and section.section not in existing_sections_by_name
+    ]
 
-    # Remove deleted sections
-    sections_to_remove_ids = set(existing_section_map.keys()) - new_section_ids
-    if sections_to_remove_ids:
-        for section_id in sections_to_remove_ids:
-            session.delete(existing_section_map[section_id])
+    sections_to_remove = [
+        section
+        for section in existing_sections
+        if section.section not in new_sections_by_name
+    ]
 
-    # Refresh relationship
-    session.refresh(grade, attribute_names=["sections"])
+    if sections_to_add:
+        session.add_all(sections_to_add)
+
+    # Validate sections exist
+    if sections_to_remove:
+        section_ids_to_remove = {s.id for s in sections_to_remove}
+        _validate_sections_exist(section_ids_to_remove, session)
+
+        stmt = delete(Section).where(
+            Section.id.in_(section_ids_to_remove),
+        )
+        session.execute(stmt)
 
 
 def _validate_streams_exist(stream_ids: set[uuid.UUID], session: Session) -> None:
-    """Validate that grades exist in the database."""
+    """Validate that Stream ids exist in the database."""
     if not stream_ids:
         return
 
@@ -240,3 +244,18 @@ def _validate_streams_exist(stream_ids: set[uuid.UUID], session: Session) -> Non
 
     if missing_streams:
         raise ValueError(f"Invalid stream IDs provided: {missing_streams}")
+
+
+def _validate_sections_exist(section_ids: set[uuid.UUID], session: Session) -> None:
+    """Validate that Section ids exist in the database."""
+    if not section_ids:
+        return
+
+    existing_sections = session.scalars(
+        select(Section.id).where(Section.id.in_(section_ids))
+    ).all()
+
+    missing_sections = section_ids - set(existing_sections)
+
+    if missing_sections:
+        raise ValueError(f"Invalid Section IDs provided: {missing_sections}")
