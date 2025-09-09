@@ -1,8 +1,7 @@
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { FieldValues, Path, useForm, useFormContext } from "react-hook-form";
+import { FieldValues, Path, useFormContext } from "react-hook-form";
 
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -17,8 +16,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { InputHTMLAttributes } from "react";
-import React from "react";
+import { cn } from "@/lib/utils";
+import React, { InputHTMLAttributes } from "react";
 
 type DateWithLabelProps<T extends FieldValues> = {
   fieldTitle: string;
@@ -34,7 +33,6 @@ export function DateWithLabel<T extends FieldValues>({
   className,
   disableFrom = new Date("1900-01-01"),
   disableTo = new Date("2035-12-31"),
-  ...props
 }: DateWithLabelProps<T>) {
   const form = useFormContext();
   const [date] = React.useState<Date | undefined>(undefined);
@@ -66,7 +64,7 @@ export function DateWithLabel<T extends FieldValues>({
                 </Button>
               </FormControl>
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="start">
+            <PopoverContent className={`w-auto p-0 ${className}`} align="start">
               <Calendar
                 mode="single"
                 selected={field.value}

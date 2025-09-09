@@ -1,22 +1,23 @@
-"use client";
-
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { logoutMutation } from "@/client/@tanstack/react-query.gen";
 import {
   AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogCancel,
   AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
-import { authApi, zodApiHandler } from "@/api";
+import { logout } from "@/store/slice/auth-slice";
+import { handleError } from "@/utils/utils";
+import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { LogOut } from "lucide-react";
-import { logoutSchema } from "@/lib/validations";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { toast } from "sonner";
 
 /**
  * Logout component that handles user logout functionality.
@@ -28,24 +29,28 @@ import { logoutSchema } from "@/lib/validations";
 const Logout = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const dispatch = useDispatch();
+
+  const mutation = useMutation({
+    ...logoutMutation(),
+    onSuccess: (response) => {
+      // removes token from redux
+      dispatch(logout());
+
+      // redirect after success
+      navigate({ to: "/authentication" });
+      toast.success(response.message, {
+        style: { color: "green" },
+      });
+    },
+    onError: (error) => {
+      handleError(error);
+    },
+  });
 
   const handleLogout = async () => {
     setOpen(false);
-    const result = await zodApiHandler(() => authApi.logout(), logoutSchema);
-    if (!result.success) {
-      toast.error(result.error.message, {
-        description:
-          "Please try again later, if the problem persists, contact the administrator.",
-        style: { color: "red" },
-      });
-      return;
-    }
-
-    localStorage.removeItem("apiKey"); // Clear tokens from local storage
-    navigate("/auth");
-    toast.success(result.data.message, {
-      style: { color: "green" },
-    });
+    mutation.mutate({});
   };
 
   return (

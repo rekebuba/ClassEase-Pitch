@@ -5,18 +5,11 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { type NavItem } from "@/lib/types";
-import { useLocation, useNavigate } from "react-router-dom";
+import { type NavBarItem } from "@/lib/types";
+import { Link } from "@tanstack/react-router";
+import { JSX } from "react";
 
-export function NavSidebar({ items }: { items: NavItem[] }): JSX.Element {
-  const location = useLocation();
-
-  const navigate = useNavigate();
-
-  const goToSideBar = (href: string) => {
-    navigate(`${href}${location.search}`);
-  };
-
+export function NavSidebar({ items }: { items: NavBarItem[] }): JSX.Element {
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Reports</SidebarGroupLabel>
@@ -24,9 +17,15 @@ export function NavSidebar({ items }: { items: NavItem[] }): JSX.Element {
         {items.map((item) => (
           <SidebarMenuItem key={item.title}>
             <SidebarMenuButton asChild>
-              <a onClick={() => goToSideBar(item.href)}>
+              <Link
+                key={item.to}
+                to={item.to}
+                params={item.params}
+                search={item.search}
+                className="flex items-center gap-2 p-2 hover:bg-gray-100"
+              >
                 <span>{item.title}</span>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         ))}

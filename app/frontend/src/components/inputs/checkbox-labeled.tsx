@@ -10,14 +10,11 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { isEqual } from "lodash";
-
-type Primitive = string | number | boolean;
 
 type CheckboxWithLabelProps<T extends FieldValues, V> = {
   fieldTitle: string;
@@ -38,37 +35,29 @@ export function CheckboxWithLabel<T extends FieldValues, V>({
   const form = useFormContext<T>();
   const control = form.control;
 
+  // Always watch the field to satisfy hook rules
+  const watchedValue = useWatch({ control, name: nameInSchema });
+
   // --- Object toggle mode ---
-  const values = value
-    ? useWatch({ control, name: nameInSchema }) || []
-    : undefined;
+  const values = value ? watchedValue || [] : undefined;
   const checked =
-    value && values ? values.some((v: T) => isEqual(v, value)) : undefined;
-
-  const getKey = (x: unknown): Primitive => (x as any).id;
-
-  const sortValues = <E,>(arr: E[], key?: (x: E) => Primitive) => {
-    const cmp = (a: E, b: E) => {
-      const ak = key ? key(a) : (a as unknown as Primitive);
-      const bk = key ? key(b) : (b as unknown as Primitive);
-      return ak < bk ? -1 : ak > bk ? 1 : 0;
-    };
-    return [...arr].sort(cmp);
-  };
+    value && values
+      ? (values as T[]).some((v: T) => isEqual(v, value))
+      : undefined;
 
   const toggle = (isChecked: boolean) => {
     const current = (form.getValues(nameInSchema) as unknown as T[]) || [];
+
     if (isChecked) {
-      const next = sortValues([...current, value!], getKey);
+      // Simply append to the end
+      const next = [...current, value!];
       form.setValue(nameInSchema, next as PathValue<T, Path<T>>, {
         shouldValidate: true,
         shouldDirty: true,
       });
     } else {
-      const next = sortValues(
-        current.filter((item: T) => !isEqual(item, value)),
-        getKey,
-      );
+      // Remove the item
+      const next = current.filter((item: T) => !isEqual(item, value));
       form.setValue(nameInSchema, next as PathValue<T, Path<T>>, {
         shouldValidate: true,
         shouldDirty: true,

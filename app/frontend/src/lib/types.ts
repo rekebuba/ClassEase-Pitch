@@ -1,17 +1,18 @@
+import { LinkOptions } from "@tanstack/react-router";
 import { z } from "zod";
 import {
-  userSchema,
-  StudentSchema,
-  StudentsDataSchema,
-  StatusCountSchema,
   AverageRangeSchema,
   GradeCountsSchema,
+  RangeSchema,
   searchParamsCache,
+  SectionCountSchema,
+  StatusCountSchema,
+  StudentSchema,
+  StudentsDataSchema,
   StudentsViewSchema,
   tableId,
   tableIdValue,
-  RangeSchema,
-  SectionCountSchema,
+  userSchema,
   ViewSchema,
 } from "./validations";
 
@@ -58,17 +59,26 @@ export type QueryParams = {
   params?: Record<string, string | number | boolean>;
 };
 
-export type NavItem = {
+export type NavBarItem = {
   title: string;
-  href: string;
+  to: LinkOptions["to"];
+  params?: LinkOptions["params"];
+  search?: LinkOptions["search"];
+  icon?: React.ComponentType;
 };
 
-export type NavMain = {
+export type NavMainItem = {
   title: string;
   icon: React.ComponentType;
-  href: string;
   isActive?: boolean;
-  items: NavItem[];
+  items: NavBarItem[];
+  params?: LinkOptions["params"];
+  search?: LinkOptions["search"];
+};
+
+export type MainNavItem = {
+  navBar: NavBarItem[];
+  navMain: NavMainItem[];
 };
 
 export type DataProps = {
@@ -85,7 +95,7 @@ export type DataProps = {
       icon: React.ComponentType;
       href: string;
     }[];
-    navMain: NavMain[];
+    navMain: NavMainItem[];
   };
 };
 

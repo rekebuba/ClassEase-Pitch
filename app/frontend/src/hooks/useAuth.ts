@@ -28,7 +28,7 @@ const useAuth = () => {
 };
 
 // Helper function to decode the JWT token
-const decodeToken = (token) => {
+const decodeToken = (token: string) => {
   try {
     // JWT tokens are in the format: header.payload.signature
     const payload = token.split(".")[1]; // Get the payload part

@@ -1,8 +1,7 @@
+import { AuthProvider } from "@/context/auth-context";
 import { lazy } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/context/auth-context";
-import { ProtectedRoute } from "@/routes/";
-import { Layout } from "@/components";
+import ProtectedRoute from "./ProtectedRoute";
 
 // Error pages
 const Forbidden = lazy(() => import("@/pages/error/403"));
@@ -89,13 +88,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/admin",
-    element: (
-      <AuthProvider>
-        <Layout>
-          <ProtectedRoute allowedRoles={["admin"]} />
-        </Layout>
-      </AuthProvider>
-    ),
+    element: <ProtectedRoute allowedRoles={["admin"]} />,
     children: [
       { index: true, element: <Navigate to="dashboard" replace /> },
       { path: "dashboard", element: <AdminDashboard /> },
@@ -123,11 +116,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/teacher",
-    element: (
-      <AuthProvider>
-        <ProtectedRoute allowedRoles={["teacher"]} />
-      </AuthProvider>
-    ),
+    element: <ProtectedRoute allowedRoles={["teacher"]} />,
     children: [
       { index: true, element: <Navigate to="dashboard" replace /> },
       { path: "dashboard", element: <TeacherDashboard /> },
@@ -137,11 +126,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/student",
-    element: (
-      <AuthProvider>
-        <ProtectedRoute allowedRoles={["student"]} />
-      </AuthProvider>
-    ),
+    element: <ProtectedRoute allowedRoles={["student"]} />,
     children: [
       { index: true, element: <Navigate to="dashboard" replace /> },
       { path: "dashboard", element: <StudentDashboard /> },

@@ -1,6 +1,6 @@
 import { RoleType } from "@/lib/enums";
 import { jwtPayloadSchema, JwtPayloadType } from "@/lib/validations";
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 interface AuthContextType {

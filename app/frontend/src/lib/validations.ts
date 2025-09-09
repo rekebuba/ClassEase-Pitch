@@ -1,21 +1,13 @@
-import { z } from "zod";
-import { getFiltersStateParser, getSortingStateParser } from "@/lib/parsers";
-import {
-  parseAsArrayOf,
-  parseAsInteger,
-  parseAsString,
-  parseAsStringEnum,
-} from "nuqs";
-import { flagConfig } from "@/config/flag";
 import { dataTableConfig } from "@/config/data-table";
-import { generateId } from "./id";
+import { z } from "zod";
 import { RoleEnum } from "./enums";
 
 export const jwtPayloadSchema = z.object({
-  id: z.string(),
+  sub: z.string(),
   exp: z.number(),
   role: RoleEnum,
   jti: z.string(),
+  iat: z.number(),
 });
 export type JwtPayloadType = z.infer<typeof jwtPayloadSchema>;
 

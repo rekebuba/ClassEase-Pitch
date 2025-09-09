@@ -1,4 +1,3 @@
-import { ChevronRight } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -14,10 +13,12 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import { type NavMainItem } from "@/lib/types";
+import { Link } from "@tanstack/react-router";
+import { ChevronRight } from "lucide-react";
+import { JSX } from "react";
 
-import { type NavMain } from "@/lib/types";
-
-export function NavMain({ items }: { items: NavMain[] }): JSX.Element {
+export function NavMain({ items }: { items: NavMainItem[] }): JSX.Element {
   return (
     <SidebarGroup>
       <SidebarGroupLabel>System</SidebarGroupLabel>
@@ -42,9 +43,16 @@ export function NavMain({ items }: { items: NavMain[] }): JSX.Element {
                   {item.items?.map((subItem) => (
                     <SidebarMenuSubItem key={subItem.title}>
                       <SidebarMenuSubButton asChild>
-                        <a href={subItem.href}>
+                        <Link
+                          to={subItem.to}
+                          key={subItem.to}
+                          params={subItem.params}
+                          search={subItem.search}
+                          className="flex items-center gap-2 p-2 hover:bg-gray-100"
+                        >
+                          {subItem.icon && <subItem.icon />}
                           <span>{subItem.title}</span>
-                        </a>
+                        </Link>
                       </SidebarMenuSubButton>
                     </SidebarMenuSubItem>
                   ))}

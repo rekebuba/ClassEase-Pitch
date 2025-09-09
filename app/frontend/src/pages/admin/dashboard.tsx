@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Layout } from "@/components";
+import { useState } from "react";
 // import { AdminStudentPerformance } from "@/features/admin";
 // import { adminApi } from "@/api";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -13,28 +15,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import {
-  BarChart3,
-  BookOpen,
-  Calendar,
-  Clock,
-  Download,
-  FileText,
-  MoreHorizontal,
-  Plus,
-  RefreshCw,
-  Users,
-  AlertTriangle,
-  CheckCircle2,
-  XCircle,
-  ArrowUpRight,
-  ArrowDownRight,
-} from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,6 +22,25 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertTriangle,
+  ArrowDownRight,
+  ArrowUpRight,
+  BarChart3,
+  BookOpen,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  Download,
+  FileText,
+  MoreHorizontal,
+  Plus,
+  RefreshCw,
+  Users,
+  XCircle,
+} from "lucide-react";
 
 /**
  * AdminDashboard component renders the main dashboard for the admin panel.

@@ -1,49 +1,36 @@
 "use client";
 
-import * as React from "react";
 import {
-  useQueryState,
-  parseAsStringEnum,
-  useQueryStates,
   parseAsInteger,
   parseAsString,
+  parseAsStringEnum,
+  useQueryState,
+  useQueryStates,
 } from "nuqs";
+import * as React from "react";
 
 import {
   DataTable,
-  DataTableAdvancedToolbar,
   DataTableColumnsVisibility,
-  DataTableFilterList,
-  DataTableFilterMenu,
   DataTableSimpleFilter,
-  DataTableSkeleton,
   DataTableSortList,
 } from "@/components/data-table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 
 import { useDataTable } from "@/hooks/use-data-table";
-import { getStudentsTableColumns } from "./student-table-columns";
-import { UpdateStudentSheet } from "./update-student-sheet";
-import { DeleteStudentsDialog } from "./delete-students-dialog";
-import { StudentsTableFloatingBar } from "./students-table-floating-bar";
+import { studentsView, useStudentsData } from "@/hooks/use-students-data";
 import { getFiltersStateParser, getSortingStateParser } from "@/lib/parsers";
-import { useStudentsData, studentsView } from "@/hooks/use-students-data";
+import { getStudentsTableColumns } from "./student-table-columns";
+import { StudentsTableFloatingBar } from "./students-table-floating-bar";
+import { UpdateStudentSheet } from "./update-student-sheet";
 
-import type { Student, SearchParams } from "@/lib/types";
-import type {
-  DataTableRowAction,
-  ExtendedColumnSort,
-} from "@/types/data-table";
-import { searchParamsCache } from "@/lib/validations";
-import { useLocation } from "react-router-dom";
-import { z, ZodError } from "zod";
-import { ShieldMoonRounded } from "@mui/icons-material";
-import { toast } from "sonner";
 import { TableInstanceProvider } from "@/components/data-table";
+import type { SearchParams, Student } from "@/lib/types";
+import { searchParamsCache } from "@/lib/validations";
+import type { DataTableRowAction } from "@/types/data-table";
 import { FilterProvider } from "@/utils/filter-context";
-import { StudentsTableToolbarActions } from "./student-table-toolbar-action";
-import { DataTableViewsDropdown } from "../views";
+import { toast } from "sonner";
 
 // Constants
 const COLUMN_PINNING = { right: ["actions"] };

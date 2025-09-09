@@ -1,5 +1,7 @@
-import { LoadingSpinner } from "@/components";
-import useAuth from "@/context/auth-context";
+import { Header } from "@/components/Header";
+import AdminSidebar from "@/components/layout/sidebar/admin-sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import useAuth from "@/hooks/use-auth";
 import { RoleType } from "@/lib/enums";
 import { Navigate, Outlet } from "react-router-dom";
 
@@ -12,19 +14,27 @@ interface ProtectedRouteProps {
  * Otherwise, it redirects the user to the login page.
  */
 const ProtectedRoute = ({ allowedRoles }: ProtectedRouteProps) => {
-  const { isAuthenticated, userRole, isLoading } = useAuth();
+  const { userError, user } = useAuth();
 
-  if (isLoading) return <LoadingSpinner />;
-
-  if (!isAuthenticated) {
+  if (!user || userError) {
     return <Navigate to="/auth" replace />;
   }
 
-  if (allowedRoles && userRole && !allowedRoles.includes(userRole)) {
+  if (allowedRoles && user.role && !allowedRoles.includes(user.role)) {
     return <Navigate to="/unauthorized" replace />;
   }
 
-  return <Outlet />;
+  return (
+    <SidebarProvider>
+      <AdminSidebar />
+      <div className="flex min-h-screen flex-col w-full overflow-x-hidden">
+        <Header />
+        <div className="p-4">
+          <Outlet />
+        </div>
+      </div>
+    </SidebarProvider>
+  );
 };
 
 export default ProtectedRoute;

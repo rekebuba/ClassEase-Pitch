@@ -1,8 +1,4 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { Download, Mail, Trash2 } from "lucide-react";
-import type { Table } from "@tanstack/react-table";
-import type { Student } from "@/lib/types";
 import {
   DataTableActionBar,
   DataTableActionBarAction,
@@ -10,6 +6,7 @@ import {
   useTableInstanceContext,
 } from "@/components/data-table";
 import { Separator } from "@radix-ui/react-separator";
+import { Download, Trash2 } from "lucide-react";
 import { useCallback, useState, useTransition } from "react";
 import { toast } from "sonner";
 
