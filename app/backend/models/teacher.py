@@ -217,7 +217,11 @@ class Teacher(BaseModel):
     agree_to_background_check: Mapped[bool] = mapped_column(Boolean, default=False)
 
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("users.id", ondelete='CASCADE'), unique=True, nullable=True, default=None
+        UUIDType(),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        unique=True,
+        nullable=True,
+        default=None,
     )
 
     status: Mapped[TeacherApplicationStatus] = mapped_column(

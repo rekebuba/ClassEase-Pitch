@@ -1,25 +1,24 @@
 #!/usr/bin/python3
 """Module for AcademicTerm class"""
 
+import uuid
 from datetime import date
 from typing import TYPE_CHECKING, List, Optional
-from sqlalchemy import ForeignKey, Date, Enum
+
+import sqlalchemy as sa
+from sqlalchemy import Date, Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from extension.enums.enum import AcademicTermEnum
 from models.base.base_model import BaseModel
-import sqlalchemy as sa
-
 from models.base.column_type import UUIDType
-import uuid
-
 
 if TYPE_CHECKING:
-    from models.teacher_term_record import TeacherTermRecord
-    from models.student_term_record import StudentTermRecord
-    from models.year import Year
     from models.student import Student
+    from models.student_term_record import StudentTermRecord
     from models.teacher import Teacher
-    from models.mark_list import MarkList
+    from models.teacher_term_record import TeacherTermRecord
+    from models.year import Year
 
 
 class AcademicTerm(BaseModel):
@@ -27,7 +26,7 @@ class AcademicTerm(BaseModel):
 
     __tablename__ = "academic_terms"
     year_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("years.id", ondelete='CASCADE'), nullable=False
+        UUIDType(), ForeignKey("years.id", ondelete="CASCADE"), nullable=False
     )
     name: Mapped[AcademicTermEnum] = mapped_column(
         Enum(
@@ -38,8 +37,8 @@ class AcademicTerm(BaseModel):
         nullable=False,
     )
 
-    start_date: Mapped[date] = mapped_column(Date, nullable=False)
-    end_date: Mapped[date] = mapped_column(Date, nullable=False)
+    start_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    end_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
 
     registration_start: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
     registration_end: Mapped[Optional[date]] = mapped_column(Date, nullable=True)

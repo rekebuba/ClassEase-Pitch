@@ -22,13 +22,15 @@ class Assessment(BaseModel):
 
     __tablename__ = "assessments"
     student_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("students.id", ondelete='CASCADE'), nullable=False
+        UUIDType(), ForeignKey("students.id", ondelete="CASCADE"), nullable=False
     )
     student_term_record_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("student_term_records.id", ondelete='CASCADE'), nullable=False
+        UUIDType(),
+        ForeignKey("student_term_records.id", ondelete="CASCADE"),
+        nullable=False,
     )
     yearly_subject_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("yearly_subjects.id", ondelete='CASCADE'), nullable=False
+        UUIDType(), ForeignKey("yearly_subjects.id", ondelete="CASCADE"), nullable=False
     )
     # The subject sum score of the student for each assessment
     total: Mapped[float] = mapped_column(Float, nullable=True, default=None)

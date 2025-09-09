@@ -1,8 +1,9 @@
 from __future__ import annotations
+
 import uuid
-from datetime import date
 from typing import TYPE_CHECKING, Optional
-from pydantic import BaseModel, ConfigDict
+
+from pydantic import BaseModel, ConfigDict, PastDate
 
 from extension.enums.enum import GenderEnum
 from extension.functions.helper import to_camel
@@ -27,7 +28,7 @@ class AdminSchema(BaseModel):
     first_name: str
     father_name: str
     grand_father_name: str
-    date_of_birth: date
+    date_of_birth: PastDate
     gender: GenderEnum
     email: str
     phone: str

@@ -1,9 +1,22 @@
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional, Set, TypeVar, TypedDict, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Literal,
+    Optional,
+    Set,
+    TypedDict,
+    TypeVar,
+    Union,
+)
+
 from sqlalchemy import ColumnElement, UnaryExpression
+
 from extension.enums.enum import RoleEnum
-from models.user import User
 from models.base.base_model import Base
+from models.user import User
 
 T = TypeVar("T")  # Fully generic
 
@@ -116,3 +129,6 @@ class QueryStudentTableId(TypedDict):
 class SendAllStudents(TypedDict):
     tableId: QueryStudentTableId
     data: List[QueryStudentsData]
+
+
+SetupMethodType = Literal["Default Template", "Manual", "Last Year Copy"]

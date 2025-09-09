@@ -1,22 +1,22 @@
 #!/usr/bin/python3
 """Module for BaseModel class"""
 
+import uuid
 from dataclasses import asdict, dataclass
 from datetime import date, datetime, timezone
-import models
 from enum import Enum
-from sqlalchemy import DateTime
-import uuid
-from sqlalchemy.orm import (
-    Mapped,
-    mapped_column,
-    DeclarativeBase,
-    MappedAsDataclass,
-)
-from sqlalchemy.sql import func
 from typing import Any, Dict, Optional
 
-from models.base.column_type import UUIDType
+from sqlalchemy.orm import (
+    DeclarativeBase,
+    Mapped,
+    MappedAsDataclass,
+    mapped_column,
+)
+from sqlalchemy.sql import func
+
+import models
+from models.base.column_type import AwareDateTime, UUIDType
 
 
 class Base(DeclarativeBase):
@@ -44,14 +44,16 @@ class BaseModel(MappedAsDataclass, Base):
         init=False,
     )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        AwareDateTime,
         default_factory=lambda: datetime.now(timezone.utc),
+        server_default=func.now(),  # let DB insert UTC
         init=False,
     )
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True),
+        AwareDateTime,
         default_factory=lambda: datetime.now(timezone.utc),
-        onupdate=func.now(),  # Automatically update on modification
+        server_default=func.now(),
+        onupdate=func.now(),
         init=False,
     )
 

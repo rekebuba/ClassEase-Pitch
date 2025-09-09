@@ -1,6 +1,8 @@
 from __future__ import annotations
+
 import uuid
-from typing import TYPE_CHECKING, Optional, List
+from typing import TYPE_CHECKING, List, Optional
+
 from pydantic import BaseModel, ConfigDict, Field
 
 from extension.functions.helper import to_camel
@@ -17,13 +19,11 @@ from extension.pydantic.models.teacher_term_record_schema import (
 )
 
 if TYPE_CHECKING:
-    from .grade_stream_subject_schema import GradeStreamSubjectSchema
-    from .student_term_record_schema import StudentTermRecordSchema
-    from .teacher_term_record_schema import TeacherTermRecordSchema
     from .grade_schema import GradeSchema
-    from .yearly_subject_schema import YearlySubjectSchema
+    from .student_term_record_schema import StudentTermRecordSchema
     from .student_year_record_schema import StudentYearRecordSchema
     from .subject_schema import SubjectSchema
+    from .teacher_term_record_schema import TeacherTermRecordSchema
 
 
 class StreamSchema(BaseModel):
@@ -37,7 +37,7 @@ class StreamSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: uuid.UUID | None = None
+    id: uuid.UUID
     grade_id: uuid.UUID
     name: str
 

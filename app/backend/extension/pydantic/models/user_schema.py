@@ -1,17 +1,18 @@
 from __future__ import annotations
+
 import uuid
-from typing import TYPE_CHECKING, Optional, List
-from pydantic import BaseModel, ConfigDict
-from datetime import datetime
+from typing import TYPE_CHECKING, List, Optional
+
+from pydantic import AwareDatetime, BaseModel, ConfigDict
 
 from extension.enums.enum import RoleEnum
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
     from .admin_schema import AdminSchema
-    from .teacher_schema import TeacherSchema
-    from .student_schema import StudentSchema
     from .saved_query_view_schema import SavedQueryViewSchema
+    from .student_schema import StudentSchema
+    from .teacher_schema import TeacherSchema
 
 
 class UserSchema(BaseModel):
@@ -25,7 +26,7 @@ class UserSchema(BaseModel):
     identification: str
     role: RoleEnum
     image_path: Optional[str] = None
-    created_at: datetime
+    created_at: AwareDatetime
 
     @classmethod
     def default_fields(cls) -> set[str]:

@@ -1,16 +1,22 @@
 #!/usr/bin/python3
 """Utility functions for the API"""
 
-import jwt
-from typing import Any, Callable, Tuple, Union
-from flask import Response, current_app  # Import current_app to access app context
 from functools import wraps
-from flask import request, jsonify
+from typing import Any, Callable, Tuple, Union
+
+import jwt
+from flask import (  # Import current_app to access app context
+    Response,
+    current_app,
+    jsonify,
+    request,
+)
+
 from api.v1.utils.typing import T
 from models import storage
+from models.blacklist_token import BlacklistToken
 from models.ceo import CEO
 from models.user import User
-from models.blacklist_token import BlacklistToken
 
 
 def check_blacklist_token(token: str) -> Tuple[bool, str]:

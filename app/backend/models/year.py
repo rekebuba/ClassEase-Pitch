@@ -3,18 +3,19 @@
 
 from datetime import date
 from typing import TYPE_CHECKING, List
-from sqlalchemy import Date, String, Enum
+
+from sqlalchemy import Date, Enum, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from extension.enums.enum import AcademicTermTypeEnum, AcademicYearStatusEnum
 from models.base.base_model import BaseModel
 
 if TYPE_CHECKING:
-    from models.yearly_subject import YearlySubject
-    from models.event import Event
     from models.academic_term import AcademicTerm
+    from models.event import Event
     from models.grade import Grade
-    from models.subject import Subject
     from models.student import Student
+    from models.subject import Subject
     from models.teacher import Teacher
 
 
@@ -58,13 +59,6 @@ class Year(BaseModel):
         default_factory=list,
         repr=False,
         passive_deletes=True,
-    )
-    yearly_subjects: Mapped[List["YearlySubject"]] = relationship(
-        "YearlySubject",
-        back_populates="year",
-        repr=False,
-        passive_deletes=True,
-        default_factory=list,
     )
     grades: Mapped[List["Grade"]] = relationship(
         "Grade",

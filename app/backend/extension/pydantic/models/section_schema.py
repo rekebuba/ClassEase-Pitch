@@ -1,16 +1,18 @@
 from __future__ import annotations
+
 import uuid
-from typing import TYPE_CHECKING, Optional, List
+from typing import TYPE_CHECKING, List, Optional
+
 from pydantic import BaseModel, ConfigDict
 
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
-    from .student_term_record_schema import StudentTermRecordSchema
-    from .teacher_term_record_schema import TeacherTermRecordSchema
     from .grade_schema import GradeSchema
     from .student_schema import StudentSchema
+    from .student_term_record_schema import StudentTermRecordSchema
     from .teacher_schema import TeacherSchema
+    from .teacher_term_record_schema import TeacherTermRecordSchema
 
 
 class SectionSchema(BaseModel):
@@ -24,9 +26,9 @@ class SectionSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: uuid.UUID | None = None
+    id: uuid.UUID
     grade_id: uuid.UUID
-    section: Optional[str] = None
+    section: str
 
     @classmethod
     def default_fields(cls) -> set[str]:

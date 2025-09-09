@@ -1,6 +1,7 @@
 from typing import Any, Dict, Generic, List, Optional, Tuple, TypeVar, Union
+
 from flask import Response, jsonify
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 from extension.functions.helper import to_camel
 

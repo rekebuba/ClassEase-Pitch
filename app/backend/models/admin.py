@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """Module for Admin class"""
 
+from datetime import date
 from typing import TYPE_CHECKING, Optional
 from sqlalchemy import Date, Enum, String, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -23,7 +24,7 @@ class Admin(BaseModel):
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
     father_name: Mapped[str] = mapped_column(String(50), nullable=False)
     grand_father_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    date_of_birth: Mapped[Date] = mapped_column(Date, nullable=False)
+    date_of_birth: Mapped[date] = mapped_column(Date, nullable=False)
     gender: Mapped[GenderEnum] = mapped_column(
         Enum(
             GenderEnum,
@@ -38,7 +39,7 @@ class Admin(BaseModel):
     address: Mapped[str] = mapped_column(Text, nullable=False)
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),
-        ForeignKey("users.id", ondelete='CASCADE'),
+        ForeignKey("users.id", ondelete="CASCADE"),
         nullable=True,
         default=None,
     )

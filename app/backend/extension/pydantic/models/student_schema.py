@@ -1,24 +1,26 @@
 from __future__ import annotations
+
 import uuid
-from typing import TYPE_CHECKING, Optional, List
-from pydantic import BaseModel, ConfigDict, Field
 from datetime import date
+from typing import TYPE_CHECKING, List, Optional
+
+from pydantic import BaseModel, ConfigDict, Field
 
 from extension.enums.enum import BloodTypeEnum, GenderEnum, StudentApplicationStatusEnum
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
+    from .academic_term_schema import AcademicTermSchema
+    from .assessment_schema import AssessmentSchema
     from .grade_schema import GradeSchema
-    from .user_schema import UserSchema
+    from .mark_list_schema import MarkListSchema
+    from .section_schema import SectionSchema
     from .student_term_record_schema import StudentTermRecordSchema
     from .student_year_record_schema import StudentYearRecordSchema
-    from .subject_yearly_average_schema import SubjectYearlyAverageSchema
-    from .assessment_schema import AssessmentSchema
-    from .mark_list_schema import MarkListSchema
     from .subject_schema import SubjectSchema
-    from .academic_term_schema import AcademicTermSchema
+    from .subject_yearly_average_schema import SubjectYearlyAverageSchema
+    from .user_schema import UserSchema
     from .year_schema import YearSchema
-    from .section_schema import SectionSchema
 
 
 class StudentSchema(BaseModel):
@@ -78,35 +80,29 @@ class StudentSchema(BaseModel):
 class StudentRelatedSchema(BaseModel):
     """This model represents the relationships of a StudentSchema."""
 
-    starting_grade: Optional[GradeSchema] = None
-    user: Optional[UserSchema] = None
-    term_records: Optional[List[StudentTermRecordSchema]] = None
-    student_year_records: Optional[List[StudentYearRecordSchema]] = None
-    subject_yearly_averages: Optional[List[SubjectYearlyAverageSchema]] = None
-    assessments: Optional[List[AssessmentSchema]] = None
+    starting_grade: Optional[GradeSchema]
+    user: Optional[UserSchema]
+    term_records: List[StudentTermRecordSchema]
+    student_year_records: List[StudentYearRecordSchema]
+    subject_yearly_averages: List[SubjectYearlyAverageSchema]
+    assessments: List[AssessmentSchema]
 
-    years: Optional[List[YearSchema]] = Field(
-        default=None,
+    years: List[YearSchema] = Field(
         description="List of years the student is associated with.",
     )
-    academic_terms: Optional[List[AcademicTermSchema]] = Field(
-        default=None,
+    academic_terms: List[AcademicTermSchema] = Field(
         description="List of academic terms the student is associated with.",
     )
-    grades: Optional[List[GradeSchema]] = Field(
-        default=None,
+    grades: List[GradeSchema] = Field(
         description="List of grades the student is associated with.",
     )
-    subjects: Optional[List[SubjectSchema]] = Field(
-        default=None,
+    subjects: List[SubjectSchema] = Field(
         description="List of subjects the student is associated with.",
     )
-    sections: Optional[List[SectionSchema]] = Field(
-        default=None,
+    sections: List[SectionSchema] = Field(
         description="List of sections the student is associated with.",
     )
-    mark_lists: Optional[List[MarkListSchema]] = Field(
-        default=None,
+    mark_lists: List[MarkListSchema] = Field(
         description="List of mark lists associated with the student.",
     )
 

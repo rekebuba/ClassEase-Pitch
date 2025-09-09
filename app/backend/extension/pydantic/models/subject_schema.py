@@ -1,19 +1,24 @@
 from __future__ import annotations
+
 import uuid
 from typing import TYPE_CHECKING, List, Optional
-from pydantic import BaseModel, ConfigDict
+
+from pydantic import AwareDatetime, BaseModel, ConfigDict
+
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
-    from .grade_stream_subject_schema import GradeStreamSubjectSchema
-    from .stream_schema import StreamWithRelatedSchema
-    from .teacher_schema import TeacherWithRelatedSchema
-    from .teacher_term_record_schema import TeacherTermRecordWithRelatedSchema
-    from .grade_schema import GradeWithRelatedSchema
-    from .teacher_term_record_schema import TeacherTermRecordSchema
-    from .teacher_schema import TeacherSchema
-    from .grade_schema import GradeSchema
-    from .stream_schema import StreamSchema
+    from extension.pydantic.models.mark_list_schema import MarkListSchema
+    from extension.pydantic.models.student_schema import StudentSchema
+    from extension.pydantic.models.year_schema import YearSchema
+
+    from .grade_schema import GradeSchema, GradeWithRelatedSchema
+    from .stream_schema import StreamSchema, StreamWithRelatedSchema
+    from .teacher_schema import TeacherSchema, TeacherWithRelatedSchema
+    from .teacher_term_record_schema import (
+        TeacherTermRecordSchema,
+        TeacherTermRecordWithRelatedSchema,
+    )
 
 
 class SubjectSchema(BaseModel):
@@ -27,10 +32,12 @@ class SubjectSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: uuid.UUID | None = None
+    id: uuid.UUID
     year_id: uuid.UUID
     name: str
     code: str
+    created_at: AwareDatetime
+    updated_at: AwareDatetime
 
     @classmethod
     def default_fields(cls) -> set[str]:
@@ -52,10 +59,13 @@ class SubjectRelatedSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    teacher_term_records: Optional[List[TeacherTermRecordSchema]] = []
-    teachers: List[TeacherSchema] = []
-    streams: List[StreamSchema] = []
-    grades: List[GradeSchema] = []
+    year: YearSchema
+    teacher_term_records: Optional[List[TeacherTermRecordSchema]]
+    teachers: List[TeacherSchema]
+    students: List[StudentSchema]
+    mark_lists: List[MarkListSchema]
+    streams: List[StreamSchema]
+    grades: List[GradeSchema]
 
 
 class SubjectNestedSchema(SubjectSchema):
@@ -69,10 +79,10 @@ class SubjectNestedSchema(SubjectSchema):
         alias_generator=to_camel,
     )
 
-    teacher_term_records: Optional[List[TeacherTermRecordWithRelatedSchema]] = []
-    teachers: List[TeacherWithRelatedSchema] = []
-    streams: List[StreamWithRelatedSchema] = []
-    grades: List[GradeWithRelatedSchema] = []
+    teacher_term_records: List[TeacherTermRecordWithRelatedSchema]
+    teachers: List[TeacherWithRelatedSchema]
+    streams: List[StreamWithRelatedSchema]
+    grades: List[GradeWithRelatedSchema]
 
 
 class SubjectWithRelatedSchema(SubjectSchema, SubjectRelatedSchema):

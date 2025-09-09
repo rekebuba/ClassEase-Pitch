@@ -1,9 +1,10 @@
-from typing import TYPE_CHECKING, Optional
 import uuid
+from typing import TYPE_CHECKING, Optional
+
 from sqlalchemy import ForeignKey, UniqueConstraint
-from models.base.base_model import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
 
 if TYPE_CHECKING:
@@ -45,8 +46,8 @@ class GradeStreamSubject(BaseModel):
         ),
     )
 
-    # One-To-Many Relationships
-    grade: Mapped["Grade"] = relationship(
+    # Many-To-One Relationships
+    grade: Mapped[Optional["Grade"]] = relationship(
         "Grade",
         back_populates="grade_stream_subjects",
         init=False,
@@ -56,14 +57,14 @@ class GradeStreamSubject(BaseModel):
     stream: Mapped[Optional["Stream"]] = relationship(
         "Stream",
         back_populates="grade_stream_subjects",
-        init=False,
         passive_deletes=True,
+        init=False,
         repr=False,
     )
     subject: Mapped["Subject"] = relationship(
         "Subject",
         back_populates="grade_stream_subjects",
-        init=False,
         passive_deletes=True,
+        init=False,
         repr=False,
     )

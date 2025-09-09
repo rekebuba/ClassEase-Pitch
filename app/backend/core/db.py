@@ -1,13 +1,14 @@
 # app/core/db.py
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, Session
 from typing import Generator
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
 
 from core.config import settings
 from models.base.base_model import Base
 
 # Create the engine
-engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI), future=True, echo=True)
+engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI), future=True)
 
 # Session factory
 SessionLocal = sessionmaker(

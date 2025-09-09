@@ -7,7 +7,7 @@ from models.base.base_model import BaseModel
 from sqlalchemy import inspect, Engine, select
 
 
-def seed_table(session: scoped_session[Session], engine: Engine) -> None:
+def seed_table(session: Session, engine: Engine) -> None:
     inspector = inspect(engine)
     db_tables = inspector.get_table_names()
 

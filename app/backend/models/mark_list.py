@@ -1,37 +1,42 @@
 #!/usr/bin/python3
 """Module for MarkList class"""
 
+import uuid
 from typing import TYPE_CHECKING
-from sqlalchemy import Enum, Integer, ForeignKey, Float
+
+from sqlalchemy import Enum, Float, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from extension.enums.enum import MarkListTypeEnum
 from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
-import uuid
-
 from models.student_term_record import StudentTermRecord
 
 if TYPE_CHECKING:
-    from models.academic_term import AcademicTerm
     from models.student import Student
     from models.subject import Subject
 
 
 class MarkList(BaseModel):
     """
-    This model represents a list of marks for students in various assessments. It includes details about the student, grade, section, subject, teacher's record, semester, year, type of assessment, percentage contribution to the final score, and the actual score obtained.
+    This model represents a list of marks for students in various assessments.
+    It includes details about the student, grade, section, subject, teacher's record,
+    semester, year, type of assessment, percentage contribution to the final score,
+     and the actual score obtained.
     """
 
     __tablename__ = "mark_lists"
 
     student_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("students.id", ondelete='CASCADE'), nullable=False
+        UUIDType(), ForeignKey("students.id", ondelete="CASCADE"), nullable=False
     )
     student_term_record_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("student_term_records.id", ondelete='CASCADE'), nullable=False
+        UUIDType(),
+        ForeignKey("student_term_records.id", ondelete="CASCADE"),
+        nullable=False,
     )
     subject_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("subjects.id", ondelete='CASCADE'), nullable=False
+        UUIDType(), ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False
     )
     type: Mapped[MarkListTypeEnum] = mapped_column(
         Enum(

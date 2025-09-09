@@ -2,7 +2,7 @@
 """Module for User class"""
 
 from typing import TYPE_CHECKING
-from sqlalchemy import String, Enum
+from sqlalchemy import Boolean, String, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from extension.enums.enum import RoleEnum
 from models.base.base_model import BaseModel
@@ -34,6 +34,7 @@ class User(BaseModel):
         nullable=False,
     )
     image_path: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
+    # is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
 
     # One-to-many relationship
     admin: Mapped["Admin"] = relationship(

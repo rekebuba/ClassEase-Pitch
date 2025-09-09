@@ -1,21 +1,21 @@
 #!/usr/bin/python3
 """Module for Section class"""
 
+import uuid
 from typing import TYPE_CHECKING, List
+
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 from models.base.base_model import BaseModel
-
 from models.base.column_type import UUIDType
-import uuid
-
 
 if TYPE_CHECKING:
-    from models.student_term_record import StudentTermRecord
-    from models.teacher_term_record import TeacherTermRecord
     from models.grade import Grade
     from models.student import Student
+    from models.student_term_record import StudentTermRecord
     from models.teacher import Teacher
+    from models.teacher_term_record import TeacherTermRecord
 
 
 class Section(BaseModel):
@@ -25,10 +25,13 @@ class Section(BaseModel):
 
     __tablename__ = "sections"
     grade_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("grades.id", ondelete='CASCADE'), nullable=False
+        UUIDType(),
+        ForeignKey("grades.id", ondelete="CASCADE"),
+        nullable=False,
     )
     section: Mapped[str] = mapped_column(
-        String(1), nullable=True, default=None
+        String(1),
+        nullable=True,
     )  # e.g., A, B, C, D, E, F, G
 
     # Relationships

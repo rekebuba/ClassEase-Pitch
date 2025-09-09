@@ -32,35 +32,7 @@ class YearlySubject(BaseModel):
     )
 
     # Relationships
-    year: Mapped["Year"] = relationship(
-        "Year",
-        back_populates="yearly_subjects",
-        init=False,
-        repr=False,
-        passive_deletes=True,
-    )
 
-    subject: Mapped["Subject"] = relationship(
-        "Subject",
-        back_populates="yearly_subjects",
-        init=False,
-        repr=False,
-        passive_deletes=True,
-    )
-    grade: Mapped["Grade"] = relationship(
-        "Grade",
-        back_populates="yearly_subjects",
-        init=False,
-        repr=False,
-        passive_deletes=True,
-    )
-    stream: Mapped["Stream"] = relationship(
-        "Stream",
-        back_populates="yearly_subjects",
-        init=False,
-        repr=False,
-        passive_deletes=True,
-    )
     assessments: Mapped[List["Assessment"]] = relationship(
         "Assessment",
         back_populates="yearly_subject",

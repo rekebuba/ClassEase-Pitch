@@ -1,30 +1,21 @@
 from __future__ import annotations
+
 import uuid
-from datetime import date, datetime
+from datetime import date
 from typing import TYPE_CHECKING, List
-from pydantic import BaseModel, ConfigDict
+
+from pydantic import AwareDatetime, BaseModel, ConfigDict
 
 from extension.enums.enum import AcademicTermTypeEnum, AcademicYearStatusEnum
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
-    from .academic_term_schema import AcademicTermWithRelatedSchema
-    from .event_schema import EventWithRelatedSchema
-    from .grade_schema import GradeWithRelatedSchema
-    from .student_schema import StudentWithRelatedSchema
-    from .student_year_record_schema import StudentYearRecordWithRelatedSchema
-    from .subject_schema import SubjectWithRelatedSchema
-    from .teacher_schema import TeacherWithRelatedSchema
-    from .student_year_record_schema import StudentYearRecordSchema
-    from .event_schema import EventSchema
-    from .academic_term_schema import AcademicTermSchema
-    from .yearly_subject_schema import YearlySubjectSchema
-    from .grade_schema import GradeSchema
-    from .section_schema import SectionSchema
-    from .stream_schema import StreamSchema
-    from .student_schema import StudentSchema
-    from .subject_schema import SubjectSchema
-    from .teacher_schema import TeacherSchema
+    from .academic_term_schema import AcademicTermSchema, AcademicTermWithRelatedSchema
+    from .event_schema import EventSchema, EventWithRelatedSchema
+    from .grade_schema import GradeSchema, GradeWithRelatedSchema
+    from .student_schema import StudentSchema, StudentWithRelatedSchema
+    from .subject_schema import SubjectSchema, SubjectWithRelatedSchema
+    from .teacher_schema import TeacherSchema, TeacherWithRelatedSchema
 
 
 class YearSchema(BaseModel):
@@ -38,14 +29,14 @@ class YearSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: uuid.UUID | None = None
+    id: uuid.UUID
     calendar_type: AcademicTermTypeEnum
     name: str
     start_date: date
     end_date: date
     status: AcademicYearStatusEnum
-    created_at: datetime
-    updated_at: datetime
+    created_at: AwareDatetime
+    updated_at: AwareDatetime
 
     @classmethod
     def default_fields(cls) -> set[str]:
@@ -65,14 +56,12 @@ class YearRelatedSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    student_year_records: List[StudentYearRecordSchema] = []
-    events: List[EventSchema] = []
-    academic_terms: List[AcademicTermSchema] = []
-    yearly_subjects: List[YearlySubjectSchema] = []
-    grades: List[GradeSchema] = []
-    students: List[StudentSchema] = []
-    teachers: List[TeacherSchema] = []
-    subjects: List[SubjectSchema] = []
+    events: List[EventSchema]
+    academic_terms: List[AcademicTermSchema]
+    grades: List[GradeSchema]
+    students: List[StudentSchema]
+    teachers: List[TeacherSchema]
+    subjects: List[SubjectSchema]
 
 
 class YearNestedSchema(YearSchema):
@@ -84,13 +73,12 @@ class YearNestedSchema(YearSchema):
         alias_generator=to_camel,
     )
 
-    student_year_records: List[StudentYearRecordWithRelatedSchema] = []
-    events: List[EventWithRelatedSchema] = []
-    academic_terms: List[AcademicTermWithRelatedSchema] = []
-    grades: List[GradeWithRelatedSchema] = []
-    students: List[StudentWithRelatedSchema] = []
-    teachers: List[TeacherWithRelatedSchema] = []
-    subjects: List[SubjectWithRelatedSchema] = []
+    events: List[EventWithRelatedSchema]
+    academic_terms: List[AcademicTermWithRelatedSchema]
+    grades: List[GradeWithRelatedSchema]
+    students: List[StudentWithRelatedSchema]
+    teachers: List[TeacherWithRelatedSchema]
+    subjects: List[SubjectWithRelatedSchema]
 
 
 class YearWithRelatedSchema(YearSchema, YearRelatedSchema):

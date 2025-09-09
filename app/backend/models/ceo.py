@@ -7,7 +7,7 @@ from sqlalchemy.orm import Mapped, mapped_column, scoped_session, Session
 from models.base.base_model import BaseModel
 
 
-def seed_ceo(session: scoped_session[Session]) -> None:
+def seed_ceo(session: Session) -> None:
     """create The first CEO When the database starts new"""
     if session.query(CEO).count() > 0:
         return

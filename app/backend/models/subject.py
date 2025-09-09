@@ -1,25 +1,26 @@
 #!/usr/bin/python3
 """Module for Subject class"""
 
+import uuid
 from typing import TYPE_CHECKING, List
-from sqlalchemy import String, ForeignKey
+
+from sqlalchemy import ForeignKey, String
+from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.ext.associationproxy import association_proxy, AssociationProxy
+
 from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
-import uuid
-
+from models.grade import Grade
+from models.stream import Stream
+from utils import sort_grade_key
 
 if TYPE_CHECKING:
     from models.grade_stream_subject import GradeStreamSubject
-    from models.teacher_term_record import TeacherTermRecord
     from models.mark_list import MarkList
-    from models.teacher import Teacher
-    from models.year import Year
-    from models.grade import Grade
-    from models.stream import Stream
-    from models.yearly_subject import YearlySubject
     from models.student import Student
+    from models.teacher import Teacher
+    from models.teacher_term_record import TeacherTermRecord
+    from models.year import Year
 
 
 class Subject(BaseModel):
@@ -35,7 +36,7 @@ class Subject(BaseModel):
         index=True,
     )
     name: Mapped[str] = mapped_column(String(50), nullable=False)
-    code: Mapped[str] = mapped_column(String(25), nullable=False)
+    code: Mapped[str] = mapped_column(String(10), nullable=False)
 
     # One-To-Many Relationships
     year: Mapped["Year"] = relationship(
@@ -60,13 +61,6 @@ class Subject(BaseModel):
         "Teacher",
         back_populates="subjects",
         secondary="teacher_subject_links",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
-    yearly_subjects: Mapped[List["YearlySubject"]] = relationship(
-        "YearlySubject",
-        back_populates="subject",
         default_factory=list,
         repr=False,
         passive_deletes=True,
@@ -110,14 +104,14 @@ class Subject(BaseModel):
 
     @property
     def grades(self) -> List["Grade"]:
-        """Return unique, non-null grades."""
+        """Return unique grades that have streams assigned to this subject."""
         seen = set()
         result = []
         for g in self._grades:
             if g is not None and g.id not in seen:
                 seen.add(g.id)
                 result.append(g)
-        return result
+        return sorted(result, key=sort_grade_key)
 
     @property
     def streams(self) -> List["Stream"]:

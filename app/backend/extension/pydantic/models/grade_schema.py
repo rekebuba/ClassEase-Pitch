@@ -1,29 +1,28 @@
 from __future__ import annotations
+
 import uuid
 from typing import TYPE_CHECKING, List, Optional, Set
-from pydantic import BaseModel, ConfigDict
 
-from extension.enums.enum import GradeLevelEnum
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
+
+from extension.enums.enum import GradeEnum, GradeLevelEnum
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
-    from .grade_stream_subject_schema import GradeStreamSubjectSchema
-    from .section_schema import SectionWithRelatedSchema
-    from .stream_schema import StreamWithRelatedSchema
-    from .student_schema import StudentWithRelatedSchema
-    from .student_term_record_schema import StudentTermRecordWithRelatedSchema
-    from .subject_schema import SubjectWithRelatedSchema
-    from .teacher_schema import TeacherWithRelatedSchema
-    from .teacher_term_record_schema import TeacherTermRecordWithRelatedSchema
-    from .year_schema import YearWithRelatedSchema
-    from .student_term_record_schema import StudentTermRecordSchema
-    from .teacher_term_record_schema import TeacherTermRecordSchema
-    from .teacher_schema import TeacherSchema
-    from .stream_schema import StreamSchema
-    from .student_schema import StudentSchema
-    from .year_schema import YearSchema
-    from .section_schema import SectionSchema
-    from .subject_schema import SubjectSchema
+    from .section_schema import SectionSchema, SectionWithRelatedSchema
+    from .stream_schema import StreamSchema, StreamWithRelatedSchema
+    from .student_schema import StudentSchema, StudentWithRelatedSchema
+    from .student_term_record_schema import (
+        StudentTermRecordSchema,
+        StudentTermRecordWithRelatedSchema,
+    )
+    from .subject_schema import SubjectSchema, SubjectWithRelatedSchema
+    from .teacher_schema import TeacherSchema, TeacherWithRelatedSchema
+    from .teacher_term_record_schema import (
+        TeacherTermRecordSchema,
+        TeacherTermRecordWithRelatedSchema,
+    )
+    from .year_schema import YearSchema, YearWithRelatedSchema
 
 
 class GradeSchema(BaseModel):
@@ -38,16 +37,19 @@ class GradeSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: uuid.UUID | None = None
+    id: uuid.UUID
     year_id: uuid.UUID
-    grade: str
+    grade: GradeEnum
     level: GradeLevelEnum
-    has_stream: bool = False
+    has_stream: bool
+    created_at: AwareDatetime
+    updated_at: AwareDatetime
 
     @classmethod
     def default_fields(cls) -> Set[str]:
         """
-        Returns a list of default fields to be used when no specific fields are requested.
+        Returns a list of default fields to be used when
+        no specific fields are requested.
         This can be overridden in subclasses if needed.
         """
         return {"id", "grade"}
@@ -65,13 +67,13 @@ class GradeRelatedSchema(BaseModel):
     )
 
     year: Optional[YearSchema]
-    teacher_term_records: Optional[List[TeacherTermRecordSchema]] = []
-    student_term_records: Optional[List[StudentTermRecordSchema]] = []
-    teachers: List[TeacherSchema] = []
-    streams: List[StreamSchema] = []
-    students: List[StudentSchema] = []
-    sections: List[SectionSchema] = []
-    subjects: List[SubjectSchema] = []
+    teacher_term_records: List[TeacherTermRecordSchema]
+    student_term_records: List[StudentTermRecordSchema]
+    teachers: List[TeacherSchema]
+    streams: List[StreamSchema]
+    students: List[StudentSchema]
+    sections: List[SectionSchema]
+    subjects: List[SubjectSchema]
 
 
 class GradeNestedSchema(GradeSchema):
@@ -85,14 +87,14 @@ class GradeNestedSchema(GradeSchema):
         alias_generator=to_camel,
     )
 
-    year: Optional[YearWithRelatedSchema]
-    teacher_term_records: Optional[List[TeacherTermRecordWithRelatedSchema]] = []
-    student_term_records: Optional[List[StudentTermRecordWithRelatedSchema]] = []
-    teachers: List[TeacherWithRelatedSchema] = []
-    streams: List[StreamWithRelatedSchema] = []
-    students: List[StudentWithRelatedSchema] = []
-    sections: List[SectionWithRelatedSchema] = []
-    subjects: List[SubjectWithRelatedSchema] = []
+    year: YearWithRelatedSchema
+    teacher_term_records: List[TeacherTermRecordWithRelatedSchema]
+    student_term_records: List[StudentTermRecordWithRelatedSchema]
+    teachers: List[TeacherWithRelatedSchema]
+    streams: List[StreamWithRelatedSchema]
+    students: List[StudentWithRelatedSchema]
+    sections: List[SectionWithRelatedSchema]
+    subjects: List[SubjectWithRelatedSchema]
 
 
 class GradeWithRelatedSchema(GradeSchema, GradeRelatedSchema):

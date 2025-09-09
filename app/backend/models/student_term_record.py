@@ -26,19 +26,22 @@ class StudentTermRecord(BaseModel):
 
     __tablename__ = "student_term_records"
     student_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("students.id", ondelete='CASCADE'), nullable=False
+        UUIDType(), ForeignKey("students.id", ondelete="CASCADE"), nullable=False
     )
     academic_term_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("academic_terms.id", ondelete='CASCADE'), nullable=False
+        UUIDType(), ForeignKey("academic_terms.id", ondelete="CASCADE"), nullable=False
     )
     grade_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("grades.id", ondelete='CASCADE'), nullable=False
+        UUIDType(), ForeignKey("grades.id", ondelete="CASCADE"), nullable=False
     )
     section_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("sections.id", ondelete='CASCADE'), nullable=False
+        UUIDType(), ForeignKey("sections.id", ondelete="CASCADE"), nullable=False
     )
     stream_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("streams.id", ondelete='CASCADE'), nullable=True, default=None
+        UUIDType(),
+        ForeignKey("streams.id", ondelete="CASCADE"),
+        nullable=True,
+        default=None,
     )
 
     average: Mapped[float] = mapped_column(Float, nullable=True, default=None)

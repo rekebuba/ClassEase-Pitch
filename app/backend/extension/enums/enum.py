@@ -296,27 +296,27 @@ class NaturalStreamSubjectsEnum(str, Enum):
 
 
 class AllSubjectsEnum(str, Enum):
-    ARTS_AND_PHYSICAL_EDUCATION = "Arts and Physical Education"
-    ENVIRONMENTAL_SCIENCE = "Environmental Science"
-    INTEGRATED_SCIENCE = "Integrated Science"
-    SOCIAL_STUDY = "Social Study"
-    VISUAL_ARTS_AND_MUSIC = "Visual Arts and Music"
-    AMHARIC_AS_SECOND_LANGUAGE = "Amharic as second language"
-    ENGLISH = "English"
-    MATHEMATICS = "Mathematics"
-    MOTHER_TONGUE = "Mother Tongue"
     AMHARIC = "Amharic"
-    PHYSICAL_EDUCATION = "Physical Education"
-    CIVICS_AND_ETHICAL_EDUCATION = "Civics and Ethical Education"
+    AMHARIC_AS_SECOND_LANGUAGE = "Amharic as second language"
+    ARTS_AND_PHYSICAL_EDUCATION = "Arts and Physical Education"
     BIOLOGY = "Biology"
-    PHYSICS = "Physics"
     CHEMISTRY = "Chemistry"
+    CIVICS_AND_ETHICAL_EDUCATION = "Civics and Ethical Education"
+    ECONOMICS = "Economics"
+    ENGLISH = "English"
+    ENVIRONMENTAL_SCIENCE = "Environmental Science"
+    GENERAL_BUSINESS = "General Business"
     GEOGRAPHY = "Geography"
     HISTORY = "History"
     INFORMATION_TECHNOLOGY = "Information Technology"
-    ECONOMICS = "Economics"
-    GENERAL_BUSINESS = "General Business"
+    INTEGRATED_SCIENCE = "Integrated Science"
+    MATHEMATICS = "Mathematics"
+    MOTHER_TONGUE = "Mother Tongue"
+    PHYSICAL_EDUCATION = "Physical Education"
+    PHYSICS = "Physics"
+    SOCIAL_STUDY = "Social Study"
     TECHNICAL_DRAWING = "Technical Drawing"
+    VISUAL_ARTS_AND_MUSIC = "Visual Arts and Music"
 
 
 class StreamEnum(str, Enum):
@@ -325,18 +325,18 @@ class StreamEnum(str, Enum):
 
 
 class GradeEnum(str, Enum):
-    GRADE_ONE = 1
-    GRADE_TWO = 2
-    GRADE_THREE = 3
-    GRADE_FOUR = 4
-    GRADE_FIVE = 5
-    GRADE_SIX = 6
-    GRADE_SEVEN = 7
-    GRADE_EIGHT = 8
-    GRADE_NINE = 9
-    GRADE_TEN = 10
-    GRADE_ELEVEN = 11
-    GRADE_TWELVE = 12
+    GRADE_ONE = "1"
+    GRADE_TWO = "2"
+    GRADE_THREE = "3"
+    GRADE_FOUR = "4"
+    GRADE_FIVE = "5"
+    GRADE_SIX = "6"
+    GRADE_SEVEN = "7"
+    GRADE_EIGHT = "8"
+    GRADE_NINE = "9"
+    GRADE_TEN = "10"
+    GRADE_ELEVEN = "11"
+    GRADE_TWELVE = "12"
 
 
 class SectionEnum(str, Enum):
@@ -346,10 +346,10 @@ class SectionEnum(str, Enum):
 
 
 class AcademicTermEnum(str, Enum):
-    FIRST_TERM = "First Term"
-    SECOND_TERM = "Second Term"
-    THIRD_TERM = "Third Term"
-    FOURTH_TERM = "Fourth Term"
+    FIRST_TERM = "1"
+    SECOND_TERM = "2"
+    THIRD_TERM = "3"
+    FOURTH_TERM = "4"
 
 
 class AcademicTermTypeEnum(str, Enum):

@@ -1,35 +1,35 @@
 #!/usr/bin/python3
 """Module for Student class"""
 
-from typing import TYPE_CHECKING, List, Optional
-from sqlalchemy import (
-    Date,
-    String,
-    ForeignKey,
-    Boolean,
-    Text,
-    Enum,
-)
-from models.base.base_model import BaseModel
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from extension.enums.enum import BloodTypeEnum, GenderEnum, StudentApplicationStatusEnum
-from models.base.column_type import UUIDType
 import uuid
+from typing import TYPE_CHECKING, List, Optional
 
+from sqlalchemy import (
+    Boolean,
+    Date,
+    Enum,
+    ForeignKey,
+    String,
+    Text,
+)
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from extension.enums.enum import BloodTypeEnum, GenderEnum, StudentApplicationStatusEnum
+from models.base.base_model import BaseModel
+from models.base.column_type import UUIDType
 
 if TYPE_CHECKING:
-    from models.grade import Grade
-    from models.student_term_record import StudentTermRecord
-    from models.mark_list import MarkList
-    from models.student_year_record import StudentYearRecord
-    from models.subject_yearly_average import SubjectYearlyAverage
-    from models.user import User
+    from models.academic_term import AcademicTerm
     from models.assessment import Assessment
-    from models.year import Year
+    from models.grade import Grade
+    from models.mark_list import MarkList
     from models.section import Section
     from models.stream import Stream
-    from models.academic_term import AcademicTerm
+    from models.student_term_record import StudentTermRecord
     from models.subject import Subject
+    from models.subject_yearly_average import SubjectYearlyAverage
+    from models.user import User
+    from models.year import Year
 
 
 class Student(BaseModel):
@@ -133,7 +133,7 @@ class Student(BaseModel):
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),
-        ForeignKey("users.id", ondelete='CASCADE'),
+        ForeignKey("users.id", ondelete="CASCADE"),
         unique=True,
         nullable=True,
         default=None,

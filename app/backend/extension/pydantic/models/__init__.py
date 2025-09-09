@@ -1,11 +1,3 @@
-from .grade_stream_subject_schema import (
-    GradeStreamSubjectSchema,
-)
-from .teacher_term_record_schema import (
-    TeacherTermRecordRelatedSchema,
-    TeacherTermRecordSchema,
-    TeacherTermRecordWithRelatedSchema,
-)
 from .academic_term_schema import (
     AcademicTermRelatedSchema,
     AcademicTermSchema,
@@ -29,6 +21,9 @@ from .grade_schema import (
     GradeWithRelatedSchema,
 )
 from .grade_stream_link_schema import GradeStreamLinkSchema
+from .grade_stream_subject_schema import (
+    GradeStreamSubjectSchema,
+)
 from .mark_list_schema import MarkListSchema
 from .registration_schema import RegistrationSchema
 from .saved_query_view_schema import (
@@ -83,6 +78,11 @@ from .teacher_schema import (
     TeacherWithRelatedSchema,
 )
 from .teacher_subject_link_schema import TeacherSubjectLinkSchema
+from .teacher_term_record_schema import (
+    TeacherTermRecordRelatedSchema,
+    TeacherTermRecordSchema,
+    TeacherTermRecordWithRelatedSchema,
+)
 from .user_schema import UserRelatedSchema, UserSchema, UserWithRelatedSchema
 from .year_schema import (
     YearNestedSchema,
@@ -203,6 +203,7 @@ SubjectSchema.model_rebuild()
 SubjectRelatedSchema.model_rebuild()
 SubjectNestedSchema.model_rebuild()
 SubjectWithRelatedSchema.model_rebuild()
+
 SubjectYearlyAverageSchema.model_rebuild()
 SubjectYearlyAverageRelatedSchema.model_rebuild()
 TeacherRecordSchema.model_rebuild()

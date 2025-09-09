@@ -1,17 +1,19 @@
 from __future__ import annotations
+
 import uuid
-from typing import TYPE_CHECKING, Optional, List
-from pydantic import BaseModel, ConfigDict
 from datetime import date
+from typing import TYPE_CHECKING, List, Optional
+
+from pydantic import BaseModel, ConfigDict
 
 from extension.enums.enum import AcademicTermEnum
 from extension.functions.helper import to_camel
 
 if TYPE_CHECKING:
-    from .year_schema import YearSchema
-    from .teacher_term_record_schema import TeacherTermRecordSchema
     from .student_term_record_schema import StudentTermRecordSchema
     from .teacher_record_schema import TeacherRecordSchema
+    from .teacher_term_record_schema import TeacherTermRecordSchema
+    from .year_schema import YearSchema
 
 
 class AcademicTermSchema(BaseModel):

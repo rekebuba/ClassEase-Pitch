@@ -1,28 +1,26 @@
 #!/usr/bin/python3
 """Module for Grade class"""
 
-from sqlalchemy import Enum, String, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.ext.associationproxy import association_proxy, AssociationProxy
-from extension.enums.enum import GradeLevelEnum
-from models.base.base_model import BaseModel
+import uuid
 from typing import TYPE_CHECKING, List
 
+from sqlalchemy import Enum, ForeignKey
+from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from extension.enums.enum import GradeEnum, GradeLevelEnum
+from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
-import uuid
-
 
 if TYPE_CHECKING:
     from models.grade_stream_subject import GradeStreamSubject
-    from models.student_term_record import StudentTermRecord
-    from models.teacher_term_record import TeacherTermRecord
+    from models.section import Section
     from models.stream import Stream
     from models.student import Student
-    from models.yearly_subject import YearlySubject
-    from models.teacher import Teacher
-    from models.section import Section
+    from models.student_term_record import StudentTermRecord
     from models.subject import Subject
+    from models.teacher import Teacher
+    from models.teacher_term_record import TeacherTermRecord
     from models.year import Year
 
 
@@ -38,7 +36,15 @@ class Grade(BaseModel):
         nullable=False,
         index=True,
     )
-    grade: Mapped[str] = mapped_column(String(25), nullable=False)
+    grade: Mapped[GradeEnum] = mapped_column(
+        Enum(
+            GradeEnum,
+            name="grade_enum",
+            values_callable=lambda x: [e.value for e in x],
+            native_enum=False,
+        ),
+        nullable=False,
+    )
     level: Mapped[GradeLevelEnum] = mapped_column(
         Enum(
             GradeLevelEnum,
@@ -50,7 +56,7 @@ class Grade(BaseModel):
     )
     has_stream: Mapped[bool] = mapped_column(nullable=False, default=False)
 
-    # One-To-Many Relationships
+    # Many-To-One Relationships
     year: Mapped["Year"] = relationship(
         "Year",
         back_populates="grades",
@@ -59,7 +65,7 @@ class Grade(BaseModel):
         init=False,
     )
 
-    # Many-To-One Relationships
+    # One-To-Many Relationships
     sections: Mapped[List["Section"]] = relationship(
         "Section",
         back_populates="grade",
@@ -98,14 +104,6 @@ class Grade(BaseModel):
         passive_deletes=True,
         default_factory=list,
     )
-    yearly_subjects: Mapped[List["YearlySubject"]] = relationship(
-        "YearlySubject",
-        back_populates="grade",
-        repr=False,
-        passive_deletes=True,
-        default_factory=list,
-    )
-
     students: Mapped[List["Student"]] = relationship(
         "Student",
         secondary="student_grade_links",
@@ -140,4 +138,5 @@ class Grade(BaseModel):
             if s is not None and s.id not in seen:
                 seen.add(s.id)
                 result.append(s)
-        return result
+
+        return sorted(result, key=lambda x: x.name)
