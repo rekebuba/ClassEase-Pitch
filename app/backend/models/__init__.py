@@ -1,10 +1,6 @@
 #!/usr/bin/python3
 """This module initializes the storage system for ClassEase"""
 
-from models.engine.db_storage import DBStorage
-
-storage = DBStorage()
-
 from models.academic_term import AcademicTerm
 from models.admin import Admin
 from models.assessment import Assessment
@@ -42,3 +38,43 @@ from models.teacher_year_link import TeacherYearLink
 from models.user import User
 from models.year import Year
 from models.yearly_subject import YearlySubject
+
+__all__ = [
+    "AcademicTerm",
+    "Admin",
+    "Assessment",
+    "BlacklistToken",
+    "CEO",
+    "Event",
+    "Grade",
+    "GradeSectionLink",
+    "GradeStreamLink",
+    "GradeStreamSubject",
+    "MarkList",
+    "Registration",
+    "SavedQueryView",
+    "Section",
+    "Stream",
+    "Student",
+    "StudentAcademicTermLink",
+    "StudentGradeLink",
+    "StudentSectionLink",
+    "StudentStreamLink",
+    "StudentSubjectLink",
+    "StudentTermRecord",
+    "StudentYearLink",
+    "StudentYearRecord",
+    "Subject",
+    "SubjectYearlyAverage",
+    "Table",
+    "Teacher",
+    "TeacherAcademicTermLink",
+    "TeacherGradeLink",
+    "TeacherSectionLink",
+    "TeacherSubjectLink",
+    "TeacherTermRecord",
+    "TeacherYearLink",
+    "User",
+    "Year",
+    "YearlySubject",
+]

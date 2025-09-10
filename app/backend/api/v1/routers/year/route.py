@@ -1,11 +1,12 @@
 import uuid
-from typing import Annotated, Any, Dict, List, Sequence
+from typing import Any, Dict, List, Sequence
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
+from starlette import status
 
-from api.v1.routers.dependencies import ProtectedRoute, SessionDep
+from api.v1.routers.dependencies import SessionDep, admin_route, shared_route
 from api.v1.routers.year.schema import (
     DeleteYearSuccess,
     NewYear,
@@ -13,19 +14,14 @@ from api.v1.routers.year.schema import (
     YearSummary,
 )
 from api.v1.routers.year.service import create_academic_term, handle_setup_methods
-from extension.enums.enum import RoleEnum
-from extension.pydantic.models.grade_schema import GradeNestedSchema
-from extension.pydantic.models.subject_schema import SubjectNestedSchema
-from extension.pydantic.models.year_schema import YearSchema
 from models.grade import Grade
 from models.subject import Subject
-from models.user import User
 from models.year import Year
+from schema.models.grade_schema import GradeNestedSchema
+from schema.models.subject_schema import SubjectNestedSchema
+from schema.models.year_schema import YearSchema
 
 router = APIRouter(prefix="/years", tags=["Years"])
-
-allowed_roles = ProtectedRoute([RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT])
-protected_route = Annotated[User, Depends(allowed_roles)]
 
 
 @router.get(
@@ -34,7 +30,7 @@ protected_route = Annotated[User, Depends(allowed_roles)]
 )
 def get_years(
     session: SessionDep,
-    user_in: protected_route,
+    user_in: shared_route,
 ) -> Sequence[Year]:
     """
     Returns a list of all academic years in the system.
@@ -50,7 +46,7 @@ def get_years(
 )
 def get_year_summary(
     session: SessionDep,
-    user_in: protected_route,
+    user_in: shared_route,
     q: str | None = None,
 ) -> Sequence[Year]:
     """
@@ -71,6 +67,7 @@ def get_year_summary(
 def get_year_by_id(
     session: SessionDep,
     year_id: uuid.UUID,
+    user_in: shared_route,
 ) -> Year:
     """
     Returns specific academic year
@@ -85,13 +82,11 @@ def get_year_by_id(
     return year
 
 
-@router.post(
-    "/",
-    response_model=NewYearSuccess,
-)
+@router.post("/", response_model=NewYearSuccess, status_code=status.HTTP_201_CREATED)
 def post_year(
     session: SessionDep,
     new_year: NewYear,
+    user_in: admin_route,
 ) -> Dict[str, Any]:
     """
     Creates a new Year
@@ -149,6 +144,7 @@ def post_year(
 def delete_year(
     session: SessionDep,
     year_id: uuid.UUID,
+    user_in: admin_route,
 ) -> DeleteYearSuccess:
     """
     Deletes an existing academic year in the system.

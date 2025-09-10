@@ -8,9 +8,9 @@ from sqlalchemy import Enum, ForeignKey
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from extension.enums.enum import GradeEnum, GradeLevelEnum
 from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
+from utils.enum import GradeEnum, GradeLevelEnum
 
 if TYPE_CHECKING:
     from models.grade_stream_subject import GradeStreamSubject

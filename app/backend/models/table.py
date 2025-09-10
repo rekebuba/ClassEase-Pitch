@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 """Module for Table class"""
 
-from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column, scoped_session, Session
+from sqlalchemy import Engine, String, inspect, select
+from sqlalchemy.orm import Mapped, Session, mapped_column
+
 from models.base.base_model import BaseModel
-from sqlalchemy import inspect, Engine, select
 
 
 def seed_table(session: Session, engine: Engine) -> None:

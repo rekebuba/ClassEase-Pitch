@@ -16,12 +16,11 @@ from sqlalchemy.orm import Session
 from core import security
 from core.config import settings
 from core.db import engine
-from extension.enums.enum import RoleEnum
-from extension.functions.helper import classify_model_fields, extract_inner_model
-from extension.pydantic.schema import TokenPayload
 from models.blacklist_token import BlacklistToken
-from models.grade import Grade
 from models.user import User
+from schema.schema import TokenPayload
+from utils.enum import RoleEnum
+from utils.utils import classify_model_fields, extract_inner_model
 
 # OAuth2 scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
@@ -86,6 +85,18 @@ class ProtectedRoute:
         if current_user.role not in self.roles:
             raise HTTPException(status_code=403, detail="Forbidden")
         return current_user
+
+
+shared_route = Annotated[
+    User, Depends(ProtectedRoute([RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT]))
+]
+admin_route = Annotated[User, Depends(ProtectedRoute([RoleEnum.ADMIN]))]
+student_route = Annotated[
+    User, Depends(ProtectedRoute([RoleEnum.ADMIN, RoleEnum.STUDENT]))
+]
+teacher_route = Annotated[
+    User, Depends(ProtectedRoute([RoleEnum.ADMIN, RoleEnum.TEACHER]))
+]
 
 
 async def parse_nested_params(
@@ -230,4 +241,3 @@ class NestedParamsDependency:
             )
         except HTTPException as e:
             raise e
-

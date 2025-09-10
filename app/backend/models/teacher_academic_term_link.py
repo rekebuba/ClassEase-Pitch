@@ -3,8 +3,10 @@
 
 import uuid
 from dataclasses import dataclass
+
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
+
 from models.base.base_model import Base
 from models.base.column_type import UUIDType
 

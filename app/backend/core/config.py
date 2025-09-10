@@ -41,7 +41,7 @@ class Settings(BaseSettings):
         list[AnyUrl] | str, BeforeValidator(parse_cors)
     ] = []
 
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field
     @property
     def all_cors_origins(self) -> list[str]:
         return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS] + [
@@ -56,7 +56,14 @@ class Settings(BaseSettings):
     MYSQL_PASSWORD: str = ""
     MYSQL_DB: str = ""
 
-    @computed_field  # type: ignore[prop-decorator]
+    # For Testing
+    TEST_MYSQL_SERVER: str
+    TEST_MYSQL_PORT: int = 3306
+    TEST_MYSQL_USER: str
+    TEST_MYSQL_PASSWORD: str = ""
+    TEST_MYSQL_DB: str = ""
+
+    @computed_field
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> MySQLDsn:
         return MySQLDsn.build(
@@ -66,6 +73,18 @@ class Settings(BaseSettings):
             host=self.MYSQL_SERVER,
             port=self.MYSQL_PORT,
             path=self.MYSQL_DB,
+        )
+
+    @computed_field
+    @property
+    def TEST_SQLALCHEMY_DATABASE_URI(self) -> MySQLDsn:
+        return MySQLDsn.build(
+            scheme="mysql",
+            username=self.TEST_MYSQL_USER,
+            password=self.TEST_MYSQL_PASSWORD,
+            host=self.TEST_MYSQL_SERVER,
+            port=self.TEST_MYSQL_PORT,
+            path=self.TEST_MYSQL_DB,
         )
 
     SMTP_TLS: bool = True
@@ -85,7 +104,7 @@ class Settings(BaseSettings):
 
     EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
 
-    @computed_field  # type: ignore[prop-decorator]
+    @computed_field
     @property
     def emails_enabled(self) -> bool:
         return bool(self.SMTP_HOST and self.EMAILS_FROM_EMAIL)

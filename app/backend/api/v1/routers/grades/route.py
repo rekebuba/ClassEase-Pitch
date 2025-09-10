@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
-from api.v1.routers.dependencies import SessionDep
+from api.v1.routers.dependencies import SessionDep, admin_route, shared_route
 from api.v1.routers.grades.schema import (
     GradeSetupSchema,
     NewGrade,
@@ -16,10 +16,10 @@ from api.v1.routers.grades.schema import (
 )
 from api.v1.routers.grades.service import update_grade_relationships
 from api.v1.routers.schema import FilterParams
-from extension.pydantic.models.grade_schema import GradeSchema
 from models.grade import Grade
 from models.year import Year
-from utils import sort_grade_key
+from schema.models.grade_schema import GradeSchema
+from utils.utils import sort_grade_key
 
 router = APIRouter(prefix="/grades", tags=["Grades"])
 
@@ -31,6 +31,7 @@ router = APIRouter(prefix="/grades", tags=["Grades"])
 def get_grades(
     session: SessionDep,
     query: Annotated[FilterParams, Query()],
+    user_in: shared_route,
 ) -> Sequence[Grade]:
     """
     Returns specific academic year
@@ -56,6 +57,7 @@ def get_grades(
 def post_grade(
     session: SessionDep,
     new_grade: NewGrade,
+    user_in: admin_route,
 ) -> Dict[str, Any]:
     """
     Creates a new Grade
@@ -100,6 +102,7 @@ def post_grade(
 def get_grades_setup(
     query: Annotated[FilterParams, Query()],
     session: SessionDep,
+    user_in: shared_route,
 ) -> Sequence[Grade]:
     """
     Returns specific academic year
@@ -130,6 +133,7 @@ def get_grades_setup(
 def get_grades_setup_by_id(
     grade_id: uuid.UUID,
     session: SessionDep,
+    user_in: shared_route,
 ) -> Grade:
     """
     Returns specific Grade SetUp
@@ -153,6 +157,7 @@ def patch_grade_setup(
     session: SessionDep,
     grade_id: uuid.UUID,
     update_data: UpdateGradeSetup,
+    user_in: admin_route,
 ) -> Dict[str, str]:
     """
     Updates specific Grade SetUp
@@ -200,6 +205,7 @@ def patch_grade_setup(
 def get_grade_by_id(
     session: SessionDep,
     grade_id: uuid.UUID,
+    user_in: shared_route,
 ) -> Grade:
     """
     Returns specific academic grade

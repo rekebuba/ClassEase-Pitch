@@ -4,9 +4,9 @@ from fastapi import APIRouter, Depends
 
 from api.v1.routers.dependencies import ProtectedRoute
 from api.v1.routers.private.schema import AdminInfo, StudentInfo, TeacherInfo
-from extension.enums.enum import RoleEnum
-from extension.pydantic.models.user_schema import UserSchema
 from models.user import User
+from schema.models.user_schema import UserSchema
+from utils.enum import RoleEnum
 
 router = APIRouter(prefix="/me", tags=["Me"])
 

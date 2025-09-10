@@ -4,7 +4,7 @@ from typing import Annotated, Any, Dict, List, Sequence
 from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import select
 
-from api.v1.routers.dependencies import SessionDep
+from api.v1.routers.dependencies import SessionDep, admin_route, shared_route
 from api.v1.routers.schema import FilterParams
 from api.v1.routers.subjects.schema import (
     NewSubject,
@@ -14,11 +14,11 @@ from api.v1.routers.subjects.schema import (
     UpdateSubjectSetupSuccess,
 )
 from api.v1.routers.subjects.service import update_subject_relationships
-from extension.pydantic.models.subject_schema import (
-    SubjectSchema,
-)
 from models.subject import Subject
 from models.year import Year
+from schema.models.subject_schema import (
+    SubjectSchema,
+)
 
 router = APIRouter(prefix="/subjects", tags=["Subjects"])
 
@@ -30,6 +30,7 @@ router = APIRouter(prefix="/subjects", tags=["Subjects"])
 def get_subjects(
     session: SessionDep,
     query: Annotated[FilterParams, Query()],
+    user_in: shared_route,
 ) -> Sequence[Subject]:
     """
     Returns All Subjects with in academic year
@@ -55,6 +56,7 @@ def get_subjects(
 def post_subject(
     session: SessionDep,
     new_subject: NewSubject,
+    user_in: admin_route,
 ) -> Dict[str, Any]:
     """
     Creates a new Subject
@@ -107,6 +109,7 @@ def post_subject(
 def get_subjects_setup(
     session: SessionDep,
     query: Annotated[FilterParams, Query()],
+    user_in: shared_route,
 ) -> Sequence[Subject]:
     """
     Returns All Subjects with in academic year
@@ -134,6 +137,7 @@ def get_subjects_setup(
 def get_subject_setup_by_id(
     session: SessionDep,
     subject_id: uuid.UUID,
+    user_in: shared_route,
 ) -> Subject:
     """
     Returns specific academic subject
@@ -156,6 +160,7 @@ def patch_subject_setup(
     session: SessionDep,
     subject_id: uuid.UUID,
     update_data: UpdateSubjectSetup,
+    user_in: admin_route,
 ) -> Dict[str, str]:
     """
     Updates Subject SetUp
@@ -195,6 +200,7 @@ def patch_subject_setup(
 def get_subject_by_id(
     session: SessionDep,
     subject_id: uuid.UUID,
+    user_in: shared_route,
 ) -> Subject:
     """
     Returns specific academic subject

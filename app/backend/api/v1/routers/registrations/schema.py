@@ -2,7 +2,7 @@ import uuid
 
 from pydantic import BaseModel
 
-from extension.pydantic.models.student_schema import StudentSchema
+from schema.models.student_schema import StudentSchema
 
 
 class RegistrationResponse(BaseModel):

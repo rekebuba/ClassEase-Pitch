@@ -1,15 +1,16 @@
 #!/usr/bin/python3
 """Module for Admin class"""
 
+import uuid
 from datetime import date
 from typing import TYPE_CHECKING, Optional
-from sqlalchemy import Date, Enum, String, ForeignKey, Text
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from extension.enums.enum import GenderEnum
-from models.base.base_model import BaseModel
 
+from sqlalchemy import Date, Enum, ForeignKey, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
-import uuid
+from utils.enum import GenderEnum
 
 if TYPE_CHECKING:
     from models.user import User

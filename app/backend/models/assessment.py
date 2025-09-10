@@ -1,13 +1,14 @@
 #!/usr/bin/python3
 """Module for Assessment class"""
 
-from typing import TYPE_CHECKING
-from sqlalchemy import Integer, ForeignKey, Float
-from models.base.base_model import BaseModel
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from models.base.column_type import UUIDType
 import uuid
+from typing import TYPE_CHECKING
 
+from sqlalchemy import Float, ForeignKey, Integer
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from models.base.base_model import BaseModel
+from models.base.column_type import UUIDType
 
 if TYPE_CHECKING:
     from models.student import Student

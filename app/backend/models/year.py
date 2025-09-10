@@ -7,8 +7,8 @@ from typing import TYPE_CHECKING, List
 from sqlalchemy import Date, Enum, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from extension.enums.enum import AcademicTermTypeEnum, AcademicYearStatusEnum
 from models.base.base_model import BaseModel
+from utils.enum import AcademicTermTypeEnum, AcademicYearStatusEnum
 
 if TYPE_CHECKING:
     from models.academic_term import AcademicTerm

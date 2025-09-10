@@ -4,15 +4,15 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
-from api.v1.utils.typing import SetupMethodType
-from extension.enums.enum import (
+from schema.models.year_schema import YearSchema
+from utils.enum import (
     AcademicTermTypeEnum,
     AcademicYearStatusEnum,
     GradeEnum,
     GradeLevelEnum,
 )
-from extension.functions.helper import to_camel
-from extension.pydantic.models.year_schema import YearSchema
+from utils.type import SetupMethodType
+from utils.utils import to_camel
 
 
 class YearSummary(YearSchema):

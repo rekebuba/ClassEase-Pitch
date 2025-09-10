@@ -9,9 +9,9 @@ import sqlalchemy as sa
 from sqlalchemy import Date, Enum, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from extension.enums.enum import AcademicTermEnum
 from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
+from utils.enum import AcademicTermEnum
 
 if TYPE_CHECKING:
     from models.student import Student

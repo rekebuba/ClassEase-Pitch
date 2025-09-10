@@ -8,14 +8,14 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from api.v1.routers.year.schema import YearSetupTemplate
-from api.v1.utils.typing import SetupMethodType
-from extension.enums.enum import AcademicTermEnum, AcademicTermTypeEnum
 from models.academic_term import AcademicTerm
 from models.grade import Grade
 from models.grade_stream_subject import GradeStreamSubject
 from models.section import Section
 from models.stream import Stream
 from models.subject import Subject
+from utils.enum import AcademicTermEnum, AcademicTermTypeEnum
+from utils.type import SetupMethodType
 
 
 def create_academic_term(

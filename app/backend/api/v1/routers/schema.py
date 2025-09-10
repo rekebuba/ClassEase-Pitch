@@ -3,7 +3,7 @@ from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict
 
-from extension.functions.helper import to_camel
+from utils.utils import to_camel
 
 
 class FilterParams(BaseModel):

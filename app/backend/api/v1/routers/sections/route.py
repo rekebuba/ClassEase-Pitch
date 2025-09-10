@@ -1,46 +1,39 @@
 import uuid
-from typing import List, Sequence
+from typing import Annotated, List, Sequence
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload
 
-from api.v1.routers.dependencies import SessionDep
-from extension.pydantic.models.section_schema import SectionWithRelatedSchema
+from api.v1.routers.dependencies import SessionDep, shared_route
+from api.v1.routers.sections.schema import SectionFilterParams
 from models.grade import Grade
 from models.section import Section
+from schema.models.section_schema import SectionSchema
 
-router = APIRouter(prefix="/grades/{grade_id}/sections", tags=["Sections"])
+router = APIRouter(prefix="/sections", tags=["Sections"])
 
 
 @router.get(
     "/",
-    response_model=List[SectionWithRelatedSchema],
+    response_model=List[SectionSchema],
 )
 def get_sections(
     session: SessionDep,
-    grade_id: uuid.UUID,
+    query: Annotated[SectionFilterParams, Query()],
+    user_in: shared_route,
 ) -> Sequence[Section]:
     """
     Returns specific academic grade
     """
-    grade = session.get(Grade, grade_id)
+    grade = session.get(Grade, query.grade_id)
     if not grade:
         raise HTTPException(
             status_code=404,
-            detail=f"Grade with ID {grade_id} not found.",
+            detail=f"Grade with ID {query.grade_id} not found.",
         )
 
     sections = session.scalars(
-        select(Section)
-        .where(Section.grade_id == grade_id)
-        .options(
-            selectinload(Section.students),
-            selectinload(Section.teachers),
-            selectinload(Section.grade),
-            selectinload(Section.student_term_records),
-            selectinload(Section.teacher_term_records),
-        )
+        select(Section).where(Section.grade_id == query.grade_id)
     ).all()
 
     return sections
@@ -48,12 +41,12 @@ def get_sections(
 
 @router.get(
     "/{section_id}",
-    response_model=SectionWithRelatedSchema,
+    response_model=SectionSchema,
 )
 def get_section_by_id(
     session: SessionDep,
-    grade_id: uuid.UUID,
     section_id: uuid.UUID,
+    user_in: shared_route,
 ) -> Section:
     """
     Returns specific academic section

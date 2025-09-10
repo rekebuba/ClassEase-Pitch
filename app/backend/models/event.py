@@ -1,29 +1,30 @@
 #!/usr/bin/python3
 """Module for Section class"""
 
+import uuid
+from typing import TYPE_CHECKING
+
 from sqlalchemy import (
-    CheckConstraint,
-    ForeignKey,
-    Text,
-    String,
-    Integer,
     Boolean,
+    CheckConstraint,
     Date,
     DateTime,
     Enum,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
 )
-from sqlalchemy.orm import Mapped, mapped_column
-from extension.enums.enum import (
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from models.base.base_model import BaseModel
+from models.base.column_type import UUIDType
+from utils.enum import (
     EventEligibilityEnum,
     EventLocationEnum,
     EventOrganizerEnum,
     EventPurposeEnum,
 )
-from models.base.base_model import BaseModel
-from sqlalchemy.orm import relationship
-from typing import TYPE_CHECKING
-from models.base.column_type import UUIDType
-import uuid
 
 if TYPE_CHECKING:
     from models.year import Year
@@ -34,7 +35,7 @@ class Event(BaseModel):
 
     __tablename__ = "events"
     year_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("years.id", ondelete='CASCADE'), nullable=False
+        UUIDType(), ForeignKey("years.id", ondelete="CASCADE"), nullable=False
     )
 
     title: Mapped[str] = mapped_column(String(100), nullable=False)

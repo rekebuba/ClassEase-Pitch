@@ -7,16 +7,8 @@ dependencies = [
     "debugpy>=1.8.14",
     "ethiopian-date>=1.0",
     "factory-boy>=3.3.3",
-    "flask-apscheduler>=1.13.1",
     "fastapi>=0.116.1",
     "uvicorn>=0.35.0",
-    "passlib>=1.7.4",
-    "flask-cors>=5.0.1",
-    "flask-jwt-extended>=4.7.1",
-    "flask-marshmallow>=1.3.0",
-    "flask-sqlalchemy>=3.1.1",
-    "marshmallow>=4.0.0",
-    "marshmallow-sqlalchemy>=1.4.2",
     "mypy>=1.15.0",
     "mysql-connector-python>=9.3.0",
     "mysqlclient>=2.2.7",
@@ -32,19 +24,20 @@ dependencies = [
     "pytest-xdist>=3.6.1",
     "python-dotenv>=1.1.0",
     "sqlalchemy>=2.0.40",
-    "sqlmodel>=0.0.24",
     "types-factory-boy>=0.4.1",
-    "types-flask-cors>=6.0.0.20250520",
     "python-multipart>=0.0.20",
     "python-jose>=3.5.0",
     "dnspython>=2.7.0",
     "email-validator",
     "emails>=0.6",
     "jsonpatch>=1.33",
+    "httpx>=0.28.1",
+    "tenacity>=9.1.2",
 ]
 
 [tool.mypy]
 files = ["."]
+exclude = ["tests/", "store/"]
 strict = true                    # Enables all strictness flags below
 disallow_untyped_defs = true     # Functions must have type annotations
 disallow_incomplete_defs = true  # No partial annotations (e.g., `def foo(x) -> int`)
@@ -92,5 +85,8 @@ dev = [
 [tool.ruff]
 extend-include = ["*.ipynb"]
 line-length = 88
-select = ["E", "F", "I"] # E: pycodestyle errors, F: Pyflakes errors, I: isort
-fixable = ["ALL"] # Only auto-fix import errors
+lint.select = ["E", "F", "I"] # E: pycodestyle errors, F: Pyflakes errors, I: isort
+lint.fixable = ["ALL"] # Only auto-fix import errors
+
+[tool.ruff.format]
+docstring-code-format = true

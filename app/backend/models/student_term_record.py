@@ -1,21 +1,21 @@
 #!/usr/bin/python3
 """Module for StudentTermRecord class"""
 
+import uuid
 from typing import TYPE_CHECKING, List
-from sqlalchemy import Integer, ForeignKey, Float
-from models.base.base_model import BaseModel
+
+from sqlalchemy import Float, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
-import uuid
-
 
 if TYPE_CHECKING:
+    from models.academic_term import AcademicTerm
     from models.grade import Grade
     from models.mark_list import MarkList
     from models.section import Section
     from models.stream import Stream
-    from models.academic_term import AcademicTerm
     from models.student import Student
 
 

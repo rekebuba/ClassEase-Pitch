@@ -14,9 +14,9 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from extension.enums.enum import BloodTypeEnum, GenderEnum, StudentApplicationStatusEnum
 from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
+from utils.enum import BloodTypeEnum, GenderEnum, StudentApplicationStatusEnum
 
 if TYPE_CHECKING:
     from models.academic_term import AcademicTerm

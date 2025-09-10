@@ -3,14 +3,14 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from extension.functions.helper import to_camel
-from extension.pydantic.models.grade_schema import (
+from schema.models.grade_schema import (
     GradeSchema,
 )
-from extension.pydantic.models.stream_schema import StreamSchema
-from extension.pydantic.models.subject_schema import (
+from schema.models.stream_schema import StreamSchema
+from schema.models.subject_schema import (
     SubjectSchema,
 )
+from utils.utils import to_camel
 
 
 class SubjectSetupSchema(SubjectSchema):

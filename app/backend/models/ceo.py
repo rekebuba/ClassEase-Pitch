@@ -2,8 +2,10 @@
 """Module for CEO class"""
 
 import os
+
 from sqlalchemy import String
-from sqlalchemy.orm import Mapped, mapped_column, scoped_session, Session
+from sqlalchemy.orm import Mapped, Session, mapped_column, scoped_session
+
 from models.base.base_model import BaseModel
 
 

@@ -2,16 +2,18 @@
 """Module for User class"""
 
 from typing import TYPE_CHECKING
-from sqlalchemy import Boolean, String, Enum
+
+from sqlalchemy import Boolean, Enum, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from extension.enums.enum import RoleEnum
+
 from models.base.base_model import BaseModel
+from utils.enum import RoleEnum
 
 if TYPE_CHECKING:
     from models.admin import Admin
+    from models.saved_query_view import SavedQueryView
     from models.student import Student
     from models.teacher import Teacher
-    from models.saved_query_view import SavedQueryView
 
 
 class User(BaseModel):

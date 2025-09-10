@@ -4,14 +4,14 @@ from typing import Annotated, List, Sequence
 from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import select
 
-from api.v1.routers.dependencies import SessionDep
+from api.v1.routers.dependencies import SessionDep, shared_route
 from api.v1.routers.schema import FilterParams
-from extension.pydantic.models.stream_schema import (
-    StreamSchema,
-)
 from models.grade import Grade
 from models.stream import Stream
 from models.year import Year
+from schema.models.stream_schema import (
+    StreamSchema,
+)
 
 router = APIRouter(prefix="/streams", tags=["Streams"])
 
@@ -23,6 +23,7 @@ router = APIRouter(prefix="/streams", tags=["Streams"])
 def get_streams(
     session: SessionDep,
     query: Annotated[FilterParams, Query()],
+    user_in: shared_route,
 ) -> Sequence[Stream]:
     """
     Returns specific academic grade
@@ -48,6 +49,7 @@ def get_streams(
 def get_stream_by_id(
     session: SessionDep,
     stream_id: uuid.UUID,
+    user_in: shared_route,
 ) -> Stream:
     """
     Returns specific academic stream

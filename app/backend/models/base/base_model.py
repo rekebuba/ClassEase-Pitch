@@ -2,10 +2,8 @@
 """Module for BaseModel class"""
 
 import uuid
-from dataclasses import asdict, dataclass
-from datetime import date, datetime, timezone
-from enum import Enum
-from typing import Any, Dict, Optional
+from dataclasses import dataclass
+from datetime import datetime, timezone
 
 from sqlalchemy.orm import (
     DeclarativeBase,
@@ -15,7 +13,6 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy.sql import func
 
-import models
 from models.base.column_type import AwareDateTime, UUIDType
 
 
@@ -57,34 +54,6 @@ class BaseModel(MappedAsDataclass, Base):
         init=False,
     )
 
-    def save(self) -> None:
-        """Saves the current instance to the storage."""
-        self.updated_at = datetime.now(timezone.utc)
-        models.storage.new(self)
-        models.storage.save()
-
-    def to_dict(self, **kwargs: Optional[Dict[str, Any]]) -> Dict[str, Any]:
-        """Converts the instance to a dictionary representation."""
-        data = asdict(self)
-
-        # Handle Enum fields
-        for key, value in data.items():
-            if isinstance(value, Enum):
-                data[key] = value.value
-            if isinstance(value, datetime):
-                if "time" in key:
-                    data[key] = value.strftime("%H:%M:%S")
-                else:
-                    data[key] = value.strftime("%Y-%m-%d")
-            elif isinstance(value, date):
-                data[key] = value.strftime("%Y-%m-%d")
-
-        return data
-
-    def delete(self) -> None:
-        """Delete the current instance from storage."""
-        models.storage.delete(self)
-
     def __str__(self) -> str:
         """Returns a string representation of the instance."""
-        return f"[{self.__class__.__name__}] ({self.id}) {self.to_dict()}"
+        return f"[{self.__class__.__name__}]: ({self.id})]"

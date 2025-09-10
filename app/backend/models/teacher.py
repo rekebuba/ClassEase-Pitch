@@ -1,21 +1,26 @@
 #!/usr/bin/python3
 """Module for Teacher class"""
 
+import uuid
 from datetime import date
 from typing import TYPE_CHECKING, List, Optional
+
 from sqlalchemy import (
     Boolean,
     CheckConstraint,
     Date,
     Enum,
     Float,
+    ForeignKey,
     Integer,
     String,
-    ForeignKey,
     Text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from extension.enums.enum import (
+
+from models.base.base_model import BaseModel
+from models.base.column_type import UUIDType
+from utils.enum import (
     ExperienceYearEnum,
     GenderEnum,
     HighestDegreeEnum,
@@ -23,19 +28,15 @@ from extension.enums.enum import (
     ScheduleEnum,
     TeacherApplicationStatus,
 )
-from models.base.base_model import BaseModel
-from models.base.column_type import UUIDType
-import uuid
-
 
 if TYPE_CHECKING:
-    from models.user import User  # Avoid circular import
-    from models.subject import Subject
-    from models.grade import Grade
-    from models.year import Year
     from models.academic_term import AcademicTerm
+    from models.grade import Grade
     from models.section import Section
+    from models.subject import Subject
     from models.teacher_term_record import TeacherTermRecord
+    from models.user import User  # Avoid circular import
+    from models.year import Year
 
 
 class Teacher(BaseModel):

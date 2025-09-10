@@ -8,17 +8,17 @@ from sqlalchemy import select
 
 from api.v1.routers.dependencies import SessionDep
 from api.v1.routers.registrations.schema import RegistrationResponse
-from extension.pydantic.models.admin_schema import AdminSchema
-from extension.pydantic.models.grade_schema import GradeSchema
-from extension.pydantic.models.student_schema import StudentWithRelatedSchema
-from extension.pydantic.models.subject_schema import SubjectSchema
-from extension.pydantic.models.teacher_schema import TeacherWithRelatedSchema
-from extension.pydantic.response.schema import SuccessResponseSchema
 from models.admin import Admin
 from models.grade import Grade
 from models.student import Student
 from models.subject import Subject
 from models.teacher import Teacher
+from schema.models.admin_schema import AdminSchema
+from schema.models.grade_schema import GradeSchema
+from schema.models.student_schema import StudentWithRelatedSchema
+from schema.models.subject_schema import SubjectSchema
+from schema.models.teacher_schema import TeacherWithRelatedSchema
+from schema.schema import SuccessResponseSchema
 
 router = APIRouter(prefix="/register", tags=["registration"])
 

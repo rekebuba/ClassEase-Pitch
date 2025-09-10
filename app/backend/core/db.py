@@ -1,37 +1,29 @@
-# app/core/db.py
-from typing import Generator
-
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy import create_engine, select
+from sqlalchemy.orm import Session
 
 from core.config import settings
-from models.base.base_model import Base
+from core.security import get_password_hash
+from models.user import User
+from utils.enum import RoleEnum
 
 # Create the engine
 engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI), future=True)
-
-# Session factory
-SessionLocal = sessionmaker(
-    bind=engine, autoflush=False, autocommit=False, expire_on_commit=False
-)
+test_engine = create_engine(str(settings.TEST_SQLALCHEMY_DATABASE_URI), future=True)
 
 
-# Dependency for FastAPI
-def get_db() -> Generator[Session, None, None]:
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+def init_db(session: Session) -> None:
+    """Initialize the database with first super user."""
 
+    user = session.execute(
+        select(User).where(User.identification == settings.FIRST_SUPERUSER)
+    ).first()
+    if not user:
+        hash_password = get_password_hash(settings.FIRST_SUPERUSER_PASSWORD)
+        user_in = User(
+            identification=settings.FIRST_SUPERUSER,
+            password=hash_password,
+            role=RoleEnum.ADMIN,
+        )
 
-# Optional: init tables + seed data
-def init_db() -> None:
-    Base.metadata.create_all(bind=engine)
-
-    from models.ceo import seed_ceo  # noqa: F401
-    from models.table import seed_table  # noqa: F401
-
-    with SessionLocal() as session:
-        seed_ceo(session)
-        seed_table(session, engine)
+        session.add(user_in)
+        session.commit()

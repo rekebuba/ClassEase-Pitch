@@ -1,0 +1,55 @@
+from __future__ import annotations
+
+import uuid
+from typing import TYPE_CHECKING, List, Optional
+
+from pydantic import BaseModel, ConfigDict
+
+from utils.utils import to_camel
+
+if TYPE_CHECKING:
+    from .grade_schema import GradeSchema
+    from .stream_schema import StreamSchema
+    from .student_schema import StudentSchema
+    from .student_term_record_schema import StudentTermRecordSchema
+    from .subject_yearly_average_schema import SubjectYearlyAverageSchema
+    from .year_schema import YearSchema
+
+
+class StudentYearRecordSchema(BaseModel):
+    """
+    This model represents a student's yearly academic record.
+    """
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    id: uuid.UUID | None = None
+    student_id: uuid.UUID
+    grade_id: uuid.UUID
+    year_id: uuid.UUID
+    stream_id: Optional[uuid.UUID] = None
+    final_score: Optional[float] = None
+    rank: Optional[int] = None
+
+
+class StudentYearRecordRelatedSchema(BaseModel):
+    """This model represents the relationships of a StudentYearRecordSchema."""
+
+    student: Optional[StudentSchema] = None
+    grade: Optional[GradeSchema] = None
+    year: Optional[YearSchema] = None
+    stream: Optional[StreamSchema] = None
+    student_term_records: Optional[List[StudentTermRecordSchema]] = None
+    subject_yearly_averages: Optional[List[SubjectYearlyAverageSchema]] = None
+
+
+class StudentYearRecordWithRelatedSchema(
+    StudentYearRecordSchema, StudentYearRecordRelatedSchema
+):
+    """This model represents a student's yearly academic record with related entities."""
+
+    pass

@@ -12,7 +12,7 @@ from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
 from models.grade import Grade
 from models.stream import Stream
-from utils import sort_grade_key
+from utils.utils import sort_grade_key
 
 if TYPE_CHECKING:
     from models.grade_stream_subject import GradeStreamSubject
@@ -36,7 +36,7 @@ class Subject(BaseModel):
         index=True,
     )
     name: Mapped[str] = mapped_column(String(50), nullable=False)
-    code: Mapped[str] = mapped_column(String(10), nullable=False)
+    code: Mapped[str] = mapped_column(String(20), nullable=False)
 
     # One-To-Many Relationships
     year: Mapped["Year"] = relationship(

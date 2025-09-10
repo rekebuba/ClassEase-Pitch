@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING
 from sqlalchemy import Enum, Float, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from extension.enums.enum import MarkListTypeEnum
 from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
 from models.student_term_record import StudentTermRecord
+from utils.enum import MarkListTypeEnum
 
 if TYPE_CHECKING:
     from models.student import Student

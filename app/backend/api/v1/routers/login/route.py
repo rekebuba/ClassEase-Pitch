@@ -1,15 +1,14 @@
 import logging
 from typing import Annotated, Any, Dict
 
+import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from jose import JWTError, jwt
 from sqlalchemy.orm import Session
-from starlette.status import HTTP_401_UNAUTHORIZED
+from starlette import status
 
-from api.v1.routers.dependencies import SessionDep, TokenDep
+from api.v1.routers.dependencies import SessionDep, TokenDep, get_db
 from core.config import settings
-from core.db import get_db
 from core.security import ALGORITHM, check_password, create_access_token
 from models.blacklist_token import BlacklistToken
 from models.user import User
@@ -32,7 +31,7 @@ async def login(
     if not user:
         logger.warning(f"Login attempt for non-existent user: {form_data.username}")
         raise HTTPException(
-            status_code=HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect identification or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
@@ -40,7 +39,7 @@ async def login(
     if not check_password(form_data.password, user.password):
         logger.warning(f"Failed password attempt for user: {user.id}")
         raise HTTPException(
-            status_code=HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect identification or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
@@ -79,7 +78,7 @@ async def logout(
 
         return {"message": "Successfully logged out"}
 
-    except JWTError as e:
+    except jwt.PyJWTError as e:
         logger.error(f"Token validation error during logout: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
