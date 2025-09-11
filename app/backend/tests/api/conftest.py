@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from api.v1.routers.dependencies import get_db
 from core.config import settings
-from core.db import init_db, test_engine
+from core.db import engine, init_db
 from main import app
 from models.base.base_model import Base
 from models.year import Year
@@ -17,7 +17,7 @@ from tests.utils.utils import get_auth_header, get_year
 
 # Session factory
 TestingSessionLocal = sessionmaker(
-    bind=test_engine, autoflush=False, autocommit=False, expire_on_commit=False
+    bind=engine, autoflush=False, autocommit=False, expire_on_commit=False
 )
 
 
@@ -36,21 +36,21 @@ app.dependency_overrides[get_db] = override_get_db
 
 @pytest.fixture(scope="session", autouse=True)
 def db() -> Generator[Session, None, None]:
-    Base.metadata.create_all(bind=test_engine)
+    Base.metadata.create_all(bind=engine)
 
     with TestingSessionLocal() as session:
         init_db(session)
 
     yield
 
-    # Base.metadata.drop_all(bind=test_engine)
-    # test_engine.dispose()
+    # Base.metadata.drop_all(bind=engine)
+    # engine.dispose()
 
 
 @pytest.fixture(scope="module")
 def db_session() -> Generator[Session, None, None]:
     """Provide a database session for each test with rollback"""
-    connection = test_engine.connect()
+    connection = engine.connect()
     transaction = connection.begin()
     session = TestingSessionLocal(bind=connection)
 

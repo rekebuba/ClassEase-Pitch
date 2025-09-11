@@ -1,19 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
-import { toast } from "sonner";
 import { EventTable } from "@/features/admin/tables";
-import { adminApi } from "@/api";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Layout } from "@/components";
+import { toast } from "sonner";
 
 export default function AdminManageEvent() {
   const [events, setEvents] = useState([]);

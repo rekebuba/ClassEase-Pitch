@@ -1,7 +1,4 @@
-import { useEffect, useState } from "react";
-import { adminApi } from "@/api";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -9,7 +6,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { StudentTable } from "@/features/admin/tables";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 /**
  * AdminStudentsList component for managing and displaying a list of students.

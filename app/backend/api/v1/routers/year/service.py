@@ -4,6 +4,7 @@ import uuid
 from datetime import date
 from typing import Dict, List, Union
 
+from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
@@ -14,6 +15,7 @@ from models.grade_stream_subject import GradeStreamSubject
 from models.section import Section
 from models.stream import Stream
 from models.subject import Subject
+from models.year import Year
 from utils.enum import AcademicTermEnum, AcademicTermTypeEnum
 from utils.type import SetupMethodType
 
@@ -65,6 +67,13 @@ def handle_setup_methods(
     elif setup_methods == "Last Year Copy":
         if old_year_id is None:
             raise ValueError("old_year_id must be provided for 'Last Year Copy'")
+        old_year_id_exists = session.scalar(select(Year).where(Year.id == old_year_id))
+
+        if old_year_id_exists is None:
+            raise HTTPException(
+                status_code=400,
+                detail={"setupMethods": "Year not found for copying."},
+            )
 
         _handle_year_copy_setup(
             old_year_id=old_year_id,

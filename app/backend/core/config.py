@@ -1,5 +1,6 @@
 import secrets
 import warnings
+from datetime import date
 from typing import Annotated, Any, Literal
 
 from pydantic import (
@@ -13,6 +14,8 @@ from pydantic import (
 )
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing_extensions import Self
+
+from utils.enum import GenderEnum
 
 
 def parse_cors(v: Any) -> list[str] | str:
@@ -112,6 +115,14 @@ class Settings(BaseSettings):
     EMAIL_TEST_USER: EmailStr = "test@example.com"
     FIRST_SUPERUSER: EmailStr
     FIRST_SUPERUSER_PASSWORD: str
+    FIRST_SUPERUSER_NAME: str
+    FIRST_SUPERUSER_FATHER_NAME: str
+    FIRST_SUPERUSER_GRAND_FATHER_NAME: str
+    FIRST_SUPERUSER_DATE_OF_BIRTH: date
+    FIRST_SUPERUSER_GENDER: GenderEnum
+    FIRST_SUPERUSER_EMAIL: str
+    FIRST_SUPERUSER_PHONE: str
+    FIRST_SUPERUSER_ADDRESS: str
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":

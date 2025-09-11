@@ -9,33 +9,27 @@ import type { Column } from "@tanstack/react-table";
 import { Button } from "@/components/ui/button";
 
 import {
-  DataTableColumnsVisibility,
-  useTableInstanceContext,
   DataTableDateFilter,
   DataTableFacetedFilter,
   DataTableInputFilter,
-  DataTableSliderFilter,
-  DataTableFilterCombobox,
-  DataTableFilterList,
+  useTableInstanceContext
 } from "@/components/data-table";
 import {
   CreateViewPopover,
   DataTableViewsDropdown,
 } from "@/components/data-table/views";
-import { SearchParams, StudentsViews, View } from "@/lib/types";
-import { Card } from "../ui/card";
+import { SearchParams, StudentsViews } from "@/lib/types";
+import { useFilters } from "@/utils/filter-context";
 import {
-  ChevronDown,
-  Copy,
-  Download,
   Filter,
   RotateCcw,
-  Save,
   Search,
   Settings2,
   X,
-  Zap,
+  Zap
 } from "lucide-react";
+import { Badge } from "../ui/badge";
+import { Card } from "../ui/card";
 import {
   Select,
   SelectContent,
@@ -43,12 +37,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Badge } from "../ui/badge";
-import { useFilters } from "@/utils/filter-context";
 import { Switch } from "../ui/switch";
 import { StudentsTableToolbarActions } from "./data-table-students/student-table-toolbar-action";
-import { createNewView } from "@/api/adminApi";
-import { toast } from "sonner";
 
 interface DataTableSimpleFilterProps {
   searchParams: SearchParams;

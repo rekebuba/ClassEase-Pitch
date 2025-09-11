@@ -2,18 +2,17 @@
 
 import type React from "react";
 
-import { useEffect, useRef, useState } from "react";
 import { ChevronLeftIcon } from "@radix-ui/react-icons";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 
-import { DeleteViewForm } from "./delete-view-form";
-import { LoaderIcon } from "lucide-react";
 import { renameViewData, StudentsViews } from "@/lib/types";
-import { renameView } from "@/api/adminApi";
+import { LoaderIcon } from "lucide-react";
+import { DeleteViewForm } from "./delete-view-form";
 
 interface EditViewFormProps {
   view: StudentsViews;

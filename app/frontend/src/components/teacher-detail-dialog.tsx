@@ -1,6 +1,5 @@
 "use client";
 
-import { updateTeacherApplicationStatus } from "@/api";
 import { TeacherStatusBadge } from "@/components";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -60,10 +59,10 @@ export default function TeacherDetailDialog({
     newStatus: TeacherApplicationWithDetails["status"],
   ) => {
     setIsUpdating(true);
-    const response = await updateTeacherApplicationStatus(
-      teacher.id,
-      newStatus,
-    );
+    // const response = await updateTeacherApplicationStatus(
+    //   teacher.id,
+    //   newStatus,
+    // );
     toast.success(response.message, {
       style: { color: "green" },
     });

@@ -148,6 +148,7 @@ function RouteComponent() {
     reset,
     watch,
     handleSubmit,
+    setError,
   } = form;
 
   useEffect(() => {
@@ -159,31 +160,35 @@ function RouteComponent() {
   const watchForm = watch();
   const watchSection = watchForm.sections;
 
-  const mutation = useMutation(patchGradeSetupMutation());
+  const mutation = useMutation({
+    ...patchGradeSetupMutation(),
+    onSuccess: (success) => {
+      toast.success(success.message, {
+        style: { color: "green" },
+      });
+      handleCancel();
+    },
+    onError: (error: any) => {
+      const detail = error.response?.data?.detail;
+
+      if (detail && typeof detail === "object") {
+        Object.entries(detail).forEach(([field, message]) => {
+          setError(field as keyof GradeSetupSchema, {
+            type: "server",
+            message: message as string,
+          });
+        });
+      } else {
+        toast.error("Something went wrong. Failed to Update Grade Setup.");
+      }
+    },
+  });
 
   const handleCancel = useCallback(() => {
     navigate({
       to: "/admin/grades",
-      search: { yearId: yearId! },
     });
-  }, [yearId, navigate]);
-
-  useEffect(() => {
-    if (mutation.isSuccess) {
-      toast.success(mutation.data.message, {
-        style: { color: "green" },
-      });
-      handleCancel();
-    }
-  }, [mutation.isSuccess, mutation.data, navigate, handleCancel]);
-
-  useEffect(() => {
-    if (mutation.isError) {
-      toast.error("Failed to Update Grade Setup", {
-        style: { color: "red" },
-      });
-    }
-  }, [mutation.isError]);
+  }, [navigate]);
 
   if (!grade) return <div>Grade not found</div>;
 

@@ -47,7 +47,7 @@ export default function LoginTab() {
 
       // redirect after success
       if (userRole) {
-        navigate({ to: `/${userRole}/year` });
+        navigate({ to: `/${userRole}` });
       }
     },
     onError: (error) => {

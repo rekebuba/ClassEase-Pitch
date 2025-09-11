@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import { sharedApi } from "@/api";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import ExamAssessmentReports from "./AdminExamAssessmentReports";
 import CollapsibleTable from "./CollapsibleTable";
@@ -43,14 +42,6 @@ const AdminStudentProfile = ({ student }) => {
     const lodeStudentSubjectList = async () => {
       try {
         if (student !== undefined && Object.keys(student).length > 0) {
-          const response = await sharedApi.getStudentAssessment({
-            student_id: student.student_id,
-            grade_id: student.grade_id,
-            section_id: student.section_id,
-            year: student.year,
-          });
-          setStudentAssessment(response.data.assessment);
-          setStudentReport(response.data.summary);
         }
       } catch (error) {
         if (

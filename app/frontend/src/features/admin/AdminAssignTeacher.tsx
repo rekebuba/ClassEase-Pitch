@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { toast } from "sonner";
-import { adminApi } from "@/api";
 
 /**
  * AdminAssignTeacher component allows an admin to assign a teacher to classes.

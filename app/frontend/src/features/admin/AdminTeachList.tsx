@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
-import { adminApi } from "@/api";
-import { toast } from "sonner";
 import { TeacherTable } from "@/features/admin/tables";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 // import Pagination from "../../library/pagination";
 
 /**

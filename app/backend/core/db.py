@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 
 from core.config import settings
 from core.security import get_password_hash
+from models.admin import Admin
 from models.user import User
 from utils.enum import RoleEnum
 
@@ -24,6 +25,18 @@ def init_db(session: Session) -> None:
             password=hash_password,
             role=RoleEnum.ADMIN,
         )
+        admin = Admin(
+            user_id=user_in.id,
+            first_name=settings.FIRST_SUPERUSER_NAME,
+            father_name=settings.FIRST_SUPERUSER_FATHER_NAME,
+            grand_father_name=settings.FIRST_SUPERUSER_GRAND_FATHER_NAME,
+            date_of_birth=settings.FIRST_SUPERUSER_DATE_OF_BIRTH,
+            gender=settings.FIRST_SUPERUSER_GENDER,
+            email=settings.FIRST_SUPERUSER_EMAIL,
+            phone=settings.FIRST_SUPERUSER_PHONE,
+            address=settings.FIRST_SUPERUSER_ADDRESS,
+        )
 
         session.add(user_in)
+        session.add(admin)
         session.commit()

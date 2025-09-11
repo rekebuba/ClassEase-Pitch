@@ -1,9 +1,7 @@
-import { useState, useEffect } from "react";
-import { FaUserCircle } from "react-icons/fa";
-import { Layout } from "@/components";
-import { toast } from "sonner";
-import { adminApi, sharedApi } from "@/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useEffect, useState } from "react";
+import { FaUserCircle } from "react-icons/fa";
+import { toast } from "sonner";
 
 /**
  * AdminUpdateProfile component allows an admin to view and update their profile information.

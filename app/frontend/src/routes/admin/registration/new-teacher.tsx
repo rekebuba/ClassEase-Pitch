@@ -1,8 +1,3 @@
-import {
-  availableGradeLevels,
-  availableSubjects,
-  saveTeacherRegistration,
-} from "@/api/sharedApi";
 import AutoSaveIndicator from "@/components/auto-save-indicator";
 import {
   FormField,
@@ -151,9 +146,7 @@ const stepNames = {
   6: "Documents & Final Information",
 };
 
-export const Route = createFileRoute(
-  "/admin/registration/new-teacher",
-)({
+export const Route = createFileRoute("/admin/registration/new-teacher")({
   component: RouteComponent,
 });
 

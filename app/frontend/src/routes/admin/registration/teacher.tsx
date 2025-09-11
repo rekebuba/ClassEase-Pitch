@@ -1,4 +1,3 @@
-import { detailTeachersApplications, fetchTeachersApplications } from "@/api";
 import { TeacherDetailDialog, TeacherStatusBadge } from "@/components";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -39,9 +38,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
-export const Route = createFileRoute(
-  "/admin/registration/teacher",
-)({
+export const Route = createFileRoute("/admin/registration/teacher")({
   component: RouteComponent,
 });
 

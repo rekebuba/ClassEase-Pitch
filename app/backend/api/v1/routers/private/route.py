@@ -1,24 +1,24 @@
-from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
-from api.v1.routers.dependencies import ProtectedRoute
+from api.v1.routers.dependencies import (
+    admin_route,
+    shared_route,
+    student_route,
+    teacher_route,
+)
 from api.v1.routers.private.schema import AdminInfo, StudentInfo, TeacherInfo
 from models.user import User
 from schema.models.user_schema import UserSchema
-from utils.enum import RoleEnum
 
 router = APIRouter(prefix="/me", tags=["Me"])
-
-allowed_roles = ProtectedRoute([RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT])
-protected_route = Annotated[User, Depends(allowed_roles)]
 
 
 @router.get(
     "/",
     response_model=UserSchema,
 )
-def get_logged_in_user(user_in: protected_route) -> User:
+def get_logged_in_user(user_in: shared_route) -> User:
     """
     Returns the current logged in user information.
     """
@@ -29,11 +29,10 @@ def get_logged_in_user(user_in: protected_route) -> User:
     "/admin",
     response_model=AdminInfo,
 )
-def get_admin_basic_info(user_in: protected_route) -> User:
+def get_admin_basic_info(user_in: admin_route) -> User:
     """
     Returns the current logged in user information.
     """
-    print(user_in.created_at, user_in.created_at.tzinfo)
     return user_in
 
 
@@ -41,7 +40,7 @@ def get_admin_basic_info(user_in: protected_route) -> User:
     "/teacher",
     response_model=TeacherInfo,
 )
-def get_teacher_basic_info(user_in: protected_route) -> User:
+def get_teacher_basic_info(user_in: teacher_route) -> User:
     """
     Returns the current logged in user information.
     """
@@ -52,7 +51,7 @@ def get_teacher_basic_info(user_in: protected_route) -> User:
     "/student",
     response_model=StudentInfo,
 )
-def get_student_basic_info(user_in: protected_route) -> User:
+def get_student_basic_info(user_in: student_route) -> User:
     """
     Returns the current logged in user information.
     """

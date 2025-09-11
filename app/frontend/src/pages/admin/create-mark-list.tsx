@@ -1,9 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Layout } from "@/components";
 import { FaPlus } from "react-icons/fa";
-import { adminApi } from "@/api";
 import { toast } from "sonner";
 
 /**

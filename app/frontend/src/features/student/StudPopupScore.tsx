@@ -1,8 +1,7 @@
-import { useState, useEffect } from "react";
-import { FaTimes } from "react-icons/fa";
-import { api } from "@/api";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { FaTimes } from "react-icons/fa";
+import { toast } from "sonner";
 
 /**
  * PopupScore component displays a popup with assessment scores.

@@ -131,6 +131,9 @@ def post_year(
         session.refresh(year)
 
         return {"message": "Year created Successfully", "id": year.id}
+    except HTTPException:
+        session.rollback()
+        raise
     except Exception as e:
         print(f"Error creating year: {e}")
         session.rollback()

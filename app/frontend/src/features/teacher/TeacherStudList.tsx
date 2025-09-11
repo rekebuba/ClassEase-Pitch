@@ -1,7 +1,4 @@
-import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { teacherApi } from "@/api";
 import {
   Select,
   SelectContent,
@@ -10,6 +7,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DataTable } from "@/features/teacher/tables";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { studentColumn } from "./tables/studentColumns";
 
 /**

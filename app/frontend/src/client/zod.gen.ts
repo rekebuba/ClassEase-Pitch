@@ -260,7 +260,7 @@ export const zStudentApplicationStatusEnum = z.enum([
  * This model represents a student in the system. It inherits from BaseModel.
  */
 export const zStudentSchema = z.object({
-  id: z.optional(z.union([z.uuid(), z.null()])),
+  id: z.uuid(),
   firstName: z.string(),
   fatherName: z.string(),
   dateOfBirth: z.iso.date(),
@@ -716,7 +716,7 @@ export const zSubjectYearlyAverageSchema = z.object({
 /**
  * StudentWithRelatedSchema
  */
-export const zStudentWithRelatedSchemaOutput = z.object({
+export const zStudentWithRelatedSchema = z.object({
   startingGrade: z.union([zGradeSchema, z.null()]),
   user: z.union([zUserSchema, z.null()]),
   termRecords: z.array(zStudentTermRecordSchema),
@@ -729,7 +729,7 @@ export const zStudentWithRelatedSchemaOutput = z.object({
   subjects: z.array(zSubjectSchema),
   sections: z.array(zSectionSchema),
   markLists: z.array(zMarkListSchema),
-  id: z.optional(z.union([z.uuid(), z.null()])),
+  id: z.uuid(),
   firstName: z.string(),
   fatherName: z.string(),
   dateOfBirth: z.iso.date(),
@@ -820,7 +820,7 @@ export const zGradeNestedSchema = z.object({
   studentTermRecords: z.array(zStudentTermRecordWithRelatedSchema),
   teachers: z.array(zTeacherWithRelatedSchemaOutput),
   streams: z.array(zStreamWithRelatedSchema),
-  students: z.array(zStudentWithRelatedSchemaOutput),
+  students: z.array(zStudentWithRelatedSchema),
   sections: z.array(zSectionWithRelatedSchema),
   subjects: z.array(zSubjectWithRelatedSchema),
 });
@@ -886,22 +886,6 @@ export const zValidationError = z.object({
  */
 export const zHttpValidationError = z.object({
   detail: z.optional(z.array(zValidationError)),
-});
-
-/**
- * JSONPatchOperation
- */
-export const zJsonPatchOperation = z.object({
-  op: z.enum(["add", "remove", "replace", "move", "copy", "test"]),
-  path: z.string(),
-  value: z.optional(z.union([z.unknown(), z.null()])),
-});
-
-/**
- * JSONPatchRequest
- */
-export const zJsonPatchRequest = z.object({
-  patch: z.array(zJsonPatchOperation),
 });
 
 /**
@@ -974,60 +958,7 @@ export const zNewYearSuccess = z.object({
  */
 export const zRegistrationResponse = z.object({
   id: z.uuid(),
-});
-
-/**
- * RelatedStreamSetupSchema
- */
-export const zRelatedStreamSetupSchema = z.object({
-  id: z.uuid(),
-  gradeId: z.uuid(),
-  name: z.string(),
-  subjects: z.array(zSubjectSchema),
-});
-
-/**
- * RelatedGradeSetupSchema
- */
-export const zRelatedGradeSetupSchemaInput = z.object({
-  id: z.uuid(),
-  yearId: z.uuid(),
-  grade: zGradeEnum,
-  level: zGradeLevelEnum,
-  hasStream: z.boolean(),
-  createdAt: z.iso.datetime(),
-  updatedAt: z.iso.datetime(),
-  subjects: z.array(zSubjectSchema),
-  streams: z.array(zRelatedStreamSetupSchema),
-  sections: z.array(zSectionSchema),
-});
-
-/**
- * RelatedGradeSetupSchema
- */
-export const zRelatedGradeSetupSchemaOutput = z.object({
-  id: z.uuid(),
-  yearId: z.uuid(),
-  grade: zGradeEnum,
-  level: zGradeLevelEnum,
-  hasStream: z.boolean(),
-  createdAt: z.iso.datetime(),
-  updatedAt: z.iso.datetime(),
-  subjects: z.array(zSubjectSchema),
-  streams: z.array(zRelatedStreamSetupSchema),
-  sections: z.array(zSectionSchema),
-});
-
-/**
- * RelatedSubjectSetupSchema
- */
-export const zRelatedSubjectSetupSchema = z.object({
-  id: z.uuid(),
-  yearId: z.uuid(),
-  name: z.string(),
-  code: z.string(),
-  createdAt: z.iso.datetime(),
-  updatedAt: z.iso.datetime(),
+  message: z.string(),
 });
 
 /**
@@ -1043,22 +974,10 @@ export const zStudentInfo = z.object({
 });
 
 /**
- * StudentWithRelatedSchema
+ * StudentRegistrationForm
  */
-export const zStudentWithRelatedSchemaInput = z.object({
-  startingGrade: z.union([zGradeSchema, z.null()]),
-  user: z.union([zUserSchema, z.null()]),
-  termRecords: z.array(zStudentTermRecordSchema),
-  studentYearRecords: z.array(zStudentYearRecordSchema),
-  subjectYearlyAverages: z.array(zSubjectYearlyAverageSchema),
-  assessments: z.array(zAssessmentSchema),
-  years: z.array(zYearSchema),
-  academicTerms: z.array(zAcademicTermSchema),
-  grades: z.array(zGradeSchema),
-  subjects: z.array(zSubjectSchema),
-  sections: z.array(zSectionSchema),
-  markLists: z.array(zMarkListSchema),
-  id: z.optional(z.union([z.uuid(), z.null()])),
+export const zStudentRegistrationForm = z.object({
+  registeredForGradeId: z.uuid(),
   firstName: z.string(),
   fatherName: z.string(),
   dateOfBirth: z.iso.date(),
@@ -1090,7 +1009,6 @@ export const zStudentWithRelatedSchemaInput = z.object({
   hasDisability: z.optional(z.boolean()).default(false),
   isTransfer: z.optional(z.boolean()).default(false),
   status: z.optional(zStudentApplicationStatusEnum),
-  userId: z.optional(z.union([z.uuid(), z.null()])),
 });
 
 /**
@@ -1322,40 +1240,6 @@ export const zUpdateSubjectSetupSuccess = z.object({
 });
 
 /**
- * YearSetupSchema
- */
-export const zYearSetupSchemaInput = z.object({
-  id: z.uuid(),
-  calendarType: zAcademicTermTypeEnum,
-  name: z.string(),
-  startDate: z.iso.date(),
-  endDate: z.iso.date(),
-  status: zAcademicYearStatusEnum,
-  createdAt: z.iso.datetime(),
-  updatedAt: z.iso.datetime(),
-  academicTerms: z.array(zAcademicTermSchema),
-  subjects: z.array(zRelatedSubjectSetupSchema),
-  grades: z.array(zRelatedGradeSetupSchemaInput),
-});
-
-/**
- * YearSetupSchema
- */
-export const zYearSetupSchemaOutput = z.object({
-  id: z.uuid(),
-  calendarType: zAcademicTermTypeEnum,
-  name: z.string(),
-  startDate: z.iso.date(),
-  endDate: z.iso.date(),
-  status: zAcademicYearStatusEnum,
-  createdAt: z.iso.datetime(),
-  updatedAt: z.iso.datetime(),
-  academicTerms: z.array(zAcademicTermSchema),
-  subjects: z.array(zRelatedSubjectSetupSchema),
-  grades: z.array(zRelatedGradeSetupSchemaOutput),
-});
-
-/**
  * YearSummary
  */
 export const zYearSummary = z.object({
@@ -1404,7 +1288,7 @@ export const zRegisterNewAdminResponse =
   zSuccessResponseSchemaRegistrationResponseNoneTypeNoneType;
 
 export const zRegisterNewStudentData = z.object({
-  body: zStudentWithRelatedSchemaInput,
+  body: zStudentRegistrationForm,
   path: z.optional(z.never()),
   query: z.optional(z.never()),
 });
@@ -1412,8 +1296,7 @@ export const zRegisterNewStudentData = z.object({
 /**
  * Successful Response
  */
-export const zRegisterNewStudentResponse =
-  zSuccessResponseSchemaRegistrationResponseNoneTypeNoneType;
+export const zRegisterNewStudentResponse = zRegistrationResponse;
 
 export const zRegisterNewTeacherData = z.object({
   body: zTeacherWithRelatedSchemaInput,
@@ -1710,22 +1593,22 @@ export const zGetStreamByIdResponse = zStreamSchema;
 
 export const zGetSectionsData = z.object({
   body: z.optional(z.never()),
-  path: z.object({
-    grade_id: z.uuid(),
+  path: z.optional(z.never()),
+  query: z.object({
+    gradeId: z.uuid(),
+    q: z.optional(z.union([z.string(), z.null()])),
   }),
-  query: z.optional(z.never()),
 });
 
 /**
- * Response Get Sections Api V1 Grades  Grade Id  Sections  Get
+ * Response Get Sections Api V1 Sections  Get
  * Successful Response
  */
-export const zGetSectionsResponse = z.array(zSectionWithRelatedSchema);
+export const zGetSectionsResponse = z.array(zSectionSchema);
 
 export const zGetSectionByIdData = z.object({
   body: z.optional(z.never()),
   path: z.object({
-    grade_id: z.uuid(),
     section_id: z.uuid(),
   }),
   query: z.optional(z.never()),
@@ -1734,7 +1617,7 @@ export const zGetSectionByIdData = z.object({
 /**
  * Successful Response
  */
-export const zGetSectionByIdResponse = zSectionWithRelatedSchema;
+export const zGetSectionByIdResponse = zSectionSchema;
 
 export const zGetLoggedInUserData = z.object({
   body: z.optional(z.never()),
@@ -1779,75 +1662,3 @@ export const zGetStudentBasicInfoData = z.object({
  * Successful Response
  */
 export const zGetStudentBasicInfoResponse = zStudentInfo;
-
-export const zGetYearsSetupData = z.object({
-  body: z.optional(z.never()),
-  path: z.optional(z.never()),
-  query: z.optional(z.never()),
-});
-
-/**
- * Response Get Years Setup Api V1 Admin Years Setup Get
- * Successful Response
- */
-export const zGetYearsSetupResponse = z.array(zYearSetupSchemaOutput);
-
-export const zPostYearSetupData = z.object({
-  body: zYearSetupSchemaInput,
-  path: z.optional(z.never()),
-  query: z.optional(z.never()),
-});
-
-/**
- * Successful Response
- */
-export const zPostYearSetupResponse = zYearSchema;
-
-export const zGetYearSetupByIdData = z.object({
-  body: z.optional(z.never()),
-  path: z.object({
-    year_id: z.uuid(),
-  }),
-  query: z.optional(z.never()),
-});
-
-/**
- * Response Get Year Setup By Id Api V1 Admin Years Setup  Year Id  Get
- * Successful Response
- */
-export const zGetYearSetupByIdResponse = z.union([
-  zYearSetupSchemaOutput,
-  z.null(),
-]);
-
-export const zPatchYearSetupByIdData = z.object({
-  body: zJsonPatchRequest,
-  path: z.object({
-    year_id: z.uuid(),
-  }),
-  query: z.optional(z.never()),
-});
-
-/**
- * Response Patch Year Setup By Id Api V1 Admin Years Setup  Year Id  Patch
- * Successful Response
- */
-export const zPatchYearSetupByIdResponse = z.union([
-  zYearSetupSchemaOutput,
-  z.null(),
-]);
-
-export const zGetPreviousYearSetupData = z.object({
-  body: z.optional(z.never()),
-  path: z.optional(z.never()),
-  query: z.object({
-    yearId: z.uuid(),
-    grades: z.boolean(),
-    subjects: z.boolean(),
-  }),
-});
-
-/**
- * Successful Response
- */
-export const zGetPreviousYearSetupResponse = zYearSetupSchemaOutput;

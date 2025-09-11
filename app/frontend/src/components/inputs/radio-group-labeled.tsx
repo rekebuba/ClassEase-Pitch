@@ -29,26 +29,28 @@ export function RadioGroupLabel<T extends FieldValues, K extends string>({
       control={form.control}
       name={nameInSchema}
       render={({ field }) => (
-        <FormItem className={className}>
+        <FormItem>
           <FormLabel>{fieldTitle}</FormLabel>
 
           <FormControl>
             <RadioGroup
               onValueChange={field.onChange}
               value={field.value}
-              className="flex flex-col space-y-2"
+              className={`flex gap-4 ${className}`}
             >
               {options.map((option) => (
-                <FormItem
-                  key={option.value}
-                  className="flex items-center space-x-2"
-                >
+                <FormItem key={option.value}>
                   <FormControl>
-                    <RadioGroupItem value={option.value} id={option.value} />
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value={option.value} id={option.value} />
+                      <FormLabel
+                        htmlFor={option.value}
+                        className="font-normal items-center justify-between"
+                      >
+                        {option.label}
+                      </FormLabel>
+                    </div>
                   </FormControl>
-                  <FormLabel htmlFor={option.value} className="font-normal">
-                    {option.label}
-                  </FormLabel>
                 </FormItem>
               ))}
             </RadioGroup>

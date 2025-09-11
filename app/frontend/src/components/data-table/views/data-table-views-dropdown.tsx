@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import { CaretDownIcon, Pencil1Icon, PlusIcon } from "@radix-ui/react-icons";
+import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 
-import { getIsMacOS } from "@/lib/utils";
+import { Kbd } from "@/components/kbd";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -26,14 +26,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Kbd } from "@/components/kbd";
+import { getIsMacOS } from "@/lib/utils";
 
-import { CreateViewForm } from "./create-view-form";
-import { EditViewForm } from "./edit-view-form";
 import { SearchParams, StudentsViews, View } from "@/lib/types";
-import { createNewView, deleteView, updateView } from "@/api/adminApi";
 import { toast } from "sonner";
 import { useTableInstanceContext } from "../table-instance-provider";
+import { CreateViewForm } from "./create-view-form";
+import { EditViewForm } from "./edit-view-form";
 
 interface DataTableViewsDropdownProps {
   views: StudentsViews[];
@@ -110,7 +109,7 @@ export function DataTableViewsDropdown({
   });
 
   const handleCreateView = async (newView: View) => {
-    const result = await createNewView(newView);
+    // const result = await createNewView(newView);
     toast.error(result.message, {
       style: { color: "green" },
     });
@@ -120,7 +119,7 @@ export function DataTableViewsDropdown({
   };
 
   const handleUpdateView = async (updatedView: StudentsViews) => {
-    const result = await updateView(updatedView);
+    // const result = await updateView(updatedView);
     toast.error(result.message, {
       style: { color: "green" },
     });
@@ -129,7 +128,7 @@ export function DataTableViewsDropdown({
   };
 
   const handleDeleteView = async (viewId: string) => {
-    const result = await deleteView(viewId);
+    // const result = await deleteView(viewId);
 
     toast.error(result.message, {
       style: { color: "green" },

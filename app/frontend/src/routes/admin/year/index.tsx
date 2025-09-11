@@ -320,6 +320,7 @@ function FormDialog({
           <RadioGroupLabel<NewYear, NewYear["setupMethods"]>
             fieldTitle="Choose a method"
             nameInSchema="setupMethods"
+            className="flex flex-col"
             options={[
               {
                 label: `Current Year Copy ${academicYearRange(currentYear.startDate, currentYear.endDate)} (Recommended)`,

@@ -9,14 +9,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-import { CreateViewForm } from "./create-view-form";
 import { SearchParams, StudentsViews, View } from "@/lib/types";
-import { Save } from "lucide-react";
 import isEqual from "lodash/isEqual";
-import UpdateViewForm from "./update-view-form";
-import { createNewView, updateView } from "@/api/adminApi";
+import { Save } from "lucide-react";
 import { toast } from "sonner";
 import { useTableInstanceContext } from "../table-instance-provider";
+import { CreateViewForm } from "./create-view-form";
+import UpdateViewForm from "./update-view-form";
 
 interface CreateViewPopoverProps {
   SearchParams: SearchParams;
@@ -106,7 +105,7 @@ export function CreateViewPopover({
   ]);
 
   const handleCreateView = async (newView: View) => {
-    const result = await createNewView(newView);
+    // const result = await createNewView(newView);
     toast.error(result.message, {
       style: { color: "green" },
     });
@@ -115,7 +114,7 @@ export function CreateViewPopover({
   };
 
   const handleUpdateView = async (updatedView: StudentsViews) => {
-    const result = await updateView(updatedView);
+    // const result = await updateView(updatedView);
     toast.error(result.message, {
       style: { color: "green" },
     });

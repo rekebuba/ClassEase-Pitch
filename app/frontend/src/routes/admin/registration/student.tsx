@@ -219,9 +219,7 @@ const mockStudents: StudentApplication[] = [
   },
 ];
 
-export const Route = createFileRoute(
-  "/admin/registration/student",
-)({
+export const Route = createFileRoute("/admin/registration/student")({
   component: RouteComponent,
 });
 

@@ -97,20 +97,6 @@ import type {
   GetTeacherBasicInfoResponses,
   GetStudentBasicInfoData,
   GetStudentBasicInfoResponses,
-  GetYearsSetupData,
-  GetYearsSetupResponses,
-  PostYearSetupData,
-  PostYearSetupResponses,
-  PostYearSetupErrors,
-  GetYearSetupByIdData,
-  GetYearSetupByIdResponses,
-  GetYearSetupByIdErrors,
-  PatchYearSetupByIdData,
-  PatchYearSetupByIdResponses,
-  PatchYearSetupByIdErrors,
-  GetPreviousYearSetupData,
-  GetPreviousYearSetupResponses,
-  GetPreviousYearSetupErrors,
 } from "./types.gen";
 import {
   zLoginResponse,
@@ -145,11 +131,6 @@ import {
   zGetAdminBasicInfoResponse,
   zGetTeacherBasicInfoResponse,
   zGetStudentBasicInfoResponse,
-  zGetYearsSetupResponse,
-  zPostYearSetupResponse,
-  zGetYearSetupByIdResponse,
-  zPatchYearSetupByIdResponse,
-  zGetPreviousYearSetupResponse,
 } from "./zod.gen";
 import { client as _heyApiClient } from "./client.gen";
 
@@ -339,6 +320,12 @@ export const postYear = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => {
       return await zPostYearResponse.parseAsync(data);
     },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
     url: "/api/v1/years/",
     ...options,
     headers: {
@@ -391,6 +378,12 @@ export const deleteYear = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => {
       return await zDeleteYearResponse.parseAsync(data);
     },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
     url: "/api/v1/years/{year_id}",
     ...options,
   });
@@ -412,6 +405,12 @@ export const getYearById = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => {
       return await zGetYearByIdResponse.parseAsync(data);
     },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
     url: "/api/v1/years/{year_id}",
     ...options,
   });
@@ -475,6 +474,12 @@ export const getGrades = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => {
       return await zGetGradesResponse.parseAsync(data);
     },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
     url: "/api/v1/grades/",
     ...options,
   });
@@ -496,6 +501,12 @@ export const postGrade = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => {
       return await zPostGradeResponse.parseAsync(data);
     },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
     url: "/api/v1/grades/",
     ...options,
     headers: {
@@ -521,6 +532,12 @@ export const getGradesSetup = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => {
       return await zGetGradesSetupResponse.parseAsync(data);
     },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
     url: "/api/v1/grades/setup",
     ...options,
   });
@@ -542,6 +559,12 @@ export const getGradesSetupById = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => {
       return await zGetGradesSetupByIdResponse.parseAsync(data);
     },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
     url: "/api/v1/grades/setup/{grade_id}",
     ...options,
   });
@@ -563,6 +586,12 @@ export const patchGradeSetup = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => {
       return await zPatchGradeSetupResponse.parseAsync(data);
     },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
     url: "/api/v1/grades/setup/{grade_id}",
     ...options,
     headers: {
@@ -588,6 +617,12 @@ export const getGradeById = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => {
       return await zGetGradeByIdResponse.parseAsync(data);
     },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
     url: "/api/v1/grades/{grade_id}",
     ...options,
   });
@@ -609,6 +644,12 @@ export const getSubjects = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => {
       return await zGetSubjectsResponse.parseAsync(data);
     },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
     url: "/api/v1/subjects/",
     ...options,
   });
@@ -630,6 +671,12 @@ export const postSubject = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => {
       return await zPostSubjectResponse.parseAsync(data);
     },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
     url: "/api/v1/subjects/",
     ...options,
     headers: {
@@ -655,6 +702,12 @@ export const getSubjectsSetup = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => {
       return await zGetSubjectsSetupResponse.parseAsync(data);
     },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
     url: "/api/v1/subjects/setup",
     ...options,
   });
@@ -676,6 +729,12 @@ export const getSubjectSetupById = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => {
       return await zGetSubjectSetupByIdResponse.parseAsync(data);
     },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
     url: "/api/v1/subjects/setup/{subject_id}",
     ...options,
   });
@@ -697,6 +756,12 @@ export const patchSubjectSetup = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => {
       return await zPatchSubjectSetupResponse.parseAsync(data);
     },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
     url: "/api/v1/subjects/setup/{subject_id}",
     ...options,
     headers: {
@@ -722,6 +787,12 @@ export const getSubjectById = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => {
       return await zGetSubjectByIdResponse.parseAsync(data);
     },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
     url: "/api/v1/subjects/{subject_id}",
     ...options,
   });
@@ -743,6 +814,12 @@ export const getStreams = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => {
       return await zGetStreamsResponse.parseAsync(data);
     },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
     url: "/api/v1/streams/",
     ...options,
   });
@@ -764,6 +841,12 @@ export const getStreamById = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => {
       return await zGetStreamByIdResponse.parseAsync(data);
     },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
     url: "/api/v1/streams/{stream_id}",
     ...options,
   });
@@ -785,7 +868,13 @@ export const getSections = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => {
       return await zGetSectionsResponse.parseAsync(data);
     },
-    url: "/api/v1/grades/{grade_id}/sections/",
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
+    url: "/api/v1/sections/",
     ...options,
   });
 };
@@ -806,7 +895,13 @@ export const getSectionById = <ThrowOnError extends boolean = false>(
     responseValidator: async (data) => {
       return await zGetSectionByIdResponse.parseAsync(data);
     },
-    url: "/api/v1/grades/{grade_id}/sections/{section_id}",
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
+    url: "/api/v1/sections/{section_id}",
     ...options,
   });
 };
@@ -915,154 +1010,6 @@ export const getStudentBasicInfo = <ThrowOnError extends boolean = false>(
       },
     ],
     url: "/api/v1/me/student",
-    ...options,
-  });
-};
-
-/**
- * Get Years Setup
- * Returns a list of all academic years in the system.
- */
-export const getYearsSetup = <ThrowOnError extends boolean = false>(
-  options?: Options<GetYearsSetupData, ThrowOnError>,
-) => {
-  return (options?.client ?? _heyApiClient).get<
-    GetYearsSetupResponses,
-    unknown,
-    ThrowOnError
-  >({
-    responseType: "json",
-    responseValidator: async (data) => {
-      return await zGetYearsSetupResponse.parseAsync(data);
-    },
-    security: [
-      {
-        scheme: "bearer",
-        type: "http",
-      },
-    ],
-    url: "/api/v1/admin/years/setup",
-    ...options,
-  });
-};
-
-/**
- * Post Year Setup
- * Set up a complete academic year with terms, grades, sections, streams, and subjects.
- *
- * This operation is atomic - if any part fails, the entire transaction is rolled back.
- *
- * Returns:
- * Response with success message or error details
- */
-export const postYearSetup = <ThrowOnError extends boolean = false>(
-  options: Options<PostYearSetupData, ThrowOnError>,
-) => {
-  return (options.client ?? _heyApiClient).post<
-    PostYearSetupResponses,
-    PostYearSetupErrors,
-    ThrowOnError
-  >({
-    responseType: "json",
-    responseValidator: async (data) => {
-      return await zPostYearSetupResponse.parseAsync(data);
-    },
-    security: [
-      {
-        scheme: "bearer",
-        type: "http",
-      },
-    ],
-    url: "/api/v1/admin/years/setup",
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
-};
-
-/**
- * Get Year Setup By Id
- * Returns a year by its ID.
- */
-export const getYearSetupById = <ThrowOnError extends boolean = false>(
-  options: Options<GetYearSetupByIdData, ThrowOnError>,
-) => {
-  return (options.client ?? _heyApiClient).get<
-    GetYearSetupByIdResponses,
-    GetYearSetupByIdErrors,
-    ThrowOnError
-  >({
-    responseType: "json",
-    responseValidator: async (data) => {
-      return await zGetYearSetupByIdResponse.parseAsync(data);
-    },
-    security: [
-      {
-        scheme: "bearer",
-        type: "http",
-      },
-    ],
-    url: "/api/v1/admin/years/setup/{year_id}",
-    ...options,
-  });
-};
-
-/**
- * Patch Year Setup By Id
- * Returns a year by its ID.
- */
-export const patchYearSetupById = <ThrowOnError extends boolean = false>(
-  options: Options<PatchYearSetupByIdData, ThrowOnError>,
-) => {
-  return (options.client ?? _heyApiClient).patch<
-    PatchYearSetupByIdResponses,
-    PatchYearSetupByIdErrors,
-    ThrowOnError
-  >({
-    responseType: "json",
-    responseValidator: async (data) => {
-      return await zPatchYearSetupByIdResponse.parseAsync(data);
-    },
-    security: [
-      {
-        scheme: "bearer",
-        type: "http",
-      },
-    ],
-    url: "/api/v1/admin/years/setup/{year_id}",
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-  });
-};
-
-/**
- * Get Previous Year Setup
- * Returns a year by its ID.
- */
-export const getPreviousYearSetup = <ThrowOnError extends boolean = false>(
-  options: Options<GetPreviousYearSetupData, ThrowOnError>,
-) => {
-  return (options.client ?? _heyApiClient).get<
-    GetPreviousYearSetupResponses,
-    GetPreviousYearSetupErrors,
-    ThrowOnError
-  >({
-    responseType: "json",
-    responseValidator: async (data) => {
-      return await zGetPreviousYearSetupResponse.parseAsync(data);
-    },
-    security: [
-      {
-        scheme: "bearer",
-        type: "http",
-      },
-    ],
-    url: "/api/v1/admin/years/import",
     ...options,
   });
 };

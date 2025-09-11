@@ -34,7 +34,7 @@ class StudentSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: Optional[uuid.UUID] = None
+    id: uuid.UUID
     first_name: str
     father_name: str
     date_of_birth: date

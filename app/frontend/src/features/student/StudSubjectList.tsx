@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { api } from "@/api";
-import { toast } from "sonner";
 import PropTypes from "prop-types";
+import React, { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 export function SubjectList({
   studentAssessment,

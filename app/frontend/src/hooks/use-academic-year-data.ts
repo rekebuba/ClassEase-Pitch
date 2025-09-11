@@ -1,5 +1,3 @@
-import { useState, useEffect } from "react";
-import sharedApi from "@/api/sharedApi";
 import {
   GradeSchema,
   StreamSchema,
@@ -7,6 +5,7 @@ import {
   YearSchema,
 } from "@/lib/api-response-type";
 import { AcademicTermEnumType, AcademicYearStatusEnumType } from "@/lib/enums";
+import { useEffect, useState } from "react";
 
 export interface AcademicYear {
   id: string;

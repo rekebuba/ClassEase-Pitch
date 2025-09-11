@@ -25,6 +25,7 @@ type DateWithLabelProps<T extends FieldValues> = {
   className?: string;
   disableFrom?: Date;
   disableTo?: Date;
+  placeholder?: string;
 } & InputHTMLAttributes<HTMLInputElement>;
 
 export function DateWithLabel<T extends FieldValues>({
@@ -33,6 +34,7 @@ export function DateWithLabel<T extends FieldValues>({
   className,
   disableFrom = new Date("1900-01-01"),
   disableTo = new Date("2035-12-31"),
+  placeholder,
 }: DateWithLabelProps<T>) {
   const form = useFormContext();
   const [date] = React.useState<Date | undefined>(undefined);
@@ -58,7 +60,7 @@ export function DateWithLabel<T extends FieldValues>({
                   {field.value ? (
                     format(field.value, "PPP")
                   ) : (
-                    <span>Pick a date</span>
+                    <span>{placeholder || "Pick a date"}</span>
                   )}
                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                 </Button>

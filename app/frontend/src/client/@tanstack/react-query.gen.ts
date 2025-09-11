@@ -34,11 +34,6 @@ import {
   getAdminBasicInfo,
   getTeacherBasicInfo,
   getStudentBasicInfo,
-  getYearsSetup,
-  postYearSetup,
-  getYearSetupById,
-  patchYearSetupById,
-  getPreviousYearSetup,
 } from "../sdk.gen";
 import {
   queryOptions,
@@ -99,15 +94,6 @@ import type {
   GetAdminBasicInfoData,
   GetTeacherBasicInfoData,
   GetStudentBasicInfoData,
-  GetYearsSetupData,
-  PostYearSetupData,
-  PostYearSetupError,
-  PostYearSetupResponse,
-  GetYearSetupByIdData,
-  PatchYearSetupByIdData,
-  PatchYearSetupByIdError,
-  PatchYearSetupByIdResponse,
-  GetPreviousYearSetupData,
 } from "../types.gen";
 import type { AxiosError } from "axios";
 import { client as _heyApiClient } from "../client.gen";
@@ -1130,165 +1116,5 @@ export const getStudentBasicInfoOptions = (
       return data;
     },
     queryKey: getStudentBasicInfoQueryKey(options),
-  });
-};
-
-export const getYearsSetupQueryKey = (options?: Options<GetYearsSetupData>) =>
-  createQueryKey("getYearsSetup", options);
-
-/**
- * Get Years Setup
- * Returns a list of all academic years in the system.
- */
-export const getYearsSetupOptions = (options?: Options<GetYearsSetupData>) => {
-  return queryOptions({
-    queryFn: async ({ queryKey, signal }) => {
-      const { data } = await getYearsSetup({
-        ...options,
-        ...queryKey[0],
-        signal,
-        throwOnError: true,
-      });
-      return data;
-    },
-    queryKey: getYearsSetupQueryKey(options),
-  });
-};
-
-export const postYearSetupQueryKey = (options: Options<PostYearSetupData>) =>
-  createQueryKey("postYearSetup", options);
-
-/**
- * Post Year Setup
- * Set up a complete academic year with terms, grades, sections, streams, and subjects.
- *
- * This operation is atomic - if any part fails, the entire transaction is rolled back.
- *
- * Returns:
- * Response with success message or error details
- */
-export const postYearSetupOptions = (options: Options<PostYearSetupData>) => {
-  return queryOptions({
-    queryFn: async ({ queryKey, signal }) => {
-      const { data } = await postYearSetup({
-        ...options,
-        ...queryKey[0],
-        signal,
-        throwOnError: true,
-      });
-      return data;
-    },
-    queryKey: postYearSetupQueryKey(options),
-  });
-};
-
-/**
- * Post Year Setup
- * Set up a complete academic year with terms, grades, sections, streams, and subjects.
- *
- * This operation is atomic - if any part fails, the entire transaction is rolled back.
- *
- * Returns:
- * Response with success message or error details
- */
-export const postYearSetupMutation = (
-  options?: Partial<Options<PostYearSetupData>>,
-): UseMutationOptions<
-  PostYearSetupResponse,
-  AxiosError<PostYearSetupError>,
-  Options<PostYearSetupData>
-> => {
-  const mutationOptions: UseMutationOptions<
-    PostYearSetupResponse,
-    AxiosError<PostYearSetupError>,
-    Options<PostYearSetupData>
-  > = {
-    mutationFn: async (localOptions) => {
-      const { data } = await postYearSetup({
-        ...options,
-        ...localOptions,
-        throwOnError: true,
-      });
-      return data;
-    },
-  };
-  return mutationOptions;
-};
-
-export const getYearSetupByIdQueryKey = (
-  options: Options<GetYearSetupByIdData>,
-) => createQueryKey("getYearSetupById", options);
-
-/**
- * Get Year Setup By Id
- * Returns a year by its ID.
- */
-export const getYearSetupByIdOptions = (
-  options: Options<GetYearSetupByIdData>,
-) => {
-  return queryOptions({
-    queryFn: async ({ queryKey, signal }) => {
-      const { data } = await getYearSetupById({
-        ...options,
-        ...queryKey[0],
-        signal,
-        throwOnError: true,
-      });
-      return data;
-    },
-    queryKey: getYearSetupByIdQueryKey(options),
-  });
-};
-
-/**
- * Patch Year Setup By Id
- * Returns a year by its ID.
- */
-export const patchYearSetupByIdMutation = (
-  options?: Partial<Options<PatchYearSetupByIdData>>,
-): UseMutationOptions<
-  PatchYearSetupByIdResponse,
-  AxiosError<PatchYearSetupByIdError>,
-  Options<PatchYearSetupByIdData>
-> => {
-  const mutationOptions: UseMutationOptions<
-    PatchYearSetupByIdResponse,
-    AxiosError<PatchYearSetupByIdError>,
-    Options<PatchYearSetupByIdData>
-  > = {
-    mutationFn: async (localOptions) => {
-      const { data } = await patchYearSetupById({
-        ...options,
-        ...localOptions,
-        throwOnError: true,
-      });
-      return data;
-    },
-  };
-  return mutationOptions;
-};
-
-export const getPreviousYearSetupQueryKey = (
-  options: Options<GetPreviousYearSetupData>,
-) => createQueryKey("getPreviousYearSetup", options);
-
-/**
- * Get Previous Year Setup
- * Returns a year by its ID.
- */
-export const getPreviousYearSetupOptions = (
-  options: Options<GetPreviousYearSetupData>,
-) => {
-  return queryOptions({
-    queryFn: async ({ queryKey, signal }) => {
-      const { data } = await getPreviousYearSetup({
-        ...options,
-        ...queryKey[0],
-        signal,
-        throwOnError: true,
-      });
-      return data;
-    },
-    queryKey: getPreviousYearSetupQueryKey(options),
   });
 };

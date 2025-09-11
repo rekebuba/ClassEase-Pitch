@@ -1,28 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import type {
   AverageRange,
   GradeCounts,
+  SearchParams,
+  SectionCounts,
   StatusCount,
   Student,
   StudentsDataResult,
-  SearchParams,
   StudentsViews,
   TableId,
-  SectionCounts,
 } from "@/lib/types";
 
-import { toast } from "sonner";
-import {
-  getStudents,
-  getStudentsStatusCounts,
-  getGradeCounts,
-  getStudentsAverageRange,
-  getAllStudentsViews,
-  getSectionCounts,
-} from "@/api/adminApi";
 
 export function useStudentsData(
   validQuery: SearchParams | null,

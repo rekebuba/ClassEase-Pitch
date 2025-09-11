@@ -3,11 +3,15 @@
 
 from typing import List
 
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
+from starlette import status
 
 from api.v1.routers.dependencies import SessionDep
-from api.v1.routers.registrations.schema import RegistrationResponse
+from api.v1.routers.registrations.schema import (
+    RegistrationResponse,
+    StudentRegistrationForm,
+)
 from models.admin import Admin
 from models.grade import Grade
 from models.student import Student
@@ -15,7 +19,6 @@ from models.subject import Subject
 from models.teacher import Teacher
 from schema.models.admin_schema import AdminSchema
 from schema.models.grade_schema import GradeSchema
-from schema.models.student_schema import StudentWithRelatedSchema
 from schema.models.subject_schema import SubjectSchema
 from schema.models.teacher_schema import TeacherWithRelatedSchema
 from schema.schema import SuccessResponseSchema
@@ -52,23 +55,17 @@ def register_new_admin(
     )
 
 
-@router.post(
-    "/students", response_model=SuccessResponseSchema[RegistrationResponse, None, None]
-)
+@router.post("/students", response_model=RegistrationResponse)
 def register_new_student(
     session: SessionDep,
-    student_data: StudentWithRelatedSchema,
-) -> SuccessResponseSchema[RegistrationResponse, None, None]:
+    student_data: StudentRegistrationForm,
+) -> RegistrationResponse:
     """Registers a new student in the system."""
-
-    # grades = session.scalar(
-    #     select(Grade).where(Grade.id == student_data.starting_grade_id)
-    # )
-
-    # if not grades:
-    #     raise ValueError(
-    #         f"Invalid starting grade {student_data.starting_grade_id} provided."
-    #     )
+    grade = session.get(Grade, student_data.registered_for_grade_id)
+    if not grade:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid grade"
+        )
 
     # Convert to dictionary before unpacking
     student_dict = student_data.model_dump(exclude_none=True)
@@ -79,9 +76,8 @@ def register_new_student(
     session.add(new_student)
     session.commit()
 
-    return SuccessResponseSchema(
-        data=RegistrationResponse(id=new_student.id),
-        message="Student Registered Successfully",
+    return RegistrationResponse(
+        id=new_student.id, message="Student Registered Successfully"
     )
 
 
