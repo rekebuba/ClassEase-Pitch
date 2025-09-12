@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -26,6 +27,7 @@ type DateWithLabelProps<T extends FieldValues> = {
   disableFrom?: Date;
   disableTo?: Date;
   placeholder?: string;
+  description?: string;
 } & InputHTMLAttributes<HTMLInputElement>;
 
 export function DateWithLabel<T extends FieldValues>({
@@ -35,6 +37,7 @@ export function DateWithLabel<T extends FieldValues>({
   disableFrom = new Date("1900-01-01"),
   disableTo = new Date("2035-12-31"),
   placeholder,
+  description,
 }: DateWithLabelProps<T>) {
   const form = useFormContext();
   const [date] = React.useState<Date | undefined>(undefined);
@@ -82,7 +85,11 @@ export function DateWithLabel<T extends FieldValues>({
               />
             </PopoverContent>
           </Popover>
-          <FormMessage />
+          {form.formState.errors[nameInSchema] ? (
+            <FormMessage />
+          ) : (
+            description && <FormDescription>{description}</FormDescription>
+          )}
         </FormItem>
       )}
     />

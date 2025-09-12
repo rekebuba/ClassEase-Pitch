@@ -2,6 +2,7 @@ import { FieldValues, Path, PathValue, useFormContext } from "react-hook-form";
 
 import {
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -22,6 +23,7 @@ type SelectWithLabelProps<T extends FieldValues, V> = {
   className?: string;
   children?: ReactNode;
   disabled?: boolean;
+  description?: string;
   getObjects?: (index: string) => V | V[];
 };
 
@@ -30,6 +32,7 @@ export function SelectWithLabel<T extends FieldValues, V>({
   nameInSchema,
   className,
   children,
+  description,
   disabled = false,
   getObjects,
 }: SelectWithLabelProps<T, V>) {
@@ -74,11 +77,13 @@ export function SelectWithLabel<T extends FieldValues, V>({
                 <SelectValue placeholder="Choose from suggestions..." />
               </SelectTrigger>
             </FormControl>
-
             <SelectContent>{children}</SelectContent>
           </Select>
-
-          <FormMessage />
+          {form.formState.errors[nameInSchema] ? (
+            <FormMessage />
+          ) : (
+            description && <FormDescription>{description}</FormDescription>
+          )}
         </FormItem>
       )}
     />

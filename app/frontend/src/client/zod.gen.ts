@@ -962,6 +962,73 @@ export const zRegistrationResponse = z.object({
 });
 
 /**
+ * RegistrationStep
+ */
+export const zRegistrationStep = z.object({
+  message: z.string(),
+});
+
+/**
+ * StudRegStep1
+ */
+export const zStudRegStep1 = z.object({
+  firstName: z.string().min(3).max(50),
+  fatherName: z.string().min(3).max(50),
+  grandFatherName: z.optional(z.union([z.string(), z.null()])),
+  dateOfBirth: z.iso.date(),
+  gender: zGenderEnum,
+  nationality: z.optional(z.union([z.string().min(3).max(100), z.null()])),
+});
+
+/**
+ * StudRegStep2
+ */
+export const zStudRegStep2 = z.object({
+  registeredForGradeId: z.uuid(),
+  transportation: z.optional(z.union([z.string(), z.null()])),
+  isTransfer: z.optional(z.boolean()).default(false),
+  previousSchool: z.optional(z.union([z.string().max(100), z.null()])),
+});
+
+/**
+ * StudRegStep3
+ */
+export const zStudRegStep3 = z.object({
+  address: z.string(),
+  city: z.string().min(3).max(50),
+  state: z.string().min(3).max(50),
+  postalCode: z.string().min(3).max(20),
+  fatherPhone: z.string(),
+  motherPhone: z.string(),
+  parentEmail: z.email(),
+});
+
+/**
+ * StudRegStep4
+ */
+export const zStudRegStep4 = z.object({
+  guardianName: z.optional(z.union([z.string(), z.null()])),
+  guardianPhone: z.optional(z.union([z.string(), z.null()])),
+  guardianRelation: z.optional(z.union([z.string(), z.null()])),
+  emergencyContactName: z.optional(z.union([z.string(), z.null()])),
+  emergencyContactPhone: z.union([z.string(), z.null()]),
+  siblingInSchool: z.optional(z.boolean()).default(false),
+  siblingDetails: z.optional(z.union([z.string(), z.null()])),
+});
+
+/**
+ * StudRegStep5
+ */
+export const zStudRegStep5 = z.object({
+  bloodType: z.optional(zBloodTypeEnum),
+  studentPhoto: z.optional(z.union([z.string(), z.null()])),
+  hasMedicalCondition: z.optional(z.boolean()).default(false),
+  medicalDetails: z.optional(z.union([z.string(), z.null()])),
+  hasDisability: z.optional(z.boolean()).default(false),
+  disabilityDetails: z.optional(z.union([z.string(), z.null()])),
+});
+
+/**
  * StudentInfo
  */
 export const zStudentInfo = z.object({
@@ -977,37 +1044,36 @@ export const zStudentInfo = z.object({
  * StudentRegistrationForm
  */
 export const zStudentRegistrationForm = z.object({
-  registeredForGradeId: z.uuid(),
-  firstName: z.string(),
-  fatherName: z.string(),
-  dateOfBirth: z.iso.date(),
-  gender: zGenderEnum,
-  address: z.string(),
-  city: z.string(),
-  state: z.string(),
-  postalCode: z.string(),
-  fatherPhone: z.string(),
-  motherPhone: z.string(),
-  parentEmail: z.string(),
-  grandFatherName: z.optional(z.union([z.string(), z.null()])),
-  nationality: z.optional(z.union([z.string(), z.null()])),
   bloodType: z.optional(zBloodTypeEnum),
   studentPhoto: z.optional(z.union([z.string(), z.null()])),
-  previousSchool: z.optional(z.union([z.string(), z.null()])),
-  previousGrades: z.optional(z.union([z.string(), z.null()])),
-  transportation: z.optional(z.union([z.string(), z.null()])),
+  hasMedicalCondition: z.optional(z.boolean()).default(false),
+  medicalDetails: z.optional(z.union([z.string(), z.null()])),
+  hasDisability: z.optional(z.boolean()).default(false),
+  disabilityDetails: z.optional(z.union([z.string(), z.null()])),
   guardianName: z.optional(z.union([z.string(), z.null()])),
   guardianPhone: z.optional(z.union([z.string(), z.null()])),
   guardianRelation: z.optional(z.union([z.string(), z.null()])),
   emergencyContactName: z.optional(z.union([z.string(), z.null()])),
-  emergencyContactPhone: z.optional(z.union([z.string(), z.null()])),
-  disabilityDetails: z.optional(z.union([z.string(), z.null()])),
-  siblingDetails: z.optional(z.union([z.string(), z.null()])),
-  medicalDetails: z.optional(z.union([z.string(), z.null()])),
+  emergencyContactPhone: z.union([z.string(), z.null()]),
   siblingInSchool: z.optional(z.boolean()).default(false),
-  hasMedicalCondition: z.optional(z.boolean()).default(false),
-  hasDisability: z.optional(z.boolean()).default(false),
+  siblingDetails: z.optional(z.union([z.string(), z.null()])),
+  address: z.string(),
+  city: z.string().min(3).max(50),
+  state: z.string().min(3).max(50),
+  postalCode: z.string().min(3).max(20),
+  fatherPhone: z.string(),
+  motherPhone: z.string(),
+  parentEmail: z.email(),
+  registeredForGradeId: z.uuid(),
+  transportation: z.optional(z.union([z.string(), z.null()])),
   isTransfer: z.optional(z.boolean()).default(false),
+  previousSchool: z.optional(z.union([z.string().max(100), z.null()])),
+  firstName: z.string().min(3).max(50),
+  fatherName: z.string().min(3).max(50),
+  grandFatherName: z.optional(z.union([z.string(), z.null()])),
+  dateOfBirth: z.iso.date(),
+  gender: zGenderEnum,
+  nationality: z.optional(z.union([z.string().min(3).max(100), z.null()])),
   status: z.optional(zStudentApplicationStatusEnum),
 });
 
@@ -1284,8 +1350,62 @@ export const zRegisterNewAdminData = z.object({
 /**
  * Successful Response
  */
-export const zRegisterNewAdminResponse =
-  zSuccessResponseSchemaRegistrationResponseNoneTypeNoneType;
+export const zRegisterNewAdminResponse = zRegistrationResponse;
+
+export const zRegisterStudentStep1Data = z.object({
+  body: zStudRegStep1,
+  path: z.optional(z.never()),
+  query: z.optional(z.never()),
+});
+
+/**
+ * Successful Response
+ */
+export const zRegisterStudentStep1Response = zRegistrationStep;
+
+export const zRegisterStudentStep2Data = z.object({
+  body: zStudRegStep2,
+  path: z.optional(z.never()),
+  query: z.optional(z.never()),
+});
+
+/**
+ * Successful Response
+ */
+export const zRegisterStudentStep2Response = zRegistrationStep;
+
+export const zRegisterStudentStep3Data = z.object({
+  body: zStudRegStep3,
+  path: z.optional(z.never()),
+  query: z.optional(z.never()),
+});
+
+/**
+ * Successful Response
+ */
+export const zRegisterStudentStep3Response = zRegistrationStep;
+
+export const zRegisterStudentStep4Data = z.object({
+  body: zStudRegStep4,
+  path: z.optional(z.never()),
+  query: z.optional(z.never()),
+});
+
+/**
+ * Successful Response
+ */
+export const zRegisterStudentStep4Response = zRegistrationStep;
+
+export const zRegisterStudentStep5Data = z.object({
+  body: zStudRegStep5,
+  path: z.optional(z.never()),
+  query: z.optional(z.never()),
+});
+
+/**
+ * Successful Response
+ */
+export const zRegisterStudentStep5Response = zRegistrationStep;
 
 export const zRegisterNewStudentData = z.object({
   body: zStudentRegistrationForm,

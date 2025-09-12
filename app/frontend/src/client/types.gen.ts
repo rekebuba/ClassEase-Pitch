@@ -725,6 +725,16 @@ export type RegistrationResponse = {
 };
 
 /**
+ * RegistrationStep
+ */
+export type RegistrationStep = {
+  /**
+   * Message
+   */
+  message: string;
+};
+
+/**
  * RoleEnum
  */
 export type RoleEnum = "admin" | "teacher" | "student";
@@ -870,6 +880,150 @@ export type StreamWithRelatedSchema = {
 };
 
 /**
+ * StudRegStep1
+ */
+export type StudRegStep1 = {
+  /**
+   * Firstname
+   */
+  firstName: string;
+  /**
+   * Fathername
+   */
+  fatherName: string;
+  /**
+   * Grandfathername
+   */
+  grandFatherName?: string | null;
+  /**
+   * Dateofbirth
+   */
+  dateOfBirth: string;
+  gender: GenderEnum;
+  /**
+   * Nationality
+   */
+  nationality?: string | null;
+};
+
+/**
+ * StudRegStep2
+ */
+export type StudRegStep2 = {
+  /**
+   * Registeredforgradeid
+   */
+  registeredForGradeId: string;
+  /**
+   * Transportation
+   */
+  transportation?: string | null;
+  /**
+   * Istransfer
+   */
+  isTransfer?: boolean;
+  /**
+   * Previousschool
+   */
+  previousSchool?: string | null;
+};
+
+/**
+ * StudRegStep3
+ */
+export type StudRegStep3 = {
+  /**
+   * Address
+   */
+  address: string;
+  /**
+   * City
+   */
+  city: string;
+  /**
+   * State
+   */
+  state: string;
+  /**
+   * Postalcode
+   */
+  postalCode: string;
+  /**
+   * Fatherphone
+   */
+  fatherPhone: string;
+  /**
+   * Motherphone
+   */
+  motherPhone: string;
+  /**
+   * Parentemail
+   */
+  parentEmail: string;
+};
+
+/**
+ * StudRegStep4
+ */
+export type StudRegStep4 = {
+  /**
+   * Guardianname
+   */
+  guardianName?: string | null;
+  /**
+   * Guardianphone
+   */
+  guardianPhone?: string | null;
+  /**
+   * Guardianrelation
+   */
+  guardianRelation?: string | null;
+  /**
+   * Emergencycontactname
+   */
+  emergencyContactName?: string | null;
+  /**
+   * Emergencycontactphone
+   */
+  emergencyContactPhone: string | null;
+  /**
+   * Siblinginschool
+   */
+  siblingInSchool?: boolean;
+  /**
+   * Siblingdetails
+   */
+  siblingDetails?: string | null;
+};
+
+/**
+ * StudRegStep5
+ */
+export type StudRegStep5 = {
+  bloodType?: BloodTypeEnum;
+  /**
+   * Studentphoto
+   */
+  studentPhoto?: string | null;
+  /**
+   * Hasmedicalcondition
+   */
+  hasMedicalCondition?: boolean;
+  /**
+   * Medicaldetails
+   */
+  medicalDetails?: string | null;
+  /**
+   * Hasdisability
+   */
+  hasDisability?: boolean;
+  /**
+   * Disabilitydetails
+   */
+  disabilityDetails?: string | null;
+};
+
+/**
  * StudentApplicationStatusEnum
  */
 export type StudentApplicationStatusEnum =
@@ -908,23 +1062,55 @@ export type StudentInfo = {
  * StudentRegistrationForm
  */
 export type StudentRegistrationForm = {
+  bloodType?: BloodTypeEnum;
   /**
-   * Registeredforgradeid
+   * Studentphoto
    */
-  registeredForGradeId: string;
+  studentPhoto?: string | null;
   /**
-   * Firstname
+   * Hasmedicalcondition
    */
-  firstName: string;
+  hasMedicalCondition?: boolean;
   /**
-   * Fathername
+   * Medicaldetails
    */
-  fatherName: string;
+  medicalDetails?: string | null;
   /**
-   * Dateofbirth
+   * Hasdisability
    */
-  dateOfBirth: string;
-  gender: GenderEnum;
+  hasDisability?: boolean;
+  /**
+   * Disabilitydetails
+   */
+  disabilityDetails?: string | null;
+  /**
+   * Guardianname
+   */
+  guardianName?: string | null;
+  /**
+   * Guardianphone
+   */
+  guardianPhone?: string | null;
+  /**
+   * Guardianrelation
+   */
+  guardianRelation?: string | null;
+  /**
+   * Emergencycontactname
+   */
+  emergencyContactName?: string | null;
+  /**
+   * Emergencycontactphone
+   */
+  emergencyContactPhone: string | null;
+  /**
+   * Siblinginschool
+   */
+  siblingInSchool?: boolean;
+  /**
+   * Siblingdetails
+   */
+  siblingDetails?: string | null;
   /**
    * Address
    */
@@ -954,78 +1140,42 @@ export type StudentRegistrationForm = {
    */
   parentEmail: string;
   /**
-   * Grandfathername
+   * Registeredforgradeid
    */
-  grandFatherName?: string | null;
-  /**
-   * Nationality
-   */
-  nationality?: string | null;
-  bloodType?: BloodTypeEnum;
-  /**
-   * Studentphoto
-   */
-  studentPhoto?: string | null;
-  /**
-   * Previousschool
-   */
-  previousSchool?: string | null;
-  /**
-   * Previousgrades
-   */
-  previousGrades?: string | null;
+  registeredForGradeId: string;
   /**
    * Transportation
    */
   transportation?: string | null;
   /**
-   * Guardianname
-   */
-  guardianName?: string | null;
-  /**
-   * Guardianphone
-   */
-  guardianPhone?: string | null;
-  /**
-   * Guardianrelation
-   */
-  guardianRelation?: string | null;
-  /**
-   * Emergencycontactname
-   */
-  emergencyContactName?: string | null;
-  /**
-   * Emergencycontactphone
-   */
-  emergencyContactPhone?: string | null;
-  /**
-   * Disabilitydetails
-   */
-  disabilityDetails?: string | null;
-  /**
-   * Siblingdetails
-   */
-  siblingDetails?: string | null;
-  /**
-   * Medicaldetails
-   */
-  medicalDetails?: string | null;
-  /**
-   * Siblinginschool
-   */
-  siblingInSchool?: boolean;
-  /**
-   * Hasmedicalcondition
-   */
-  hasMedicalCondition?: boolean;
-  /**
-   * Hasdisability
-   */
-  hasDisability?: boolean;
-  /**
    * Istransfer
    */
   isTransfer?: boolean;
+  /**
+   * Previousschool
+   */
+  previousSchool?: string | null;
+  /**
+   * Firstname
+   */
+  firstName: string;
+  /**
+   * Fathername
+   */
+  fatherName: string;
+  /**
+   * Grandfathername
+   */
+  grandFatherName?: string | null;
+  /**
+   * Dateofbirth
+   */
+  dateOfBirth: string;
+  gender: GenderEnum;
+  /**
+   * Nationality
+   */
+  nationality?: string | null;
   status?: StudentApplicationStatusEnum;
 };
 
@@ -3025,11 +3175,146 @@ export type RegisterNewAdminResponses = {
   /**
    * Successful Response
    */
-  200: SuccessResponseSchemaRegistrationResponseNoneTypeNoneType;
+  200: RegistrationResponse;
 };
 
 export type RegisterNewAdminResponse =
   RegisterNewAdminResponses[keyof RegisterNewAdminResponses];
+
+export type RegisterStudentStep1Data = {
+  body: StudRegStep1;
+  path?: never;
+  query?: never;
+  url: "/api/v1/register/students/step1";
+};
+
+export type RegisterStudentStep1Errors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type RegisterStudentStep1Error =
+  RegisterStudentStep1Errors[keyof RegisterStudentStep1Errors];
+
+export type RegisterStudentStep1Responses = {
+  /**
+   * Successful Response
+   */
+  200: RegistrationStep;
+};
+
+export type RegisterStudentStep1Response =
+  RegisterStudentStep1Responses[keyof RegisterStudentStep1Responses];
+
+export type RegisterStudentStep2Data = {
+  body: StudRegStep2;
+  path?: never;
+  query?: never;
+  url: "/api/v1/register/students/step2";
+};
+
+export type RegisterStudentStep2Errors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type RegisterStudentStep2Error =
+  RegisterStudentStep2Errors[keyof RegisterStudentStep2Errors];
+
+export type RegisterStudentStep2Responses = {
+  /**
+   * Successful Response
+   */
+  200: RegistrationStep;
+};
+
+export type RegisterStudentStep2Response =
+  RegisterStudentStep2Responses[keyof RegisterStudentStep2Responses];
+
+export type RegisterStudentStep3Data = {
+  body: StudRegStep3;
+  path?: never;
+  query?: never;
+  url: "/api/v1/register/students/step3";
+};
+
+export type RegisterStudentStep3Errors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type RegisterStudentStep3Error =
+  RegisterStudentStep3Errors[keyof RegisterStudentStep3Errors];
+
+export type RegisterStudentStep3Responses = {
+  /**
+   * Successful Response
+   */
+  200: RegistrationStep;
+};
+
+export type RegisterStudentStep3Response =
+  RegisterStudentStep3Responses[keyof RegisterStudentStep3Responses];
+
+export type RegisterStudentStep4Data = {
+  body: StudRegStep4;
+  path?: never;
+  query?: never;
+  url: "/api/v1/register/students/step4";
+};
+
+export type RegisterStudentStep4Errors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type RegisterStudentStep4Error =
+  RegisterStudentStep4Errors[keyof RegisterStudentStep4Errors];
+
+export type RegisterStudentStep4Responses = {
+  /**
+   * Successful Response
+   */
+  200: RegistrationStep;
+};
+
+export type RegisterStudentStep4Response =
+  RegisterStudentStep4Responses[keyof RegisterStudentStep4Responses];
+
+export type RegisterStudentStep5Data = {
+  body: StudRegStep5;
+  path?: never;
+  query?: never;
+  url: "/api/v1/register/students/step5";
+};
+
+export type RegisterStudentStep5Errors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type RegisterStudentStep5Error =
+  RegisterStudentStep5Errors[keyof RegisterStudentStep5Errors];
+
+export type RegisterStudentStep5Responses = {
+  /**
+   * Successful Response
+   */
+  200: RegistrationStep;
+};
+
+export type RegisterStudentStep5Response =
+  RegisterStudentStep5Responses[keyof RegisterStudentStep5Responses];
 
 export type RegisterNewStudentData = {
   body: StudentRegistrationForm;

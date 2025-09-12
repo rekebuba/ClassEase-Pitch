@@ -33,6 +33,8 @@ dependencies = [
     "jsonpatch>=1.33",
     "httpx>=0.28.1",
     "tenacity>=9.1.2",
+    "pydantic-extra-types>=2.10.5",
+    "phonenumbers>=9.0.13",
 ]
 
 [tool.mypy]

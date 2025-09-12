@@ -5,6 +5,11 @@ import {
   login,
   logout,
   registerNewAdmin,
+  registerStudentStep1,
+  registerStudentStep2,
+  registerStudentStep3,
+  registerStudentStep4,
+  registerStudentStep5,
   registerNewStudent,
   registerNewTeacher,
   getYears,
@@ -49,6 +54,21 @@ import type {
   RegisterNewAdminData,
   RegisterNewAdminError,
   RegisterNewAdminResponse,
+  RegisterStudentStep1Data,
+  RegisterStudentStep1Error,
+  RegisterStudentStep1Response,
+  RegisterStudentStep2Data,
+  RegisterStudentStep2Error,
+  RegisterStudentStep2Response,
+  RegisterStudentStep3Data,
+  RegisterStudentStep3Error,
+  RegisterStudentStep3Response,
+  RegisterStudentStep4Data,
+  RegisterStudentStep4Error,
+  RegisterStudentStep4Response,
+  RegisterStudentStep5Data,
+  RegisterStudentStep5Error,
+  RegisterStudentStep5Response,
   RegisterNewStudentData,
   RegisterNewStudentError,
   RegisterNewStudentResponse,
@@ -278,6 +298,271 @@ export const registerNewAdminMutation = (
   > = {
     mutationFn: async (localOptions) => {
       const { data } = await registerNewAdmin({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const registerStudentStep1QueryKey = (
+  options: Options<RegisterStudentStep1Data>,
+) => createQueryKey("registerStudentStep1", options);
+
+/**
+ * Register Student Step1
+ * Validate student data for each step
+ */
+export const registerStudentStep1Options = (
+  options: Options<RegisterStudentStep1Data>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await registerStudentStep1({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: registerStudentStep1QueryKey(options),
+  });
+};
+
+/**
+ * Register Student Step1
+ * Validate student data for each step
+ */
+export const registerStudentStep1Mutation = (
+  options?: Partial<Options<RegisterStudentStep1Data>>,
+): UseMutationOptions<
+  RegisterStudentStep1Response,
+  AxiosError<RegisterStudentStep1Error>,
+  Options<RegisterStudentStep1Data>
+> => {
+  const mutationOptions: UseMutationOptions<
+    RegisterStudentStep1Response,
+    AxiosError<RegisterStudentStep1Error>,
+    Options<RegisterStudentStep1Data>
+  > = {
+    mutationFn: async (localOptions) => {
+      const { data } = await registerStudentStep1({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const registerStudentStep2QueryKey = (
+  options: Options<RegisterStudentStep2Data>,
+) => createQueryKey("registerStudentStep2", options);
+
+/**
+ * Register Student Step2
+ * Validate student data for each step
+ */
+export const registerStudentStep2Options = (
+  options: Options<RegisterStudentStep2Data>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await registerStudentStep2({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: registerStudentStep2QueryKey(options),
+  });
+};
+
+/**
+ * Register Student Step2
+ * Validate student data for each step
+ */
+export const registerStudentStep2Mutation = (
+  options?: Partial<Options<RegisterStudentStep2Data>>,
+): UseMutationOptions<
+  RegisterStudentStep2Response,
+  AxiosError<RegisterStudentStep2Error>,
+  Options<RegisterStudentStep2Data>
+> => {
+  const mutationOptions: UseMutationOptions<
+    RegisterStudentStep2Response,
+    AxiosError<RegisterStudentStep2Error>,
+    Options<RegisterStudentStep2Data>
+  > = {
+    mutationFn: async (localOptions) => {
+      const { data } = await registerStudentStep2({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const registerStudentStep3QueryKey = (
+  options: Options<RegisterStudentStep3Data>,
+) => createQueryKey("registerStudentStep3", options);
+
+/**
+ * Register Student Step3
+ * Validate student data for each step
+ */
+export const registerStudentStep3Options = (
+  options: Options<RegisterStudentStep3Data>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await registerStudentStep3({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: registerStudentStep3QueryKey(options),
+  });
+};
+
+/**
+ * Register Student Step3
+ * Validate student data for each step
+ */
+export const registerStudentStep3Mutation = (
+  options?: Partial<Options<RegisterStudentStep3Data>>,
+): UseMutationOptions<
+  RegisterStudentStep3Response,
+  AxiosError<RegisterStudentStep3Error>,
+  Options<RegisterStudentStep3Data>
+> => {
+  const mutationOptions: UseMutationOptions<
+    RegisterStudentStep3Response,
+    AxiosError<RegisterStudentStep3Error>,
+    Options<RegisterStudentStep3Data>
+  > = {
+    mutationFn: async (localOptions) => {
+      const { data } = await registerStudentStep3({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const registerStudentStep4QueryKey = (
+  options: Options<RegisterStudentStep4Data>,
+) => createQueryKey("registerStudentStep4", options);
+
+/**
+ * Register Student Step4
+ * Validate student data for each step
+ */
+export const registerStudentStep4Options = (
+  options: Options<RegisterStudentStep4Data>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await registerStudentStep4({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: registerStudentStep4QueryKey(options),
+  });
+};
+
+/**
+ * Register Student Step4
+ * Validate student data for each step
+ */
+export const registerStudentStep4Mutation = (
+  options?: Partial<Options<RegisterStudentStep4Data>>,
+): UseMutationOptions<
+  RegisterStudentStep4Response,
+  AxiosError<RegisterStudentStep4Error>,
+  Options<RegisterStudentStep4Data>
+> => {
+  const mutationOptions: UseMutationOptions<
+    RegisterStudentStep4Response,
+    AxiosError<RegisterStudentStep4Error>,
+    Options<RegisterStudentStep4Data>
+  > = {
+    mutationFn: async (localOptions) => {
+      const { data } = await registerStudentStep4({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const registerStudentStep5QueryKey = (
+  options: Options<RegisterStudentStep5Data>,
+) => createQueryKey("registerStudentStep5", options);
+
+/**
+ * Register Student Step5
+ * Validate student data for each step
+ */
+export const registerStudentStep5Options = (
+  options: Options<RegisterStudentStep5Data>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await registerStudentStep5({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: registerStudentStep5QueryKey(options),
+  });
+};
+
+/**
+ * Register Student Step5
+ * Validate student data for each step
+ */
+export const registerStudentStep5Mutation = (
+  options?: Partial<Options<RegisterStudentStep5Data>>,
+): UseMutationOptions<
+  RegisterStudentStep5Response,
+  AxiosError<RegisterStudentStep5Error>,
+  Options<RegisterStudentStep5Data>
+> => {
+  const mutationOptions: UseMutationOptions<
+    RegisterStudentStep5Response,
+    AxiosError<RegisterStudentStep5Error>,
+    Options<RegisterStudentStep5Data>
+  > = {
+    mutationFn: async (localOptions) => {
+      const { data } = await registerStudentStep5({
         ...options,
         ...localOptions,
         throwOnError: true,

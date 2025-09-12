@@ -8,7 +8,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
+import { PhoneInput } from "@/components/ui/phone-input";
 import { InputHTMLAttributes } from "react";
 
 type InputWithLabelProps<T extends FieldValues> = {
@@ -18,12 +18,11 @@ type InputWithLabelProps<T extends FieldValues> = {
   description?: string;
 } & InputHTMLAttributes<HTMLInputElement>;
 
-export function InputWithLabel<T extends FieldValues>({
+export function PhoneInputWithLabel<T extends FieldValues>({
   fieldTitle,
   nameInSchema,
   className,
   description,
-  ...props
 }: InputWithLabelProps<T>) {
   const form = useFormContext();
 
@@ -36,11 +35,11 @@ export function InputWithLabel<T extends FieldValues>({
           <FormLabel htmlFor={nameInSchema}>{fieldTitle}</FormLabel>
 
           <FormControl>
-            <Input
-              id={nameInSchema}
-              className={`disabled:text-blue-500 dark:disabled:text-yellow-300 disabled:opacity-75 ${className}`}
-              {...props}
+            <PhoneInput
+              placeholder="Placeholder"
               {...field}
+              defaultCountry="ET"
+              className={className}
             />
           </FormControl>
           {form.formState.errors[nameInSchema] ? (

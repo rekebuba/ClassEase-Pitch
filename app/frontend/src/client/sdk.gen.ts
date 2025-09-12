@@ -15,6 +15,21 @@ import type {
   RegisterNewAdminData,
   RegisterNewAdminResponses,
   RegisterNewAdminErrors,
+  RegisterStudentStep1Data,
+  RegisterStudentStep1Responses,
+  RegisterStudentStep1Errors,
+  RegisterStudentStep2Data,
+  RegisterStudentStep2Responses,
+  RegisterStudentStep2Errors,
+  RegisterStudentStep3Data,
+  RegisterStudentStep3Responses,
+  RegisterStudentStep3Errors,
+  RegisterStudentStep4Data,
+  RegisterStudentStep4Responses,
+  RegisterStudentStep4Errors,
+  RegisterStudentStep5Data,
+  RegisterStudentStep5Responses,
+  RegisterStudentStep5Errors,
   RegisterNewStudentData,
   RegisterNewStudentResponses,
   RegisterNewStudentErrors,
@@ -102,6 +117,11 @@ import {
   zLoginResponse,
   zLogoutResponse,
   zRegisterNewAdminResponse,
+  zRegisterStudentStep1Response,
+  zRegisterStudentStep2Response,
+  zRegisterStudentStep3Response,
+  zRegisterStudentStep4Response,
+  zRegisterStudentStep5Response,
   zRegisterNewStudentResponse,
   zRegisterNewTeacherResponse,
   zGetYearsResponse,
@@ -219,6 +239,131 @@ export const registerNewAdmin = <ThrowOnError extends boolean = false>(
       return await zRegisterNewAdminResponse.parseAsync(data);
     },
     url: "/api/v1/register/admins",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+};
+
+/**
+ * Register Student Step1
+ * Validate student data for each step
+ */
+export const registerStudentStep1 = <ThrowOnError extends boolean = false>(
+  options: Options<RegisterStudentStep1Data, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).post<
+    RegisterStudentStep1Responses,
+    RegisterStudentStep1Errors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    responseValidator: async (data) => {
+      return await zRegisterStudentStep1Response.parseAsync(data);
+    },
+    url: "/api/v1/register/students/step1",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+};
+
+/**
+ * Register Student Step2
+ * Validate student data for each step
+ */
+export const registerStudentStep2 = <ThrowOnError extends boolean = false>(
+  options: Options<RegisterStudentStep2Data, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).post<
+    RegisterStudentStep2Responses,
+    RegisterStudentStep2Errors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    responseValidator: async (data) => {
+      return await zRegisterStudentStep2Response.parseAsync(data);
+    },
+    url: "/api/v1/register/students/step2",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+};
+
+/**
+ * Register Student Step3
+ * Validate student data for each step
+ */
+export const registerStudentStep3 = <ThrowOnError extends boolean = false>(
+  options: Options<RegisterStudentStep3Data, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).post<
+    RegisterStudentStep3Responses,
+    RegisterStudentStep3Errors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    responseValidator: async (data) => {
+      return await zRegisterStudentStep3Response.parseAsync(data);
+    },
+    url: "/api/v1/register/students/step3",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+};
+
+/**
+ * Register Student Step4
+ * Validate student data for each step
+ */
+export const registerStudentStep4 = <ThrowOnError extends boolean = false>(
+  options: Options<RegisterStudentStep4Data, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).post<
+    RegisterStudentStep4Responses,
+    RegisterStudentStep4Errors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    responseValidator: async (data) => {
+      return await zRegisterStudentStep4Response.parseAsync(data);
+    },
+    url: "/api/v1/register/students/step4",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
+  });
+};
+
+/**
+ * Register Student Step5
+ * Validate student data for each step
+ */
+export const registerStudentStep5 = <ThrowOnError extends boolean = false>(
+  options: Options<RegisterStudentStep5Data, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).post<
+    RegisterStudentStep5Responses,
+    RegisterStudentStep5Errors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    responseValidator: async (data) => {
+      return await zRegisterStudentStep5Response.parseAsync(data);
+    },
+    url: "/api/v1/register/students/step5",
     ...options,
     headers: {
       "Content-Type": "application/json",

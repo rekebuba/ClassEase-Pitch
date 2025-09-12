@@ -10,7 +10,13 @@ from starlette import status
 from api.v1.routers.dependencies import SessionDep
 from api.v1.routers.registrations.schema import (
     RegistrationResponse,
+    RegistrationStep,
     StudentRegistrationForm,
+    StudRegStep1,
+    StudRegStep2,
+    StudRegStep3,
+    StudRegStep4,
+    StudRegStep5,
 )
 from models.admin import Admin
 from models.grade import Grade
@@ -26,12 +32,10 @@ from schema.schema import SuccessResponseSchema
 router = APIRouter(prefix="/register", tags=["registration"])
 
 
-@router.post(
-    "/admins", response_model=SuccessResponseSchema[RegistrationResponse, None, None]
-)
+@router.post("/admins", response_model=RegistrationResponse)
 def register_new_admin(
     session: SessionDep, admin_data: AdminSchema
-) -> SuccessResponseSchema[RegistrationResponse, None, None]:
+) -> RegistrationResponse:
     """Registers a new admin in the system."""
 
     # Create SQLAlchemy model instance
@@ -49,10 +53,49 @@ def register_new_admin(
     session.add(new_admin)
     session.commit()
 
-    return SuccessResponseSchema(
-        data=RegistrationResponse(id=new_admin.id),
-        message="Admin Registered Successfully",
+    return RegistrationResponse(
+        id=new_admin.id, message="Admin Registered Successfully"
     )
+
+
+@router.post("/students/step1", response_model=RegistrationStep)
+def register_student_step1(
+    session: SessionDep, student_data: StudRegStep1
+) -> RegistrationStep:
+    """Validate student data for each step"""
+    return RegistrationStep(message="Student Step 1 Successful")
+
+
+@router.post("/students/step2", response_model=RegistrationStep)
+def register_student_step2(
+    session: SessionDep, student_data: StudRegStep2
+) -> RegistrationStep:
+    """Validate student data for each step"""
+    return RegistrationStep(message="Student Step 2 Successful")
+
+
+@router.post("/students/step3", response_model=RegistrationStep)
+def register_student_step3(
+    session: SessionDep, student_data: StudRegStep3
+) -> RegistrationStep:
+    """Validate student data for each step"""
+    return RegistrationStep(message="Student Step 3 Successful")
+
+
+@router.post("/students/step4", response_model=RegistrationStep)
+def register_student_step4(
+    session: SessionDep, student_data: StudRegStep4
+) -> RegistrationStep:
+    """Validate student data for each step"""
+    return RegistrationStep(message="Student Step 4 Successful")
+
+
+@router.post("/students/step5", response_model=RegistrationStep)
+def register_student_step5(
+    session: SessionDep, student_data: StudRegStep5
+) -> RegistrationStep:
+    """Validate student data for each step"""
+    return RegistrationStep(message="Student Step 5 Successful")
 
 
 @router.post("/students", response_model=RegistrationResponse)
