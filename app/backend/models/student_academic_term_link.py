@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 from sqlalchemy import Float, Integer
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlmodel import ForeignKey
+from sqlalchemy import ForeignKey
 
 from models.base.base_model import Base
 from models.base.column_type import UUIDType
