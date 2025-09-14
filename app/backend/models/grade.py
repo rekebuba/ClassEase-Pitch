@@ -80,6 +80,13 @@ class Grade(BaseModel):
         repr=False,
         passive_deletes=True,
     )
+    students: Mapped[List["Student"]] = relationship(
+        "Student",
+        back_populates="grade",
+        default_factory=list,
+        repr=False,
+        passive_deletes=True,
+    )
     teacher_term_records: Mapped[List["TeacherTermRecord"]] = relationship(
         "TeacherTermRecord",
         back_populates="grade",

@@ -112,6 +112,9 @@ import type {
   GetTeacherBasicInfoResponses,
   GetStudentBasicInfoData,
   GetStudentBasicInfoResponses,
+  GetStudentsData,
+  GetStudentsResponses,
+  GetStudentsErrors,
 } from "./types.gen";
 import {
   zLoginResponse,
@@ -151,6 +154,7 @@ import {
   zGetAdminBasicInfoResponse,
   zGetTeacherBasicInfoResponse,
   zGetStudentBasicInfoResponse,
+  zGetStudentsResponse,
 } from "./zod.gen";
 import { client as _heyApiClient } from "./client.gen";
 
@@ -1155,6 +1159,33 @@ export const getStudentBasicInfo = <ThrowOnError extends boolean = false>(
       },
     ],
     url: "/api/v1/me/student",
+    ...options,
+  });
+};
+
+/**
+ * Get Students
+ * This endpoint will return students based on the provided filters.
+ */
+export const getStudents = <ThrowOnError extends boolean = false>(
+  options: Options<GetStudentsData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).get<
+    GetStudentsResponses,
+    GetStudentsErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    responseValidator: async (data) => {
+      return await zGetStudentsResponse.parseAsync(data);
+    },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
+    url: "/api/v1/students/",
     ...options,
   });
 };

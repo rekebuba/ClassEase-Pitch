@@ -4,7 +4,8 @@ import uuid
 from datetime import date
 from typing import TYPE_CHECKING, List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
+from pydantic_extra_types.phone_numbers import PhoneNumber
 
 from utils.enum import BloodTypeEnum, GenderEnum, StudentApplicationStatusEnum
 from utils.utils import to_camel
@@ -43,30 +44,30 @@ class StudentSchema(BaseModel):
     city: str
     state: str
     postal_code: str
-    father_phone: str
-    mother_phone: str
-    parent_email: str
-    grand_father_name: Optional[str] = None
-    nationality: Optional[str] = None
+    father_phone: PhoneNumber
+    mother_phone: PhoneNumber
+    parent_email: EmailStr
+    grand_father_name: Optional[str]
+    nationality: Optional[str]
     blood_type: BloodTypeEnum = BloodTypeEnum.UNKNOWN
-    student_photo: Optional[str] = None
-    previous_school: Optional[str] = None
-    previous_grades: Optional[str] = None
-    transportation: Optional[str] = None
-    guardian_name: Optional[str] = None
-    guardian_phone: Optional[str] = None
-    guardian_relation: Optional[str] = None
-    emergency_contact_name: Optional[str] = None
-    emergency_contact_phone: Optional[str] = None
-    disability_details: Optional[str] = None
-    sibling_details: Optional[str] = None
-    medical_details: Optional[str] = None
-    sibling_in_school: bool = False
-    has_medical_condition: bool = False
-    has_disability: bool = False
-    is_transfer: bool = False
+    student_photo: Optional[str]
+    previous_school: Optional[str]
+    previous_grades: Optional[str]
+    transportation: Optional[str]
+    guardian_name: Optional[str]
+    guardian_phone: Optional[PhoneNumber]
+    guardian_relation: Optional[str]
+    emergency_contact_name: Optional[str]
+    emergency_contact_phone: Optional[str]
+    disability_details: Optional[str]
+    sibling_details: Optional[str]
+    medical_details: Optional[str]
+    sibling_in_school: bool
+    has_medical_condition: bool
+    has_disability: bool
+    is_transfer: bool
     status: StudentApplicationStatusEnum = StudentApplicationStatusEnum.PENDING
-    user_id: Optional[uuid.UUID] = None
+    user_id: Optional[uuid.UUID]
 
     @classmethod
     def default_fields(cls) -> set[str]:

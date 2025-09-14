@@ -21,7 +21,7 @@ import type {
   TeacherApplication,
   TeacherApplicationWithDetails,
 } from "@/lib/api-validation";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   AlertTriangle,
   Award,
@@ -43,6 +43,7 @@ export const Route = createFileRoute("/admin/registration/teacher")({
 });
 
 function RouteComponent() {
+  const navigate = useNavigate();
   const [teachers, setTeachers] = useState<TeacherApplication[]>([]);
   const [selectedTeacher, setSelectedTeacher] =
     useState<TeacherApplicationWithDetails | null>(null);
@@ -218,10 +219,9 @@ function RouteComponent() {
                 </CardDescription>
               </div>
               <Button
-                onClick={() => {
-                  // Navigate to new application page
-                  window.location.href = "/admin/teacher/registration/new";
-                }}
+                onClick={() =>
+                  navigate({ to: "/admin/registration/new-teacher" })
+                }
                 className="bg-blue-600 text-white hover:bg-blue-700"
               >
                 New Application

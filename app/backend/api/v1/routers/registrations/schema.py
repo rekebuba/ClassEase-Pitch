@@ -58,7 +58,9 @@ class StudRegStep2(BaseModel):
     @model_validator(mode="after")
     def validate_transfer_details(self) -> "StudRegStep2":
         if self.is_transfer and not self.previous_school:
-            raise ValueError("previous_school must be provided if is_transfer is True")
+            raise ValueError(
+                "previousSchool Must be provided if student is Transferred"
+            )
         if not self.is_transfer:
             self.previous_school = None
         return self
@@ -109,6 +111,22 @@ class StudRegStep5(BaseModel):
     medical_details: Optional[str] = Field(default=None)
     has_disability: bool = Field(default=False)
     disability_details: Optional[str] = Field(default=None)
+
+    @model_validator(mode="after")
+    def validate_medical_details(self) -> "StudRegStep5":
+        if self.has_medical_condition and not self.medical_details:
+            raise ValueError(
+                "medicalDetails Must be provided if has Medical Conditions"
+            )
+        if not self.has_medical_condition:
+            self.medical_details = None
+
+        if self.has_disability and not self.disability_details:
+            raise ValueError("disabilityDetails Must be provided if has Disability")
+        if not self.has_disability:
+            self.disability_details = None
+
+        return self
 
 
 class StudentRegistrationForm(

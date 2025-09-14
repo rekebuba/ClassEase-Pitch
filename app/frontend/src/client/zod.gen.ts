@@ -271,28 +271,28 @@ export const zStudentSchema = z.object({
   postalCode: z.string(),
   fatherPhone: z.string(),
   motherPhone: z.string(),
-  parentEmail: z.string(),
-  grandFatherName: z.optional(z.union([z.string(), z.null()])),
-  nationality: z.optional(z.union([z.string(), z.null()])),
+  parentEmail: z.email(),
+  grandFatherName: z.union([z.string(), z.null()]),
+  nationality: z.union([z.string(), z.null()]),
   bloodType: z.optional(zBloodTypeEnum),
-  studentPhoto: z.optional(z.union([z.string(), z.null()])),
-  previousSchool: z.optional(z.union([z.string(), z.null()])),
-  previousGrades: z.optional(z.union([z.string(), z.null()])),
-  transportation: z.optional(z.union([z.string(), z.null()])),
-  guardianName: z.optional(z.union([z.string(), z.null()])),
-  guardianPhone: z.optional(z.union([z.string(), z.null()])),
-  guardianRelation: z.optional(z.union([z.string(), z.null()])),
-  emergencyContactName: z.optional(z.union([z.string(), z.null()])),
-  emergencyContactPhone: z.optional(z.union([z.string(), z.null()])),
-  disabilityDetails: z.optional(z.union([z.string(), z.null()])),
-  siblingDetails: z.optional(z.union([z.string(), z.null()])),
-  medicalDetails: z.optional(z.union([z.string(), z.null()])),
-  siblingInSchool: z.optional(z.boolean()).default(false),
-  hasMedicalCondition: z.optional(z.boolean()).default(false),
-  hasDisability: z.optional(z.boolean()).default(false),
-  isTransfer: z.optional(z.boolean()).default(false),
+  studentPhoto: z.union([z.string(), z.null()]),
+  previousSchool: z.union([z.string(), z.null()]),
+  previousGrades: z.union([z.string(), z.null()]),
+  transportation: z.union([z.string(), z.null()]),
+  guardianName: z.union([z.string(), z.null()]),
+  guardianPhone: z.union([z.string(), z.null()]),
+  guardianRelation: z.union([z.string(), z.null()]),
+  emergencyContactName: z.union([z.string(), z.null()]),
+  emergencyContactPhone: z.union([z.string(), z.null()]),
+  disabilityDetails: z.union([z.string(), z.null()]),
+  siblingDetails: z.union([z.string(), z.null()]),
+  medicalDetails: z.union([z.string(), z.null()]),
+  siblingInSchool: z.boolean(),
+  hasMedicalCondition: z.boolean(),
+  hasDisability: z.boolean(),
+  isTransfer: z.boolean(),
   status: z.optional(zStudentApplicationStatusEnum),
-  userId: z.optional(z.union([z.uuid(), z.null()])),
+  userId: z.union([z.uuid(), z.null()]),
 });
 
 /**
@@ -740,28 +740,28 @@ export const zStudentWithRelatedSchema = z.object({
   postalCode: z.string(),
   fatherPhone: z.string(),
   motherPhone: z.string(),
-  parentEmail: z.string(),
-  grandFatherName: z.optional(z.union([z.string(), z.null()])),
-  nationality: z.optional(z.union([z.string(), z.null()])),
+  parentEmail: z.email(),
+  grandFatherName: z.union([z.string(), z.null()]),
+  nationality: z.union([z.string(), z.null()]),
   bloodType: z.optional(zBloodTypeEnum),
-  studentPhoto: z.optional(z.union([z.string(), z.null()])),
-  previousSchool: z.optional(z.union([z.string(), z.null()])),
-  previousGrades: z.optional(z.union([z.string(), z.null()])),
-  transportation: z.optional(z.union([z.string(), z.null()])),
-  guardianName: z.optional(z.union([z.string(), z.null()])),
-  guardianPhone: z.optional(z.union([z.string(), z.null()])),
-  guardianRelation: z.optional(z.union([z.string(), z.null()])),
-  emergencyContactName: z.optional(z.union([z.string(), z.null()])),
-  emergencyContactPhone: z.optional(z.union([z.string(), z.null()])),
-  disabilityDetails: z.optional(z.union([z.string(), z.null()])),
-  siblingDetails: z.optional(z.union([z.string(), z.null()])),
-  medicalDetails: z.optional(z.union([z.string(), z.null()])),
-  siblingInSchool: z.optional(z.boolean()).default(false),
-  hasMedicalCondition: z.optional(z.boolean()).default(false),
-  hasDisability: z.optional(z.boolean()).default(false),
-  isTransfer: z.optional(z.boolean()).default(false),
+  studentPhoto: z.union([z.string(), z.null()]),
+  previousSchool: z.union([z.string(), z.null()]),
+  previousGrades: z.union([z.string(), z.null()]),
+  transportation: z.union([z.string(), z.null()]),
+  guardianName: z.union([z.string(), z.null()]),
+  guardianPhone: z.union([z.string(), z.null()]),
+  guardianRelation: z.union([z.string(), z.null()]),
+  emergencyContactName: z.union([z.string(), z.null()]),
+  emergencyContactPhone: z.union([z.string(), z.null()]),
+  disabilityDetails: z.union([z.string(), z.null()]),
+  siblingDetails: z.union([z.string(), z.null()]),
+  medicalDetails: z.union([z.string(), z.null()]),
+  siblingInSchool: z.boolean(),
+  hasMedicalCondition: z.boolean(),
+  hasDisability: z.boolean(),
+  isTransfer: z.boolean(),
   status: z.optional(zStudentApplicationStatusEnum),
-  userId: z.optional(z.union([z.uuid(), z.null()])),
+  userId: z.union([z.uuid(), z.null()]),
 });
 
 /**
@@ -1026,6 +1026,45 @@ export const zStudRegStep5 = z.object({
   medicalDetails: z.optional(z.union([z.string(), z.null()])),
   hasDisability: z.optional(z.boolean()).default(false),
   disabilityDetails: z.optional(z.union([z.string(), z.null()])),
+});
+
+/**
+ * StudentCurrentGrade
+ */
+export const zStudentCurrentGrade = z.object({
+  id: z.uuid(),
+  grade: zGradeEnum,
+});
+
+/**
+ * StudentBasicInfo
+ */
+export const zStudentBasicInfo = z.object({
+  id: z.uuid(),
+  firstName: z.string(),
+  fatherName: z.string(),
+  grandFatherName: z.union([z.string(), z.null()]),
+  dateOfBirth: z.iso.date(),
+  gender: zGenderEnum,
+  address: z.string(),
+  city: z.string(),
+  state: z.string(),
+  postalCode: z.string(),
+  fatherPhone: z.string(),
+  motherPhone: z.string(),
+  parentEmail: z.email(),
+  bloodType: z.optional(zBloodTypeEnum),
+  previousSchool: z.union([z.string(), z.null()]),
+  guardianName: z.union([z.string(), z.null()]),
+  guardianPhone: z.union([z.string(), z.null()]),
+  guardianRelation: z.union([z.string(), z.null()]),
+  siblingInSchool: z.boolean(),
+  hasMedicalCondition: z.boolean(),
+  hasDisability: z.boolean(),
+  isTransfer: z.boolean(),
+  status: zStudentApplicationStatusEnum,
+  grade: zStudentCurrentGrade,
+  createdAt: z.iso.datetime(),
 });
 
 /**
@@ -1782,3 +1821,18 @@ export const zGetStudentBasicInfoData = z.object({
  * Successful Response
  */
 export const zGetStudentBasicInfoResponse = zStudentInfo;
+
+export const zGetStudentsData = z.object({
+  body: z.optional(z.never()),
+  path: z.optional(z.never()),
+  query: z.object({
+    yearId: z.uuid(),
+    q: z.optional(z.union([z.string(), z.null()])),
+  }),
+});
+
+/**
+ * Response Get Students Api V1 Students  Get
+ * Successful Response
+ */
+export const zGetStudentsResponse = z.array(zStudentBasicInfo);

@@ -10,13 +10,18 @@ import {
 } from "redux-persist";
 import { api } from "./api"; // this is the generated file
 import { rtkQueryErrorLogger } from "./middleware/global-error";
-import { persistedAuthReducer, persistedYearReducer } from "./persist";
+import {
+  persistedAuthReducer,
+  persistedStudentRegistrationForm,
+  persistedYearReducer,
+} from "./persist";
 
 export const store = configureStore({
   reducer: {
     [api.reducerPath]: api.reducer,
     auth: persistedAuthReducer,
     year: persistedYearReducer,
+    studentRegistrationForm: persistedStudentRegistrationForm,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

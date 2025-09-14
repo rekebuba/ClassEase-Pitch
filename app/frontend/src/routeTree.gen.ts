@@ -17,6 +17,7 @@ import { Route as AuthenticationIndexRouteImport } from './routes/authentication
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminYearIndexRouteImport } from './routes/admin/year/index'
 import { Route as AdminSubjectsIndexRouteImport } from './routes/admin/subjects/index'
+import { Route as AdminStudentsIndexRouteImport } from './routes/admin/students/index'
 import { Route as AdminGradesIndexRouteImport } from './routes/admin/grades/index'
 import { Route as AdminRegistrationTeacherRouteImport } from './routes/admin/registration/teacher'
 import { Route as AdminRegistrationStudentRouteImport } from './routes/admin/registration/student'
@@ -24,6 +25,7 @@ import { Route as AdminRegistrationNewTeacherRouteImport } from './routes/admin/
 import { Route as AdminRegistrationNewStudentRouteImport } from './routes/admin/registration/new-student'
 import { Route as AdminYearYearIdIndexRouteImport } from './routes/admin/year/$yearId/index'
 import { Route as AdminSubjectsSubjectIdIndexRouteImport } from './routes/admin/subjects/$subjectId/index'
+import { Route as AdminStudentsStudentIdIndexRouteImport } from './routes/admin/students/$studentId/index'
 import { Route as AdminGradesGradeIdIndexRouteImport } from './routes/admin/grades/$gradeId/index'
 
 const AdminRouteRoute = AdminRouteRouteImport.update({
@@ -66,6 +68,11 @@ const AdminSubjectsIndexRoute = AdminSubjectsIndexRouteImport.update({
   path: '/subjects/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const AdminStudentsIndexRoute = AdminStudentsIndexRouteImport.update({
+  id: '/students/',
+  path: '/students/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
 const AdminGradesIndexRoute = AdminGradesIndexRouteImport.update({
   id: '/grades/',
   path: '/grades/',
@@ -106,6 +113,12 @@ const AdminSubjectsSubjectIdIndexRoute =
     path: '/subjects/$subjectId/',
     getParentRoute: () => AdminRouteRoute,
   } as any)
+const AdminStudentsStudentIdIndexRoute =
+  AdminStudentsStudentIdIndexRouteImport.update({
+    id: '/students/$studentId/',
+    path: '/students/$studentId/',
+    getParentRoute: () => AdminRouteRoute,
+  } as any)
 const AdminGradesGradeIdIndexRoute = AdminGradesGradeIdIndexRouteImport.update({
   id: '/grades/$gradeId/',
   path: '/grades/$gradeId/',
@@ -124,9 +137,11 @@ export interface FileRoutesByFullPath {
   '/admin/registration/student': typeof AdminRegistrationStudentRoute
   '/admin/registration/teacher': typeof AdminRegistrationTeacherRoute
   '/admin/grades': typeof AdminGradesIndexRoute
+  '/admin/students': typeof AdminStudentsIndexRoute
   '/admin/subjects': typeof AdminSubjectsIndexRoute
   '/admin/year': typeof AdminYearIndexRoute
   '/admin/grades/$gradeId': typeof AdminGradesGradeIdIndexRoute
+  '/admin/students/$studentId': typeof AdminStudentsStudentIdIndexRoute
   '/admin/subjects/$subjectId': typeof AdminSubjectsSubjectIdIndexRoute
   '/admin/year/$yearId': typeof AdminYearYearIdIndexRoute
 }
@@ -141,9 +156,11 @@ export interface FileRoutesByTo {
   '/admin/registration/student': typeof AdminRegistrationStudentRoute
   '/admin/registration/teacher': typeof AdminRegistrationTeacherRoute
   '/admin/grades': typeof AdminGradesIndexRoute
+  '/admin/students': typeof AdminStudentsIndexRoute
   '/admin/subjects': typeof AdminSubjectsIndexRoute
   '/admin/year': typeof AdminYearIndexRoute
   '/admin/grades/$gradeId': typeof AdminGradesGradeIdIndexRoute
+  '/admin/students/$studentId': typeof AdminStudentsStudentIdIndexRoute
   '/admin/subjects/$subjectId': typeof AdminSubjectsSubjectIdIndexRoute
   '/admin/year/$yearId': typeof AdminYearYearIdIndexRoute
 }
@@ -160,9 +177,11 @@ export interface FileRoutesById {
   '/admin/registration/student': typeof AdminRegistrationStudentRoute
   '/admin/registration/teacher': typeof AdminRegistrationTeacherRoute
   '/admin/grades/': typeof AdminGradesIndexRoute
+  '/admin/students/': typeof AdminStudentsIndexRoute
   '/admin/subjects/': typeof AdminSubjectsIndexRoute
   '/admin/year/': typeof AdminYearIndexRoute
   '/admin/grades/$gradeId/': typeof AdminGradesGradeIdIndexRoute
+  '/admin/students/$studentId/': typeof AdminStudentsStudentIdIndexRoute
   '/admin/subjects/$subjectId/': typeof AdminSubjectsSubjectIdIndexRoute
   '/admin/year/$yearId/': typeof AdminYearYearIdIndexRoute
 }
@@ -180,9 +199,11 @@ export interface FileRouteTypes {
     | '/admin/registration/student'
     | '/admin/registration/teacher'
     | '/admin/grades'
+    | '/admin/students'
     | '/admin/subjects'
     | '/admin/year'
     | '/admin/grades/$gradeId'
+    | '/admin/students/$studentId'
     | '/admin/subjects/$subjectId'
     | '/admin/year/$yearId'
   fileRoutesByTo: FileRoutesByTo
@@ -197,9 +218,11 @@ export interface FileRouteTypes {
     | '/admin/registration/student'
     | '/admin/registration/teacher'
     | '/admin/grades'
+    | '/admin/students'
     | '/admin/subjects'
     | '/admin/year'
     | '/admin/grades/$gradeId'
+    | '/admin/students/$studentId'
     | '/admin/subjects/$subjectId'
     | '/admin/year/$yearId'
   id:
@@ -215,9 +238,11 @@ export interface FileRouteTypes {
     | '/admin/registration/student'
     | '/admin/registration/teacher'
     | '/admin/grades/'
+    | '/admin/students/'
     | '/admin/subjects/'
     | '/admin/year/'
     | '/admin/grades/$gradeId/'
+    | '/admin/students/$studentId/'
     | '/admin/subjects/$subjectId/'
     | '/admin/year/$yearId/'
   fileRoutesById: FileRoutesById
@@ -288,6 +313,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSubjectsIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/students/': {
+      id: '/admin/students/'
+      path: '/students'
+      fullPath: '/admin/students'
+      preLoaderRoute: typeof AdminStudentsIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/grades/': {
       id: '/admin/grades/'
       path: '/grades'
@@ -337,6 +369,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSubjectsSubjectIdIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
+    '/admin/students/$studentId/': {
+      id: '/admin/students/$studentId/'
+      path: '/students/$studentId'
+      fullPath: '/admin/students/$studentId'
+      preLoaderRoute: typeof AdminStudentsStudentIdIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
     '/admin/grades/$gradeId/': {
       id: '/admin/grades/$gradeId/'
       path: '/grades/$gradeId'
@@ -354,9 +393,11 @@ interface AdminRouteRouteChildren {
   AdminRegistrationStudentRoute: typeof AdminRegistrationStudentRoute
   AdminRegistrationTeacherRoute: typeof AdminRegistrationTeacherRoute
   AdminGradesIndexRoute: typeof AdminGradesIndexRoute
+  AdminStudentsIndexRoute: typeof AdminStudentsIndexRoute
   AdminSubjectsIndexRoute: typeof AdminSubjectsIndexRoute
   AdminYearIndexRoute: typeof AdminYearIndexRoute
   AdminGradesGradeIdIndexRoute: typeof AdminGradesGradeIdIndexRoute
+  AdminStudentsStudentIdIndexRoute: typeof AdminStudentsStudentIdIndexRoute
   AdminSubjectsSubjectIdIndexRoute: typeof AdminSubjectsSubjectIdIndexRoute
   AdminYearYearIdIndexRoute: typeof AdminYearYearIdIndexRoute
 }
@@ -368,9 +409,11 @@ const AdminRouteRouteChildren: AdminRouteRouteChildren = {
   AdminRegistrationStudentRoute: AdminRegistrationStudentRoute,
   AdminRegistrationTeacherRoute: AdminRegistrationTeacherRoute,
   AdminGradesIndexRoute: AdminGradesIndexRoute,
+  AdminStudentsIndexRoute: AdminStudentsIndexRoute,
   AdminSubjectsIndexRoute: AdminSubjectsIndexRoute,
   AdminYearIndexRoute: AdminYearIndexRoute,
   AdminGradesGradeIdIndexRoute: AdminGradesGradeIdIndexRoute,
+  AdminStudentsStudentIdIndexRoute: AdminStudentsStudentIdIndexRoute,
   AdminSubjectsSubjectIdIndexRoute: AdminSubjectsSubjectIdIndexRoute,
   AdminYearYearIdIndexRoute: AdminYearYearIdIndexRoute,
 }

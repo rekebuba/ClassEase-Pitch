@@ -3,6 +3,9 @@ import {
   registerNewStudentMutation,
   registerStudentStep1Mutation,
   registerStudentStep2Mutation,
+  registerStudentStep3Mutation,
+  registerStudentStep4Mutation,
+  registerStudentStep5Mutation,
 } from "@/client/@tanstack/react-query.gen";
 import {
   StudentRegistrationForm,
@@ -21,6 +24,7 @@ import {
   zStudRegStep4,
   zStudRegStep5,
 } from "@/client/zod.gen";
+import AdvanceTooltip from "@/components/advance-tooltip";
 import { CheckboxWithLabel } from "@/components/inputs/checkbox-labeled";
 import { DateWithLabel } from "@/components/inputs/date-labeled";
 import { InputWithLabel } from "@/components/inputs/input-labeled";
@@ -49,47 +53,22 @@ import {
   StepperTrigger,
 } from "@/components/ui/stepper";
 import { store } from "@/store/main-store";
+import {
+  resetForm,
+  setFormData,
+  setFormStep,
+} from "@/store/slice/student-registration-slice";
+import { extractFirstWord } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Loader, Upload } from "lucide-react";
+import { Loader, RefreshCcw, Save, Upload } from "lucide-react";
 import { useCallback, useState } from "react";
-import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 
 // undefined fields are optional
-const initialFormData: StudentRegistrationForm = {
-  registeredForGradeId: "",
-  firstName: "",
-  fatherName: "",
-  grandFatherName: "",
-  dateOfBirth: "",
-  gender: undefined as any,
-  nationality: "",
-  bloodType: undefined,
-  studentPhoto: undefined,
-  isTransfer: false,
-  previousSchool: "",
-  address: "",
-  city: "",
-  state: "",
-  postalCode: "",
-  fatherPhone: "",
-  motherPhone: "",
-  parentEmail: "",
-  guardianName: "",
-  guardianPhone: "",
-  guardianRelation: null,
-  emergencyContactName: null,
-  emergencyContactPhone: null,
-  hasMedicalCondition: false,
-  medicalDetails: "",
-  hasDisability: false,
-  disabilityDetails: "",
-  transportation: null,
-  siblingInSchool: false,
-  siblingDetails: "",
-};
 
 const steps = [
   {
@@ -125,76 +104,80 @@ export const Route = createFileRoute("/admin/registration/new-student")({
 
 function RouteComponent() {
   const yearId = store.getState().year.id;
+  const { data: initialData, step } = store.getState().studentRegistrationForm;
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const [currentStep, setCurrentStep] = useState(1);
-  const [defaultValues] = useState<StudentRegistrationForm>(initialFormData);
+  const [currentStep, setCurrentStep] = useState(step);
+  const [savePending, setSavePending] = useState(false);
+  const [resetPending, setResetPending] = useState(false);
+
+  const [step1InitialValues] = useState<StudRegStep1>({
+    firstName: initialData.firstName,
+    fatherName: initialData.fatherName,
+    grandFatherName: initialData.grandFatherName,
+    dateOfBirth: initialData.dateOfBirth,
+    gender: initialData.gender,
+    nationality: initialData.nationality,
+  });
+  const [step2InitialValues] = useState<StudRegStep2>({
+    registeredForGradeId: initialData.registeredForGradeId,
+    transportation: initialData.transportation,
+    isTransfer: initialData.isTransfer,
+    previousSchool: initialData.previousSchool,
+  });
+
+  const [step3InitialValues] = useState<StudRegStep3>({
+    address: initialData.address,
+    city: initialData.city,
+    state: initialData.state,
+    postalCode: initialData.postalCode,
+    fatherPhone: initialData.fatherPhone,
+    motherPhone: initialData.motherPhone,
+    parentEmail: initialData.parentEmail,
+  });
+  const [step4InitialValues] = useState<StudRegStep4>({
+    guardianName: initialData.guardianName,
+    guardianPhone: initialData.guardianPhone,
+    guardianRelation: initialData.guardianRelation,
+    emergencyContactName: initialData.emergencyContactName,
+    emergencyContactPhone: initialData.emergencyContactPhone,
+    siblingInSchool: initialData.siblingInSchool,
+    siblingDetails: initialData.siblingDetails,
+  });
+  const [step5InitialValues] = useState<StudRegStep5>({
+    hasMedicalCondition: initialData.hasMedicalCondition,
+    medicalDetails: initialData.medicalDetails,
+    hasDisability: initialData.hasDisability,
+    disabilityDetails: initialData.disabilityDetails,
+  });
 
   const form = useForm<StudentRegistrationForm>({
     resolver: zodResolver(zStudentRegistrationForm),
-    defaultValues,
+    defaultValues: initialData,
   });
   const step1Form = useForm<StudRegStep1>({
     resolver: zodResolver(zStudRegStep1),
-    defaultValues: {
-      firstName: defaultValues.firstName,
-      fatherName: defaultValues.fatherName,
-      grandFatherName: defaultValues.grandFatherName,
-      dateOfBirth: defaultValues.dateOfBirth,
-      gender: defaultValues.gender,
-      nationality: defaultValues.nationality,
-    },
+    defaultValues: step1InitialValues,
   });
   const step2Form = useForm<StudRegStep2>({
     resolver: zodResolver(zStudRegStep2),
-    defaultValues: {
-      registeredForGradeId: defaultValues.registeredForGradeId,
-      transportation: defaultValues.transportation,
-      isTransfer: defaultValues.isTransfer,
-      previousSchool: defaultValues.previousSchool,
-    },
+    defaultValues: step2InitialValues,
   });
   const step3Form = useForm<StudRegStep3>({
     resolver: zodResolver(zStudRegStep3),
-    defaultValues: {
-      address: defaultValues.address,
-      city: defaultValues.city,
-      state: defaultValues.state,
-      postalCode: defaultValues.postalCode,
-      fatherPhone: defaultValues.fatherPhone,
-      motherPhone: defaultValues.motherPhone,
-      parentEmail: defaultValues.parentEmail,
-    },
+    defaultValues: step3InitialValues,
   });
   const step4Form = useForm<StudRegStep4>({
     resolver: zodResolver(zStudRegStep4),
-    defaultValues: {
-      guardianName: defaultValues.guardianName,
-      guardianPhone: defaultValues.guardianPhone,
-      guardianRelation: defaultValues.guardianRelation,
-      emergencyContactName: defaultValues.emergencyContactName,
-      emergencyContactPhone: defaultValues.emergencyContactPhone,
-      siblingInSchool: defaultValues.siblingInSchool,
-      siblingDetails: defaultValues.siblingDetails,
-    },
+    defaultValues: step4InitialValues,
   });
   const step5Form = useForm<StudRegStep5>({
     resolver: zodResolver(zStudRegStep5),
-    defaultValues: {
-      hasMedicalCondition: defaultValues.hasMedicalCondition,
-      medicalDetails: defaultValues.medicalDetails,
-      hasDisability: defaultValues.hasDisability,
-      disabilityDetails: defaultValues.disabilityDetails,
-    },
+    defaultValues: step5InitialValues,
   });
 
-  const {
-    formState: { isDirty },
-    reset,
-    handleSubmit,
-    setError,
-    setValue,
-  } = form;
+  const { reset, setError, setValue } = form;
 
   const { data: grades } = useQuery({
     ...getGradesOptions({
@@ -210,7 +193,8 @@ function RouteComponent() {
         style: { color: "green" },
       });
       handleCancel();
-      reset(defaultValues);
+      dispatch(resetForm());
+      reset(initialData);
     },
     onError: (error: any) => {
       const detail = error.response?.data?.detail;
@@ -238,15 +222,17 @@ function RouteComponent() {
         });
       });
       setCurrentStep(2);
+      dispatch(setFormData(form.getValues()));
+      dispatch(setFormStep(2));
     },
     onError: (error: any) => {
       const detail = error.response?.data?.detail;
 
-      if (detail && typeof detail === "object") {
-        Object.entries(detail).forEach(([field, message]) => {
-          setError(field as keyof StudentRegistrationForm, {
+      if (detail && Array.isArray(detail)) {
+        detail.forEach(({ loc, msg }: { loc: string[]; msg: string }) => {
+          step1Form.setError(extractFirstWord(loc, msg) as keyof StudRegStep1, {
             type: "server",
-            message: message as string,
+            message: msg,
           });
         });
       } else {
@@ -265,20 +251,109 @@ function RouteComponent() {
         });
       });
       setCurrentStep(3);
+      dispatch(setFormData(form.getValues()));
+      dispatch(setFormStep(3));
+    },
+    onError: (error: any) => {
+      const detail = error.response?.data?.detail;
+
+      if (detail && Array.isArray(detail)) {
+        detail.forEach(({ loc, msg }: { loc: string[]; msg: string }) => {
+          step2Form.setError(extractFirstWord(loc, msg) as keyof StudRegStep2, {
+            type: "server",
+            message: msg,
+          });
+        });
+      } else {
+        toast.error("Something went wrong. Failed to Validate Step 2.");
+      }
+    },
+  });
+
+  const step3Mutation = useMutation({
+    ...registerStudentStep3Mutation(),
+    onSuccess: () => {
+      const step3Values = step3Form.getValues();
+      Object.entries(step3Values).forEach(([key, value]) => {
+        setValue(key as keyof StudRegStep3, value, {
+          shouldDirty: true,
+        });
+      });
+      setCurrentStep(4);
+      dispatch(setFormData(form.getValues()));
+      dispatch(setFormStep(4));
     },
     onError: (error: any) => {
       const detail = error.response?.data?.detail;
       console.log(detail);
 
-      if (detail && typeof detail === "object") {
-        Object.entries(detail).forEach(([field, message]) => {
-          setError(field as keyof StudentRegistrationForm, {
+      if (detail && Array.isArray(detail)) {
+        detail.forEach(({ loc, msg }: { loc: string[]; msg: string }) => {
+          step3Form.setError(extractFirstWord(loc, msg) as keyof StudRegStep3, {
             type: "server",
-            message: message as string,
+            message: msg,
           });
         });
       } else {
-        toast.error("Something went wrong. Failed to Validate Step 1.");
+        toast.error("Something went wrong. Failed to Validate Step 3.");
+      }
+    },
+  });
+
+  const step4Mutation = useMutation({
+    ...registerStudentStep4Mutation(),
+    onSuccess: () => {
+      const step4Values = step4Form.getValues();
+      Object.entries(step4Values).forEach(([key, value]) => {
+        setValue(key as keyof StudRegStep4, value, {
+          shouldDirty: true,
+        });
+      });
+      setCurrentStep(5);
+      dispatch(setFormData(form.getValues()));
+      dispatch(setFormStep(5));
+    },
+    onError: (error: any) => {
+      const detail = error.response?.data?.detail;
+
+      if (detail && Array.isArray(detail)) {
+        detail.forEach(({ loc, msg }: { loc: string[]; msg: string }) => {
+          step4Form.setError(extractFirstWord(loc, msg) as keyof StudRegStep4, {
+            type: "server",
+            message: msg,
+          });
+        });
+      } else {
+        toast.error("Something went wrong. Failed to Validate Step 4.");
+      }
+    },
+  });
+
+  const step5Mutation = useMutation({
+    ...registerStudentStep5Mutation(),
+    onSuccess: () => {
+      const step5Values = step5Form.getValues();
+      Object.entries(step5Values).forEach(([key, value]) => {
+        setValue(key as keyof StudRegStep5, value, {
+          shouldDirty: true,
+        });
+      });
+      dispatch(setFormData(form.getValues()));
+      dispatch(setFormStep(5));
+      handleSave();
+    },
+    onError: (error: any) => {
+      const detail = error.response?.data?.detail;
+
+      if (detail && Array.isArray(detail)) {
+        detail.forEach(({ loc, msg }: { loc: string[]; msg: string }) => {
+          step5Form.setError(extractFirstWord(loc, msg) as keyof StudRegStep5, {
+            type: "server",
+            message: msg,
+          });
+        });
+      } else {
+        toast.error("Something went wrong. Failed to Validate Step 5.");
       }
     },
   });
@@ -291,22 +366,21 @@ function RouteComponent() {
     step2Mutation.mutate({ body: data }),
   );
 
-  // const onStep3Submit = step3Form.handleSubmit(
-  //   (data) => step3Mutation.mutate({ body: data }),
-  // );
+  const onStep3Submit = step3Form.handleSubmit((data) =>
+    step3Mutation.mutate({ body: data }),
+  );
 
-  // const onStep4Submit = step4Form.handleSubmit(
-  //   (data) => step4Mutation.mutate({ body: data }),
-  // );
+  const onStep4Submit = step4Form.handleSubmit((data) =>
+    step4Mutation.mutate({ body: data }),
+  );
 
-  // const onStep5Submit = step5Form.handleSubmit(
-  //   (data) => step5Mutation.mutate({ body: data }),
-  // );
+  const onStep5Submit = step5Form.handleSubmit((data) =>
+    step5Mutation.mutate({ body: data }),
+  );
 
-  const onValid: SubmitHandler<StudentRegistrationForm> = (data) => {
-    mutation.mutate({ body: data });
+  const handleSave = () => {
+    mutation.mutate({ body: form.getValues() });
   };
-  const handleSave = handleSubmit(onValid);
 
   const handleCancel = useCallback(() => {
     navigate({
@@ -389,12 +463,6 @@ function RouteComponent() {
                         type="file"
                         accept="image/*"
                         className="hidden"
-                        onChange={(e) =>
-                          updateFormData(
-                            "studentPhoto",
-                            e.target.files?.[0] || null,
-                          )
-                        }
                       />
                     </Label>
                   </div>
@@ -412,9 +480,7 @@ function RouteComponent() {
               <Button
                 type="submit"
                 onClick={onStep1Submit}
-                disabled={
-                  !step1Form.formState.isDirty || step1Mutation.isPending
-                }
+                disabled={step1Mutation.isPending}
                 className="px-8"
               >
                 {step1Mutation.isPending && <Loader className="animate-spin" />}
@@ -491,9 +557,7 @@ function RouteComponent() {
               <Button
                 type="submit"
                 onClick={onStep2Submit}
-                disabled={
-                  !step2Form.formState.isDirty || step2Mutation.isPending
-                }
+                disabled={step2Mutation.isPending}
                 className="px-8"
               >
                 {step2Mutation.isPending && <Loader className="animate-spin" />}
@@ -568,10 +632,12 @@ function RouteComponent() {
                 Previous
               </Button>
               <Button
-                onClick={() => setCurrentStep(4)}
-                disabled={currentStep >= steps.length}
+                type="submit"
+                onClick={onStep3Submit}
+                disabled={step3Mutation.isPending}
                 className="px-8"
               >
+                {step3Mutation.isPending && <Loader className="animate-spin" />}
                 Next Step
               </Button>
             </div>
@@ -669,10 +735,12 @@ function RouteComponent() {
                 Previous
               </Button>
               <Button
-                onClick={() => setCurrentStep(5)}
-                disabled={currentStep >= steps.length}
+                type="submit"
+                onClick={onStep4Submit}
+                disabled={step4Mutation.isPending}
                 className="px-8"
               >
+                {step4Mutation.isPending && <Loader className="animate-spin" />}
                 Next Step
               </Button>
             </div>
@@ -752,14 +820,16 @@ function RouteComponent() {
                 Previous
               </Button>
               <Button
-                disabled={!isDirty || mutation.isPending}
                 type="submit"
-                onClick={handleSave}
+                onClick={onStep5Submit}
+                disabled={step1Mutation.isPending || mutation.isPending}
                 className="px-8 bg-green-600 hover:bg-green-700"
               >
-                {mutation.isPending && <Loader className="animate-spin" />}
+                {(step5Mutation.isPending || mutation.isPending) && (
+                  <Loader className="animate-spin" />
+                )}
                 Submit Registration
-              </Button>
+              </Button>{" "}
             </div>
           </FormProvider>
         );
@@ -770,77 +840,89 @@ function RouteComponent() {
   };
 
   return (
-    // <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-    <>
-      <Card>
-        <CardHeader className="text-center">
+    <Card>
+      <CardHeader className="text-center">
+        <div className="flex justify-between items-center w-full">
+          <AdvanceTooltip
+            tooltip="Save Progress"
+            isPending={savePending}
+            size="sm"
+            onClick={() => {
+              setSavePending(true);
+              setTimeout(() => setSavePending(false), 500);
+              dispatch(
+                setFormData({
+                  ...step1Form.getValues(),
+                  ...step2Form.getValues(),
+                  ...step3Form.getValues(),
+                  ...step4Form.getValues(),
+                  ...step5Form.getValues(),
+                }),
+              );
+              dispatch(setFormStep(currentStep));
+            }}
+            className="ml-2 h-10 w-10 rounded-full"
+          >
+            <Save className="h-4 w-4" />
+          </AdvanceTooltip>
           <CardTitle className="text-3xl font-bold text-gray-800">
             Student Registration Form
           </CardTitle>
-          <CardDescription className="text-lg">
-            Complete all steps to register your student for the upcoming
-            academic year
-          </CardDescription>
-          <CardDescription className="space-y-8 text-center">
-            <Stepper value={currentStep} onValueChange={setCurrentStep}>
-              {steps.map(({ step, title, description }) => (
-                <StepperItem
-                  key={step}
-                  step={step}
-                  className="relative flex-1 flex-col!"
+          <AdvanceTooltip
+            tooltip="Reset Form"
+            isPending={resetPending}
+            size="sm"
+            onClick={() => {
+              setResetPending(true);
+              setTimeout(() => setResetPending(false), 300);
+              dispatch(resetForm());
+              form.reset(initialData);
+              step1Form.reset(step1InitialValues);
+              step2Form.reset(step2InitialValues);
+              step3Form.reset(step3InitialValues);
+              step4Form.reset(step4InitialValues);
+              step5Form.reset(step5InitialValues);
+              setCurrentStep(1);
+            }}
+            className="ml-2 h-10 w-10 rounded-full"
+          >
+            <RefreshCcw className="h-4 w-4" />
+          </AdvanceTooltip>
+        </div>
+        <CardDescription className="text-lg">
+          Complete all steps to register your student for the upcoming academic
+          year
+        </CardDescription>
+        <CardDescription className="space-y-8 text-center">
+          <Stepper value={currentStep} onValueChange={setCurrentStep}>
+            {steps.map(({ step, title, description }) => (
+              <StepperItem
+                key={step}
+                step={step}
+                className="relative flex-1 flex-col!"
+              >
+                <StepperTrigger
+                  className="flex-col gap-3 rounded"
+                  onClick={() => {}}
                 >
-                  <StepperTrigger
-                    className="flex-col gap-3 rounded"
-                    onClick={() => {}}
-                  >
-                    <StepperIndicator />
-                    <div className="space-y-0.5 px-2">
-                      <StepperTitle>{title}</StepperTitle>
-                      <StepperDescription>{description}</StepperDescription>
-                    </div>
-                  </StepperTrigger>
-                  {step < steps.length && (
-                    <StepperSeparator className="absolute inset-x-0 top-3 left-[calc(50%+0.75rem+0.125rem)] -order-1 m-0 -translate-y-1/2 group-data-[orientation=horizontal]/stepper:w-[calc(100%-1.5rem-0.25rem)] group-data-[orientation=horizontal]/stepper:flex-none" />
-                  )}
-                </StepperItem>
-              ))}
-            </Stepper>
-          </CardDescription>
-        </CardHeader>
+                  <StepperIndicator />
+                  <div className="space-y-0.5 px-2">
+                    <StepperTitle>{title}</StepperTitle>
+                    <StepperDescription>{description}</StepperDescription>
+                  </div>
+                </StepperTrigger>
+                {step < steps.length && (
+                  <StepperSeparator className="absolute inset-x-0 top-3 left-[calc(50%+0.75rem+0.125rem)] -order-1 m-0 -translate-y-1/2 group-data-[orientation=horizontal]/stepper:w-[calc(100%-1.5rem-0.25rem)] group-data-[orientation=horizontal]/stepper:flex-none" />
+                )}
+              </StepperItem>
+            ))}
+          </Stepper>
+        </CardDescription>
+      </CardHeader>
 
-        <CardContent className="p-8">
-          <div className="w-full">{renderStep()}</div>
-          {/* <div className="flex justify-between mt-8 pt-6 border-t">
-            <Button
-              variant="outline"
-              onClick={() => setCurrentStep((prev) => prev - 1)}
-              disabled={currentStep === 1}
-              className="px-8"
-            >
-              Previous
-            </Button>
-            {currentStep < totalSteps ? (
-              <Button
-                onClick={() => setCurrentStep((prev) => prev + 1)}
-                disabled={currentStep >= steps.length}
-                className="px-8"
-              >
-                Next Step
-              </Button>
-            ) : (
-              <Button
-                disabled={!isDirty || mutation.isPending}
-                type="submit"
-                onClick={handleSave}
-                className="px-8 bg-green-600 hover:bg-green-700"
-              >
-                {mutation.isPending && <Loader className="animate-spin" />}
-                Submit Registration
-              </Button>
-            )}
-          </div> */}
-        </CardContent>
-      </Card>
-    </>
+      <CardContent className="p-8">
+        <div className="w-full">{renderStep()}</div>
+      </CardContent>
+    </Card>
   );
 }

@@ -1,3 +1,4 @@
+import { getStudentsOptions } from "@/client/@tanstack/react-query.gen";
 import { StudentDetailDialog, StudentStatusBadge } from "@/components";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -18,253 +19,55 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import type { StudentApplication } from "@/lib/api-validation";
+import { formatDate } from "@/lib/format";
+import { queryClient } from "@/lib/query-client";
+import { store } from "@/store/main-store";
+import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
   AlertTriangle,
   CheckCircle,
-  Clock,
   Eye,
-  FileText,
-  GraduationCap,
   Heart,
   Mail,
   MapPin,
   Phone,
   Users,
-  XCircle,
 } from "lucide-react";
 import { useState } from "react";
 
-// Mock data - in real app this would come from your backend
-const mockStudents: StudentApplication[] = [
-  {
-    id: "1",
-    registrationDate: "2024-01-15",
-    status: "pending",
-    firstName: "Emma",
-    fatherName: "Michael Johnson",
-    grandFatherName: "Robert Johnson",
-    dateOfBirth: "2015-03-22",
-    gender: "female",
-    nationality: "American",
-    bloodType: "A+",
-    grade: "Grade 3",
-    academicYear: "2024-2025",
-    isTransfer: false,
-    transportation: "school-bus",
-    address: "123 Oak Street",
-    city: "Springfield",
-    state: "Illinois",
-    postalCode: "62701",
-    fatherPhone: "(555) 123-4567",
-    motherPhone: "(555) 987-6543",
-    parentEmail: "johnson.family@email.com",
-    guardianName: "Sarah Johnson",
-    guardianPhone: "(555) 111-2222",
-    guardianRelation: "aunt-uncle",
-    emergencyContactName: "Patricia Williams",
-    emergencyContactPhone: "(555) 333-4444",
-    siblingInSchool: true,
-    siblingDetails: "Brother: Alex Johnson in Grade 5",
-    hasMedicalCondition: false,
-    hasDisability: false,
-  },
-  {
-    id: "2",
-    registrationDate: "2024-01-18",
-    status: "under-review",
-    firstName: "Liam",
-    fatherName: "David Chen",
-    dateOfBirth: "2013-07-14",
-    gender: "male",
-    nationality: "American",
-    bloodType: "B+",
-    grade: "Grade 5",
-    academicYear: "2024-2025",
-    isTransfer: true,
-    previousSchool: "Roosevelt Elementary",
-    previousGrades: "Excellent performance, honor roll student",
-    transportation: "parent-drop",
-    address: "456 Pine Avenue",
-    city: "Springfield",
-    state: "Illinois",
-    postalCode: "62702",
-    fatherPhone: "(555) 234-5678",
-    motherPhone: "(555) 876-5432",
-    parentEmail: "chen.family@email.com",
-    emergencyContactName: "Lisa Chen",
-    emergencyContactPhone: "(555) 222-3333",
-    siblingInSchool: false,
-    hasMedicalCondition: true,
-    medicalDetails: "Mild asthma, requires inhaler during physical activities",
-    hasDisability: false,
-  },
-  {
-    id: "3",
-    registrationDate: "2024-01-20",
-    status: "documents-required",
-    firstName: "Sophia",
-    fatherName: "Carlos Rodriguez",
-    grandFatherName: "Miguel Rodriguez",
-    dateOfBirth: "2016-11-03",
-    gender: "female",
-    nationality: "American",
-    bloodType: "O-",
-    grade: "Grade 2",
-    academicYear: "2024-2025",
-    isTransfer: false,
-    transportation: "walk",
-    address: "789 Maple Drive",
-    city: "Springfield",
-    state: "Illinois",
-    postalCode: "62703",
-    fatherPhone: "(555) 345-6789",
-    motherPhone: "(555) 765-4321",
-    parentEmail: "rodriguez.family@email.com",
-    guardianName: "Maria Rodriguez",
-    guardianPhone: "(555) 333-4444",
-    guardianRelation: "grandparent",
-    emergencyContactName: "Ana Rodriguez",
-    emergencyContactPhone: "(555) 444-5555",
-    siblingInSchool: false,
-    hasMedicalCondition: false,
-    hasDisability: true,
-    disabilityDetails: "Mild hearing impairment in left ear",
-  },
-  {
-    id: "4",
-    registrationDate: "2024-01-22",
-    status: "approved",
-    firstName: "Noah",
-    fatherName: "James Thompson",
-    dateOfBirth: "2012-05-18",
-    gender: "male",
-    nationality: "American",
-    bloodType: "AB+",
-    grade: "Grade 6",
-    academicYear: "2024-2025",
-    isTransfer: false,
-    transportation: "bicycle",
-    address: "321 Elm Street",
-    city: "Springfield",
-    state: "Illinois",
-    postalCode: "62704",
-    fatherPhone: "(555) 456-7890",
-    motherPhone: "(555) 654-3210",
-    parentEmail: "thompson.family@email.com",
-    emergencyContactName: "Jennifer Thompson",
-    emergencyContactPhone: "(555) 777-8888",
-    siblingInSchool: true,
-    siblingDetails: "Sister: Olivia Thompson in Grade 4",
-    hasMedicalCondition: false,
-    hasDisability: false,
-  },
-  {
-    id: "5",
-    registrationDate: "2024-01-25",
-    status: "enrolled",
-    firstName: "Ava",
-    fatherName: "Robert Anderson",
-    dateOfBirth: "2017-09-12",
-    gender: "female",
-    nationality: "American",
-    bloodType: "A-",
-    grade: "Grade 1",
-    academicYear: "2024-2025",
-    isTransfer: false,
-    transportation: "school-bus",
-    address: "654 Cedar Lane",
-    city: "Springfield",
-    state: "Illinois",
-    postalCode: "62705",
-    fatherPhone: "(555) 567-8901",
-    motherPhone: "(555) 543-2109",
-    parentEmail: "anderson.family@email.com",
-    emergencyContactName: "Susan Anderson",
-    emergencyContactPhone: "(555) 999-0000",
-    siblingInSchool: false,
-    hasMedicalCondition: false,
-    hasDisability: false,
-  },
-  {
-    id: "6",
-    registrationDate: "2024-01-28",
-    status: "rejected",
-    firstName: "Ethan",
-    fatherName: "Mark Wilson",
-    dateOfBirth: "2014-12-08",
-    gender: "male",
-    nationality: "American",
-    grade: "Grade 4",
-    academicYear: "2024-2025",
-    isTransfer: true,
-    previousSchool: "Lincoln Elementary",
-    previousGrades: "Below average performance, behavioral concerns",
-    transportation: "parent-drop",
-    address: "987 Birch Road",
-    city: "Springfield",
-    state: "Illinois",
-    postalCode: "62706",
-    fatherPhone: "(555) 678-9012",
-    motherPhone: "(555) 432-1098",
-    parentEmail: "wilson.family@email.com",
-    emergencyContactName: "Carol Wilson",
-    emergencyContactPhone: "(555) 000-1111",
-    siblingInSchool: false,
-    hasMedicalCondition: true,
-    medicalDetails:
-      "ADHD, requires medication management and behavioral support",
-    hasDisability: true,
-    disabilityDetails: "Learning disability in reading comprehension",
-  },
-];
-
 export const Route = createFileRoute("/admin/registration/student")({
   component: RouteComponent,
+  loader: async () => {
+    const yearId = store.getState().year.id;
+    if (yearId) {
+      await queryClient.ensureQueryData(
+        getStudentsOptions({
+          query: { yearId },
+        }),
+      );
+    }
+  },
 });
 
 function RouteComponent() {
+  const yearId = store.getState().year.id;
   const navigate = useNavigate();
-  const [students, setStudents] = useState<StudentApplication[]>(mockStudents);
+  // const [students, setStudents] = useState<StudentBasicInfo[]>(mockStudents);
   const [selectedStudent, setSelectedStudent] =
     useState<StudentApplication | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
-  const handleViewDetails = (student: StudentApplication) => {
-    setSelectedStudent(student);
-    setIsDetailDialogOpen(true);
-  };
-
-  const handleStatusChange = (
-    studentId: string,
-    newStatus: StudentApplication["status"],
-  ) => {
-    setStudents((prev) =>
-      prev.map((student) =>
-        student.id === studentId ? { ...student, status: newStatus } : student,
-      ),
-    );
-  };
-
-  const getStatusCounts = () => {
-    return students.reduce(
-      (acc, student) => {
-        acc[student.status] = (acc[student.status] || 0) + 1;
-        return acc;
-      },
-      {} as Record<string, number>,
-    );
-  };
-
-  const statusCounts = getStatusCounts();
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
+  const {
+    data: students,
+    isLoading,
+    error,
+  } = useQuery({
+    ...getStudentsOptions({
+      query: { yearId: yearId! },
+    }),
+    enabled: !!yearId,
+  });
 
   const getInitials = (firstName: string, fatherName: string) => {
     return `${firstName.charAt(0)}${fatherName.charAt(0)}`.toUpperCase();
@@ -318,82 +121,9 @@ function RouteComponent() {
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="text-lg px-3 py-1">
-              {students.length} Total Registrations
+              {students?.length} Total Registrations
             </Badge>
           </div>
-        </div>
-        {/* Status Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Pending</CardTitle>
-              <Clock className="h-4 w-4 text-yellow-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-yellow-600">
-                {statusCounts.pending || 0}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Under Review
-              </CardTitle>
-              <Eye className="h-4 w-4 text-blue-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-600">
-                {statusCounts["under-review"] || 0}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Documents Required
-              </CardTitle>
-              <FileText className="h-4 w-4 text-orange-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-600">
-                {statusCounts["documents-required"] || 0}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Approved</CardTitle>
-              <CheckCircle className="h-4 w-4 text-green-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                {statusCounts.approved || 0}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Enrolled</CardTitle>
-              <GraduationCap className="h-4 w-4 text-purple-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-purple-600">
-                {statusCounts.enrolled || 0}
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Rejected</CardTitle>
-              <XCircle className="h-4 w-4 text-red-600" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {statusCounts.rejected || 0}
-              </div>
-            </CardContent>
-          </Card>
         </div>
         {/* Students Table */}
         <Card>
@@ -434,14 +164,12 @@ function RouteComponent() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {students.map((student) => (
+                  {students?.map((student) => (
                     <TableRow key={student.id} className="hover:bg-gray-50">
                       <TableCell>
                         <div className="flex items-center gap-3">
                           <Avatar className="h-10 w-10">
-                            <AvatarImage
-                              src={student.studentPhoto || "/placeholder.svg"}
-                            />
+                            <AvatarImage src={"/placeholder.svg"} />
                             <AvatarFallback>
                               {getInitials(
                                 student.firstName,
@@ -467,11 +195,8 @@ function RouteComponent() {
                       <TableCell>
                         <div>
                           <Badge className="bg-blue-100 text-blue-800 mb-1">
-                            {getGradeLevel(student.grade)}
+                            {getGradeLevel(student.grade.grade)}
                           </Badge>
-                          <div className="text-sm text-gray-500">
-                            {student.academicYear}
-                          </div>
                           {student.isTransfer && (
                             <Badge
                               variant="outline"
@@ -543,7 +268,7 @@ function RouteComponent() {
                       </TableCell>
                       <TableCell>
                         <div className="text-sm">
-                          {formatDate(student.registrationDate)}
+                          {formatDate(student.createdAt)}
                         </div>
                         {student.isTransfer && student.previousSchool && (
                           <div className="text-xs text-gray-500">
@@ -582,7 +307,6 @@ function RouteComponent() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => handleViewDetails(student)}
                           className="flex items-center gap-1"
                         >
                           <Eye className="h-4 w-4" />
@@ -604,7 +328,7 @@ function RouteComponent() {
             setIsDetailDialogOpen(false);
             setSelectedStudent(null);
           }}
-          onStatusChange={handleStatusChange}
+          onStatusChange={() => {}}
         />
       </div>
     </div>

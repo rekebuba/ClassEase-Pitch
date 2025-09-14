@@ -144,6 +144,15 @@ class Student(BaseModel):
         default=None,
     )
 
+    # Many-To-One Relationships
+    grade: Mapped["Grade"] = relationship(
+        "Grade",
+        back_populates="students",
+        repr=False,
+        passive_deletes=True,
+        init=False,
+    )
+
     # Relationships
     user: Mapped["User"] = relationship(
         "User",

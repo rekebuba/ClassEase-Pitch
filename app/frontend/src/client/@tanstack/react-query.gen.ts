@@ -39,6 +39,7 @@ import {
   getAdminBasicInfo,
   getTeacherBasicInfo,
   getStudentBasicInfo,
+  getStudents,
 } from "../sdk.gen";
 import {
   queryOptions,
@@ -114,6 +115,7 @@ import type {
   GetAdminBasicInfoData,
   GetTeacherBasicInfoData,
   GetStudentBasicInfoData,
+  GetStudentsData,
 } from "../types.gen";
 import type { AxiosError } from "axios";
 import { client as _heyApiClient } from "../client.gen";
@@ -1401,5 +1403,27 @@ export const getStudentBasicInfoOptions = (
       return data;
     },
     queryKey: getStudentBasicInfoQueryKey(options),
+  });
+};
+
+export const getStudentsQueryKey = (options: Options<GetStudentsData>) =>
+  createQueryKey("getStudents", options);
+
+/**
+ * Get Students
+ * This endpoint will return students based on the provided filters.
+ */
+export const getStudentsOptions = (options: Options<GetStudentsData>) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getStudents({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getStudentsQueryKey(options),
   });
 };

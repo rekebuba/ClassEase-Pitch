@@ -1035,6 +1035,111 @@ export type StudentApplicationStatusEnum =
   | "enrolled";
 
 /**
+ * StudentBasicInfo
+ */
+export type StudentBasicInfo = {
+  /**
+   * Id
+   */
+  id: string;
+  /**
+   * Firstname
+   */
+  firstName: string;
+  /**
+   * Fathername
+   */
+  fatherName: string;
+  /**
+   * Grandfathername
+   */
+  grandFatherName: string | null;
+  /**
+   * Dateofbirth
+   */
+  dateOfBirth: string;
+  gender: GenderEnum;
+  /**
+   * Address
+   */
+  address: string;
+  /**
+   * City
+   */
+  city: string;
+  /**
+   * State
+   */
+  state: string;
+  /**
+   * Postalcode
+   */
+  postalCode: string;
+  /**
+   * Fatherphone
+   */
+  fatherPhone: string;
+  /**
+   * Motherphone
+   */
+  motherPhone: string;
+  /**
+   * Parentemail
+   */
+  parentEmail: string;
+  bloodType?: BloodTypeEnum;
+  /**
+   * Previousschool
+   */
+  previousSchool: string | null;
+  /**
+   * Guardianname
+   */
+  guardianName: string | null;
+  /**
+   * Guardianphone
+   */
+  guardianPhone: string | null;
+  /**
+   * Guardianrelation
+   */
+  guardianRelation: string | null;
+  /**
+   * Siblinginschool
+   */
+  siblingInSchool: boolean;
+  /**
+   * Hasmedicalcondition
+   */
+  hasMedicalCondition: boolean;
+  /**
+   * Hasdisability
+   */
+  hasDisability: boolean;
+  /**
+   * Istransfer
+   */
+  isTransfer: boolean;
+  status: StudentApplicationStatusEnum;
+  grade: StudentCurrentGrade;
+  /**
+   * Createdat
+   */
+  createdAt: string;
+};
+
+/**
+ * StudentCurrentGrade
+ */
+export type StudentCurrentGrade = {
+  /**
+   * Id
+   */
+  id: string;
+  grade: GradeEnum;
+};
+
+/**
  * StudentInfo
  */
 export type StudentInfo = {
@@ -1232,81 +1337,81 @@ export type StudentSchema = {
   /**
    * Grandfathername
    */
-  grandFatherName?: string | null;
+  grandFatherName: string | null;
   /**
    * Nationality
    */
-  nationality?: string | null;
+  nationality: string | null;
   bloodType?: BloodTypeEnum;
   /**
    * Studentphoto
    */
-  studentPhoto?: string | null;
+  studentPhoto: string | null;
   /**
    * Previousschool
    */
-  previousSchool?: string | null;
+  previousSchool: string | null;
   /**
    * Previousgrades
    */
-  previousGrades?: string | null;
+  previousGrades: string | null;
   /**
    * Transportation
    */
-  transportation?: string | null;
+  transportation: string | null;
   /**
    * Guardianname
    */
-  guardianName?: string | null;
+  guardianName: string | null;
   /**
    * Guardianphone
    */
-  guardianPhone?: string | null;
+  guardianPhone: string | null;
   /**
    * Guardianrelation
    */
-  guardianRelation?: string | null;
+  guardianRelation: string | null;
   /**
    * Emergencycontactname
    */
-  emergencyContactName?: string | null;
+  emergencyContactName: string | null;
   /**
    * Emergencycontactphone
    */
-  emergencyContactPhone?: string | null;
+  emergencyContactPhone: string | null;
   /**
    * Disabilitydetails
    */
-  disabilityDetails?: string | null;
+  disabilityDetails: string | null;
   /**
    * Siblingdetails
    */
-  siblingDetails?: string | null;
+  siblingDetails: string | null;
   /**
    * Medicaldetails
    */
-  medicalDetails?: string | null;
+  medicalDetails: string | null;
   /**
    * Siblinginschool
    */
-  siblingInSchool?: boolean;
+  siblingInSchool: boolean;
   /**
    * Hasmedicalcondition
    */
-  hasMedicalCondition?: boolean;
+  hasMedicalCondition: boolean;
   /**
    * Hasdisability
    */
-  hasDisability?: boolean;
+  hasDisability: boolean;
   /**
    * Istransfer
    */
-  isTransfer?: boolean;
+  isTransfer: boolean;
   status?: StudentApplicationStatusEnum;
   /**
    * Userid
    */
-  userId?: string | null;
+  userId: string | null;
 };
 
 /**
@@ -1497,81 +1602,81 @@ export type StudentWithRelatedSchema = {
   /**
    * Grandfathername
    */
-  grandFatherName?: string | null;
+  grandFatherName: string | null;
   /**
    * Nationality
    */
-  nationality?: string | null;
+  nationality: string | null;
   bloodType?: BloodTypeEnum;
   /**
    * Studentphoto
    */
-  studentPhoto?: string | null;
+  studentPhoto: string | null;
   /**
    * Previousschool
    */
-  previousSchool?: string | null;
+  previousSchool: string | null;
   /**
    * Previousgrades
    */
-  previousGrades?: string | null;
+  previousGrades: string | null;
   /**
    * Transportation
    */
-  transportation?: string | null;
+  transportation: string | null;
   /**
    * Guardianname
    */
-  guardianName?: string | null;
+  guardianName: string | null;
   /**
    * Guardianphone
    */
-  guardianPhone?: string | null;
+  guardianPhone: string | null;
   /**
    * Guardianrelation
    */
-  guardianRelation?: string | null;
+  guardianRelation: string | null;
   /**
    * Emergencycontactname
    */
-  emergencyContactName?: string | null;
+  emergencyContactName: string | null;
   /**
    * Emergencycontactphone
    */
-  emergencyContactPhone?: string | null;
+  emergencyContactPhone: string | null;
   /**
    * Disabilitydetails
    */
-  disabilityDetails?: string | null;
+  disabilityDetails: string | null;
   /**
    * Siblingdetails
    */
-  siblingDetails?: string | null;
+  siblingDetails: string | null;
   /**
    * Medicaldetails
    */
-  medicalDetails?: string | null;
+  medicalDetails: string | null;
   /**
    * Siblinginschool
    */
-  siblingInSchool?: boolean;
+  siblingInSchool: boolean;
   /**
    * Hasmedicalcondition
    */
-  hasMedicalCondition?: boolean;
+  hasMedicalCondition: boolean;
   /**
    * Hasdisability
    */
-  hasDisability?: boolean;
+  hasDisability: boolean;
   /**
    * Istransfer
    */
-  isTransfer?: boolean;
+  isTransfer: boolean;
   status?: StudentApplicationStatusEnum;
   /**
    * Userid
    */
-  userId?: string | null;
+  userId: string | null;
 };
 
 /**
@@ -4160,6 +4265,42 @@ export type GetStudentBasicInfoResponses = {
 
 export type GetStudentBasicInfoResponse =
   GetStudentBasicInfoResponses[keyof GetStudentBasicInfoResponses];
+
+export type GetStudentsData = {
+  body?: never;
+  path?: never;
+  query: {
+    /**
+     * Yearid
+     */
+    yearId: string;
+    /**
+     * Q
+     */
+    q?: string | null;
+  };
+  url: "/api/v1/students/";
+};
+
+export type GetStudentsErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type GetStudentsError = GetStudentsErrors[keyof GetStudentsErrors];
+
+export type GetStudentsResponses = {
+  /**
+   * Response Get Students Api V1 Students  Get
+   * Successful Response
+   */
+  200: Array<StudentBasicInfo>;
+};
+
+export type GetStudentsResponse =
+  GetStudentsResponses[keyof GetStudentsResponses];
 
 export type ClientOptions = {
   baseURL: "http://backend:8000" | (string & {});

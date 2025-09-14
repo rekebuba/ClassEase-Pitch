@@ -128,3 +128,18 @@ export function academicYearRange(
   }
   return `${startYear}/${endYear}`;
 }
+
+export function extractFirstWord(loc: string[], msg: string): string | null {
+  // Split by comma, take the part after the first comma
+  if (loc.length === 2) {
+    return loc[1];
+  }
+
+  const [, afterComma] = msg.split(",", 2);
+
+  if (!afterComma) return null;
+
+  // Trim spaces and split into words
+  const firstWord = afterComma.trim().split(/\s+/)[0];
+  return firstWord || null;
+}
