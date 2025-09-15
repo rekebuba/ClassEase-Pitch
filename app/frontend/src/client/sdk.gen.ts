@@ -112,6 +112,9 @@ import type {
   GetTeacherBasicInfoResponses,
   GetStudentBasicInfoData,
   GetStudentBasicInfoResponses,
+  DeleteStudentsData,
+  DeleteStudentsResponses,
+  DeleteStudentsErrors,
   GetStudentsData,
   GetStudentsResponses,
   GetStudentsErrors,
@@ -154,6 +157,7 @@ import {
   zGetAdminBasicInfoResponse,
   zGetTeacherBasicInfoResponse,
   zGetStudentBasicInfoResponse,
+  zDeleteStudentsResponse,
   zGetStudentsResponse,
 } from "./zod.gen";
 import { client as _heyApiClient } from "./client.gen";
@@ -1159,6 +1163,33 @@ export const getStudentBasicInfo = <ThrowOnError extends boolean = false>(
       },
     ],
     url: "/api/v1/me/student",
+    ...options,
+  });
+};
+
+/**
+ * Delete Students
+ * This endpoint will delete students based on the provided IDs.
+ */
+export const deleteStudents = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteStudentsData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).delete<
+    DeleteStudentsResponses,
+    DeleteStudentsErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    responseValidator: async (data) => {
+      return await zDeleteStudentsResponse.parseAsync(data);
+    },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
+    url: "/api/v1/students/",
     ...options,
   });
 };

@@ -1041,6 +1041,7 @@ export const zStudentCurrentGrade = z.object({
  */
 export const zStudentBasicInfo = z.object({
   id: z.uuid(),
+  fullName: z.string(),
   firstName: z.string(),
   fatherName: z.string(),
   grandFatherName: z.union([z.string(), z.null()]),
@@ -1149,15 +1150,13 @@ export const zSubjectSetupSchema = z.object({
 });
 
 /**
- * SuccessResponseSchema[RegistrationResponse, NoneType, NoneType]
+ * SuccessResponseSchema
+ * This model represents a generic response schema.
+ * It can be used to standardize the structure of API responses.
  */
-export const zSuccessResponseSchemaRegistrationResponseNoneTypeNoneType =
-  z.object({
-    data: zRegistrationResponse,
-    message: z.optional(z.string()).default("Success"),
-    meta: z.optional(z.null()),
-    links: z.optional(z.null()),
-  });
+export const zSuccessResponseSchema = z.object({
+  message: z.optional(z.string()).default("Success"),
+});
 
 /**
  * TeacherInfo
@@ -1466,8 +1465,7 @@ export const zRegisterNewTeacherData = z.object({
 /**
  * Successful Response
  */
-export const zRegisterNewTeacherResponse =
-  zSuccessResponseSchemaRegistrationResponseNoneTypeNoneType;
+export const zRegisterNewTeacherResponse = zRegistrationResponse;
 
 export const zGetYearsData = z.object({
   body: z.optional(z.never()),
@@ -1821,6 +1819,19 @@ export const zGetStudentBasicInfoData = z.object({
  * Successful Response
  */
 export const zGetStudentBasicInfoResponse = zStudentInfo;
+
+export const zDeleteStudentsData = z.object({
+  body: z.optional(z.never()),
+  path: z.optional(z.never()),
+  query: z.object({
+    student_ids: z.array(z.uuid()),
+  }),
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteStudentsResponse = zSuccessResponseSchema;
 
 export const zGetStudentsData = z.object({
   body: z.optional(z.never()),

@@ -27,7 +27,6 @@ from schema.models.admin_schema import AdminSchema
 from schema.models.grade_schema import GradeSchema
 from schema.models.subject_schema import SubjectSchema
 from schema.models.teacher_schema import TeacherWithRelatedSchema
-from schema.schema import SuccessResponseSchema
 
 router = APIRouter(prefix="/register", tags=["registration"])
 
@@ -98,7 +97,7 @@ def register_student_step5(
     return RegistrationStep(message="Student Step 5 Successful")
 
 
-@router.post("/students", response_model=RegistrationResponse)
+@router.post("/students", status_code=201, response_model=RegistrationResponse)
 def register_new_student(
     session: SessionDep,
     student_data: StudentRegistrationForm,
@@ -124,13 +123,11 @@ def register_new_student(
     )
 
 
-@router.post(
-    "/teachers", response_model=SuccessResponseSchema[RegistrationResponse, None, None]
-)
+@router.post("/teachers", response_model=RegistrationResponse)
 def register_new_teacher(
     session: SessionDep,
     teacher_data: TeacherWithRelatedSchema,
-) -> SuccessResponseSchema[RegistrationResponse, None, None]:
+) -> RegistrationResponse:
     """
     Registers a new user (Admin, Student, Teacher) in the system.
     """
@@ -179,9 +176,8 @@ def register_new_teacher(
 
     session.commit()
 
-    return SuccessResponseSchema(
-        data=RegistrationResponse(id=new_teacher.id),
-        message="Teacher Registered Successfully",
+    return RegistrationResponse(
+        id=new_teacher.id, message="Teacher Registered Successfully"
     )
 
 

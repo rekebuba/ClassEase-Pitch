@@ -39,7 +39,7 @@ dependencies = [
 
 [tool.mypy]
 files = ["."]
-exclude = ["tests/", "store/"]
+exclude = ["tests/factories/.*"]
 strict = true                    # Enables all strictness flags below
 disallow_untyped_defs = true     # Functions must have type annotations
 disallow_incomplete_defs = true  # No partial annotations (e.g., `def foo(x) -> int`)

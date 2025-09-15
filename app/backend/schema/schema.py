@@ -1,18 +1,13 @@
 import uuid
 from datetime import datetime
-from typing import Generic, Optional, TypeVar
 
 from pydantic import BaseModel, ConfigDict
 
 from utils.enum import RoleEnum
 from utils.utils import to_camel
 
-T = TypeVar("T")  # For the data payload
-M = TypeVar("M")  # For meta
-L = TypeVar("L")  # For links
 
-
-class SuccessResponseSchema(BaseModel, Generic[T, M, L]):
+class SuccessResponseSchema(BaseModel):
     """
     This model represents a generic response schema.
     It can be used to standardize the structure of API responses.
@@ -25,13 +20,10 @@ class SuccessResponseSchema(BaseModel, Generic[T, M, L]):
         alias_generator=to_camel,
     )
 
-    data: T
     message: str = "Success"
-    meta: Optional[M] = None
-    links: Optional[L] = None
 
 
-class ErrorResponseSchema(BaseModel, Generic[M, L]):
+class ErrorResponseSchema(BaseModel):
     """
     This model represents an error response schema.
     It can be used to standardize the structure of API error responses.
@@ -45,8 +37,6 @@ class ErrorResponseSchema(BaseModel, Generic[M, L]):
     )
 
     message: str
-    meta: Optional[M] = None
-    links: Optional[L] = None
 
 
 class TokenPayload(BaseModel):

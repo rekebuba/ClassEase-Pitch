@@ -1,3 +1,4 @@
+import uuid
 from typing import Annotated, List, Sequence
 
 from fastapi import APIRouter, HTTPException, Query
@@ -9,6 +10,7 @@ from api.v1.routers.students.schema import StudentBasicInfo
 from models.grade import Grade
 from models.student import Student
 from models.year import Year
+from schema.schema import SuccessResponseSchema
 
 router = APIRouter(prefix="/students", tags=["Students"])
 
@@ -39,3 +41,40 @@ def get_students(
     students = session.scalars(stm).all()
 
     return students
+
+
+@router.delete("/", response_model=SuccessResponseSchema)
+def delete_students(
+    session: SessionDep,
+    student_ids: Annotated[List[uuid.UUID], Query()],
+    user_in: admin_route,
+) -> SuccessResponseSchema:
+    """This endpoint will delete students based on the provided IDs."""
+    for student_id in student_ids:
+        student = session.get(Student, student_id)
+        if not student:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Student with ID {student_id} not found.",
+            )
+        session.delete(student)
+    session.commit()
+    return SuccessResponseSchema(message="Students deleted successfully.")
+
+
+@router.delete("/{student_id}", response_model=SuccessResponseSchema)
+def delete_student(
+    session: SessionDep,
+    student_id: uuid.UUID,
+    user_in: admin_route,
+) -> SuccessResponseSchema:
+    """This endpoint will delete students based on the provided IDs."""
+    student = session.get(Student, student_id)
+    if not student:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Student with ID {student_id} not found.",
+        )
+    session.delete(student)
+    session.commit()
+    return SuccessResponseSchema(message="Student deleted successfully.")

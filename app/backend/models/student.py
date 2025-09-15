@@ -12,6 +12,7 @@ from sqlalchemy import (
     String,
     Text,
 )
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
@@ -135,6 +136,14 @@ class Student(BaseModel):
         nullable=False,
         default=StudentApplicationStatusEnum.PENDING,
     )
+
+    @hybrid_property
+    def full_name(self):
+        return self.first_name + " " + self.father_name + " " + self.grand_father_name
+
+    @full_name.expression  # type: ignore
+    def full_name(cls):
+        return cls.first_name + " " + cls.father_name + " " + cls.grand_father_name
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),

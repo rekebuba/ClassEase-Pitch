@@ -39,6 +39,7 @@ import {
   getAdminBasicInfo,
   getTeacherBasicInfo,
   getStudentBasicInfo,
+  deleteStudents,
   getStudents,
 } from "../sdk.gen";
 import {
@@ -115,6 +116,9 @@ import type {
   GetAdminBasicInfoData,
   GetTeacherBasicInfoData,
   GetStudentBasicInfoData,
+  DeleteStudentsData,
+  DeleteStudentsError,
+  DeleteStudentsResponse,
   GetStudentsData,
 } from "../types.gen";
 import type { AxiosError } from "axios";
@@ -1404,6 +1408,34 @@ export const getStudentBasicInfoOptions = (
     },
     queryKey: getStudentBasicInfoQueryKey(options),
   });
+};
+
+/**
+ * Delete Students
+ * This endpoint will delete students based on the provided IDs.
+ */
+export const deleteStudentsMutation = (
+  options?: Partial<Options<DeleteStudentsData>>,
+): UseMutationOptions<
+  DeleteStudentsResponse,
+  AxiosError<DeleteStudentsError>,
+  Options<DeleteStudentsData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteStudentsResponse,
+    AxiosError<DeleteStudentsError>,
+    Options<DeleteStudentsData>
+  > = {
+    mutationFn: async (localOptions) => {
+      const { data } = await deleteStudents({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
 };
 
 export const getStudentsQueryKey = (options: Options<GetStudentsData>) =>

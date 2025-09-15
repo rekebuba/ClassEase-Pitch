@@ -15,15 +15,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-interface YearTableProps<TData> {
+interface StudentRegistrationTableProps<TData> {
   columns: ColumnDef<TData, any>[];
   data: TData[];
 }
 
-export function YearTable<TData extends RowData>({
+export function StudentRegistrationTable<TData extends RowData>({
   columns,
   data,
-}: YearTableProps<TData>) {
+}: StudentRegistrationTableProps<TData>) {
   const table = useReactTable({
     data,
     columns,

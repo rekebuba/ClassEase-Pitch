@@ -33,6 +33,7 @@ class StudentBasicInfo(BaseModel):
     )
 
     id: uuid.UUID
+    full_name: str
     first_name: str
     father_name: str
     grand_father_name: Optional[str]

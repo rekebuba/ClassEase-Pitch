@@ -1043,6 +1043,10 @@ export type StudentBasicInfo = {
    */
   id: string;
   /**
+   * Fullname
+   */
+  fullName: string;
+  /**
    * Firstname
    */
   firstName: string;
@@ -1918,22 +1922,15 @@ export type SubjectYearlyAverageSchema = {
 };
 
 /**
- * SuccessResponseSchema[RegistrationResponse, NoneType, NoneType]
+ * SuccessResponseSchema
+ * This model represents a generic response schema.
+ * It can be used to standardize the structure of API responses.
  */
-export type SuccessResponseSchemaRegistrationResponseNoneTypeNoneType = {
-  data: RegistrationResponse;
+export type SuccessResponseSchema = {
   /**
    * Message
    */
   message?: string;
-  /**
-   * Meta
-   */
-  meta?: null;
-  /**
-   * Links
-   */
-  links?: null;
 };
 
 /**
@@ -3442,7 +3439,7 @@ export type RegisterNewStudentResponses = {
   /**
    * Successful Response
    */
-  200: RegistrationResponse;
+  201: RegistrationResponse;
 };
 
 export type RegisterNewStudentResponse =
@@ -3469,7 +3466,7 @@ export type RegisterNewTeacherResponses = {
   /**
    * Successful Response
    */
-  200: SuccessResponseSchemaRegistrationResponseNoneTypeNoneType;
+  200: RegistrationResponse;
 };
 
 export type RegisterNewTeacherResponse =
@@ -4265,6 +4262,38 @@ export type GetStudentBasicInfoResponses = {
 
 export type GetStudentBasicInfoResponse =
   GetStudentBasicInfoResponses[keyof GetStudentBasicInfoResponses];
+
+export type DeleteStudentsData = {
+  body?: never;
+  path?: never;
+  query: {
+    /**
+     * Student Ids
+     */
+    student_ids: Array<string>;
+  };
+  url: "/api/v1/students/";
+};
+
+export type DeleteStudentsErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type DeleteStudentsError =
+  DeleteStudentsErrors[keyof DeleteStudentsErrors];
+
+export type DeleteStudentsResponses = {
+  /**
+   * Successful Response
+   */
+  200: SuccessResponseSchema;
+};
+
+export type DeleteStudentsResponse =
+  DeleteStudentsResponses[keyof DeleteStudentsResponses];
 
 export type GetStudentsData = {
   body?: never;

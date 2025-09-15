@@ -1,48 +1,29 @@
-import random
-import uuid
-from typing import get_args
-
-from factory import LazyAttribute
+from factory import LazyAttribute, SubFactory
 from faker import Faker
 
-from api.v1.routers.registrations.schema import StudentRegistrationForm
-from api.v1.routers.year.schema import NewYear
+from models.student import Student
 from tests.factories.typed_factory import TypedFactory
 from utils.enum import (
-    AcademicTermTypeEnum,
-    AcademicYearStatusEnum,
     BloodTypeEnum,
     GenderEnum,
+    RoleEnum,
     StudentApplicationStatusEnum,
 )
-from utils.type import SetupMethodType
 
 fake = Faker()
 
 
-class NewYearFactory(TypedFactory[NewYear]):
+class StudentFactory(TypedFactory[Student]):
     class Meta:
-        model = NewYear
+        model = Student
+        exclude = ("user",)
 
-    name = LazyAttribute(lambda _: fake.name())
-    calendar_type = LazyAttribute(lambda _: random.choice(list(AcademicTermTypeEnum)))
-    start_date = LazyAttribute(lambda _: fake.past_date())
-    end_date = LazyAttribute(lambda _: fake.future_date())
-    status = LazyAttribute(
-        lambda _: random.choice(
-            [AcademicYearStatusEnum.ACTIVE, AcademicYearStatusEnum.UPCOMING]
-        )
-    )
-    setup_methods = LazyAttribute(lambda _: random.choice(get_args(SetupMethodType)))
-    copy_from_year_id = LazyAttribute(
-        lambda x: uuid.uuid4() if x.setup_methods == "Last Year Copy" else None
+    user = SubFactory(
+        "tests.factories.models.user_factory.UserFactory",
+        role=RoleEnum.STUDENT,
     )
 
-
-class StudentRegistrationFactory(TypedFactory[StudentRegistrationForm]):
-    class Meta:
-        model = StudentRegistrationForm
-
+    user_id = LazyAttribute(lambda x: x.user.id if x.user else None)
     registered_for_grade_id = None  # To be set explicitly
 
     # Personal Information
@@ -94,9 +75,7 @@ class StudentRegistrationFactory(TypedFactory[StudentRegistrationForm]):
     # Medical Information
     has_medical_condition = LazyAttribute(lambda _: fake.boolean())
     medical_details = LazyAttribute(
-        lambda obj: fake.text(max_nb_chars=60)
-        if obj.has_medical_condition
-        else None
+        lambda obj: fake.text(max_nb_chars=60) if obj.has_medical_condition else None
     )
     has_disability = LazyAttribute(lambda x_: fake.boolean())
     disability_details = LazyAttribute(

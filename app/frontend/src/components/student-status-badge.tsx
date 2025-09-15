@@ -1,3 +1,4 @@
+import { StudentApplicationStatusEnum } from "@/client";
 import { Badge } from "@/components/ui/badge";
 import {
   Clock,
@@ -9,13 +10,7 @@ import {
 } from "lucide-react";
 
 interface StudentStatusBadgeProps {
-  status:
-    | "pending"
-    | "under-review"
-    | "documents-required"
-    | "approved"
-    | "rejected"
-    | "enrolled";
+  status: StudentApplicationStatusEnum;
 }
 
 export default function StudentStatusBadge({
