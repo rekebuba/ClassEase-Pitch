@@ -42,8 +42,7 @@ class Student(BaseModel):
 
     registered_for_grade_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),
-        ForeignKey("grades.id", ondelete="SET NULL"),
-        nullable=True,
+        ForeignKey("grades.id"),
     )
     # Personal Information
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)

@@ -143,3 +143,7 @@ export function extractFirstWord(loc: string[], msg: string): string | null {
   const firstWord = afterComma.trim().split(/\s+/)[0];
   return firstWord || null;
 }
+
+export const getInitials = (firstName: string, fatherName: string) => {
+  return `${firstName.charAt(0)}${fatherName.charAt(0)}`.toUpperCase();
+};

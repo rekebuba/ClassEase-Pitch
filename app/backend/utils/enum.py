@@ -113,11 +113,12 @@ class HighestDegreeEnum(str, Enum):
 
 class StudentApplicationStatusEnum(str, Enum):
     PENDING = "pending"
-    UNDER_REVIEW = "under-review"
-    DOCUMENTS_REQUIRED = "documents-required"
-    APPROVED = "approved"
     REJECTED = "rejected"
-    ENROLLED = "enrolled"
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    GRADUATED = "graduated"
+    SUSPENDED = "suspended"
+    WITHDRAWN = "withdrawn"
 
 
 class AcademicYearStatusEnum(str, Enum):

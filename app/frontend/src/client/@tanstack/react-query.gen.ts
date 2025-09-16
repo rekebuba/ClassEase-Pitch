@@ -41,6 +41,8 @@ import {
   getStudentBasicInfo,
   deleteStudents,
   getStudents,
+  getStudent,
+  updateStudentStatus,
 } from "../sdk.gen";
 import {
   queryOptions,
@@ -120,6 +122,10 @@ import type {
   DeleteStudentsError,
   DeleteStudentsResponse,
   GetStudentsData,
+  GetStudentData,
+  UpdateStudentStatusData,
+  UpdateStudentStatusError,
+  UpdateStudentStatusResponse,
 } from "../types.gen";
 import type { AxiosError } from "axios";
 import { client as _heyApiClient } from "../client.gen";
@@ -1458,4 +1464,54 @@ export const getStudentsOptions = (options: Options<GetStudentsData>) => {
     },
     queryKey: getStudentsQueryKey(options),
   });
+};
+
+export const getStudentQueryKey = (options: Options<GetStudentData>) =>
+  createQueryKey("getStudent", options);
+
+/**
+ * Get Student
+ * This endpoint will return a student based on the provided ID.
+ */
+export const getStudentOptions = (options: Options<GetStudentData>) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getStudent({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getStudentQueryKey(options),
+  });
+};
+
+/**
+ * Update Student Status
+ * This endpoint will patch students based on the provided IDs.
+ */
+export const updateStudentStatusMutation = (
+  options?: Partial<Options<UpdateStudentStatusData>>,
+): UseMutationOptions<
+  UpdateStudentStatusResponse,
+  AxiosError<UpdateStudentStatusError>,
+  Options<UpdateStudentStatusData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateStudentStatusResponse,
+    AxiosError<UpdateStudentStatusError>,
+    Options<UpdateStudentStatusData>
+  > = {
+    mutationFn: async (localOptions) => {
+      const { data } = await updateStudentStatus({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
 };

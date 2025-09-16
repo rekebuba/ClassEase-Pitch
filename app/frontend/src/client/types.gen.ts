@@ -1028,11 +1028,12 @@ export type StudRegStep5 = {
  */
 export type StudentApplicationStatusEnum =
   | "pending"
-  | "under-review"
-  | "documents-required"
-  | "approved"
   | "rejected"
-  | "enrolled";
+  | "active"
+  | "inactive"
+  | "graduated"
+  | "suspended"
+  | "withdrawn";
 
 /**
  * StudentBasicInfo
@@ -1057,7 +1058,7 @@ export type StudentBasicInfo = {
   /**
    * Grandfathername
    */
-  grandFatherName: string | null;
+  grandFatherName: string;
   /**
    * Dateofbirth
    */
@@ -1091,11 +1092,27 @@ export type StudentBasicInfo = {
    * Parentemail
    */
   parentEmail: string;
-  bloodType?: BloodTypeEnum;
+  /**
+   * Nationality
+   */
+  nationality: string | null;
+  bloodType: BloodTypeEnum;
+  /**
+   * Studentphoto
+   */
+  studentPhoto: string | null;
   /**
    * Previousschool
    */
   previousSchool: string | null;
+  /**
+   * Previousgrades
+   */
+  previousGrades: string | null;
+  /**
+   * Transportation
+   */
+  transportation: string | null;
   /**
    * Guardianname
    */
@@ -1108,6 +1125,26 @@ export type StudentBasicInfo = {
    * Guardianrelation
    */
   guardianRelation: string | null;
+  /**
+   * Emergencycontactname
+   */
+  emergencyContactName: string | null;
+  /**
+   * Emergencycontactphone
+   */
+  emergencyContactPhone: string | null;
+  /**
+   * Disabilitydetails
+   */
+  disabilityDetails: string | null;
+  /**
+   * Siblingdetails
+   */
+  siblingDetails: string | null;
+  /**
+   * Medicaldetails
+   */
+  medicalDetails: string | null;
   /**
    * Siblinginschool
    */
@@ -1125,22 +1162,11 @@ export type StudentBasicInfo = {
    */
   isTransfer: boolean;
   status: StudentApplicationStatusEnum;
-  grade: StudentCurrentGrade;
   /**
    * Createdat
    */
   createdAt: string;
-};
-
-/**
- * StudentCurrentGrade
- */
-export type StudentCurrentGrade = {
-  /**
-   * Id
-   */
-  id: string;
-  grade: GradeEnum;
+  grade: StudentRegisteredGrade;
 };
 
 /**
@@ -1165,6 +1191,32 @@ export type StudentInfo = {
    */
   createdAt: string;
   student: StudentSchema;
+};
+
+/**
+ * StudentRegisteredGrade
+ */
+export type StudentRegisteredGrade = {
+  /**
+   * Id
+   */
+  id: string;
+  grade: GradeEnum;
+  year: StudentRegisteredYear;
+};
+
+/**
+ * StudentRegisteredYear
+ */
+export type StudentRegisteredYear = {
+  /**
+   * Id
+   */
+  id: string;
+  /**
+   * Name
+   */
+  name: string;
 };
 
 /**
@@ -2978,6 +3030,17 @@ export type UpdateStreamSetup = {
 };
 
 /**
+ * UpdateStudentStatus
+ */
+export type UpdateStudentStatus = {
+  status: StudentApplicationStatusEnum;
+  /**
+   * Studentids
+   */
+  studentIds: Array<string>;
+};
+
+/**
  * UpdateSubject
  * This model represents a subject that can be updated in the system.
  */
@@ -4330,6 +4393,63 @@ export type GetStudentsResponses = {
 
 export type GetStudentsResponse =
   GetStudentsResponses[keyof GetStudentsResponses];
+
+export type GetStudentData = {
+  body?: never;
+  path: {
+    /**
+     * Student Id
+     */
+    student_id: string;
+  };
+  query?: never;
+  url: "/api/v1/students/{student_id}";
+};
+
+export type GetStudentErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type GetStudentError = GetStudentErrors[keyof GetStudentErrors];
+
+export type GetStudentResponses = {
+  /**
+   * Successful Response
+   */
+  200: StudentBasicInfo;
+};
+
+export type GetStudentResponse = GetStudentResponses[keyof GetStudentResponses];
+
+export type UpdateStudentStatusData = {
+  body: UpdateStudentStatus;
+  path?: never;
+  query?: never;
+  url: "/api/v1/students/status";
+};
+
+export type UpdateStudentStatusErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type UpdateStudentStatusError =
+  UpdateStudentStatusErrors[keyof UpdateStudentStatusErrors];
+
+export type UpdateStudentStatusResponses = {
+  /**
+   * Successful Response
+   */
+  200: SuccessResponseSchema;
+};
+
+export type UpdateStudentStatusResponse =
+  UpdateStudentStatusResponses[keyof UpdateStudentStatusResponses];
 
 export type ClientOptions = {
   baseURL: "http://backend:8000" | (string & {});

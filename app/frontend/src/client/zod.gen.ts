@@ -248,11 +248,12 @@ export const zGradeSchema = z.object({
  */
 export const zStudentApplicationStatusEnum = z.enum([
   "pending",
-  "under-review",
-  "documents-required",
-  "approved",
   "rejected",
-  "enrolled",
+  "active",
+  "inactive",
+  "graduated",
+  "suspended",
+  "withdrawn",
 ]);
 
 /**
@@ -1029,11 +1030,20 @@ export const zStudRegStep5 = z.object({
 });
 
 /**
- * StudentCurrentGrade
+ * StudentRegisteredYear
  */
-export const zStudentCurrentGrade = z.object({
+export const zStudentRegisteredYear = z.object({
+  id: z.uuid(),
+  name: z.string(),
+});
+
+/**
+ * StudentRegisteredGrade
+ */
+export const zStudentRegisteredGrade = z.object({
   id: z.uuid(),
   grade: zGradeEnum,
+  year: zStudentRegisteredYear,
 });
 
 /**
@@ -1044,7 +1054,7 @@ export const zStudentBasicInfo = z.object({
   fullName: z.string(),
   firstName: z.string(),
   fatherName: z.string(),
-  grandFatherName: z.union([z.string(), z.null()]),
+  grandFatherName: z.string(),
   dateOfBirth: z.iso.date(),
   gender: zGenderEnum,
   address: z.string(),
@@ -1054,18 +1064,27 @@ export const zStudentBasicInfo = z.object({
   fatherPhone: z.string(),
   motherPhone: z.string(),
   parentEmail: z.email(),
-  bloodType: z.optional(zBloodTypeEnum),
+  nationality: z.union([z.string(), z.null()]),
+  bloodType: zBloodTypeEnum,
+  studentPhoto: z.union([z.string(), z.null()]),
   previousSchool: z.union([z.string(), z.null()]),
+  previousGrades: z.union([z.string(), z.null()]),
+  transportation: z.union([z.string(), z.null()]),
   guardianName: z.union([z.string(), z.null()]),
   guardianPhone: z.union([z.string(), z.null()]),
   guardianRelation: z.union([z.string(), z.null()]),
+  emergencyContactName: z.union([z.string(), z.null()]),
+  emergencyContactPhone: z.union([z.string(), z.null()]),
+  disabilityDetails: z.union([z.string(), z.null()]),
+  siblingDetails: z.union([z.string(), z.null()]),
+  medicalDetails: z.union([z.string(), z.null()]),
   siblingInSchool: z.boolean(),
   hasMedicalCondition: z.boolean(),
   hasDisability: z.boolean(),
   isTransfer: z.boolean(),
   status: zStudentApplicationStatusEnum,
-  grade: zStudentCurrentGrade,
   createdAt: z.iso.datetime(),
+  grade: zStudentRegisteredGrade,
 });
 
 /**
@@ -1309,6 +1328,14 @@ export const zUpdateGradeSetup = z.object({
  */
 export const zUpdateGradeSetupSuccess = z.object({
   message: z.optional(z.string()).default("Grade Setup updated Successfully"),
+});
+
+/**
+ * UpdateStudentStatus
+ */
+export const zUpdateStudentStatus = z.object({
+  status: zStudentApplicationStatusEnum,
+  studentIds: z.array(z.uuid()),
 });
 
 /**
@@ -1847,3 +1874,27 @@ export const zGetStudentsData = z.object({
  * Successful Response
  */
 export const zGetStudentsResponse = z.array(zStudentBasicInfo);
+
+export const zGetStudentData = z.object({
+  body: z.optional(z.never()),
+  path: z.object({
+    student_id: z.uuid(),
+  }),
+  query: z.optional(z.never()),
+});
+
+/**
+ * Successful Response
+ */
+export const zGetStudentResponse = zStudentBasicInfo;
+
+export const zUpdateStudentStatusData = z.object({
+  body: zUpdateStudentStatus,
+  path: z.optional(z.never()),
+  query: z.optional(z.never()),
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateStudentStatusResponse = zSuccessResponseSchema;

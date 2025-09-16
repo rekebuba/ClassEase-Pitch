@@ -118,6 +118,12 @@ import type {
   GetStudentsData,
   GetStudentsResponses,
   GetStudentsErrors,
+  GetStudentData,
+  GetStudentResponses,
+  GetStudentErrors,
+  UpdateStudentStatusData,
+  UpdateStudentStatusResponses,
+  UpdateStudentStatusErrors,
 } from "./types.gen";
 import {
   zLoginResponse,
@@ -159,6 +165,8 @@ import {
   zGetStudentBasicInfoResponse,
   zDeleteStudentsResponse,
   zGetStudentsResponse,
+  zGetStudentResponse,
+  zUpdateStudentStatusResponse,
 } from "./zod.gen";
 import { client as _heyApiClient } from "./client.gen";
 
@@ -1218,5 +1226,63 @@ export const getStudents = <ThrowOnError extends boolean = false>(
     ],
     url: "/api/v1/students/",
     ...options,
+  });
+};
+
+/**
+ * Get Student
+ * This endpoint will return a student based on the provided ID.
+ */
+export const getStudent = <ThrowOnError extends boolean = false>(
+  options: Options<GetStudentData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).get<
+    GetStudentResponses,
+    GetStudentErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    responseValidator: async (data) => {
+      return await zGetStudentResponse.parseAsync(data);
+    },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
+    url: "/api/v1/students/{student_id}",
+    ...options,
+  });
+};
+
+/**
+ * Update Student Status
+ * This endpoint will patch students based on the provided IDs.
+ */
+export const updateStudentStatus = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateStudentStatusData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).patch<
+    UpdateStudentStatusResponses,
+    UpdateStudentStatusErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    responseValidator: async (data) => {
+      return await zUpdateStudentStatusResponse.parseAsync(data);
+    },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
+    url: "/api/v1/students/status",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
   });
 };

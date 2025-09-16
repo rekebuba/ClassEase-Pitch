@@ -1,6 +1,7 @@
 import {
   deleteStudentsMutation,
   getStudentsOptions,
+  getStudentsQueryKey,
 } from "@/client/@tanstack/react-query.gen";
 import { StudentBasicInfo } from "@/client/types.gen";
 import { StudentDetailDialog } from "@/components";
@@ -41,19 +42,16 @@ export const Route = createFileRoute("/admin/registration/student")({
 function RouteComponent() {
   const yearId = store.getState().year.id;
   const navigate = useNavigate();
-  // const [students, setStudents] = useState<StudentBasicInfo[]>(mockStudents);
   const [selectedStudent, setSelectedStudent] =
     useState<StudentApplication | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
 
-  const {
-    data: students,
-    isLoading,
-    error,
-  } = useQuery({
-    ...getStudentsOptions({
-      query: { yearId: yearId! },
-    }),
+  const getGradesQueryConfig = () => ({
+    query: { yearId: yearId! },
+  });
+
+  const { data: students } = useQuery({
+    ...getStudentsOptions(getGradesQueryConfig()),
     enabled: !!yearId,
   });
 
@@ -64,10 +62,7 @@ function RouteComponent() {
         style: { color: "green" },
       });
       queryClient.invalidateQueries({
-        queryKey: getStudentsOptions(getYearQueryConfig()),
-      });
-      queryClient.invalidateQueries({
-        queryKey: getStudentsOptions().queryKey,
+        queryKey: getStudentsQueryKey(getGradesQueryConfig()),
       });
     },
     onError: () => {
@@ -75,8 +70,12 @@ function RouteComponent() {
     },
   });
 
-  const handleDelete = (yearId: string) => {
-    deleteStudent.mutate({ path: { year_id: yearId } });
+  const handleView = (studentId: string) => {
+    navigate({ to: "/admin/students/$studentId", params: { studentId } });
+  };
+
+  const handleDelete = (studentId: string) => {
+    deleteStudent.mutate({ query: { student_ids: [studentId] } });
   };
 
   return (
@@ -123,7 +122,7 @@ function RouteComponent() {
           </CardHeader>
           <CardContent>
             <StudentRegistrationTable<StudentBasicInfo>
-              columns={studentBasicInfoColumns(() => {}, handleDelete)}
+              columns={studentBasicInfoColumns(handleView, handleDelete)}
               data={students || []}
             />
           </CardContent>

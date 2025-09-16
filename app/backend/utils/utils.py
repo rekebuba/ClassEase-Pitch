@@ -29,6 +29,7 @@ from core import security
 from core.config import settings
 from models.grade import Grade
 from models.user import User
+from models.year import Year
 from utils.enum import RoleEnum
 
 logging.basicConfig(level=logging.INFO)
@@ -186,8 +187,8 @@ def to_snake(s: str) -> str:
     return s.lower()
 
 
-def current_EC_year(date: date | datetime = datetime.now()) -> EthDate:
-    return EthDate.date_to_ethiopian(date).year
+def current_EC_year(date: date | datetime) -> Any:
+    return EthDate.to_ethiopian(date.year, date.month, date.day)["year"]
 
 
 def current_GC_year(ethiopian_year: int) -> str:
@@ -290,7 +291,7 @@ def generate_id(
     *,
     session: Session,
     role: RoleEnum,
-    academic_year: int,
+    year: Year,
     min_val: int = 1000,
     max_val: int = 9999,
     max_attempts: int = 100,
@@ -301,7 +302,7 @@ def generate_id(
 
     Args:
         role: RoleEnum representing the user role (Admin, Student, Teacher)
-        academic_year: Academic year as int (e.g., 2025)
+        year: Academic year
         min_val: Minimum value of ID range (inclusive)
         max_val: Maximum value of ID range (inclusive)
         max_attempts: Maximum number of retries
@@ -319,6 +320,9 @@ def generate_id(
         ValueError: If a unique ID could not be generated in time.
     """
     section: str = ""
+    year_start = current_EC_year(year.start_date)
+    year_end = current_EC_year(year.end_date)
+    academic_year = int(year_start) if year_start == year_end else int(year_end)
 
     # Assign prefix based on role
     if role == RoleEnum.STUDENT:

@@ -28,8 +28,6 @@ import {
   XCircle,
   Eye,
   Bus,
-  Utensils,
-  Activity,
 } from "lucide-react";
 import type { StudentApplication } from "@/lib/api-validation";
 import { StudentStatusBadge } from "@/components";
@@ -40,7 +38,7 @@ interface StudentDetailDialogProps {
   onClose: () => void;
   onStatusChange: (
     studentId: string,
-    newStatus: StudentApplication["status"],
+    newStatus: StudentApplication["status"]
   ) => void;
 }
 
@@ -55,7 +53,7 @@ export default function StudentDetailDialog({
   if (!student) return null;
 
   const handleStatusChange = async (
-    newStatus: StudentApplication["status"],
+    newStatus: StudentApplication["status"]
   ) => {
     setIsUpdating(true);
     // Simulate API call
