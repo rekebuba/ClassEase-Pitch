@@ -11,7 +11,15 @@ from pydantic import (
 )
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
-from utils.enum import BloodTypeEnum, GenderEnum, StudentApplicationStatusEnum
+from utils.enum import (
+    BloodTypeEnum,
+    ExperienceYearEnum,
+    GenderEnum,
+    HighestDegreeEnum,
+    MaritalStatusEnum,
+    StudentApplicationStatusEnum,
+    TeacherApplicationStatus,
+)
 from utils.utils import to_camel
 
 
@@ -41,6 +49,7 @@ class StudRegStep1(BaseModel):
     date_of_birth: date
     gender: GenderEnum
     nationality: Optional[str] = Field(default=None, min_length=3, max_length=100)
+    student_photo: Optional[str] = Field(default=None)
 
 
 class StudRegStep2(BaseModel):
@@ -62,7 +71,7 @@ class StudRegStep2(BaseModel):
                 "previousSchool Must be provided if student is Transferred"
             )
         if not self.is_transfer:
-            self.previous_school = None
+            self.previous_school = Field(default=None)
         return self
 
 
@@ -106,7 +115,6 @@ class StudRegStep5(BaseModel):
     )
 
     blood_type: BloodTypeEnum = Field(default=BloodTypeEnum.UNKNOWN)
-    student_photo: Optional[str] = Field(default=None)
     has_medical_condition: bool = Field(default=False)
     medical_details: Optional[str] = Field(default=None)
     has_disability: bool = Field(default=False)
@@ -119,12 +127,12 @@ class StudRegStep5(BaseModel):
                 "medicalDetails Must be provided if has Medical Conditions"
             )
         if not self.has_medical_condition:
-            self.medical_details = None
+            self.medical_details = Field(default=None)
 
         if self.has_disability and not self.disability_details:
             raise ValueError("disabilityDetails Must be provided if has Disability")
         if not self.has_disability:
-            self.disability_details = None
+            self.disability_details = Field(default=None)
 
         return self
 
@@ -139,3 +147,91 @@ class StudentRegistrationForm(
     status: StudentApplicationStatusEnum = Field(
         default=StudentApplicationStatusEnum.PENDING
     )
+
+
+class TeacherRegStep1(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    first_name: str = Field(min_length=3, max_length=50)
+    father_name: str = Field(min_length=3, max_length=50)
+    grand_father_name: Optional[str] = Field(default=None)
+    date_of_birth: date
+    gender: GenderEnum
+    nationality: Optional[str] = Field(default=None, min_length=3, max_length=100)
+    marital_status: Optional[MaritalStatusEnum] = Field(default=None)
+    social_security_number: str
+
+
+class TeacherRegStep2(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    address: str
+    city: str = Field(min_length=3, max_length=50)
+    state: str = Field(min_length=3, max_length=50)
+    country: str
+    primary_phone: PhoneNumber
+    secondary_phone: Optional[PhoneNumber] = Field(default=None)
+    personal_email: EmailStr
+    emergency_contact_name: str = Field(min_length=3, max_length=50)
+    emergency_contact_relation: str = Field(min_length=3, max_length=50)
+    emergency_contact_phone: PhoneNumber
+
+
+class TeacherRegStep3(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    highest_degree: HighestDegreeEnum
+    university: str
+    graduation_year: int
+    gpa: float
+    position_applying_for: str
+    teaching_license: bool
+    years_of_experience: ExperienceYearEnum
+
+
+class TeacherRegStep4(BaseModel):       
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    reference1_name: str
+    reference1_organization: str
+    reference1_phone: str
+    reference1_email: Optional[EmailStr] = Field(default=None)
+
+
+class TeacherRegStep5(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    resume: Optional[str] = Field(default=None)
+    background_check: Optional[str] = Field(default=None)
+    agree_to_terms: bool = Field(validate_default=True)
+    agree_to_background_check: bool = Field(validate_default=True)
+
+
+class TeacherRegistrationForm(
+    TeacherRegStep1,
+    TeacherRegStep2,
+    TeacherRegStep3,
+    TeacherRegStep4,
+    TeacherRegStep5,
+):
+    status: TeacherApplicationStatus = TeacherApplicationStatus.PENDING

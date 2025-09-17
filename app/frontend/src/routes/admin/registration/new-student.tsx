@@ -27,6 +27,7 @@ import {
 import AdvanceTooltip from "@/components/advance-tooltip";
 import { CheckboxWithLabel } from "@/components/inputs/checkbox-labeled";
 import { DateWithLabel } from "@/components/inputs/date-labeled";
+import { FileUploadField } from "@/components/inputs/file-upload-field";
 import { InputWithLabel } from "@/components/inputs/input-labeled";
 import { PhoneInputWithLabel } from "@/components/inputs/phone-input-labeled";
 import { RadioGroupLabel } from "@/components/inputs/radio-group-labeled";
@@ -39,8 +40,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { SelectItem } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -62,7 +61,7 @@ import { extractFirstWord } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Loader, RefreshCcw, Save, Upload } from "lucide-react";
+import { Loader, RefreshCcw, Save } from "lucide-react";
 import { useCallback, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
@@ -119,6 +118,7 @@ function RouteComponent() {
     dateOfBirth: initialData.dateOfBirth,
     gender: initialData.gender,
     nationality: initialData.nationality,
+    studentPhoto: initialData.studentPhoto,
   });
   const [step2InitialValues] = useState<StudRegStep2>({
     registeredForGradeId: initialData.registeredForGradeId,
@@ -449,29 +449,14 @@ function RouteComponent() {
                   description="Student's nationality (e.g., Ethiopian)"
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="studentPhoto">Student Photo</Label>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                  <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                  <div className="mt-2">
-                    <Label htmlFor="studentPhoto" className="cursor-pointer">
-                      <span className="text-blue-600 hover:text-blue-500">
-                        Upload a photo
-                      </span>
-                      <Input
-                        id="studentPhoto"
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                      />
-                    </Label>
-                  </div>
-                  <p className="text-xs text-gray-500">PNG, JPG up to 2MB</p>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Recent passport-style photo with plain background
-                  </p>
-                </div>
-              </div>
+              <FileUploadField<StudRegStep1>
+                nameInSchema="studentPhoto"
+                fieldTitle="Student Photo"
+                description="Upload Recent 4x4 Student Picture"
+                accept={{ "image/*": [] }}
+                maxFiles={1}
+                maxSize={1024 * 1024 * 5}
+              />
             </div>
             <div className="flex justify-between mt-8 pt-6 border-t">
               <Button variant="outline" disabled={true} className="px-8">
@@ -822,7 +807,7 @@ function RouteComponent() {
               <Button
                 type="submit"
                 onClick={onStep5Submit}
-                disabled={step1Mutation.isPending || mutation.isPending}
+                disabled={step5Mutation.isPending || mutation.isPending}
                 className="px-8 bg-green-600 hover:bg-green-700"
               >
                 {(step5Mutation.isPending || mutation.isPending) && (

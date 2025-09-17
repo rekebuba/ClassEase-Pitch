@@ -573,7 +573,7 @@ export const zTeacherTermRecordSchema = z.object({
  * TeacherWithRelatedSchema
  * This model extends TeacherSchema to include relationships.
  */
-export const zTeacherWithRelatedSchemaOutput = z.object({
+export const zTeacherWithRelatedSchema = z.object({
   user: z.optional(z.union([zUserSchema, z.null()])),
   sections: z.optional(z.union([z.array(zSectionSchema), z.null()])),
   years: z.optional(z.union([z.array(zYearSchema), z.null()])),
@@ -819,7 +819,7 @@ export const zGradeNestedSchema = z.object({
   year: zYearWithRelatedSchema,
   teacherTermRecords: z.array(zTeacherTermRecordWithRelatedSchema),
   studentTermRecords: z.array(zStudentTermRecordWithRelatedSchema),
-  teachers: z.array(zTeacherWithRelatedSchemaOutput),
+  teachers: z.array(zTeacherWithRelatedSchema),
   streams: z.array(zStreamWithRelatedSchema),
   students: z.array(zStudentWithRelatedSchema),
   sections: z.array(zSectionWithRelatedSchema),
@@ -979,6 +979,7 @@ export const zStudRegStep1 = z.object({
   dateOfBirth: z.iso.date(),
   gender: zGenderEnum,
   nationality: z.optional(z.union([z.string().min(3).max(100), z.null()])),
+  studentPhoto: z.optional(z.union([z.string(), z.null()])),
 });
 
 /**
@@ -1022,7 +1023,6 @@ export const zStudRegStep4 = z.object({
  */
 export const zStudRegStep5 = z.object({
   bloodType: z.optional(zBloodTypeEnum),
-  studentPhoto: z.optional(z.union([z.string(), z.null()])),
   hasMedicalCondition: z.optional(z.boolean()).default(false),
   medicalDetails: z.optional(z.union([z.string(), z.null()])),
   hasDisability: z.optional(z.boolean()).default(false),
@@ -1104,7 +1104,6 @@ export const zStudentInfo = z.object({
  */
 export const zStudentRegistrationForm = z.object({
   bloodType: z.optional(zBloodTypeEnum),
-  studentPhoto: z.optional(z.union([z.string(), z.null()])),
   hasMedicalCondition: z.optional(z.boolean()).default(false),
   medicalDetails: z.optional(z.union([z.string(), z.null()])),
   hasDisability: z.optional(z.boolean()).default(false),
@@ -1133,6 +1132,7 @@ export const zStudentRegistrationForm = z.object({
   dateOfBirth: z.iso.date(),
   gender: zGenderEnum,
   nationality: z.optional(z.union([z.string().min(3).max(100), z.null()])),
+  studentPhoto: z.optional(z.union([z.string(), z.null()])),
   status: z.optional(zStudentApplicationStatusEnum),
 });
 
@@ -1149,7 +1149,7 @@ export const zSubjectNestedSchema = z.object({
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
   teacherTermRecords: z.array(zTeacherTermRecordWithRelatedSchema),
-  teachers: z.array(zTeacherWithRelatedSchemaOutput),
+  teachers: z.array(zTeacherWithRelatedSchema),
   streams: z.array(zStreamWithRelatedSchema),
   grades: z.array(zGradeWithRelatedSchema),
 });
@@ -1190,87 +1190,105 @@ export const zTeacherInfo = z.object({
 });
 
 /**
- * TeacherWithRelatedSchema
- * This model extends TeacherSchema to include relationships.
+ * TeacherRegStep1
  */
-export const zTeacherWithRelatedSchemaInput = z.object({
-  user: z.optional(z.union([zUserSchema, z.null()])),
-  sections: z.optional(z.union([z.array(zSectionSchema), z.null()])),
-  years: z.optional(z.union([z.array(zYearSchema), z.null()])),
-  termRecords: z.optional(
-    z.union([z.array(zTeacherTermRecordSchema), z.null()]),
-  ),
-  academicTerms: z.optional(z.union([z.array(zAcademicTermSchema), z.null()])),
-  grades: z.optional(z.union([z.array(zGradeSchema), z.null()])),
-  subjects: z.optional(z.union([z.array(zSubjectSchema), z.null()])),
-  id: z.optional(z.union([z.uuid(), z.null()])),
-  firstName: z.string(),
-  fatherName: z.string(),
-  grandFatherName: z.string(),
+export const zTeacherRegStep1 = z.object({
+  firstName: z.string().min(3).max(50),
+  fatherName: z.string().min(3).max(50),
+  grandFatherName: z.optional(z.union([z.string(), z.null()])),
   dateOfBirth: z.iso.date(),
   gender: zGenderEnum,
-  nationality: z.string(),
+  nationality: z.optional(z.union([z.string().min(3).max(100), z.null()])),
+  maritalStatus: z.optional(z.union([zMaritalStatusEnum, z.null()])),
   socialSecurityNumber: z.string(),
+});
+
+/**
+ * TeacherRegStep2
+ */
+export const zTeacherRegStep2 = z.object({
   address: z.string(),
-  city: z.string(),
-  state: z.string(),
-  postalCode: z.string(),
+  city: z.string().min(3).max(50),
+  state: z.string().min(3).max(50),
   country: z.string(),
   primaryPhone: z.string(),
-  personalEmail: z.string(),
-  emergencyContactName: z.string(),
-  emergencyContactRelation: z.string(),
+  secondaryPhone: z.optional(z.union([z.string(), z.null()])),
+  personalEmail: z.email(),
+  emergencyContactName: z.string().min(3).max(50),
+  emergencyContactRelation: z.string().min(3).max(50),
   emergencyContactPhone: z.string(),
-  emergencyContactEmail: z.string(),
+});
+
+/**
+ * TeacherRegStep3
+ */
+export const zTeacherRegStep3 = z.object({
   highestDegree: zHighestDegreeEnum,
   university: z.string(),
   graduationYear: z.int(),
   gpa: z.number(),
   positionApplyingFor: z.string(),
+  teachingLicense: z.boolean(),
   yearsOfExperience: zExperienceYearEnum,
-  preferredSchedule: zScheduleEnum,
+});
+
+/**
+ * TeacherRegStep4
+ */
+export const zTeacherRegStep4 = z.object({
   reference1Name: z.string(),
-  reference1Title: z.string(),
   reference1Organization: z.string(),
   reference1Phone: z.string(),
-  reference1Email: z.string(),
-  maritalStatus: z.optional(z.union([zMaritalStatusEnum, z.null()])),
-  secondaryPhone: z.optional(z.union([z.string(), z.null()])),
-  additionalDegrees: z.optional(z.union([z.string(), z.null()])),
-  teachingLicense: z.optional(z.union([z.boolean(), z.null()])),
-  licenseNumber: z.optional(z.union([z.string(), z.null()])),
-  licenseState: z.optional(z.union([z.string(), z.null()])),
-  licenseExpirationDate: z.optional(z.union([z.iso.date(), z.null()])),
-  certifications: z.optional(z.union([z.string(), z.null()])),
-  specializations: z.optional(z.union([z.string(), z.null()])),
-  previousSchools: z.optional(z.union([z.string(), z.null()])),
-  specialSkills: z.optional(z.union([z.string(), z.null()])),
-  professionalDevelopment: z.optional(z.union([z.string(), z.null()])),
-  hasConvictions: z.optional(z.boolean()).default(false),
-  convictionDetails: z.optional(z.union([z.string(), z.null()])),
-  hasDisciplinaryActions: z.optional(z.boolean()).default(false),
-  disciplinaryDetails: z.optional(z.union([z.string(), z.null()])),
-  reference2Name: z.optional(z.union([z.string(), z.null()])),
-  reference2Title: z.optional(z.union([z.string(), z.null()])),
-  reference2Organization: z.optional(z.union([z.string(), z.null()])),
-  reference2Phone: z.optional(z.union([z.string(), z.null()])),
-  reference2Email: z.optional(z.union([z.string(), z.null()])),
-  reference3Name: z.optional(z.union([z.string(), z.null()])),
-  reference3Title: z.optional(z.union([z.string(), z.null()])),
-  reference3Organization: z.optional(z.union([z.string(), z.null()])),
-  reference3Phone: z.optional(z.union([z.string(), z.null()])),
-  reference3Email: z.optional(z.union([z.string(), z.null()])),
+  reference1Email: z.optional(z.union([z.email(), z.null()])),
+});
+
+/**
+ * TeacherRegStep5
+ */
+export const zTeacherRegStep5 = z.object({
   resume: z.optional(z.union([z.string(), z.null()])),
-  coverLetter: z.optional(z.union([z.string(), z.null()])),
-  transcripts: z.optional(z.union([z.string(), z.null()])),
-  teachingCertificate: z.optional(z.union([z.string(), z.null()])),
   backgroundCheck: z.optional(z.union([z.string(), z.null()])),
-  teachingPhilosophy: z.optional(z.union([z.string(), z.null()])),
-  whyTeaching: z.optional(z.union([z.string(), z.null()])),
-  additionalComments: z.optional(z.union([z.string(), z.null()])),
-  agreeToTerms: z.optional(z.boolean()).default(false),
-  agreeToBackgroundCheck: z.optional(z.boolean()).default(false),
-  userId: z.optional(z.union([z.uuid(), z.null()])),
+  agreeToTerms: z.boolean(),
+  agreeToBackgroundCheck: z.boolean(),
+});
+
+/**
+ * TeacherRegistrationForm
+ */
+export const zTeacherRegistrationForm = z.object({
+  resume: z.optional(z.union([z.string(), z.null()])),
+  backgroundCheck: z.optional(z.union([z.string(), z.null()])),
+  agreeToTerms: z.boolean(),
+  agreeToBackgroundCheck: z.boolean(),
+  reference1Name: z.string(),
+  reference1Organization: z.string(),
+  reference1Phone: z.string(),
+  reference1Email: z.optional(z.union([z.email(), z.null()])),
+  highestDegree: zHighestDegreeEnum,
+  university: z.string(),
+  graduationYear: z.int(),
+  gpa: z.number(),
+  positionApplyingFor: z.string(),
+  teachingLicense: z.boolean(),
+  yearsOfExperience: zExperienceYearEnum,
+  address: z.string(),
+  city: z.string().min(3).max(50),
+  state: z.string().min(3).max(50),
+  country: z.string(),
+  primaryPhone: z.string(),
+  secondaryPhone: z.optional(z.union([z.string(), z.null()])),
+  personalEmail: z.email(),
+  emergencyContactName: z.string().min(3).max(50),
+  emergencyContactRelation: z.string().min(3).max(50),
+  emergencyContactPhone: z.string(),
+  firstName: z.string().min(3).max(50),
+  fatherName: z.string().min(3).max(50),
+  grandFatherName: z.optional(z.union([z.string(), z.null()])),
+  dateOfBirth: z.iso.date(),
+  gender: zGenderEnum,
+  nationality: z.optional(z.union([z.string().min(3).max(100), z.null()])),
+  maritalStatus: z.optional(z.union([zMaritalStatusEnum, z.null()])),
+  socialSecurityNumber: z.string(),
   status: z.optional(zTeacherApplicationStatus),
 });
 
@@ -1483,8 +1501,63 @@ export const zRegisterNewStudentData = z.object({
  */
 export const zRegisterNewStudentResponse = zRegistrationResponse;
 
+export const zRegisterTeacherStep1Data = z.object({
+  body: zTeacherRegStep1,
+  path: z.optional(z.never()),
+  query: z.optional(z.never()),
+});
+
+/**
+ * Successful Response
+ */
+export const zRegisterTeacherStep1Response = zRegistrationStep;
+
+export const zRegisterTeacherStep2Data = z.object({
+  body: zTeacherRegStep2,
+  path: z.optional(z.never()),
+  query: z.optional(z.never()),
+});
+
+/**
+ * Successful Response
+ */
+export const zRegisterTeacherStep2Response = zRegistrationStep;
+
+export const zRegisterTeacherStep3Data = z.object({
+  body: zTeacherRegStep3,
+  path: z.optional(z.never()),
+  query: z.optional(z.never()),
+});
+
+/**
+ * Successful Response
+ */
+export const zRegisterTeacherStep3Response = zRegistrationStep;
+
+export const zRegisterTeacherStep4Data = z.object({
+  body: zTeacherRegStep4,
+  path: z.optional(z.never()),
+  query: z.optional(z.never()),
+});
+
+/**
+ * Successful Response
+ */
+export const zRegisterTeacherStep4Response = zRegistrationStep;
+
+export const zRegisterTeacherStep5Data = z.object({
+  body: zTeacherRegStep5,
+  path: z.optional(z.never()),
+  query: z.optional(z.never()),
+});
+
+/**
+ * Successful Response
+ */
+export const zRegisterTeacherStep5Response = zRegistrationStep;
+
 export const zRegisterNewTeacherData = z.object({
-  body: zTeacherWithRelatedSchemaInput,
+  body: zTeacherRegistrationForm,
   path: z.optional(z.never()),
   query: z.optional(z.never()),
 });

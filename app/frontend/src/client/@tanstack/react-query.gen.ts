@@ -11,6 +11,11 @@ import {
   registerStudentStep4,
   registerStudentStep5,
   registerNewStudent,
+  registerTeacherStep1,
+  registerTeacherStep2,
+  registerTeacherStep3,
+  registerTeacherStep4,
+  registerTeacherStep5,
   registerNewTeacher,
   getYears,
   postYear,
@@ -76,6 +81,21 @@ import type {
   RegisterNewStudentData,
   RegisterNewStudentError,
   RegisterNewStudentResponse,
+  RegisterTeacherStep1Data,
+  RegisterTeacherStep1Error,
+  RegisterTeacherStep1Response,
+  RegisterTeacherStep2Data,
+  RegisterTeacherStep2Error,
+  RegisterTeacherStep2Response,
+  RegisterTeacherStep3Data,
+  RegisterTeacherStep3Error,
+  RegisterTeacherStep3Response,
+  RegisterTeacherStep4Data,
+  RegisterTeacherStep4Error,
+  RegisterTeacherStep4Response,
+  RegisterTeacherStep5Data,
+  RegisterTeacherStep5Error,
+  RegisterTeacherStep5Response,
   RegisterNewTeacherData,
   RegisterNewTeacherError,
   RegisterNewTeacherResponse,
@@ -628,6 +648,271 @@ export const registerNewStudentMutation = (
   > = {
     mutationFn: async (localOptions) => {
       const { data } = await registerNewStudent({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const registerTeacherStep1QueryKey = (
+  options: Options<RegisterTeacherStep1Data>,
+) => createQueryKey("registerTeacherStep1", options);
+
+/**
+ * Register Teacher Step1
+ * Validate teacher data for each step
+ */
+export const registerTeacherStep1Options = (
+  options: Options<RegisterTeacherStep1Data>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await registerTeacherStep1({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: registerTeacherStep1QueryKey(options),
+  });
+};
+
+/**
+ * Register Teacher Step1
+ * Validate teacher data for each step
+ */
+export const registerTeacherStep1Mutation = (
+  options?: Partial<Options<RegisterTeacherStep1Data>>,
+): UseMutationOptions<
+  RegisterTeacherStep1Response,
+  AxiosError<RegisterTeacherStep1Error>,
+  Options<RegisterTeacherStep1Data>
+> => {
+  const mutationOptions: UseMutationOptions<
+    RegisterTeacherStep1Response,
+    AxiosError<RegisterTeacherStep1Error>,
+    Options<RegisterTeacherStep1Data>
+  > = {
+    mutationFn: async (localOptions) => {
+      const { data } = await registerTeacherStep1({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const registerTeacherStep2QueryKey = (
+  options: Options<RegisterTeacherStep2Data>,
+) => createQueryKey("registerTeacherStep2", options);
+
+/**
+ * Register Teacher Step2
+ * Validate teacher data for each step
+ */
+export const registerTeacherStep2Options = (
+  options: Options<RegisterTeacherStep2Data>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await registerTeacherStep2({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: registerTeacherStep2QueryKey(options),
+  });
+};
+
+/**
+ * Register Teacher Step2
+ * Validate teacher data for each step
+ */
+export const registerTeacherStep2Mutation = (
+  options?: Partial<Options<RegisterTeacherStep2Data>>,
+): UseMutationOptions<
+  RegisterTeacherStep2Response,
+  AxiosError<RegisterTeacherStep2Error>,
+  Options<RegisterTeacherStep2Data>
+> => {
+  const mutationOptions: UseMutationOptions<
+    RegisterTeacherStep2Response,
+    AxiosError<RegisterTeacherStep2Error>,
+    Options<RegisterTeacherStep2Data>
+  > = {
+    mutationFn: async (localOptions) => {
+      const { data } = await registerTeacherStep2({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const registerTeacherStep3QueryKey = (
+  options: Options<RegisterTeacherStep3Data>,
+) => createQueryKey("registerTeacherStep3", options);
+
+/**
+ * Register Teacher Step3
+ * Validate teacher data for each step
+ */
+export const registerTeacherStep3Options = (
+  options: Options<RegisterTeacherStep3Data>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await registerTeacherStep3({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: registerTeacherStep3QueryKey(options),
+  });
+};
+
+/**
+ * Register Teacher Step3
+ * Validate teacher data for each step
+ */
+export const registerTeacherStep3Mutation = (
+  options?: Partial<Options<RegisterTeacherStep3Data>>,
+): UseMutationOptions<
+  RegisterTeacherStep3Response,
+  AxiosError<RegisterTeacherStep3Error>,
+  Options<RegisterTeacherStep3Data>
+> => {
+  const mutationOptions: UseMutationOptions<
+    RegisterTeacherStep3Response,
+    AxiosError<RegisterTeacherStep3Error>,
+    Options<RegisterTeacherStep3Data>
+  > = {
+    mutationFn: async (localOptions) => {
+      const { data } = await registerTeacherStep3({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const registerTeacherStep4QueryKey = (
+  options: Options<RegisterTeacherStep4Data>,
+) => createQueryKey("registerTeacherStep4", options);
+
+/**
+ * Register Teacher Step4
+ * Validate teacher data for each step
+ */
+export const registerTeacherStep4Options = (
+  options: Options<RegisterTeacherStep4Data>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await registerTeacherStep4({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: registerTeacherStep4QueryKey(options),
+  });
+};
+
+/**
+ * Register Teacher Step4
+ * Validate teacher data for each step
+ */
+export const registerTeacherStep4Mutation = (
+  options?: Partial<Options<RegisterTeacherStep4Data>>,
+): UseMutationOptions<
+  RegisterTeacherStep4Response,
+  AxiosError<RegisterTeacherStep4Error>,
+  Options<RegisterTeacherStep4Data>
+> => {
+  const mutationOptions: UseMutationOptions<
+    RegisterTeacherStep4Response,
+    AxiosError<RegisterTeacherStep4Error>,
+    Options<RegisterTeacherStep4Data>
+  > = {
+    mutationFn: async (localOptions) => {
+      const { data } = await registerTeacherStep4({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const registerTeacherStep5QueryKey = (
+  options: Options<RegisterTeacherStep5Data>,
+) => createQueryKey("registerTeacherStep5", options);
+
+/**
+ * Register Teacher Step5
+ * Validate teacher data for each step
+ */
+export const registerTeacherStep5Options = (
+  options: Options<RegisterTeacherStep5Data>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await registerTeacherStep5({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: registerTeacherStep5QueryKey(options),
+  });
+};
+
+/**
+ * Register Teacher Step5
+ * Validate teacher data for each step
+ */
+export const registerTeacherStep5Mutation = (
+  options?: Partial<Options<RegisterTeacherStep5Data>>,
+): UseMutationOptions<
+  RegisterTeacherStep5Response,
+  AxiosError<RegisterTeacherStep5Error>,
+  Options<RegisterTeacherStep5Data>
+> => {
+  const mutationOptions: UseMutationOptions<
+    RegisterTeacherStep5Response,
+    AxiosError<RegisterTeacherStep5Error>,
+    Options<RegisterTeacherStep5Data>
+  > = {
+    mutationFn: async (localOptions) => {
+      const { data } = await registerTeacherStep5({
         ...options,
         ...localOptions,
         throwOnError: true,

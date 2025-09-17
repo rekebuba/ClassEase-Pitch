@@ -1,5 +1,5 @@
 import uuid
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from models.grade import Grade
     from models.stream import Stream
     from models.subject import Subject
+    from models.teacher_record import TeacherRecord
 
 
 class GradeStreamSubject(BaseModel):
@@ -67,4 +68,13 @@ class GradeStreamSubject(BaseModel):
         passive_deletes=True,
         init=False,
         repr=False,
+    )
+
+    # One-To-Many Relationships
+    teacher_records: Mapped[List["TeacherRecord"]] = relationship(
+        "TeacherRecord",
+        back_populates="grade_stream_subjects",
+        default_factory=list,
+        repr=False,
+        passive_deletes=True,
     )

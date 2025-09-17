@@ -382,7 +382,7 @@ export type GradeNestedSchema = {
   /**
    * Teachers
    */
-  teachers: Array<TeacherWithRelatedSchemaOutput>;
+  teachers: Array<TeacherWithRelatedSchema>;
   /**
    * Streams
    */
@@ -904,6 +904,10 @@ export type StudRegStep1 = {
    * Nationality
    */
   nationality?: string | null;
+  /**
+   * Studentphoto
+   */
+  studentPhoto?: string | null;
 };
 
 /**
@@ -1001,10 +1005,6 @@ export type StudRegStep4 = {
  */
 export type StudRegStep5 = {
   bloodType?: BloodTypeEnum;
-  /**
-   * Studentphoto
-   */
-  studentPhoto?: string | null;
   /**
    * Hasmedicalcondition
    */
@@ -1225,10 +1225,6 @@ export type StudentRegisteredYear = {
 export type StudentRegistrationForm = {
   bloodType?: BloodTypeEnum;
   /**
-   * Studentphoto
-   */
-  studentPhoto?: string | null;
-  /**
    * Hasmedicalcondition
    */
   hasMedicalCondition?: boolean;
@@ -1337,6 +1333,10 @@ export type StudentRegistrationForm = {
    * Nationality
    */
   nationality?: string | null;
+  /**
+   * Studentphoto
+   */
+  studentPhoto?: string | null;
   status?: StudentApplicationStatusEnum;
 };
 
@@ -1807,7 +1807,7 @@ export type SubjectNestedSchema = {
   /**
    * Teachers
    */
-  teachers: Array<TeacherWithRelatedSchemaOutput>;
+  teachers: Array<TeacherWithRelatedSchema>;
   /**
    * Streams
    */
@@ -2017,6 +2017,283 @@ export type TeacherInfo = {
    */
   createdAt: string;
   teacher: TeacherSchema;
+};
+
+/**
+ * TeacherRegStep1
+ */
+export type TeacherRegStep1 = {
+  /**
+   * Firstname
+   */
+  firstName: string;
+  /**
+   * Fathername
+   */
+  fatherName: string;
+  /**
+   * Grandfathername
+   */
+  grandFatherName?: string | null;
+  /**
+   * Dateofbirth
+   */
+  dateOfBirth: string;
+  gender: GenderEnum;
+  /**
+   * Nationality
+   */
+  nationality?: string | null;
+  maritalStatus?: MaritalStatusEnum | null;
+  /**
+   * Socialsecuritynumber
+   */
+  socialSecurityNumber: string;
+};
+
+/**
+ * TeacherRegStep2
+ */
+export type TeacherRegStep2 = {
+  /**
+   * Address
+   */
+  address: string;
+  /**
+   * City
+   */
+  city: string;
+  /**
+   * State
+   */
+  state: string;
+  /**
+   * Country
+   */
+  country: string;
+  /**
+   * Primaryphone
+   */
+  primaryPhone: string;
+  /**
+   * Secondaryphone
+   */
+  secondaryPhone?: string | null;
+  /**
+   * Personalemail
+   */
+  personalEmail: string;
+  /**
+   * Emergencycontactname
+   */
+  emergencyContactName: string;
+  /**
+   * Emergencycontactrelation
+   */
+  emergencyContactRelation: string;
+  /**
+   * Emergencycontactphone
+   */
+  emergencyContactPhone: string;
+};
+
+/**
+ * TeacherRegStep3
+ */
+export type TeacherRegStep3 = {
+  highestDegree: HighestDegreeEnum;
+  /**
+   * University
+   */
+  university: string;
+  /**
+   * Graduationyear
+   */
+  graduationYear: number;
+  /**
+   * Gpa
+   */
+  gpa: number;
+  /**
+   * Positionapplyingfor
+   */
+  positionApplyingFor: string;
+  /**
+   * Teachinglicense
+   */
+  teachingLicense: boolean;
+  yearsOfExperience: ExperienceYearEnum;
+};
+
+/**
+ * TeacherRegStep4
+ */
+export type TeacherRegStep4 = {
+  /**
+   * Reference1Name
+   */
+  reference1Name: string;
+  /**
+   * Reference1Organization
+   */
+  reference1Organization: string;
+  /**
+   * Reference1Phone
+   */
+  reference1Phone: string;
+  /**
+   * Reference1Email
+   */
+  reference1Email?: string | null;
+};
+
+/**
+ * TeacherRegStep5
+ */
+export type TeacherRegStep5 = {
+  /**
+   * Resume
+   */
+  resume?: string | null;
+  /**
+   * Backgroundcheck
+   */
+  backgroundCheck?: string | null;
+  /**
+   * Agreetoterms
+   */
+  agreeToTerms: boolean;
+  /**
+   * Agreetobackgroundcheck
+   */
+  agreeToBackgroundCheck: boolean;
+};
+
+/**
+ * TeacherRegistrationForm
+ */
+export type TeacherRegistrationForm = {
+  /**
+   * Resume
+   */
+  resume?: string | null;
+  /**
+   * Backgroundcheck
+   */
+  backgroundCheck?: string | null;
+  /**
+   * Agreetoterms
+   */
+  agreeToTerms: boolean;
+  /**
+   * Agreetobackgroundcheck
+   */
+  agreeToBackgroundCheck: boolean;
+  /**
+   * Reference1Name
+   */
+  reference1Name: string;
+  /**
+   * Reference1Organization
+   */
+  reference1Organization: string;
+  /**
+   * Reference1Phone
+   */
+  reference1Phone: string;
+  /**
+   * Reference1Email
+   */
+  reference1Email?: string | null;
+  highestDegree: HighestDegreeEnum;
+  /**
+   * University
+   */
+  university: string;
+  /**
+   * Graduationyear
+   */
+  graduationYear: number;
+  /**
+   * Gpa
+   */
+  gpa: number;
+  /**
+   * Positionapplyingfor
+   */
+  positionApplyingFor: string;
+  /**
+   * Teachinglicense
+   */
+  teachingLicense: boolean;
+  yearsOfExperience: ExperienceYearEnum;
+  /**
+   * Address
+   */
+  address: string;
+  /**
+   * City
+   */
+  city: string;
+  /**
+   * State
+   */
+  state: string;
+  /**
+   * Country
+   */
+  country: string;
+  /**
+   * Primaryphone
+   */
+  primaryPhone: string;
+  /**
+   * Secondaryphone
+   */
+  secondaryPhone?: string | null;
+  /**
+   * Personalemail
+   */
+  personalEmail: string;
+  /**
+   * Emergencycontactname
+   */
+  emergencyContactName: string;
+  /**
+   * Emergencycontactrelation
+   */
+  emergencyContactRelation: string;
+  /**
+   * Emergencycontactphone
+   */
+  emergencyContactPhone: string;
+  /**
+   * Firstname
+   */
+  firstName: string;
+  /**
+   * Fathername
+   */
+  fatherName: string;
+  /**
+   * Grandfathername
+   */
+  grandFatherName?: string | null;
+  /**
+   * Dateofbirth
+   */
+  dateOfBirth: string;
+  gender: GenderEnum;
+  /**
+   * Nationality
+   */
+  nationality?: string | null;
+  maritalStatus?: MaritalStatusEnum | null;
+  /**
+   * Socialsecuritynumber
+   */
+  socialSecurityNumber: string;
+  status?: TeacherApplicationStatus;
 };
 
 /**
@@ -2363,301 +2640,7 @@ export type TeacherTermRecordWithRelatedSchema = {
  * TeacherWithRelatedSchema
  * This model extends TeacherSchema to include relationships.
  */
-export type TeacherWithRelatedSchemaInput = {
-  user?: UserSchema | null;
-  /**
-   * Sections
-   */
-  sections?: Array<SectionSchema> | null;
-  /**
-   * Years
-   * List of years the teacher is associated with.
-   */
-  years?: Array<YearSchema> | null;
-  /**
-   * Termrecords
-   */
-  termRecords?: Array<TeacherTermRecordSchema> | null;
-  /**
-   * Academicterms
-   * List of academic terms the teacher is associated with.
-   */
-  academicTerms?: Array<AcademicTermSchema> | null;
-  /**
-   * Grades
-   * List of grades the teacher is associated with.
-   */
-  grades?: Array<GradeSchema> | null;
-  /**
-   * Subjects
-   * List of subjects the teacher is associated with.
-   */
-  subjects?: Array<SubjectSchema> | null;
-  /**
-   * Id
-   */
-  id?: string | null;
-  /**
-   * Firstname
-   */
-  firstName: string;
-  /**
-   * Fathername
-   */
-  fatherName: string;
-  /**
-   * Grandfathername
-   */
-  grandFatherName: string;
-  /**
-   * Dateofbirth
-   */
-  dateOfBirth: string;
-  gender: GenderEnum;
-  /**
-   * Nationality
-   */
-  nationality: string;
-  /**
-   * Socialsecuritynumber
-   */
-  socialSecurityNumber: string;
-  /**
-   * Address
-   */
-  address: string;
-  /**
-   * City
-   */
-  city: string;
-  /**
-   * State
-   */
-  state: string;
-  /**
-   * Postalcode
-   */
-  postalCode: string;
-  /**
-   * Country
-   */
-  country: string;
-  /**
-   * Primaryphone
-   */
-  primaryPhone: string;
-  /**
-   * Personalemail
-   */
-  personalEmail: string;
-  /**
-   * Emergencycontactname
-   */
-  emergencyContactName: string;
-  /**
-   * Emergencycontactrelation
-   */
-  emergencyContactRelation: string;
-  /**
-   * Emergencycontactphone
-   */
-  emergencyContactPhone: string;
-  /**
-   * Emergencycontactemail
-   */
-  emergencyContactEmail: string;
-  highestDegree: HighestDegreeEnum;
-  /**
-   * University
-   */
-  university: string;
-  /**
-   * Graduationyear
-   */
-  graduationYear: number;
-  /**
-   * Gpa
-   */
-  gpa: number;
-  /**
-   * Positionapplyingfor
-   */
-  positionApplyingFor: string;
-  yearsOfExperience: ExperienceYearEnum;
-  preferredSchedule: ScheduleEnum;
-  /**
-   * Reference1Name
-   */
-  reference1Name: string;
-  /**
-   * Reference1Title
-   */
-  reference1Title: string;
-  /**
-   * Reference1Organization
-   */
-  reference1Organization: string;
-  /**
-   * Reference1Phone
-   */
-  reference1Phone: string;
-  /**
-   * Reference1Email
-   */
-  reference1Email: string;
-  maritalStatus?: MaritalStatusEnum | null;
-  /**
-   * Secondaryphone
-   */
-  secondaryPhone?: string | null;
-  /**
-   * Additionaldegrees
-   */
-  additionalDegrees?: string | null;
-  /**
-   * Teachinglicense
-   */
-  teachingLicense?: boolean | null;
-  /**
-   * Licensenumber
-   */
-  licenseNumber?: string | null;
-  /**
-   * Licensestate
-   */
-  licenseState?: string | null;
-  /**
-   * Licenseexpirationdate
-   */
-  licenseExpirationDate?: string | null;
-  /**
-   * Certifications
-   */
-  certifications?: string | null;
-  /**
-   * Specializations
-   */
-  specializations?: string | null;
-  /**
-   * Previousschools
-   */
-  previousSchools?: string | null;
-  /**
-   * Specialskills
-   */
-  specialSkills?: string | null;
-  /**
-   * Professionaldevelopment
-   */
-  professionalDevelopment?: string | null;
-  /**
-   * Hasconvictions
-   */
-  hasConvictions?: boolean;
-  /**
-   * Convictiondetails
-   */
-  convictionDetails?: string | null;
-  /**
-   * Hasdisciplinaryactions
-   */
-  hasDisciplinaryActions?: boolean;
-  /**
-   * Disciplinarydetails
-   */
-  disciplinaryDetails?: string | null;
-  /**
-   * Reference2Name
-   */
-  reference2Name?: string | null;
-  /**
-   * Reference2Title
-   */
-  reference2Title?: string | null;
-  /**
-   * Reference2Organization
-   */
-  reference2Organization?: string | null;
-  /**
-   * Reference2Phone
-   */
-  reference2Phone?: string | null;
-  /**
-   * Reference2Email
-   */
-  reference2Email?: string | null;
-  /**
-   * Reference3Name
-   */
-  reference3Name?: string | null;
-  /**
-   * Reference3Title
-   */
-  reference3Title?: string | null;
-  /**
-   * Reference3Organization
-   */
-  reference3Organization?: string | null;
-  /**
-   * Reference3Phone
-   */
-  reference3Phone?: string | null;
-  /**
-   * Reference3Email
-   */
-  reference3Email?: string | null;
-  /**
-   * Resume
-   */
-  resume?: string | null;
-  /**
-   * Coverletter
-   */
-  coverLetter?: string | null;
-  /**
-   * Transcripts
-   */
-  transcripts?: string | null;
-  /**
-   * Teachingcertificate
-   */
-  teachingCertificate?: string | null;
-  /**
-   * Backgroundcheck
-   */
-  backgroundCheck?: string | null;
-  /**
-   * Teachingphilosophy
-   */
-  teachingPhilosophy?: string | null;
-  /**
-   * Whyteaching
-   */
-  whyTeaching?: string | null;
-  /**
-   * Additionalcomments
-   */
-  additionalComments?: string | null;
-  /**
-   * Agreetoterms
-   */
-  agreeToTerms?: boolean;
-  /**
-   * Agreetobackgroundcheck
-   */
-  agreeToBackgroundCheck?: boolean;
-  /**
-   * Userid
-   */
-  userId?: string | null;
-  status?: TeacherApplicationStatus;
-};
-
-/**
- * TeacherWithRelatedSchema
- * This model extends TeacherSchema to include relationships.
- */
-export type TeacherWithRelatedSchemaOutput = {
+export type TeacherWithRelatedSchema = {
   user?: UserSchema | null;
   /**
    * Sections
@@ -3508,8 +3491,143 @@ export type RegisterNewStudentResponses = {
 export type RegisterNewStudentResponse =
   RegisterNewStudentResponses[keyof RegisterNewStudentResponses];
 
+export type RegisterTeacherStep1Data = {
+  body: TeacherRegStep1;
+  path?: never;
+  query?: never;
+  url: "/api/v1/register/teachers/step1";
+};
+
+export type RegisterTeacherStep1Errors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type RegisterTeacherStep1Error =
+  RegisterTeacherStep1Errors[keyof RegisterTeacherStep1Errors];
+
+export type RegisterTeacherStep1Responses = {
+  /**
+   * Successful Response
+   */
+  200: RegistrationStep;
+};
+
+export type RegisterTeacherStep1Response =
+  RegisterTeacherStep1Responses[keyof RegisterTeacherStep1Responses];
+
+export type RegisterTeacherStep2Data = {
+  body: TeacherRegStep2;
+  path?: never;
+  query?: never;
+  url: "/api/v1/register/teachers/step2";
+};
+
+export type RegisterTeacherStep2Errors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type RegisterTeacherStep2Error =
+  RegisterTeacherStep2Errors[keyof RegisterTeacherStep2Errors];
+
+export type RegisterTeacherStep2Responses = {
+  /**
+   * Successful Response
+   */
+  200: RegistrationStep;
+};
+
+export type RegisterTeacherStep2Response =
+  RegisterTeacherStep2Responses[keyof RegisterTeacherStep2Responses];
+
+export type RegisterTeacherStep3Data = {
+  body: TeacherRegStep3;
+  path?: never;
+  query?: never;
+  url: "/api/v1/register/teachers/step3";
+};
+
+export type RegisterTeacherStep3Errors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type RegisterTeacherStep3Error =
+  RegisterTeacherStep3Errors[keyof RegisterTeacherStep3Errors];
+
+export type RegisterTeacherStep3Responses = {
+  /**
+   * Successful Response
+   */
+  200: RegistrationStep;
+};
+
+export type RegisterTeacherStep3Response =
+  RegisterTeacherStep3Responses[keyof RegisterTeacherStep3Responses];
+
+export type RegisterTeacherStep4Data = {
+  body: TeacherRegStep4;
+  path?: never;
+  query?: never;
+  url: "/api/v1/register/teachers/step4";
+};
+
+export type RegisterTeacherStep4Errors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type RegisterTeacherStep4Error =
+  RegisterTeacherStep4Errors[keyof RegisterTeacherStep4Errors];
+
+export type RegisterTeacherStep4Responses = {
+  /**
+   * Successful Response
+   */
+  200: RegistrationStep;
+};
+
+export type RegisterTeacherStep4Response =
+  RegisterTeacherStep4Responses[keyof RegisterTeacherStep4Responses];
+
+export type RegisterTeacherStep5Data = {
+  body: TeacherRegStep5;
+  path?: never;
+  query?: never;
+  url: "/api/v1/register/teachers/step5";
+};
+
+export type RegisterTeacherStep5Errors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type RegisterTeacherStep5Error =
+  RegisterTeacherStep5Errors[keyof RegisterTeacherStep5Errors];
+
+export type RegisterTeacherStep5Responses = {
+  /**
+   * Successful Response
+   */
+  200: RegistrationStep;
+};
+
+export type RegisterTeacherStep5Response =
+  RegisterTeacherStep5Responses[keyof RegisterTeacherStep5Responses];
+
 export type RegisterNewTeacherData = {
-  body: TeacherWithRelatedSchemaInput;
+  body: TeacherRegistrationForm;
   path?: never;
   query?: never;
   url: "/api/v1/register/teachers";

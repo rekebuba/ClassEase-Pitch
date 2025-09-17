@@ -11,18 +11,18 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { TextareaHTMLAttributes } from "react";
 
-type TextAreaWithLabelProps<T extends FieldValues> = {
+type TextareaWithLabelProps<T extends FieldValues> = {
   fieldTitle: string;
   nameInSchema: Path<T>;
   className?: string;
 } & TextareaHTMLAttributes<HTMLTextAreaElement>;
 
-export function TextAreaWithLabel<T extends FieldValues>({
+export function TextareaWithLabel<T extends FieldValues>({
   fieldTitle,
   nameInSchema,
   className,
   ...props
-}: TextAreaWithLabelProps<T>) {
+}: TextareaWithLabelProps<T>) {
   const form = useFormContext();
 
   return (

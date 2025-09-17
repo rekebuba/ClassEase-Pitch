@@ -2,7 +2,6 @@
 """Module for Teacher class"""
 
 import uuid
-from datetime import date
 from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import (
@@ -16,16 +15,17 @@ from sqlalchemy import (
     String,
     Text,
 )
+from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
+from models.teacher_record import TeacherRecord
 from utils.enum import (
     ExperienceYearEnum,
     GenderEnum,
     HighestDegreeEnum,
     MaritalStatusEnum,
-    ScheduleEnum,
     TeacherApplicationStatus,
 )
 
@@ -35,13 +35,14 @@ if TYPE_CHECKING:
     from models.section import Section
     from models.subject import Subject
     from models.teacher_term_record import TeacherTermRecord
-    from models.user import User  # Avoid circular import
+    from models.user import User
     from models.year import Year
 
 
 class Teacher(BaseModel):
     """
-    This model represents a teacher in the ClassEase system. It inherits from BaseModel and Base.
+    This model represents a teacher in the ClassEase system.
+    It inherits from BaseModel and Base.
     """
 
     __tablename__ = "teachers"
@@ -66,7 +67,6 @@ class Teacher(BaseModel):
     address: Mapped[str] = mapped_column(Text, nullable=False)
     city: Mapped[str] = mapped_column(String(50), nullable=False)
     state: Mapped[str] = mapped_column(String(50), nullable=False)
-    postal_code: Mapped[str] = mapped_column(String(50), nullable=False)
     country: Mapped[str] = mapped_column(String(50), nullable=False)
     primary_phone: Mapped[str] = mapped_column(String(50), nullable=False)
     personal_email: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -75,7 +75,6 @@ class Teacher(BaseModel):
     emergency_contact_name: Mapped[str] = mapped_column(String(50), nullable=False)
     emergency_contact_relation: Mapped[str] = mapped_column(String(50), nullable=False)
     emergency_contact_phone: Mapped[str] = mapped_column(String(50), nullable=False)
-    emergency_contact_email: Mapped[str] = mapped_column(String(50), nullable=False)
 
     # Educational Background
     highest_degree: Mapped[HighestDegreeEnum] = mapped_column(
@@ -102,25 +101,15 @@ class Teacher(BaseModel):
         ),
         nullable=False,
     )
-
-    preferred_schedule: Mapped[ScheduleEnum] = mapped_column(
-        Enum(
-            ScheduleEnum,
-            name="schedule_enum",
-            values_callable=lambda x: [e.value for e in x],
-            native_enum=False,
-        ),
-        nullable=False,
-    )
+    teaching_license: bool
 
     # Background & References
     reference1_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    reference1_title: Mapped[str] = mapped_column(String(50), nullable=False)
     reference1_organization: Mapped[str] = mapped_column(String(50), nullable=False)
     reference1_phone: Mapped[str] = mapped_column(String(50), nullable=False)
-    reference1_email: Mapped[str] = mapped_column(String(50), nullable=False)
 
     # Additional Information (Default values)
+    reference1_email: Mapped[Optional[str]] = mapped_column(String(50), default=None)
     marital_status: Mapped[Optional[MaritalStatusEnum]] = mapped_column(
         Enum(
             MaritalStatusEnum,
@@ -135,84 +124,15 @@ class Teacher(BaseModel):
     secondary_phone: Mapped[Optional[str]] = mapped_column(
         String(50), nullable=True, default=None
     )
-    additional_degrees: Mapped[Optional[str]] = mapped_column(
-        Text, nullable=True, default=None
-    )
-    teaching_license: Optional[bool] = False
-    license_number: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-    license_state: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-    license_expiration_date: Mapped[Optional[date]] = mapped_column(
-        Date, nullable=True, default=None
-    )
 
     certifications: Mapped[Optional[str]] = mapped_column(
         Text, nullable=True, default=None
     )
-    specializations: Mapped[Optional[str]] = mapped_column(
-        Text, nullable=True, default=None
-    )
-    previous_schools: Mapped[Optional[str]] = mapped_column(
-        Text, nullable=True, default=None
-    )
 
-    special_skills: Mapped[Optional[str]] = mapped_column(Text, default=None)
-    professional_development: Mapped[Optional[str]] = mapped_column(Text, default=None)
-
-    has_convictions: Mapped[bool] = mapped_column(Boolean, default=False)
-    conviction_details: Mapped[Optional[str]] = mapped_column(Text, default=None)
-    has_disciplinary_actions: Mapped[bool] = mapped_column(Boolean, default=False)
-    disciplinary_details: Mapped[Optional[str]] = mapped_column(Text, default=None)
-
-    reference2_name: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-    reference2_title: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-    reference2_organization: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-    reference2_phone: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-    reference2_email: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-    reference3_name: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-    reference3_title: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-    reference3_organization: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-    reference3_phone: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-    reference3_email: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
     resume: Mapped[Optional[str]] = mapped_column(
         String(50), nullable=True, default=None
     )
-    cover_letter: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-    transcripts: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-    teaching_certificate: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
     background_check: Mapped[Optional[str]] = mapped_column(Text, default=None)
-    teaching_philosophy: Mapped[Optional[str]] = mapped_column(Text, default=None)
-    why_teaching: Mapped[Optional[str]] = mapped_column(Text, default=None)
-    additional_comments: Mapped[Optional[str]] = mapped_column(Text, default=None)
 
     agree_to_terms: Mapped[bool] = mapped_column(Boolean, default=False)
     agree_to_background_check: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -254,13 +174,6 @@ class Teacher(BaseModel):
         repr=False,
         passive_deletes=True,
     )
-    term_records: Mapped[List["TeacherTermRecord"]] = relationship(
-        "TeacherTermRecord",
-        back_populates="teacher",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
     academic_terms: Mapped[List["AcademicTerm"]] = relationship(
         "AcademicTerm",
         back_populates="teachers",
@@ -289,6 +202,15 @@ class Teacher(BaseModel):
         "Section",
         back_populates="teachers",
         secondary="teacher_section_links",
+        default_factory=list,
+        repr=False,
+        passive_deletes=True,
+    )
+
+    # One-To-Many Relationships
+    teacher_records: Mapped[List["TeacherRecord"]] = relationship(
+        "TeacherRecord",
+        back_populates="teacher",
         default_factory=list,
         repr=False,
         passive_deletes=True,

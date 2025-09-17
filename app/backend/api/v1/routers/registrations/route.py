@@ -17,6 +17,12 @@ from api.v1.routers.registrations.schema import (
     StudRegStep3,
     StudRegStep4,
     StudRegStep5,
+    TeacherRegistrationForm,
+    TeacherRegStep1,
+    TeacherRegStep2,
+    TeacherRegStep3,
+    TeacherRegStep4,
+    TeacherRegStep5,
 )
 from models.admin import Admin
 from models.grade import Grade
@@ -26,7 +32,6 @@ from models.teacher import Teacher
 from schema.models.admin_schema import AdminSchema
 from schema.models.grade_schema import GradeSchema
 from schema.models.subject_schema import SubjectSchema
-from schema.models.teacher_schema import TeacherWithRelatedSchema
 
 router = APIRouter(prefix="/register", tags=["registration"])
 
@@ -123,10 +128,50 @@ def register_new_student(
     )
 
 
+@router.post("/teachers/step1", response_model=RegistrationStep)
+def register_teacher_step1(
+    session: SessionDep, teacher_data: TeacherRegStep1
+) -> RegistrationStep:
+    """Validate teacher data for each step"""
+    return RegistrationStep(message="Teacher Step 1 Successful")
+
+
+@router.post("/teachers/step2", response_model=RegistrationStep)
+def register_teacher_step2(
+    session: SessionDep, teacher_data: TeacherRegStep2
+) -> RegistrationStep:
+    """Validate teacher data for each step"""
+    return RegistrationStep(message="Teacher Step 2 Successful")
+
+
+@router.post("/teachers/step3", response_model=RegistrationStep)
+def register_teacher_step3(
+    session: SessionDep, teacher_data: TeacherRegStep3
+) -> RegistrationStep:
+    """Validate teacher data for each step"""
+    return RegistrationStep(message="Teacher Step 3 Successful")
+
+
+@router.post("/teachers/step4", response_model=RegistrationStep)
+def register_teacher_step4(
+    session: SessionDep, teacher_data: TeacherRegStep4
+) -> RegistrationStep:
+    """Validate teacher data for each step"""
+    return RegistrationStep(message="Teacher Step 4 Successful")
+
+
+@router.post("/teachers/step5", response_model=RegistrationStep)
+def register_teacher_step5(
+    session: SessionDep, teacher_data: TeacherRegStep5
+) -> RegistrationStep:
+    """Validate teacher data for each step"""
+    return RegistrationStep(message="Teacher Step 5 Successful")
+
+
 @router.post("/teachers", response_model=RegistrationResponse)
 def register_new_teacher(
     session: SessionDep,
-    teacher_data: TeacherWithRelatedSchema,
+    teacher_data: TeacherRegistrationForm,
 ) -> RegistrationResponse:
     """
     Registers a new user (Admin, Student, Teacher) in the system.

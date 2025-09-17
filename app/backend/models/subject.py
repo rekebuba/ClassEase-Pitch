@@ -47,15 +47,6 @@ class Subject(BaseModel):
         init=False,
     )
 
-    # Many-To-One Relationships
-    teacher_term_records: Mapped[List["TeacherTermRecord"]] = relationship(
-        "TeacherTermRecord",
-        back_populates="subject",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
-
     # Many-To-Many Relationships
     teachers: Mapped[List["Teacher"]] = relationship(
         "Teacher",

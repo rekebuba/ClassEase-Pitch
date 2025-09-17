@@ -15,6 +15,7 @@ if TYPE_CHECKING:
     from models.student import Student
     from models.student_term_record import StudentTermRecord
     from models.teacher import Teacher
+    from models.teacher_record import TeacherRecord
     from models.teacher_term_record import TeacherTermRecord
 
 
@@ -44,13 +45,6 @@ class Section(BaseModel):
     )
 
     # Many-To-One Relationships
-    teacher_term_records: Mapped[List["TeacherTermRecord"]] = relationship(
-        "TeacherTermRecord",
-        back_populates="section",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
     student_term_records: Mapped[List["StudentTermRecord"]] = relationship(
         "StudentTermRecord",
         back_populates="section",
@@ -72,6 +66,15 @@ class Section(BaseModel):
     students: Mapped[List["Student"]] = relationship(
         "Student",
         secondary="student_section_links",
+        back_populates="sections",
+        default_factory=list,
+        repr=False,
+        passive_deletes=True,
+    )
+
+    # One-To-Many Relationships
+    teacher_records: Mapped[List["TeacherRecord"]] = relationship(
+        "TeacherRecord",
         back_populates="sections",
         default_factory=list,
         repr=False,

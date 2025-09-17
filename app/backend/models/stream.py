@@ -17,7 +17,6 @@ if TYPE_CHECKING:
     from models.student import Student
     from models.student_term_record import StudentTermRecord
     from models.subject import Subject
-    from models.teacher_term_record import TeacherTermRecord
 
 
 class Stream(BaseModel):
@@ -42,13 +41,6 @@ class Stream(BaseModel):
     )
 
     # Many-To-One Relationships
-    teacher_term_records: Mapped[List["TeacherTermRecord"]] = relationship(
-        "TeacherTermRecord",
-        back_populates="stream",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
     student_term_records: Mapped[List["StudentTermRecord"]] = relationship(
         "StudentTermRecord",
         back_populates="stream",

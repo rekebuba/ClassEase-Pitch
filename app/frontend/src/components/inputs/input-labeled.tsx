@@ -41,6 +41,15 @@ export function InputWithLabel<T extends FieldValues>({
               className={`disabled:text-blue-500 dark:disabled:text-yellow-300 disabled:opacity-75 ${className}`}
               {...props}
               {...field}
+              onChange={(e) => {
+                const value =
+                  props.type === "number"
+                    ? e.target.value === ""
+                      ? undefined
+                      : +e.target.value
+                    : e.target.value;
+                field.onChange(value);
+              }}
             />
           </FormControl>
           {form.formState.errors[nameInSchema] ? (

@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from models.student import Student
     from models.student_term_record import StudentTermRecord
     from models.teacher import Teacher
+    from models.teacher_record import TeacherRecord
     from models.teacher_term_record import TeacherTermRecord
     from models.year import Year
 
@@ -58,13 +59,6 @@ class AcademicTerm(BaseModel):
         repr=False,
         passive_deletes=True,
     )
-    teacher_term_records: Mapped[List["TeacherTermRecord"]] = relationship(
-        "TeacherTermRecord",
-        back_populates="academic_term",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
 
     students: Mapped[List["Student"]] = relationship(
         "Student",
@@ -78,6 +72,15 @@ class AcademicTerm(BaseModel):
         "Teacher",
         secondary="teacher_academic_term_links",
         back_populates="academic_terms",
+        default_factory=list,
+        repr=False,
+        passive_deletes=True,
+    )
+
+    # One-To-Many Relationships
+    teacher_records: Mapped[List["TeacherRecord"]] = relationship(
+        "TeacherRecord",
+        back_populates="academic_term",
         default_factory=list,
         repr=False,
         passive_deletes=True,

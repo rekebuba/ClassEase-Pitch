@@ -24,6 +24,7 @@ type SelectWithLabelProps<T extends FieldValues, V> = {
   children?: ReactNode;
   disabled?: boolean;
   description?: string;
+  placeholder?: string;
   getObjects?: (index: string) => V | V[];
 };
 
@@ -34,6 +35,7 @@ export function SelectWithLabel<T extends FieldValues, V>({
   children,
   description,
   disabled = false,
+  placeholder,
   getObjects,
 }: SelectWithLabelProps<T, V>) {
   const form = useFormContext<T>();
@@ -74,7 +76,9 @@ export function SelectWithLabel<T extends FieldValues, V>({
           >
             <FormControl>
               <SelectTrigger id={nameInSchema} className={className}>
-                <SelectValue placeholder="Choose from suggestions..." />
+                <SelectValue
+                  placeholder={placeholder || "Choose from suggestions..."}
+                />
               </SelectTrigger>
             </FormControl>
             <SelectContent>{children}</SelectContent>
