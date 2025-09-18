@@ -67,7 +67,6 @@ from .subject_yearly_average_schema import (
     SubjectYearlyAverageSchema,
 )
 from .table_schema import TableSchema
-from .teacher_grade_link_schema import TeacherGradeLinkSchema
 from .teacher_record_schema import (
     TeacherRecordRelatedSchema,
     TeacherRecordSchema,
@@ -76,12 +75,6 @@ from .teacher_schema import (
     TeacherRelatedSchema,
     TeacherSchema,
     TeacherWithRelatedSchema,
-)
-from .teacher_subject_link_schema import TeacherSubjectLinkSchema
-from .teacher_term_record_schema import (
-    TeacherTermRecordRelatedSchema,
-    TeacherTermRecordSchema,
-    TeacherTermRecordWithRelatedSchema,
 )
 from .user_schema import UserRelatedSchema, UserSchema, UserWithRelatedSchema
 from .year_schema import (
@@ -139,12 +132,10 @@ __all__ = [
     "SubjectYearlyAverageRelatedSchema",
     "SubjectYearlyAverageSchema",
     "TableSchema",
-    "TeacherGradeLinkSchema",
     "TeacherRecordRelatedSchema",
     "TeacherRecordSchema",
     "TeacherRelatedSchema",
     "TeacherSchema",
-    "TeacherSubjectLinkSchema",
     "TeacherWithRelatedSchema",
     "UserRelatedSchema",
     "UserSchema",
@@ -211,9 +202,6 @@ TeacherRecordRelatedSchema.model_rebuild()
 TeacherSchema.model_rebuild()
 TeacherRelatedSchema.model_rebuild()
 TeacherWithRelatedSchema.model_rebuild()
-TeacherTermRecordSchema.model_rebuild()
-TeacherTermRecordRelatedSchema.model_rebuild()
-TeacherTermRecordWithRelatedSchema.model_rebuild()
 UserSchema.model_rebuild()
 UserRelatedSchema.model_rebuild()
 UserWithRelatedSchema.model_rebuild()

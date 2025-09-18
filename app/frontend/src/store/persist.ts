@@ -2,7 +2,7 @@ import { persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage"; // defaults to localStorage for web
 import authReducer from "./slice/auth-slice";
 import studentRegistrationFormReducer from "./slice/student-registration-slice";
-import teacherRegistrationFormReducer from "./slice/teacher-registration-slice";
+import employeeRegistrationFormReducer from "./slice/employee-registration-slice";
 import yearReducer from "./slice/year-slice";
 
 // Persist configuration
@@ -45,13 +45,13 @@ export const persistedStudentRegistrationForm = persistReducer(
   studentRegistrationFormReducer,
 );
 
-const teacherRegistrationFormConfig = {
-  key: "teacherRegistrationForm",
+const employeeRegistrationFormConfig = {
+  key: "employeeRegistrationForm",
   storage,
   whitelist: ["data", "step"],
 };
 
-export const persistedTeacherRegistrationForm = persistReducer(
-  teacherRegistrationFormConfig,
-  teacherRegistrationFormReducer,
+export const persistedEmployeeRegistrationForm = persistReducer(
+  employeeRegistrationFormConfig,
+  employeeRegistrationFormReducer,
 );

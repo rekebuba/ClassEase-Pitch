@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, List, Optional, Set
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field
+from pydantic import AwareDatetime, BaseModel, ConfigDict
 
 from utils.enum import GradeEnum, GradeLevelEnum
 from utils.utils import to_camel
@@ -14,14 +14,9 @@ if TYPE_CHECKING:
     from .student_schema import StudentSchema, StudentWithRelatedSchema
     from .student_term_record_schema import (
         StudentTermRecordSchema,
-        StudentTermRecordWithRelatedSchema,
     )
     from .subject_schema import SubjectSchema, SubjectWithRelatedSchema
     from .teacher_schema import TeacherSchema, TeacherWithRelatedSchema
-    from .teacher_term_record_schema import (
-        TeacherTermRecordSchema,
-        TeacherTermRecordWithRelatedSchema,
-    )
     from .year_schema import YearSchema, YearWithRelatedSchema
 
 
@@ -67,7 +62,6 @@ class GradeRelatedSchema(BaseModel):
     )
 
     year: Optional[YearSchema]
-    teacher_term_records: List[TeacherTermRecordSchema]
     student_term_records: List[StudentTermRecordSchema]
     teachers: List[TeacherSchema]
     streams: List[StreamSchema]
@@ -88,8 +82,6 @@ class GradeNestedSchema(GradeSchema):
     )
 
     year: YearWithRelatedSchema
-    teacher_term_records: List[TeacherTermRecordWithRelatedSchema]
-    student_term_records: List[StudentTermRecordWithRelatedSchema]
     teachers: List[TeacherWithRelatedSchema]
     streams: List[StreamWithRelatedSchema]
     students: List[StudentWithRelatedSchema]

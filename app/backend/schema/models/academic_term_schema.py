@@ -12,7 +12,6 @@ from utils.utils import to_camel
 if TYPE_CHECKING:
     from .student_term_record_schema import StudentTermRecordSchema
     from .teacher_record_schema import TeacherRecordSchema
-    from .teacher_term_record_schema import TeacherTermRecordSchema
     from .year_schema import YearSchema
 
 
@@ -54,7 +53,6 @@ class AcademicTermRelatedSchema(BaseModel):
     )
 
     year: Optional[YearSchema] = None
-    teacher_term_records: Optional[List[TeacherTermRecordSchema]] = []
     student_term_records: Optional[List[StudentTermRecordSchema]] = []
     teacher_records: Optional[List[TeacherRecordSchema]] = []
 

@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     from models.grade import Grade
     from models.student import Student
     from models.subject import Subject
-    from models.teacher import Teacher
 
 
 class Year(BaseModel):
@@ -78,14 +77,6 @@ class Year(BaseModel):
     students: Mapped[List["Student"]] = relationship(
         "Student",
         secondary="student_year_links",
-        back_populates="years",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
-    teachers: Mapped[List["Teacher"]] = relationship(
-        "Teacher",
-        secondary="teacher_year_links",
         back_populates="years",
         default_factory=list,
         repr=False,

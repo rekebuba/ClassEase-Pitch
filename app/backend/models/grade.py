@@ -19,8 +19,6 @@ if TYPE_CHECKING:
     from models.student import Student
     from models.student_term_record import StudentTermRecord
     from models.subject import Subject
-    from models.teacher import Teacher
-    from models.teacher_term_record import TeacherTermRecord
     from models.year import Year
 
 
@@ -96,14 +94,6 @@ class Grade(BaseModel):
     )
 
     # Many-To-Many Relationships
-    teachers: Mapped[List["Teacher"]] = relationship(
-        "Teacher",
-        back_populates="grades",
-        secondary="teacher_grade_links",
-        repr=False,
-        passive_deletes=True,
-        default_factory=list,
-    )
     students: Mapped[List["Student"]] = relationship(
         "Student",
         secondary="student_grade_links",

@@ -11,12 +11,12 @@ import {
   registerStudentStep4,
   registerStudentStep5,
   registerNewStudent,
-  registerTeacherStep1,
-  registerTeacherStep2,
-  registerTeacherStep3,
-  registerTeacherStep4,
-  registerTeacherStep5,
-  registerNewTeacher,
+  registerEmployeeStep1,
+  registerEmployeeStep2,
+  registerEmployeeStep3,
+  registerEmployeeStep4,
+  registerEmployeeStep5,
+  registerNewEmployee,
   getYears,
   postYear,
   getYearSummary,
@@ -81,24 +81,24 @@ import type {
   RegisterNewStudentData,
   RegisterNewStudentError,
   RegisterNewStudentResponse,
-  RegisterTeacherStep1Data,
-  RegisterTeacherStep1Error,
-  RegisterTeacherStep1Response,
-  RegisterTeacherStep2Data,
-  RegisterTeacherStep2Error,
-  RegisterTeacherStep2Response,
-  RegisterTeacherStep3Data,
-  RegisterTeacherStep3Error,
-  RegisterTeacherStep3Response,
-  RegisterTeacherStep4Data,
-  RegisterTeacherStep4Error,
-  RegisterTeacherStep4Response,
-  RegisterTeacherStep5Data,
-  RegisterTeacherStep5Error,
-  RegisterTeacherStep5Response,
-  RegisterNewTeacherData,
-  RegisterNewTeacherError,
-  RegisterNewTeacherResponse,
+  RegisterEmployeeStep1Data,
+  RegisterEmployeeStep1Error,
+  RegisterEmployeeStep1Response,
+  RegisterEmployeeStep2Data,
+  RegisterEmployeeStep2Error,
+  RegisterEmployeeStep2Response,
+  RegisterEmployeeStep3Data,
+  RegisterEmployeeStep3Error,
+  RegisterEmployeeStep3Response,
+  RegisterEmployeeStep4Data,
+  RegisterEmployeeStep4Error,
+  RegisterEmployeeStep4Response,
+  RegisterEmployeeStep5Data,
+  RegisterEmployeeStep5Error,
+  RegisterEmployeeStep5Response,
+  RegisterNewEmployeeData,
+  RegisterNewEmployeeError,
+  RegisterNewEmployeeResponse,
   GetYearsData,
   PostYearData,
   PostYearError,
@@ -658,20 +658,20 @@ export const registerNewStudentMutation = (
   return mutationOptions;
 };
 
-export const registerTeacherStep1QueryKey = (
-  options: Options<RegisterTeacherStep1Data>,
-) => createQueryKey("registerTeacherStep1", options);
+export const registerEmployeeStep1QueryKey = (
+  options: Options<RegisterEmployeeStep1Data>,
+) => createQueryKey("registerEmployeeStep1", options);
 
 /**
- * Register Teacher Step1
- * Validate teacher data for each step
+ * Register Employee Step1
+ * Validate employee data for each step
  */
-export const registerTeacherStep1Options = (
-  options: Options<RegisterTeacherStep1Data>,
+export const registerEmployeeStep1Options = (
+  options: Options<RegisterEmployeeStep1Data>,
 ) => {
   return queryOptions({
     queryFn: async ({ queryKey, signal }) => {
-      const { data } = await registerTeacherStep1({
+      const { data } = await registerEmployeeStep1({
         ...options,
         ...queryKey[0],
         signal,
@@ -679,28 +679,28 @@ export const registerTeacherStep1Options = (
       });
       return data;
     },
-    queryKey: registerTeacherStep1QueryKey(options),
+    queryKey: registerEmployeeStep1QueryKey(options),
   });
 };
 
 /**
- * Register Teacher Step1
- * Validate teacher data for each step
+ * Register Employee Step1
+ * Validate employee data for each step
  */
-export const registerTeacherStep1Mutation = (
-  options?: Partial<Options<RegisterTeacherStep1Data>>,
+export const registerEmployeeStep1Mutation = (
+  options?: Partial<Options<RegisterEmployeeStep1Data>>,
 ): UseMutationOptions<
-  RegisterTeacherStep1Response,
-  AxiosError<RegisterTeacherStep1Error>,
-  Options<RegisterTeacherStep1Data>
+  RegisterEmployeeStep1Response,
+  AxiosError<RegisterEmployeeStep1Error>,
+  Options<RegisterEmployeeStep1Data>
 > => {
   const mutationOptions: UseMutationOptions<
-    RegisterTeacherStep1Response,
-    AxiosError<RegisterTeacherStep1Error>,
-    Options<RegisterTeacherStep1Data>
+    RegisterEmployeeStep1Response,
+    AxiosError<RegisterEmployeeStep1Error>,
+    Options<RegisterEmployeeStep1Data>
   > = {
     mutationFn: async (localOptions) => {
-      const { data } = await registerTeacherStep1({
+      const { data } = await registerEmployeeStep1({
         ...options,
         ...localOptions,
         throwOnError: true,
@@ -711,20 +711,20 @@ export const registerTeacherStep1Mutation = (
   return mutationOptions;
 };
 
-export const registerTeacherStep2QueryKey = (
-  options: Options<RegisterTeacherStep2Data>,
-) => createQueryKey("registerTeacherStep2", options);
+export const registerEmployeeStep2QueryKey = (
+  options: Options<RegisterEmployeeStep2Data>,
+) => createQueryKey("registerEmployeeStep2", options);
 
 /**
- * Register Teacher Step2
- * Validate teacher data for each step
+ * Register Employee Step2
+ * Validate employee data for each step
  */
-export const registerTeacherStep2Options = (
-  options: Options<RegisterTeacherStep2Data>,
+export const registerEmployeeStep2Options = (
+  options: Options<RegisterEmployeeStep2Data>,
 ) => {
   return queryOptions({
     queryFn: async ({ queryKey, signal }) => {
-      const { data } = await registerTeacherStep2({
+      const { data } = await registerEmployeeStep2({
         ...options,
         ...queryKey[0],
         signal,
@@ -732,28 +732,28 @@ export const registerTeacherStep2Options = (
       });
       return data;
     },
-    queryKey: registerTeacherStep2QueryKey(options),
+    queryKey: registerEmployeeStep2QueryKey(options),
   });
 };
 
 /**
- * Register Teacher Step2
- * Validate teacher data for each step
+ * Register Employee Step2
+ * Validate employee data for each step
  */
-export const registerTeacherStep2Mutation = (
-  options?: Partial<Options<RegisterTeacherStep2Data>>,
+export const registerEmployeeStep2Mutation = (
+  options?: Partial<Options<RegisterEmployeeStep2Data>>,
 ): UseMutationOptions<
-  RegisterTeacherStep2Response,
-  AxiosError<RegisterTeacherStep2Error>,
-  Options<RegisterTeacherStep2Data>
+  RegisterEmployeeStep2Response,
+  AxiosError<RegisterEmployeeStep2Error>,
+  Options<RegisterEmployeeStep2Data>
 > => {
   const mutationOptions: UseMutationOptions<
-    RegisterTeacherStep2Response,
-    AxiosError<RegisterTeacherStep2Error>,
-    Options<RegisterTeacherStep2Data>
+    RegisterEmployeeStep2Response,
+    AxiosError<RegisterEmployeeStep2Error>,
+    Options<RegisterEmployeeStep2Data>
   > = {
     mutationFn: async (localOptions) => {
-      const { data } = await registerTeacherStep2({
+      const { data } = await registerEmployeeStep2({
         ...options,
         ...localOptions,
         throwOnError: true,
@@ -764,20 +764,20 @@ export const registerTeacherStep2Mutation = (
   return mutationOptions;
 };
 
-export const registerTeacherStep3QueryKey = (
-  options: Options<RegisterTeacherStep3Data>,
-) => createQueryKey("registerTeacherStep3", options);
+export const registerEmployeeStep3QueryKey = (
+  options: Options<RegisterEmployeeStep3Data>,
+) => createQueryKey("registerEmployeeStep3", options);
 
 /**
- * Register Teacher Step3
- * Validate teacher data for each step
+ * Register Employee Step3
+ * Validate employee data for each step
  */
-export const registerTeacherStep3Options = (
-  options: Options<RegisterTeacherStep3Data>,
+export const registerEmployeeStep3Options = (
+  options: Options<RegisterEmployeeStep3Data>,
 ) => {
   return queryOptions({
     queryFn: async ({ queryKey, signal }) => {
-      const { data } = await registerTeacherStep3({
+      const { data } = await registerEmployeeStep3({
         ...options,
         ...queryKey[0],
         signal,
@@ -785,28 +785,28 @@ export const registerTeacherStep3Options = (
       });
       return data;
     },
-    queryKey: registerTeacherStep3QueryKey(options),
+    queryKey: registerEmployeeStep3QueryKey(options),
   });
 };
 
 /**
- * Register Teacher Step3
- * Validate teacher data for each step
+ * Register Employee Step3
+ * Validate employee data for each step
  */
-export const registerTeacherStep3Mutation = (
-  options?: Partial<Options<RegisterTeacherStep3Data>>,
+export const registerEmployeeStep3Mutation = (
+  options?: Partial<Options<RegisterEmployeeStep3Data>>,
 ): UseMutationOptions<
-  RegisterTeacherStep3Response,
-  AxiosError<RegisterTeacherStep3Error>,
-  Options<RegisterTeacherStep3Data>
+  RegisterEmployeeStep3Response,
+  AxiosError<RegisterEmployeeStep3Error>,
+  Options<RegisterEmployeeStep3Data>
 > => {
   const mutationOptions: UseMutationOptions<
-    RegisterTeacherStep3Response,
-    AxiosError<RegisterTeacherStep3Error>,
-    Options<RegisterTeacherStep3Data>
+    RegisterEmployeeStep3Response,
+    AxiosError<RegisterEmployeeStep3Error>,
+    Options<RegisterEmployeeStep3Data>
   > = {
     mutationFn: async (localOptions) => {
-      const { data } = await registerTeacherStep3({
+      const { data } = await registerEmployeeStep3({
         ...options,
         ...localOptions,
         throwOnError: true,
@@ -817,20 +817,20 @@ export const registerTeacherStep3Mutation = (
   return mutationOptions;
 };
 
-export const registerTeacherStep4QueryKey = (
-  options: Options<RegisterTeacherStep4Data>,
-) => createQueryKey("registerTeacherStep4", options);
+export const registerEmployeeStep4QueryKey = (
+  options: Options<RegisterEmployeeStep4Data>,
+) => createQueryKey("registerEmployeeStep4", options);
 
 /**
- * Register Teacher Step4
- * Validate teacher data for each step
+ * Register Employee Step4
+ * Validate employee data for each step
  */
-export const registerTeacherStep4Options = (
-  options: Options<RegisterTeacherStep4Data>,
+export const registerEmployeeStep4Options = (
+  options: Options<RegisterEmployeeStep4Data>,
 ) => {
   return queryOptions({
     queryFn: async ({ queryKey, signal }) => {
-      const { data } = await registerTeacherStep4({
+      const { data } = await registerEmployeeStep4({
         ...options,
         ...queryKey[0],
         signal,
@@ -838,28 +838,28 @@ export const registerTeacherStep4Options = (
       });
       return data;
     },
-    queryKey: registerTeacherStep4QueryKey(options),
+    queryKey: registerEmployeeStep4QueryKey(options),
   });
 };
 
 /**
- * Register Teacher Step4
- * Validate teacher data for each step
+ * Register Employee Step4
+ * Validate employee data for each step
  */
-export const registerTeacherStep4Mutation = (
-  options?: Partial<Options<RegisterTeacherStep4Data>>,
+export const registerEmployeeStep4Mutation = (
+  options?: Partial<Options<RegisterEmployeeStep4Data>>,
 ): UseMutationOptions<
-  RegisterTeacherStep4Response,
-  AxiosError<RegisterTeacherStep4Error>,
-  Options<RegisterTeacherStep4Data>
+  RegisterEmployeeStep4Response,
+  AxiosError<RegisterEmployeeStep4Error>,
+  Options<RegisterEmployeeStep4Data>
 > => {
   const mutationOptions: UseMutationOptions<
-    RegisterTeacherStep4Response,
-    AxiosError<RegisterTeacherStep4Error>,
-    Options<RegisterTeacherStep4Data>
+    RegisterEmployeeStep4Response,
+    AxiosError<RegisterEmployeeStep4Error>,
+    Options<RegisterEmployeeStep4Data>
   > = {
     mutationFn: async (localOptions) => {
-      const { data } = await registerTeacherStep4({
+      const { data } = await registerEmployeeStep4({
         ...options,
         ...localOptions,
         throwOnError: true,
@@ -870,20 +870,20 @@ export const registerTeacherStep4Mutation = (
   return mutationOptions;
 };
 
-export const registerTeacherStep5QueryKey = (
-  options: Options<RegisterTeacherStep5Data>,
-) => createQueryKey("registerTeacherStep5", options);
+export const registerEmployeeStep5QueryKey = (
+  options: Options<RegisterEmployeeStep5Data>,
+) => createQueryKey("registerEmployeeStep5", options);
 
 /**
- * Register Teacher Step5
- * Validate teacher data for each step
+ * Register Employee Step5
+ * Validate employee data for each step
  */
-export const registerTeacherStep5Options = (
-  options: Options<RegisterTeacherStep5Data>,
+export const registerEmployeeStep5Options = (
+  options: Options<RegisterEmployeeStep5Data>,
 ) => {
   return queryOptions({
     queryFn: async ({ queryKey, signal }) => {
-      const { data } = await registerTeacherStep5({
+      const { data } = await registerEmployeeStep5({
         ...options,
         ...queryKey[0],
         signal,
@@ -891,28 +891,28 @@ export const registerTeacherStep5Options = (
       });
       return data;
     },
-    queryKey: registerTeacherStep5QueryKey(options),
+    queryKey: registerEmployeeStep5QueryKey(options),
   });
 };
 
 /**
- * Register Teacher Step5
- * Validate teacher data for each step
+ * Register Employee Step5
+ * Validate employee data for each step
  */
-export const registerTeacherStep5Mutation = (
-  options?: Partial<Options<RegisterTeacherStep5Data>>,
+export const registerEmployeeStep5Mutation = (
+  options?: Partial<Options<RegisterEmployeeStep5Data>>,
 ): UseMutationOptions<
-  RegisterTeacherStep5Response,
-  AxiosError<RegisterTeacherStep5Error>,
-  Options<RegisterTeacherStep5Data>
+  RegisterEmployeeStep5Response,
+  AxiosError<RegisterEmployeeStep5Error>,
+  Options<RegisterEmployeeStep5Data>
 > => {
   const mutationOptions: UseMutationOptions<
-    RegisterTeacherStep5Response,
-    AxiosError<RegisterTeacherStep5Error>,
-    Options<RegisterTeacherStep5Data>
+    RegisterEmployeeStep5Response,
+    AxiosError<RegisterEmployeeStep5Error>,
+    Options<RegisterEmployeeStep5Data>
   > = {
     mutationFn: async (localOptions) => {
-      const { data } = await registerTeacherStep5({
+      const { data } = await registerEmployeeStep5({
         ...options,
         ...localOptions,
         throwOnError: true,
@@ -923,20 +923,20 @@ export const registerTeacherStep5Mutation = (
   return mutationOptions;
 };
 
-export const registerNewTeacherQueryKey = (
-  options: Options<RegisterNewTeacherData>,
-) => createQueryKey("registerNewTeacher", options);
+export const registerNewEmployeeQueryKey = (
+  options: Options<RegisterNewEmployeeData>,
+) => createQueryKey("registerNewEmployee", options);
 
 /**
- * Register New Teacher
- * Registers a new user (Admin, Student, Teacher) in the system.
+ * Register New Employee
+ * Registers a new user (Admin, Student, Employee) in the system.
  */
-export const registerNewTeacherOptions = (
-  options: Options<RegisterNewTeacherData>,
+export const registerNewEmployeeOptions = (
+  options: Options<RegisterNewEmployeeData>,
 ) => {
   return queryOptions({
     queryFn: async ({ queryKey, signal }) => {
-      const { data } = await registerNewTeacher({
+      const { data } = await registerNewEmployee({
         ...options,
         ...queryKey[0],
         signal,
@@ -944,28 +944,28 @@ export const registerNewTeacherOptions = (
       });
       return data;
     },
-    queryKey: registerNewTeacherQueryKey(options),
+    queryKey: registerNewEmployeeQueryKey(options),
   });
 };
 
 /**
- * Register New Teacher
- * Registers a new user (Admin, Student, Teacher) in the system.
+ * Register New Employee
+ * Registers a new user (Admin, Student, Employee) in the system.
  */
-export const registerNewTeacherMutation = (
-  options?: Partial<Options<RegisterNewTeacherData>>,
+export const registerNewEmployeeMutation = (
+  options?: Partial<Options<RegisterNewEmployeeData>>,
 ): UseMutationOptions<
-  RegisterNewTeacherResponse,
-  AxiosError<RegisterNewTeacherError>,
-  Options<RegisterNewTeacherData>
+  RegisterNewEmployeeResponse,
+  AxiosError<RegisterNewEmployeeError>,
+  Options<RegisterNewEmployeeData>
 > => {
   const mutationOptions: UseMutationOptions<
-    RegisterNewTeacherResponse,
-    AxiosError<RegisterNewTeacherError>,
-    Options<RegisterNewTeacherData>
+    RegisterNewEmployeeResponse,
+    AxiosError<RegisterNewEmployeeError>,
+    Options<RegisterNewEmployeeData>
   > = {
     mutationFn: async (localOptions) => {
-      const { data } = await registerNewTeacher({
+      const { data } = await registerNewEmployee({
         ...options,
         ...localOptions,
         throwOnError: true,

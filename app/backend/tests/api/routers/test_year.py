@@ -10,8 +10,7 @@ class TestYearApi:
     def test_create_new_academic_year(
         self, client: TestClient, admin_token_headers: Dict[str, str]
     ) -> None:
-        data = NewYearFactory.create()
-        data.setup_methods = "Default Template"
+        data = NewYearFactory.create(setup_methods="Default Template")
 
         r = client.post(
             f"{settings.API_V1_STR}/years",

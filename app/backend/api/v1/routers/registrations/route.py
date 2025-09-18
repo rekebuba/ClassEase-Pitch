@@ -1,14 +1,18 @@
 #!/usr/bin/python3
 """Public views module for the API"""
 
-from typing import List
-
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import select
 from starlette import status
 
 from api.v1.routers.dependencies import SessionDep
 from api.v1.routers.registrations.schema import (
+    EmployeeRegistrationForm,
+    EmployeeRegStep1,
+    EmployeeRegStep2,
+    EmployeeRegStep3,
+    EmployeeRegStep4,
+    EmployeeRegStep5,
     RegistrationResponse,
     RegistrationStep,
     StudentRegistrationForm,
@@ -17,21 +21,15 @@ from api.v1.routers.registrations.schema import (
     StudRegStep3,
     StudRegStep4,
     StudRegStep5,
-    TeacherRegistrationForm,
-    TeacherRegStep1,
-    TeacherRegStep2,
-    TeacherRegStep3,
-    TeacherRegStep4,
-    TeacherRegStep5,
 )
+from models.academic_term import AcademicTerm
 from models.admin import Admin
+from models.employee import Employee
 from models.grade import Grade
 from models.student import Student
-from models.subject import Subject
-from models.teacher import Teacher
+from models.teacher_record import TeacherRecord
 from schema.models.admin_schema import AdminSchema
-from schema.models.grade_schema import GradeSchema
-from schema.models.subject_schema import SubjectSchema
+from utils.enum import EmployeePositionEnum
 
 router = APIRouter(prefix="/register", tags=["registration"])
 
@@ -128,126 +126,96 @@ def register_new_student(
     )
 
 
-@router.post("/teachers/step1", response_model=RegistrationStep)
-def register_teacher_step1(
-    session: SessionDep, teacher_data: TeacherRegStep1
+@router.post("/employees/step1", response_model=RegistrationStep)
+def register_employee_step1(
+    session: SessionDep, employee_data: EmployeeRegStep1
 ) -> RegistrationStep:
-    """Validate teacher data for each step"""
-    return RegistrationStep(message="Teacher Step 1 Successful")
+    """Validate employee data for each step"""
+    return RegistrationStep(message="Employee Step 1 Successful")
 
 
-@router.post("/teachers/step2", response_model=RegistrationStep)
-def register_teacher_step2(
-    session: SessionDep, teacher_data: TeacherRegStep2
+@router.post("/employees/step2", response_model=RegistrationStep)
+def register_employee_step2(
+    session: SessionDep, employee_data: EmployeeRegStep2
 ) -> RegistrationStep:
-    """Validate teacher data for each step"""
-    return RegistrationStep(message="Teacher Step 2 Successful")
+    """Validate employee data for each step"""
+    return RegistrationStep(message="Employee Step 2 Successful")
 
 
-@router.post("/teachers/step3", response_model=RegistrationStep)
-def register_teacher_step3(
-    session: SessionDep, teacher_data: TeacherRegStep3
+@router.post("/employees/step3", response_model=RegistrationStep)
+def register_employee_step3(
+    session: SessionDep, employee_data: EmployeeRegStep3
 ) -> RegistrationStep:
-    """Validate teacher data for each step"""
-    return RegistrationStep(message="Teacher Step 3 Successful")
+    """Validate employee data for each step"""
+    return RegistrationStep(message="Employee Step 3 Successful")
 
 
-@router.post("/teachers/step4", response_model=RegistrationStep)
-def register_teacher_step4(
-    session: SessionDep, teacher_data: TeacherRegStep4
+@router.post("/employees/step4", response_model=RegistrationStep)
+def register_employee_step4(
+    session: SessionDep, employee_data: EmployeeRegStep4
 ) -> RegistrationStep:
-    """Validate teacher data for each step"""
-    return RegistrationStep(message="Teacher Step 4 Successful")
+    """Validate employee data for each step"""
+    return RegistrationStep(message="Employee Step 4 Successful")
 
 
-@router.post("/teachers/step5", response_model=RegistrationStep)
-def register_teacher_step5(
-    session: SessionDep, teacher_data: TeacherRegStep5
+@router.post("/employees/step5", response_model=RegistrationStep)
+def register_employee_step5(
+    session: SessionDep, employee_data: EmployeeRegStep5
 ) -> RegistrationStep:
-    """Validate teacher data for each step"""
-    return RegistrationStep(message="Teacher Step 5 Successful")
+    """Validate employee data for each step"""
+    return RegistrationStep(message="Employee Step 5 Successful")
 
 
-@router.post("/teachers", response_model=RegistrationResponse)
-def register_new_teacher(
+@router.post("/employees", status_code=201, response_model=RegistrationResponse)
+def register_new_employee(
     session: SessionDep,
-    teacher_data: TeacherRegistrationForm,
+    employee_data: EmployeeRegistrationForm,
 ) -> RegistrationResponse:
     """
-    Registers a new user (Admin, Student, Teacher) in the system.
+    Registers a new user (Admin, Student, Employee) in the system.
     """
 
-    subjects = session.scalars(
-        select(Subject).where(
-            Subject.id.in_([subject.id for subject in teacher_data.subjects or []])
-        )
-    ).all()
-    grades = session.scalars(
-        select(Grade).where(
-            Grade.id.in_([grade.id for grade in teacher_data.grades or []])
-        )
-    ).all()
-    subject_schemas = [SubjectSchema.model_validate(subject) for subject in subjects]
-    grade_schemas = [GradeSchema.model_validate(grade) for grade in grades]
-
-    if not subject_schemas or not grade_schemas:
-        raise ValueError("No valid subjects or grades found for the teacher.")
-
-    # Validate all subjects/grades exist
-    _validate_relations(
-        requested_subjects=teacher_data.subjects,
-        found_subjects=subject_schemas,
-        requested_grades=teacher_data.grades,
-        found_grades=grade_schemas,
-    )
-
     # Convert to dictionary before unpacking
-    teacher_dict = teacher_data.model_dump(
+    employee_dict = employee_data.model_dump(
         exclude={
-            "grades",
-            "subjects",
+            "agree_to_terms",
+            "agree_to_background_check",
+            "subject_id",
         },
         exclude_none=True,
     )
 
     # Create SQLAlchemy model instance
-    new_teacher = Teacher(**teacher_dict)
+    new_employee = Employee(**employee_dict)
 
-    session.add(new_teacher)
+    session.add(new_employee)
+    session.flush()
 
-    # Add relationships after creation
-    new_teacher.subjects = list(subjects)
-    new_teacher.grades = list(grades)
+    if (
+        employee_data.position == EmployeePositionEnum.TEACHING_STAFF
+        and employee_data.subject_id
+    ):
+        # TODO: Handle Academic Term properly
+        first_term = session.scalar(
+            select(AcademicTerm).where(AcademicTerm.name == "1")
+        )
+        if not first_term:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="No academic term found",
+            )
+
+        teacher_record = TeacherRecord(
+            employee_id=new_employee.id,
+            subject_id=employee_data.subject_id,
+            grade_stream_subject_id=None,
+            academic_term_id=first_term.id,
+        )
+
+        session.add(teacher_record)
 
     session.commit()
 
     return RegistrationResponse(
-        id=new_teacher.id, message="Teacher Registered Successfully"
+        id=new_employee.id, message="Employee Registered Successfully"
     )
-
-
-def _validate_relations(
-    requested_subjects: List[SubjectSchema] | None,
-    found_subjects: List[SubjectSchema],
-    requested_grades: List[GradeSchema] | None,
-    found_grades: List[GradeSchema],
-) -> None:
-    if not requested_subjects or not requested_grades:
-        raise ValueError("Requested subjects or grades cannot be None or empty.")
-
-    """Validate that all requested relations exist."""
-    missing_subjects = {s.name for s in requested_subjects} - {
-        s.name for s in found_subjects
-    }
-    missing_grades = {g.grade for g in requested_grades} - {
-        g.grade for g in found_grades
-    }
-
-    errors = []
-    if missing_subjects:
-        errors.append(f"Invalid subjects: {', '.join(missing_subjects)}")
-    if missing_grades:
-        errors.append(f"Invalid grade: {', '.join(missing_grades)}")
-
-    if errors:
-        raise ValueError(" | ".join(errors))

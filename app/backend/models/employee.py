@@ -1,11 +1,7 @@
-#!/usr/bin/python3
-"""Module for Teacher class"""
-
 import uuid
 from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import (
-    Boolean,
     CheckConstraint,
     Date,
     Enum,
@@ -15,37 +11,31 @@ from sqlalchemy import (
     String,
     Text,
 )
-from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
 from models.teacher_record import TeacherRecord
 from utils.enum import (
+    EmployeeApplicationStatus,
+    EmployeePositionEnum,
     ExperienceYearEnum,
     GenderEnum,
-    HighestDegreeEnum,
+    HighestEducationEnum,
     MaritalStatusEnum,
-    TeacherApplicationStatus,
 )
 
 if TYPE_CHECKING:
-    from models.academic_term import AcademicTerm
-    from models.grade import Grade
-    from models.section import Section
-    from models.subject import Subject
-    from models.teacher_term_record import TeacherTermRecord
     from models.user import User
-    from models.year import Year
 
 
-class Teacher(BaseModel):
+class Employee(BaseModel):
     """
-    This model represents a teacher in the ClassEase system.
+    This model represents an employee in the ClassEase system.
     It inherits from BaseModel and Base.
     """
 
-    __tablename__ = "teachers"
+    __tablename__ = "employees"
 
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
     father_name: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -77,21 +67,26 @@ class Teacher(BaseModel):
     emergency_contact_phone: Mapped[str] = mapped_column(String(50), nullable=False)
 
     # Educational Background
-    highest_degree: Mapped[HighestDegreeEnum] = mapped_column(
+    highest_education: Mapped[HighestEducationEnum] = mapped_column(
         Enum(
-            HighestDegreeEnum,
-            name="highest_degree_enum",
+            HighestEducationEnum,
+            name="highest_education_enum",
             values_callable=lambda x: [e.value for e in x],
             native_enum=False,
         ),
-        nullable=False,
     )
     university: Mapped[str] = mapped_column(String(50), nullable=False)
     graduation_year: Mapped[int] = mapped_column(Integer, nullable=False)
     gpa: Mapped[float] = mapped_column(Float, nullable=False)
 
-    # Teaching Experience
-    position_applying_for: Mapped[str] = mapped_column(String(50), nullable=False)
+    position: Mapped[EmployeePositionEnum] = mapped_column(
+        Enum(
+            EmployeePositionEnum,
+            name="employee_position_enum",
+            values_callable=lambda x: [e.value for e in x],
+            native_enum=False,
+        ),
+    )
     years_of_experience: Mapped[ExperienceYearEnum] = mapped_column(
         Enum(
             ExperienceYearEnum,
@@ -101,7 +96,6 @@ class Teacher(BaseModel):
         ),
         nullable=False,
     )
-    teaching_license: bool
 
     # Background & References
     reference1_name: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -134,9 +128,6 @@ class Teacher(BaseModel):
     )
     background_check: Mapped[Optional[str]] = mapped_column(Text, default=None)
 
-    agree_to_terms: Mapped[bool] = mapped_column(Boolean, default=False)
-    agree_to_background_check: Mapped[bool] = mapped_column(Boolean, default=False)
-
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),
         ForeignKey("users.id", ondelete="CASCADE"),
@@ -144,65 +135,22 @@ class Teacher(BaseModel):
         nullable=True,
         default=None,
     )
-
-    status: Mapped[TeacherApplicationStatus] = mapped_column(
+    status: Mapped[EmployeeApplicationStatus] = mapped_column(
         Enum(
-            TeacherApplicationStatus,
+            EmployeeApplicationStatus,
             name="status_enum",
             values_callable=lambda x: [e.value for e in x],
             native_enum=False,
         ),
         nullable=False,
-        default=TeacherApplicationStatus.PENDING,
+        default=EmployeeApplicationStatus.PENDING,
     )
 
     # Relationship with Default
     user: Mapped[Optional["User"]] = relationship(
         "User",
-        back_populates="teacher",
+        back_populates="employee",
         init=False,
-        repr=False,
-        passive_deletes=True,
-    )
-
-    # Many-to-Many Relationship
-    years: Mapped[List["Year"]] = relationship(
-        "Year",
-        back_populates="teachers",
-        secondary="teacher_year_links",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
-    academic_terms: Mapped[List["AcademicTerm"]] = relationship(
-        "AcademicTerm",
-        back_populates="teachers",
-        secondary="teacher_academic_term_links",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
-    subjects: Mapped[List["Subject"]] = relationship(
-        "Subject",
-        back_populates="teachers",
-        secondary="teacher_subject_links",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
-    grades: Mapped[List["Grade"]] = relationship(
-        "Grade",
-        back_populates="teachers",
-        secondary="teacher_grade_links",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
-    sections: Mapped[List["Section"]] = relationship(
-        "Section",
-        back_populates="teachers",
-        secondary="teacher_section_links",
-        default_factory=list,
         repr=False,
         passive_deletes=True,
     )
@@ -217,13 +165,5 @@ class Teacher(BaseModel):
     )
 
     __table_args__ = (
-        CheckConstraint("gpa >= 0.0 AND gpa <= 4.0", name="check_teacher_gpa_range"),
-        CheckConstraint(
-            "(has_convictions = 0 OR conviction_details IS NOT NULL)",
-            name="check_conviction_details",
-        ),
-        CheckConstraint(
-            "(has_disciplinary_actions = 0 OR disciplinary_details IS NOT NULL)",
-            name="check_disciplinary_details",
-        ),
+        CheckConstraint("gpa >= 0.0 AND gpa <= 4.0", name="check_employee_gpa_range"),
     )

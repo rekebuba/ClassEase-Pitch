@@ -8,6 +8,7 @@ class RoleEnum(str, Enum):
     ADMIN = "admin"
     TEACHER = "teacher"
     STUDENT = "student"
+    OTHER = "other"
 
 
 class TableEnum(str, Enum):
@@ -97,7 +98,18 @@ class GradeLevelEnum(str, Enum):
     HIGH_SCHOOL = "high school"
 
 
-class TeacherApplicationStatus(str, Enum):
+class EmployeePositionEnum(str, Enum):
+    ADMINISTRATIVE_STAFF = "administrative staff"
+    TEACHING_STAFF = "teaching staff"
+    SUPPORT_STAFF = "support staff"
+    MAINTENANCE_STAFF = "maintenance staff"
+    COUNSELOR = "counselor"
+    LIBRARIAN = "librarian"
+    IT_SUPPORT = "IT support"
+    OTHER = "other"
+
+
+class EmployeeApplicationStatus(str, Enum):
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
@@ -105,7 +117,7 @@ class TeacherApplicationStatus(str, Enum):
     UNDER_REVIEW = "under-review"
 
 
-class HighestDegreeEnum(str, Enum):
+class HighestEducationEnum(str, Enum):
     BACHELORS = "bachelors"
     MASTERS = "masters"
     DOCTORATE = "doctorate"

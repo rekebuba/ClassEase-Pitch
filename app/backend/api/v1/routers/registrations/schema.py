@@ -13,12 +13,13 @@ from pydantic_extra_types.phone_numbers import PhoneNumber
 
 from utils.enum import (
     BloodTypeEnum,
+    EmployeeApplicationStatus,
+    EmployeePositionEnum,
     ExperienceYearEnum,
     GenderEnum,
-    HighestDegreeEnum,
+    HighestEducationEnum,
     MaritalStatusEnum,
     StudentApplicationStatusEnum,
-    TeacherApplicationStatus,
 )
 from utils.utils import to_camel
 
@@ -149,7 +150,7 @@ class StudentRegistrationForm(
     )
 
 
-class TeacherRegStep1(BaseModel):
+class EmployeeRegStep1(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
         populate_by_name=True,
@@ -166,7 +167,7 @@ class TeacherRegStep1(BaseModel):
     social_security_number: str
 
 
-class TeacherRegStep2(BaseModel):
+class EmployeeRegStep2(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
         populate_by_name=True,
@@ -185,23 +186,34 @@ class TeacherRegStep2(BaseModel):
     emergency_contact_phone: PhoneNumber
 
 
-class TeacherRegStep3(BaseModel):
+class EmployeeRegStep3(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
         populate_by_name=True,
         alias_generator=to_camel,
     )
 
-    highest_degree: HighestDegreeEnum
+    highest_education: HighestEducationEnum
+    subject_id: Optional[uuid.UUID] = Field(default=None)
     university: str
     graduation_year: int
     gpa: float
-    position_applying_for: str
-    teaching_license: bool
+    position: EmployeePositionEnum
     years_of_experience: ExperienceYearEnum
 
+    @model_validator(mode="after")
+    def validate_education_details(self) -> "EmployeeRegStep3":
+        if self.position == EmployeePositionEnum.TEACHING_STAFF:
+            if not self.subject_id:
+                raise ValueError(
+                    "subjectId must be provided for teachers applying for the position"
+                )
+        else:
+            self.subject_id = None
+        return self
 
-class TeacherRegStep4(BaseModel):       
+
+class EmployeeRegStep4(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
         populate_by_name=True,
@@ -214,7 +226,7 @@ class TeacherRegStep4(BaseModel):
     reference1_email: Optional[EmailStr] = Field(default=None)
 
 
-class TeacherRegStep5(BaseModel):
+class EmployeeRegStep5(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
         populate_by_name=True,
@@ -227,11 +239,11 @@ class TeacherRegStep5(BaseModel):
     agree_to_background_check: bool = Field(validate_default=True)
 
 
-class TeacherRegistrationForm(
-    TeacherRegStep1,
-    TeacherRegStep2,
-    TeacherRegStep3,
-    TeacherRegStep4,
-    TeacherRegStep5,
+class EmployeeRegistrationForm(
+    EmployeeRegStep1,
+    EmployeeRegStep2,
+    EmployeeRegStep3,
+    EmployeeRegStep4,
+    EmployeeRegStep5,
 ):
-    status: TeacherApplicationStatus = TeacherApplicationStatus.PENDING
+    status: EmployeeApplicationStatus = EmployeeApplicationStatus.PENDING

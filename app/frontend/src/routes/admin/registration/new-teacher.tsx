@@ -1,26 +1,31 @@
 import {
-  registerNewTeacherMutation,
-  registerTeacherStep1Mutation,
-  registerTeacherStep2Mutation,
-  registerTeacherStep3Mutation,
-  registerTeacherStep4Mutation,
-  registerTeacherStep5Mutation,
+  registerNewEmployeeMutation,
+  registerEmployeeStep1Mutation,
+  registerEmployeeStep2Mutation,
+  registerEmployeeStep3Mutation,
+  registerEmployeeStep4Mutation,
+  registerEmployeeStep5Mutation,
+  getSubjectsOptions,
 } from "@/client/@tanstack/react-query.gen";
 import {
-  TeacherRegistrationForm,
-  TeacherRegStep1,
-  TeacherRegStep2,
-  TeacherRegStep3,
-  TeacherRegStep4,
-  TeacherRegStep5,
+  EmployeePositionEnum,
+  EmployeeRegistrationForm,
+  EmployeeRegStep1,
+  EmployeeRegStep2,
+  EmployeeRegStep3,
+  EmployeeRegStep4,
+  EmployeeRegStep5,
 } from "@/client/types.gen";
 import {
-  zTeacherRegistrationForm,
-  zTeacherRegStep1,
-  zTeacherRegStep2,
-  zTeacherRegStep3,
-  zTeacherRegStep4,
-  zTeacherRegStep5,
+  zEmployeePositionEnum,
+  zEmployeeRegistrationForm,
+  zEmployeeRegStep1,
+  zEmployeeRegStep2,
+  zEmployeeRegStep3,
+  zEmployeeRegStep4,
+  zEmployeeRegStep5,
+  zExperienceYearEnum,
+  zHighestEducationEnum,
 } from "@/client/zod.gen";
 import AdvanceTooltip from "@/components/advance-tooltip";
 import { CheckboxWithLabel } from "@/components/inputs/checkbox-labeled";
@@ -30,7 +35,6 @@ import { InputWithLabel } from "@/components/inputs/input-labeled";
 import { PhoneInputWithLabel } from "@/components/inputs/phone-input-labeled";
 import { RadioGroupLabel } from "@/components/inputs/radio-group-labeled";
 import { SelectWithLabel } from "@/components/inputs/select-labeled";
-import { TextareaWithLabel } from "@/components/inputs/textarea-labeled";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -39,8 +43,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { SelectItem } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -58,12 +60,12 @@ import {
   resetForm,
   setFormData,
   setFormStep,
-} from "@/store/slice/teacher-registration-slice";
+} from "@/store/slice/employee-registration-slice";
 import { extractFirstWord } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Loader, RefreshCcw, Save, Upload } from "lucide-react";
+import { Loader, RefreshCcw, Save } from "lucide-react";
 import { useCallback, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
@@ -82,8 +84,8 @@ export const Route = createFileRoute("/admin/registration/new-teacher")({
 });
 
 function RouteComponent() {
-  // NOTE: Assuming a 'teacherRegistrationForm' slice exists in your Redux store
-  const { data: initialData, step } = store.getState().teacherRegistrationForm;
+  const yearId = store.getState().year.id;
+  const { data: initialData, step } = store.getState().employeeRegistrationForm;
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -91,7 +93,7 @@ function RouteComponent() {
   const [savePending, setSavePending] = useState(false);
   const [resetPending, setResetPending] = useState(false);
 
-  const [step1InitialValues] = useState<TeacherRegStep1>({
+  const [step1InitialValues] = useState<EmployeeRegStep1>({
     firstName: initialData.firstName,
     fatherName: initialData.fatherName,
     grandFatherName: initialData.grandFatherName,
@@ -102,7 +104,7 @@ function RouteComponent() {
     socialSecurityNumber: initialData.socialSecurityNumber,
   });
 
-  const [step2InitialValues] = useState<TeacherRegStep2>({
+  const [step2InitialValues] = useState<EmployeeRegStep2>({
     address: initialData.address,
     city: initialData.city,
     state: initialData.state,
@@ -115,52 +117,59 @@ function RouteComponent() {
     emergencyContactPhone: initialData.emergencyContactPhone,
   });
 
-  const [step3InitialValues] = useState<TeacherRegStep3>({
-    highestDegree: initialData.highestDegree,
+  const [step3InitialValues] = useState<EmployeeRegStep3>({
+    highestEducation: initialData.highestEducation,
     university: initialData.university,
     graduationYear: initialData.graduationYear,
     gpa: initialData.gpa,
-    positionApplyingFor: initialData.positionApplyingFor,
-    teachingLicense: initialData.teachingLicense,
+    position: initialData.position,
+    subjectId: initialData.subjectId,
     yearsOfExperience: initialData.yearsOfExperience,
   });
 
-  const [step4InitialValues] = useState<TeacherRegStep4>({
+  const [step4InitialValues] = useState<EmployeeRegStep4>({
     reference1Name: initialData.reference1Name,
     reference1Organization: initialData.reference1Organization,
     reference1Phone: initialData.reference1Phone,
     reference1Email: initialData.reference1Email,
   });
 
-  const [step5InitialValues] = useState<TeacherRegStep5>({
+  const [step5InitialValues] = useState<EmployeeRegStep5>({
     resume: initialData.resume,
     backgroundCheck: initialData.backgroundCheck,
     agreeToTerms: initialData.agreeToTerms,
     agreeToBackgroundCheck: initialData.agreeToBackgroundCheck,
   });
 
-  const form = useForm<TeacherRegistrationForm>({
-    resolver: zodResolver(zTeacherRegistrationForm),
+  const { data: subjects } = useQuery({
+    ...getSubjectsOptions({
+      query: { yearId: yearId! },
+    }),
+    enabled: !!yearId,
+  });
+
+  const form = useForm<EmployeeRegistrationForm>({
+    resolver: zodResolver(zEmployeeRegistrationForm),
     defaultValues: initialData,
   });
-  const step1Form = useForm<TeacherRegStep1>({
-    resolver: zodResolver(zTeacherRegStep1),
+  const step1Form = useForm<EmployeeRegStep1>({
+    resolver: zodResolver(zEmployeeRegStep1),
     defaultValues: step1InitialValues,
   });
-  const step2Form = useForm<TeacherRegStep2>({
-    resolver: zodResolver(zTeacherRegStep2),
+  const step2Form = useForm<EmployeeRegStep2>({
+    resolver: zodResolver(zEmployeeRegStep2),
     defaultValues: step2InitialValues,
   });
-  const step3Form = useForm<TeacherRegStep3>({
-    resolver: zodResolver(zTeacherRegStep3),
+  const step3Form = useForm<EmployeeRegStep3>({
+    resolver: zodResolver(zEmployeeRegStep3),
     defaultValues: step3InitialValues,
   });
-  const step4Form = useForm<TeacherRegStep4>({
-    resolver: zodResolver(zTeacherRegStep4),
+  const step4Form = useForm<EmployeeRegStep4>({
+    resolver: zodResolver(zEmployeeRegStep4),
     defaultValues: step4InitialValues,
   });
-  const step5Form = useForm<TeacherRegStep5>({
-    resolver: zodResolver(zTeacherRegStep5),
+  const step5Form = useForm<EmployeeRegStep5>({
+    resolver: zodResolver(zEmployeeRegStep5),
     defaultValues: step5InitialValues,
   });
 
@@ -170,7 +179,7 @@ function RouteComponent() {
   // const { data: gradeLevels } = useQuery({ ...getGradeLevelsOptions() });
 
   const mutation = useMutation({
-    ...registerNewTeacherMutation(),
+    ...registerNewEmployeeMutation(),
     onSuccess: (success) => {
       toast.success(success.message, {
         style: { color: "green" },
@@ -184,7 +193,7 @@ function RouteComponent() {
 
       if (detail && typeof detail === "object") {
         Object.entries(detail).forEach(([field, message]) => {
-          setError(field as keyof TeacherRegistrationForm, {
+          setError(field as keyof EmployeeRegistrationForm, {
             type: "server",
             message: message as string,
           });
@@ -196,11 +205,11 @@ function RouteComponent() {
   });
 
   const step1Mutation = useMutation({
-    ...registerTeacherStep1Mutation(),
+    ...registerEmployeeStep1Mutation(),
     onSuccess: () => {
       const step1Values = step1Form.getValues();
       Object.entries(step1Values).forEach(([key, value]) => {
-        setValue(key as keyof TeacherRegStep1, value, {
+        setValue(key as keyof EmployeeRegStep1, value, {
           shouldDirty: true,
         });
       });
@@ -214,7 +223,7 @@ function RouteComponent() {
       if (detail && Array.isArray(detail)) {
         detail.forEach(({ loc, msg }: { loc: string[]; msg: string }) => {
           step1Form.setError(
-            extractFirstWord(loc, msg) as keyof TeacherRegStep1,
+            extractFirstWord(loc, msg) as keyof EmployeeRegStep1,
             {
               type: "server",
               message: msg,
@@ -228,11 +237,11 @@ function RouteComponent() {
   });
 
   const step2Mutation = useMutation({
-    ...registerTeacherStep2Mutation(),
+    ...registerEmployeeStep2Mutation(),
     onSuccess: () => {
       const step2Values = step2Form.getValues();
       Object.entries(step2Values).forEach(([key, value]) => {
-        setValue(key as keyof TeacherRegStep2, value, {
+        setValue(key as keyof EmployeeRegStep2, value, {
           shouldDirty: true,
         });
       });
@@ -246,7 +255,7 @@ function RouteComponent() {
       if (detail && Array.isArray(detail)) {
         detail.forEach(({ loc, msg }: { loc: string[]; msg: string }) => {
           step2Form.setError(
-            extractFirstWord(loc, msg) as keyof TeacherRegStep2,
+            extractFirstWord(loc, msg) as keyof EmployeeRegStep2,
             {
               type: "server",
               message: msg,
@@ -260,11 +269,11 @@ function RouteComponent() {
   });
 
   const step3Mutation = useMutation({
-    ...registerTeacherStep3Mutation(),
+    ...registerEmployeeStep3Mutation(),
     onSuccess: () => {
       const step3Values = step3Form.getValues();
       Object.entries(step3Values).forEach(([key, value]) => {
-        setValue(key as keyof TeacherRegStep3, value, {
+        setValue(key as keyof EmployeeRegStep3, value, {
           shouldDirty: true,
         });
       });
@@ -279,7 +288,7 @@ function RouteComponent() {
       if (detail && Array.isArray(detail)) {
         detail.forEach(({ loc, msg }: { loc: string[]; msg: string }) => {
           step3Form.setError(
-            extractFirstWord(loc, msg) as keyof TeacherRegStep3,
+            extractFirstWord(loc, msg) as keyof EmployeeRegStep3,
             {
               type: "server",
               message: msg,
@@ -293,11 +302,11 @@ function RouteComponent() {
   });
 
   const step4Mutation = useMutation({
-    ...registerTeacherStep4Mutation(),
+    ...registerEmployeeStep4Mutation(),
     onSuccess: () => {
       const step4Values = step4Form.getValues();
       Object.entries(step4Values).forEach(([key, value]) => {
-        setValue(key as keyof TeacherRegStep4, value, {
+        setValue(key as keyof EmployeeRegStep4, value, {
           shouldDirty: true,
         });
       });
@@ -311,7 +320,7 @@ function RouteComponent() {
       if (detail && Array.isArray(detail)) {
         detail.forEach(({ loc, msg }: { loc: string[]; msg: string }) => {
           step4Form.setError(
-            extractFirstWord(loc, msg) as keyof TeacherRegStep4,
+            extractFirstWord(loc, msg) as keyof EmployeeRegStep4,
             {
               type: "server",
               message: msg,
@@ -325,11 +334,11 @@ function RouteComponent() {
   });
 
   const step5Mutation = useMutation({
-    ...registerTeacherStep5Mutation(),
+    ...registerEmployeeStep5Mutation(),
     onSuccess: () => {
       const step5Values = step5Form.getValues();
       Object.entries(step5Values).forEach(([key, value]) => {
-        setValue(key as keyof TeacherRegStep5, value, {
+        setValue(key as keyof EmployeeRegStep5, value, {
           shouldDirty: true,
         });
       });
@@ -343,7 +352,7 @@ function RouteComponent() {
       if (detail && Array.isArray(detail)) {
         detail.forEach(({ loc, msg }: { loc: string[]; msg: string }) => {
           step5Form.setError(
-            extractFirstWord(loc, msg) as keyof TeacherRegStep5,
+            extractFirstWord(loc, msg) as keyof EmployeeRegStep5,
             {
               type: "server",
               message: msg,
@@ -398,29 +407,29 @@ function RouteComponent() {
             </div>
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <InputWithLabel<TeacherRegStep1>
+                <InputWithLabel<EmployeeRegStep1>
                   nameInSchema="firstName"
                   fieldTitle="First Name *"
                   placeholder="Enter First Name"
                 />
-                <InputWithLabel<TeacherRegStep1>
+                <InputWithLabel<EmployeeRegStep1>
                   nameInSchema="fatherName"
                   fieldTitle="Father Name *"
                   placeholder="Enter Father Name"
                 />
-                <InputWithLabel<TeacherRegStep1>
+                <InputWithLabel<EmployeeRegStep1>
                   nameInSchema="grandFatherName"
                   fieldTitle="Grandfather Name"
                   placeholder="Enter Grandfather Name"
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <DateWithLabel<TeacherRegStep1>
+                <DateWithLabel<EmployeeRegStep1>
                   nameInSchema="dateOfBirth"
                   fieldTitle="Date of Birth *"
                   placeholder="Select date of birth"
                 />
-                <RadioGroupLabel<TeacherRegStep1, string>
+                <RadioGroupLabel<EmployeeRegStep1, string>
                   fieldTitle="Gender *"
                   nameInSchema="gender"
                   options={[
@@ -428,14 +437,14 @@ function RouteComponent() {
                     { label: "Female", value: "female" },
                   ]}
                 />
-                <InputWithLabel<TeacherRegStep1>
+                <InputWithLabel<EmployeeRegStep1>
                   nameInSchema="nationality"
                   fieldTitle="Nationality *"
                   placeholder="Enter Nationality"
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <SelectWithLabel<TeacherRegStep1, string>
+                <SelectWithLabel<EmployeeRegStep1, string>
                   fieldTitle="Marital Status"
                   nameInSchema="maritalStatus"
                   placeholder="Select marital status"
@@ -445,7 +454,7 @@ function RouteComponent() {
                   <SelectItem value="divorced">Divorced</SelectItem>
                   <SelectItem value="widowed">Widowed</SelectItem>
                 </SelectWithLabel>
-                <InputWithLabel<TeacherRegStep1>
+                <InputWithLabel<EmployeeRegStep1>
                   nameInSchema="socialSecurityNumber"
                   fieldTitle="Social Security Number"
                   placeholder="123-45-6789"
@@ -481,23 +490,23 @@ function RouteComponent() {
               </p>
             </div>
             <div className="space-y-6">
-              <InputWithLabel<TeacherRegStep2>
+              <InputWithLabel<EmployeeRegStep2>
                 nameInSchema="address"
                 fieldTitle="Street Address *"
                 placeholder="Enter street address"
               />
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <InputWithLabel<TeacherRegStep2>
+                <InputWithLabel<EmployeeRegStep2>
                   nameInSchema="city"
                   fieldTitle="City *"
                   placeholder="Enter city"
                 />
-                <InputWithLabel<TeacherRegStep2>
+                <InputWithLabel<EmployeeRegStep2>
                   nameInSchema="state"
                   fieldTitle="State/Province *"
                   placeholder="Enter state"
                 />
-                <InputWithLabel<TeacherRegStep2>
+                <InputWithLabel<EmployeeRegStep2>
                   nameInSchema="country"
                   fieldTitle="Country *"
                   placeholder="Enter country"
@@ -505,18 +514,18 @@ function RouteComponent() {
               </div>
               <Separator />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <PhoneInputWithLabel<TeacherRegStep2>
+                <PhoneInputWithLabel<EmployeeRegStep2>
                   nameInSchema="primaryPhone"
                   fieldTitle="Primary Phone Number *"
                   description="Use Country Code +251"
                 />
-                <PhoneInputWithLabel<TeacherRegStep2>
+                <PhoneInputWithLabel<EmployeeRegStep2>
                   nameInSchema="secondaryPhone"
                   fieldTitle="Secondary Phone Number"
                   description="Use Country Code +251"
                 />
               </div>
-              <InputWithLabel<TeacherRegStep2>
+              <InputWithLabel<EmployeeRegStep2>
                 nameInSchema="personalEmail"
                 fieldTitle="Personal Email *"
                 placeholder="personal@example.com"
@@ -525,12 +534,12 @@ function RouteComponent() {
               <div className="space-y-4">
                 <h4 className="font-medium text-red-600">Emergency Contact</h4>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <InputWithLabel<TeacherRegStep2>
+                  <InputWithLabel<EmployeeRegStep2>
                     nameInSchema="emergencyContactName"
                     fieldTitle="Emergency Contact Name *"
                     placeholder="Enter full name"
                   />
-                  <SelectWithLabel<TeacherRegStep2, string>
+                  <SelectWithLabel<EmployeeRegStep2, string>
                     fieldTitle="Relationship *"
                     nameInSchema="emergencyContactRelation"
                   >
@@ -541,7 +550,7 @@ function RouteComponent() {
                     <SelectItem value="family-friend">Family Friend</SelectItem>
                     <SelectItem value="other">Other</SelectItem>
                   </SelectWithLabel>
-                  <PhoneInputWithLabel<TeacherRegStep2>
+                  <PhoneInputWithLabel<EmployeeRegStep2>
                     nameInSchema="emergencyContactPhone"
                     fieldTitle="Emergency Contact Phone *"
                   />
@@ -580,62 +589,67 @@ function RouteComponent() {
                 Detail your qualifications and the position you're applying for.
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InputWithLabel<TeacherRegStep3>
-                nameInSchema="positionApplyingFor"
-                fieldTitle="Position Applying For *"
-                placeholder="e.g., Elementary Teacher"
-              />
-            </div>
-            <Separator />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <SelectWithLabel<TeacherRegStep3, string>
-                fieldTitle="Highest Degree *"
-                nameInSchema="highestDegree"
-                placeholder="Select highest degree"
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <SelectWithLabel<EmployeeRegStep3, EmployeePositionEnum>
+                  fieldTitle="Position Applying For *"
+                  nameInSchema="position"
+                >
+                  {zEmployeePositionEnum.options.map((position) => (
+                    <SelectItem value={position}>{position}</SelectItem>
+                  ))}
+                </SelectWithLabel>
+                {step3Form.watch("position") === "teaching staff" && (
+                  <SelectWithLabel<EmployeeRegStep3, string>
+                    fieldTitle="Available Positions *"
+                    nameInSchema="subjectId"
+                  >
+                    {subjects?.map((subject) => (
+                      <SelectItem value={subject.id}>{subject.name}</SelectItem>
+                    ))}
+                  </SelectWithLabel>
+                )}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <SelectWithLabel<EmployeeRegStep3, string>
+                  fieldTitle="Highest Degree *"
+                  nameInSchema="highestEducation"
+                  placeholder="Select highest degree"
+                >
+                  {zHighestEducationEnum.options.map((degree) => (
+                    <SelectItem value={degree}>{degree}</SelectItem>
+                  ))}
+                </SelectWithLabel>
+                <InputWithLabel<EmployeeRegStep3>
+                  nameInSchema="university"
+                  fieldTitle="University/College *"
+                  placeholder="Enter university name"
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <InputWithLabel<EmployeeRegStep3>
+                  nameInSchema="graduationYear"
+                  fieldTitle="Graduation Year *"
+                  placeholder="2020"
+                  type="number"
+                />
+                <InputWithLabel<EmployeeRegStep3>
+                  nameInSchema="gpa"
+                  fieldTitle="GPA"
+                  placeholder="3.50"
+                  type="number"
+                />
+              </div>
+              <SelectWithLabel<EmployeeRegStep3, string>
+                fieldTitle="Years of Teaching Experience *"
+                nameInSchema="yearsOfExperience"
+                placeholder="Select years of experience"
               >
-                <SelectItem value="bachelors">Bachelor's Degree</SelectItem>
-                <SelectItem value="masters">Master's Degree</SelectItem>
-                <SelectItem value="doctorate">Doctorate/PhD</SelectItem>
-                <SelectItem value="other">Other</SelectItem>
+                {zExperienceYearEnum.options.map((experience) => (
+                  <SelectItem value={experience}>{experience}</SelectItem>
+                ))}
               </SelectWithLabel>
-              <InputWithLabel<TeacherRegStep3>
-                nameInSchema="university"
-                fieldTitle="University/College *"
-                placeholder="Enter university name"
-              />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <InputWithLabel<TeacherRegStep3>
-                nameInSchema="graduationYear"
-                fieldTitle="Graduation Year *"
-                placeholder="2020"
-                type="number"
-              />
-              <InputWithLabel<TeacherRegStep3>
-                nameInSchema="gpa"
-                fieldTitle="GPA"
-                placeholder="3.50"
-                type="number"
-              />
-            </div>
-            <CheckboxWithLabel<TeacherRegStep3, boolean>
-              nameInSchema="teachingLicense"
-              fieldTitle="Do you have a valid teaching license?"
-            />
-            <SelectWithLabel<TeacherRegStep3, string>
-              fieldTitle="Years of Teaching Experience *"
-              nameInSchema="yearsOfExperience"
-              placeholder="Select years of experience"
-            >
-              <SelectItem value="0">No experience</SelectItem>
-              <SelectItem value="1-2">1-2 years</SelectItem>
-              <SelectItem value="3-5">3-5 years</SelectItem>
-              <SelectItem value="6-10">6-10 years</SelectItem>
-              <SelectItem value="11-15">11-15 years</SelectItem>
-              <SelectItem value="16-20">16-20 years</SelectItem>
-              <SelectItem value="20+">20+ years</SelectItem>
-            </SelectWithLabel>
             <div className="flex justify-between mt-8 pt-6 border-t">
               <Button
                 variant="outline"
@@ -676,21 +690,21 @@ function RouteComponent() {
               <div className="space-y-4 p-4 bg-blue-50 rounded-lg">
                 <h5 className="font-medium">Reference 1 (Required)</h5>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <InputWithLabel<TeacherRegStep4>
+                  <InputWithLabel<EmployeeRegStep4>
                     nameInSchema="reference1Name"
                     fieldTitle="Name *"
                   />
-                  <InputWithLabel<TeacherRegStep4>
+                  <InputWithLabel<EmployeeRegStep4>
                     nameInSchema="reference1Organization"
                     fieldTitle="Organization *"
                   />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <PhoneInputWithLabel<TeacherRegStep4>
+                  <PhoneInputWithLabel<EmployeeRegStep4>
                     nameInSchema="reference1Phone"
                     fieldTitle="Phone Number *"
                   />
-                  <InputWithLabel<TeacherRegStep4>
+                  <InputWithLabel<EmployeeRegStep4>
                     nameInSchema="reference1Email"
                     fieldTitle="Email (Optional)"
                     type="email"
@@ -732,7 +746,7 @@ function RouteComponent() {
             </div>
             <div className="space-y-6">
               <h4 className="font-medium text-blue-600">Required Documents</h4>
-              <FileUploadField<TeacherRegStep5>
+              <FileUploadField<EmployeeRegStep5>
                 nameInSchema="resume"
                 fieldTitle="Resume/CV *"
                 description="Upload Recent Resume or CV"
@@ -747,14 +761,14 @@ function RouteComponent() {
 
               <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-start space-x-2">
-                  <CheckboxWithLabel<TeacherRegStep5, boolean>
+                  <CheckboxWithLabel<EmployeeRegStep5, boolean>
                     nameInSchema="agreeToTerms"
                     fieldTitle="I agree to the terms and conditions of employment and understand that all information provided is accurate and complete. I understand that any false information may result in rejection of my application or termination of employment. *"
                   />
                 </div>
 
                 <div className="flex items-start space-x-2">
-                  <CheckboxWithLabel<TeacherRegStep5, boolean>
+                  <CheckboxWithLabel<EmployeeRegStep5, boolean>
                     nameInSchema="agreeToBackgroundCheck"
                     fieldTitle="I authorize the school district to conduct a comprehensive background check, including criminal history, employment verification, and reference checks. I understand this is required for all teaching positions. *"
                   />

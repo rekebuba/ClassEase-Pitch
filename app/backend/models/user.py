@@ -13,7 +13,7 @@ if TYPE_CHECKING:
     from models.admin import Admin
     from models.saved_query_view import SavedQueryView
     from models.student import Student
-    from models.teacher import Teacher
+    from models.employee import Employee
 
 
 class User(BaseModel):
@@ -47,8 +47,8 @@ class User(BaseModel):
         repr=False,
         passive_deletes=True,
     )
-    teacher: Mapped["Teacher"] = relationship(
-        "Teacher",
+    employee: Mapped["Employee"] = relationship(
+        "Employee",
         back_populates="user",
         uselist=False,
         init=False,

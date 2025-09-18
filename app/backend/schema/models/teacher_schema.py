@@ -10,10 +10,10 @@ from schema.models.academic_term_schema import AcademicTermSchema
 from utils.enum import (
     ExperienceYearEnum,
     GenderEnum,
-    HighestDegreeEnum,
+    HighestEducationEnum,
     MaritalStatusEnum,
     ScheduleEnum,
-    TeacherApplicationStatus,
+    EmployeeApplicationStatus,
 )
 from utils.utils import to_camel
 
@@ -21,7 +21,6 @@ if TYPE_CHECKING:
     from .grade_schema import GradeSchema
     from .section_schema import SectionSchema
     from .subject_schema import SubjectSchema
-    from .teacher_term_record_schema import TeacherTermRecordSchema
     from .user_schema import UserSchema
     from .year_schema import YearSchema
 
@@ -52,7 +51,7 @@ class TeacherSchema(BaseModel):
     emergency_contact_relation: str
     emergency_contact_phone: str
     emergency_contact_email: str
-    highest_degree: HighestDegreeEnum
+    highest_degree: HighestEducationEnum
     university: str
     graduation_year: int
     gpa: float
@@ -101,7 +100,7 @@ class TeacherSchema(BaseModel):
     agree_to_terms: bool = False
     agree_to_background_check: bool = False
     user_id: Optional[uuid.UUID] = None
-    status: TeacherApplicationStatus = TeacherApplicationStatus.PENDING
+    status: EmployeeApplicationStatus = EmployeeApplicationStatus.PENDING
 
     @classmethod
     def default_fields(cls) -> set[str]:
@@ -129,7 +128,6 @@ class TeacherRelatedSchema(BaseModel):
         default=None,
         description="List of years the teacher is associated with.",
     )
-    term_records: Optional[List[TeacherTermRecordSchema]] = []
     academic_terms: Optional[List[AcademicTermSchema]] = Field(
         default=None,
         description="List of academic terms the teacher is associated with.",

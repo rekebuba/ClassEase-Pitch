@@ -196,7 +196,6 @@ def get_detail_grades_by_year_id(
             selectinload(Grade.streams),
             selectinload(Grade.teachers),
             selectinload(Grade.students),
-            selectinload(Grade.teacher_term_records),
             selectinload(Grade.student_term_records),
         )
     ).all()
@@ -229,7 +228,6 @@ def get_detail_subjects_by_year_id(
             selectinload(Subject.teachers),
             selectinload(Subject.students),
             selectinload(Subject.mark_lists),
-            selectinload(Subject.teacher_term_records),
         )
     ).all()
 

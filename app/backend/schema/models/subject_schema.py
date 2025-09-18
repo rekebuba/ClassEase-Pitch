@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict
 
@@ -15,10 +15,6 @@ if TYPE_CHECKING:
     from .grade_schema import GradeSchema, GradeWithRelatedSchema
     from .stream_schema import StreamSchema, StreamWithRelatedSchema
     from .teacher_schema import TeacherSchema, TeacherWithRelatedSchema
-    from .teacher_term_record_schema import (
-        TeacherTermRecordSchema,
-        TeacherTermRecordWithRelatedSchema,
-    )
 
 
 class SubjectSchema(BaseModel):
@@ -60,7 +56,6 @@ class SubjectRelatedSchema(BaseModel):
     )
 
     year: YearSchema
-    teacher_term_records: Optional[List[TeacherTermRecordSchema]]
     teachers: List[TeacherSchema]
     students: List[StudentSchema]
     mark_lists: List[MarkListSchema]
@@ -79,7 +74,6 @@ class SubjectNestedSchema(SubjectSchema):
         alias_generator=to_camel,
     )
 
-    teacher_term_records: List[TeacherTermRecordWithRelatedSchema]
     teachers: List[TeacherWithRelatedSchema]
     streams: List[StreamWithRelatedSchema]
     grades: List[GradeWithRelatedSchema]

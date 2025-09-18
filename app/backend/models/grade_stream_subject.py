@@ -73,7 +73,7 @@ class GradeStreamSubject(BaseModel):
     # One-To-Many Relationships
     teacher_records: Mapped[List["TeacherRecord"]] = relationship(
         "TeacherRecord",
-        back_populates="grade_stream_subjects",
+        back_populates="grade_stream_subject",
         default_factory=list,
         repr=False,
         passive_deletes=True,

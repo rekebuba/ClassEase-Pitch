@@ -28,13 +28,9 @@ from models.student_year_record import StudentYearRecord
 from models.subject import Subject
 from models.subject_yearly_average import SubjectYearlyAverage
 from models.table import Table
-from models.teacher import Teacher
-from models.teacher_academic_term_link import TeacherAcademicTermLink
-from models.teacher_grade_link import TeacherGradeLink
-from models.teacher_section_link import TeacherSectionLink
-from models.teacher_subject_link import TeacherSubjectLink
-from models.teacher_term_record import TeacherTermRecord
-from models.teacher_year_link import TeacherYearLink
+from models.employee import Employee
+from models.teacher_record import TeacherRecord
+from models.teacher_record_link import TeacherRecordLink
 from models.user import User
 from models.year import Year
 from models.yearly_subject import YearlySubject
@@ -67,13 +63,9 @@ __all__ = [
     "Subject",
     "SubjectYearlyAverage",
     "Table",
-    "Teacher",
-    "TeacherAcademicTermLink",
-    "TeacherGradeLink",
-    "TeacherSectionLink",
-    "TeacherSubjectLink",
-    "TeacherTermRecord",
-    "TeacherYearLink",
+    "Employee",
+    "TeacherRecordLink",
+    "TeacherRecord",
     "User",
     "Year",
     "YearlySubject",

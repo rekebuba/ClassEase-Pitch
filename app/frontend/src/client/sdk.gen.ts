@@ -33,24 +33,24 @@ import type {
   RegisterNewStudentData,
   RegisterNewStudentResponses,
   RegisterNewStudentErrors,
-  RegisterTeacherStep1Data,
-  RegisterTeacherStep1Responses,
-  RegisterTeacherStep1Errors,
-  RegisterTeacherStep2Data,
-  RegisterTeacherStep2Responses,
-  RegisterTeacherStep2Errors,
-  RegisterTeacherStep3Data,
-  RegisterTeacherStep3Responses,
-  RegisterTeacherStep3Errors,
-  RegisterTeacherStep4Data,
-  RegisterTeacherStep4Responses,
-  RegisterTeacherStep4Errors,
-  RegisterTeacherStep5Data,
-  RegisterTeacherStep5Responses,
-  RegisterTeacherStep5Errors,
-  RegisterNewTeacherData,
-  RegisterNewTeacherResponses,
-  RegisterNewTeacherErrors,
+  RegisterEmployeeStep1Data,
+  RegisterEmployeeStep1Responses,
+  RegisterEmployeeStep1Errors,
+  RegisterEmployeeStep2Data,
+  RegisterEmployeeStep2Responses,
+  RegisterEmployeeStep2Errors,
+  RegisterEmployeeStep3Data,
+  RegisterEmployeeStep3Responses,
+  RegisterEmployeeStep3Errors,
+  RegisterEmployeeStep4Data,
+  RegisterEmployeeStep4Responses,
+  RegisterEmployeeStep4Errors,
+  RegisterEmployeeStep5Data,
+  RegisterEmployeeStep5Responses,
+  RegisterEmployeeStep5Errors,
+  RegisterNewEmployeeData,
+  RegisterNewEmployeeResponses,
+  RegisterNewEmployeeErrors,
   GetYearsData,
   GetYearsResponses,
   PostYearData,
@@ -150,12 +150,12 @@ import {
   zRegisterStudentStep4Response,
   zRegisterStudentStep5Response,
   zRegisterNewStudentResponse,
-  zRegisterTeacherStep1Response,
-  zRegisterTeacherStep2Response,
-  zRegisterTeacherStep3Response,
-  zRegisterTeacherStep4Response,
-  zRegisterTeacherStep5Response,
-  zRegisterNewTeacherResponse,
+  zRegisterEmployeeStep1Response,
+  zRegisterEmployeeStep2Response,
+  zRegisterEmployeeStep3Response,
+  zRegisterEmployeeStep4Response,
+  zRegisterEmployeeStep5Response,
+  zRegisterNewEmployeeResponse,
   zGetYearsResponse,
   zPostYearResponse,
   zGetYearSummaryResponse,
@@ -434,22 +434,22 @@ export const registerNewStudent = <ThrowOnError extends boolean = false>(
 };
 
 /**
- * Register Teacher Step1
- * Validate teacher data for each step
+ * Register Employee Step1
+ * Validate employee data for each step
  */
-export const registerTeacherStep1 = <ThrowOnError extends boolean = false>(
-  options: Options<RegisterTeacherStep1Data, ThrowOnError>,
+export const registerEmployeeStep1 = <ThrowOnError extends boolean = false>(
+  options: Options<RegisterEmployeeStep1Data, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).post<
-    RegisterTeacherStep1Responses,
-    RegisterTeacherStep1Errors,
+    RegisterEmployeeStep1Responses,
+    RegisterEmployeeStep1Errors,
     ThrowOnError
   >({
     responseType: "json",
     responseValidator: async (data) => {
-      return await zRegisterTeacherStep1Response.parseAsync(data);
+      return await zRegisterEmployeeStep1Response.parseAsync(data);
     },
-    url: "/api/v1/register/teachers/step1",
+    url: "/api/v1/register/employees/step1",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -459,22 +459,22 @@ export const registerTeacherStep1 = <ThrowOnError extends boolean = false>(
 };
 
 /**
- * Register Teacher Step2
- * Validate teacher data for each step
+ * Register Employee Step2
+ * Validate employee data for each step
  */
-export const registerTeacherStep2 = <ThrowOnError extends boolean = false>(
-  options: Options<RegisterTeacherStep2Data, ThrowOnError>,
+export const registerEmployeeStep2 = <ThrowOnError extends boolean = false>(
+  options: Options<RegisterEmployeeStep2Data, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).post<
-    RegisterTeacherStep2Responses,
-    RegisterTeacherStep2Errors,
+    RegisterEmployeeStep2Responses,
+    RegisterEmployeeStep2Errors,
     ThrowOnError
   >({
     responseType: "json",
     responseValidator: async (data) => {
-      return await zRegisterTeacherStep2Response.parseAsync(data);
+      return await zRegisterEmployeeStep2Response.parseAsync(data);
     },
-    url: "/api/v1/register/teachers/step2",
+    url: "/api/v1/register/employees/step2",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -484,22 +484,22 @@ export const registerTeacherStep2 = <ThrowOnError extends boolean = false>(
 };
 
 /**
- * Register Teacher Step3
- * Validate teacher data for each step
+ * Register Employee Step3
+ * Validate employee data for each step
  */
-export const registerTeacherStep3 = <ThrowOnError extends boolean = false>(
-  options: Options<RegisterTeacherStep3Data, ThrowOnError>,
+export const registerEmployeeStep3 = <ThrowOnError extends boolean = false>(
+  options: Options<RegisterEmployeeStep3Data, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).post<
-    RegisterTeacherStep3Responses,
-    RegisterTeacherStep3Errors,
+    RegisterEmployeeStep3Responses,
+    RegisterEmployeeStep3Errors,
     ThrowOnError
   >({
     responseType: "json",
     responseValidator: async (data) => {
-      return await zRegisterTeacherStep3Response.parseAsync(data);
+      return await zRegisterEmployeeStep3Response.parseAsync(data);
     },
-    url: "/api/v1/register/teachers/step3",
+    url: "/api/v1/register/employees/step3",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -509,22 +509,22 @@ export const registerTeacherStep3 = <ThrowOnError extends boolean = false>(
 };
 
 /**
- * Register Teacher Step4
- * Validate teacher data for each step
+ * Register Employee Step4
+ * Validate employee data for each step
  */
-export const registerTeacherStep4 = <ThrowOnError extends boolean = false>(
-  options: Options<RegisterTeacherStep4Data, ThrowOnError>,
+export const registerEmployeeStep4 = <ThrowOnError extends boolean = false>(
+  options: Options<RegisterEmployeeStep4Data, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).post<
-    RegisterTeacherStep4Responses,
-    RegisterTeacherStep4Errors,
+    RegisterEmployeeStep4Responses,
+    RegisterEmployeeStep4Errors,
     ThrowOnError
   >({
     responseType: "json",
     responseValidator: async (data) => {
-      return await zRegisterTeacherStep4Response.parseAsync(data);
+      return await zRegisterEmployeeStep4Response.parseAsync(data);
     },
-    url: "/api/v1/register/teachers/step4",
+    url: "/api/v1/register/employees/step4",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -534,22 +534,22 @@ export const registerTeacherStep4 = <ThrowOnError extends boolean = false>(
 };
 
 /**
- * Register Teacher Step5
- * Validate teacher data for each step
+ * Register Employee Step5
+ * Validate employee data for each step
  */
-export const registerTeacherStep5 = <ThrowOnError extends boolean = false>(
-  options: Options<RegisterTeacherStep5Data, ThrowOnError>,
+export const registerEmployeeStep5 = <ThrowOnError extends boolean = false>(
+  options: Options<RegisterEmployeeStep5Data, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).post<
-    RegisterTeacherStep5Responses,
-    RegisterTeacherStep5Errors,
+    RegisterEmployeeStep5Responses,
+    RegisterEmployeeStep5Errors,
     ThrowOnError
   >({
     responseType: "json",
     responseValidator: async (data) => {
-      return await zRegisterTeacherStep5Response.parseAsync(data);
+      return await zRegisterEmployeeStep5Response.parseAsync(data);
     },
-    url: "/api/v1/register/teachers/step5",
+    url: "/api/v1/register/employees/step5",
     ...options,
     headers: {
       "Content-Type": "application/json",
@@ -559,22 +559,22 @@ export const registerTeacherStep5 = <ThrowOnError extends boolean = false>(
 };
 
 /**
- * Register New Teacher
- * Registers a new user (Admin, Student, Teacher) in the system.
+ * Register New Employee
+ * Registers a new user (Admin, Student, Employee) in the system.
  */
-export const registerNewTeacher = <ThrowOnError extends boolean = false>(
-  options: Options<RegisterNewTeacherData, ThrowOnError>,
+export const registerNewEmployee = <ThrowOnError extends boolean = false>(
+  options: Options<RegisterNewEmployeeData, ThrowOnError>,
 ) => {
   return (options.client ?? _heyApiClient).post<
-    RegisterNewTeacherResponses,
-    RegisterNewTeacherErrors,
+    RegisterNewEmployeeResponses,
+    RegisterNewEmployeeErrors,
     ThrowOnError
   >({
     responseType: "json",
     responseValidator: async (data) => {
-      return await zRegisterNewTeacherResponse.parseAsync(data);
+      return await zRegisterNewEmployeeResponse.parseAsync(data);
     },
-    url: "/api/v1/register/teachers",
+    url: "/api/v1/register/employees",
     ...options,
     headers: {
       "Content-Type": "application/json",

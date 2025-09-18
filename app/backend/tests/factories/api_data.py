@@ -5,14 +5,21 @@ from typing import get_args
 from factory import LazyAttribute
 from faker import Faker
 
-from api.v1.routers.registrations.schema import StudentRegistrationForm
+from api.v1.routers.registrations.schema import (
+    EmployeeRegistrationForm,
+    StudentRegistrationForm,
+)
 from api.v1.routers.year.schema import NewYear
 from tests.factories.typed_factory import TypedFactory
 from utils.enum import (
     AcademicTermTypeEnum,
     AcademicYearStatusEnum,
     BloodTypeEnum,
+    EmployeePositionEnum,
+    ExperienceYearEnum,
     GenderEnum,
+    HighestEducationEnum,
+    MaritalStatusEnum,
     StudentApplicationStatusEnum,
 )
 from utils.type import SetupMethodType
@@ -94,12 +101,77 @@ class StudentRegistrationFactory(TypedFactory[StudentRegistrationForm]):
     # Medical Information
     has_medical_condition = LazyAttribute(lambda _: fake.boolean())
     medical_details = LazyAttribute(
-        lambda obj: fake.text(max_nb_chars=60)
-        if obj.has_medical_condition
-        else None
+        lambda obj: fake.text(max_nb_chars=60) if obj.has_medical_condition else None
     )
     has_disability = LazyAttribute(lambda x_: fake.boolean())
     disability_details = LazyAttribute(
         lambda obj: fake.text(max_nb_chars=60) if obj.has_disability else None
     )
     status = LazyAttribute(lambda x: StudentApplicationStatusEnum.PENDING)
+
+
+class EmployeeRegistrationFactory(TypedFactory[EmployeeRegistrationForm]):
+    class Meta:
+        model = EmployeeRegistrationForm
+
+    first_name = LazyAttribute(lambda x: fake.first_name())
+    father_name = LazyAttribute(lambda x: fake.last_name())
+    grand_father_name = LazyAttribute(lambda x: fake.first_name())
+    date_of_birth = LazyAttribute(lambda x: fake.date_of_birth())
+    gender = LazyAttribute(lambda x: fake.random_element(elements=list(GenderEnum)))
+    nationality = LazyAttribute(lambda x: fake.country())
+    marital_status = LazyAttribute(
+        lambda x: fake.random_element(elements=list(MaritalStatusEnum))
+    )
+    social_security_number = LazyAttribute(lambda x: str(fake.uuid4()))
+    # Contact Information
+    address = LazyAttribute(lambda x: fake.address())
+    city = LazyAttribute(lambda x: fake.city())
+    state = LazyAttribute(lambda x: fake.state())
+    country = LazyAttribute(lambda x: fake.country()[:50])
+    primary_phone = LazyAttribute(lambda x: "+251912345678")
+    secondary_phone = LazyAttribute(lambda x: "+251912345678")
+    personal_email = LazyAttribute(lambda x: fake.email())
+
+    # Emergency Contact
+    emergency_contact_name = LazyAttribute(lambda x: fake.name())
+    emergency_contact_relation = LazyAttribute(
+        lambda x: fake.random_element(
+            elements=("Parent", "Sibling", "Spouse", "Friend", "Other")
+        )
+    )
+    emergency_contact_phone = LazyAttribute(lambda x: "+251912345678")
+    emergency_contact_email = LazyAttribute(lambda x: fake.email())
+
+    # Educational Background
+    highest_education = LazyAttribute(
+        lambda x: fake.random_element(elements=list(HighestEducationEnum))
+    )
+
+    university = LazyAttribute(lambda x: fake.company())
+    graduation_year = LazyAttribute(lambda x: random.randint(2000, 2023))
+    gpa = LazyAttribute(lambda x: round(random.uniform(1.0, 4.0), 2))
+
+    # Teaching Experience
+    years_of_experience = LazyAttribute(
+        lambda x: fake.random_element(elements=list(ExperienceYearEnum))
+    )
+
+    # Employment Information
+    position = LazyAttribute(
+        lambda x: fake.random_element(elements=list(EmployeePositionEnum))
+    )
+    subject_id = LazyAttribute(
+        lambda x: None
+    )  # To be set explicitly if position is Teacher
+
+    # Background & References
+    reference1_name = LazyAttribute(lambda x: fake.name())
+    reference1_organization = LazyAttribute(lambda x: fake.company())
+    reference1_phone = LazyAttribute(lambda x: "+251912345678")
+    reference1_email = LazyAttribute(lambda x: fake.email())
+
+    # Documents
+    resume = LazyAttribute(lambda x: fake.file_name(extension="pdf"))
+    agree_to_terms = LazyAttribute(lambda _: True)
+    agree_to_background_check = LazyAttribute(lambda _: True)

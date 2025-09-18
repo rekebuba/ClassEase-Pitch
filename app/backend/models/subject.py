@@ -12,14 +12,13 @@ from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
 from models.grade import Grade
 from models.stream import Stream
+from models.teacher_record import TeacherRecord
 from utils.utils import sort_grade_key
 
 if TYPE_CHECKING:
     from models.grade_stream_subject import GradeStreamSubject
     from models.mark_list import MarkList
     from models.student import Student
-    from models.teacher import Teacher
-    from models.teacher_term_record import TeacherTermRecord
     from models.year import Year
 
 
@@ -47,15 +46,15 @@ class Subject(BaseModel):
         init=False,
     )
 
-    # Many-To-Many Relationships
-    teachers: Mapped[List["Teacher"]] = relationship(
-        "Teacher",
-        back_populates="subjects",
-        secondary="teacher_subject_links",
+    teacher_records: Mapped[List["TeacherRecord"]] = relationship(
+        "TeacherRecord",
+        back_populates="subject",
         default_factory=list,
         repr=False,
         passive_deletes=True,
     )
+
+    # Many-To-Many Relationships
     students: Mapped[List["Student"]] = relationship(
         "Student",
         secondary="student_subject_links",

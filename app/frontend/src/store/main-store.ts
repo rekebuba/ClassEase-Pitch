@@ -13,7 +13,7 @@ import { rtkQueryErrorLogger } from "./middleware/global-error";
 import {
   persistedAuthReducer,
   persistedStudentRegistrationForm,
-  persistedTeacherRegistrationForm,
+  persistedEmployeeRegistrationForm,
   persistedYearReducer,
 } from "./persist";
 
@@ -23,7 +23,7 @@ export const store = configureStore({
     auth: persistedAuthReducer,
     year: persistedYearReducer,
     studentRegistrationForm: persistedStudentRegistrationForm,
-    teacherRegistrationForm: persistedTeacherRegistrationForm,
+    employeeRegistrationForm: persistedEmployeeRegistrationForm,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

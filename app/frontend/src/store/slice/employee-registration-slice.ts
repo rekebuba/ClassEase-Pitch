@@ -1,12 +1,12 @@
-import { TeacherRegistrationForm } from "@/client/types.gen";
+import { EmployeeRegistrationForm } from "@/client/types.gen";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface TeacherRegistrationFormState {
-  data: TeacherRegistrationForm;
+interface EmployeeRegistrationFormState {
+  data: EmployeeRegistrationForm;
   step: number;
 }
 
-const initialFormData: TeacherRegistrationForm = {
+const initialFormData: EmployeeRegistrationForm = {
   // Personal Information
   firstName: "",
   fatherName: "",
@@ -32,19 +32,17 @@ const initialFormData: TeacherRegistrationForm = {
   emergencyContactPhone: "",
 
   // Educational Background
-  highestDegree: undefined as any,
+  highestEducation: undefined as any,
   university: "",
   graduationYear: 0,
   gpa: 0,
-
-  // Teaching Certifications & Licenses
-  teachingLicense: false,
 
   // Teaching Experience
   yearsOfExperience: undefined as any,
 
   // Employment Information
-  positionApplyingFor: "",
+  position: undefined as any,
+  subjectId: undefined,
 
   // Background & References
   reference1Name: "",
@@ -61,16 +59,16 @@ const initialFormData: TeacherRegistrationForm = {
   agreeToBackgroundCheck: false,
 };
 
-const initialState: TeacherRegistrationFormState = {
+const initialState: EmployeeRegistrationFormState = {
   data: initialFormData,
   step: 1,
 };
 
-export const teacherRegistrationFormSlice = createSlice({
-  name: "teacherRegistrationForm",
+export const employeeRegistrationFormSlice = createSlice({
+  name: "employeeRegistrationForm",
   initialState,
   reducers: {
-    setFormData: (state, action: PayloadAction<TeacherRegistrationForm>) => {
+    setFormData: (state, action: PayloadAction<EmployeeRegistrationForm>) => {
       state.data = action.payload;
     },
     setFormStep: (state, action: PayloadAction<number>) => {
@@ -84,5 +82,5 @@ export const teacherRegistrationFormSlice = createSlice({
 });
 
 export const { setFormData, setFormStep, resetForm } =
-  teacherRegistrationFormSlice.actions;
-export default teacherRegistrationFormSlice.reducer;
+  employeeRegistrationFormSlice.actions;
+export default employeeRegistrationFormSlice.reducer;
