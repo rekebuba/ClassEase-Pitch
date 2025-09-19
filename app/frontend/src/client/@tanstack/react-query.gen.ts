@@ -51,6 +51,7 @@ import {
   deleteEmployees,
   getEmployees,
   getEmployee,
+  updateEmployeeStatus,
 } from "../sdk.gen";
 import {
   queryOptions,
@@ -154,6 +155,9 @@ import type {
   DeleteEmployeesResponse,
   GetEmployeesData,
   GetEmployeeData,
+  UpdateEmployeeStatusData,
+  UpdateEmployeeStatusError,
+  UpdateEmployeeStatusResponse,
 } from "../types.gen";
 import type { AxiosError } from "axios";
 import { client as _heyApiClient } from "../client.gen";
@@ -1837,14 +1841,14 @@ export const deleteEmployeesMutation = (
   return mutationOptions;
 };
 
-export const getEmployeesQueryKey = (options: Options<GetEmployeesData>) =>
+export const getEmployeesQueryKey = (options?: Options<GetEmployeesData>) =>
   createQueryKey("getEmployees", options);
 
 /**
  * Get Employees
  * This endpoint will return employees based on the provided filters.
  */
-export const getEmployeesOptions = (options: Options<GetEmployeesData>) => {
+export const getEmployeesOptions = (options?: Options<GetEmployeesData>) => {
   return queryOptions({
     queryFn: async ({ queryKey, signal }) => {
       const { data } = await getEmployees({
@@ -1879,4 +1883,32 @@ export const getEmployeeOptions = (options: Options<GetEmployeeData>) => {
     },
     queryKey: getEmployeeQueryKey(options),
   });
+};
+
+/**
+ * Update Employee Status
+ * This endpoint will update the status of employees by their IDs.
+ */
+export const updateEmployeeStatusMutation = (
+  options?: Partial<Options<UpdateEmployeeStatusData>>,
+): UseMutationOptions<
+  UpdateEmployeeStatusResponse,
+  AxiosError<UpdateEmployeeStatusError>,
+  Options<UpdateEmployeeStatusData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    UpdateEmployeeStatusResponse,
+    AxiosError<UpdateEmployeeStatusError>,
+    Options<UpdateEmployeeStatusData>
+  > = {
+    mutationFn: async (localOptions) => {
+      const { data } = await updateEmployeeStatus({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
 };

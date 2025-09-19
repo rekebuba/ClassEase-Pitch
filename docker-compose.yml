@@ -1,20 +1,4 @@
 services:
-  devcontainer:
-    container_name: classease_devcontainer
-    image: ghcr.io/rekebuba/devcontainer:latest
-    privileged: true
-    working_dir: /ClassEase-Pitch
-    environment:
-      - PYTHONPATH=/ClassEase-Pitch/app/backend
-    volumes:
-      - .:/ClassEase-Pitch:cached
-      - /var/run/docker.sock:/var/run/docker.sock
-    networks:
-      - app-network
-    depends_on:
-      - db
-    command: sleep infinity
-
   frontend:
     container_name: frontend_container
     image: ghcr.io/rekebuba/frontend:latest
@@ -41,15 +25,21 @@ services:
       - "8000:8000"
     env_file:
       - .env
-    environment:
-      - IS_DOCKER=true
     volumes:
       - .:/ClassEase-Pitch:cached
+
+      # Exclude these from being overridden by empty volumes
+      - /ClassEase-Pitch/app/backend/.mypy_cache
+      - /ClassEase-Pitch/app/backend/.pytest_cache
+      - /ClassEase-Pitch/app/backend/__pycache__
+      - /ClassEase-Pitch/app/backend/.venv
+      
     depends_on:
       db:
         condition: service_healthy
     networks:
       - app-network
+
     entrypoint: [ "/ClassEase-Pitch/app/backend/entrypoint.sh" ]
     command: [ "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
 
@@ -72,7 +62,8 @@ services:
 
 volumes:
   mysql_data:
-
+  frontend-code:
+  backend-code:
 
 networks:
   app-network:

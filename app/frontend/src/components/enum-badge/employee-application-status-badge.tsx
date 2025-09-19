@@ -1,23 +1,31 @@
-import { StudentApplicationStatusEnum } from "@/client";
+import { EmployeeApplicationStatusEnum } from "@/client";
 import { Badge } from "@/components/ui/badge";
 import {
-  Clock,
+  Calendar,
   CheckCircle,
-  XCircle,
-  GraduationCap,
-  Pause,
-  Ban,
+  Clock,
   LogOut,
+  Pause,
+  XCircle,
 } from "lucide-react";
 
-interface StudentStatusBadgeProps {
-  status: StudentApplicationStatusEnum;
+interface EmployeeStatusBadgeProps {
+  status: EmployeeApplicationStatusEnum;
 }
 
-export default function StudentStatusBadge({
+type StatusConfig = {
+  [key in EmployeeApplicationStatusEnum]: {
+    label: string;
+    variant: "secondary";
+    icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+    className: string;
+  };
+};
+
+export default function EmployeeApplicationStatusBadge({
   status,
-}: StudentStatusBadgeProps) {
-  const statusConfig = {
+}: EmployeeStatusBadgeProps) {
+  const statusConfig: StatusConfig = {
     pending: {
       label: "Pending",
       variant: "secondary" as const,
@@ -42,16 +50,16 @@ export default function StudentStatusBadge({
       icon: Pause,
       className: "bg-green-100 text-green-800 border-green-200",
     },
-    graduated: {
-      label: "Graduated",
+    "interview-scheduled": {
+      label: "Interview Scheduled",
       variant: "secondary" as const,
-      icon: GraduationCap,
+      icon: Calendar,
       className: "bg-blue-100 text-blue-800 border-blue-200",
     },
-    suspended: {
-      label: "Suspended",
+    approved: {
+      label: "Approved",
       variant: "secondary" as const,
-      icon: Ban,
+      icon: CheckCircle,
       className: "bg-purple-100 text-purple-800 border-purple-200",
     },
     withdrawn: {

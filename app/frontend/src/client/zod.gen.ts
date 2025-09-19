@@ -123,14 +123,16 @@ export const zDeleteYearSuccess = z.object({
 });
 
 /**
- * EmployeeApplicationStatus
+ * EmployeeApplicationStatusEnum
  */
-export const zEmployeeApplicationStatus = z.enum([
+export const zEmployeeApplicationStatusEnum = z.enum([
   "pending",
   "approved",
   "rejected",
   "interview-scheduled",
-  "under-review",
+  "active",
+  "inactive",
+  "withdrawn",
 ]);
 
 /**
@@ -209,7 +211,7 @@ export const zEmployeeBasicInfo = z.object({
   maritalStatus: z.union([zMaritalStatusEnum, z.null()]),
   secondaryPhone: z.union([z.string(), z.null()]),
   resume: z.union([z.string(), z.null()]),
-  status: zEmployeeApplicationStatus,
+  status: zEmployeeApplicationStatusEnum,
   createdAt: z.iso.datetime(),
   subjects: z.array(zTeacherAppliedSubject),
 });
@@ -328,7 +330,7 @@ export const zEmployeeRegistrationForm = z.object({
   nationality: z.optional(z.union([z.string().min(3).max(100), z.null()])),
   maritalStatus: z.optional(z.union([zMaritalStatusEnum, z.null()])),
   socialSecurityNumber: z.string(),
-  status: z.optional(zEmployeeApplicationStatus),
+  status: z.optional(zEmployeeApplicationStatusEnum),
 });
 
 /**
@@ -574,7 +576,7 @@ export const zTeacherSchema = z.object({
   agreeToTerms: z.optional(z.boolean()).default(false),
   agreeToBackgroundCheck: z.optional(z.boolean()).default(false),
   userId: z.optional(z.union([z.uuid(), z.null()])),
-  status: z.optional(zEmployeeApplicationStatus),
+  status: z.optional(zEmployeeApplicationStatusEnum),
 });
 
 /**
@@ -726,7 +728,7 @@ export const zTeacherWithRelatedSchema = z.object({
   agreeToTerms: z.optional(z.boolean()).default(false),
   agreeToBackgroundCheck: z.optional(z.boolean()).default(false),
   userId: z.optional(z.union([z.uuid(), z.null()])),
-  status: z.optional(zEmployeeApplicationStatus),
+  status: z.optional(zEmployeeApplicationStatusEnum),
 });
 
 /**
@@ -1291,6 +1293,14 @@ export const zTeacherInfo = z.object({
 export const zToken = z.object({
   access_token: z.string(),
   token_type: z.string(),
+});
+
+/**
+ * UpdateEmployeeStatusSchema
+ */
+export const zUpdateEmployeeStatusSchema = z.object({
+  employeeIds: z.array(z.uuid()),
+  status: zEmployeeApplicationStatusEnum,
 });
 
 /**
@@ -1981,10 +1991,11 @@ export const zDeleteEmployeesResponse = zSuccessResponseSchema;
 export const zGetEmployeesData = z.object({
   body: z.optional(z.never()),
   path: z.optional(z.never()),
-  query: z.object({
-    yearId: z.uuid(),
-    q: z.optional(z.union([z.string(), z.null()])),
-  }),
+  query: z.optional(
+    z.object({
+      q: z.optional(z.union([z.string(), z.null()])),
+    }),
+  ),
 });
 
 /**
@@ -2005,3 +2016,14 @@ export const zGetEmployeeData = z.object({
  * Successful Response
  */
 export const zGetEmployeeResponse = zEmployeeBasicInfo;
+
+export const zUpdateEmployeeStatusData = z.object({
+  body: zUpdateEmployeeStatusSchema,
+  path: z.optional(z.never()),
+  query: z.optional(z.never()),
+});
+
+/**
+ * Successful Response
+ */
+export const zUpdateEmployeeStatusResponse = zSuccessResponseSchema;

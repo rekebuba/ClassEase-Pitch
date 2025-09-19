@@ -4,7 +4,6 @@ import {
   updateEmployeeStatusMutation,
 } from "@/client/@tanstack/react-query.gen";
 import { EmployeeApplicationStatusEnum as Status } from "@/client/types.gen";
-import { StudentStatusBadge } from "@/components";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,7 +20,6 @@ import {
   CheckCircle,
   Clock,
   FileText,
-  GraduationCap,
   Home,
   Info,
   LogOut,
@@ -51,12 +49,12 @@ interface EmployeeStatusActionsProps {
 }
 
 const statusTransitions: Record<Status, Status[]> = {
-  pending: ["active", "rejected"],
-  rejected: ["pending"],
-  active: ["inactive", "suspended", "withdrawn"],
+  pending: ["active", "approved", "rejected"],
+  rejected: ["pending", "interview-scheduled"],
+  active: ["inactive", "withdrawn"],
   inactive: ["active", "withdrawn"],
-  graduated: [],
-  suspended: ["active", "withdrawn"],
+  "interview-scheduled": ["approved", "rejected"],
+  approved: ["active", "withdrawn"],
   withdrawn: ["pending"],
 };
 
@@ -85,14 +83,14 @@ const statusMeta: Record<
     icon: Pause,
     className: "bg-red-100 hover:bg-red-500",
   },
-  graduated: {
-    label: "Graduate",
-    icon: GraduationCap,
-    className: "bg-green-100 hover:bg-green-500",
-  },
-  suspended: {
-    label: "Suspend",
+  "interview-scheduled": {
+    label: "interview-scheduled",
     icon: Ban,
+    className: "bg-red-100 hover:bg-red-500",
+  },
+  approved: {
+    label: "approved",
+    icon: LogOut,
     className: "bg-red-100 hover:bg-red-500",
   },
   withdrawn: {
@@ -106,9 +104,7 @@ export function EmployeeStatusActions({
   currentStatus,
   onStatusChange,
 }: EmployeeStatusActionsProps) {
-  const nextStatuses = (statusTransitions[currentStatus] || []).filter(
-    (s) => s !== "graduated",
-  );
+  const nextStatuses = statusTransitions[currentStatus] || [];
 
   if (nextStatuses.length === 0) {
     return (
@@ -159,7 +155,7 @@ function RouteComponent() {
           path: { employee_id: employeeId },
         }),
       });
-      navigate({ to: "/admin/registration/teacher" });
+      navigate({ to: "/admin/registration/employees" });
     },
     onError: () => {
       toast.error("Something went wrong.", { style: { color: "red" } });
@@ -197,7 +193,7 @@ function RouteComponent() {
                 <span>
                   {employee.firstName} {employee.fatherName}
                 </span>
-                <StudentStatusBadge status={employee.status} />
+                {/* <EmployeeApplicationStatusBadge status={employee.status} /> */}
                 <p className="text-sm text-gray-500 capitalize">
                   {employee.position}
                 </p>
@@ -364,7 +360,9 @@ function RouteComponent() {
               </div>
               {employee.subjects && (
                 <div>
-                  <p className="text-sm font-medium text-gray-500">Subject</p>
+                  <p className="text-sm font-medium text-gray-500">
+                    Teaching Subject
+                  </p>
                   <p>
                     {employee.subjects
                       .map((subject) => subject.name)
@@ -373,10 +371,8 @@ function RouteComponent() {
                 </div>
               )}
               <div>
-                <p className="text-sm font-medium text-gray-500">
-                  Years of Experience
-                </p>
-                <p>{employee.yearsOfExperience}</p>
+                <p className="text-sm font-medium text-gray-500">Experience</p>
+                <p>{employee.yearsOfExperience} Years</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">
@@ -412,7 +408,7 @@ function RouteComponent() {
             </CardHeader>
             <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-3">
-                <h4 className="font-medium text-blue-600">Reference 1</h4>
+                <h4 className="font-medium text-blue-600">Reference</h4>
                 {employee.reference1Name ? (
                   <>
                     <div>
@@ -469,44 +465,6 @@ function RouteComponent() {
                   </Button>
                 ) : (
                   <p>Not provided</p>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <p className="text-sm font-medium text-gray-500">
-                  Agreed to Terms:
-                </p>
-                {employee.agreeToTerms ? (
-                  <Badge className="bg-green-100 text-green-800 flex items-center gap-1">
-                    <CheckCircle className="h-3 w-3" />
-                    Yes
-                  </Badge>
-                ) : (
-                  <Badge
-                    variant="destructive"
-                    className="flex items-center gap-1"
-                  >
-                    <XCircle className="h-3 w-3" />
-                    No
-                  </Badge>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <p className="text-sm font-medium text-gray-500">
-                  Agreed to Background Check:
-                </p>
-                {employee.agreeToBackgroundCheck ? (
-                  <Badge className="bg-green-100 text-green-800 flex items-center gap-1">
-                    <CheckCircle className="h-3 w-3" />
-                    Yes
-                  </Badge>
-                ) : (
-                  <Badge
-                    variant="destructive"
-                    className="flex items-center gap-1"
-                  >
-                    <XCircle className="h-3 w-3" />
-                    No
-                  </Badge>
                 )}
               </div>
             </CardContent>

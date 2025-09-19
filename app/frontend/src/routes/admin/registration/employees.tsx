@@ -22,14 +22,14 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Users } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/admin/registration/teacher")({
+export const Route = createFileRoute("/admin/registration/employees")({
   component: RouteComponent,
   loader: async () => {
     const yearId = store.getState().year.id;
     if (yearId) {
       await queryClient.ensureQueryData(
         getEmployeesOptions({
-          query: { yearId },
+          query: { q: "" },
         }),
       );
     }
@@ -41,7 +41,7 @@ function RouteComponent() {
   const navigate = useNavigate();
 
   const getEmployeesQueryConfig = () => ({
-    query: { yearId: yearId! },
+    query: { q: "" },
   });
 
   const { data: employees } = useQuery({
@@ -92,7 +92,6 @@ function RouteComponent() {
           </div>
         </div>
 
-        {/* Teachers Table */}
         <Card>
           <CardHeader>
             <div className="flex justify-between items-center">
@@ -107,7 +106,7 @@ function RouteComponent() {
               </div>
               <Button
                 onClick={() =>
-                  navigate({ to: "/admin/registration/new-teacher" })
+                  navigate({ to: "/admin/registration/new-employee" })
                 }
                 className="bg-blue-600 text-white hover:bg-blue-700"
               >

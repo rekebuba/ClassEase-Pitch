@@ -109,12 +109,14 @@ class EmployeePositionEnum(str, Enum):
     OTHER = "other"
 
 
-class EmployeeApplicationStatus(str, Enum):
+class EmployeeApplicationStatusEnum(str, Enum):
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
-    INTERVIEW_scheduled = "interview-scheduled"
-    UNDER_REVIEW = "under-review"
+    INTERVIEW_SCHEDULED = "interview-scheduled"
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    WITHDRAWN = "withdrawn"
 
 
 class HighestEducationEnum(str, Enum):

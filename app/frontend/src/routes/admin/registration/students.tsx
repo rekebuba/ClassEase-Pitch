@@ -22,7 +22,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Users } from "lucide-react";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/admin/registration/student")({
+export const Route = createFileRoute("/admin/registration/students")({
   component: RouteComponent,
   loader: async () => {
     const yearId = store.getState().year.id;

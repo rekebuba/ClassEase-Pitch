@@ -1,11 +1,11 @@
 import {
-  registerNewEmployeeMutation,
+  getSubjectsOptions,
   registerEmployeeStep1Mutation,
   registerEmployeeStep2Mutation,
   registerEmployeeStep3Mutation,
   registerEmployeeStep4Mutation,
   registerEmployeeStep5Mutation,
-  getSubjectsOptions,
+  registerNewEmployeeMutation,
 } from "@/client/@tanstack/react-query.gen";
 import {
   EmployeePositionEnum,
@@ -56,7 +56,6 @@ import {
 } from "@/components/ui/stepper";
 import { store } from "@/store/main-store";
 import {
-  // NOTE: Assuming a Redux slice for teacher registration exists
   resetForm,
   setFormData,
   setFormStep,
@@ -66,7 +65,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Loader, RefreshCcw, Save } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
@@ -79,7 +78,7 @@ const steps = [
   { step: 5, title: "Step Five", description: "Background & References" },
 ];
 
-export const Route = createFileRoute("/admin/registration/new-teacher")({
+export const Route = createFileRoute("/admin/registration/new-employee")({
   component: RouteComponent,
 });
 
@@ -175,16 +174,15 @@ function RouteComponent() {
 
   const { reset, setError, setValue } = form;
 
-  // const { data: subjects } = useQuery({ ...getSubjectsOptions() });
-  // const { data: gradeLevels } = useQuery({ ...getGradeLevelsOptions() });
-
   const mutation = useMutation({
     ...registerNewEmployeeMutation(),
     onSuccess: (success) => {
       toast.success(success.message, {
         style: { color: "green" },
       });
-      handleCancel();
+      navigate({
+        to: "/admin/registration/employees",
+      });
       dispatch(resetForm());
       reset(initialData);
     },
@@ -199,7 +197,7 @@ function RouteComponent() {
           });
         });
       } else {
-        toast.error("Something went wrong. Failed to Register Teacher.");
+        toast.error("Something went wrong. Failed to Register Employee.");
       }
     },
   });
@@ -384,12 +382,6 @@ function RouteComponent() {
   const handleSave = () => {
     mutation.mutate({ body: form.getValues() });
   };
-
-  const handleCancel = useCallback(() => {
-    navigate({
-      to: "/admin/registration/teacher",
-    });
-  }, [navigate]);
 
   const renderStep = () => {
     switch (currentStep) {
@@ -840,7 +832,7 @@ function RouteComponent() {
             <Save className="h-4 w-4" />
           </AdvanceTooltip>
           <CardTitle className="text-3xl font-bold text-gray-800">
-            Teacher Registration Form
+            Employee Registration Form
           </CardTitle>
           <AdvanceTooltip
             tooltip="Reset Form"

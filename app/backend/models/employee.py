@@ -19,7 +19,7 @@ from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
 from models.teacher_record import TeacherRecord
 from utils.enum import (
-    EmployeeApplicationStatus,
+    EmployeeApplicationStatusEnum,
     EmployeePositionEnum,
     ExperienceYearEnum,
     GenderEnum,
@@ -138,15 +138,15 @@ class Employee(BaseModel):
         nullable=True,
         default=None,
     )
-    status: Mapped[EmployeeApplicationStatus] = mapped_column(
+    status: Mapped[EmployeeApplicationStatusEnum] = mapped_column(
         Enum(
-            EmployeeApplicationStatus,
+            EmployeeApplicationStatusEnum,
             name="status_enum",
             values_callable=lambda x: [e.value for e in x],
             native_enum=False,
         ),
         nullable=False,
-        default=EmployeeApplicationStatus.PENDING,
+        default=EmployeeApplicationStatusEnum.PENDING,
     )
 
     @hybrid_property

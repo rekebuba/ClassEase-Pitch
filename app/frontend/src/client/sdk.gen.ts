@@ -148,6 +148,9 @@ import type {
   GetEmployeeData,
   GetEmployeeResponses,
   GetEmployeeErrors,
+  UpdateEmployeeStatusData,
+  UpdateEmployeeStatusResponses,
+  UpdateEmployeeStatusErrors,
 } from "./types.gen";
 import {
   zLoginResponse,
@@ -199,6 +202,7 @@ import {
   zDeleteEmployeesResponse,
   zGetEmployeesResponse,
   zGetEmployeeResponse,
+  zUpdateEmployeeStatusResponse,
 } from "./zod.gen";
 import { client as _heyApiClient } from "./client.gen";
 
@@ -1476,9 +1480,9 @@ export const deleteEmployees = <ThrowOnError extends boolean = false>(
  * This endpoint will return employees based on the provided filters.
  */
 export const getEmployees = <ThrowOnError extends boolean = false>(
-  options: Options<GetEmployeesData, ThrowOnError>,
+  options?: Options<GetEmployeesData, ThrowOnError>,
 ) => {
-  return (options.client ?? _heyApiClient).get<
+  return (options?.client ?? _heyApiClient).get<
     GetEmployeesResponses,
     GetEmployeesErrors,
     ThrowOnError
@@ -1522,5 +1526,36 @@ export const getEmployee = <ThrowOnError extends boolean = false>(
     ],
     url: "/api/v1/employees/{employee_id}",
     ...options,
+  });
+};
+
+/**
+ * Update Employee Status
+ * This endpoint will update the status of employees by their IDs.
+ */
+export const updateEmployeeStatus = <ThrowOnError extends boolean = false>(
+  options: Options<UpdateEmployeeStatusData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).patch<
+    UpdateEmployeeStatusResponses,
+    UpdateEmployeeStatusErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    responseValidator: async (data) => {
+      return await zUpdateEmployeeStatusResponse.parseAsync(data);
+    },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
+    url: "/api/v1/employees/status",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
   });
 };

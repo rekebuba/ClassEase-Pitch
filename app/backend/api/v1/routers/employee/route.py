@@ -1,15 +1,12 @@
 import uuid
-from typing import Annotated, List, Sequence
+from typing import Annotated, List, Optional, Sequence
 
 from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import select
 
 from api.v1.routers.dependencies import SessionDep, admin_route
-from api.v1.routers.employee.schema import EmployeeBasicInfo
-from api.v1.routers.schema import FilterParams
-from models import student
+from api.v1.routers.employee.schema import EmployeeBasicInfo, UpdateEmployeeStatusSchema
 from models.employee import Employee
-from models.year import Year
 from schema.schema import SuccessResponseSchema
 
 router = APIRouter(prefix="/employees", tags=["Employees"])
@@ -18,21 +15,14 @@ router = APIRouter(prefix="/employees", tags=["Employees"])
 @router.get("/", response_model=List[EmployeeBasicInfo])
 def get_employees(
     session: SessionDep,
-    query: Annotated[FilterParams, Query()],
     user_in: admin_route,
+    q: Annotated[Optional[str], Query()] = None,
 ) -> Sequence[Employee]:
     """This endpoint will return employees based on the provided filters."""
-    year = session.get(Year, query.year_id)
-    if not year:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Year with ID {query.year_id} not found.",
-        )
-
     stm = select(Employee)
 
-    if query.q:
-        stm = stm.where(Employee.first_name.ilike(f"%{query.q}%"))
+    if q:
+        stm = stm.where(Employee.first_name.ilike(f"%{q}%"))
 
     employees = session.scalars(stm).all()
 
@@ -47,7 +37,7 @@ def get_employee(
 ) -> Employee:
     """This endpoint will return a single employee by ID."""
     employee = session.get(Employee, employee_id)
-    
+
     if not employee:
         raise HTTPException(
             status_code=404,
@@ -74,3 +64,22 @@ def delete_employees(
     session.commit()
 
     return SuccessResponseSchema(message="Employees deleted successfully.")
+
+
+@router.patch("/status", response_model=SuccessResponseSchema)
+def update_employee_status(
+    session: SessionDep,
+    employees: UpdateEmployeeStatusSchema,
+    user_in: admin_route,
+) -> SuccessResponseSchema:
+    """This endpoint will update the status of employees by their IDs."""
+    for employee_id in employees.employee_ids:
+        employee = session.get(Employee, employee_id)
+        if not employee:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Employee with ID {employee_id} not found.",
+            )
+        employee.status = employees.status
+    session.commit()
+    return SuccessResponseSchema(message="Employees status updated successfully.")

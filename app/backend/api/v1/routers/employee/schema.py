@@ -6,7 +6,7 @@ from pydantic import AwareDatetime, BaseModel, ConfigDict, EmailStr
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
 from utils.enum import (
-    EmployeeApplicationStatus,
+    EmployeeApplicationStatusEnum,
     ExperienceYearEnum,
     GenderEnum,
     HighestEducationEnum,
@@ -64,6 +64,17 @@ class EmployeeBasicInfo(BaseModel):
     marital_status: Optional[MaritalStatusEnum]
     secondary_phone: Optional[str]
     resume: Optional[str]
-    status: EmployeeApplicationStatus
+    status: EmployeeApplicationStatusEnum
     created_at: AwareDatetime
     subjects: List[TeacherAppliedSubject]
+
+
+class UpdateEmployeeStatusSchema(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    employee_ids: List[uuid.UUID]
+    status: EmployeeApplicationStatusEnum

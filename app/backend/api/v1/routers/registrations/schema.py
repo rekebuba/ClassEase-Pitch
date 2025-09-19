@@ -13,7 +13,7 @@ from pydantic_extra_types.phone_numbers import PhoneNumber
 
 from utils.enum import (
     BloodTypeEnum,
-    EmployeeApplicationStatus,
+    EmployeeApplicationStatusEnum,
     EmployeePositionEnum,
     ExperienceYearEnum,
     GenderEnum,
@@ -246,4 +246,4 @@ class EmployeeRegistrationForm(
     EmployeeRegStep4,
     EmployeeRegStep5,
 ):
-    status: EmployeeApplicationStatus = EmployeeApplicationStatus.PENDING
+    status: EmployeeApplicationStatusEnum = EmployeeApplicationStatusEnum.PENDING

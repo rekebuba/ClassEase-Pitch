@@ -4,7 +4,6 @@ import {
   updateStudentStatusMutation,
 } from "@/client/@tanstack/react-query.gen";
 import { StudentApplicationStatusEnum as Status } from "@/client/types.gen";
-import { StudentStatusBadge } from "@/components";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -70,7 +69,7 @@ export default function RouteComponent() {
           path: { student_id: studentId },
         }),
       });
-      navigate({ to: "/admin/registration/student" });
+      navigate({ to: "/admin/registration/students" });
     },
     onError: () => {
       toast.error("Something went wrong.", { style: { color: "red" } });
@@ -108,7 +107,7 @@ export default function RouteComponent() {
                 <span>
                   {student.firstName} {student.fatherName}
                 </span>
-                <StudentStatusBadge status={student.status} />
+                {/* <StudentApplicationStatusBadge status={student.status} /> */}
                 <p className="text-sm text-gray-500">
                   Grade {student.grade.grade}
                 </p>

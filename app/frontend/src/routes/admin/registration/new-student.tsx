@@ -62,7 +62,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Loader, RefreshCcw, Save } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
@@ -192,9 +192,11 @@ function RouteComponent() {
       toast.success(success.message, {
         style: { color: "green" },
       });
-      handleCancel();
       dispatch(resetForm());
       reset(initialData);
+      navigate({
+        to: "/admin/registration/students",
+      });
     },
     onError: (error: any) => {
       const detail = error.response?.data?.detail;
@@ -381,12 +383,6 @@ function RouteComponent() {
   const handleSave = () => {
     mutation.mutate({ body: form.getValues() });
   };
-
-  const handleCancel = useCallback(() => {
-    navigate({
-      to: "/admin/registration/student",
-    });
-  }, [navigate]);
 
   const renderStep = () => {
     switch (currentStep) {

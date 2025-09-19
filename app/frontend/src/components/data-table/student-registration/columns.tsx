@@ -1,4 +1,5 @@
 import { StudentBasicInfo } from "@/client";
+import { StudentApplicationStatusBadge } from "@/components/enum-badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,6 +11,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -20,6 +23,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { formatDate } from "@/lib/format";
+import { calculateAge, getInitials } from "@/utils/utils";
 import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
 import {
   AlertTriangle,
@@ -29,11 +34,6 @@ import {
   MoreHorizontalIcon,
   Phone,
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { formatDate } from "@/lib/format";
-import { Badge } from "@/components/ui/badge";
-import StudentStatusBadge from "@/components/student-status-badge";
-import { calculateAge, getInitials } from "@/utils/utils";
 
 const columnHelper = createColumnHelper<StudentBasicInfo>();
 
@@ -181,7 +181,7 @@ export const studentBasicInfoColumns: StudentBasicInfoColumnProps = (
   columnHelper.accessor("status", {
     header: "Status",
     cell: (props) => {
-      return <StudentStatusBadge status={props.getValue()} />;
+      return <StudentApplicationStatusBadge status={props.getValue()} />;
     },
     enableSorting: true,
   }),

@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from schema.models.academic_term_schema import AcademicTermSchema
 from utils.enum import (
-    EmployeeApplicationStatus,
+    EmployeeApplicationStatusEnum,
     ExperienceYearEnum,
     GenderEnum,
     HighestEducationEnum,
@@ -100,7 +100,7 @@ class TeacherSchema(BaseModel):
     agree_to_terms: bool = False
     agree_to_background_check: bool = False
     user_id: Optional[uuid.UUID] = None
-    status: EmployeeApplicationStatus = EmployeeApplicationStatus.PENDING
+    status: EmployeeApplicationStatusEnum = EmployeeApplicationStatusEnum.PENDING
 
     @classmethod
     def default_fields(cls) -> set[str]:

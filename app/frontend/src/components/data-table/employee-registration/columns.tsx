@@ -1,5 +1,5 @@
 import { EmployeeBasicInfo } from "@/client/types.gen";
-import { StudentStatusBadge } from "@/components";
+import { EmployeeApplicationStatusBadge } from "@/components/enum-badge";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -133,7 +133,7 @@ export const employeeBasicInfoColumns: EmployeeBasicInfoColumnProps = (
   columnHelper.accessor("status", {
     header: "Status",
     cell: (props) => {
-      return <StudentStatusBadge status={props.getValue()} />;
+      return <EmployeeApplicationStatusBadge status={props.getValue()} />;
     },
     enableSorting: true,
   }),

@@ -79,11 +79,11 @@ const data: MainNavItem = {
       items: [
         {
           title: "Student Registration",
-          to: `/admin/registration/student`,
+          to: `/admin/registration/students`,
         },
         {
-          title: "Teacher Registration",
-          to: `/admin/registration/teacher`,
+          title: "Employee Registration",
+          to: `/admin/registration/employees`,
         },
       ],
     },

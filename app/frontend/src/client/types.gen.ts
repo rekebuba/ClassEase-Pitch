@@ -205,14 +205,16 @@ export type DeleteYearSuccess = {
 };
 
 /**
- * EmployeeApplicationStatus
+ * EmployeeApplicationStatusEnum
  */
-export type EmployeeApplicationStatus =
+export type EmployeeApplicationStatusEnum =
   | "pending"
   | "approved"
   | "rejected"
   | "interview-scheduled"
-  | "under-review";
+  | "active"
+  | "inactive"
+  | "withdrawn";
 
 /**
  * EmployeeBasicInfo
@@ -330,7 +332,7 @@ export type EmployeeBasicInfo = {
    * Resume
    */
   resume: string | null;
-  status: EmployeeApplicationStatus;
+  status: EmployeeApplicationStatusEnum;
   /**
    * Createdat
    */
@@ -622,7 +624,7 @@ export type EmployeeRegistrationForm = {
    * Socialsecuritynumber
    */
   socialSecurityNumber: string;
-  status?: EmployeeApplicationStatus;
+  status?: EmployeeApplicationStatusEnum;
 };
 
 /**
@@ -2624,7 +2626,7 @@ export type TeacherSchema = {
    * Userid
    */
   userId?: string | null;
-  status?: EmployeeApplicationStatus;
+  status?: EmployeeApplicationStatusEnum;
 };
 
 /**
@@ -2914,7 +2916,7 @@ export type TeacherWithRelatedSchema = {
    * Userid
    */
   userId?: string | null;
-  status?: EmployeeApplicationStatus;
+  status?: EmployeeApplicationStatusEnum;
 };
 
 /**
@@ -2929,6 +2931,17 @@ export type Token = {
    * Token Type
    */
   token_type: string;
+};
+
+/**
+ * UpdateEmployeeStatusSchema
+ */
+export type UpdateEmployeeStatusSchema = {
+  /**
+   * Employeeids
+   */
+  employeeIds: Array<string>;
+  status: EmployeeApplicationStatusEnum;
 };
 
 /**
@@ -4591,11 +4604,7 @@ export type DeleteEmployeesResponse =
 export type GetEmployeesData = {
   body?: never;
   path?: never;
-  query: {
-    /**
-     * Yearid
-     */
-    yearId: string;
+  query?: {
     /**
      * Q
      */
@@ -4654,6 +4663,33 @@ export type GetEmployeeResponses = {
 
 export type GetEmployeeResponse =
   GetEmployeeResponses[keyof GetEmployeeResponses];
+
+export type UpdateEmployeeStatusData = {
+  body: UpdateEmployeeStatusSchema;
+  path?: never;
+  query?: never;
+  url: "/api/v1/employees/status";
+};
+
+export type UpdateEmployeeStatusErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type UpdateEmployeeStatusError =
+  UpdateEmployeeStatusErrors[keyof UpdateEmployeeStatusErrors];
+
+export type UpdateEmployeeStatusResponses = {
+  /**
+   * Successful Response
+   */
+  200: SuccessResponseSchema;
+};
+
+export type UpdateEmployeeStatusResponse =
+  UpdateEmployeeStatusResponses[keyof UpdateEmployeeStatusResponses];
 
 export type ClientOptions = {
   baseURL: "http://backend:8000" | (string & {});
