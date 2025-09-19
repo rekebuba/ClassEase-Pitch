@@ -48,6 +48,9 @@ import {
   getStudents,
   getStudent,
   updateStudentStatus,
+  deleteEmployees,
+  getEmployees,
+  getEmployee,
 } from "../sdk.gen";
 import {
   queryOptions,
@@ -146,6 +149,11 @@ import type {
   UpdateStudentStatusData,
   UpdateStudentStatusError,
   UpdateStudentStatusResponse,
+  DeleteEmployeesData,
+  DeleteEmployeesError,
+  DeleteEmployeesResponse,
+  GetEmployeesData,
+  GetEmployeeData,
 } from "../types.gen";
 import type { AxiosError } from "axios";
 import { client as _heyApiClient } from "../client.gen";
@@ -1799,4 +1807,76 @@ export const updateStudentStatusMutation = (
     },
   };
   return mutationOptions;
+};
+
+/**
+ * Delete Employees
+ * This endpoint will delete employees by their IDs.
+ */
+export const deleteEmployeesMutation = (
+  options?: Partial<Options<DeleteEmployeesData>>,
+): UseMutationOptions<
+  DeleteEmployeesResponse,
+  AxiosError<DeleteEmployeesError>,
+  Options<DeleteEmployeesData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    DeleteEmployeesResponse,
+    AxiosError<DeleteEmployeesError>,
+    Options<DeleteEmployeesData>
+  > = {
+    mutationFn: async (localOptions) => {
+      const { data } = await deleteEmployees({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
+};
+
+export const getEmployeesQueryKey = (options: Options<GetEmployeesData>) =>
+  createQueryKey("getEmployees", options);
+
+/**
+ * Get Employees
+ * This endpoint will return employees based on the provided filters.
+ */
+export const getEmployeesOptions = (options: Options<GetEmployeesData>) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getEmployees({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getEmployeesQueryKey(options),
+  });
+};
+
+export const getEmployeeQueryKey = (options: Options<GetEmployeeData>) =>
+  createQueryKey("getEmployee", options);
+
+/**
+ * Get Employee
+ * This endpoint will return a single employee by ID.
+ */
+export const getEmployeeOptions = (options: Options<GetEmployeeData>) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getEmployee({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getEmployeeQueryKey(options),
+  });
 };

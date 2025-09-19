@@ -213,3 +213,4 @@ def get_subject_by_id(
         )
 
     return subject
+

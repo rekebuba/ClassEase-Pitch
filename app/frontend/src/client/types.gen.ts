@@ -215,6 +215,133 @@ export type EmployeeApplicationStatus =
   | "under-review";
 
 /**
+ * EmployeeBasicInfo
+ */
+export type EmployeeBasicInfo = {
+  /**
+   * Id
+   */
+  id: string;
+  /**
+   * Firstname
+   */
+  firstName: string;
+  /**
+   * Fathername
+   */
+  fatherName: string;
+  /**
+   * Grandfathername
+   */
+  grandFatherName: string;
+  /**
+   * Fullname
+   */
+  fullName: string;
+  /**
+   * Dateofbirth
+   */
+  dateOfBirth: string;
+  gender: GenderEnum;
+  /**
+   * Nationality
+   */
+  nationality: string;
+  /**
+   * Socialsecuritynumber
+   */
+  socialSecurityNumber: string;
+  /**
+   * Address
+   */
+  address: string;
+  /**
+   * City
+   */
+  city: string;
+  /**
+   * State
+   */
+  state: string;
+  /**
+   * Country
+   */
+  country: string;
+  /**
+   * Primaryphone
+   */
+  primaryPhone: string;
+  /**
+   * Personalemail
+   */
+  personalEmail: string;
+  /**
+   * Emergencycontactname
+   */
+  emergencyContactName: string;
+  /**
+   * Emergencycontactrelation
+   */
+  emergencyContactRelation: string;
+  /**
+   * Emergencycontactphone
+   */
+  emergencyContactPhone: string;
+  highestEducation: HighestEducationEnum;
+  /**
+   * University
+   */
+  university: string;
+  /**
+   * Graduationyear
+   */
+  graduationYear: number;
+  /**
+   * Gpa
+   */
+  gpa: number;
+  /**
+   * Position
+   */
+  position: string;
+  yearsOfExperience: ExperienceYearEnum;
+  /**
+   * Reference1Name
+   */
+  reference1Name: string;
+  /**
+   * Reference1Organization
+   */
+  reference1Organization: string;
+  /**
+   * Reference1Phone
+   */
+  reference1Phone: string;
+  /**
+   * Reference1Email
+   */
+  reference1Email: string | null;
+  maritalStatus: MaritalStatusEnum | null;
+  /**
+   * Secondaryphone
+   */
+  secondaryPhone: string | null;
+  /**
+   * Resume
+   */
+  resume: string | null;
+  status: EmployeeApplicationStatus;
+  /**
+   * Createdat
+   */
+  createdAt: string;
+  /**
+   * Subjects
+   */
+  subjects: Array<TeacherAppliedSubject>;
+};
+
+/**
  * EmployeePositionEnum
  */
 export type EmployeePositionEnum =
@@ -2199,6 +2326,20 @@ export type SuccessResponseSchema = {
 };
 
 /**
+ * TeacherAppliedSubject
+ */
+export type TeacherAppliedSubject = {
+  /**
+   * Id
+   */
+  id: string;
+  /**
+   * Name
+   */
+  name: string;
+};
+
+/**
  * TeacherInfo
  */
 export type TeacherInfo = {
@@ -3493,7 +3634,7 @@ export type RegisterNewEmployeeResponses = {
   /**
    * Successful Response
    */
-  200: RegistrationResponse;
+  201: RegistrationResponse;
 };
 
 export type RegisterNewEmployeeResponse =
@@ -4414,6 +4555,105 @@ export type UpdateStudentStatusResponses = {
 
 export type UpdateStudentStatusResponse =
   UpdateStudentStatusResponses[keyof UpdateStudentStatusResponses];
+
+export type DeleteEmployeesData = {
+  body?: never;
+  path?: never;
+  query: {
+    /**
+     * Employee Ids
+     */
+    employee_ids: Array<string>;
+  };
+  url: "/api/v1/employees/";
+};
+
+export type DeleteEmployeesErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type DeleteEmployeesError =
+  DeleteEmployeesErrors[keyof DeleteEmployeesErrors];
+
+export type DeleteEmployeesResponses = {
+  /**
+   * Successful Response
+   */
+  200: SuccessResponseSchema;
+};
+
+export type DeleteEmployeesResponse =
+  DeleteEmployeesResponses[keyof DeleteEmployeesResponses];
+
+export type GetEmployeesData = {
+  body?: never;
+  path?: never;
+  query: {
+    /**
+     * Yearid
+     */
+    yearId: string;
+    /**
+     * Q
+     */
+    q?: string | null;
+  };
+  url: "/api/v1/employees/";
+};
+
+export type GetEmployeesErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type GetEmployeesError = GetEmployeesErrors[keyof GetEmployeesErrors];
+
+export type GetEmployeesResponses = {
+  /**
+   * Response Get Employees Api V1 Employees  Get
+   * Successful Response
+   */
+  200: Array<EmployeeBasicInfo>;
+};
+
+export type GetEmployeesResponse =
+  GetEmployeesResponses[keyof GetEmployeesResponses];
+
+export type GetEmployeeData = {
+  body?: never;
+  path: {
+    /**
+     * Employee Id
+     */
+    employee_id: string;
+  };
+  query?: never;
+  url: "/api/v1/employees/{employee_id}";
+};
+
+export type GetEmployeeErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type GetEmployeeError = GetEmployeeErrors[keyof GetEmployeeErrors];
+
+export type GetEmployeeResponses = {
+  /**
+   * Successful Response
+   */
+  200: EmployeeBasicInfo;
+};
+
+export type GetEmployeeResponse =
+  GetEmployeeResponses[keyof GetEmployeeResponses];
 
 export type ClientOptions = {
   baseURL: "http://backend:8000" | (string & {});

@@ -8,12 +8,12 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from schema.models.academic_term_schema import AcademicTermSchema
 from utils.enum import (
+    EmployeeApplicationStatus,
     ExperienceYearEnum,
     GenderEnum,
     HighestEducationEnum,
     MaritalStatusEnum,
     ScheduleEnum,
-    EmployeeApplicationStatus,
 )
 from utils.utils import to_camel
 

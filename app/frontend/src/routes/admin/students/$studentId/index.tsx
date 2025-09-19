@@ -1,41 +1,41 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  User,
-  MapPin,
-  GraduationCap,
-  Heart,
-  Users,
-  FileText,
-  Phone,
-  Mail,
-  Home,
-  AlertTriangle,
-  CheckCircle,
-  Bus,
-  Info,
-  BookOpen,
-  XCircle,
-  Pause,
-  Ban,
-  LogOut,
-  Clock,
-} from "lucide-react";
-import { StudentStatusBadge } from "@/components";
-import { queryClient } from "@/lib/query-client";
 import {
   getStudentOptions,
   getStudentQueryKey,
   updateStudentStatusMutation,
 } from "@/client/@tanstack/react-query.gen";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { getInitials } from "@/utils/utils";
-import { Button } from "@/components/ui/button";
 import { StudentApplicationStatusEnum as Status } from "@/client/types.gen";
-import { toast } from "sonner";
+import { StudentStatusBadge } from "@/components";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/format";
+import { queryClient } from "@/lib/query-client";
+import { calculateAge, getInitials } from "@/utils/utils";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+  AlertTriangle,
+  Ban,
+  BookOpen,
+  Bus,
+  CheckCircle,
+  Clock,
+  FileText,
+  GraduationCap,
+  Heart,
+  Home,
+  Info,
+  LogOut,
+  Mail,
+  MapPin,
+  Pause,
+  Phone,
+  User,
+  Users,
+  XCircle,
+} from "lucide-react";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/students/$studentId/")({
   component: RouteComponent,
@@ -43,7 +43,7 @@ export const Route = createFileRoute("/admin/students/$studentId/")({
     await queryClient.ensureQueryData(
       getStudentOptions({
         path: { student_id: params.studentId },
-      })
+      }),
     );
   },
 });
@@ -84,20 +84,6 @@ export default function RouteComponent() {
   };
 
   if (!student) return null;
-
-  const calculateAge = (dateOfBirth: string) => {
-    const today = new Date();
-    const birthDate = new Date(dateOfBirth);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birthDate.getDate())
-    ) {
-      age--;
-    }
-    return age;
-  };
 
   const contentNav = [
     { name: "Overview", icon: Info },

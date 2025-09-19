@@ -4,7 +4,6 @@ import {
   getStudentsQueryKey,
 } from "@/client/@tanstack/react-query.gen";
 import { StudentBasicInfo } from "@/client/types.gen";
-import { StudentDetailDialog } from "@/components";
 import { studentBasicInfoColumns } from "@/components/data-table/student-registration/columns";
 import { StudentRegistrationTable } from "@/components/data-table/student-registration/student-registration-table";
 import { Badge } from "@/components/ui/badge";
@@ -16,13 +15,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import type { StudentApplication } from "@/lib/api-validation";
 import { queryClient } from "@/lib/query-client";
 import { store } from "@/store/main-store";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Users } from "lucide-react";
-import { useState } from "react";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/registration/student")({
@@ -33,7 +30,7 @@ export const Route = createFileRoute("/admin/registration/student")({
       await queryClient.ensureQueryData(
         getStudentsOptions({
           query: { yearId },
-        })
+        }),
       );
     }
   },
@@ -42,10 +39,6 @@ export const Route = createFileRoute("/admin/registration/student")({
 function RouteComponent() {
   const yearId = store.getState().year.id;
   const navigate = useNavigate();
-  const [selectedStudent, setSelectedStudent] =
-    useState<StudentApplication | null>(null);
-  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
-
   const getGradesQueryConfig = () => ({
     query: { yearId: yearId! },
   });
@@ -127,16 +120,6 @@ function RouteComponent() {
             />
           </CardContent>
         </Card>
-        {/* Student Detail Dialog */}
-        <StudentDetailDialog
-          student={selectedStudent}
-          isOpen={isDetailDialogOpen}
-          onClose={() => {
-            setIsDetailDialogOpen(false);
-            setSelectedStudent(null);
-          }}
-          onStatusChange={() => {}}
-        />
       </div>
     </div>
   );

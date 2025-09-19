@@ -139,6 +139,15 @@ import type {
   UpdateStudentStatusData,
   UpdateStudentStatusResponses,
   UpdateStudentStatusErrors,
+  DeleteEmployeesData,
+  DeleteEmployeesResponses,
+  DeleteEmployeesErrors,
+  GetEmployeesData,
+  GetEmployeesResponses,
+  GetEmployeesErrors,
+  GetEmployeeData,
+  GetEmployeeResponses,
+  GetEmployeeErrors,
 } from "./types.gen";
 import {
   zLoginResponse,
@@ -187,6 +196,9 @@ import {
   zGetStudentsResponse,
   zGetStudentResponse,
   zUpdateStudentStatusResponse,
+  zDeleteEmployeesResponse,
+  zGetEmployeesResponse,
+  zGetEmployeeResponse,
 } from "./zod.gen";
 import { client as _heyApiClient } from "./client.gen";
 
@@ -1429,5 +1441,86 @@ export const updateStudentStatus = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+};
+
+/**
+ * Delete Employees
+ * This endpoint will delete employees by their IDs.
+ */
+export const deleteEmployees = <ThrowOnError extends boolean = false>(
+  options: Options<DeleteEmployeesData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).delete<
+    DeleteEmployeesResponses,
+    DeleteEmployeesErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    responseValidator: async (data) => {
+      return await zDeleteEmployeesResponse.parseAsync(data);
+    },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
+    url: "/api/v1/employees/",
+    ...options,
+  });
+};
+
+/**
+ * Get Employees
+ * This endpoint will return employees based on the provided filters.
+ */
+export const getEmployees = <ThrowOnError extends boolean = false>(
+  options: Options<GetEmployeesData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).get<
+    GetEmployeesResponses,
+    GetEmployeesErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    responseValidator: async (data) => {
+      return await zGetEmployeesResponse.parseAsync(data);
+    },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
+    url: "/api/v1/employees/",
+    ...options,
+  });
+};
+
+/**
+ * Get Employee
+ * This endpoint will return a single employee by ID.
+ */
+export const getEmployee = <ThrowOnError extends boolean = false>(
+  options: Options<GetEmployeeData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).get<
+    GetEmployeeResponses,
+    GetEmployeeErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    responseValidator: async (data) => {
+      return await zGetEmployeeResponse.parseAsync(data);
+    },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
+    url: "/api/v1/employees/{employee_id}",
+    ...options,
   });
 };

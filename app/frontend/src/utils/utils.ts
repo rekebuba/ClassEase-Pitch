@@ -147,3 +147,17 @@ export function extractFirstWord(loc: string[], msg: string): string | null {
 export const getInitials = (firstName: string, fatherName: string) => {
   return `${firstName.charAt(0)}${fatherName.charAt(0)}`.toUpperCase();
 };
+
+export const calculateAge = (dateOfBirth: string) => {
+  const today = new Date();
+  const birthDate = new Date(dateOfBirth);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (
+    monthDiff < 0 ||
+    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+  ) {
+    age--;
+  }
+  return age;
+};

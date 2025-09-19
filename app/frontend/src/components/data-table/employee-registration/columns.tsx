@@ -1,4 +1,5 @@
-import { StudentBasicInfo } from "@/client";
+import { EmployeeBasicInfo } from "@/client/types.gen";
+import { StudentStatusBadge } from "@/components";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,6 +11,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -20,29 +22,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
-import {
-  AlertTriangle,
-  CheckCircle,
-  Heart,
-  MapPin,
-  MoreHorizontalIcon,
-  Phone,
-} from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDate } from "@/lib/format";
-import { Badge } from "@/components/ui/badge";
-import StudentStatusBadge from "@/components/student-status-badge";
-import { calculateAge, getInitials } from "@/utils/utils";
+import { getInitials } from "@/utils/utils";
+import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
+import { MapPin, MoreHorizontalIcon, Phone } from "lucide-react";
 
-const columnHelper = createColumnHelper<StudentBasicInfo>();
+const columnHelper = createColumnHelper<EmployeeBasicInfo>();
 
-type StudentBasicInfoColumnProps = (
+type EmployeeBasicInfoColumnProps = (
   handleView: (yearId: string) => void,
   handleDelete: (yearId: string) => void,
-) => ColumnDef<StudentBasicInfo, any>[];
+) => ColumnDef<EmployeeBasicInfo, any>[];
 
-export const studentBasicInfoColumns: StudentBasicInfoColumnProps = (
+export const employeeBasicInfoColumns: EmployeeBasicInfoColumnProps = (
   handleView,
   handleDelete,
 ) => [
@@ -65,8 +57,7 @@ export const studentBasicInfoColumns: StudentBasicInfoColumnProps = (
       // Access other values from the same row
       const firstName = props.row.original.firstName;
       const fatherName = props.row.original.fatherName;
-      const fatherPhone = props.row.original.fatherPhone;
-      const siblingInSchool = props.row.original.siblingInSchool;
+      const primaryPhone = props.row.original.primaryPhone;
       const address = props.row.original.address;
 
       return (
@@ -83,17 +74,12 @@ export const studentBasicInfoColumns: StudentBasicInfoColumnProps = (
               <div className="space-y-1 text-sm text-gray-500">
                 <div className="flex items-center gap-1 text-sm">
                   <Phone className="h-3 w-3" />
-                  <span>{fatherPhone}</span>
+                  <span className="truncate max-w-[150px]">{primaryPhone}</span>
                 </div>
                 <div className="flex items-center gap-1 text-sm">
                   <MapPin className="h-3 w-3" />
                   <span className="truncate max-w-[150px]">{address}</span>
                 </div>
-                {siblingInSchool && (
-                  <Badge variant="outline" className="text-xs">
-                    Has Sibling
-                  </Badge>
-                )}
               </div>
             </div>
           </div>
@@ -102,73 +88,39 @@ export const studentBasicInfoColumns: StudentBasicInfoColumnProps = (
     },
     enableSorting: true,
   }),
-  columnHelper.accessor("dateOfBirth", {
-    header: "Date of Birth",
-    cell: (props) => (
-      <div>
-        <div>{formatDate(props.getValue())}</div>
-        <div className="text-sm text-gray-500">
-          Age: {calculateAge(props.getValue())}
-        </div>
-      </div>
-    ),
-    enableSorting: true,
-  }),
-  columnHelper.accessor("grade.grade", {
-    header: "Grade",
+  columnHelper.accessor("position", {
+    header: "Position",
     cell: (props) => {
-      const grade = props.getValue();
-      const isTransfer = props.row.original.isTransfer;
+      const position = props.getValue();
 
+      const yearsOfExperience = props.row.original.yearsOfExperience;
       return (
         <div className="flex flex-col">
-          <Badge className="bg-blue-100 text-blue-800 mb-1">
-            Grade {grade}
-          </Badge>
-          {isTransfer && (
-            <Badge
-              variant="outline"
-              className="bg-orange-100 text-orange-800 text-xs"
-            >
-              Transfer
-            </Badge>
-          )}
+          <div className="font-medium">{position}</div>
+          <div className="space-y-1 text-sm text-gray-500">
+            <p>{yearsOfExperience} Years</p>
+          </div>
         </div>
       );
     },
+    enableSorting: true,
   }),
-  columnHelper.accessor("hasMedicalCondition", {
-    header: "Medical Condition",
+  columnHelper.accessor("highestEducation", {
+    header: "Education",
     cell: (props) => {
-      const hasMedicalCondition = props.getValue();
-      const hasDisability = props.row.original.hasDisability;
+      const highestEducation = props.getValue();
+      const university = props.row.original.university;
+      const gpa = props.row.original.gpa;
 
       return (
-        <div className="space-y-1">
-          {hasMedicalCondition && (
-            <Badge
-              variant="destructive"
-              className="text-xs flex items-center gap-1 w-fit"
-            >
-              <Heart className="h-3 w-3" />
-              Medical
-            </Badge>
-          )}
-          {hasDisability && (
-            <Badge
-              variant="destructive"
-              className="text-xs flex items-center gap-1 w-fit"
-            >
-              <AlertTriangle className="h-3 w-3" />
-              Disability
-            </Badge>
-          )}
-          {!hasMedicalCondition && !hasDisability && (
-            <Badge className="bg-green-100 text-green-800 text-xs flex items-center gap-1 w-fit">
-              <CheckCircle className="h-3 w-3" />
-              Healthy
-            </Badge>
-          )}
+        <div className="flex flex-col">
+          <div className="font-medium">{highestEducation}</div>
+          <div className="space-y-1 text-sm text-gray-500">
+            <p className="truncate max-w-[150px]">{university}</p>
+          </div>
+          <div className="space-y-1 text-sm text-gray-500">
+            <p>GPA: {gpa}</p>
+          </div>
         </div>
       );
     },

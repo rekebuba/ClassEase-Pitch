@@ -134,17 +134,25 @@ export const zEmployeeApplicationStatus = z.enum([
 ]);
 
 /**
- * EmployeePositionEnum
+ * HighestEducationEnum
  */
-export const zEmployeePositionEnum = z.enum([
-  "administrative staff",
-  "teaching staff",
-  "support staff",
-  "maintenance staff",
-  "counselor",
-  "librarian",
-  "IT support",
-  "other",
+export const zHighestEducationEnum = z.enum([
+  "bachelors",
+  "masters",
+  "doctorate",
+]);
+
+/**
+ * ExperienceYearEnum
+ */
+export const zExperienceYearEnum = z.enum([
+  "0",
+  "1-2",
+  "3-5",
+  "6-10",
+  "11-15",
+  "16-20",
+  "20+",
 ]);
 
 /**
@@ -156,6 +164,68 @@ export const zMaritalStatusEnum = z.enum([
   "divorced",
   "widowed",
   "prefer-not-to-say",
+]);
+
+/**
+ * TeacherAppliedSubject
+ */
+export const zTeacherAppliedSubject = z.object({
+  id: z.uuid(),
+  name: z.string(),
+});
+
+/**
+ * EmployeeBasicInfo
+ */
+export const zEmployeeBasicInfo = z.object({
+  id: z.uuid(),
+  firstName: z.string(),
+  fatherName: z.string(),
+  grandFatherName: z.string(),
+  fullName: z.string(),
+  dateOfBirth: z.iso.date(),
+  gender: zGenderEnum,
+  nationality: z.string(),
+  socialSecurityNumber: z.string(),
+  address: z.string(),
+  city: z.string(),
+  state: z.string(),
+  country: z.string(),
+  primaryPhone: z.string(),
+  personalEmail: z.email(),
+  emergencyContactName: z.string(),
+  emergencyContactRelation: z.string(),
+  emergencyContactPhone: z.string(),
+  highestEducation: zHighestEducationEnum,
+  university: z.string(),
+  graduationYear: z.int(),
+  gpa: z.number(),
+  position: z.string(),
+  yearsOfExperience: zExperienceYearEnum,
+  reference1Name: z.string(),
+  reference1Organization: z.string(),
+  reference1Phone: z.string(),
+  reference1Email: z.union([z.email(), z.null()]),
+  maritalStatus: z.union([zMaritalStatusEnum, z.null()]),
+  secondaryPhone: z.union([z.string(), z.null()]),
+  resume: z.union([z.string(), z.null()]),
+  status: zEmployeeApplicationStatus,
+  createdAt: z.iso.datetime(),
+  subjects: z.array(zTeacherAppliedSubject),
+});
+
+/**
+ * EmployeePositionEnum
+ */
+export const zEmployeePositionEnum = z.enum([
+  "administrative staff",
+  "teaching staff",
+  "support staff",
+  "maintenance staff",
+  "counselor",
+  "librarian",
+  "IT support",
+  "other",
 ]);
 
 /**
@@ -187,28 +257,6 @@ export const zEmployeeRegStep2 = z.object({
   emergencyContactRelation: z.string().min(3).max(50),
   emergencyContactPhone: z.string(),
 });
-
-/**
- * HighestEducationEnum
- */
-export const zHighestEducationEnum = z.enum([
-  "bachelors",
-  "masters",
-  "doctorate",
-]);
-
-/**
- * ExperienceYearEnum
- */
-export const zExperienceYearEnum = z.enum([
-  "0",
-  "1-2",
-  "3-5",
-  "6-10",
-  "11-15",
-  "16-20",
-  "20+",
-]);
 
 /**
  * EmployeeRegStep3
@@ -1916,3 +1964,44 @@ export const zUpdateStudentStatusData = z.object({
  * Successful Response
  */
 export const zUpdateStudentStatusResponse = zSuccessResponseSchema;
+
+export const zDeleteEmployeesData = z.object({
+  body: z.optional(z.never()),
+  path: z.optional(z.never()),
+  query: z.object({
+    employee_ids: z.array(z.uuid()),
+  }),
+});
+
+/**
+ * Successful Response
+ */
+export const zDeleteEmployeesResponse = zSuccessResponseSchema;
+
+export const zGetEmployeesData = z.object({
+  body: z.optional(z.never()),
+  path: z.optional(z.never()),
+  query: z.object({
+    yearId: z.uuid(),
+    q: z.optional(z.union([z.string(), z.null()])),
+  }),
+});
+
+/**
+ * Response Get Employees Api V1 Employees  Get
+ * Successful Response
+ */
+export const zGetEmployeesResponse = z.array(zEmployeeBasicInfo);
+
+export const zGetEmployeeData = z.object({
+  body: z.optional(z.never()),
+  path: z.object({
+    employee_id: z.uuid(),
+  }),
+  query: z.optional(z.never()),
+});
+
+/**
+ * Successful Response
+ */
+export const zGetEmployeeResponse = zEmployeeBasicInfo;
