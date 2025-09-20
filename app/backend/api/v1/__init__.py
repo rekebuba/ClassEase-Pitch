@@ -9,6 +9,7 @@ from api.v1.routers.sections import route as section_router
 from api.v1.routers.streams import route as stream_router
 from api.v1.routers.students import route as student_router
 from api.v1.routers.subjects import route as subject_router
+from api.v1.routers.teachers import route as teachers_router
 from api.v1.routers.year import route as year_router
 
 # Create a root router for v1
@@ -25,3 +26,4 @@ api_router.include_router(section_router.router)
 api_router.include_router(private_router.router)
 api_router.include_router(student_router.router)
 api_router.include_router(employee_router.router)
+api_router.include_router(teachers_router.router)

@@ -107,7 +107,6 @@ class StudentRegistrationFactory(TypedFactory[StudentRegistrationForm]):
     disability_details = LazyAttribute(
         lambda obj: fake.text(max_nb_chars=60) if obj.has_disability else None
     )
-    status = LazyAttribute(lambda x: StudentApplicationStatusEnum.PENDING)
 
 
 class EmployeeRegistrationFactory(TypedFactory[EmployeeRegistrationForm]):
@@ -161,9 +160,7 @@ class EmployeeRegistrationFactory(TypedFactory[EmployeeRegistrationForm]):
     position = LazyAttribute(
         lambda x: fake.random_element(elements=list(EmployeePositionEnum))
     )
-    subject_id = LazyAttribute(
-        lambda x: None
-    )  # To be set explicitly if position is Teacher
+    subject_id = None  # To be set explicitly if position is Teacher
 
     # Background & References
     reference1_name = LazyAttribute(lambda x: fake.name())

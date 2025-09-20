@@ -1,4 +1,5 @@
 import random
+import uuid
 from collections.abc import Generator
 from typing import Dict
 
@@ -13,12 +14,11 @@ from core.db import engine, init_db
 from main import app
 from models.base.base_model import Base
 from models.year import Year
-from tests.utils.utils import get_auth_header, get_year
+from tests.factories.api_data import NewYearFactory
+from tests.utils.utils import get_auth_header
 
 # Session factory
-TestingSessionLocal = sessionmaker(
-    bind=engine, autoflush=False, autocommit=False, expire_on_commit=False
-)
+TestingSessionLocal = sessionmaker(bind=engine, autoflush=True, expire_on_commit=False)
 
 
 # Override the get_db dependency to use test database
@@ -92,11 +92,36 @@ def student_token_headers(client: TestClient) -> dict[str, str]:
 
 @pytest.fixture(scope="module")
 def year(
-    db_session: Session, client: TestClient, admin_token_headers: Dict[str, str]
+    client: TestClient,
+    db_session: Session,
+    admin_token_headers: Dict[str, str],
 ) -> Year:
-    years = db_session.scalars(select(Year)).all()
+    data = NewYearFactory.create(setup_methods="Default Template")
 
-    if len(years) > 0:
-        return random.choice(years)
+    r = client.post(
+        f"{settings.API_V1_STR}/years",
+        json=data.model_dump(mode="json", by_alias=True),
+        headers=admin_token_headers,
+    )
+    assert r.status_code == 201
+    assert r.json() is not None
 
-    return get_year(client, admin_token_headers, db_session)
+    result = r.json()
+
+    assert "id" in result
+    assert "message" in result
+    assert "Year created Successfully" == result["message"]
+
+    try:
+        year_id = uuid.UUID(result["id"])
+    except ValueError:
+        assert False, "Year ID is not a valid UUID"
+
+    year = db_session.scalar(
+        select(Year)
+        .join(Year.grades)
+        .join(Year.subjects)
+        .where(Year.id == year_id)
+        .distinct()
+    )
+    return year

@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatDate } from "@/lib/format";
 import { queryClient } from "@/lib/query-client";
+import { store } from "@/store/main-store";
 import { calculateAge, getInitials } from "@/utils/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
@@ -134,6 +135,7 @@ export function EmployeeStatusActions({
 }
 
 function RouteComponent() {
+  const yearId = store.getState().year.id;
   const employeeId = Route.useParams().employeeId;
   const navigate = useNavigate();
 
@@ -164,7 +166,7 @@ function RouteComponent() {
 
   const onStatusChange = (newStatus: Status) => {
     updateEmployeeStatus.mutate({
-      body: { status: newStatus, employeeIds: [employeeId] },
+      body: { yearId: yearId!, status: newStatus, employeeIds: [employeeId] },
     });
   };
 

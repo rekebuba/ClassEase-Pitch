@@ -5,7 +5,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
-import { EmployeeBasicInfo } from "@/client/types.gen";
+import { TeacherBasicInfo } from "@/client/types.gen";
 import {
   Table,
   TableBody,
@@ -15,15 +15,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-interface EmployeeRegistrationTableProps {
-  columns: ColumnDef<EmployeeBasicInfo, any>[];
-  data: EmployeeBasicInfo[];
+interface ManageTeacherTableProps {
+  columns: ColumnDef<TeacherBasicInfo, any>[];
+  data: TeacherBasicInfo[];
 }
 
-export function EmployeeRegistrationTable({
-  columns,
-  data,
-}: EmployeeRegistrationTableProps) {
+export function ManageTeacherTable({ columns, data }: ManageTeacherTableProps) {
   const table = useReactTable({
     data,
     columns,

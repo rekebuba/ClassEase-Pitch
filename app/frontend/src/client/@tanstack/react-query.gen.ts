@@ -52,6 +52,7 @@ import {
   getEmployees,
   getEmployee,
   updateEmployeeStatus,
+  getTeachers,
 } from "../sdk.gen";
 import {
   queryOptions,
@@ -158,6 +159,7 @@ import type {
   UpdateEmployeeStatusData,
   UpdateEmployeeStatusError,
   UpdateEmployeeStatusResponse,
+  GetTeachersData,
 } from "../types.gen";
 import type { AxiosError } from "axios";
 import { client as _heyApiClient } from "../client.gen";
@@ -1911,4 +1913,26 @@ export const updateEmployeeStatusMutation = (
     },
   };
   return mutationOptions;
+};
+
+export const getTeachersQueryKey = (options?: Options<GetTeachersData>) =>
+  createQueryKey("getTeachers", options);
+
+/**
+ * Get Teachers
+ * This endpoint will return employees based on the provided filters.
+ */
+export const getTeachersOptions = (options?: Options<GetTeachersData>) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getTeachers({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getTeachersQueryKey(options),
+  });
 };

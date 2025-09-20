@@ -2342,6 +2342,38 @@ export type TeacherAppliedSubject = {
 };
 
 /**
+ * TeacherBasicInfo
+ */
+export type TeacherBasicInfo = {
+  /**
+   * Id
+   */
+  id: string;
+  /**
+   * Firstname
+   */
+  firstName: string;
+  /**
+   * Fathername
+   */
+  fatherName: string;
+  /**
+   * Grandfathername
+   */
+  grandFatherName: string;
+  /**
+   * Fullname
+   */
+  fullName: string;
+  gender: GenderEnum;
+  status: EmployeeApplicationStatusEnum;
+  /**
+   * Subjects
+   */
+  subjects: Array<TeacherAppliedSubject>;
+};
+
+/**
  * TeacherInfo
  */
 export type TeacherInfo = {
@@ -2937,6 +2969,10 @@ export type Token = {
  * UpdateEmployeeStatusSchema
  */
 export type UpdateEmployeeStatusSchema = {
+  /**
+   * Yearid
+   */
+  yearId: string;
   /**
    * Employeeids
    */
@@ -4690,6 +4726,38 @@ export type UpdateEmployeeStatusResponses = {
 
 export type UpdateEmployeeStatusResponse =
   UpdateEmployeeStatusResponses[keyof UpdateEmployeeStatusResponses];
+
+export type GetTeachersData = {
+  body?: never;
+  path?: never;
+  query?: {
+    /**
+     * Q
+     */
+    q?: string | null;
+  };
+  url: "/api/v1/teachers/";
+};
+
+export type GetTeachersErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type GetTeachersError = GetTeachersErrors[keyof GetTeachersErrors];
+
+export type GetTeachersResponses = {
+  /**
+   * Response Get Teachers Api V1 Teachers  Get
+   * Successful Response
+   */
+  200: Array<TeacherBasicInfo>;
+};
+
+export type GetTeachersResponse =
+  GetTeachersResponses[keyof GetTeachersResponses];
 
 export type ClientOptions = {
   baseURL: "http://backend:8000" | (string & {});

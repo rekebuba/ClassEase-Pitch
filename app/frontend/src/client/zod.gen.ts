@@ -234,12 +234,12 @@ export const zEmployeePositionEnum = z.enum([
  * EmployeeRegStep1
  */
 export const zEmployeeRegStep1 = z.object({
-  firstName: z.string().min(3).max(50),
-  fatherName: z.string().min(3).max(50),
+  firstName: z.string().min(2).max(50),
+  fatherName: z.string().min(2).max(50),
   grandFatherName: z.optional(z.union([z.string(), z.null()])),
   dateOfBirth: z.iso.date(),
   gender: zGenderEnum,
-  nationality: z.optional(z.union([z.string().min(3).max(100), z.null()])),
+  nationality: z.optional(z.union([z.string().min(2).max(100), z.null()])),
   maritalStatus: z.optional(z.union([zMaritalStatusEnum, z.null()])),
   socialSecurityNumber: z.string(),
 });
@@ -249,14 +249,14 @@ export const zEmployeeRegStep1 = z.object({
  */
 export const zEmployeeRegStep2 = z.object({
   address: z.string(),
-  city: z.string().min(3).max(50),
-  state: z.string().min(3).max(50),
+  city: z.string().min(2).max(50),
+  state: z.string().min(2).max(50),
   country: z.string(),
   primaryPhone: z.string(),
   secondaryPhone: z.optional(z.union([z.string(), z.null()])),
   personalEmail: z.email(),
-  emergencyContactName: z.string().min(3).max(50),
-  emergencyContactRelation: z.string().min(3).max(50),
+  emergencyContactName: z.string().min(2).max(50),
+  emergencyContactRelation: z.string().min(2).max(50),
   emergencyContactPhone: z.string(),
 });
 
@@ -313,21 +313,21 @@ export const zEmployeeRegistrationForm = z.object({
   position: zEmployeePositionEnum,
   yearsOfExperience: zExperienceYearEnum,
   address: z.string(),
-  city: z.string().min(3).max(50),
-  state: z.string().min(3).max(50),
+  city: z.string().min(2).max(50),
+  state: z.string().min(2).max(50),
   country: z.string(),
   primaryPhone: z.string(),
   secondaryPhone: z.optional(z.union([z.string(), z.null()])),
   personalEmail: z.email(),
-  emergencyContactName: z.string().min(3).max(50),
-  emergencyContactRelation: z.string().min(3).max(50),
+  emergencyContactName: z.string().min(2).max(50),
+  emergencyContactRelation: z.string().min(2).max(50),
   emergencyContactPhone: z.string(),
-  firstName: z.string().min(3).max(50),
-  fatherName: z.string().min(3).max(50),
+  firstName: z.string().min(2).max(50),
+  fatherName: z.string().min(2).max(50),
   grandFatherName: z.optional(z.union([z.string(), z.null()])),
   dateOfBirth: z.iso.date(),
   gender: zGenderEnum,
-  nationality: z.optional(z.union([z.string().min(3).max(100), z.null()])),
+  nationality: z.optional(z.union([z.string().min(2).max(100), z.null()])),
   maritalStatus: z.optional(z.union([zMaritalStatusEnum, z.null()])),
   socialSecurityNumber: z.string(),
   status: z.optional(zEmployeeApplicationStatusEnum),
@@ -1072,12 +1072,12 @@ export const zRegistrationStep = z.object({
  * StudRegStep1
  */
 export const zStudRegStep1 = z.object({
-  firstName: z.string().min(3).max(50),
-  fatherName: z.string().min(3).max(50),
+  firstName: z.string().min(2).max(50),
+  fatherName: z.string().min(2).max(50),
   grandFatherName: z.optional(z.union([z.string(), z.null()])),
   dateOfBirth: z.iso.date(),
   gender: zGenderEnum,
-  nationality: z.optional(z.union([z.string().min(3).max(100), z.null()])),
+  nationality: z.optional(z.union([z.string().min(2).max(100), z.null()])),
   studentPhoto: z.optional(z.union([z.string(), z.null()])),
 });
 
@@ -1096,9 +1096,9 @@ export const zStudRegStep2 = z.object({
  */
 export const zStudRegStep3 = z.object({
   address: z.string(),
-  city: z.string().min(3).max(50),
-  state: z.string().min(3).max(50),
-  postalCode: z.string().min(3).max(20),
+  city: z.string().min(2).max(50),
+  state: z.string().min(2).max(50),
+  postalCode: z.string().min(2).max(20),
   fatherPhone: z.string(),
   motherPhone: z.string(),
   parentEmail: z.email(),
@@ -1215,9 +1215,9 @@ export const zStudentRegistrationForm = z.object({
   siblingInSchool: z.optional(z.boolean()).default(false),
   siblingDetails: z.optional(z.union([z.string(), z.null()])),
   address: z.string(),
-  city: z.string().min(3).max(50),
-  state: z.string().min(3).max(50),
-  postalCode: z.string().min(3).max(20),
+  city: z.string().min(2).max(50),
+  state: z.string().min(2).max(50),
+  postalCode: z.string().min(2).max(20),
   fatherPhone: z.string(),
   motherPhone: z.string(),
   parentEmail: z.email(),
@@ -1225,12 +1225,12 @@ export const zStudentRegistrationForm = z.object({
   transportation: z.optional(z.union([z.string(), z.null()])),
   isTransfer: z.optional(z.boolean()).default(false),
   previousSchool: z.optional(z.union([z.string().max(100), z.null()])),
-  firstName: z.string().min(3).max(50),
-  fatherName: z.string().min(3).max(50),
+  firstName: z.string().min(2).max(50),
+  fatherName: z.string().min(2).max(50),
   grandFatherName: z.optional(z.union([z.string(), z.null()])),
   dateOfBirth: z.iso.date(),
   gender: zGenderEnum,
-  nationality: z.optional(z.union([z.string().min(3).max(100), z.null()])),
+  nationality: z.optional(z.union([z.string().min(2).max(100), z.null()])),
   studentPhoto: z.optional(z.union([z.string(), z.null()])),
   status: z.optional(zStudentApplicationStatusEnum),
 });
@@ -1276,6 +1276,20 @@ export const zSuccessResponseSchema = z.object({
 });
 
 /**
+ * TeacherBasicInfo
+ */
+export const zTeacherBasicInfo = z.object({
+  id: z.uuid(),
+  firstName: z.string(),
+  fatherName: z.string(),
+  grandFatherName: z.string(),
+  fullName: z.string(),
+  gender: zGenderEnum,
+  status: zEmployeeApplicationStatusEnum,
+  subjects: z.array(zTeacherAppliedSubject),
+});
+
+/**
  * TeacherInfo
  */
 export const zTeacherInfo = z.object({
@@ -1299,6 +1313,7 @@ export const zToken = z.object({
  * UpdateEmployeeStatusSchema
  */
 export const zUpdateEmployeeStatusSchema = z.object({
+  yearId: z.uuid(),
   employeeIds: z.array(z.uuid()),
   status: zEmployeeApplicationStatusEnum,
 });
@@ -2027,3 +2042,19 @@ export const zUpdateEmployeeStatusData = z.object({
  * Successful Response
  */
 export const zUpdateEmployeeStatusResponse = zSuccessResponseSchema;
+
+export const zGetTeachersData = z.object({
+  body: z.optional(z.never()),
+  path: z.optional(z.never()),
+  query: z.optional(
+    z.object({
+      q: z.optional(z.union([z.string(), z.null()])),
+    }),
+  ),
+});
+
+/**
+ * Response Get Teachers Api V1 Teachers  Get
+ * Successful Response
+ */
+export const zGetTeachersResponse = z.array(zTeacherBasicInfo);

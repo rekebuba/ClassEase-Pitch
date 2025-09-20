@@ -44,12 +44,12 @@ class StudRegStep1(BaseModel):
         alias_generator=to_camel,
     )
 
-    first_name: str = Field(min_length=3, max_length=50)
-    father_name: str = Field(min_length=3, max_length=50)
+    first_name: str = Field(min_length=2, max_length=50)
+    father_name: str = Field(min_length=2, max_length=50)
     grand_father_name: Optional[str] = Field(default=None)
     date_of_birth: date
     gender: GenderEnum
-    nationality: Optional[str] = Field(default=None, min_length=3, max_length=100)
+    nationality: Optional[str] = Field(default=None, min_length=2, max_length=100)
     student_photo: Optional[str] = Field(default=None)
 
 
@@ -84,9 +84,9 @@ class StudRegStep3(BaseModel):
     )
 
     address: str
-    city: str = Field(min_length=3, max_length=50)
-    state: str = Field(min_length=3, max_length=50)
-    postal_code: str = Field(min_length=3, max_length=20)
+    city: str = Field(min_length=2, max_length=50)
+    state: str = Field(min_length=2, max_length=50)
+    postal_code: str = Field(min_length=2, max_length=20)
     father_phone: PhoneNumber
     mother_phone: PhoneNumber
     parent_email: EmailStr
@@ -157,12 +157,12 @@ class EmployeeRegStep1(BaseModel):
         alias_generator=to_camel,
     )
 
-    first_name: str = Field(min_length=3, max_length=50)
-    father_name: str = Field(min_length=3, max_length=50)
+    first_name: str = Field(min_length=2, max_length=50)
+    father_name: str = Field(min_length=2, max_length=50)
     grand_father_name: Optional[str] = Field(default=None)
     date_of_birth: date
     gender: GenderEnum
-    nationality: Optional[str] = Field(default=None, min_length=3, max_length=100)
+    nationality: Optional[str] = Field(default=None, min_length=2, max_length=100)
     marital_status: Optional[MaritalStatusEnum] = Field(default=None)
     social_security_number: str
 
@@ -175,14 +175,14 @@ class EmployeeRegStep2(BaseModel):
     )
 
     address: str
-    city: str = Field(min_length=3, max_length=50)
-    state: str = Field(min_length=3, max_length=50)
+    city: str = Field(min_length=2, max_length=50)
+    state: str = Field(min_length=2, max_length=50)
     country: str
     primary_phone: PhoneNumber
     secondary_phone: Optional[PhoneNumber] = Field(default=None)
     personal_email: EmailStr
-    emergency_contact_name: str = Field(min_length=3, max_length=50)
-    emergency_contact_relation: str = Field(min_length=3, max_length=50)
+    emergency_contact_name: str = Field(min_length=2, max_length=50)
+    emergency_contact_relation: str = Field(min_length=2, max_length=50)
     emergency_contact_phone: PhoneNumber
 
 

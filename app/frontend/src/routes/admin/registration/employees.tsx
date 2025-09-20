@@ -3,7 +3,6 @@ import {
   getEmployeesOptions,
   getEmployeesQueryKey,
 } from "@/client/@tanstack/react-query.gen";
-import { EmployeeBasicInfo } from "@/client/types.gen";
 import { employeeBasicInfoColumns } from "@/components/data-table/employee-registration/columns";
 import { EmployeeRegistrationTable } from "@/components/data-table/employee-registration/employee-registration-table";
 import { Badge } from "@/components/ui/badge";
@@ -115,7 +114,7 @@ function RouteComponent() {
             </div>
           </CardHeader>
           <CardContent>
-            <EmployeeRegistrationTable<EmployeeBasicInfo>
+            <EmployeeRegistrationTable
               columns={employeeBasicInfoColumns(handleView, handleDelete)}
               data={employees || []}
             />

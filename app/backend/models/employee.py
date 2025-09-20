@@ -17,6 +17,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
+from models.grade import Grade
 from models.teacher_record import TeacherRecord
 from utils.enum import (
     EmployeeApplicationStatusEnum,
@@ -28,6 +29,7 @@ from utils.enum import (
 )
 
 if TYPE_CHECKING:
+    from models.grade_stream_subject import GradeStreamSubject
     from models.subject import Subject
     from models.user import User
 
@@ -178,6 +180,12 @@ class Employee(BaseModel):
     subjects: AssociationProxy[List["Subject"]] = association_proxy(
         "teacher_records",
         "subject",
+        default_factory=list,
+    )
+
+    grades: AssociationProxy[List["Grade"]] = association_proxy(
+        "teacher_records",
+        "grades",
         default_factory=list,
     )
 

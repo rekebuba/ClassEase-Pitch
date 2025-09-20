@@ -1,6 +1,7 @@
 import random
 from typing import Dict
 
+import pytest
 from fastapi.testclient import TestClient
 
 from core.config import settings
@@ -35,17 +36,22 @@ class TestRegistration:
         assert r.json().get("message") == "Student Registered Successfully"
         assert r.json().get("id") is not None
 
+    @pytest.mark.parametrize(
+        "position",
+        [EmployeePositionEnum.TEACHING_STAFF] * 2,
+    )
     def test_employee_registration(
         self,
         client: TestClient,
         admin_token_headers: Dict[str, str],
         year: Year,
+        position: EmployeePositionEnum,
     ) -> None:
-        """Test Student Registration"""
+        """Test Employee Registration"""
 
         subject = random.choice(year.subjects)
         employee = EmployeeRegistrationFactory.create(
-            position=EmployeePositionEnum.TEACHING_STAFF, subject_id=subject.id
+            position=position, subject_id=subject.id
         )
 
         r = client.post(

@@ -5,6 +5,7 @@ import uuid
 from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import ForeignKey, UniqueConstraint
+from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
@@ -13,6 +14,7 @@ from models.base.column_type import UUIDType
 if TYPE_CHECKING:
     from models.academic_term import AcademicTerm
     from models.employee import Employee
+    from models.grade import Grade
     from models.grade_stream_subject import GradeStreamSubject
     from models.subject import Subject
     from models.teacher_record_link import TeacherRecordLink
@@ -88,4 +90,16 @@ class TeacherRecord(BaseModel):
         default_factory=list,
         repr=False,
         passive_deletes=True,
+    )
+
+    # grade: AssociationProxy["Grade"] = association_proxy(
+    #     "grade_stream_subject",
+    #     "grade",
+    #     default=None,
+    # )
+
+    grades: AssociationProxy[List["Grade"]] = association_proxy(
+        "subject",
+        "grades",
+        default_factory=list,
     )

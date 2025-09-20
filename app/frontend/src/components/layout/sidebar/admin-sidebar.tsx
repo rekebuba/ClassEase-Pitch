@@ -69,7 +69,7 @@ const data: MainNavItem = {
       isActive: true,
       items: [
         { title: "Manage Students", to: "/admin/manage/students" },
-        { title: "Manage Teachers", to: "/admin/manage/teachers" },
+        { title: "Manage Teachers", to: "/admin/manage-teachers" },
         { title: "Roles & Permissions", to: "/admin/manage/user-access" },
       ],
     },

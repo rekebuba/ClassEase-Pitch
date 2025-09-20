@@ -151,6 +151,9 @@ import type {
   UpdateEmployeeStatusData,
   UpdateEmployeeStatusResponses,
   UpdateEmployeeStatusErrors,
+  GetTeachersData,
+  GetTeachersResponses,
+  GetTeachersErrors,
 } from "./types.gen";
 import {
   zLoginResponse,
@@ -203,6 +206,7 @@ import {
   zGetEmployeesResponse,
   zGetEmployeeResponse,
   zUpdateEmployeeStatusResponse,
+  zGetTeachersResponse,
 } from "./zod.gen";
 import { client as _heyApiClient } from "./client.gen";
 
@@ -1557,5 +1561,32 @@ export const updateEmployeeStatus = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+};
+
+/**
+ * Get Teachers
+ * This endpoint will return employees based on the provided filters.
+ */
+export const getTeachers = <ThrowOnError extends boolean = false>(
+  options?: Options<GetTeachersData, ThrowOnError>,
+) => {
+  return (options?.client ?? _heyApiClient).get<
+    GetTeachersResponses,
+    GetTeachersErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    responseValidator: async (data) => {
+      return await zGetTeachersResponse.parseAsync(data);
+    },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
+    url: "/api/v1/teachers/",
+    ...options,
   });
 };

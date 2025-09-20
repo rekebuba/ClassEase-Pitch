@@ -76,5 +76,6 @@ class UpdateEmployeeStatusSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    year_id: uuid.UUID
     employee_ids: List[uuid.UUID]
     status: EmployeeApplicationStatusEnum
