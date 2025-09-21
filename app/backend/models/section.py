@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from models.grade import Grade
     from models.student import Student
     from models.student_term_record import StudentTermRecord
-    from models.teacher_record_link import TeacherRecordLink
+    from models.teacher_record import TeacherRecord
 
 
 class Section(BaseModel):
@@ -52,8 +52,8 @@ class Section(BaseModel):
     )
 
     # Many-to-many relationships
-    teacher_record_links: Mapped[List["TeacherRecordLink"]] = relationship(
-        "TeacherRecordLink",
+    teacher_records: Mapped[List["TeacherRecord"]] = relationship(
+        "TeacherRecord",
         back_populates="section",
         default_factory=list,
         repr=False,

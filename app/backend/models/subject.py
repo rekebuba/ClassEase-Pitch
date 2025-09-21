@@ -10,6 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
+from models.employee import Employee
 from models.grade import Grade
 from models.stream import Stream
 from models.teacher_record import TeacherRecord
@@ -46,8 +47,8 @@ class Subject(BaseModel):
         init=False,
     )
 
-    teacher_records: Mapped[List["TeacherRecord"]] = relationship(
-        "TeacherRecord",
+    teachers: Mapped[List["Employee"]] = relationship(
+        "Employee",
         back_populates="subject",
         default_factory=list,
         repr=False,

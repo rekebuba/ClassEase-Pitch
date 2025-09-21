@@ -17,6 +17,22 @@ if TYPE_CHECKING:
     from .teacher_schema import TeacherSchema, TeacherWithRelatedSchema
 
 
+class BasicSubjectSchema(BaseModel):
+    """
+    This model represents a basic subject in the system. It inherits from BaseModel.
+    """
+
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    id: uuid.UUID
+    name: str
+    code: str
+
+
 class SubjectSchema(BaseModel):
     """
     This model represents a subject in the system. It inherits from BaseModel.

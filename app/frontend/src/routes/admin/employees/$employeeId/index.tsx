@@ -360,18 +360,22 @@ function RouteComponent() {
                   {employee.position}
                 </Badge>
               </div>
-              {employee.subjects && (
-                <div>
-                  <p className="text-sm font-medium text-gray-500">
-                    Teaching Subject
-                  </p>
-                  <p>
-                    {employee.subjects
-                      .map((subject) => subject.name)
-                      .join(", ")}
-                  </p>
-                </div>
-              )}
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Major Subject
+                </p>
+                <p>{employee.subject?.name}</p>
+              </div>
+              <div>
+                <p className="text-sm font-medium text-gray-500">
+                  Additional Subjects
+                </p>
+                <p>
+                  {employee.subjects
+                    .map((subject) => subject.name)
+                    .join(", ") || "N/A"}
+                </p>
+              </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">Experience</p>
                 <p>{employee.yearsOfExperience} Years</p>

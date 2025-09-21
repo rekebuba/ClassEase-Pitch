@@ -2,7 +2,7 @@
 """Module for TeacherRecord class"""
 
 import uuid
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
@@ -16,8 +16,8 @@ if TYPE_CHECKING:
     from models.employee import Employee
     from models.grade import Grade
     from models.grade_stream_subject import GradeStreamSubject
+    from models.section import Section
     from models.subject import Subject
-    from models.teacher_record_link import TeacherRecordLink
 
 
 class TeacherRecord(BaseModel):
@@ -38,9 +38,9 @@ class TeacherRecord(BaseModel):
         nullable=True,
         default=None,
     )
-    subject_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    section_id: Mapped[uuid.UUID] = mapped_column(
         UUIDType(),
-        ForeignKey("subjects.id", ondelete="SET NULL"),
+        ForeignKey("sections.id", ondelete="SET NULL"),
         nullable=True,
         default=None,
     )
@@ -49,8 +49,8 @@ class TeacherRecord(BaseModel):
         UniqueConstraint(
             "employee_id",
             "academic_term_id",
-            "subject_id",
             "grade_stream_subject_id",
+            "section_id",
             name="uq_teacher_record",
         ),
     )
@@ -70,13 +70,6 @@ class TeacherRecord(BaseModel):
         repr=False,
         passive_deletes=True,
     )
-    subject: Mapped[Optional["Subject"]] = relationship(
-        "Subject",
-        back_populates="teacher_records",
-        init=False,
-        repr=False,
-        passive_deletes=True,
-    )
     grade_stream_subject: Mapped["GradeStreamSubject"] = relationship(
         "GradeStreamSubject",
         back_populates="teacher_records",
@@ -84,22 +77,21 @@ class TeacherRecord(BaseModel):
         repr=False,
         passive_deletes=True,
     )
-    teacher_record_links: Mapped[List["TeacherRecordLink"]] = relationship(
-        "TeacherRecordLink",
-        back_populates="teacher_record",
-        default_factory=list,
+    section: Mapped["Section"] = relationship(
+        "Section",
+        back_populates="teacher_records",
+        init=False,
         repr=False,
         passive_deletes=True,
     )
+    grade: AssociationProxy["Grade"] = association_proxy(
+        "grade_stream_subject",
+        "grade",
+        default=None,
+    )
 
-    # grade: AssociationProxy["Grade"] = association_proxy(
-    #     "grade_stream_subject",
-    #     "grade",
-    #     default=None,
-    # )
-
-    grades: AssociationProxy[List["Grade"]] = association_proxy(
+    subject: AssociationProxy["Subject"] = association_proxy(
+        "grade_stream_subject",
         "subject",
-        "grades",
-        default_factory=list,
+        default=None,
     )

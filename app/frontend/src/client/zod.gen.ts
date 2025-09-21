@@ -89,6 +89,35 @@ export const zAssessmentSchema = z.object({
 });
 
 /**
+ * SectionIDs
+ */
+export const zSectionIds = z.object({
+  id: z.uuid(),
+});
+
+/**
+ * AssignTeacher
+ */
+export const zAssignTeacher = z.object({
+  yearId: z.uuid(),
+  teacherId: z.uuid(),
+  subjectId: z.uuid(),
+  streamId: z.union([z.uuid(), z.null()]),
+  gradeId: z.uuid(),
+  sections: z.array(zSectionIds),
+});
+
+/**
+ * BasicSubjectSchema
+ * This model represents a basic subject in the system. It inherits from BaseModel.
+ */
+export const zBasicSubjectSchema = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  code: z.string(),
+});
+
+/**
  * BloodTypeEnum
  */
 export const zBloodTypeEnum = z.enum([
@@ -169,14 +198,6 @@ export const zMaritalStatusEnum = z.enum([
 ]);
 
 /**
- * TeacherAppliedSubject
- */
-export const zTeacherAppliedSubject = z.object({
-  id: z.uuid(),
-  name: z.string(),
-});
-
-/**
  * EmployeeBasicInfo
  */
 export const zEmployeeBasicInfo = z.object({
@@ -212,8 +233,9 @@ export const zEmployeeBasicInfo = z.object({
   secondaryPhone: z.union([z.string(), z.null()]),
   resume: z.union([z.string(), z.null()]),
   status: zEmployeeApplicationStatusEnum,
+  subject: z.union([zBasicSubjectSchema, z.null()]),
+  subjects: z.array(zBasicSubjectSchema),
   createdAt: z.iso.datetime(),
-  subjects: z.array(zTeacherAppliedSubject),
 });
 
 /**
@@ -1272,6 +1294,7 @@ export const zSubjectSetupSchema = z.object({
  * It can be used to standardize the structure of API responses.
  */
 export const zSuccessResponseSchema = z.object({
+  id: z.optional(z.union([z.uuid(), z.null()])),
   message: z.optional(z.string()).default("Success"),
 });
 
@@ -1286,7 +1309,9 @@ export const zTeacherBasicInfo = z.object({
   fullName: z.string(),
   gender: zGenderEnum,
   status: zEmployeeApplicationStatusEnum,
-  subjects: z.array(zTeacherAppliedSubject),
+  subject: zBasicSubjectSchema,
+  subjects: z.array(zBasicSubjectSchema),
+  grades: z.array(z.union([zGradeSchema, z.null()])),
 });
 
 /**
@@ -2058,3 +2083,14 @@ export const zGetTeachersData = z.object({
  * Successful Response
  */
 export const zGetTeachersResponse = z.array(zTeacherBasicInfo);
+
+export const zAssignTeacherData = z.object({
+  body: zAssignTeacher,
+  path: z.optional(z.never()),
+  query: z.optional(z.never()),
+});
+
+/**
+ * Successful Response
+ */
+export const zAssignTeacherResponse = zSuccessResponseSchema;

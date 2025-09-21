@@ -124,4 +124,6 @@ def year(
         .where(Year.id == year_id)
         .distinct()
     )
+    assert year is not None
+
     return year

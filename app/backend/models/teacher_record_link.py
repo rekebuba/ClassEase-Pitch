@@ -33,19 +33,3 @@ class TeacherRecordLink(BaseModel):
             name="uq_teacher_record",
         ),
     )
-
-    # Many-To-One Relationships
-    teacher_record: Mapped["TeacherRecord"] = relationship(
-        "TeacherRecord",
-        back_populates="teacher_record_links",
-        init=False,
-        repr=False,
-        passive_deletes=True,
-    )
-    section: Mapped["Section"] = relationship(
-        "Section",
-        back_populates="teacher_record_links",
-        init=False,
-        repr=False,
-        passive_deletes=True,
-    )

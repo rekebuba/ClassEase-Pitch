@@ -5,6 +5,7 @@ from typing import List, Optional
 from pydantic import AwareDatetime, BaseModel, ConfigDict, EmailStr
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
+from schema.models.subject_schema import BasicSubjectSchema
 from utils.enum import (
     EmployeeApplicationStatusEnum,
     ExperienceYearEnum,
@@ -13,17 +14,6 @@ from utils.enum import (
     MaritalStatusEnum,
 )
 from utils.utils import to_camel
-
-
-class TeacherAppliedSubject(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
-    id: uuid.UUID
-    name: str
 
 
 class EmployeeBasicInfo(BaseModel):
@@ -65,8 +55,9 @@ class EmployeeBasicInfo(BaseModel):
     secondary_phone: Optional[str]
     resume: Optional[str]
     status: EmployeeApplicationStatusEnum
+    subject: BasicSubjectSchema | None
+    subjects: List[BasicSubjectSchema]
     created_at: AwareDatetime
-    subjects: List[TeacherAppliedSubject]
 
 
 class UpdateEmployeeStatusSchema(BaseModel):

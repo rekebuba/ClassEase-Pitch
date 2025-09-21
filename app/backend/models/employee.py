@@ -140,6 +140,12 @@ class Employee(BaseModel):
         nullable=True,
         default=None,
     )
+    subject_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUIDType(),
+        ForeignKey("subjects.id", ondelete="SET NULL"),
+        nullable=True,
+        default=None,
+    )  # For Teaching positions
     status: Mapped[EmployeeApplicationStatusEnum] = mapped_column(
         Enum(
             EmployeeApplicationStatusEnum,
@@ -176,6 +182,13 @@ class Employee(BaseModel):
         repr=False,
         passive_deletes=True,
     )
+    subject: Mapped[Optional["Subject"]] = relationship(
+        "Subject",
+        back_populates="teachers",
+        init=False,
+        repr=False,
+        passive_deletes=True,
+    )
 
     subjects: AssociationProxy[List["Subject"]] = association_proxy(
         "teacher_records",
@@ -185,7 +198,7 @@ class Employee(BaseModel):
 
     grades: AssociationProxy[List["Grade"]] = association_proxy(
         "teacher_records",
-        "grades",
+        "grade",
         default_factory=list,
     )
 

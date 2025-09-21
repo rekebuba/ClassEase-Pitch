@@ -63,14 +63,24 @@ export const teacherBasicInfoColumns: TeacherBasicInfoColumnProps = (
     },
     enableSorting: true,
   }),
-  columnHelper.accessor("subjects", {
+  columnHelper.accessor("subject", {
     header: "Subjects",
     cell: (props) => {
+      const subject = props.getValue()?.name;
       const subjects = props.row.original.subjects
         .map((sub) => sub.name)
         .join(", ");
 
-      return <div className="flex flex-col">{subjects}</div>;
+      return (
+        <div className="flex flex-col">
+          <div>{subject}</div>
+          {subjects && (
+            <div className="space-y-1 text-sm text-gray-500 truncate max-w-[150px]">
+              + {subjects}
+            </div>
+          )}
+        </div>
+      );
     },
     enableSorting: true,
   }),

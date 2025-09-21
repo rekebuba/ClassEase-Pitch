@@ -57,6 +57,7 @@ from .student_year_record_schema import (
     StudentYearRecordWithRelatedSchema,
 )
 from .subject_schema import (
+    BasicSubjectSchema,
     SubjectNestedSchema,
     SubjectRelatedSchema,
     SubjectSchema,
@@ -127,6 +128,7 @@ __all__ = [
     "StudentYearRecordWithRelatedSchema",
     "SubjectNestedSchema",
     "SubjectRelatedSchema",
+    "BasicSubjectSchema",
     "SubjectSchema",
     "SubjectWithRelatedSchema",
     "SubjectYearlyAverageRelatedSchema",
@@ -190,6 +192,7 @@ StudentYearRecordSchema.model_rebuild()
 StudentYearRecordRelatedSchema.model_rebuild()
 StudentYearRecordWithRelatedSchema.model_rebuild()
 
+BasicSubjectSchema.model_rebuild()
 SubjectSchema.model_rebuild()
 SubjectRelatedSchema.model_rebuild()
 SubjectNestedSchema.model_rebuild()

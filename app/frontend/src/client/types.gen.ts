@@ -151,6 +151,55 @@ export type AssessmentSchema = {
 };
 
 /**
+ * AssignTeacher
+ */
+export type AssignTeacher = {
+  /**
+   * Yearid
+   */
+  yearId: string;
+  /**
+   * Teacherid
+   */
+  teacherId: string;
+  /**
+   * Subjectid
+   */
+  subjectId: string;
+  /**
+   * Streamid
+   */
+  streamId: string | null;
+  /**
+   * Gradeid
+   */
+  gradeId: string;
+  /**
+   * Sections
+   */
+  sections: Array<SectionIds>;
+};
+
+/**
+ * BasicSubjectSchema
+ * This model represents a basic subject in the system. It inherits from BaseModel.
+ */
+export type BasicSubjectSchema = {
+  /**
+   * Id
+   */
+  id: string;
+  /**
+   * Name
+   */
+  name: string;
+  /**
+   * Code
+   */
+  code: string;
+};
+
+/**
  * BloodTypeEnum
  */
 export type BloodTypeEnum =
@@ -333,14 +382,15 @@ export type EmployeeBasicInfo = {
    */
   resume: string | null;
   status: EmployeeApplicationStatusEnum;
+  subject: BasicSubjectSchema | null;
+  /**
+   * Subjects
+   */
+  subjects: Array<BasicSubjectSchema>;
   /**
    * Createdat
    */
   createdAt: string;
-  /**
-   * Subjects
-   */
-  subjects: Array<TeacherAppliedSubject>;
 };
 
 /**
@@ -1158,6 +1208,16 @@ export type ScheduleEnum =
   | "part-time"
   | "flexible-hours"
   | "substitute";
+
+/**
+ * SectionIDs
+ */
+export type SectionIds = {
+  /**
+   * Id
+   */
+  id: string;
+};
 
 /**
  * SectionSchema
@@ -2322,23 +2382,13 @@ export type SubjectYearlyAverageSchema = {
  */
 export type SuccessResponseSchema = {
   /**
+   * Id
+   */
+  id?: string | null;
+  /**
    * Message
    */
   message?: string;
-};
-
-/**
- * TeacherAppliedSubject
- */
-export type TeacherAppliedSubject = {
-  /**
-   * Id
-   */
-  id: string;
-  /**
-   * Name
-   */
-  name: string;
 };
 
 /**
@@ -2367,10 +2417,15 @@ export type TeacherBasicInfo = {
   fullName: string;
   gender: GenderEnum;
   status: EmployeeApplicationStatusEnum;
+  subject: BasicSubjectSchema;
   /**
    * Subjects
    */
-  subjects: Array<TeacherAppliedSubject>;
+  subjects: Array<BasicSubjectSchema>;
+  /**
+   * Grades
+   */
+  grades: Array<GradeSchema | null>;
 };
 
 /**
@@ -4758,6 +4813,32 @@ export type GetTeachersResponses = {
 
 export type GetTeachersResponse =
   GetTeachersResponses[keyof GetTeachersResponses];
+
+export type AssignTeacherData = {
+  body: AssignTeacher;
+  path?: never;
+  query?: never;
+  url: "/api/v1/teachers/";
+};
+
+export type AssignTeacherErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type AssignTeacherError = AssignTeacherErrors[keyof AssignTeacherErrors];
+
+export type AssignTeacherResponses = {
+  /**
+   * Successful Response
+   */
+  200: SuccessResponseSchema;
+};
+
+export type AssignTeacherResponse =
+  AssignTeacherResponses[keyof AssignTeacherResponses];
 
 export type ClientOptions = {
   baseURL: "http://backend:8000" | (string & {});

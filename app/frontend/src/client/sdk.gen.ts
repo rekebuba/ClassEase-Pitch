@@ -154,6 +154,9 @@ import type {
   GetTeachersData,
   GetTeachersResponses,
   GetTeachersErrors,
+  AssignTeacherData,
+  AssignTeacherResponses,
+  AssignTeacherErrors,
 } from "./types.gen";
 import {
   zLoginResponse,
@@ -207,6 +210,7 @@ import {
   zGetEmployeeResponse,
   zUpdateEmployeeStatusResponse,
   zGetTeachersResponse,
+  zAssignTeacherResponse,
 } from "./zod.gen";
 import { client as _heyApiClient } from "./client.gen";
 
@@ -1588,5 +1592,39 @@ export const getTeachers = <ThrowOnError extends boolean = false>(
     ],
     url: "/api/v1/teachers/",
     ...options,
+  });
+};
+
+/**
+ * Assign Teacher
+ * This endpoint will assign a teacher to
+ * - academic term
+ * - grade stream subject
+ * - section
+ */
+export const assignTeacher = <ThrowOnError extends boolean = false>(
+  options: Options<AssignTeacherData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).post<
+    AssignTeacherResponses,
+    AssignTeacherErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    responseValidator: async (data) => {
+      return await zAssignTeacherResponse.parseAsync(data);
+    },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
+    url: "/api/v1/teachers/",
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      ...options.headers,
+    },
   });
 };

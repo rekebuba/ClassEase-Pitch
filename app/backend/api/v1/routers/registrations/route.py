@@ -2,7 +2,6 @@
 """Public views module for the API"""
 
 from fastapi import APIRouter, HTTPException
-from sqlalchemy import select
 from starlette import status
 
 from api.v1.routers.dependencies import SessionDep
@@ -22,14 +21,11 @@ from api.v1.routers.registrations.schema import (
     StudRegStep4,
     StudRegStep5,
 )
-from models.academic_term import AcademicTerm
 from models.admin import Admin
 from models.employee import Employee
 from models.grade import Grade
 from models.student import Student
-from models.teacher_record import TeacherRecord
 from schema.models.admin_schema import AdminSchema
-from utils.enum import EmployeePositionEnum
 
 router = APIRouter(prefix="/register", tags=["registration"])
 
@@ -180,7 +176,6 @@ def register_new_employee(
         exclude={
             "agree_to_terms",
             "agree_to_background_check",
-            "subject_id",
         },
         exclude_none=True,
     )
@@ -189,31 +184,6 @@ def register_new_employee(
     new_employee = Employee(**employee_dict)
 
     session.add(new_employee)
-    session.flush()
-
-    if (
-        employee_data.position == EmployeePositionEnum.TEACHING_STAFF
-        and employee_data.subject_id
-    ):
-        # TODO: Handle Academic Term properly
-        first_term = session.scalar(
-            select(AcademicTerm).where(AcademicTerm.name == "1")
-        )
-        if not first_term:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="No academic term found",
-            )
-
-        teacher_record = TeacherRecord(
-            employee_id=new_employee.id,
-            subject_id=employee_data.subject_id,
-            grade_stream_subject_id=None,
-            academic_term_id=first_term.id,
-        )
-
-        session.add(teacher_record)
-
     session.commit()
 
     return RegistrationResponse(

@@ -53,6 +53,7 @@ import {
   getEmployee,
   updateEmployeeStatus,
   getTeachers,
+  assignTeacher,
 } from "../sdk.gen";
 import {
   queryOptions,
@@ -160,6 +161,9 @@ import type {
   UpdateEmployeeStatusError,
   UpdateEmployeeStatusResponse,
   GetTeachersData,
+  AssignTeacherData,
+  AssignTeacherError,
+  AssignTeacherResponse,
 } from "../types.gen";
 import type { AxiosError } from "axios";
 import { client as _heyApiClient } from "../client.gen";
@@ -1935,4 +1939,60 @@ export const getTeachersOptions = (options?: Options<GetTeachersData>) => {
     },
     queryKey: getTeachersQueryKey(options),
   });
+};
+
+export const assignTeacherQueryKey = (options: Options<AssignTeacherData>) =>
+  createQueryKey("assignTeacher", options);
+
+/**
+ * Assign Teacher
+ * This endpoint will assign a teacher to
+ * - academic term
+ * - grade stream subject
+ * - section
+ */
+export const assignTeacherOptions = (options: Options<AssignTeacherData>) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await assignTeacher({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: assignTeacherQueryKey(options),
+  });
+};
+
+/**
+ * Assign Teacher
+ * This endpoint will assign a teacher to
+ * - academic term
+ * - grade stream subject
+ * - section
+ */
+export const assignTeacherMutation = (
+  options?: Partial<Options<AssignTeacherData>>,
+): UseMutationOptions<
+  AssignTeacherResponse,
+  AxiosError<AssignTeacherError>,
+  Options<AssignTeacherData>
+> => {
+  const mutationOptions: UseMutationOptions<
+    AssignTeacherResponse,
+    AxiosError<AssignTeacherError>,
+    Options<AssignTeacherData>
+  > = {
+    mutationFn: async (localOptions) => {
+      const { data } = await assignTeacher({
+        ...options,
+        ...localOptions,
+        throwOnError: true,
+      });
+      return data;
+    },
+  };
+  return mutationOptions;
 };

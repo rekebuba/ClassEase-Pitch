@@ -20,6 +20,7 @@ class SuccessResponseSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    id: uuid.UUID | None = None
     message: str = "Success"
 
 

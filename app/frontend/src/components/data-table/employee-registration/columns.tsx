@@ -92,17 +92,17 @@ export const employeeBasicInfoColumns: EmployeeBasicInfoColumnProps = (
     header: "Position",
     cell: (props) => {
       const position = props.getValue();
-      const subjects = props.row.original.subjects
-        .map((sub) => sub.name)
-        .join(", ");
+      const subject = props.row.original.subject?.name;
 
       const yearsOfExperience = props.row.original.yearsOfExperience;
       return (
         <div className="flex flex-col">
           <div className="font-medium">{position}</div>
-          <div className="text-sm text-gray-500 truncate max-w-[150px]">
-            {subjects}
-          </div>
+          {subject && (
+            <div className="text-sm text-gray-500 truncate max-w-[150px]">
+              {subject}
+            </div>
+          )}
           <div className="space-y-1 text-sm text-gray-500">
             <p>{yearsOfExperience} Years</p>
           </div>

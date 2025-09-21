@@ -208,8 +208,10 @@ class EmployeeRegStep3(BaseModel):
                 raise ValueError(
                     "subjectId must be provided for teachers applying for the position"
                 )
-        else:
-            self.subject_id = None
+        elif self.position != EmployeePositionEnum.TEACHING_STAFF and self.subject_id:
+            raise ValueError(
+                "subjectId should be null for non-teaching staff positions"
+            )
         return self
 
 

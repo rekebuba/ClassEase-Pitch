@@ -113,9 +113,8 @@ export default function RouteComponent() {
   const handleCancel = useCallback(() => {
     navigate({
       to: "/admin/subjects",
-      search: { yearId: yearId! },
     });
-  }, [yearId, navigate]);
+  }, [navigate]);
 
   const mutation = useMutation({
     ...patchSubjectSetupMutation(),
