@@ -151,6 +151,24 @@ export type AssessmentSchema = {
 };
 
 /**
+ * AssignGrade
+ */
+export type AssignGrade = {
+  /**
+   * Id
+   */
+  id: string;
+  /**
+   * Streamid
+   */
+  streamId: string | null;
+  /**
+   * Sections
+   */
+  sections: Array<SectionIds>;
+};
+
+/**
  * AssignTeacher
  */
 export type AssignTeacher = {
@@ -166,18 +184,7 @@ export type AssignTeacher = {
    * Subjectid
    */
   subjectId: string;
-  /**
-   * Streamid
-   */
-  streamId: string | null;
-  /**
-   * Gradeid
-   */
-  gradeId: string;
-  /**
-   * Sections
-   */
-  sections: Array<SectionIds>;
+  grade: AssignGrade;
 };
 
 /**

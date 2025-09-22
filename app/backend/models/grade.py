@@ -93,16 +93,6 @@ class Grade(BaseModel):
         passive_deletes=True,
     )
 
-    # Many-To-Many Relationships
-    students: Mapped[List["Student"]] = relationship(
-        "Student",
-        secondary="student_grade_links",
-        back_populates="grades",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
-
     # Association Object
     grade_stream_subjects: Mapped[List["GradeStreamSubject"]] = relationship(
         "GradeStreamSubject",

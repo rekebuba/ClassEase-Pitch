@@ -81,9 +81,11 @@ function RouteComponent() {
     teacherId: "",
     yearId: yearId!,
     subjectId: "",
-    streamId: null,
-    gradeId: "",
-    sections: [],
+    grade: {
+      id: "",
+      streamId: "",
+      sections: [],
+    },
   });
 
   const assignTeacherForm = useForm<AssignTeacher>({
@@ -224,14 +226,14 @@ function FormDialog({
     error: isSectionsError,
   } = useQuery({
     ...getSectionsOptions({
-      query: { gradeId: watchForm.gradeId },
+      query: { gradeId: watchForm.grade.id },
     }),
-    enabled: !!watchForm.gradeId,
+    enabled: !!watchForm.grade.id,
   });
 
   const selectedGrade = useMemo(() => {
-    return subject?.grades.find((grade) => grade.id === watchForm.gradeId);
-  }, [subject, watchForm.gradeId]);
+    return subject?.grades.find((grade) => grade.id === watchForm.grade.id);
+  }, [subject, watchForm.grade.id]);
 
   const defaultSubject = useMemo(() => {
     if (!watchForm.teacherId) return undefined;
@@ -240,12 +242,8 @@ function FormDialog({
   }, [teachers, watchForm.teacherId]);
 
   useEffect(() => {
-    setValue("gradeId", "");
+    setValue("grade", { id: "", streamId: "", sections: [] });
   }, [watchForm.subjectId, setValue]);
-
-  useEffect(() => {
-    setValue("sections", []);
-  }, [watchForm.gradeId, setValue]);
 
   useEffect(() => {
     if (defaultSubject) {
@@ -255,6 +253,20 @@ function FormDialog({
 
   // Form submission
   const handleSave = handleSubmit(submitAssignTeacher);
+
+  const joinId = (gradeId: string, streamId?: string) => {
+    return streamId ? `${gradeId},${streamId}` : gradeId;
+  };
+
+  const getGradeObject = (joinedId: string): AssignTeacher["grade"] => {
+    const [gradeId, streamId] = joinedId.split(",").map((id) => id.trim());
+
+    return {
+      id: gradeId,
+      streamId: streamId || null,
+      sections: [],
+    };
+  };
 
   console.log(watchForm);
   return (
@@ -294,18 +306,36 @@ function FormDialog({
                 ))}
               </ApiState>
             </SelectWithLabel>
-            <SelectWithLabel<AssignTeacher, string>
+            <SelectWithLabel<AssignTeacher, AssignTeacher["grade"]>
               fieldTitle="Grade *"
-              nameInSchema="gradeId"
+              nameInSchema="grade"
+              getObjects={(joinedId) => getGradeObject(joinedId)}
             >
               <ApiState
                 isLoading={isSubjectLoading}
                 error={isSubjectError?.message}
               >
                 {subject?.grades.map((grade) => (
-                  <SelectItem key={grade.id} value={grade.id}>
-                    Grade {grade.grade}
-                  </SelectItem>
+                  <>
+                    {!grade.hasStream ? (
+                      <SelectItem key={grade.id} value={joinId(grade.id)}>
+                        Grade {grade.grade}
+                      </SelectItem>
+                    ) : (
+                      <div>
+                        {subject.streams
+                          .filter((s) => s.gradeId === grade.id)
+                          .map((stream) => (
+                            <SelectItem
+                              key={stream.id}
+                              value={joinId(grade.id, stream.id)}
+                            >
+                              Grade {grade.grade} - {stream.name}
+                            </SelectItem>
+                          ))}
+                      </div>
+                    )}
+                  </>
                 ))}
               </ApiState>
             </SelectWithLabel>
@@ -325,12 +355,12 @@ function FormDialog({
               {sections?.map((section) => (
                 <CheckboxWithLabel<
                   AssignTeacher,
-                  AssignTeacher["sections"][number]
+                  AssignTeacher["grade"]["sections"][number]
                 >
-                  nameInSchema={`sections`}
+                  nameInSchema={`grade.sections`}
                   fieldTitle={`Section ${section.section}`}
                   value={
-                    watchForm.sections.find((s) => s.id === section.id) ||
+                    watchForm.grade.sections.find((s) => s.id === section.id) ||
                     section
                   }
                 />

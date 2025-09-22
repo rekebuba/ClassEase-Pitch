@@ -64,7 +64,6 @@ export function SelectWithLabel<T extends FieldValues, V>({
               if (getObjects) {
                 const obj = getObjects(val) as PathValue<T, Path<T>>;
                 form.setValue(nameInSchema, obj, {
-                  shouldValidate: true,
                   shouldDirty: true,
                 });
                 setValue(val);

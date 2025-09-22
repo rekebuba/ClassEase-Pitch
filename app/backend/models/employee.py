@@ -27,6 +27,7 @@ from utils.enum import (
     HighestEducationEnum,
     MaritalStatusEnum,
 )
+from utils.utils import sort_grade_key
 
 if TYPE_CHECKING:
     from models.grade_stream_subject import GradeStreamSubject
@@ -190,17 +191,40 @@ class Employee(BaseModel):
         passive_deletes=True,
     )
 
-    subjects: AssociationProxy[List["Subject"]] = association_proxy(
+    _subjects: AssociationProxy[List["Subject"]] = association_proxy(
         "teacher_records",
         "subject",
         default_factory=list,
     )
 
-    grades: AssociationProxy[List["Grade"]] = association_proxy(
+    @property
+    def subjects(self) -> List["Subject"]:
+        """Return unique, non-null subjects."""
+        seen = set()
+        result = []
+        for s in self._subjects:
+            if s is not None and s.id not in seen and s.id != self.subject_id:
+                seen.add(s.id)
+                result.append(s)
+
+        return sorted(result, key=lambda x: x.name)
+
+    _grades: AssociationProxy[List["Grade"]] = association_proxy(
         "teacher_records",
         "grade",
         default_factory=list,
     )
+
+    @property
+    def grades(self) -> List["Grade"]:
+        """Return unique grades that have streams assigned to this subject."""
+        seen = set()
+        result = []
+        for g in self._grades:
+            if g is not None and g.id not in seen:
+                seen.add(g.id)
+                result.append(g)
+        return sorted(result, key=sort_grade_key)
 
     __table_args__ = (
         CheckConstraint("gpa >= 0.0 AND gpa <= 4.0", name="check_employee_gpa_range"),

@@ -96,15 +96,22 @@ export const zSectionIds = z.object({
 });
 
 /**
+ * AssignGrade
+ */
+export const zAssignGrade = z.object({
+  id: z.uuid(),
+  streamId: z.union([z.uuid(), z.null()]),
+  sections: z.array(zSectionIds).min(1),
+});
+
+/**
  * AssignTeacher
  */
 export const zAssignTeacher = z.object({
   yearId: z.uuid(),
   teacherId: z.uuid(),
   subjectId: z.uuid(),
-  streamId: z.union([z.uuid(), z.null()]),
-  gradeId: z.uuid(),
-  sections: z.array(zSectionIds),
+  grade: zAssignGrade,
 });
 
 /**

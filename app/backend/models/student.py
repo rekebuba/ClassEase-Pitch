@@ -222,14 +222,6 @@ class Student(BaseModel):
         repr=False,
         passive_deletes=True,
     )
-    grades: Mapped[List["Grade"]] = relationship(
-        "Grade",
-        secondary="student_grade_links",
-        back_populates="students",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
     sections: Mapped[List["Section"]] = relationship(
         "Section",
         secondary="student_section_links",

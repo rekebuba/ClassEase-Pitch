@@ -4,7 +4,10 @@ from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import select
 
 from api.v1.routers.dependencies import SessionDep, admin_route
-from api.v1.routers.teachers.schema import AssignTeacher, TeacherBasicInfo
+from api.v1.routers.teachers.schema import (
+    AssignTeacher,
+    TeacherBasicInfo,
+)
 from models.academic_term import AcademicTerm
 from models.employee import Employee
 from models.grade import Grade
@@ -62,24 +65,36 @@ def assign_teacher(
             detail=f"Employee with ID {assign_data.teacher_id} is not a teacher.",
         )
 
-    grade = session.scalar(
-        select(Grade)
-        .join(Stream)
-        .where(Grade.id == assign_data.grade_id)
-        .where(Stream.id == assign_data.stream_id)
-    )
-
+    grade = session.scalar(select(Grade).where(Grade.id == assign_data.grade.id))
     if not grade:
         raise HTTPException(
             status_code=400,
-            detail="Grade not found.",
+            detail=f"Grade with ID {assign_data.grade.id} not found.",
         )
+
+    if grade and grade.has_stream:
+        if not assign_data.grade.stream_id:
+            raise HTTPException(
+                status_code=400,
+                detail="Stream ID is required for the selected grade.",
+            )
+
+        stream = session.scalar(
+            select(Stream)
+            .where(Stream.id == assign_data.grade.stream_id)
+            .where(Stream.grade_id == assign_data.grade.id)
+        )
+        if not stream:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Stream with ID {assign_data.grade.stream_id} not found.",
+            )
 
     gss = session.scalar(
         select(GradeStreamSubject)
-        .where(GradeStreamSubject.stream_id == assign_data.stream_id)
+        .where(GradeStreamSubject.stream_id == assign_data.grade.stream_id)
         .where(GradeStreamSubject.subject_id == assign_data.subject_id)
-        .where(GradeStreamSubject.grade_id == assign_data.grade_id)
+        .where(GradeStreamSubject.grade_id == assign_data.grade.id)
     )
 
     if not gss:
@@ -98,7 +113,7 @@ def assign_teacher(
         )
 
     for term_id in term_ids:
-        for section in assign_data.sections:
+        for section in assign_data.grade.sections:
             existing_record = session.scalar(
                 select(TeacherRecord).where(
                     TeacherRecord.employee_id == assign_data.teacher_id,
