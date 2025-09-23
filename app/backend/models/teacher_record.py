@@ -2,7 +2,7 @@
 """Module for TeacherRecord class"""
 
 import uuid
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
@@ -38,19 +38,12 @@ class TeacherRecord(BaseModel):
         nullable=True,
         default=None,
     )
-    section_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(),
-        ForeignKey("sections.id", ondelete="SET NULL"),
-        nullable=True,
-        default=None,
-    )
 
     __table_args__ = (
         UniqueConstraint(
             "employee_id",
             "academic_term_id",
             "grade_stream_subject_id",
-            "section_id",
             name="uq_teacher_record",
         ),
     )
@@ -77,10 +70,12 @@ class TeacherRecord(BaseModel):
         repr=False,
         passive_deletes=True,
     )
-    section: Mapped["Section"] = relationship(
+    # Many-to-many relationship with sections
+    sections: Mapped[List["Section"]] = relationship(
         "Section",
+        secondary="teacher_record_links",
         back_populates="teacher_records",
-        init=False,
+        default_factory=list,
         repr=False,
         passive_deletes=True,
     )

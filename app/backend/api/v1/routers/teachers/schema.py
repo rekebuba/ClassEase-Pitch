@@ -7,10 +7,20 @@ from schema.models.grade_schema import GradeSchema
 from schema.models.section_schema import SectionSchema
 from schema.models.subject_schema import BasicSubjectSchema
 from utils.enum import (
+    AcademicTermEnum,
     EmployeeApplicationStatusEnum,
     GenderEnum,
 )
 from utils.utils import to_camel
+
+
+class AcademicTermSchema(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+    name: AcademicTermEnum
 
 
 class TeacherRecordSchema(BaseModel):
@@ -20,9 +30,10 @@ class TeacherRecordSchema(BaseModel):
         alias_generator=to_camel,
     )
 
+    academic_term: AcademicTermSchema
     grade: GradeSchema
     subject: BasicSubjectSchema
-    section: SectionSchema
+    sections: List[SectionSchema]
 
 
 class TeacherBasicInfo(BaseModel):
@@ -40,9 +51,6 @@ class TeacherBasicInfo(BaseModel):
     gender: GenderEnum
     status: EmployeeApplicationStatusEnum
     teacher_records: List[TeacherRecordSchema]
-    subject: BasicSubjectSchema
-    subjects: List[BasicSubjectSchema]
-    grades: List[GradeSchema | None]
 
 
 class SectionIDs(BaseModel):

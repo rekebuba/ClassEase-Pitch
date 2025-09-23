@@ -12,8 +12,10 @@ from models.academic_term import AcademicTerm
 from models.employee import Employee
 from models.grade import Grade
 from models.grade_stream_subject import GradeStreamSubject
+from models.section import Section
 from models.stream import Stream
 from models.teacher_record import TeacherRecord
+from models.teacher_record_link import TeacherRecordLink
 from schema.schema import SuccessResponseSchema
 from utils.enum import EmployeePositionEnum
 
@@ -113,30 +115,54 @@ def assign_teacher(
         )
 
     for term_id in term_ids:
-        for section in assign_data.grade.sections:
-            existing_record = session.scalar(
-                select(TeacherRecord).where(
-                    TeacherRecord.employee_id == assign_data.teacher_id,
-                    TeacherRecord.academic_term_id == term_id,
-                    TeacherRecord.grade_stream_subject_id == gss.id,
-                    TeacherRecord.section_id == section.id,
-                )
+        existing_record = session.scalar(
+            select(TeacherRecord).where(
+                TeacherRecord.employee_id == assign_data.teacher_id,
+                TeacherRecord.academic_term_id == term_id,
+                TeacherRecord.grade_stream_subject_id == gss.id,
+            )
+        )
+
+        if existing_record:
+            raise HTTPException(
+                status_code=400,
+                detail="Another Teacher is already assigned with the same details.",
             )
 
-            if existing_record:
+        new_record = TeacherRecord(
+            employee_id=assign_data.teacher_id,
+            academic_term_id=term_id,
+            grade_stream_subject_id=gss.id,
+        )
+
+        session.add(new_record)
+        session.flush()
+
+        for section in assign_data.grade.sections:
+            session_exists = session.get(Section, section.id)
+            if not session_exists:
                 raise HTTPException(
                     status_code=400,
-                    detail="Another Teacher is already assigned with the same details.",
+                    detail=f"Section with ID {section.id} not found.",
                 )
 
-            new_record = TeacherRecord(
-                employee_id=assign_data.teacher_id,
-                academic_term_id=term_id,
-                grade_stream_subject_id=gss.id,
-                section_id=section.id,
+            teacher_record_link_exists = session.scalar(
+                select(TeacherRecordLink).where(
+                    TeacherRecordLink.teacher_record_id == new_record.id,
+                    TeacherRecordLink.section_id == section.id,
+                )
             )
+            if teacher_record_link_exists:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Teacher is already assigned to section with ID {section.id}.",
+                )
 
-            session.add(new_record)
+            session.add(
+                TeacherRecordLink(
+                    teacher_record_id=new_record.id, section_id=section.id
+                )
+            )
 
     session.add(new_record)
     session.commit()

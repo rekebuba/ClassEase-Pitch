@@ -13,7 +13,6 @@ from models.base.column_type import UUIDType
 from models.employee import Employee
 from models.grade import Grade
 from models.stream import Stream
-from models.teacher_record import TeacherRecord
 from utils.utils import sort_grade_key
 
 if TYPE_CHECKING:

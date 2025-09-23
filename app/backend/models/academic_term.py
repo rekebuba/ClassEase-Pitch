@@ -7,11 +7,16 @@ from typing import TYPE_CHECKING, List, Optional
 
 import sqlalchemy as sa
 from sqlalchemy import Date, Enum, ForeignKey
+from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
+from models.grade import Grade
+from models.section import Section
+from models.subject import Subject
 from utils.enum import AcademicTermEnum
+from utils.utils import sort_grade_key
 
 if TYPE_CHECKING:
     from models.student import Student
@@ -75,6 +80,41 @@ class AcademicTerm(BaseModel):
         repr=False,
         passive_deletes=True,
     )
+
+    _grades: AssociationProxy[List["Grade"]] = association_proxy(
+        "teacher_records",
+        "grade",
+        default_factory=list,
+    )
+
+    _subjects: AssociationProxy[List["Subject"]] = association_proxy(
+        "teacher_records",
+        "subject",
+        default_factory=list,
+    )
+
+    @property
+    def subjects(self) -> List["Subject"]:
+        """Return unique, non-null subjects."""
+        seen = set()
+        result = []
+        for s in self._subjects:
+            if s is not None and s.id not in seen:
+                seen.add(s.id)
+                result.append(s)
+
+        return sorted(result, key=lambda x: x.name)
+
+    @property
+    def grades(self) -> List["Grade"]:
+        """Return unique grades that have streams assigned to this subject."""
+        seen = set()
+        result = []
+        for g in self._grades:
+            if g is not None and g.id not in seen:
+                seen.add(g.id)
+                result.append(g)
+        return sorted(result, key=sort_grade_key)
 
     __table_args__ = (
         sa.CheckConstraint("start_date <= end_date", name="check_term_dates"),

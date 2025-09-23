@@ -2,14 +2,13 @@ import uuid
 from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 
 from models.base.base_model import BaseModel
 from models.base.column_type import UUIDType
 
 if TYPE_CHECKING:
-    from models.section import Section
-    from models.teacher_record import TeacherRecord
+    pass
 
 
 class TeacherRecordLink(BaseModel):

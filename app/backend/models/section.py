@@ -54,7 +54,8 @@ class Section(BaseModel):
     # Many-to-many relationships
     teacher_records: Mapped[List["TeacherRecord"]] = relationship(
         "TeacherRecord",
-        back_populates="section",
+        secondary="teacher_record_links",
+        back_populates="sections",
         default_factory=list,
         repr=False,
         passive_deletes=True,
