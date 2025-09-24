@@ -51,7 +51,7 @@ class TeacherBasicInfo(BaseModel):
     gender: GenderEnum
     status: EmployeeApplicationStatusEnum
     teacher_records: List[TeacherRecordSchema]
-
+    subject: BasicSubjectSchema
 
 class SectionIDs(BaseModel):
     id: uuid.UUID

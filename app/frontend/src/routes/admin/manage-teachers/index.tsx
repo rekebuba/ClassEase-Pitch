@@ -169,7 +169,7 @@ function RouteComponent() {
           </CardHeader>
           <CardContent>
             <ManageTeacherTable
-              columns={teacherBasicInfoColumns(handleView)}
+              columns={teacherBasicInfoColumns(handleView, teachers || [])}
               data={teachers || []}
             />
           </CardContent>
