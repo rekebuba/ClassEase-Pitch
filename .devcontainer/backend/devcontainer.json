@@ -5,23 +5,5 @@
     ],
     "service": "backend",
     "workspaceFolder": "/${localWorkspaceFolderBasename}/app/backend",
-    "shutdownAction": "none",
-    "customizations": {
-        "vscode": {
-            "extensions": [
-                "ms-python.python",
-                "esbenp.prettier-vscode",
-                "cweijan.vscode-mysql-client2",
-                "ms-azuretools.vscode-containers",
-                "ms-python.mypy-type-checker",
-                "charliermarsh.ruff",
-                "hbenl.vscode-test-explorer",
-                "oderwat.indent-rainbow",
-                "streetsidesoftware.code-spell-checker",
-                "Cardinal90.multi-cursor-case-preserve",
-                "tamasfe.even-better-toml",
-                "google.geminicodeassist"
-            ]
-        }
-    }
+    "shutdownAction": "none"
 }

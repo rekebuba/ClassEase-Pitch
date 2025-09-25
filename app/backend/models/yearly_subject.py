@@ -9,7 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.assessment import Assessment
 from models.base.base_model import BaseModel
-from models.base.column_type import UUIDType
+from sqlalchemy import UUID
 
 if TYPE_CHECKING:
     from models.grade import Grade
@@ -24,16 +24,16 @@ class YearlySubject(BaseModel):
 
     subject_code: Mapped[str] = mapped_column(String(25), nullable=False)
     year_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("years.id", ondelete="CASCADE")
+        UUID(), ForeignKey("years.id", ondelete="CASCADE")
     )
     subject_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("subjects.id", ondelete="CASCADE")
+        UUID(), ForeignKey("subjects.id", ondelete="CASCADE")
     )
     grade_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("grades.id", ondelete="CASCADE")
+        UUID(), ForeignKey("grades.id", ondelete="CASCADE")
     )
     stream_id: Mapped[Optional[str]] = mapped_column(
-        UUIDType(),
+        UUID(),
         ForeignKey("streams.id", ondelete="CASCADE"),
         nullable=True,
         default=None,

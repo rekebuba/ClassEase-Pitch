@@ -8,7 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import ForeignKey
 
 from models.base.base_model import Base
-from models.base.column_type import UUIDType
+from sqlalchemy import UUID
 
 
 @dataclass
@@ -16,12 +16,12 @@ class StudentYearLink(Base):
     __tablename__ = "student_year_links"
 
     student_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(),
+        UUID(),
         ForeignKey("students.id", ondelete="CASCADE"),
         primary_key=True,
     )
     year_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(),
+        UUID(),
         ForeignKey("years.id", ondelete="CASCADE"),
         primary_key=True,
     )

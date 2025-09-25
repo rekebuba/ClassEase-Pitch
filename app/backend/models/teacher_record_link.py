@@ -5,7 +5,7 @@ from sqlalchemy import ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from models.base.base_model import BaseModel
-from models.base.column_type import UUIDType
+from sqlalchemy import UUID
 
 if TYPE_CHECKING:
     pass
@@ -15,12 +15,12 @@ class TeacherRecordLink(BaseModel):
     __tablename__ = "teacher_record_links"
 
     teacher_record_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(),
+        UUID(),
         ForeignKey("teacher_records.id", ondelete="CASCADE"),
         nullable=False,
     )
     section_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(),
+        UUID(),
         ForeignKey("sections.id", ondelete="CASCADE"),
         nullable=False,
     )
@@ -29,6 +29,6 @@ class TeacherRecordLink(BaseModel):
         UniqueConstraint(
             "teacher_record_id",
             "section_id",
-            name="uq_teacher_record",
+            name="uq_teacher_record_links",
         ),
     )

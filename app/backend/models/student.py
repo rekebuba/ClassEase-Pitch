@@ -16,7 +16,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
-from models.base.column_type import UUIDType
+from sqlalchemy import UUID
 from utils.enum import BloodTypeEnum, GenderEnum, StudentApplicationStatusEnum
 
 if TYPE_CHECKING:
@@ -41,7 +41,7 @@ class Student(BaseModel):
     __tablename__ = "students"
 
     registered_for_grade_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(),
+        UUID(),
         ForeignKey("grades.id"),
     )
     # Personal Information
@@ -145,7 +145,7 @@ class Student(BaseModel):
         return cls.first_name + " " + cls.father_name + " " + cls.grand_father_name
 
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(),
+        UUID(),
         ForeignKey("users.id", ondelete="CASCADE"),
         unique=True,
         nullable=True,

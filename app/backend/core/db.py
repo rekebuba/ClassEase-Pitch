@@ -8,8 +8,8 @@ from models.user import User
 from utils.enum import RoleEnum
 
 # Create the engine
-engine = create_engine(str(settings.SQLALCHEMY_DATABASE_URI), future=True)
-test_engine = create_engine(str(settings.TEST_SQLALCHEMY_DATABASE_URI), future=True)
+engine = create_engine(str(settings.SQLALCHEMY_POSTGRES_DATABASE_URI), future=True)
+test_engine = create_engine(str(settings.SQLALCHEMY_POSTGRES_TEST_DATABASE_URI), future=True)
 
 
 def init_db(session: Session) -> None:

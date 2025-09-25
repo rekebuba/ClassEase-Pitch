@@ -8,7 +8,7 @@ from sqlalchemy import Enum, Float, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
-from models.base.column_type import UUIDType
+from sqlalchemy import UUID
 from models.student_term_record import StudentTermRecord
 from utils.enum import MarkListTypeEnum
 
@@ -28,15 +28,15 @@ class MarkList(BaseModel):
     __tablename__ = "mark_lists"
 
     student_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("students.id", ondelete="CASCADE"), nullable=False
+        UUID(), ForeignKey("students.id", ondelete="CASCADE"), nullable=False
     )
     student_term_record_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(),
+        UUID(),
         ForeignKey("student_term_records.id", ondelete="CASCADE"),
         nullable=False,
     )
     subject_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False
+        UUID(), ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False
     )
     type: Mapped[MarkListTypeEnum] = mapped_column(
         Enum(

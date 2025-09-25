@@ -5,6 +5,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 
+from sqlalchemy import UUID
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
@@ -35,7 +36,7 @@ class BaseModel(MappedAsDataclass, Base):
 
     # Dataclass fields (not mapped to SQLAlchemy)
     id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(),
+        UUID(),
         default_factory=uuid.uuid4,
         primary_key=True,
         init=False,

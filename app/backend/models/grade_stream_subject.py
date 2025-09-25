@@ -6,7 +6,7 @@ from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
-from models.base.column_type import UUIDType
+from sqlalchemy import UUID
 
 if TYPE_CHECKING:
     from models.grade import Grade
@@ -25,17 +25,17 @@ class GradeStreamSubject(BaseModel):
     __tablename__ = "grade_stream_subjects"
 
     grade_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(),
+        UUID(),
         ForeignKey("grades.id", ondelete="CASCADE"),
         nullable=False,
     )
     stream_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        UUIDType(),
+        UUID(),
         ForeignKey("streams.id", ondelete="CASCADE"),
         nullable=True,
     )
     subject_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(),
+        UUID(),
         ForeignKey("subjects.id", ondelete="CASCADE"),
         nullable=False,
     )

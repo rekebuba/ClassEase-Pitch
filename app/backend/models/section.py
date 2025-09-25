@@ -8,7 +8,7 @@ from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
-from models.base.column_type import UUIDType
+from sqlalchemy import UUID
 
 if TYPE_CHECKING:
     from models.grade import Grade
@@ -24,7 +24,7 @@ class Section(BaseModel):
 
     __tablename__ = "sections"
     grade_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(),
+        UUID(),
         ForeignKey("grades.id", ondelete="CASCADE"),
         nullable=False,
     )

@@ -1,12 +1,13 @@
 from typing import Annotated, List, Optional, Sequence
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlalchemy import select
+from sqlalchemy import func, select
 
 from api.v1.routers.dependencies import SessionDep, admin_route
 from api.v1.routers.teachers.schema import (
     AssignTeacher,
     TeacherBasicInfo,
+    TeacherRecordSchema,
 )
 from models.academic_term import AcademicTerm
 from models.employee import Employee

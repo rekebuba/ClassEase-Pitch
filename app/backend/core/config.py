@@ -9,6 +9,7 @@ from pydantic import (
     EmailStr,
     HttpUrl,
     MySQLDsn,
+    PostgresDsn,
     computed_field,
     model_validator,
 )
@@ -29,7 +30,7 @@ def parse_cors(v: Any) -> list[str] | str:
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
         # Use top level .env file (one level above ./backend/)
-        env_file=".env",
+        env_file="../../.env",
         env_ignore_empty=True,
         extra="ignore",
     )
@@ -66,6 +67,42 @@ class Settings(BaseSettings):
     TEST_MYSQL_PASSWORD: str = ""
     TEST_MYSQL_DB: str = ""
 
+    DEV_POSTGRES_SERVER: str
+    DEV_POSTGRES_PORT: int
+    DEV_POSTGRES_USER: str
+    DEV_POSTGRES_PASSWORD: str = ""
+    DEV_POSTGRES_DB: str = ""
+
+    TEST_POSTGRES_SERVER: str
+    TEST_POSTGRES_PORT: int
+    TEST_POSTGRES_USER: str
+    TEST_POSTGRES_PASSWORD: str = ""
+    TEST_POSTGRES_DB: str = ""
+
+    @computed_field
+    @property
+    def SQLALCHEMY_POSTGRES_DATABASE_URI(self) -> PostgresDsn:
+        return PostgresDsn.build(
+            scheme="postgresql",
+            username=self.DEV_POSTGRES_USER,
+            password=self.DEV_POSTGRES_PASSWORD,
+            host=self.DEV_POSTGRES_SERVER,
+            port=self.DEV_POSTGRES_PORT,
+            path=self.DEV_POSTGRES_DB,
+        )
+    
+    # @computed_field
+    @property
+    def SQLALCHEMY_POSTGRES_TEST_DATABASE_URI(self) -> PostgresDsn:
+        return PostgresDsn.build(
+            scheme="postgresql",
+            username=self.TEST_POSTGRES_USER,
+            password=self.TEST_POSTGRES_PASSWORD,
+            host=self.TEST_POSTGRES_SERVER,
+            port=self.TEST_POSTGRES_PORT,
+            path=self.TEST_POSTGRES_DB,
+        )
+    
     @computed_field
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> MySQLDsn:

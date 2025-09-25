@@ -5,21 +5,5 @@
     ],
     "service": "frontend",
     "workspaceFolder": "/${localWorkspaceFolderBasename}/app/frontend",
-    "shutdownAction": "none",
-    "customizations": {
-        "vscode": {
-            "extensions": [
-                "esbenp.prettier-vscode",
-                "cweijan.vscode-mysql-client2",
-                "oderwat.indent-rainbow",
-                "streetsidesoftware.code-spell-checker",
-                "yoavbls.pretty-ts-errors",
-                "bradlc.vscode-tailwindcss",
-                "Cardinal90.multi-cursor-case-preserve",
-                "dbaeumer.vscode-eslint",
-                "rvest.vs-code-prettier-eslint"
-                // Add more extensions here
-            ]
-        }
-    }
+    "shutdownAction": "none"
 }

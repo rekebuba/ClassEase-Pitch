@@ -8,7 +8,7 @@ from sqlalchemy import Float, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
-from models.base.column_type import UUIDType
+from sqlalchemy import UUID
 
 if TYPE_CHECKING:
     from models.student import Student
@@ -19,13 +19,13 @@ if TYPE_CHECKING:
 class SubjectYearlyAverage(BaseModel):
     __tablename__ = "subject_yearly_averages"
     student_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("students.id", ondelete="CASCADE"), nullable=False
+        UUID(), ForeignKey("students.id", ondelete="CASCADE"), nullable=False
     )
     yearly_subject_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("yearly_subjects.id", ondelete="CASCADE"), nullable=False
+        UUID(), ForeignKey("yearly_subjects.id", ondelete="CASCADE"), nullable=False
     )
     student_year_record_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(),
+        UUID(),
         ForeignKey("student_year_records.id", ondelete="CASCADE"),
         nullable=True,
     )

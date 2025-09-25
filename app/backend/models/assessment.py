@@ -8,7 +8,7 @@ from sqlalchemy import Float, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
-from models.base.column_type import UUIDType
+from sqlalchemy import UUID
 
 if TYPE_CHECKING:
     from models.student import Student
@@ -23,15 +23,15 @@ class Assessment(BaseModel):
 
     __tablename__ = "assessments"
     student_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("students.id", ondelete="CASCADE"), nullable=False
+        UUID(), ForeignKey("students.id", ondelete="CASCADE"), nullable=False
     )
     student_term_record_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(),
+        UUID(),
         ForeignKey("student_term_records.id", ondelete="CASCADE"),
         nullable=False,
     )
     yearly_subject_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("yearly_subjects.id", ondelete="CASCADE"), nullable=False
+        UUID(), ForeignKey("yearly_subjects.id", ondelete="CASCADE"), nullable=False
     )
     # The subject sum score of the student for each assessment
     total: Mapped[float] = mapped_column(Float, nullable=True, default=None)

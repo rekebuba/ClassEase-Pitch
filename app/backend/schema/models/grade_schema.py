@@ -50,6 +50,13 @@ class GradeSchema(BaseModel):
         return {"id", "grade"}
 
 
+class GradeWithSubjectSchema(GradeSchema):
+    """
+    This model represents a grade along with its associated subjects."""
+
+    subjects: List[SubjectSchema]
+
+
 class GradeRelatedSchema(BaseModel):
     """This model represents the relationships of a GradeSchema.
     It is used to define the relationships between the GradeSchema and other schemas.
@@ -86,7 +93,6 @@ class GradeNestedSchema(GradeSchema):
     streams: List[StreamWithRelatedSchema]
     students: List[StudentWithRelatedSchema]
     sections: List[SectionWithRelatedSchema]
-    subjects: List[SubjectWithRelatedSchema]
 
 
 class GradeWithRelatedSchema(GradeSchema, GradeRelatedSchema):

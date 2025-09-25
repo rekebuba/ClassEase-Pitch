@@ -19,6 +19,7 @@ from .grade_schema import (
     GradeRelatedSchema,
     GradeSchema,
     GradeWithRelatedSchema,
+    GradeWithSubjectSchema,
 )
 from .grade_stream_link_schema import GradeStreamLinkSchema
 from .grade_stream_subject_schema import (
@@ -149,6 +150,7 @@ __all__ = [
     "YearlySubjectRelatedSchema",
     "YearlySubjectSchema",
     "StreamNestedSchema",
+    "GradeWithSubjectSchema",
 ]
 
 AcademicTermSchema.model_rebuild()
@@ -165,6 +167,7 @@ EventRelatedSchema.model_rebuild()
 EventWithRelatedSchema.model_rebuild()
 
 GradeSchema.model_rebuild()
+GradeWithSubjectSchema.model_rebuild()
 GradeRelatedSchema.model_rebuild()
 GradeNestedSchema.model_rebuild()
 GradeWithRelatedSchema.model_rebuild()

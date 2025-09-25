@@ -7,7 +7,7 @@ from sqlalchemy import DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from models.base.base_model import BaseModel
-from models.base.column_type import UUIDType
+from sqlalchemy import UUID
 
 
 class Registration(BaseModel):
@@ -15,9 +15,9 @@ class Registration(BaseModel):
 
     __tablename__ = "registrations"
     student_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("students.id", ondelete="CASCADE"), nullable=False
+        UUID(), ForeignKey("students.id", ondelete="CASCADE"), nullable=False
     )
     subject_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False
+        UUID(), ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False
     )
     registration_date: Mapped[DateTime] = mapped_column(DateTime, nullable=False)

@@ -9,7 +9,7 @@ from sqlalchemy import Date, Enum, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
-from models.base.column_type import UUIDType
+from sqlalchemy import UUID
 from utils.enum import GenderEnum
 
 if TYPE_CHECKING:
@@ -39,7 +39,7 @@ class Admin(BaseModel):
     phone: Mapped[str] = mapped_column(String(25), nullable=False)
     address: Mapped[str] = mapped_column(Text, nullable=False)
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(),
+        UUID(),
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=True,
         default=None,

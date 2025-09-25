@@ -8,7 +8,7 @@ from sqlalchemy import Float, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
-from models.base.column_type import UUIDType
+from sqlalchemy import UUID
 
 if TYPE_CHECKING:
     from models.grade import Grade
@@ -26,16 +26,16 @@ class StudentYearRecord(BaseModel):
 
     __tablename__ = "student_year_records"
     student_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("students.id", ondelete="CASCADE"), nullable=False
+        UUID(), ForeignKey("students.id", ondelete="CASCADE"), nullable=False
     )
     grade_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("grades.id", ondelete="CASCADE"), nullable=False
+        UUID(), ForeignKey("grades.id", ondelete="CASCADE"), nullable=False
     )
     year_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("years.id", ondelete="CASCADE"), nullable=False
+        UUID(), ForeignKey("years.id", ondelete="CASCADE"), nullable=False
     )
     stream_id: Mapped[Optional[str]] = mapped_column(
-        UUIDType(),
+        UUID(),
         ForeignKey("streams.id", ondelete="CASCADE"),
         nullable=True,
         default=None,

@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from schema.models.grade_schema import GradeSchema
+from schema.models.grade_schema import GradeSchema, GradeWithSubjectSchema
 from schema.models.section_schema import SectionSchema
 from schema.models.subject_schema import BasicSubjectSchema
 from utils.enum import (
@@ -21,6 +21,7 @@ class AcademicTermSchema(BaseModel):
         alias_generator=to_camel,
     )
     name: AcademicTermEnum
+    # grade: GradeSchema
 
 
 class TeacherRecordSchema(BaseModel):
@@ -31,9 +32,7 @@ class TeacherRecordSchema(BaseModel):
     )
 
     academic_term: AcademicTermSchema
-    grade: GradeSchema
-    subject: BasicSubjectSchema
-    sections: List[SectionSchema]
+    # sections: List[SectionSchema]
 
 
 class TeacherBasicInfo(BaseModel):
@@ -50,8 +49,12 @@ class TeacherBasicInfo(BaseModel):
     full_name: str
     gender: GenderEnum
     status: EmployeeApplicationStatusEnum
-    teacher_records: List[TeacherRecordSchema]
-    subject: BasicSubjectSchema
+    # teacher_records: List[TeacherRecordSchema]
+    # subject: BasicSubjectSchema | None
+    # grades: List[GradeSchema]
+    # subjects: List[BasicSubjectSchema]
+    grades_with_subjects: List[GradeWithSubjectSchema]
+
 
 class SectionIDs(BaseModel):
     id: uuid.UUID

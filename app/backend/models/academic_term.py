@@ -11,7 +11,7 @@ from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
-from models.base.column_type import UUIDType
+from sqlalchemy import UUID
 from models.grade import Grade
 from models.section import Section
 from models.subject import Subject
@@ -30,7 +30,7 @@ class AcademicTerm(BaseModel):
 
     __tablename__ = "academic_terms"
     year_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("years.id", ondelete="CASCADE"), nullable=False
+        UUID(), ForeignKey("years.id", ondelete="CASCADE"), nullable=False
     )
     name: Mapped[AcademicTermEnum] = mapped_column(
         Enum(

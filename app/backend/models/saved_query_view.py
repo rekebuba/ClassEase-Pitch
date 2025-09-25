@@ -8,7 +8,7 @@ from sqlalchemy import JSON, Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
-from models.base.column_type import UUIDType
+from sqlalchemy import UUID
 from utils.enum import TableEnum
 
 if TYPE_CHECKING:
@@ -22,7 +22,7 @@ class SavedQueryView(BaseModel):
 
     # Columns
     user_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
+        UUID(), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
     name: Mapped[str] = mapped_column(String(50), nullable=False)
     table_name: Mapped[TableEnum] = mapped_column(

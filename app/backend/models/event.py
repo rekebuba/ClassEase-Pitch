@@ -18,7 +18,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
-from models.base.column_type import UUIDType
+from sqlalchemy import UUID
 from utils.enum import (
     EventEligibilityEnum,
     EventLocationEnum,
@@ -35,7 +35,7 @@ class Event(BaseModel):
 
     __tablename__ = "events"
     year_id: Mapped[uuid.UUID] = mapped_column(
-        UUIDType(), ForeignKey("years.id", ondelete="CASCADE"), nullable=False
+        UUID(), ForeignKey("years.id", ondelete="CASCADE"), nullable=False
     )
 
     title: Mapped[str] = mapped_column(String(100), nullable=False)
