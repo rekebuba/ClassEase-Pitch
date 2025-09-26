@@ -1,7 +1,8 @@
 import uuid
-from typing import TYPE_CHECKING, Dict, List, Optional
+from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import (
+    UUID,
     CheckConstraint,
     Date,
     Enum,
@@ -16,12 +17,8 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
-from sqlalchemy import UUID
 from models.grade import Grade
-from models.section import Section
 from models.teacher_record import TeacherRecord
-from schema.models.grade_schema import GradeWithSubjectSchema
-from schema.models.subject_schema import SubjectSchema
 from utils.enum import (
     EmployeeApplicationStatusEnum,
     EmployeePositionEnum,
@@ -30,11 +27,9 @@ from utils.enum import (
     HighestEducationEnum,
     MaritalStatusEnum,
 )
-from utils.type import GradeData
 from utils.utils import sort_grade_key
 
 if TYPE_CHECKING:
-    from models.grade_stream_subject import GradeStreamSubject
     from models.subject import Subject
     from models.user import User
 

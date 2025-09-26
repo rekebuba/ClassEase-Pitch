@@ -4,11 +4,10 @@
 import uuid
 from typing import TYPE_CHECKING, List
 
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import UUID, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
-from sqlalchemy import UUID
 
 if TYPE_CHECKING:
     from models.grade import Grade

@@ -6,6 +6,7 @@ from models.admin import Admin
 from models.assessment import Assessment
 from models.blacklist_token import BlacklistToken
 from models.ceo import CEO
+from models.employee import Employee
 from models.event import Event
 from models.grade import Grade
 from models.grade_section_link import GradeSectionLink
@@ -28,7 +29,6 @@ from models.student_year_record import StudentYearRecord
 from models.subject import Subject
 from models.subject_yearly_average import SubjectYearlyAverage
 from models.table import Table
-from models.employee import Employee
 from models.teacher_record import TeacherRecord
 from models.teacher_record_link import TeacherRecordLink
 from models.user import User

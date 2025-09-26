@@ -14,7 +14,7 @@ from sqlalchemy.orm import (
 )
 from sqlalchemy.sql import func
 
-from models.base.column_type import AwareDateTime, UUIDType
+from models.base.column_type import AwareDateTime
 
 
 class Base(DeclarativeBase):

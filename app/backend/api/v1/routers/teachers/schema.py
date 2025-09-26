@@ -3,8 +3,6 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from schema.models.grade_schema import GradeSchema, GradeWithSubjectSchema
-from schema.models.section_schema import SectionSchema
 from schema.models.subject_schema import BasicSubjectSchema
 from utils.enum import (
     AcademicTermEnum,
@@ -49,11 +47,8 @@ class TeacherBasicInfo(BaseModel):
     full_name: str
     gender: GenderEnum
     status: EmployeeApplicationStatusEnum
-    # teacher_records: List[TeacherRecordSchema]
-    # subject: BasicSubjectSchema | None
-    # grades: List[GradeSchema]
-    # subjects: List[BasicSubjectSchema]
-    grades_with_subjects: List[GradeWithSubjectSchema]
+    teacher_records: List[TeacherRecordSchema]
+    subject: BasicSubjectSchema | None
 
 
 class SectionIDs(BaseModel):

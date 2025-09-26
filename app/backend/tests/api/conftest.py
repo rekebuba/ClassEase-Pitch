@@ -1,4 +1,3 @@
-import random
 import uuid
 from collections.abc import Generator
 from typing import Dict

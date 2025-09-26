@@ -1,16 +1,13 @@
 import uuid
 from typing import TYPE_CHECKING, List, Optional
 
-from sqlalchemy import ForeignKey, UniqueConstraint
-from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
+from sqlalchemy import UUID, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
-from sqlalchemy import UUID
 
 if TYPE_CHECKING:
     from models.grade import Grade
-    from models.section import Section
     from models.stream import Stream
     from models.subject import Subject
     from models.teacher_record import TeacherRecord
