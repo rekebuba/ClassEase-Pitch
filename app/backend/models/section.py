@@ -5,6 +5,7 @@ import uuid
 from typing import TYPE_CHECKING, List
 
 from sqlalchemy import UUID, ForeignKey, String
+from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
@@ -13,6 +14,7 @@ if TYPE_CHECKING:
     from models.grade import Grade
     from models.student import Student
     from models.student_term_record import StudentTermRecord
+    from models.subject import Subject
     from models.teacher_record import TeacherRecord
 
 
@@ -67,4 +69,10 @@ class Section(BaseModel):
         default_factory=list,
         repr=False,
         passive_deletes=True,
+    )
+
+    subjects: AssociationProxy[List["Subject"]] = association_proxy(
+        "grade",
+        "subjects",
+        default_factory=list,
     )

@@ -4,12 +4,11 @@
 import uuid
 from typing import TYPE_CHECKING, List
 
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import UUID, ForeignKey, String
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
-from sqlalchemy import UUID
 from models.employee import Employee
 from models.grade import Grade
 from models.stream import Stream
