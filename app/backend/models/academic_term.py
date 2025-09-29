@@ -6,14 +6,12 @@ from datetime import date
 from typing import TYPE_CHECKING, List, Optional
 
 import sqlalchemy as sa
-from sqlalchemy import Date, Enum, ForeignKey
+from sqlalchemy import UUID, Date, Enum, ForeignKey
 from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
-from sqlalchemy import UUID
 from models.grade import Grade
-from models.section import Section
 from models.subject import Subject
 from utils.enum import AcademicTermEnum
 from utils.utils import sort_grade_key

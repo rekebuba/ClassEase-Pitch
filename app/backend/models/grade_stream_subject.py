@@ -2,11 +2,14 @@ import uuid
 from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import UUID, ForeignKey, UniqueConstraint
+from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base.base_model import BaseModel
+from utils.utils import sort_grade_key
 
 if TYPE_CHECKING:
+    from models.employee import Employee
     from models.grade import Grade
     from models.stream import Stream
     from models.subject import Subject
@@ -77,3 +80,38 @@ class GradeStreamSubject(BaseModel):
         repr=False,
         passive_deletes=True,
     )
+
+    _teacher_grades: AssociationProxy[List["Grade"]] = association_proxy(
+        "teacher_records",
+        "grade",
+        default_factory=list,
+    )
+
+    @property
+    def teacher_grades(self) -> List["Grade"]:
+        """Return unique teacher grades that have streams assigned to this subject."""
+        seen = set()
+        result = []
+        for g in self._teacher_grades:
+            if g is not None and g.id not in seen:
+                seen.add(g.id)
+                result.append(g)
+        return sorted(result, key=sort_grade_key)
+
+    _teacher_subjects: AssociationProxy[List["Subject"]] = association_proxy(
+        "teacher_records",
+        "subject",
+        default_factory=list,
+    )
+
+    @property
+    def teacher_subjects(self) -> List["Subject"]:
+        """Return unique, non-null teacher_subjects."""
+        seen = set()
+        result = []
+        for s in self._teacher_subjects:
+            if s is not None and s.id not in seen:
+                seen.add(s.id)
+                result.append(s)
+
+        return sorted(result, key=lambda x: x.name)

@@ -71,8 +71,20 @@ class Section(BaseModel):
         passive_deletes=True,
     )
 
-    subjects: AssociationProxy[List["Subject"]] = association_proxy(
-        "grade",
-        "subjects",
+    _teacher_subjects: AssociationProxy[List["Subject"]] = association_proxy(
+        "teacher_records",
+        "subject",
         default_factory=list,
     )
+
+    @property
+    def teacher_subjects(self) -> List["Subject"]:
+        """Return unique, non-null teacher_subjects."""
+        seen = set()
+        result = []
+        for s in self._teacher_subjects:
+            if s is not None and s.id not in seen:
+                seen.add(s.id)
+                result.append(s)
+
+        return sorted(result, key=lambda x: x.name)

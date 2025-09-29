@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 """Main module for the API"""
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.exceptions import ResponseValidationError
+from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
 from starlette.middleware.cors import CORSMiddleware
 
@@ -42,3 +44,17 @@ def use_route_names_as_operation_ids(app: FastAPI) -> None:
 
 
 use_route_names_as_operation_ids(app)
+
+
+@app.exception_handler(ResponseValidationError)
+async def validation_exception_handler(
+    request: Request, exc: ResponseValidationError
+) -> JSONResponse:
+    print("Caught a ResponseValidationError!")
+    print(exc.errors())  # This will print the detailed Pydantic error list
+    return JSONResponse(
+        status_code=500,
+        content={
+            "message": "Internal server error due to response validation failure."
+        },
+    )
