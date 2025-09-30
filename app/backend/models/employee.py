@@ -32,6 +32,7 @@ from utils.utils import sort_grade_key
 if TYPE_CHECKING:
     from models.subject import Subject
     from models.user import User
+    from models.year import Year
 
 
 class Employee(BaseModel):
@@ -174,14 +175,24 @@ class Employee(BaseModel):
         passive_deletes=True,
     )
 
-    # One-To-Many Relationships
-    teacher_records: Mapped[List["TeacherRecord"]] = relationship(
-        "TeacherRecord",
-        back_populates="teacher",
+    years: Mapped[List["Year"]] = relationship(
+        "Year",
+        secondary="employee_year_links",
+        back_populates="employees",
         default_factory=list,
         repr=False,
         passive_deletes=True,
     )
+
+    # One-To-Many Relationships
+    teacher_records: Mapped[List["TeacherRecord"]] = relationship(
+        "TeacherRecord",
+        back_populates="employee",
+        default_factory=list,
+        repr=False,
+        passive_deletes=True,
+    )
+
     subject: Mapped[Optional["Subject"]] = relationship(
         "Subject",
         back_populates="teachers",

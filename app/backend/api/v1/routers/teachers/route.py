@@ -1,8 +1,16 @@
 from typing import Annotated, List, Optional, Sequence
+import uuid
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlalchemy import select
-
+from pydantic import BaseModel, ConfigDict
+from sqlalchemy import and_, cast, func, select
+from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy.orm import (
+    with_loader_criteria,
+    selectinload,
+    contains_eager,
+    joinedload,
+)
 from api.v1.routers.dependencies import SessionDep, admin_route
 from api.v1.routers.teachers.schema import (
     AssignTeacher,
@@ -14,12 +22,67 @@ from models.grade import Grade
 from models.grade_stream_subject import GradeStreamSubject
 from models.section import Section
 from models.stream import Stream
+from models.subject import Subject
 from models.teacher_record import TeacherRecord
 from models.teacher_record_link import TeacherRecordLink
+from schema.models.academic_term_schema import AcademicTermSchema
+from schema.models.grade_schema import GradeSchema
+from schema.models.section_schema import SectionSchema
+from schema.models.subject_schema import SubjectSchema
 from schema.schema import SuccessResponseSchema
-from utils.enum import EmployeePositionEnum
+from utils.enum import AcademicTermEnum, EmployeePositionEnum
+from utils.utils import to_camel
 
 router = APIRouter(prefix="/teachers", tags=["Teachers"])
+
+
+class TestSchemaSection(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    id: uuid.UUID
+    grade_id: uuid.UUID
+    section: str
+    teacher_subjects: List[SubjectSchema]
+
+
+class TestGSS(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    grade: str
+    sections: List[TestSchemaSection]
+    subjects: List[SubjectSchema]
+
+
+class TestTeacherRecord(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    id: uuid.UUID
+    academic_term: AcademicTermSchema
+    academic_term_id: uuid.UUID
+    name: AcademicTermEnum
+    # grade: TestGSS
+
+
+class TestSchema(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    teacher_records: List[TestTeacherRecord]
 
 
 @router.get("/", response_model=List[TeacherBasicInfo])
@@ -29,16 +92,38 @@ def get_teachers(
     q: Annotated[Optional[str], Query()] = None,
 ) -> Sequence[Employee]:
     """This endpoint will return employees based on the provided filters."""
-    stm = select(Employee).where(
-        Employee.position == EmployeePositionEnum.TEACHING_STAFF
+
+    filtered_gss_subquery = (
+        select(GradeStreamSubject.id)
+        .join(
+            TeacherRecord,
+            TeacherRecord.grade_stream_subject_id == GradeStreamSubject.id,
+        )
+        .join(
+            TeacherRecordLink, TeacherRecordLink.teacher_record_id == TeacherRecord.id
+        )
+        .where(TeacherRecordLink.section_id == Section.id)
+        .correlate(Grade)
+        .scalar_subquery()
     )
 
-    if q:
-        stm = stm.where(Employee.first_name.ilike(f"%{q}%"))
+    teachers = select(Employee).options(
+        with_loader_criteria(Section, Section.id == TeacherRecordLink.section_id),
+        with_loader_criteria(
+            GradeStreamSubject, GradeStreamSubject.id.in_(filtered_gss_subquery)
+        ),
+        joinedload(Employee.teacher_records).joinedload(TeacherRecord.academic_term),
+        joinedload(Employee.teacher_records)
+        .joinedload(TeacherRecord.grade_stream_subject)
+        .joinedload(GradeStreamSubject.subject),
+        joinedload(Employee.teacher_records)
+        .joinedload(TeacherRecord.grade_stream_subject)
+        .joinedload(GradeStreamSubject.stream),
+    )
 
-    employees = session.scalars(stm).all()
+    result = session.scalars(teachers).unique().all()
 
-    return employees
+    return result
 
 
 @router.post("/", response_model=SuccessResponseSchema)

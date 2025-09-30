@@ -8,6 +8,20 @@ import { z } from "zod";
 export const zAcademicTermEnum = z.enum(["1", "2", "3", "4"]);
 
 /**
+ * AcademicTermSchema
+ * This model represents an academic term in the system.
+ */
+export const zAcademicTermSchema = z.object({
+  id: z.optional(z.union([z.uuid(), z.null()])),
+  yearId: z.uuid(),
+  name: zAcademicTermEnum,
+  startDate: z.iso.date(),
+  endDate: z.iso.date(),
+  registrationStart: z.optional(z.union([z.iso.date(), z.null()])),
+  registrationEnd: z.optional(z.union([z.iso.date(), z.null()])),
+});
+
+/**
  * AcademicTermTypeEnum
  */
 export const zAcademicTermTypeEnum = z.enum(["Semester", "Quarter"]);
@@ -443,20 +457,6 @@ export const zGradeLevelEnum = z.enum([
 ]);
 
 /**
- * AcademicTermSchema
- * This model represents an academic term in the system.
- */
-export const zSchemaModelsAcademicTermSchemaAcademicTermSchema = z.object({
-  id: z.optional(z.union([z.uuid(), z.null()])),
-  yearId: z.uuid(),
-  name: zAcademicTermEnum,
-  startDate: z.iso.date(),
-  endDate: z.iso.date(),
-  registrationStart: z.optional(z.union([z.iso.date(), z.null()])),
-  registrationEnd: z.optional(z.union([z.iso.date(), z.null()])),
-});
-
-/**
  * GradeSchema
  * This model represents a grade in the system. It inherits from BaseModel.
  */
@@ -627,7 +627,7 @@ export const zSubjectSchema = z.object({
  */
 export const zYearWithRelatedSchema = z.object({
   events: z.array(zEventSchema),
-  academicTerms: z.array(zSchemaModelsAcademicTermSchemaAcademicTermSchema),
+  academicTerms: z.array(zAcademicTermSchema),
   grades: z.array(zGradeSchema),
   students: z.array(zStudentSchema),
   teachers: z.array(zTeacherSchema),
@@ -686,12 +686,7 @@ export const zTeacherWithRelatedSchema = z.object({
   user: z.optional(z.union([zUserSchema, z.null()])),
   sections: z.optional(z.union([z.array(zSectionSchema), z.null()])),
   years: z.optional(z.union([z.array(zYearSchema), z.null()])),
-  academicTerms: z.optional(
-    z.union([
-      z.array(zSchemaModelsAcademicTermSchemaAcademicTermSchema),
-      z.null(),
-    ]),
-  ),
+  academicTerms: z.optional(z.union([z.array(zAcademicTermSchema), z.null()])),
   grades: z.optional(z.union([z.array(zGradeSchema), z.null()])),
   subjects: z.optional(z.union([z.array(zSubjectSchema), z.null()])),
   id: z.optional(z.union([z.uuid(), z.null()])),
@@ -858,7 +853,7 @@ export const zStudentWithRelatedSchema = z.object({
   subjectYearlyAverages: z.array(zSubjectYearlyAverageSchema),
   assessments: z.array(zAssessmentSchema),
   years: z.array(zYearSchema),
-  academicTerms: z.array(zSchemaModelsAcademicTermSchemaAcademicTermSchema),
+  academicTerms: z.array(zAcademicTermSchema),
   grades: z.array(zGradeSchema),
   subjects: z.array(zSubjectSchema),
   sections: z.array(zSectionSchema),
@@ -912,34 +907,6 @@ export const zSectionWithRelatedSchema = z.object({
 });
 
 /**
- * StreamSchema
- * This model represents a stream in the system.
- */
-export const zStreamSchema = z.object({
-  id: z.uuid(),
-  gradeId: z.uuid(),
-  name: z.string(),
-});
-
-/**
- * SubjectWithRelatedSchema
- */
-export const zSubjectWithRelatedSchema = z.object({
-  year: zYearSchema,
-  teachers: z.array(zTeacherSchema),
-  students: z.array(zStudentSchema),
-  markLists: z.array(zMarkListSchema),
-  streams: z.array(zStreamSchema),
-  grades: z.array(zGradeSchema),
-  id: z.uuid(),
-  yearId: z.uuid(),
-  name: z.string(),
-  code: z.string(),
-  createdAt: z.iso.datetime(),
-  updatedAt: z.iso.datetime(),
-});
-
-/**
  * GradeNestedSchema
  * This model represents the relationships of a GradeSchema.
  * It is used to define the relationships between the GradeSchema and other schemas.
@@ -957,7 +924,6 @@ export const zGradeNestedSchema = z.object({
   streams: z.array(zStreamWithRelatedSchema),
   students: z.array(zStudentWithRelatedSchema),
   sections: z.array(zSectionWithRelatedSchema),
-  subjects: z.array(zSubjectWithRelatedSchema),
 });
 
 /**
@@ -984,6 +950,16 @@ export const zGradeSetupSchema = z.object({
   subjects: z.array(zSubjectSchema),
   streams: z.array(zStreamSetupSchema),
   sections: z.array(zSectionSchema),
+});
+
+/**
+ * StreamSchema
+ * This model represents a stream in the system.
+ */
+export const zStreamSchema = z.object({
+  id: z.uuid(),
+  gradeId: z.uuid(),
+  name: z.string(),
 });
 
 /**
@@ -1311,20 +1287,43 @@ export const zSuccessResponseSchema = z.object({
 });
 
 /**
- * AcademicTermSchema
+ * TeacherSectionDetail
  */
-export const zApiV1RoutersTeachersSchemaAcademicTermSchema = z.object({
-  name: zAcademicTermEnum,
+export const zTeacherSectionDetail = z.object({
+  id: z.uuid(),
+  gradeId: z.uuid(),
+  section: z.string(),
+  teacherSubjects: z.array(zSubjectSchema),
 });
 
 /**
- * TeacherRecordSchema
+ * TeacherGradeDetail
  */
-export const zTeacherRecordSchema = z.object({
-  academicTerm: zApiV1RoutersTeachersSchemaAcademicTermSchema,
-  grade: zGradeSchema,
-  subject: zBasicSubjectSchema,
-  sections: z.array(zSectionSchema),
+export const zTeacherGradeDetail = z.object({
+  id: z.uuid(),
+  grade: z.string(),
+  level: z.string(),
+  hasStream: z.boolean(),
+  sections: z.array(zTeacherSectionDetail),
+  subjects: z.array(zSubjectSchema),
+});
+
+/**
+ * TeacherAcademicTermDetail
+ */
+export const zTeacherAcademicTermDetail = z.object({
+  id: z.uuid(),
+  name: zAcademicTermEnum,
+  grades: z.array(zTeacherGradeDetail),
+});
+
+/**
+ * TeacherYearDetail
+ */
+export const zTeacherYearDetail = z.object({
+  id: z.uuid(),
+  name: z.string(),
+  academicTerms: z.array(zTeacherAcademicTermDetail),
 });
 
 /**
@@ -1338,8 +1337,8 @@ export const zTeacherBasicInfo = z.object({
   fullName: z.string(),
   gender: zGenderEnum,
   status: zEmployeeApplicationStatusEnum,
-  teacherRecords: z.array(zTeacherRecordSchema),
-  subject: zBasicSubjectSchema,
+  subject: z.union([zBasicSubjectSchema, z.null()]),
+  years: z.array(zTeacherYearDetail),
 });
 
 /**

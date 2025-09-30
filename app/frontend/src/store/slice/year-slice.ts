@@ -1,3 +1,4 @@
+import { AcademicTermTypeEnum } from "@/client/types.gen";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface YearState {
@@ -5,6 +6,7 @@ interface YearState {
   name: string | undefined;
   startDate: string | undefined;
   endDate: string | undefined;
+  calendarType: AcademicTermTypeEnum | undefined;
 }
 
 interface YearPayload {
@@ -12,6 +14,7 @@ interface YearPayload {
   name: string;
   startDate: string;
   endDate: string;
+  calendarType: AcademicTermTypeEnum;
 }
 
 const initialState: YearState = {
@@ -19,6 +22,7 @@ const initialState: YearState = {
   name: undefined,
   startDate: undefined,
   endDate: undefined,
+  calendarType: undefined,
 };
 
 export const yearSlice = createSlice({
@@ -30,6 +34,7 @@ export const yearSlice = createSlice({
       state.name = action.payload.name;
       state.startDate = action.payload.startDate;
       state.endDate = action.payload.endDate;
+      state.calendarType = action.payload.calendarType;
     },
   },
 });

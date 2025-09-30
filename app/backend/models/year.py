@@ -12,6 +12,7 @@ from utils.enum import AcademicTermTypeEnum, AcademicYearStatusEnum
 
 if TYPE_CHECKING:
     from models.academic_term import AcademicTerm
+    from models.employee import Employee
     from models.event import Event
     from models.grade import Grade
     from models.student import Student
@@ -77,6 +78,15 @@ class Year(BaseModel):
     students: Mapped[List["Student"]] = relationship(
         "Student",
         secondary="student_year_links",
+        back_populates="years",
+        default_factory=list,
+        repr=False,
+        passive_deletes=True,
+    )
+
+    employees: Mapped[List["Employee"]] = relationship(
+        "Employee",
+        secondary="employee_year_links",
         back_populates="years",
         default_factory=list,
         repr=False,

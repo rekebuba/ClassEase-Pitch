@@ -48,7 +48,7 @@ class TeacherRecord(BaseModel):
     )
 
     # Many-To-One Relationships
-    teacher: Mapped["Employee"] = relationship(
+    employee: Mapped["Employee"] = relationship(
         "Employee",
         back_populates="teacher_records",
         init=False,
@@ -61,6 +61,11 @@ class TeacherRecord(BaseModel):
         init=False,
         repr=False,
         passive_deletes=True,
+    )
+    academic_term_name: AssociationProxy["AcademicTerm"] = association_proxy(
+        "academic_term",
+        "name",
+        default=None,
     )
     grade_stream_subject: Mapped["GradeStreamSubject"] = relationship(
         "GradeStreamSubject",

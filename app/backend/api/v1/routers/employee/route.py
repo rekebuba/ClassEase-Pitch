@@ -8,6 +8,7 @@ from api.v1.routers.dependencies import SessionDep, admin_route
 from api.v1.routers.employee.schema import EmployeeBasicInfo, UpdateEmployeeStatusSchema
 from core.security import get_password_hash
 from models.employee import Employee
+from models.employee_year_link import EmployeeYearLink
 from models.user import User
 from models.year import Year
 from schema.schema import SuccessResponseSchema
@@ -92,6 +93,11 @@ def update_employee_status(
                 status_code=404,
                 detail=f"Employee with ID {employee_id} not found.",
             )
+
+        if employee not in year.employees:
+            link = EmployeeYearLink(employee_id=employee.id, year_id=year.id)
+            session.add(link)
+
         stmt = (
             update(Employee)
             .where(Employee.id == employee_id)

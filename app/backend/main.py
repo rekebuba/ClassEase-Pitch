@@ -1,7 +1,9 @@
 #!/usr/bin/python3
 """Main module for the API"""
 
+import json
 from fastapi import FastAPI, Request
+from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRoute
@@ -51,7 +53,7 @@ async def validation_exception_handler(
     request: Request, exc: ResponseValidationError
 ) -> JSONResponse:
     print("Caught a ResponseValidationError!")
-    print(exc.errors())  # This will print the detailed Pydantic error list
+    print(json.dumps(jsonable_encoder(exc.errors()), indent=2, sort_keys=True))
     return JSONResponse(
         status_code=500,
         content={

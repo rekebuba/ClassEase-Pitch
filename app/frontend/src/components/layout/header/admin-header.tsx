@@ -57,6 +57,7 @@ export default function AdminHeader() {
                   name: year.name,
                   startDate: year.startDate,
                   endDate: year.endDate,
+                  calendarType: year.calendarType,
                 }),
               );
               navigate({ to: `/admin` });

@@ -6,6 +6,38 @@
 export type AcademicTermEnum = "1" | "2" | "3" | "4";
 
 /**
+ * AcademicTermSchema
+ * This model represents an academic term in the system.
+ */
+export type AcademicTermSchema = {
+  /**
+   * Id
+   */
+  id?: string | null;
+  /**
+   * Yearid
+   */
+  yearId: string;
+  name: AcademicTermEnum;
+  /**
+   * Startdate
+   */
+  startDate: string;
+  /**
+   * Enddate
+   */
+  endDate: string;
+  /**
+   * Registrationstart
+   */
+  registrationStart?: string | null;
+  /**
+   * Registrationend
+   */
+  registrationEnd?: string | null;
+};
+
+/**
  * AcademicTermTypeEnum
  */
 export type AcademicTermTypeEnum = "Semester" | "Quarter";
@@ -835,10 +867,6 @@ export type GradeNestedSchema = {
    * Sections
    */
   sections: Array<SectionWithRelatedSchema>;
-  /**
-   * Subjects
-   */
-  subjects: Array<SubjectWithRelatedSchema>;
 };
 
 /**
@@ -1974,7 +2002,7 @@ export type StudentWithRelatedSchema = {
    * Academicterms
    * List of academic terms the student is associated with.
    */
-  academicTerms: Array<SchemaModelsAcademicTermSchemaAcademicTermSchema>;
+  academicTerms: Array<AcademicTermSchema>;
   /**
    * Grades
    * List of grades the student is associated with.
@@ -2269,57 +2297,6 @@ export type SubjectSetupSchema = {
 };
 
 /**
- * SubjectWithRelatedSchema
- */
-export type SubjectWithRelatedSchema = {
-  year: YearSchema;
-  /**
-   * Teachers
-   */
-  teachers: Array<TeacherSchema>;
-  /**
-   * Students
-   */
-  students: Array<StudentSchema>;
-  /**
-   * Marklists
-   */
-  markLists: Array<MarkListSchema>;
-  /**
-   * Streams
-   */
-  streams: Array<StreamSchema>;
-  /**
-   * Grades
-   */
-  grades: Array<GradeSchema>;
-  /**
-   * Id
-   */
-  id: string;
-  /**
-   * Yearid
-   */
-  yearId: string;
-  /**
-   * Name
-   */
-  name: string;
-  /**
-   * Code
-   */
-  code: string;
-  /**
-   * Createdat
-   */
-  createdAt: string;
-  /**
-   * Updatedat
-   */
-  updatedAt: string;
-};
-
-/**
  * SubjectYearlyAverageSchema
  * This model represents the yearly average of a subject for a student.
  */
@@ -2367,6 +2344,21 @@ export type SuccessResponseSchema = {
 };
 
 /**
+ * TeacherAcademicTermDetail
+ */
+export type TeacherAcademicTermDetail = {
+  /**
+   * Id
+   */
+  id: string;
+  name: AcademicTermEnum;
+  /**
+   * Grades
+   */
+  grades: Array<TeacherGradeDetail>;
+};
+
+/**
  * TeacherBasicInfo
  */
 export type TeacherBasicInfo = {
@@ -2392,11 +2384,41 @@ export type TeacherBasicInfo = {
   fullName: string;
   gender: GenderEnum;
   status: EmployeeApplicationStatusEnum;
+  subject: BasicSubjectSchema | null;
   /**
-   * Teacherrecords
+   * Years
    */
-  teacherRecords: Array<TeacherRecordSchema>;
-  subject: BasicSubjectSchema;
+  years: Array<TeacherYearDetail>;
+};
+
+/**
+ * TeacherGradeDetail
+ */
+export type TeacherGradeDetail = {
+  /**
+   * Id
+   */
+  id: string;
+  /**
+   * Grade
+   */
+  grade: string;
+  /**
+   * Level
+   */
+  level: string;
+  /**
+   * Hasstream
+   */
+  hasStream: boolean;
+  /**
+   * Sections
+   */
+  sections: Array<TeacherSectionDetail>;
+  /**
+   * Subjects
+   */
+  subjects: Array<SubjectSchema>;
 };
 
 /**
@@ -2421,19 +2443,6 @@ export type TeacherInfo = {
    */
   createdAt: string;
   teacher: TeacherSchema;
-};
-
-/**
- * TeacherRecordSchema
- */
-export type TeacherRecordSchema = {
-  academicTerm: ApiV1RoutersTeachersSchemaAcademicTermSchema;
-  grade: GradeSchema;
-  subject: BasicSubjectSchema;
-  /**
-   * Sections
-   */
-  sections: Array<SectionSchema>;
 };
 
 /**
@@ -2701,6 +2710,28 @@ export type TeacherSchema = {
 };
 
 /**
+ * TeacherSectionDetail
+ */
+export type TeacherSectionDetail = {
+  /**
+   * Id
+   */
+  id: string;
+  /**
+   * Gradeid
+   */
+  gradeId: string;
+  /**
+   * Section
+   */
+  section: string;
+  /**
+   * Teachersubjects
+   */
+  teacherSubjects: Array<SubjectSchema>;
+};
+
+/**
  * TeacherWithRelatedSchema
  * This model extends TeacherSchema to include relationships.
  */
@@ -2719,7 +2750,7 @@ export type TeacherWithRelatedSchema = {
    * Academicterms
    * List of academic terms the teacher is associated with.
    */
-  academicTerms?: Array<SchemaModelsAcademicTermSchemaAcademicTermSchema> | null;
+  academicTerms?: Array<AcademicTermSchema> | null;
   /**
    * Grades
    * List of grades the teacher is associated with.
@@ -2988,6 +3019,24 @@ export type TeacherWithRelatedSchema = {
    */
   userId?: string | null;
   status?: EmployeeApplicationStatusEnum;
+};
+
+/**
+ * TeacherYearDetail
+ */
+export type TeacherYearDetail = {
+  /**
+   * Id
+   */
+  id: string;
+  /**
+   * Name
+   */
+  name: string;
+  /**
+   * Academicterms
+   */
+  academicTerms: Array<TeacherAcademicTermDetail>;
 };
 
 /**
@@ -3291,7 +3340,7 @@ export type YearWithRelatedSchema = {
   /**
    * Academicterms
    */
-  academicTerms: Array<SchemaModelsAcademicTermSchemaAcademicTermSchema>;
+  academicTerms: Array<AcademicTermSchema>;
   /**
    * Grades
    */
@@ -3334,45 +3383,6 @@ export type YearWithRelatedSchema = {
    * Updatedat
    */
   updatedAt: string;
-};
-
-/**
- * AcademicTermSchema
- */
-export type ApiV1RoutersTeachersSchemaAcademicTermSchema = {
-  name: AcademicTermEnum;
-};
-
-/**
- * AcademicTermSchema
- * This model represents an academic term in the system.
- */
-export type SchemaModelsAcademicTermSchemaAcademicTermSchema = {
-  /**
-   * Id
-   */
-  id?: string | null;
-  /**
-   * Yearid
-   */
-  yearId: string;
-  name: AcademicTermEnum;
-  /**
-   * Startdate
-   */
-  startDate: string;
-  /**
-   * Enddate
-   */
-  endDate: string;
-  /**
-   * Registrationstart
-   */
-  registrationStart?: string | null;
-  /**
-   * Registrationend
-   */
-  registrationEnd?: string | null;
 };
 
 export type LoginData = {

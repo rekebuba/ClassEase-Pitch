@@ -7,6 +7,7 @@ from models.assessment import Assessment
 from models.blacklist_token import BlacklistToken
 from models.ceo import CEO
 from models.employee import Employee
+from models.employee_year_link import EmployeeYearLink
 from models.event import Event
 from models.grade import Grade
 from models.grade_section_link import GradeSectionLink
@@ -69,4 +70,5 @@ __all__ = [
     "User",
     "Year",
     "YearlySubject",
+    "EmployeeYearLink",
 ]

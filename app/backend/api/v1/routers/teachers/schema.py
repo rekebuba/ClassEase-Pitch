@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from schema.models.subject_schema import BasicSubjectSchema
+from schema.models.subject_schema import BasicSubjectSchema, SubjectSchema
 from utils.enum import (
     AcademicTermEnum,
     EmployeeApplicationStatusEnum,
@@ -12,25 +12,56 @@ from utils.enum import (
 from utils.utils import to_camel
 
 
-class AcademicTermSchema(BaseModel):
+class TeacherSectionDetail(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
         populate_by_name=True,
         alias_generator=to_camel,
     )
+
+    id: uuid.UUID
+    grade_id: uuid.UUID
+    section: str
+    teacher_subjects: List[SubjectSchema]
+
+
+class TeacherGradeDetail(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    id: uuid.UUID
+    grade: str
+    level: str
+    has_stream: bool
+    sections: List[TeacherSectionDetail]
+    subjects: List[SubjectSchema]
+
+
+class TeacherAcademicTermDetail(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    id: uuid.UUID
     name: AcademicTermEnum
-    # grade: GradeSchema
+    grades: List[TeacherGradeDetail]
 
 
-class TeacherRecordSchema(BaseModel):
+class TeacherYearDetail(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
         populate_by_name=True,
         alias_generator=to_camel,
     )
 
-    academic_term: AcademicTermSchema
-    # sections: List[SectionSchema]
+    id: uuid.UUID
+    name: str
+    academic_terms: List[TeacherAcademicTermDetail]
 
 
 class TeacherBasicInfo(BaseModel):
@@ -47,8 +78,8 @@ class TeacherBasicInfo(BaseModel):
     full_name: str
     gender: GenderEnum
     status: EmployeeApplicationStatusEnum
-    teacher_records: List[TeacherRecordSchema]
     subject: BasicSubjectSchema | None
+    years: List[TeacherYearDetail]
 
 
 class SectionIDs(BaseModel):
