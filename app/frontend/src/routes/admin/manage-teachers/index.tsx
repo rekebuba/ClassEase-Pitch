@@ -8,8 +8,6 @@ import {
 import { AssignTeacher, TeacherBasicInfo } from "@/client/types.gen";
 import { zAssignTeacher } from "@/client/zod.gen";
 import { ApiState } from "@/components/api-state";
-import { teacherBasicInfoColumns } from "@/components/data-table/manage-teachers/columns";
-import { ManageTeacherTable } from "@/components/data-table/manage-teachers/manage-teachers-table";
 import { CheckboxWithLabel } from "@/components/inputs/checkbox-labeled";
 import { SelectWithLabel } from "@/components/inputs/select-labeled";
 import {
@@ -23,6 +21,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -31,15 +31,33 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Label } from "@/components/ui/label";
 import { SelectItem } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { queryClient } from "@/lib/query-client";
 import { store } from "@/store/main-store";
+import { getInitials } from "@/utils/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Loader, Plus, Users } from "lucide-react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import {
+  BookOpen,
+  Calendar,
+  Edit,
+  Eye,
+  GraduationCap,
+  Loader,
+  Mail,
+  MoreHorizontal,
+  Plus,
+  Users,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import {
   FormProvider,
@@ -168,10 +186,207 @@ function RouteComponent() {
             </div>
           </CardHeader>
           <CardContent>
-            <ManageTeacherTable
-              columns={teacherBasicInfoColumns(handleView, teachers || [])}
-              data={teachers || []}
-            />
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {teachers?.map((teacher) => (
+                <Card
+                  key={teacher.id}
+                  className="bg-muted/30 border-border hover:border-primary/50 transition-all duration-300 hover:shadow-lg"
+                >
+                  <CardContent className="p-6">
+                    {/* Header with Avatar and Actions */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="w-14 h-14 ring-2 ring-primary/20">
+                          <AvatarImage src={undefined} />
+                          <AvatarFallback className="bg-primary/10 text-primary font-semibold text-lg">
+                            {getInitials(teacher.firstName, teacher.lastName)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <h3 className="font-semibold text-lg text-foreground">
+                            {teacher.firstName} {teacher.lastName}
+                          </h3>
+                          <div className="flex items-center gap-2 mt-1">
+                            {getStatusBadge(teacher.status)}
+                          </div>
+                        </div>
+                      </div>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="w-8 h-8 -mt-1"
+                          >
+                            <MoreHorizontal className="w-4 h-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem asChild>
+                            <Link
+                              to={`/teacher/${teacher.id}`}
+                              className="flex items-center"
+                            >
+                              <Eye className="w-4 h-4 mr-2" />
+                              View Profile
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem>
+                            <Edit className="w-4 h-4 mr-2" />
+                            Edit Details
+                          </DropdownMenuItem>
+                          <AssignmentDialog
+                            teacherId={teacher.id}
+                            trigger={
+                              <DropdownMenuItem
+                                onSelect={(e) => e.preventDefault()}
+                              >
+                                <Plus className="w-4 h-4 mr-2" />
+                                Assign to Class
+                              </DropdownMenuItem>
+                            }
+                          />
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+
+                    {/* Contact Information */}
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4 pb-4 border-b border-border">
+                      <Mail className="w-4 h-4 flex-shrink-0" />
+                      <span className="truncate">{teacher.email}</span>
+                    </div>
+
+                    {/* Main Subject */}
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <BookOpen className="w-4 h-4 text-primary" />
+                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Main Subject
+                        </span>
+                      </div>
+                      <div className="font-semibold text-foreground text-base">
+                        {teacher.mainSubject}
+                      </div>
+                    </div>
+
+                    {/* Secondary Subjects */}
+                    {teacher.secondarySubjects.length > 0 && (
+                      <div className="mb-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <GraduationCap className="w-4 h-4 text-primary" />
+                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                            Additional Subjects
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5">
+                          {teacher.secondarySubjects.map((subject, index) => (
+                            <Badge
+                              key={index}
+                              variant="secondary"
+                              className="text-xs"
+                            >
+                              {subject}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Current Assignments */}
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Users className="w-4 h-4 text-primary" />
+                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Current Assignments
+                        </span>
+                      </div>
+                      <div className="space-y-1.5">
+                        {teacher.currentAssignments.map((assignment, index) => (
+                          <div
+                            key={index}
+                            className="flex items-center justify-between text-sm bg-background/50 rounded px-2 py-1.5"
+                          >
+                            <span className="font-medium text-foreground">
+                              {assignment.grade} {assignment.section}
+                            </span>
+                            <span className="text-muted-foreground text-xs">
+                              {assignment.subject}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Stats Row */}
+                    <div className="grid grid-cols-3 gap-3 pt-4 border-t border-border">
+                      <div className="text-center">
+                        <div className="flex items-center justify-center gap-1 mb-1">
+                          <Users className="w-3.5 h-3.5 text-muted-foreground" />
+                        </div>
+                        <div className="font-semibold text-foreground">
+                          {teacher.totalStudents}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Students
+                        </div>
+                      </div>
+
+                      <div className="text-center border-x border-border">
+                        <div className="flex items-center justify-center gap-1 mb-1">
+                          <Star className="w-3.5 h-3.5 text-chart-4 fill-chart-4" />
+                        </div>
+                        <div className="font-semibold text-foreground">
+                          {teacher.performanceRating}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Rating
+                        </div>
+                      </div>
+
+                      <div className="text-center">
+                        <div className="flex items-center justify-center gap-1 mb-1">
+                          <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
+                        </div>
+                        <div className="font-semibold text-foreground">
+                          {getYearsOfExperience(teacher.hireDate)}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Years
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quick Actions */}
+                    <div className="flex gap-2 mt-4">
+                      <Button
+                        asChild
+                        variant="outline"
+                        size="sm"
+                        className="flex-1 border-border bg-transparent"
+                      >
+                        <Link to={`/teacher/${teacher.id}`}>
+                          <Eye className="w-3.5 h-3.5 mr-1.5" />
+                          View Profile
+                        </Link>
+                      </Button>
+                      <AssignmentDialog
+                        teacherId={teacher.id}
+                        trigger={
+                          <Button
+                            size="sm"
+                            className="flex-1 bg-primary hover:bg-primary/90"
+                          >
+                            <Plus className="w-3.5 h-3.5 mr-1.5" />
+                            Assign
+                          </Button>
+                        }
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
           </CardContent>
         </Card>
       </div>
