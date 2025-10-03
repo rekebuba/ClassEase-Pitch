@@ -54,6 +54,7 @@ import {
   updateEmployeeStatus,
   getTeachers,
   assignTeacher,
+  getAcademicTerms,
 } from "../sdk.gen";
 import {
   queryOptions,
@@ -164,6 +165,7 @@ import type {
   AssignTeacherData,
   AssignTeacherError,
   AssignTeacherResponse,
+  GetAcademicTermsData,
 } from "../types.gen";
 import type { AxiosError } from "axios";
 import { client as _heyApiClient } from "../client.gen";
@@ -1995,4 +1997,29 @@ export const assignTeacherMutation = (
     },
   };
   return mutationOptions;
+};
+
+export const getAcademicTermsQueryKey = (
+  options: Options<GetAcademicTermsData>,
+) => createQueryKey("getAcademicTerms", options);
+
+/**
+ * Get Academic Terms
+ * This endpoint will return a list of academic terms for a given year.
+ */
+export const getAcademicTermsOptions = (
+  options: Options<GetAcademicTermsData>,
+) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getAcademicTerms({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getAcademicTermsQueryKey(options),
+  });
 };

@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from api.v1.routers.academic_term import route as academic_term_router
 from api.v1.routers.employee import route as employee_router
 from api.v1.routers.grades import route as grade_router
 from api.v1.routers.login import route as auth_router
@@ -27,3 +28,4 @@ api_router.include_router(private_router.router)
 api_router.include_router(student_router.router)
 api_router.include_router(employee_router.router)
 api_router.include_router(teachers_router.router)
+api_router.include_router(academic_term_router.router)

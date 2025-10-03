@@ -12,13 +12,13 @@ export const zAcademicTermEnum = z.enum(["1", "2", "3", "4"]);
  * This model represents an academic term in the system.
  */
 export const zAcademicTermSchema = z.object({
-  id: z.optional(z.union([z.uuid(), z.null()])),
+  id: z.uuid(),
   yearId: z.uuid(),
   name: zAcademicTermEnum,
   startDate: z.iso.date(),
   endDate: z.iso.date(),
-  registrationStart: z.optional(z.union([z.iso.date(), z.null()])),
-  registrationEnd: z.optional(z.union([z.iso.date(), z.null()])),
+  registrationStart: z.union([z.iso.date(), z.null()]),
+  registrationEnd: z.union([z.iso.date(), z.null()]),
 });
 
 /**
@@ -1287,43 +1287,13 @@ export const zSuccessResponseSchema = z.object({
 });
 
 /**
- * TeacherSectionDetail
- */
-export const zTeacherSectionDetail = z.object({
-  id: z.uuid(),
-  gradeId: z.uuid(),
-  section: z.string(),
-  teacherSubjects: z.array(zSubjectSchema),
-});
-
-/**
  * TeacherGradeDetail
  */
 export const zTeacherGradeDetail = z.object({
   id: z.uuid(),
   grade: z.string(),
-  level: z.string(),
   hasStream: z.boolean(),
-  sections: z.array(zTeacherSectionDetail),
-  subjects: z.array(zSubjectSchema),
-});
-
-/**
- * TeacherAcademicTermDetail
- */
-export const zTeacherAcademicTermDetail = z.object({
-  id: z.uuid(),
-  name: zAcademicTermEnum,
-  grades: z.array(zTeacherGradeDetail),
-});
-
-/**
- * TeacherYearDetail
- */
-export const zTeacherYearDetail = z.object({
-  id: z.uuid(),
-  name: z.string(),
-  academicTerms: z.array(zTeacherAcademicTermDetail),
+  subjects: z.array(zBasicSubjectSchema),
 });
 
 /**
@@ -1335,10 +1305,12 @@ export const zTeacherBasicInfo = z.object({
   fatherName: z.string(),
   grandFatherName: z.string(),
   fullName: z.string(),
+  email: z.email(),
   gender: zGenderEnum,
   status: zEmployeeApplicationStatusEnum,
-  subject: z.union([zBasicSubjectSchema, z.null()]),
-  years: z.array(zTeacherYearDetail),
+  majorSubject: z.optional(z.union([z.string(), z.null()])),
+  otherSubjects: z.array(zBasicSubjectSchema),
+  grades: z.array(zTeacherGradeDetail),
 });
 
 /**
@@ -2101,6 +2073,8 @@ export const zGetTeachersData = z.object({
   query: z.optional(
     z.object({
       q: z.optional(z.union([z.string(), z.null()])),
+      yearId: z.optional(z.union([z.uuid(), z.null()])),
+      academicTermId: z.optional(z.union([z.uuid(), z.null()])),
     }),
   ),
 });
@@ -2121,3 +2095,18 @@ export const zAssignTeacherData = z.object({
  * Successful Response
  */
 export const zAssignTeacherResponse = zSuccessResponseSchema;
+
+export const zGetAcademicTermsData = z.object({
+  body: z.optional(z.never()),
+  path: z.optional(z.never()),
+  query: z.object({
+    yearId: z.uuid(),
+    q: z.optional(z.union([z.string(), z.null()])),
+  }),
+});
+
+/**
+ * Response Get Academic Terms Api V1 Terms  Get
+ * Successful Response
+ */
+export const zGetAcademicTermsResponse = z.array(zAcademicTermSchema);

@@ -157,6 +157,9 @@ import type {
   AssignTeacherData,
   AssignTeacherResponses,
   AssignTeacherErrors,
+  GetAcademicTermsData,
+  GetAcademicTermsResponses,
+  GetAcademicTermsErrors,
 } from "./types.gen";
 import {
   zLoginResponse,
@@ -211,6 +214,7 @@ import {
   zUpdateEmployeeStatusResponse,
   zGetTeachersResponse,
   zAssignTeacherResponse,
+  zGetAcademicTermsResponse,
 } from "./zod.gen";
 import { client as _heyApiClient } from "./client.gen";
 
@@ -1626,5 +1630,32 @@ export const assignTeacher = <ThrowOnError extends boolean = false>(
       "Content-Type": "application/json",
       ...options.headers,
     },
+  });
+};
+
+/**
+ * Get Academic Terms
+ * This endpoint will return a list of academic terms for a given year.
+ */
+export const getAcademicTerms = <ThrowOnError extends boolean = false>(
+  options: Options<GetAcademicTermsData, ThrowOnError>,
+) => {
+  return (options.client ?? _heyApiClient).get<
+    GetAcademicTermsResponses,
+    GetAcademicTermsErrors,
+    ThrowOnError
+  >({
+    responseType: "json",
+    responseValidator: async (data) => {
+      return await zGetAcademicTermsResponse.parseAsync(data);
+    },
+    security: [
+      {
+        scheme: "bearer",
+        type: "http",
+      },
+    ],
+    url: "/api/v1/terms/",
+    ...options,
   });
 };

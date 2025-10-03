@@ -26,13 +26,13 @@ class AcademicTermSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: uuid.UUID | None = None
+    id: uuid.UUID
     year_id: uuid.UUID
     name: AcademicTermEnum
     start_date: date
     end_date: date
-    registration_start: Optional[date] = None
-    registration_end: Optional[date] = None
+    registration_start: Optional[date]
+    registration_end: Optional[date]
 
     @classmethod
     def default_fields(cls) -> set[str]:

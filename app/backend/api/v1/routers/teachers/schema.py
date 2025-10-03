@@ -1,11 +1,10 @@
 import uuid
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
-from schema.models.subject_schema import BasicSubjectSchema, SubjectSchema
+from schema.models.subject_schema import BasicSubjectSchema
 from utils.enum import (
-    AcademicTermEnum,
     EmployeeApplicationStatusEnum,
     GenderEnum,
 )
@@ -20,9 +19,8 @@ class TeacherSectionDetail(BaseModel):
     )
 
     id: uuid.UUID
-    grade_id: uuid.UUID
     section: str
-    teacher_subjects: List[SubjectSchema]
+    teacher_subjects: List[BasicSubjectSchema]
 
 
 class TeacherGradeDetail(BaseModel):
@@ -34,34 +32,8 @@ class TeacherGradeDetail(BaseModel):
 
     id: uuid.UUID
     grade: str
-    level: str
     has_stream: bool
-    sections: List[TeacherSectionDetail]
-    subjects: List[SubjectSchema]
-
-
-class TeacherAcademicTermDetail(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
-    id: uuid.UUID
-    name: AcademicTermEnum
-    grades: List[TeacherGradeDetail]
-
-
-class TeacherYearDetail(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
-    id: uuid.UUID
-    name: str
-    academic_terms: List[TeacherAcademicTermDetail]
+    subjects: List[BasicSubjectSchema]
 
 
 class TeacherBasicInfo(BaseModel):
@@ -76,10 +48,24 @@ class TeacherBasicInfo(BaseModel):
     father_name: str
     grand_father_name: str
     full_name: str
+    personal_email: EmailStr = Field(alias="email")
     gender: GenderEnum
     status: EmployeeApplicationStatusEnum
-    subject: BasicSubjectSchema | None
-    years: List[TeacherYearDetail]
+    major_subject: Optional[str] = None
+    subjects: List[BasicSubjectSchema] = Field(alias="otherSubjects")
+    grades: List[TeacherGradeDetail]
+
+
+class TeachersQuery(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    q: Optional[str] = None
+    year_id: Optional[uuid.UUID] = None
+    academic_term_id: Optional[uuid.UUID] = None
 
 
 class SectionIDs(BaseModel):

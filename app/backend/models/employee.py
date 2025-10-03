@@ -147,6 +147,11 @@ class Employee(BaseModel):
         nullable=True,
         default=None,
     )  # For Teaching positions
+    major_subject: AssociationProxy[Optional["Subject"]] = association_proxy(
+        "subject",
+        "name",
+        default=None,
+    )
     status: Mapped[EmployeeApplicationStatusEnum] = mapped_column(
         Enum(
             EmployeeApplicationStatusEnum,

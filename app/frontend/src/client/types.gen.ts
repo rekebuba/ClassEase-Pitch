@@ -13,7 +13,7 @@ export type AcademicTermSchema = {
   /**
    * Id
    */
-  id?: string | null;
+  id: string;
   /**
    * Yearid
    */
@@ -30,11 +30,11 @@ export type AcademicTermSchema = {
   /**
    * Registrationstart
    */
-  registrationStart?: string | null;
+  registrationStart: string | null;
   /**
    * Registrationend
    */
-  registrationEnd?: string | null;
+  registrationEnd: string | null;
 };
 
 /**
@@ -2344,21 +2344,6 @@ export type SuccessResponseSchema = {
 };
 
 /**
- * TeacherAcademicTermDetail
- */
-export type TeacherAcademicTermDetail = {
-  /**
-   * Id
-   */
-  id: string;
-  name: AcademicTermEnum;
-  /**
-   * Grades
-   */
-  grades: Array<TeacherGradeDetail>;
-};
-
-/**
  * TeacherBasicInfo
  */
 export type TeacherBasicInfo = {
@@ -2382,13 +2367,24 @@ export type TeacherBasicInfo = {
    * Fullname
    */
   fullName: string;
+  /**
+   * Email
+   */
+  email: string;
   gender: GenderEnum;
   status: EmployeeApplicationStatusEnum;
-  subject: BasicSubjectSchema | null;
   /**
-   * Years
+   * Majorsubject
    */
-  years: Array<TeacherYearDetail>;
+  majorSubject?: string | null;
+  /**
+   * Othersubjects
+   */
+  otherSubjects: Array<BasicSubjectSchema>;
+  /**
+   * Grades
+   */
+  grades: Array<TeacherGradeDetail>;
 };
 
 /**
@@ -2404,21 +2400,13 @@ export type TeacherGradeDetail = {
    */
   grade: string;
   /**
-   * Level
-   */
-  level: string;
-  /**
    * Hasstream
    */
   hasStream: boolean;
   /**
-   * Sections
-   */
-  sections: Array<TeacherSectionDetail>;
-  /**
    * Subjects
    */
-  subjects: Array<SubjectSchema>;
+  subjects: Array<BasicSubjectSchema>;
 };
 
 /**
@@ -2710,28 +2698,6 @@ export type TeacherSchema = {
 };
 
 /**
- * TeacherSectionDetail
- */
-export type TeacherSectionDetail = {
-  /**
-   * Id
-   */
-  id: string;
-  /**
-   * Gradeid
-   */
-  gradeId: string;
-  /**
-   * Section
-   */
-  section: string;
-  /**
-   * Teachersubjects
-   */
-  teacherSubjects: Array<SubjectSchema>;
-};
-
-/**
  * TeacherWithRelatedSchema
  * This model extends TeacherSchema to include relationships.
  */
@@ -3019,24 +2985,6 @@ export type TeacherWithRelatedSchema = {
    */
   userId?: string | null;
   status?: EmployeeApplicationStatusEnum;
-};
-
-/**
- * TeacherYearDetail
- */
-export type TeacherYearDetail = {
-  /**
-   * Id
-   */
-  id: string;
-  /**
-   * Name
-   */
-  name: string;
-  /**
-   * Academicterms
-   */
-  academicTerms: Array<TeacherAcademicTermDetail>;
 };
 
 /**
@@ -4823,6 +4771,14 @@ export type GetTeachersData = {
      * Q
      */
     q?: string | null;
+    /**
+     * Yearid
+     */
+    yearId?: string | null;
+    /**
+     * Academictermid
+     */
+    academicTermId?: string | null;
   };
   url: "/api/v1/teachers/";
 };
@@ -4872,6 +4828,43 @@ export type AssignTeacherResponses = {
 
 export type AssignTeacherResponse =
   AssignTeacherResponses[keyof AssignTeacherResponses];
+
+export type GetAcademicTermsData = {
+  body?: never;
+  path?: never;
+  query: {
+    /**
+     * Yearid
+     */
+    yearId: string;
+    /**
+     * Q
+     */
+    q?: string | null;
+  };
+  url: "/api/v1/terms/";
+};
+
+export type GetAcademicTermsErrors = {
+  /**
+   * Validation Error
+   */
+  422: HttpValidationError;
+};
+
+export type GetAcademicTermsError =
+  GetAcademicTermsErrors[keyof GetAcademicTermsErrors];
+
+export type GetAcademicTermsResponses = {
+  /**
+   * Response Get Academic Terms Api V1 Terms  Get
+   * Successful Response
+   */
+  200: Array<AcademicTermSchema>;
+};
+
+export type GetAcademicTermsResponse =
+  GetAcademicTermsResponses[keyof GetAcademicTermsResponses];
 
 export type ClientOptions = {
   baseURL: "http://backend:8000" | (string & {});

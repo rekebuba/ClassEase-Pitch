@@ -194,7 +194,6 @@ def get_detail_grades_by_year_id(
             selectinload(Grade.year),
             selectinload(Grade.sections),
             selectinload(Grade.streams),
-            selectinload(Grade.teachers),
             selectinload(Grade.students),
             selectinload(Grade.student_term_records),
         )

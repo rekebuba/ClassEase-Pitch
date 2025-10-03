@@ -1,20 +1,17 @@
-from typing import Annotated, List, Optional, Sequence
-import uuid
+from typing import Annotated, List, Sequence
 
 from fastapi import APIRouter, HTTPException, Query
-from pydantic import BaseModel, ConfigDict
-from sqlalchemy import and_, cast, func, select
-from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy import select
 from sqlalchemy.orm import (
-    with_loader_criteria,
-    selectinload,
-    contains_eager,
     joinedload,
+    with_loader_criteria,
 )
+
 from api.v1.routers.dependencies import SessionDep, admin_route
 from api.v1.routers.teachers.schema import (
     AssignTeacher,
     TeacherBasicInfo,
+    TeachersQuery,
 )
 from models.academic_term import AcademicTerm
 from models.employee import Employee
@@ -22,76 +19,36 @@ from models.grade import Grade
 from models.grade_stream_subject import GradeStreamSubject
 from models.section import Section
 from models.stream import Stream
-from models.subject import Subject
 from models.teacher_record import TeacherRecord
 from models.teacher_record_link import TeacherRecordLink
-from schema.models.academic_term_schema import AcademicTermSchema
-from schema.models.grade_schema import GradeSchema
-from schema.models.section_schema import SectionSchema
-from schema.models.subject_schema import SubjectSchema
+from models.year import Year
 from schema.schema import SuccessResponseSchema
-from utils.enum import AcademicTermEnum, EmployeePositionEnum
-from utils.utils import to_camel
+from utils.enum import EmployeePositionEnum
 
 router = APIRouter(prefix="/teachers", tags=["Teachers"])
-
-
-class TestSchemaSection(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
-    id: uuid.UUID
-    grade_id: uuid.UUID
-    section: str
-    teacher_subjects: List[SubjectSchema]
-
-
-class TestGSS(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
-    grade: str
-    sections: List[TestSchemaSection]
-    subjects: List[SubjectSchema]
-
-
-class TestTeacherRecord(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
-    id: uuid.UUID
-    academic_term: AcademicTermSchema
-    academic_term_id: uuid.UUID
-    name: AcademicTermEnum
-    # grade: TestGSS
-
-
-class TestSchema(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
-    teacher_records: List[TestTeacherRecord]
 
 
 @router.get("/", response_model=List[TeacherBasicInfo])
 def get_teachers(
     session: SessionDep,
     user_in: admin_route,
-    q: Annotated[Optional[str], Query()] = None,
+    q: Annotated[TeachersQuery, Query()],
 ) -> Sequence[Employee]:
     """This endpoint will return employees based on the provided filters."""
+    if session.query(Year).where(Year.id == q.year_id).first() is None:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Year with ID {q.year_id} not found.",
+        )
+
+    if (
+        session.query(AcademicTerm).where(AcademicTerm.id == q.academic_term_id).first()
+        is None
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Academic Term with ID {q.academic_term_id} not found.",
+        )
 
     filtered_gss_subquery = (
         select(GradeStreamSubject.id)
@@ -112,6 +69,8 @@ def get_teachers(
         with_loader_criteria(
             GradeStreamSubject, GradeStreamSubject.id.in_(filtered_gss_subquery)
         ),
+        with_loader_criteria(Year, Year.id == q.year_id),
+        with_loader_criteria(AcademicTerm, AcademicTerm.id == q.academic_term_id),
         joinedload(Employee.teacher_records).joinedload(TeacherRecord.academic_term),
         joinedload(Employee.teacher_records)
         .joinedload(TeacherRecord.grade_stream_subject)
