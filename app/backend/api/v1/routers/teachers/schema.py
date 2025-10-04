@@ -51,7 +51,7 @@ class TeacherBasicInfo(BaseModel):
     personal_email: EmailStr = Field(alias="email")
     gender: GenderEnum
     status: EmployeeApplicationStatusEnum
-    major_subject: Optional[str] = None
+    subject: Optional[BasicSubjectSchema] = Field(alias="mainSubject")
     subjects: List[BasicSubjectSchema] = Field(alias="otherSubjects")
     grades: List[TeacherGradeDetail]
 

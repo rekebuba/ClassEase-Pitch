@@ -58,17 +58,13 @@ import {
   Loader,
   Mail,
   MoreHorizontal,
+  Plus,
   Search,
   UserPlus,
   Users,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import {
-  FormProvider,
-  SubmitHandler,
-  useForm,
-  UseFormReturn,
-} from "react-hook-form";
+import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/manage-teachers/")({
@@ -98,19 +94,27 @@ export const Route = createFileRoute("/admin/manage-teachers/")({
 function RouteComponent() {
   const yearId = store.getState().year.id;
   const navigate = useNavigate();
-  const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedAcademicTerm, setSelectedAcademicTerm] = useState<
-    string | null
-  >(null);
+  const [selectedAcademicTerm, setSelectedAcademicTerm] = useState<string>("");
 
-  const { data: academicTerms } = useQuery({
+  const {
+    data: academicTerms,
+    isLoading: isLoadingAcademicTerms,
+    error: isAcademicTermsError,
+  } = useQuery({
     ...getAcademicTermsOptions({
       query: { yearId: yearId! },
     }),
     enabled: !!yearId,
   });
+
+  useEffect(() => {
+    if (academicTerms && academicTerms.length > 0) {
+      const firstTerm = academicTerms[0];
+      setSelectedAcademicTerm(firstTerm.id);
+    }
+  }, [academicTerms]);
 
   const getTeacherQueryConfig = () => ({
     query: { q: "", yearId: yearId!, academicTermId: selectedAcademicTerm },
@@ -121,60 +125,9 @@ function RouteComponent() {
     enabled: !!yearId && !!selectedAcademicTerm,
   });
 
-  const [defaultValues] = useState<AssignTeacher>({
-    teacherId: "",
-    yearId: yearId!,
-    subjectId: "",
-    grade: {
-      id: "",
-      streamId: "",
-      sections: [],
-    },
-  });
-
-  const assignTeacherForm = useForm<AssignTeacher>({
-    resolver: zodResolver(zAssignTeacher),
-    defaultValues,
-  });
-
-  const mutation = useMutation({
-    ...assignTeacherMutation(),
-    onSuccess: (success) => {
-      toast.success(success.message, {
-        style: { color: "green" },
-      });
-      queryClient.invalidateQueries(
-        getTeachersOptions(getTeacherQueryConfig()),
-      );
-      assignTeacherForm.reset(defaultValues);
-      setFormDialogOpen(false);
-    },
-    onError: (error) => {
-      const detail = error.response?.data.detail;
-
-      if (detail && Array.isArray(detail) && detail.length > 0) {
-        const first = detail[0];
-        if (first?.loc?.[1]) {
-          assignTeacherForm.setError(first.loc[1] as keyof AssignTeacher, {
-            type: "server",
-            message: first.msg,
-          });
-        }
-      } else if (detail && typeof detail === "string") {
-        toast.error(detail || "Something went wrong. Please try again.");
-      }
-    },
-  });
-
-  const submitAssignTeacher: SubmitHandler<AssignTeacher> = (data) => {
-    mutation.mutate({
-      body: data,
-    });
-  };
-
-  const handleView = (employeeId: string) => {
-    navigate({ to: "/admin/employees/$employeeId", params: { employeeId } });
-  };
+  // const handleView = (employeeId: string) => {
+  //   navigate({ to: "/admin/employees/$employeeId", params: { employeeId } });
+  // };
 
   const teacherGrades = (length: number) => {
     switch (length) {
@@ -202,21 +155,18 @@ function RouteComponent() {
             </CardTitle>
           </div>
           <div className="flex items-center gap-2">
-            <AlertDialog open={formDialogOpen} onOpenChange={setFormDialogOpen}>
-              <AlertDialogTrigger asChild>
-                <Button className="bg-primary hover:bg-primary/90">
-                  <UserPlus className="w-4 h-4 mr-2" />
-                  Add Teacher
+            <FormDialog
+              teachers={teachers || []}
+              trigger={
+                <Button
+                  size="sm"
+                  className="flex-1 bg-primary hover:bg-primary/90"
+                >
+                  <UserPlus className="w-3.5 h-3.5 mr-1.5" />
+                  Assign
                 </Button>
-              </AlertDialogTrigger>
-
-              <FormDialog
-                assignTeacherForm={assignTeacherForm}
-                teachers={teachers || []}
-                submitAssignTeacher={submitAssignTeacher}
-                isAssignTeacherPending={mutation.isPending}
-              />
-            </AlertDialog>
+              }
+            />
           </div>
         </div>
 
@@ -231,21 +181,26 @@ function RouteComponent() {
             />
           </div>
 
-          <Select
-            defaultValue={academicTerms?.[0]?.name}
-            onValueChange={setSelectedAcademicTerm}
+          <ApiState
+            isLoading={isLoadingAcademicTerms}
+            error={isAcademicTermsError?.message}
           >
-            <SelectTrigger className="w-[280px]">
-              <SelectValue placeholder="Academic Term" />
-            </SelectTrigger>
-            <SelectContent>
-              {academicTerms?.map((term) => (
-                <SelectItem key={term.id} value={term.id}>
-                  Term {term.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            <Select
+              defaultValue={selectedAcademicTerm}
+              onValueChange={setSelectedAcademicTerm}
+            >
+              <SelectTrigger className="w-[280px]">
+                <SelectValue placeholder="Academic Term" />
+              </SelectTrigger>
+              <SelectContent>
+                {academicTerms?.map((term) => (
+                  <SelectItem key={term.id} value={term.id}>
+                    Term {term.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </ApiState>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -347,7 +302,7 @@ function RouteComponent() {
                     </span>
                   </div>
                   <div className="font-semibold text-foreground text-base">
-                    {teacher.majorSubject}
+                    {teacher.mainSubject?.name}
                   </div>
                 </div>
 
@@ -425,18 +380,20 @@ function RouteComponent() {
                       View Profile
                     </Link>
                   </Button>
-                  {/* <AssignmentDialog
-                        teacherId={teacher.id}
-                        trigger={
-                          <Button
-                            size="sm"
-                            className="flex-1 bg-primary hover:bg-primary/90"
-                          >
-                            <Plus className="w-3.5 h-3.5 mr-1.5" />
-                            Assign
-                          </Button>
-                        }
-                      /> */}
+                  <FormDialog
+                    teachers={teachers || []}
+                    teacherId={teacher.id}
+                    subjectId={teacher.mainSubject?.id}
+                    trigger={
+                      <Button
+                        size="sm"
+                        className="flex-1 bg-primary hover:bg-primary/90"
+                      >
+                        <Plus className="w-3.5 h-3.5 mr-1.5" />
+                        Assign
+                      </Button>
+                    }
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -448,17 +405,35 @@ function RouteComponent() {
 }
 
 function FormDialog({
-  assignTeacherForm,
   teachers,
-  submitAssignTeacher,
-  isAssignTeacherPending,
+  teacherId,
+  subjectId,
+  trigger,
 }: {
-  assignTeacherForm: UseFormReturn<AssignTeacher>;
   teachers: TeacherBasicInfo[];
-  submitAssignTeacher: (data: AssignTeacher) => void;
-  isAssignTeacherPending: boolean;
+  teacherId?: string;
+  subjectId?: string;
+  trigger?: React.ReactNode;
 }) {
+  const [formDialogOpen, setFormDialogOpen] = useState(false);
   const yearId = store.getState().year.id;
+
+  const [defaultValues] = useState<AssignTeacher>({
+    teacherId: teacherId || "",
+    yearId: yearId!,
+    subjectId: subjectId || "",
+    grade: {
+      id: "",
+      streamId: "",
+      sections: [],
+    },
+  });
+
+  const assignTeacherForm = useForm<AssignTeacher>({
+    resolver: zodResolver(zAssignTeacher),
+    defaultValues,
+  });
+
   const {
     formState: { isDirty },
     watch,
@@ -499,6 +474,41 @@ function FormDialog({
     enabled: !!watchForm.grade.id,
   });
 
+  const mutation = useMutation({
+    ...assignTeacherMutation(),
+    onSuccess: (success) => {
+      toast.success(success.message, {
+        style: { color: "green" },
+      });
+      queryClient.invalidateQueries({
+        queryKey: getTeachersOptions().queryKey,
+      });
+      assignTeacherForm.reset(defaultValues);
+      setFormDialogOpen(false);
+    },
+    onError: (error) => {
+      const detail = error.response?.data.detail;
+
+      if (detail && Array.isArray(detail) && detail.length > 0) {
+        const first = detail[0];
+        if (first?.loc?.[1]) {
+          assignTeacherForm.setError(first.loc[1] as keyof AssignTeacher, {
+            type: "server",
+            message: first.msg,
+          });
+        }
+      } else if (detail && typeof detail === "string") {
+        toast.error(detail || "Something went wrong. Please try again.");
+      }
+    },
+  });
+
+  const submitAssignTeacher: SubmitHandler<AssignTeacher> = (data) => {
+    mutation.mutate({
+      body: data,
+    });
+  };
+
   const selectedGrade = useMemo(() => {
     return subject?.grades.find((grade) => grade.id === watchForm.grade.id);
   }, [subject, watchForm.grade.id]);
@@ -506,7 +516,7 @@ function FormDialog({
   const defaultSubject = useMemo(() => {
     if (!watchForm.teacherId) return undefined;
     return teachers.find((teacher) => teacher.id === watchForm.teacherId)
-      ?.subject.id;
+      ?.mainSubject?.id;
   }, [teachers, watchForm.teacherId]);
 
   useEffect(() => {
@@ -536,125 +546,138 @@ function FormDialog({
     };
   };
 
+  const defaultTrigger = (
+    <Button className="bg-primary hover:bg-primary/90">
+      <Plus className="w-4 h-4 mr-2" />
+      New Assignment
+    </Button>
+  );
+
   console.log(watchForm);
   return (
-    <AlertDialogContent>
-      <AlertDialogHeader>
-        <AlertDialogTitle>Create New Assignment</AlertDialogTitle>
-        <AlertDialogDescription>
-          Assign a teacher to a specific grade, section, and subject.
-        </AlertDialogDescription>
-      </AlertDialogHeader>
-      <Separator />
-      <FormProvider {...assignTeacherForm}>
-        <div className="space-y-6">
-          <SelectWithLabel<AssignTeacher, string>
-            fieldTitle="Teacher *"
-            nameInSchema="teacherId"
-          >
-            {teachers.map((teacher) => (
-              <SelectItem key={teacher.id} value={teacher.id}>
-                {teacher.fullName} - {teacher.majorSubject}
-              </SelectItem>
-            ))}
-          </SelectWithLabel>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <AlertDialog open={formDialogOpen} onOpenChange={setFormDialogOpen}>
+      <AlertDialogTrigger asChild>
+        {trigger || defaultTrigger}
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Create New Assignment</AlertDialogTitle>
+          <AlertDialogDescription>
+            Assign a teacher to a specific grade, section, and subject.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <Separator />
+        <FormProvider {...assignTeacherForm}>
+          <div className="space-y-6">
             <SelectWithLabel<AssignTeacher, string>
-              fieldTitle="Subject *"
-              nameInSchema="subjectId"
+              fieldTitle="Teacher *"
+              nameInSchema="teacherId"
             >
-              <ApiState
-                isLoading={isSubjectsLoading}
-                error={isSubjectsError?.message}
-              >
-                {subjects?.map((subject) => (
-                  <SelectItem key={subject.id} value={subject.id}>
-                    {subject.name}
-                  </SelectItem>
-                ))}
-              </ApiState>
-            </SelectWithLabel>
-            <SelectWithLabel<AssignTeacher, AssignTeacher["grade"]>
-              fieldTitle="Grade *"
-              nameInSchema="grade"
-              getObjects={(joinedId) => getGradeObject(joinedId)}
-            >
-              <ApiState
-                isLoading={isSubjectLoading}
-                error={isSubjectError?.message}
-              >
-                {subject?.grades.map((grade) => (
-                  <>
-                    {!grade.hasStream ? (
-                      <SelectItem key={grade.id} value={joinId(grade.id)}>
-                        Grade {grade.grade}
-                      </SelectItem>
-                    ) : (
-                      <div>
-                        {subject.streams
-                          .filter((s) => s.gradeId === grade.id)
-                          .map((stream) => (
-                            <SelectItem
-                              key={stream.id}
-                              value={joinId(grade.id, stream.id)}
-                            >
-                              Grade {grade.grade} - {stream.name}
-                            </SelectItem>
-                          ))}
-                      </div>
-                    )}
-                  </>
-                ))}
-              </ApiState>
-            </SelectWithLabel>
-          </div>
-          <div className="grid grid-row-3 md:grid-cols-1 gap-4">
-            <ApiState
-              isLoading={isSectionsLoading}
-              error={isSectionsError?.message}
-            >
-              {sections && (
-                <div className="">
-                  <Label className="text-sm">
-                    Grade {selectedGrade?.grade || ""} Sections *
-                  </Label>
-                </div>
-              )}
-              {sections?.map((section) => (
-                <CheckboxWithLabel<
-                  AssignTeacher,
-                  AssignTeacher["grade"]["sections"][number]
-                >
-                  nameInSchema={`grade.sections`}
-                  fieldTitle={`Section ${section.section}`}
-                  value={
-                    watchForm.grade.sections.find((s) => s.id === section.id) ||
-                    section
-                  }
-                />
+              {teachers.map((teacher) => (
+                <SelectItem key={teacher.id} value={teacher.id}>
+                  {teacher.fullName} - {teacher.mainSubject?.name}
+                </SelectItem>
               ))}
-            </ApiState>
+            </SelectWithLabel>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <SelectWithLabel<AssignTeacher, string>
+                fieldTitle="Subject *"
+                nameInSchema="subjectId"
+              >
+                <ApiState
+                  isLoading={isSubjectsLoading}
+                  error={isSubjectsError?.message}
+                >
+                  {subjects?.map((subject) => (
+                    <SelectItem key={subject.id} value={subject.id}>
+                      {subject.name}
+                    </SelectItem>
+                  ))}
+                </ApiState>
+              </SelectWithLabel>
+              <SelectWithLabel<AssignTeacher, AssignTeacher["grade"]>
+                fieldTitle="Grade *"
+                nameInSchema="grade"
+                getObjects={(joinedId) => getGradeObject(joinedId)}
+              >
+                <ApiState
+                  isLoading={isSubjectLoading}
+                  error={isSubjectError?.message}
+                >
+                  {subject?.grades.map((grade) => (
+                    <>
+                      {!grade.hasStream ? (
+                        <SelectItem key={grade.id} value={joinId(grade.id)}>
+                          Grade {grade.grade}
+                        </SelectItem>
+                      ) : (
+                        <div>
+                          {subject.streams
+                            .filter((s) => s.gradeId === grade.id)
+                            .map((stream) => (
+                              <SelectItem
+                                key={stream.id}
+                                value={joinId(grade.id, stream.id)}
+                              >
+                                Grade {grade.grade} - {stream.name}
+                              </SelectItem>
+                            ))}
+                        </div>
+                      )}
+                    </>
+                  ))}
+                </ApiState>
+              </SelectWithLabel>
+            </div>
+            <div className="grid grid-row-3 md:grid-cols-1 gap-4">
+              <ApiState
+                isLoading={isSectionsLoading}
+                error={isSectionsError?.message}
+              >
+                {sections && (
+                  <div className="">
+                    <Label className="text-sm">
+                      Grade {selectedGrade?.grade || ""} Sections *
+                    </Label>
+                  </div>
+                )}
+                {sections?.map((section) => (
+                  <CheckboxWithLabel<
+                    AssignTeacher,
+                    AssignTeacher["grade"]["sections"][number]
+                  >
+                    nameInSchema={`grade.sections`}
+                    fieldTitle={`Section ${section.section}`}
+                    value={
+                      watchForm.grade.sections.find(
+                        (s) => s.id === section.id,
+                      ) || section
+                    }
+                  />
+                ))}
+              </ApiState>
+            </div>
           </div>
-        </div>
 
-        {/* Action Buttons */}
-        <AlertDialogFooter className="mt-5">
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction asChild>
-            <Button
-              disabled={!isDirty || isAssignTeacherPending}
-              type="submit"
-              onClick={handleSave}
-              className="bg-blue-600 text-white hover:bg-blue-700 disabled:pointer-events-auto disabled:cursor-not-allowed w-32"
-            >
-              {isAssignTeacherPending && (
-                <Loader className="animate-spin mr-2 h-4 w-4" />
-              )}
-              Save Changes
-            </Button>
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </FormProvider>
-    </AlertDialogContent>
+          {/* Action Buttons */}
+          <AlertDialogFooter className="mt-5">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction asChild>
+              <Button
+                disabled={!isDirty || mutation.isPending}
+                type="submit"
+                onClick={handleSave}
+                className="bg-blue-600 text-white hover:bg-blue-700 disabled:pointer-events-auto disabled:cursor-not-allowed w-32"
+              >
+                {mutation.isPending && (
+                  <Loader className="animate-spin mr-2 h-4 w-4" />
+                )}
+                Save Changes
+              </Button>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </FormProvider>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

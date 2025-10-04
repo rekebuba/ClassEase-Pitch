@@ -1308,7 +1308,7 @@ export const zTeacherBasicInfo = z.object({
   email: z.email(),
   gender: zGenderEnum,
   status: zEmployeeApplicationStatusEnum,
-  majorSubject: z.optional(z.union([z.string(), z.null()])),
+  mainSubject: z.union([zBasicSubjectSchema, z.null()]),
   otherSubjects: z.array(zBasicSubjectSchema),
   grades: z.array(zTeacherGradeDetail),
 });

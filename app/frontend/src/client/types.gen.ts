@@ -2373,10 +2373,7 @@ export type TeacherBasicInfo = {
   email: string;
   gender: GenderEnum;
   status: EmployeeApplicationStatusEnum;
-  /**
-   * Majorsubject
-   */
-  majorSubject?: string | null;
+  mainSubject: BasicSubjectSchema | null;
   /**
    * Othersubjects
    */
