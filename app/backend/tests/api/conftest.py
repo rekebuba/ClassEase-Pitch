@@ -90,11 +90,23 @@ def student_token_headers(client: TestClient) -> dict[str, str]:
 
 
 @pytest.fixture(scope="module")
+def existing_year(
+    db_session: Session,
+) -> Year | None:
+    year = db_session.execute(select(Year)).scalars().first()
+    return year
+
+
+@pytest.fixture(scope="module")
 def year(
     client: TestClient,
     db_session: Session,
     admin_token_headers: Dict[str, str],
+    existing_year: Year | None,
 ) -> Year:
+    if existing_year:
+        return existing_year
+
     data = NewYearFactory.create(setup_methods="Default Template")
 
     r = client.post(

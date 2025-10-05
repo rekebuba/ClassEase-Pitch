@@ -72,7 +72,7 @@ class StudRegStep2(BaseModel):
                 "previousSchool Must be provided if student is Transferred"
             )
         if not self.is_transfer:
-            self.previous_school = Field(default=None)
+            self.previous_school = None
         return self
 
 
@@ -128,12 +128,12 @@ class StudRegStep5(BaseModel):
                 "medicalDetails Must be provided if has Medical Conditions"
             )
         if not self.has_medical_condition:
-            self.medical_details = Field(default=None)
+            self.medical_details = None
 
         if self.has_disability and not self.disability_details:
             raise ValueError("disabilityDetails Must be provided if has Disability")
         if not self.has_disability:
-            self.disability_details = Field(default=None)
+            self.disability_details = None
 
         return self
 

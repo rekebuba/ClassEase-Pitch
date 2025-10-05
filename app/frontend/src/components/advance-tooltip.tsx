@@ -11,6 +11,7 @@ import * as React from "react";
 interface AdvanceTooltipProps extends React.ComponentProps<typeof Button> {
   tooltip?: string;
   isPending?: boolean;
+  side?: "top" | "right" | "bottom" | "left";
 }
 
 export default function AdvanceTooltip({
@@ -20,6 +21,7 @@ export default function AdvanceTooltip({
   disabled,
   className,
   children,
+  side = "top",
   ...props
 }: AdvanceTooltipProps) {
   const trigger = (
@@ -44,6 +46,7 @@ export default function AdvanceTooltip({
     <Tooltip>
       <TooltipTrigger asChild>{trigger}</TooltipTrigger>
       <TooltipContent
+        side={side}
         sideOffset={6}
         className="border bg-accent font-semibold text-foreground dark:bg-zinc-900 [&>span]:hidden"
       >

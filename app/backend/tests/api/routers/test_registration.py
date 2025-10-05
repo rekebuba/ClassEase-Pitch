@@ -22,10 +22,8 @@ class TestRegistration:
     ) -> None:
         """Test Student Registration"""
 
-        # grade = random.choice(year.grades)
-        student = StudentRegistrationFactory.create(
-            # registered_for_grade_id=grade.id
-            )
+        grade = random.choice(year.grades)
+        student = StudentRegistrationFactory.build(registered_for_grade_id=grade.id)
 
         r = client.post(
             f"{settings.API_V1_STR}/register/students",
@@ -52,7 +50,7 @@ class TestRegistration:
         """Test Employee Registration"""
 
         subject = random.choice(year.subjects)
-        employee = EmployeeRegistrationFactory.create(
+        employee = EmployeeRegistrationFactory.build(
             position=position, subject_id=subject.id
         )
 

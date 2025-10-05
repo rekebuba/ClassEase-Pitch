@@ -24,6 +24,7 @@ export function NavSidebar({ items }: { items: NavBarItem[] }): JSX.Element {
                 search={item.search}
                 className="flex items-center gap-2 p-2 hover:bg-gray-100"
               >
+                {item.icon && <item.icon />}
                 <span>{item.title}</span>
               </Link>
             </SidebarMenuButton>

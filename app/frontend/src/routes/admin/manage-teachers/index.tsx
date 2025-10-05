@@ -271,8 +271,8 @@ function RouteComponent() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem asChild>
                         <Link
-                          to="/admin/teachers"
-                          params={{ teacherId: teacher.id }}
+                          to="/admin/employees/$employeeId"
+                          params={{ employeeId: teacher.id }}
                           className="flex items-center"
                         >
                           <Eye className="w-4 h-4 mr-2" />
@@ -294,40 +294,41 @@ function RouteComponent() {
                 </div>
 
                 {/* Main Subject */}
-                <div className="mb-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <BookOpen className="w-4 h-4 text-primary" />
-                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Main Subject
-                    </span>
-                  </div>
-                  <div className="font-semibold text-foreground text-base">
-                    {teacher.mainSubject?.name}
-                  </div>
-                </div>
-
-                {/* Secondary Subjects */}
-                {teacher.otherSubjects.length > 0 && (
+                <div className="grid grid-cols-2 gap-4 mb-4">
                   <div className="mb-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <GraduationCap className="w-4 h-4 text-primary" />
+                      <BookOpen className="w-4 h-4 text-primary" />
                       <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                        Additional Subjects
+                        Main Subject
                       </span>
                     </div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {teacher.otherSubjects.map((subject, index) => (
-                        <Badge
-                          key={index}
-                          variant="secondary"
-                          className="text-xs"
-                        >
-                          {subject.name}
-                        </Badge>
-                      ))}
+                    <div className="font-semibold text-foreground text-base">
+                      {teacher.mainSubject?.name}
                     </div>
                   </div>
-                )}
+                  {/* Secondary Subjects */}
+                  {teacher.otherSubjects.length > 0 && (
+                    <div className="mb-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <GraduationCap className="w-4 h-4 text-primary" />
+                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                          Additional Subjects
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {teacher.otherSubjects.map((subject, index) => (
+                          <Badge
+                            key={index}
+                            variant="secondary"
+                            className="text-xs"
+                          >
+                            {subject.name}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 <div className="flex items-center gap-2 mb-2">
                   <Users className="w-4 h-4 text-primary" />
@@ -373,8 +374,8 @@ function RouteComponent() {
                     className="flex-1 border-border bg-transparent"
                   >
                     <Link
-                      to="/admin/teachers"
-                      params={{ teacherId: teacher.id }}
+                      to="/admin/employees/$employeeId"
+                      params={{ employeeId: teacher.id }}
                     >
                       <Eye className="w-3.5 h-3.5 mr-1.5" />
                       View Profile
