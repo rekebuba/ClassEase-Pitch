@@ -41,7 +41,7 @@ function RouteComponent() {
   if (!employee) return null;
 
   return (
-    <Card className="border-none space-y-6">
+    <div className="border-none space-y-6">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -288,6 +288,6 @@ function RouteComponent() {
           </div>
         </CardContent>
       </Card>
-    </Card>
+    </div>
   );
 }
