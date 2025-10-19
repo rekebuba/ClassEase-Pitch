@@ -316,15 +316,9 @@ function RouteComponent() {
                         </span>
                       </div>
                       <div className="flex flex-wrap gap-1.5">
-                        {teacher.otherSubjects.map((subject, index) => (
-                          <Badge
-                            key={index}
-                            variant="secondary"
-                            className="text-xs"
-                          >
-                            {subject.name}
-                          </Badge>
-                        ))}
+                        <Badge variant="secondary" className="text-xs">
+                          {teacher.otherSubjects.length} Subjects
+                        </Badge>
                       </div>
                     </div>
                   )}
@@ -335,9 +329,9 @@ function RouteComponent() {
                   <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
                     Current Assignments
                   </span>
-                  {teacher.grades.length > 3 && (
+                  {teacher.grades.length > 4 && (
                     <Badge variant="outline" className="text-xs">
-                      +{teacher.grades.length - 3} more
+                      +{teacher.grades.length - 4} more
                     </Badge>
                   )}
                 </div>
@@ -345,7 +339,7 @@ function RouteComponent() {
                   className={`grid gap-3 pt-4 border-t ${teacherGrades(teacher.grades.length)}`}
                 >
                   {teacher.grades.length > 0 ? (
-                    teacher.grades.map((grade) => (
+                    teacher.grades.slice(0, 4).map((grade) => (
                       <div className="text-center">
                         <div className="flex items-center justify-center gap-1 mb-1">
                           <GraduationCap className="w-3.5 h-3.5 text-muted-foreground" />
