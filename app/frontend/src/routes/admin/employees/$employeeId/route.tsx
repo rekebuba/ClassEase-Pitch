@@ -230,7 +230,6 @@ function RouteComponent() {
             style={{ gap: contentGap }}
             className="flex gap-6 justify-between items-center flex-1"
           >
-            {/* Avatar */}
             <motion.div
               style={{
                 width: avatarSize,
@@ -246,7 +245,6 @@ function RouteComponent() {
               </Avatar>
             </motion.div>
 
-            {/* Profile Info */}
             <motion.div
               style={{ gap: profileInfoGap }}
               className="flex flex-col min-w-0 flex-1"
@@ -270,7 +268,6 @@ function RouteComponent() {
                 {employee.subject?.name} Teacher
               </motion.p>
 
-              {/* Extra Info fades out */}
               <motion.div
                 style={{
                   opacity: detailsOpacity,
@@ -304,7 +301,6 @@ function RouteComponent() {
             </motion.div>
           </motion.div>
 
-          {/* Edit Button */}
           <Button className="bg-primary hover:bg-primary/90 shrink-0">
             <Edit className="w-4 h-4 md:mr-2" />
             <span className="hidden md:inline-block">Edit Profile</span>
@@ -312,9 +308,7 @@ function RouteComponent() {
         </div>
       </motion.div>
 
-      {/* Main Layout */}
       <div className="flex flex-1 overflow-hidden">
-        {/* Sticky Sidebar */}
         <motion.div
           style={{ top: headerHeight }}
           className="w-16 border-r p-2 sticky left-0 self-start h-[calc(100vh-var(--header-height))] overflow-y-auto bg-white transition-all duration-300 ease-in-out"
