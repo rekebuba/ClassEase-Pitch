@@ -2,13 +2,13 @@ services:
   frontend:
     container_name: frontend_container
     image: ghcr.io/rekebuba/frontend:latest
-    working_dir: /ClassEase-Pitch/app/frontend
+    working_dir: /frontend
     ports:
       - "5173:5173"
     volumes:
       - ./app/frontend:/frontend:cached
 
-      # 2. The "masking" volume
+      # "masking" volume
       - /frontend/node_modules
 
     networks:
@@ -28,6 +28,9 @@ services:
       - .env
     volumes:
       - ./app/backend:/backend:cached
+
+      # "masking" volume
+      - /backend/.venv
       
     networks:
       - app-network
@@ -58,7 +61,6 @@ services:
 
 
 volumes:
-  mysql_data:
   frontend-code:
   backend-code:
 

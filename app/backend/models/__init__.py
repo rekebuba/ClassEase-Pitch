@@ -5,7 +5,6 @@ from models.academic_term import AcademicTerm
 from models.admin import Admin
 from models.assessment import Assessment
 from models.blacklist_token import BlacklistToken
-from models.ceo import CEO
 from models.employee import Employee
 from models.employee_year_link import EmployeeYearLink
 from models.event import Event
@@ -41,7 +40,6 @@ __all__ = [
     "Admin",
     "Assessment",
     "BlacklistToken",
-    "CEO",
     "Event",
     "Grade",
     "GradeSectionLink",

@@ -26,13 +26,10 @@ jobs:
       fail-fast: false # Let all matrix jobs complete
       matrix:
         image_config:
-          - name: "devcontainer"
-            dockerfile: ".devcontainer/Dockerfile"
-            context: ".devcontainer"
 
-          - name: "db"
-            dockerfile: "app/db/Dockerfile"
-            context: "app/db"
+          # - name: "db"
+          #   dockerfile: "app/db/Dockerfile"
+          #   context: "app/db"
 
           - name: "backend"
             dockerfile: "app/backend/Dockerfile"
@@ -104,21 +101,15 @@ jobs:
       - name: Pull images
         run: |
           docker pull ghcr.io/rekebuba/backend:${{ env.IMAGE_TAG }}
+          echo "${{ secrets.ENV_BASE64 }}" | base64 -d > .env.test
 
       - name: Run tests
-        env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.MYSQL_ROOT_PASSWORD }}
-          TEST_ADMIN_JWT_SECRET: ${{ secrets.TEST_ADMIN_JWT_SECRET }}
-          TEST_TEACHER_JWT_SECRET: ${{ secrets.TEST_TEACHER_JWT_SECRET }}
-          TEST_STUDENT_JWT_SECRET: ${{ secrets.TEST_STUDENT_JWT_SECRET }}
-          TEST_MYSQL_USER: ${{ secrets.TEST_MYSQL_USER }}
-          TEST_MYSQL_PWD: ${{ secrets.TEST_MYSQL_PWD }}
-          TEST_MYSQL_DB: ${{ secrets.TEST_MYSQL_DB }}
+
         run: |
           docker compose -f docker-compose.test.yml up \
             --abort-on-container-exit \
             --exit-code-from backend \
-            --build
+            --remove-orphans
 
       - name: Upload test results for artifact
         uses: actions/upload-artifact@v4
@@ -133,11 +124,14 @@ jobs:
         with:
           name: test-results-for-codecov
           files: test-reports/coverage.xml
-          # fail_ci_if_error: true
+
+      - name: Cleanup
+        if: always()
+        run: docker compose -f docker-compose.test.yml down -v
 
   cleanup:
     needs: build-and-push
-    if: github.event_name == 'schedule'
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
     permissions:
@@ -155,5 +149,5 @@ jobs:
           older-than: ${{ env.IMAGE_RETENTION_DAYS }} days
           delete-untagged: true
           delete-partial-images: true
-          dry-run: true
+          dry-run: false
           log-level: info

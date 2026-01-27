@@ -8,7 +8,6 @@ from pydantic import (
     BeforeValidator,
     EmailStr,
     HttpUrl,
-    MySQLDsn,
     PostgresDsn,
     computed_field,
     model_validator,
@@ -53,19 +52,6 @@ class Settings(BaseSettings):
         ]
 
     PROJECT_NAME: str
-    SENTRY_DSN: HttpUrl | None = None
-    MYSQL_SERVER: str
-    MYSQL_PORT: int = 3306
-    MYSQL_USER: str
-    MYSQL_PASSWORD: str = ""
-    MYSQL_DB: str = ""
-
-    # For Testing
-    TEST_MYSQL_SERVER: str
-    TEST_MYSQL_PORT: int = 3306
-    TEST_MYSQL_USER: str
-    TEST_MYSQL_PASSWORD: str = ""
-    TEST_MYSQL_DB: str = ""
 
     DEV_POSTGRES_SERVER: str
     DEV_POSTGRES_PORT: int
@@ -101,30 +87,6 @@ class Settings(BaseSettings):
             host=self.TEST_POSTGRES_SERVER,
             port=self.TEST_POSTGRES_PORT,
             path=self.TEST_POSTGRES_DB,
-        )
-    
-    @computed_field
-    @property
-    def SQLALCHEMY_DATABASE_URI(self) -> MySQLDsn:
-        return MySQLDsn.build(
-            scheme="mysql",
-            username=self.MYSQL_USER,
-            password=self.MYSQL_PASSWORD,
-            host=self.MYSQL_SERVER,
-            port=self.MYSQL_PORT,
-            path=self.MYSQL_DB,
-        )
-
-    @computed_field
-    @property
-    def TEST_SQLALCHEMY_DATABASE_URI(self) -> MySQLDsn:
-        return MySQLDsn.build(
-            scheme="mysql",
-            username=self.TEST_MYSQL_USER,
-            password=self.TEST_MYSQL_PASSWORD,
-            host=self.TEST_MYSQL_SERVER,
-            port=self.TEST_MYSQL_PORT,
-            path=self.TEST_MYSQL_DB,
         )
 
     SMTP_TLS: bool = True
@@ -175,7 +137,6 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def _enforce_non_default_secrets(self) -> Self:
         self._check_default_secret("SECRET_KEY", self.SECRET_KEY)
-        self._check_default_secret("MYSQL_PASSWORD", self.MYSQL_PASSWORD)
         self._check_default_secret(
             "FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD
         )

@@ -1,13 +1,12 @@
 services:
-  db:
-    image: mysql:8.0
+  test_postgres_db:
+    image: postgres:13.22-alpine3.22
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${TEST_MYSQL_DB}
-      MYSQL_USER: ${TEST_MYSQL_USER}
-      MYSQL_PASSWORD: ${TEST_MYSQL_PWD}
+      - POSTGRES_USER=${TEST_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${TEST_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${TEST_POSTGRES_DB}
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-p${MYSQL_ROOT_PASSWORD}"]
+      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
       interval: 5s
       timeout: 10s
       retries: 5
@@ -15,24 +14,16 @@ services:
   backend:
     image: ghcr.io/rekebuba/backend:${IMAGE_TAG:-latest}
     depends_on:
-      db:
+      test_postgres_db:
         condition: service_healthy
     volumes:
-      - ./test-reports:/ClassEase-Pitch/test-reports # Ensure pytest saves here
-    environment:
-      DB_HOST: db
-      DB_PORT: 3306
+      - ./test-reports:/backend/test-reports # Ensure pytest saves here
+    env_file:
+      - .env.test
 
-      TEST_MYSQL_USER: ${TEST_MYSQL_USER}
-      TEST_MYSQL_PWD: ${TEST_MYSQL_PWD}
-      TEST_MYSQL_DB: ${TEST_MYSQL_DB}
-
-      TEST_ADMIN_JWT_SECRET: ${TEST_ADMIN_JWT_SECRET}
-      TEST_TEACHER_JWT_SECRET: ${TEST_TEACHER_JWT_SECRET}
-      TEST_STUDENT_JWT_SECRET: ${TEST_STUDENT_JWT_SECRET}
     command: >
       sh -c "mkdir -p test-reports &&
              pytest --cov --cov-branch --cov-report=xml:test-reports/coverage.xml"
 
 volumes:
-  mysql_data:
+  postgres_data:
