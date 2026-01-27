@@ -9,7 +9,8 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from api.v1.routers.dependencies import get_db
 from core.config import settings
-from core.db import engine, init_db
+from core.db import test_engine as engine
+from core.db import init_db
 from main import app
 from models.base.base_model import Base
 from models.year import Year
@@ -42,8 +43,8 @@ def db() -> Generator[Session, None, None]:
 
     yield
 
-    # Base.metadata.drop_all(bind=engine)
-    # engine.dispose()
+    Base.metadata.drop_all(bind=engine)
+    engine.dispose()
 
 
 @pytest.fixture(scope="module")

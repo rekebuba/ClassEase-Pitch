@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 import bcrypt
@@ -38,9 +38,9 @@ def create_access_token(
     expires_delta: timedelta | None = None,
 ) -> str:
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(timezone.utc) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(
+        expire = datetime.now(timezone.utc) + timedelta(
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
 
@@ -49,7 +49,7 @@ def create_access_token(
         "sub": subject,
         "role": role.value,
         "jti": str(uuid.uuid4()),  # Unique identifier for token
-        "iat": datetime.utcnow(),  # Issued at time
+        "iat": datetime.now(timezone.utc),  # Issued at time
     }
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
 

@@ -7,13 +7,12 @@ from tests_pre_start import init, logger
 
 def test_init_successful_connection() -> None:
     engine_mock = MagicMock()
-
-    session_mock = MagicMock()
-    execute_mock = MagicMock(return_value=True)
-    session_mock.configure_mock(**{"execute_mock.return_value": execute_mock})
+    
+    #    structure: engine.connect() -> __enter__() -> connection
+    connection_mock = MagicMock()
+    engine_mock.connect.return_value.__enter__.return_value = connection_mock
 
     with (
-        patch("sqlalchemy.orm.Session", return_value=session_mock),
         patch.object(logger, "info"),
         patch.object(logger, "error"),
         patch.object(logger, "warn"),
@@ -24,10 +23,14 @@ def test_init_successful_connection() -> None:
         except Exception:
             connection_successful = False
 
-        assert connection_successful, (
-            "The database connection should be successful and not raise an exception."
-        )
+        assert connection_successful, "The database connection should be successful."
 
-        assert session_mock.execute.called_once_with(text("SELECT 1")), (
-            "The session should execute a select statement once."
-        )
+        #    This avoids issues where text("A") != text("A") in mocks
+        assert connection_mock.execute.call_count == 1
+        
+        # Extract the first argument of the first call
+        args, _ = connection_mock.execute.call_args
+        executed_sql = args[0]
+        
+        # Verify the string representation of the SQL command matches
+        assert str(executed_sql) == "SELECT 1"
