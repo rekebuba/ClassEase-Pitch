@@ -4,6 +4,6 @@
         "../../docker-compose.yml"
     ],
     "service": "backend",
-    "workspaceFolder": "/${localWorkspaceFolderBasename}/app/backend",
+    "workspaceFolder": "/backend",
     "shutdownAction": "none"
 }
