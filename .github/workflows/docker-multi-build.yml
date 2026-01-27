@@ -101,12 +101,14 @@ jobs:
       - name: Pull images
         run: |
           docker pull ghcr.io/rekebuba/backend:${{ env.IMAGE_TAG }}
-          echo "${{ secrets.ENV_BASE64 }}" | base64 -d > .env.test
+          echo "${{ secrets.ENV_BASE64 }}" | base64 -d > .env
 
       - name: Run tests
 
         run: |
-          docker compose -f docker-compose.test.yml up \
+          docker compose \
+            --env-file .env \
+            -f docker-compose.test.yml up \
             --abort-on-container-exit \
             --exit-code-from backend \
             --remove-orphans
