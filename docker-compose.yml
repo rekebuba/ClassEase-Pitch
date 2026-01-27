@@ -5,11 +5,12 @@ services:
     working_dir: /ClassEase-Pitch/app/frontend
     ports:
       - "5173:5173"
-    environment:
-      - CHOKIDAR_USEPOLLING=true
-      - IS_DOCKER=true
     volumes:
-      - .:/ClassEase-Pitch:cached
+      - ./app/frontend:/frontend:cached
+
+      # 2. The "masking" volume
+      - /frontend/node_modules
+
     networks:
       - app-network
     stdin_open: true
@@ -18,7 +19,7 @@ services:
   backend:
     container_name: backend_container
     image: ghcr.io/rekebuba/backend:latest
-    working_dir: /ClassEase-Pitch/app/backend
+    working_dir: /backend
     ports:
       - "5000:5000"
       - "5678:5678"
@@ -26,19 +27,10 @@ services:
     env_file:
       - .env
     volumes:
-      - .:/ClassEase-Pitch:cached
-
-      # Exclude these from being overridden by empty volumes
-      - /ClassEase-Pitch/app/backend/.mypy_cache
-      - /ClassEase-Pitch/app/backend/.pytest_cache
-      - /ClassEase-Pitch/app/backend/__pycache__
-      - /ClassEase-Pitch/app/backend/.venv
+      - ./app/backend:/backend:cached
       
     networks:
       - app-network
-
-    entrypoint: [ "/ClassEase-Pitch/app/backend/entrypoint.sh" ]
-    command: [ "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
 
   postgres_db:
     container_name: postgres_container

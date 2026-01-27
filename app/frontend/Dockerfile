@@ -1,18 +1,16 @@
 FROM node:24-alpine
 
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+RUN corepack enable pnpm
 
 # Install git and other build tools
 RUN apk add --no-cache git
 
-WORKDIR /ClassEase-Pitch
+WORKDIR /frontend
 
-COPY package*.json /ClassEase-Pitch/
+COPY package*.json .
 
 RUN pnpm install
 
-COPY ./ /ClassEase-Pitch/
+COPY . .
 
 CMD ["pnpm", "run", "dev"]

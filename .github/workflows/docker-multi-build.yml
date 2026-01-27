@@ -89,17 +89,6 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # - name: Scan for vulnerabilities
-      #   uses: aquasecurity/trivy-action@master
-      #   with:
-      #     image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAMESPACE }}/${{ matrix.image_config.name }}:${{ steps.meta.outputs.version || github.sha }}
-      #     format: "table"
-      #     exit-code: "1"
-      #     ignore-unfixed: true
-      #     continue-on-error: true
-      #     vuln-type: "os,library"
-      #     severity: "CRITICAL,HIGH"
-
   test:
     needs: build-and-push
     runs-on: ubuntu-latest
