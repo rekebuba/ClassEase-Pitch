@@ -1,7 +1,7 @@
 import { defineConfig } from "@hey-api/openapi-ts";
 
 export default defineConfig({
-  input: "http://backend:8000/api/v1/openapi.json",
+  input: "http://nginx:8080/api/v1/openapi.json",
   output: {
     path: "./src/client",
     clean: true,

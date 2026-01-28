@@ -5,7 +5,7 @@ import { loginFailure } from "@/store/slice/auth-slice";
 // Create a new client with auth configuration
 client.setConfig({
   auth: () => store.getState().auth.token || "",
-  baseURL: "http://localhost:8000",
+  baseURL: "https://localhost",
 });
 
 client.instance.interceptors.response.use(

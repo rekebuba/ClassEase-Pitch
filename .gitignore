@@ -16,3 +16,5 @@ requirements.txt
 **/.gitignore
 .pnpm-store
 postman
+ssl
+dist

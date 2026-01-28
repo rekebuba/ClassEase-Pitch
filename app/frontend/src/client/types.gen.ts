@@ -4864,5 +4864,5 @@ export type GetAcademicTermsResponse =
   GetAcademicTermsResponses[keyof GetAcademicTermsResponses];
 
 export type ClientOptions = {
-  baseURL: "http://backend:8000" | (string & {});
+  baseURL: "http://nginx:8080" | (string & {});
 };
