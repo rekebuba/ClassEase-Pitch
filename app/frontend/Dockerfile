@@ -5,9 +5,12 @@ FROM node:24-alpine AS builder
 
 RUN corepack enable pnpm
 
+# Install git and other build tools
+RUN apk add --no-cache git
+
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml* ./
+COPY package*.json .
 
 RUN pnpm install
 
