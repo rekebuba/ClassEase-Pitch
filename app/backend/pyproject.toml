@@ -4,27 +4,13 @@ version = "0.1.0"
 requires-python = ">=3.12"
 dependencies = [
     "bcrypt>=4.3.0",
-    "debugpy>=1.8.14",
-    "ethiopian-date>=1.0",
-    "factory-boy>=3.3.3",
     "fastapi>=0.116.1",
     "uvicorn>=0.35.0",
-    "mypy>=1.15.0",
-    "mysql-connector-python>=9.3.0",
-    "mysqlclient>=2.2.7",
-    "num2words>=0.5.14",
     "pillow>=11.2.1",
-    "pre-commit>=4.2.0",
     "pydantic>=2.11.5",
     "pydantic-settings>=2.10.1",
     "pyethiodate>=1.0.6",
-    "pyinspect>=0.1.0",
-    "pytest>=8.3.5",
-    "pytest-cov>=6.1.1",
-    "pytest-xdist>=3.6.1",
-    "python-dotenv>=1.1.0",
     "sqlalchemy>=2.0.40",
-    "types-factory-boy>=0.4.1",
     "python-multipart>=0.0.20",
     "python-jose>=3.5.0",
     "dnspython>=2.7.0",
@@ -38,6 +24,18 @@ dependencies = [
     "psycopg2>=2.9.10",
     "PyJWT>=2.10.1",
     "Jinja2>=3.1.6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "debugpy>=1.8.14",
+    "factory-boy>=3.3.3",
+    "mypy>=1.15.0",
+    "pre-commit>=4.2.0",
+    "pytest>=8.3.5",
+    "pytest-cov>=6.1.1",
+    "pytest-xdist>=3.6.1",
+    "types-factory-boy>=0.4.1",
 ]
 
 [tool.mypy]
