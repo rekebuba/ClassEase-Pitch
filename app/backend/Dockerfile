@@ -1,19 +1,47 @@
-FROM python:3.12.12-trixie
+# -----------------------
+# Build stage
+# -----------------------
+FROM python:3.12-slim AS builder
 
-# Install uv globally
+# Install system deps needed to build wheels
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-# Set working directory for the app
-WORKDIR /backend
+WORKDIR /app
 
-# Copy dependency files first (for Docker cache efficiency)
+# Copy dependency metadata
 COPY pyproject.toml .
 
-# Install dependencies system-wide (no virtual environment)
-RUN uv pip install --system -v -r pyproject.toml
+# Install runtime deps only
+RUN uv pip install \
+    --system \
+    --no-cache \
+    .
 
-# Copy the rest of the application code
+# -----------------------
+# Runtime stage
+# -----------------------
+FROM python:3.12-slim
+
+# Runtime OS deps only
+RUN apt-get update && apt-get install -y \
+    libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /backend
+
+# Copy installed packages from builder
+COPY --from=builder /usr/local /usr/local
+
+# Copy app code
 COPY . .
 
-# Run the Flask app
-CMD [ "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload" ]
+# Cloud Run listens on $PORT
+ENV PORT=8000
+
+CMD ["uvicorn", "main:app", "--host=0.0.0.0", "--port=8000"]
