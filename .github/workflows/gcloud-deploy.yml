@@ -1,4 +1,4 @@
-name: Build, Push, and Secure Multiple Docker Images to GHCR
+name: deploy to GCP Artifact Registry
 
 on:
   push:
@@ -9,16 +9,11 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAMESPACE: ${{ github.repository_owner }}
-  PLATFORMS: linux/amd64,linux/arm64
-  # Retention days for untagged images
   IMAGE_TAG: latest
   ARTIFACT_REPO: us-central1-docker.pkg.dev/gen-lang-client-0537147856/backend
 
 jobs:
   deploy:
-    needs: test
     runs-on: ubuntu-latest
     permissions:
       contents: 'read'
