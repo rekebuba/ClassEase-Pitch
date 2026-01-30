@@ -18,6 +18,7 @@ env:
   IMAGE_RETENTION_DAYS: 30
   KEEP_RECENT_VERSIONS: 5 # Keep the 5 most recent tagged versions
   IMAGE_TAG: latest
+  ARTIFACT_REPO: us-central1-docker.pkg.dev/gen-lang-client-0537147856/backend
 
 jobs:
   build-and-push:
@@ -130,6 +131,45 @@ jobs:
       - name: Cleanup
         if: always()
         run: docker compose -f docker-compose.test.yml down -v
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: 'read'
+      id-token: 'write'
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Login to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    # Authenticate with Google Cloud
+    - id: 'auth'
+      uses: 'google-github-actions/auth@v2'
+      with:
+        workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+        service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+    # Set up gcloud CLI
+    - name: 'Set up Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v2'
+
+    # Authorize Docker to push to Artifact Registry
+    - name: 'Configure Docker for GCP'
+      run: |
+        gcloud auth configure-docker us-central1-docker.pkg.dev
+
+    - name: 'Push to Artifact Registry'
+      run: |
+        docker pull ghcr.io/rekebuba/backend:${{ env.IMAGE_TAG }}
+        docker tag ghcr.io/rekebuba/backend:${{ env.IMAGE_TAG }} ${{ env.ARTIFACT_REPO }}/backend:${{ env.IMAGE_TAG }}
+        docker push ${{ env.ARTIFACT_REPO }}/backend:${{ env.IMAGE_TAG }}
 
   cleanup:
     needs: build-and-push
