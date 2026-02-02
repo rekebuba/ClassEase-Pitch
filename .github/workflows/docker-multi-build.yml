@@ -21,8 +21,55 @@ env:
   ARTIFACT_REPO: us-central1-docker.pkg.dev/gen-lang-client-0537147856/backend
 
 jobs:
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12' 
+
+      - name: Start Database
+        run: |
+          echo "${{ secrets.ENV_BASE64 }}" | base64 -d > .env
+          docker run -d \
+          --name test_postgres_db \
+          --env-file .env \
+          postgres:13.22-alpine3.22
+
+      - name: Install dependencies
+        run: |
+          cd app/backend
+          pip install uv
+          uv sync --all-extras
+
+      - name: Run tests
+      - run: |
+          pytest --cov --cov-branch --cov-report=xml:test-reports/coverage.xml
+
+      - name: Upload test results for artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-for-artifact
+          path: test-reports/
+          retention-days: 15
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          name: test-results-for-codecov
+          files: test-reports/coverage.xml
+
+      - name: Cleanup
+        if: always()
+        run: docker compose -f docker-compose.test.yml down -v
+
+
   build-and-push:
     runs-on: ubuntu-latest
+    needs: test
     strategy:
       fail-fast: false # Let all matrix jobs complete
       matrix:
@@ -82,52 +129,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-  test:
-    needs: build-and-push
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Login to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Pull images
-        run: |
-          docker pull ghcr.io/rekebuba/backend:${{ env.IMAGE_TAG }}
-          echo "${{ secrets.ENV_BASE64 }}" | base64 -d > .env
-
-      - name: Run tests
-
-        run: |
-          docker compose \
-            --env-file .env \
-            -f docker-compose.test.yml up \
-            --abort-on-container-exit \
-            --exit-code-from backend \
-            --remove-orphans
-
-      - name: Upload test results for artifact
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results-for-artifact
-          path: test-reports/
-          retention-days: 15
-
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          name: test-results-for-codecov
-          files: test-reports/coverage.xml
-
-      - name: Cleanup
-        if: always()
-        run: docker compose -f docker-compose.test.yml down -v
-
 
   cleanup:
     needs: build-and-push

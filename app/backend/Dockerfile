@@ -38,9 +38,9 @@ WORKDIR /app
 COPY --from=builder /usr/local /usr/local
 
 # Copy app code
-COPY ./src/project . 
+COPY ./src . 
 
 ENV PORT=8080
 
 # -k uvicorn.workers.UvicornWorker: Tells Gunicorn to use Uvicorn
-CMD ["gunicorn", "--bind", ":$PORT", "--workers", "1", "--worker-class", "uvicorn.workers.UvicornWorker", "main:app"]
+CMD ["gunicorn", "--bind", ":$PORT", "--workers", "1", "--worker-class", "uvicorn.workers.UvicornWorker", "project.main:app"]
