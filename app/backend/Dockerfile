@@ -17,11 +17,10 @@ WORKDIR /app
 # Copy dependency metadata
 COPY pyproject.toml .
 
+RUN uv pip compile pyproject.toml -o requirements-prod.txt
+
 # Install runtime deps only
-RUN uv pip install \
-    --system \
-    --no-cache \
-    .
+RUN pip install -r requirements-prod.txt
 
 # -----------------------
 # Runtime stage
@@ -39,9 +38,9 @@ WORKDIR /app
 COPY --from=builder /usr/local /usr/local
 
 # Copy app code
-COPY ./src . 
+COPY ./src/project . 
 
 ENV PORT=8080
 
 # -k uvicorn.workers.UvicornWorker: Tells Gunicorn to use Uvicorn
-CMD exec gunicorn --bind :$PORT --workers 1 --worker-class uvicorn.workers.UvicornWorker  project.main:app
+CMD ["gunicorn", "--bind", ":$PORT", "--workers", "1", "--worker-class", "uvicorn.workers.UvicornWorker", "main:app"]
