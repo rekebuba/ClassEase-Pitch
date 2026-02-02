@@ -24,19 +24,29 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    steps:
+
+    services:
+      postgres_db:
+        image: postgres:13.22-alpine3.22
+        env:
+          POSTGRES_USER: ${{ secrets.TEST_POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.TEST_POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.TEST_POSTGRES_DB }}
+        # Expose the port so the runner can see it
+        ports:
+          - 5432:5432
+        # Health check ensures the DB is ready before tests start
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12' 
-
-      - name: Start Database
-        run: |
-          echo "${{ secrets.ENV_BASE64 }}" | base64 -d > .env
-          docker run -d \
-          --name test_postgres_db \
-          --env-file .env \
-          postgres:13.22-alpine3.22
 
       - name: Install dependencies
         run: |
