@@ -55,7 +55,7 @@ jobs:
           uv sync --all-extras
 
       - name: Run tests
-      - run: |
+        run: |
           pytest --cov --cov-branch --cov-report=xml:test-reports/coverage.xml
 
       - name: Upload test results for artifact
