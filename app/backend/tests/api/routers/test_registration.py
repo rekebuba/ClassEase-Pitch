@@ -4,13 +4,13 @@ from typing import Dict
 import pytest
 from fastapi.testclient import TestClient
 
-from core.config import settings
-from models.year import Year
+from project.core.config import settings
+from project.models.year import Year
 from tests.factories.api_data import (
     EmployeeRegistrationFactory,
     StudentRegistrationFactory,
 )
-from utils.enum import EmployeePositionEnum
+from project.utils.enum import EmployeePositionEnum
 
 
 class TestRegistration:

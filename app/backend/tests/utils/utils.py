@@ -4,7 +4,7 @@ from typing import Dict
 from fastapi.testclient import TestClient
 from sqlalchemy.orm import Session
 
-from core.config import settings
+from project.core.config import settings
 from tests.factories.api_data import NewYearFactory
 
 

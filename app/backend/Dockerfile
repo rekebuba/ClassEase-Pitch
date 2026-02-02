@@ -33,15 +33,15 @@ RUN apt-get update && apt-get install -y \
     libpq5 \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /backend
+WORKDIR /app
 
 # Copy installed packages from builder
 COPY --from=builder /usr/local /usr/local
 
 # Copy app code
-COPY . .
+COPY ./src . 
 
-# Cloud Run listens on $PORT
-ENV PORT=8000
+ENV PORT=8080
 
-CMD ["uvicorn", "main:app", "--host=0.0.0.0", "--port=8000"]
+# -k uvicorn.workers.UvicornWorker: Tells Gunicorn to use Uvicorn
+CMD exec gunicorn --bind :$PORT --workers 1 --worker-class uvicorn.workers.UvicornWorker  project.main:app

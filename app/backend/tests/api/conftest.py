@@ -7,12 +7,12 @@ from fastapi.testclient import TestClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
-from api.v1.routers.dependencies import get_db
-from core.config import settings
-from core.db import engine, init_db
-from main import app
-from models.base.base_model import Base
-from models.year import Year
+from project.api.v1.routers.dependencies import get_db
+from project.core.config import settings
+from project.core.db import engine, init_db
+from project.main import app
+from project.models.base.base_model import Base
+from project.models.year import Year
 from tests.factories.api_data import NewYearFactory
 from tests.utils.utils import get_auth_header
 

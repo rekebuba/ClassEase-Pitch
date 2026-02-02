@@ -18,7 +18,7 @@ services:
       test_postgres_db:
         condition: service_healthy
     volumes:
-      - ./test-reports:/backend/test-reports # Ensure pytest saves here
+      - ./test-reports:/app/test-reports # Ensure pytest saves here
     env_file:
       - .env
 
