@@ -28,10 +28,6 @@ jobs:
       matrix:
         image_config:
 
-          # - name: "db"
-          #   dockerfile: "app/db/Dockerfile"
-          #   context: "app/db"
-
           - name: "backend"
             dockerfile: "app/backend/Dockerfile"
             context: "app/backend"

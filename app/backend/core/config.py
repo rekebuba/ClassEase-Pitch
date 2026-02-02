@@ -28,7 +28,6 @@ def parse_cors(v: Any) -> list[str] | str:
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        # Use top level .env file (one level above ./backend/)
         env_file=".env",
         env_ignore_empty=True,
         extra="ignore",
@@ -38,7 +37,7 @@ class Settings(BaseSettings):
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     FRONTEND_HOST: str = "http://localhost:5173"
-    ENVIRONMENT: Literal["local", "staging", "production"] = "local"
+    ENVIRONMENT: Literal["development", "testing", "production"] = "development"
 
     BACKEND_CORS_ORIGINS: Annotated[
         list[AnyUrl] | str, BeforeValidator(parse_cors)
@@ -52,6 +51,12 @@ class Settings(BaseSettings):
         ]
 
     PROJECT_NAME: str
+
+    PROD_POSTGRES_SERVER: str
+    PROD_POSTGRES_PORT: int
+    PROD_POSTGRES_USER: str
+    PROD_POSTGRES_PASSWORD: str
+    PROD_POSTGRES_DB: str
 
     DEV_POSTGRES_SERVER: str
     DEV_POSTGRES_PORT: int
@@ -68,26 +73,33 @@ class Settings(BaseSettings):
     @computed_field
     @property
     def SQLALCHEMY_POSTGRES_DATABASE_URI(self) -> PostgresDsn:
-        return PostgresDsn.build(
-            scheme="postgresql",
-            username=self.DEV_POSTGRES_USER,
-            password=self.DEV_POSTGRES_PASSWORD,
-            host=self.DEV_POSTGRES_SERVER,
-            port=self.DEV_POSTGRES_PORT,
-            path=self.DEV_POSTGRES_DB,
-        )
-    
-    # @computed_field
-    @property
-    def SQLALCHEMY_POSTGRES_TEST_DATABASE_URI(self) -> PostgresDsn:
-        return PostgresDsn.build(
-            scheme="postgresql",
-            username=self.TEST_POSTGRES_USER,
-            password=self.TEST_POSTGRES_PASSWORD,
-            host=self.TEST_POSTGRES_SERVER,
-            port=self.TEST_POSTGRES_PORT,
-            path=self.TEST_POSTGRES_DB,
-        )
+        if self.ENVIRONMENT == "production":
+            return PostgresDsn.build(
+                scheme="postgresql",
+                username=self.PROD_POSTGRES_USER,
+                password=self.PROD_POSTGRES_PASSWORD,
+                host=self.PROD_POSTGRES_SERVER,
+                port=self.PROD_POSTGRES_PORT,
+                path=self.PROD_POSTGRES_DB,
+            )
+        elif self.ENVIRONMENT == "development":
+            return PostgresDsn.build(
+                scheme="postgresql",
+                username=self.DEV_POSTGRES_USER,
+                password=self.DEV_POSTGRES_PASSWORD,
+                host=self.DEV_POSTGRES_SERVER,
+                port=self.DEV_POSTGRES_PORT,
+                path=self.DEV_POSTGRES_DB,
+            )
+        elif self.ENVIRONMENT == "testing":    
+            return PostgresDsn.build(
+                scheme="postgresql",
+                username=self.TEST_POSTGRES_USER,
+                password=self.TEST_POSTGRES_PASSWORD,
+                host=self.TEST_POSTGRES_SERVER,
+                port=self.TEST_POSTGRES_PORT,
+                path=self.TEST_POSTGRES_DB,
+            )
 
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
@@ -129,7 +141,7 @@ class Settings(BaseSettings):
                 f'The value of {var_name} is "changethis", '
                 "for security, please change it, at least for deployments."
             )
-            if self.ENVIRONMENT == "local":
+            if self.ENVIRONMENT == "development":
                 warnings.warn(message, stacklevel=1)
             else:
                 raise ValueError(message)

@@ -3,7 +3,7 @@ import logging
 from sqlalchemy import Engine, text
 from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixed
 
-from core.db import test_engine as engine
+from core.db import engine
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
