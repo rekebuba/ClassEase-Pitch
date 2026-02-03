@@ -213,7 +213,6 @@ jobs:
 
     - name: Push to Artifact Registry
       run: |
-        # Use Bash logic to pick the correct tag
         TAG=$([[ "${{ matrix.service }}" == "backend" ]] && echo "$BACKEND_TAG" || echo "$FRONTEND_TAG")
 
         docker pull ghcr.io/rekebuba/${{ matrix.service }}:$TAG
