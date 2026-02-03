@@ -24,6 +24,9 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app/backend
 
     services:
       postgres_db:
@@ -50,13 +53,16 @@ jobs:
 
       - name: Install dependencies
         run: |
-          cd app/backend
           pip install uv
           uv sync --all-extras
 
+      - name: Load environment variables
+        run: |
+          echo "${{ secrets.ENV_BASE64 }}" | base64 -d >> $GITHUB_ENV
+
       - name: Run tests
         run: |
-          pytest --cov --cov-branch --cov-report=xml:test-reports/coverage.xml
+          uv run pytest --cov --cov-branch --cov-report=xml:test-reports/coverage.xml
 
       - name: Upload test results for artifact
         uses: actions/upload-artifact@v4
