@@ -56,9 +56,9 @@ jobs:
           pip install uv
           uv sync --all-extras
 
-      - name: Load environment variables
+      - name: Load environment variables In Root Directory
         run: |
-          echo "${{ secrets.ENV_BASE64 }}" | base64 -d >> $GITHUB_ENV
+          echo "${{ secrets.ENV_BASE64 }}" | base64 -d > ../../.env
 
       - name: Run tests
         run: |
