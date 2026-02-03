@@ -2,31 +2,19 @@ services:
   frontend:
     container_name: frontend_container
     image: ghcr.io/rekebuba/frontend:latest
-    working_dir: /frontend
     ports:
       - "5173:5173"
-    volumes:
-      - ./app/frontend:/frontend:cached
-
-      # "masking" volume
-      - /frontend/node_modules
+    env_file:
+      - .env
 
     networks:
       - app-network
-    stdin_open: true
-    tty: true
 
   backend:
     container_name: backend_container
     image: ghcr.io/rekebuba/backend:latest
-    working_dir: /backend
     env_file:
       - .env
-    volumes:
-      - ./app/backend:/backend:cached
-
-      # "masking" volume
-      - /backend/.venv
       
     networks:
       - app-network
@@ -52,22 +40,6 @@ services:
       - POSTGRES_DB=${TEST_POSTGRES_DB}
     ports:
       - "5433:5432"
-    networks:
-      - app-network
-
-  nginx:
-    image: nginx:stable-alpine3.23-slim
-    container_name: nginx
-    ports:
-      - "8080:8080"
-      - "443:443"
-    volumes:
-      - ./app/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-      - ./app/nginx/ssl/nginx-selfsigned.crt:/etc/ssl/certs/nginx-selfsigned.crt:ro
-      - ./app/nginx/ssl/nginx-selfsigned.key:/etc/ssl/private/nginx-selfsigned.key:ro
-      - ./app/frontend/dist:/usr/share/nginx/html:ro
-    depends_on:
-      - backend
     networks:
       - app-network
 

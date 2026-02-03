@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+RUN pip install --no-cache-dir uv
 
 WORKDIR /app
 
@@ -38,7 +38,9 @@ WORKDIR /app
 COPY --from=builder /usr/local /usr/local
 
 # Copy app code
-COPY ./src . 
+COPY ./src ./src
+
+WORKDIR /app/src
 
 ENV PORT=8080
 

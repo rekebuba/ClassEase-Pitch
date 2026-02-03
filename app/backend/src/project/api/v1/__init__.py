@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from project.api.v1.routers.health import route as health_router
 from project.api.v1.routers.academic_term import route as academic_term_router
 from project.api.v1.routers.employee import route as employee_router
 from project.api.v1.routers.grades import route as grade_router
@@ -17,6 +18,7 @@ from project.api.v1.routers.year import route as year_router
 api_router = APIRouter()
 
 # Include each sub-router
+api_router.include_router(health_router.router)
 api_router.include_router(auth_router.router)
 api_router.include_router(registration_router.router)
 api_router.include_router(year_router.router)
