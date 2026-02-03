@@ -15,7 +15,12 @@ services:
     image: ghcr.io/rekebuba/backend:latest
     env_file:
       - .env
-      
+    volumes:
+      - ./app/backend/src/:/app/src/
+
+    ports:
+      - "8080:8080"
+
     networks:
       - app-network
 

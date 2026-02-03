@@ -3,7 +3,7 @@ from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 from project.api.v1.routers.dependencies import SessionDep
 from project.api.v1.routers.health.schema import HealthStatus
-from sqlalchemy import select
+from sqlalchemy import select, text
 
 
 router = APIRouter(prefix="/health", tags=["Health"])
@@ -19,7 +19,7 @@ def get_health(
     Returns the health status of the API
     """
     try:
-        session.execute(select(1))
+        session.execute(text("SELECT 1"))
         return HealthStatus(
             api_status="healthy",
             db_status="healthy",
