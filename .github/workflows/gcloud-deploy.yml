@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_TAG: latest
+  IMAGE_TAG: sha-3c7baee
   ARTIFACT_REPO: us-central1-docker.pkg.dev/gen-lang-client-0537147856/backend
 
 jobs:
