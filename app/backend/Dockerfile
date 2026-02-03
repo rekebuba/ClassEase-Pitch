@@ -43,4 +43,4 @@ COPY ./src .
 ENV PORT=8080
 
 # -k uvicorn.workers.UvicornWorker: Tells Gunicorn to use Uvicorn
-CMD ["gunicorn", "--bind", ":$PORT", "--workers", "1", "--worker-class", "uvicorn.workers.UvicornWorker", "project.main:app"]
+CMD ["sh", "-c", "exec gunicorn --bind :$PORT --workers 1 --worker-class uvicorn.workers.UvicornWorker project.main:app"]
