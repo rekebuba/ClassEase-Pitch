@@ -178,6 +178,10 @@ jobs:
     strategy:
       matrix:
         service: [backend, frontend]
+    
+    env:
+      BACKEND_TAG: ${{ needs.build-and-push.outputs.backend_tag }}
+      FRONTEND_TAG: ${{ needs.build-and-push.outputs.frontend_tag }}
 
     permissions:
       contents: 'read'
@@ -210,11 +214,7 @@ jobs:
     - name: Push to Artifact Registry
       run: |
         # Use Bash logic to pick the correct tag
-        if [ "${{ matrix.service }}" == "backend" ]; then
-          TAG="${{ needs.build-and-push.outputs.backend_tag }}"
-        else
-          TAG="${{ needs.build-and-push.outputs.frontend_tag }}"
-        fi
+        TAG=$([[ "${{ matrix.service }}" == "backend" ]] && echo "$BACKEND_TAG" || echo "$FRONTEND_TAG")
 
         docker pull ghcr.io/rekebuba/${{ matrix.service }}:$TAG
         docker tag ghcr.io/rekebuba/${{ matrix.service }}:$TAG ${{ env.ARTIFACT_REPO }}/${{ matrix.service }}:$TAG
