@@ -57,8 +57,8 @@ jobs:
 
       - name: Load environment variables In Root Directory
         run: |
-          export TEST_POSTGRES_SERVER=127.0.0.1
           echo "${{ secrets.ENV_BASE64 }}" | base64 -d > ../../.env
+          echo "TEST_POSTGRES_SERVER=127.0.0.1" >> ../../.env
 
       - name: Run tests
         run: |
