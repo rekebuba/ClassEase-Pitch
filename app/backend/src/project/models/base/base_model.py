@@ -3,9 +3,9 @@
 
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime
 
-from sqlalchemy import UUID
+from sqlalchemy import UUID, DateTime
 from sqlalchemy.orm import (
     DeclarativeBase,
     Mapped,
@@ -13,8 +13,6 @@ from sqlalchemy.orm import (
     mapped_column,
 )
 from sqlalchemy.sql import func
-
-from project.models.base.column_type import AwareDateTime
 
 
 class Base(DeclarativeBase):
@@ -42,14 +40,14 @@ class BaseModel(MappedAsDataclass, Base):
         init=False,
     )
     created_at: Mapped[datetime] = mapped_column(
-        AwareDateTime,
-        default_factory=lambda: datetime.now(timezone.utc),
-        server_default=func.now(),  # let DB insert UTC
+        DateTime(timezone=True),
+        server_default=func.now(),
+        nullable=False,
         init=False,
     )
+
     updated_at: Mapped[datetime] = mapped_column(
-        AwareDateTime,
-        default_factory=lambda: datetime.now(timezone.utc),
+        DateTime(timezone=True),
         server_default=func.now(),
         onupdate=func.now(),
         init=False,
