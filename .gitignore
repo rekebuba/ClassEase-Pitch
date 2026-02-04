@@ -18,3 +18,5 @@ requirements.txt
 postman
 ssl
 dist
+*.egg-info/
+env.b64

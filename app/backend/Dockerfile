@@ -5,23 +5,21 @@ FROM python:3.12-slim AS builder
 
 # Install system deps needed to build wheels
 RUN apt-get update && apt-get install -y \
-    build-essential \
     libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+RUN pip install --no-cache-dir uv
 
 WORKDIR /app
 
 # Copy dependency metadata
 COPY pyproject.toml .
 
+RUN uv pip compile pyproject.toml -o requirements-prod.txt
+
 # Install runtime deps only
-RUN uv pip install \
-    --system \
-    --no-cache \
-    .
+RUN pip install -r requirements-prod.txt
 
 # -----------------------
 # Runtime stage
@@ -33,15 +31,17 @@ RUN apt-get update && apt-get install -y \
     libpq5 \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /backend
+WORKDIR /app
 
 # Copy installed packages from builder
 COPY --from=builder /usr/local /usr/local
 
 # Copy app code
-COPY . .
+COPY ./src ./src
 
-# Cloud Run listens on $PORT
-ENV PORT=8000
+WORKDIR /app/src
 
-CMD ["uvicorn", "main:app", "--host=0.0.0.0", "--port=8000"]
+ENV PORT=8080
+
+# -k uvicorn.workers.UvicornWorker: Tells Gunicorn to use Uvicorn
+CMD ["sh", "-c", "exec gunicorn --bind :$PORT --workers 1 --worker-class uvicorn.workers.UvicornWorker project.main:app"]

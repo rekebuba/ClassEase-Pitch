@@ -1,30 +1,46 @@
 services:
   test_postgres_db:
+    container_name: test_postgres_container
     image: postgres:13.22-alpine3.22
     environment:
-      POSTGRES_USER: ${TEST_POSTGRES_USER}
-      POSTGRES_PASSWORD: ${TEST_POSTGRES_PASSWORD}
-      POSTGRES_DB: ${TEST_POSTGRES_DB}
-
+      - POSTGRES_USER=${TEST_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${TEST_POSTGRES_PASSWORD}
+      - POSTGRES_DB=${TEST_POSTGRES_DB}
+    networks:
+      - app-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $TEST_POSTGRES_USER -d $TEST_POSTGRES_DB"]
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 10s
       retries: 5
 
+
   backend:
-    image: ghcr.io/rekebuba/backend:${IMAGE_TAG:-latest}
+    container_name: backend_container
+    image: ghcr.io/rekebuba/backend:latest
     depends_on:
       test_postgres_db:
         condition: service_healthy
-    volumes:
-      - ./test-reports:/backend/test-reports # Ensure pytest saves here
     env_file:
       - .env
+    ports:
+      - "8080:8080"
+      
+    networks:
+      - app-network
+    
+  # frontend:
+  #   container_name: frontend_container
+  #   image: ghcr.io/rekebuba/frontend:latest
+  #   ports:
+  #     - "5173:5173"
+  #   env_file:
+  #     - .env
 
-    command: >
-      sh -c "mkdir -p test-reports &&
-             pytest --cov --cov-branch --cov-report=xml:test-reports/coverage.xml"
+  #   networks:
+  #     - app-network
+  
 
-volumes:
-  postgres_data:
+
+networks:
+  app-network:

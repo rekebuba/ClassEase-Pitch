@@ -17,19 +17,74 @@ env:
   # Retention days for untagged images
   IMAGE_RETENTION_DAYS: 30
   KEEP_RECENT_VERSIONS: 5 # Keep the 5 most recent tagged versions
-  IMAGE_TAG: latest
+  ARTIFACT_REPO: us-central1-docker.pkg.dev/gen-lang-client-0537147856/backend
 
 jobs:
+
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app/backend
+
+    services:
+      postgres_db:
+        image: postgres:13.22-alpine3.22
+        env:
+          POSTGRES_USER: ${{ secrets.TEST_POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.TEST_POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.TEST_POSTGRES_DB }}
+        # Expose the port so the runner can see it
+        ports:
+          - 5432:5432
+        # Health check ensures the DB is ready before tests start
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12' 
+
+      - name: Install dependencies
+        run: |
+          pip install uv
+          uv sync --all-extras
+
+      - name: Load environment variables In Root Directory
+        run: |
+          echo "${{ secrets.ENV_BASE64 }}" | base64 -d > ../../.env
+          echo "TEST_POSTGRES_SERVER=127.0.0.1" >> ../../.env
+
+      - name: Run tests
+        run: |
+          uv run pytest --cov --cov-branch --cov-report=xml:test-reports/coverage.xml
+
+      - name: Upload test results for artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-for-artifact
+          path: test-reports/
+          retention-days: 15
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          name: test-results-for-codecov
+          files: test-reports/coverage.xml
+
   build-and-push:
     runs-on: ubuntu-latest
+    needs: test
     strategy:
       fail-fast: false # Let all matrix jobs complete
       matrix:
         image_config:
-
-          # - name: "db"
-          #   dockerfile: "app/db/Dockerfile"
-          #   context: "app/db"
 
           - name: "backend"
             dockerfile: "app/backend/Dockerfile"
@@ -62,12 +117,7 @@ jobs:
           images: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAMESPACE }}/${{ matrix.image_config.name }}
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=sha
+            type=sha,prefix=sha-,format=short
             latest
           labels: |
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
@@ -86,50 +136,91 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  test:
-    needs: build-and-push
+  test-image:
     runs-on: ubuntu-latest
+    needs: build-and-push
+
     steps:
       - uses: actions/checkout@v4
-      - name: Login to GHCR
+      - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Pull images
+      - name: Load environment variables
         run: |
-          docker pull ghcr.io/rekebuba/backend:${{ env.IMAGE_TAG }}
           echo "${{ secrets.ENV_BASE64 }}" | base64 -d > .env
 
-      - name: Run tests
-
+      - name: Start Container
         run: |
-          docker compose \
-            --env-file .env \
-            -f docker-compose.test.yml up \
-            --abort-on-container-exit \
-            --exit-code-from backend \
-            --remove-orphans
+          docker compose -f docker-compose.test.yml up -d
+        
+      - name: Run Health Tests
+        run: |
+          curl --fail --retry 10 --retry-all-errors --retry-delay 3 http://localhost:8080/api/v1/health/ || exit 1
 
-      - name: Upload test results for artifact
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: test-results-for-artifact
-          path: test-reports/
-          retention-days: 15
 
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v5
-        with:
-          name: test-results-for-codecov
-          files: test-reports/coverage.xml
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test-image
+    strategy:
+      matrix:
+        service: [backend, frontend]
+    
+    permissions:
+      contents: 'read'
+      id-token: 'write'
 
-      - name: Cleanup
-        if: always()
-        run: docker compose -f docker-compose.test.yml down -v
+    steps:
+    - name: Login to GHCR
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    # Authenticate with Google Cloud
+    - id: 'auth'
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+        service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+    # Set up gcloud CLI
+    - name: Set up Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
+    # Authorize Docker to push to Artifact Registry
+    - name: Configure Docker for GCP
+      run: |
+        gcloud auth configure-docker us-central1-docker.pkg.dev
+
+    - name: Push to Artifact Registry
+      run: |
+        docker pull ghcr.io/rekebuba/${{ matrix.service }}:latest
+        docker tag ghcr.io/rekebuba/${{ matrix.service }}:latest ${{ env.ARTIFACT_REPO }}/${{ matrix.service }}:latest
+        docker push ${{ env.ARTIFACT_REPO }}/${{ matrix.service }}:latest
+
+    - name: Deploy Backend to Cloud Run
+      if: matrix.service == 'backend'
+      run: |
+        gcloud run deploy backend \
+          --image ${{ env.ARTIFACT_REPO }}/${{ matrix.service }}:latest \
+          --region us-central1 \
+          --platform managed \
+          --allow-unauthenticated \
+          --add-cloudsql-instances=${{ secrets.CLOUD_SQL_CONNECTION_NAME }}
+
+    - name: Deploy Frontend to Cloud Run
+      if: matrix.service == 'frontend'
+      run: |
+        gcloud run deploy frontend \
+          --image ${{ env.ARTIFACT_REPO }}/${{ matrix.service }}:latest \
+          --region us-central1 \
+          --platform managed \
+          --allow-unauthenticated
 
   cleanup:
     needs: build-and-push

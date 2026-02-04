@@ -8,11 +8,11 @@ from factory import LazyAttribute, RelatedFactory
 from faker import Faker
 from PIL import Image
 
-from core.security import get_password_hash
-from models.user import User
+from project.core.security import get_password_hash
+from project.models.user import User
 from tests.factories.typed_factory import TypedFactory
-from utils.enum import RoleEnum
-from utils.utils import current_EC_year, generate_id
+from project.utils.enum import RoleEnum
+from project.utils.utils import current_EC_year, generate_id
 
 fake = Faker()
 

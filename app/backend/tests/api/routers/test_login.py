@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from core.config import settings
+from project.core.config import settings
 
 
 def test_login(client: TestClient) -> None:

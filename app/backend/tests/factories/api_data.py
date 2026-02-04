@@ -5,13 +5,13 @@ from typing import get_args
 from factory import LazyAttribute
 from faker import Faker
 
-from api.v1.routers.registrations.schema import (
+from project.api.v1.routers.registrations.schema import (
     EmployeeRegistrationForm,
     StudentRegistrationForm,
 )
-from api.v1.routers.year.schema import NewYear
+from project.api.v1.routers.year.schema import NewYear
 from tests.factories.typed_factory import TypedFactory
-from utils.enum import (
+from project.utils.enum import (
     AcademicTermTypeEnum,
     AcademicYearStatusEnum,
     BloodTypeEnum,
@@ -22,7 +22,7 @@ from utils.enum import (
     MaritalStatusEnum,
     StudentApplicationStatusEnum,
 )
-from utils.type import SetupMethodType
+from project.utils.type import SetupMethodType
 
 fake = Faker()
 
