@@ -78,16 +78,11 @@ class Settings(BaseSettings):
 
     @computed_field
     @property
-    def SQLALCHEMY_POSTGRES_DATABASE_URI(self) -> PostgresDsn:
+    def SQLALCHEMY_POSTGRES_DATABASE_URI(self) -> PostgresDsn | str:
         if self.ENVIRONMENT == "production":
-            return PostgresDsn.build(
-                scheme="postgresql",
-                username=self.PROD_POSTGRES_USER,
-                password=self.PROD_POSTGRES_PASSWORD,
-                host=self.PROD_POSTGRES_SERVER,
-                port=self.PROD_POSTGRES_PORT,
-                path=self.PROD_POSTGRES_DB,
-            )
+            # For Cloud SQL Unix Sockets, the format is:
+            # postgresql://user:pass@/dbname?host=/cloudsql/connection-name
+            return f"postgresql://{self.PROD_POSTGRES_USER}:{self.PROD_POSTGRES_PASSWORD}@/{self.PROD_POSTGRES_DB}?host={self.PROD_POSTGRES_SERVER}"
         elif self.ENVIRONMENT == "development":
             return PostgresDsn.build(
                 scheme="postgresql",
