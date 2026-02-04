@@ -94,11 +94,6 @@ jobs:
             dockerfile: "app/frontend/Dockerfile"
             context: "app/frontend"
 
-    # Map matrix results to job-level outputs
-    outputs:
-      backend_tag: ${{ steps.save-tag.outputs.backend_tag }}
-      frontend_tag: ${{ steps.save-tag.outputs.frontend_tag }}
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -140,18 +135,10 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-      
-      - name: Save tags to output
-        id: save-tag
-        run: |
-          echo "${{ matrix.image_config.name }}_tag=${{ steps.meta.outputs.version }}" >> $GITHUB_OUTPUT
 
   test-image:
     runs-on: ubuntu-latest
     needs: build-and-push
-    env:
-      BACKEND_TAG: ${{ needs.build-and-push.outputs.backend_tag }}
-      FRONTEND_TAG: ${{ needs.build-and-push.outputs.frontend_tag }}
 
     steps:
       - uses: actions/checkout@v4
@@ -168,7 +155,6 @@ jobs:
 
       - name: Start Container
         run: |
-          BACKEND_TAG=${{ env.BACKEND_TAG }} FRONTEND_TAG=${{ env.FRONTEND_TAG }} \
           docker compose -f docker-compose.test.yml up -d
         
       - name: Run Health Tests
@@ -178,15 +164,11 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [test-image, build-and-push]
+    needs: test-image
     strategy:
       matrix:
         service: [backend, frontend]
     
-    env:
-      BACKEND_TAG: ${{ needs.build-and-push.outputs.backend_tag }}
-      FRONTEND_TAG: ${{ needs.build-and-push.outputs.frontend_tag }}
-
     permissions:
       contents: 'read'
       id-token: 'write'
@@ -217,16 +199,29 @@ jobs:
 
     - name: Push to Artifact Registry
       run: |
-        if [ "${{ matrix.service }}" == "backend" ]; then
-          TAG="${{ env.BACKEND_TAG }}"
-        else
-          TAG="${{ env.FRONTEND_TAG }}"
-        fi
+        docker pull ghcr.io/rekebuba/${{ matrix.service }}:latest
+        docker tag ghcr.io/rekebuba/${{ matrix.service }}:latest ${{ env.ARTIFACT_REPO }}/${{ matrix.service }}:latest
+        docker push ${{ env.ARTIFACT_REPO }}/${{ matrix.service }}:latest
 
-        docker pull ghcr.io/rekebuba/${{ matrix.service }}:$TAG
-        docker tag ghcr.io/rekebuba/${{ matrix.service }}:$TAG ${{ env.ARTIFACT_REPO }}/${{ matrix.service }}:$TAG
-        docker push ${{ env.ARTIFACT_REPO }}/${{ matrix.service }}:$TAG
+    - name: Deploy to Cloud Run
+    - name: Deploy Backend to Cloud Run
+      if: matrix.service == 'backend'
+      run: |
+        gcloud run deploy backend \
+          --image ${{ env.ARTIFACT_REPO }}/${{ matrix.service }}:latest \
+          --region us-central1 \
+          --platform managed \
+          --allow-unauthenticated \
+          --add-cloudsql-instances=${{ secrets.CLOUD_SQL_CONNECTION_NAME }}
 
+    - name: Deploy Frontend to Cloud Run
+      if: matrix.service == 'frontend'
+      run: |
+        gcloud run deploy frontend \
+          --image ${{ env.ARTIFACT_REPO }}/${{ matrix.service }}:latest \
+          --region us-central1 \
+          --platform managed \
+          --allow-unauthenticated
 
   cleanup:
     needs: build-and-push
