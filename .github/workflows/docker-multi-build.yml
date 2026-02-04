@@ -203,7 +203,6 @@ jobs:
         docker tag ghcr.io/rekebuba/${{ matrix.service }}:latest ${{ env.ARTIFACT_REPO }}/${{ matrix.service }}:latest
         docker push ${{ env.ARTIFACT_REPO }}/${{ matrix.service }}:latest
 
-    - name: Deploy to Cloud Run
     - name: Deploy Backend to Cloud Run
       if: matrix.service == 'backend'
       run: |
