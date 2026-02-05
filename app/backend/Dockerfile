@@ -38,6 +38,8 @@ COPY --from=builder /usr/local /usr/local
 
 # Copy app code
 COPY ./src ./src
+COPY alembic.ini ./
+COPY alembic ./alembic
 
 WORKDIR /app/src
 

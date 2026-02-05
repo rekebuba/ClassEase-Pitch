@@ -203,6 +203,21 @@ jobs:
         docker tag ghcr.io/rekebuba/${{ matrix.service }}:latest ${{ env.ARTIFACT_REPO }}/${{ matrix.service }}:latest
         docker push ${{ env.ARTIFACT_REPO }}/${{ matrix.service }}:latest
 
+    - name: Run Cloud Run Job for DB Migration
+      if: matrix.service == 'backend'
+      run: |
+        gcloud run jobs update migrate-db \
+        --image ${{ env.ARTIFACT_REPO }}/${{ matrix.service }}:latest \
+        --region us-central1 \
+        --command alembic \
+        --args upgrade,head \
+        --set-cloudsql-instances=${{ secrets.CLOUD_SQL_CONNECTION_NAME }} \
+        --service-account=${{ secrets.CLOUD_JOB_SA }}
+
+        gcloud run jobs execute migrate-db \
+          --region us-central1 \
+          --wait
+    
     - name: Deploy Backend to Cloud Run
       if: matrix.service == 'backend'
       run: |
