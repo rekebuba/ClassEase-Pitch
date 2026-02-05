@@ -206,7 +206,7 @@ jobs:
     - name: Run Cloud Run Job for DB Migration
       if: matrix.service == 'backend'
       run: |
-        gcloud run jobs update migrate-db \
+        gcloud run jobs deploy migrate-db \
         --image ${{ env.ARTIFACT_REPO }}/${{ matrix.service }}:latest \
         --region us-central1 \
         --command alembic \
