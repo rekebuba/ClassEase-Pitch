@@ -3,7 +3,7 @@
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Boolean, Enum, String
+from sqlalchemy import Enum, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
@@ -11,14 +11,17 @@ from project.utils.enum import RoleEnum
 
 if TYPE_CHECKING:
     from project.models.admin import Admin
+    from project.models.employee import Employee
     from project.models.saved_query_view import SavedQueryView
     from project.models.student import Student
-    from project.models.employee import Employee
 
 
 class User(BaseModel):
     """
-    This module defines the User model which represents a user in the system. The User can have one of three roles: 'admin', 'teacher', or 'student'. Each user has a unique ID and a password.
+    This module defines the User model which represents
+    a user in the system. The User can have one of three
+    roles: 'admin', 'teacher', or 'student'.
+    Each user has a unique ID and a password.
     """
 
     __tablename__ = "users"

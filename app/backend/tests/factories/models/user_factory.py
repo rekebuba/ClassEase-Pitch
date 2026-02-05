@@ -10,9 +10,8 @@ from PIL import Image
 
 from project.core.security import get_password_hash
 from project.models.user import User
-from tests.factories.typed_factory import TypedFactory
 from project.utils.enum import RoleEnum
-from project.utils.utils import current_EC_year, generate_id
+from tests.factories.typed_factory import TypedFactory
 
 fake = Faker()
 
@@ -50,9 +49,7 @@ class UserFactory(TypedFactory[User]):
     )
 
     role: Any = LazyAttribute(lambda x: random.choice(list(RoleEnum)))
-    identification: Any = LazyAttribute(
-        lambda x: generate_id(role=x.role, academic_year=current_EC_year())
-    )
+    identification = LazyAttribute(lambda x: str(fake.uuid4()))
     password: Any = LazyAttribute(lambda x: get_password_hash(x.identification))
     image_path: Any = LazyAttribute(
         lambda x: UserFactory.generate_fake_profile_picture()

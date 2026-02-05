@@ -175,7 +175,7 @@ async def parse_nested_params(
     # If no fields explicitly given for this model, use defaults
     if not valid_fields:
         if hasattr(base_model, "default_fields"):
-            valid_fields = list(base_model.default_fields())
+            valid_fields = list(base_model.default_fields())  # type: ignore
         else:
             valid_fields = list(base_model.model_fields.keys())
 

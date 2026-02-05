@@ -10,7 +10,6 @@ from project.api.v1.routers.registrations.schema import (
     StudentRegistrationForm,
 )
 from project.api.v1.routers.year.schema import NewYear
-from tests.factories.typed_factory import TypedFactory
 from project.utils.enum import (
     AcademicTermTypeEnum,
     AcademicYearStatusEnum,
@@ -20,9 +19,9 @@ from project.utils.enum import (
     GenderEnum,
     HighestEducationEnum,
     MaritalStatusEnum,
-    StudentApplicationStatusEnum,
 )
 from project.utils.type import SetupMethodType
+from tests.factories.typed_factory import TypedFactory
 
 fake = Faker()
 

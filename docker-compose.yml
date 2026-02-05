@@ -37,7 +37,7 @@ services:
       - "5432:5432"
     networks:
       - app-network
-    
+
   test_postgres_db:
     container_name: test_postgres_container
     image: postgres:13.22-alpine3.22

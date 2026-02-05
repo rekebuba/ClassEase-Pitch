@@ -4,11 +4,10 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Enum, Float, ForeignKey, Integer
+from sqlalchemy import UUID, Enum, Float, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
-from sqlalchemy import UUID
 from project.models.student_term_record import StudentTermRecord
 from project.utils.enum import MarkListTypeEnum
 

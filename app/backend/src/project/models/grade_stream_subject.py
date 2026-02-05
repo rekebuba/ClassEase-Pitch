@@ -9,7 +9,6 @@ from project.models.base.base_model import BaseModel
 from project.utils.utils import sort_grade_key
 
 if TYPE_CHECKING:
-    from project.models.employee import Employee
     from project.models.grade import Grade
     from project.models.stream import Stream
     from project.models.subject import Subject

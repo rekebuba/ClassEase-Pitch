@@ -4,19 +4,14 @@
 import uuid
 from typing import TYPE_CHECKING, List, Optional
 
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import UUID, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.assessment import Assessment
 from project.models.base.base_model import BaseModel
-from sqlalchemy import UUID
 
 if TYPE_CHECKING:
-    from project.models.grade import Grade
-    from project.models.stream import Stream
-    from project.models.subject import Subject
     from project.models.subject_yearly_average import SubjectYearlyAverage
-    from project.models.year import Year
 
 
 class YearlySubject(BaseModel):

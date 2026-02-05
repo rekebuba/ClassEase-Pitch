@@ -5,11 +5,10 @@ import uuid
 from datetime import date
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import Date, Enum, ForeignKey, String, Text
+from sqlalchemy import UUID, Date, Enum, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
-from sqlalchemy import UUID
 from project.utils.enum import GenderEnum
 
 if TYPE_CHECKING:

@@ -1,9 +1,9 @@
 from fastapi import APIRouter
 
-from project.api.v1.routers.health import route as health_router
 from project.api.v1.routers.academic_term import route as academic_term_router
 from project.api.v1.routers.employee import route as employee_router
 from project.api.v1.routers.grades import route as grade_router
+from project.api.v1.routers.health import route as health_router
 from project.api.v1.routers.login import route as auth_router
 from project.api.v1.routers.private import route as private_router
 from project.api.v1.routers.registrations import route as registration_router

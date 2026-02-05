@@ -1,11 +1,6 @@
-import uuid
 from typing import Dict
 
 from fastapi.testclient import TestClient
-from sqlalchemy.orm import Session
-
-from project.core.config import settings
-from tests.factories.api_data import NewYearFactory
 
 
 def get_auth_header(client: TestClient, login_data: Dict[str, str]) -> Dict[str, str]:

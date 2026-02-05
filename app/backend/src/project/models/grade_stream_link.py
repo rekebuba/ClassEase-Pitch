@@ -4,11 +4,10 @@
 import uuid
 from dataclasses import dataclass
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import UUID, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from project.models.base.base_model import Base
-from sqlalchemy import UUID
 
 
 @dataclass

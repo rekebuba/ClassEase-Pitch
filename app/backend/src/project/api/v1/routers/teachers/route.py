@@ -199,7 +199,8 @@ def assign_teacher(
             if teacher_record_link_exists:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Teacher is already assigned to section with ID {section.id}.",
+                    detail=f"Teacher is already assigned to section with ID \
+                         {section.id}.",
                 )
 
             session.add(

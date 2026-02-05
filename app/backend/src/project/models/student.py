@@ -5,6 +5,7 @@ import uuid
 from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import (
+    UUID,
     Boolean,
     Date,
     Enum,
@@ -16,7 +17,6 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
-from sqlalchemy import UUID
 from project.utils.enum import BloodTypeEnum, GenderEnum, StudentApplicationStatusEnum
 
 if TYPE_CHECKING:
@@ -138,11 +138,11 @@ class Student(BaseModel):
 
     @hybrid_property
     def full_name(self):
-        return self.first_name + " " + self.father_name + " " + self.grand_father_name
+        return f"{self.first_name} {self.father_name} {self.grand_father_name}"
 
-    @full_name.expression  # type: ignore
+    @full_name.expression
     def full_name(cls):
-        return cls.first_name + " " + cls.father_name + " " + cls.grand_father_name
+        return f"{cls.first_name} {cls.father_name} {cls.grand_father_name}"
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(),

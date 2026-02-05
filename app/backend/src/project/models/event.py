@@ -5,6 +5,7 @@ import uuid
 from typing import TYPE_CHECKING
 
 from sqlalchemy import (
+    UUID,
     Boolean,
     CheckConstraint,
     Date,
@@ -18,7 +19,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
-from sqlalchemy import UUID
 from project.utils.enum import (
     EventEligibilityEnum,
     EventLocationEnum,

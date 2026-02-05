@@ -5,7 +5,6 @@ import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
-from starlette import status
 
 from project.api.v1.routers.dependencies import SessionDep, TokenDep, get_db
 from project.core.config import settings
