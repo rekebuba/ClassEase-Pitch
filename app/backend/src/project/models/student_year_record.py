@@ -2,21 +2,15 @@
 """Module for StudentYearRecord class"""
 
 import uuid
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import Float, ForeignKey, Integer
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import UUID, Float, ForeignKey, Integer
+from sqlalchemy.orm import Mapped, mapped_column
 
 from project.models.base.base_model import BaseModel
-from sqlalchemy import UUID
 
 if TYPE_CHECKING:
-    from project.models.grade import Grade
-    from project.models.stream import Stream
-    from project.models.student import Student
-    from project.models.student_term_record import StudentTermRecord
-    from project.models.subject_yearly_average import SubjectYearlyAverage
-    from project.models.year import Year
+    pass
 
 
 class StudentYearRecord(BaseModel):

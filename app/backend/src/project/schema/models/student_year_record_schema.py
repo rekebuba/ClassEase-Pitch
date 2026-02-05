@@ -12,7 +12,9 @@ if TYPE_CHECKING:
     from project.schema.models.stream_schema import StreamSchema
     from project.schema.models.student_schema import StudentSchema
     from project.schema.models.student_term_record_schema import StudentTermRecordSchema
-    from project.schema.models.subject_yearly_average_schema import SubjectYearlyAverageSchema
+    from project.schema.models.subject_yearly_average_schema import (
+        SubjectYearlyAverageSchema,
+    )
     from project.schema.models.year_schema import YearSchema
 
 
@@ -50,6 +52,9 @@ class StudentYearRecordRelatedSchema(BaseModel):
 class StudentYearRecordWithRelatedSchema(
     StudentYearRecordSchema, StudentYearRecordRelatedSchema
 ):
-    """This model represents a student's yearly academic record with related entities."""
+    """
+    This model represents a student's yearly academic record
+    with related entities.
+    """
 
     pass

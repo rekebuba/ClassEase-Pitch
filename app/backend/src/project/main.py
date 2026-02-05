@@ -2,6 +2,7 @@
 """Main module for the API"""
 
 import json
+
 from fastapi import FastAPI, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import ResponseValidationError
@@ -23,12 +24,13 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 # Set all CORS enabled origins
 if settings.all_cors_origins:
     app.add_middleware(
-        CORSMiddleware,
+        CORSMiddleware,  # ty:ignore[invalid-argument-type]
         allow_origins=settings.all_cors_origins,
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
 
 def use_route_names_as_operation_ids(app: FastAPI) -> None:
     """

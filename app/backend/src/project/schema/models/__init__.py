@@ -13,7 +13,11 @@ from project.schema.models.assessment_schema import (
     AssessmentSchema,
 )
 from project.schema.models.blacklist_token_schema import BlacklistTokenSchema
-from project.schema.models.event_schema import EventRelatedSchema, EventSchema, EventWithRelatedSchema
+from project.schema.models.event_schema import (
+    EventRelatedSchema,
+    EventSchema,
+    EventWithRelatedSchema,
+)
 from project.schema.models.grade_schema import (
     GradeNestedSchema,
     GradeRelatedSchema,
@@ -78,7 +82,11 @@ from project.schema.models.teacher_schema import (
     TeacherSchema,
     TeacherWithRelatedSchema,
 )
-from project.schema.models.user_schema import UserRelatedSchema, UserSchema, UserWithRelatedSchema
+from project.schema.models.user_schema import (
+    UserRelatedSchema,
+    UserSchema,
+    UserWithRelatedSchema,
+)
 from project.schema.models.year_schema import (
     YearNestedSchema,
     YearRelatedSchema,

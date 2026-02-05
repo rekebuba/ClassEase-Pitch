@@ -9,14 +9,28 @@ from project.utils.enum import GradeEnum, GradeLevelEnum
 from project.utils.utils import to_camel
 
 if TYPE_CHECKING:
-    from project.schema.models.section_schema import SectionSchema, SectionWithRelatedSchema
-    from project.schema.models.stream_schema import StreamSchema, StreamWithRelatedSchema
-    from project.schema.models.student_schema import StudentSchema, StudentWithRelatedSchema
+    from project.schema.models.section_schema import (
+        SectionSchema,
+        SectionWithRelatedSchema,
+    )
+    from project.schema.models.stream_schema import (
+        StreamSchema,
+        StreamWithRelatedSchema,
+    )
+    from project.schema.models.student_schema import (
+        StudentSchema,
+        StudentWithRelatedSchema,
+    )
     from project.schema.models.student_term_record_schema import (
         StudentTermRecordSchema,
     )
-    from project.schema.models.subject_schema import SubjectSchema, SubjectWithRelatedSchema
-    from project.schema.models.teacher_schema import TeacherSchema, TeacherWithRelatedSchema
+    from project.schema.models.subject_schema import (
+        SubjectSchema,
+    )
+    from project.schema.models.teacher_schema import (
+        TeacherSchema,
+        TeacherWithRelatedSchema,
+    )
     from project.schema.models.year_schema import YearSchema, YearWithRelatedSchema
 
 

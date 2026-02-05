@@ -1,8 +1,9 @@
 from typing import Dict
 
 from fastapi.testclient import TestClient
-from requests import Session
+from sqlalchemy.orm import Session
 
+from project.api.v1.routers.year.schema import NewYearSuccess
 from project.core.config import settings
 from project.models.year import Year
 from tests.factories.api_data import NewYearFactory
@@ -24,13 +25,10 @@ class TestYearApi:
         )
 
         assert r.status_code == 201
-        assert r.json() is not None
 
-        result = r.json()
+        result = NewYearSuccess.model_validate_json(r.text)
 
-        assert "id" in result
-        assert "message" in result
-        assert "Year created Successfully" == result["message"]
+        assert "Year created Successfully" == result.message
 
-        year = db_session.get(Year, result["id"])
+        year = db_session.get(Year, result.id)
         assert year is not None

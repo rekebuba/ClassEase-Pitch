@@ -3,11 +3,10 @@
 
 import uuid
 
-from sqlalchemy import DateTime, ForeignKey
+from sqlalchemy import UUID, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
 from project.models.base.base_model import BaseModel
-from sqlalchemy import UUID
 
 
 class Registration(BaseModel):

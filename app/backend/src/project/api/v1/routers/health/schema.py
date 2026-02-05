@@ -1,4 +1,5 @@
 from pydantic import BaseModel, ConfigDict
+
 from project.utils.utils import to_camel
 
 

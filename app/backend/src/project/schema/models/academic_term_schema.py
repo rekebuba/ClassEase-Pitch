@@ -37,7 +37,8 @@ class AcademicTermSchema(BaseModel):
     @classmethod
     def default_fields(cls) -> set[str]:
         """
-        Returns a list of default fields to be used when no specific fields are requested.
+        Returns a list of default fields to be used
+        when no specific fields are requested.
         This can be overridden in subclasses if needed.
         """
         return {"id", "name", "start_date", "end_date"}

@@ -1,4 +1,3 @@
-
 from fastapi import APIRouter
 
 from project.api.v1.routers.dependencies import (

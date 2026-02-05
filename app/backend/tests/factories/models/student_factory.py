@@ -2,13 +2,13 @@ from factory import LazyAttribute, SubFactory
 from faker import Faker
 
 from project.models.student import Student
-from tests.factories.typed_factory import TypedFactory
 from project.utils.enum import (
     BloodTypeEnum,
     GenderEnum,
     RoleEnum,
     StudentApplicationStatusEnum,
 )
+from tests.factories.typed_factory import TypedFactory
 
 fake = Faker()
 

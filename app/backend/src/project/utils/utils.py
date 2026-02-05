@@ -16,12 +16,12 @@ from typing import (
     get_origin,
 )
 
-import emails  # type: ignore
+import emails
 import jwt
 from jinja2 import Template
 from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel
-from pyethiodate import EthDate  # type: ignore
+from pyethiodate import EthDate
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -147,7 +147,7 @@ def generate_subject_code(subject: str) -> str:
     # Split the subject name into words
     words = subject.split()
 
-    """Determine the length of the prefix for each word 
+    """Determine the length of the prefix for each word
     (2 letters if multiple words, 3 otherwise)"""
     prefix_length = 3
 
