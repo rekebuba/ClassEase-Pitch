@@ -12,7 +12,9 @@ if TYPE_CHECKING:
     from project.schema.models.grade_schema import GradeSchema
     from project.schema.models.stream_schema import StreamSchema
     from project.schema.models.subject_schema import SubjectSchema
-    from project.schema.models.subject_yearly_average_schema import SubjectYearlyAverageSchema
+    from project.schema.models.subject_yearly_average_schema import (
+        SubjectYearlyAverageSchema,
+    )
     from project.schema.models.teacher_record_schema import TeacherRecordSchema
     from project.schema.models.year_schema import YearSchema
 

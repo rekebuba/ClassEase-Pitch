@@ -105,7 +105,8 @@ class TeacherSchema(BaseModel):
     @classmethod
     def default_fields(cls) -> set[str]:
         """
-        Returns a list of default fields to be used when no specific fields are requested.
+        Returns a list of default fields to be used
+        when no specific fields are requested.
         This can be overridden in subclasses if needed.
         """
         return {"id", "first_name", "father_name", "date_of_birth"}

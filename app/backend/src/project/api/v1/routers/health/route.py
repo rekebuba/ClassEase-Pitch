@@ -1,12 +1,12 @@
-from typing import List
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
+
 from project.api.v1.routers.dependencies import SessionDep
 from project.api.v1.routers.health.schema import HealthStatus
-from sqlalchemy import select, text
-
 
 router = APIRouter(prefix="/health", tags=["Health"])
+
 
 @router.get(
     "/",

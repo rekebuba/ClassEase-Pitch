@@ -4,15 +4,13 @@
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Float, ForeignKey, Integer
+from sqlalchemy import UUID, Float, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
-from sqlalchemy import UUID
 
 if TYPE_CHECKING:
     from project.models.student import Student
-    from project.models.student_year_record import StudentYearRecord
     from project.models.yearly_subject import YearlySubject
 
 

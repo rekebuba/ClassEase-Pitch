@@ -3,12 +3,10 @@
 import uuid
 from dataclasses import dataclass
 
-from sqlalchemy import Float, Integer
+from sqlalchemy import UUID, Float, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import ForeignKey
 
 from project.models.base.base_model import Base
-from sqlalchemy import UUID
 
 
 @dataclass

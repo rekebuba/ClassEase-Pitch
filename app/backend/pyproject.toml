@@ -10,7 +10,6 @@ dependencies = [
     "pydantic>=2.11.5",
     "pydantic-settings>=2.10.1",
     "pyethiodate>=1.0.6",
-    "sqlalchemy>=2.0.40",
     "python-multipart>=0.0.20",
     "python-jose>=3.5.0",
     "dnspython>=2.7.0",
@@ -31,8 +30,10 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "ty>=0.0.15",
     "debugpy>=1.8.14",
     "factory-boy>=3.3.3",
+    "sqlalchemy[mypy]>=2.0.40",
     "mypy>=1.15.0",
     "pre-commit>=4.2.0",
     "pytest>=8.3.5",
@@ -51,43 +52,6 @@ package-dir = {"" = "src"}
 [tool.setuptools.packages.find]
 where = ["src"]
 
-[tool.mypy]
-files = ["."]
-exclude = ["tests/factories/.*"]
-strict = true                    # Enables all strictness flags below
-disallow_untyped_defs = true     # Functions must have type annotations
-disallow_incomplete_defs = true  # No partial annotations (e.g., `def foo(x) -> int`)
-disallow_any_generics = true       # No `Any` in generic types
-warn_return_any = true           # Warn if a function returns `Any`
-warn_unused_configs = true       # Warn about unused mypy configs
-
-plugins = "sqlalchemy.ext.mypy.plugin"
-disable_error_code = ["misc"]     # Disable specific error codes (e.g., `misc` for non-critical issues)
-
-# Imports and modules
-ignore_missing_imports = false    # Fail if imports are missing
-follow_imports = "silent"        # Follow imports but don't spam output
-namespace_packages = true        # Support modern Python namespace packages
-
-# Performance optimizations (critical for large projects)
-cache_dir = ".mypy_cache"        # Speeds up incremental checks
-show_error_codes = true          # Show error codes (e.g., `[no-untyped-def]`)
-warn_redundant_casts = true      # Warn if casting is unnecessary
-warn_unused_ignores = true       # Warn if `# type: ignore` is unused
-
-# Platform-specific settings (if needed)
-python_version = "3.10"          # Set your target Python version
-platform = "linux"              # Optional: enforce OS-specific checks
-
-# Per-module overrides (example: relax rules for tests/legacy code)
-[[tool.mypy.overrides]]
-module = "tests.*"
-disallow_untyped_defs = false
-
-[[tool.mypy.overrides]]
-module = "legacy.*"
-ignore_errors = true
-
 [tool.pytest.ini_options]
 testpaths = ["tests"]       # Replaces pytestArgs
 pythonpath = ["."]       # Ensures correct import resolution
@@ -103,9 +67,19 @@ extend-include = ["*.ipynb"]
 line-length = 88
 lint.select = ["E", "F", "I"] # E: pycodestyle errors, F: Pyflakes errors, I: isort
 lint.fixable = ["ALL"] # Only auto-fix import errors
+src = ["src"]
 
 [tool.ruff.format]
 docstring-code-format = true
+
+[tool.pyright]
+exclude = [".venv", "tests/factories/**"]
+venvPath = "."
+venv = ".venv"
+
+[tool.ty.src]
+include = ["src", "tests"]
+exclude = [".venv"]
 
 
 [tool.alembic]

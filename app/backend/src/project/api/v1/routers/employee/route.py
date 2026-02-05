@@ -5,14 +5,21 @@ from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import select, update
 
 from project.api.v1.routers.dependencies import SessionDep, admin_route
-from project.api.v1.routers.employee.schema import EmployeeBasicInfo, UpdateEmployeeStatusSchema
+from project.api.v1.routers.employee.schema import (
+    EmployeeBasicInfo,
+    UpdateEmployeeStatusSchema,
+)
 from project.core.security import get_password_hash
 from project.models.employee import Employee
 from project.models.employee_year_link import EmployeeYearLink
 from project.models.user import User
 from project.models.year import Year
 from project.schema.schema import SuccessResponseSchema
-from project.utils.enum import EmployeeApplicationStatusEnum, EmployeePositionEnum, RoleEnum
+from project.utils.enum import (
+    EmployeeApplicationStatusEnum,
+    EmployeePositionEnum,
+    RoleEnum,
+)
 from project.utils.utils import generate_id
 
 router = APIRouter(prefix="/employees", tags=["Employees"])

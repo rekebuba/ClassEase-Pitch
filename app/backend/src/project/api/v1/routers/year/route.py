@@ -13,7 +13,10 @@ from project.api.v1.routers.year.schema import (
     NewYearSuccess,
     YearSummary,
 )
-from project.api.v1.routers.year.service import create_academic_term, handle_setup_methods
+from project.api.v1.routers.year.service import (
+    create_academic_term,
+    handle_setup_methods,
+)
 from project.models.grade import Grade
 from project.models.subject import Subject
 from project.models.year import Year

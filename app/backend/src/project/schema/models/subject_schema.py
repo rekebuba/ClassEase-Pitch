@@ -8,13 +8,18 @@ from pydantic import AwareDatetime, BaseModel, ConfigDict
 from project.utils.utils import to_camel
 
 if TYPE_CHECKING:
-    from project.schema.models.mark_list_schema import MarkListSchema
-    from project.schema.models.student_schema import StudentSchema
-    from project.schema.models.year_schema import YearSchema
-
     from project.schema.models.grade_schema import GradeSchema, GradeWithRelatedSchema
-    from project.schema.models.stream_schema import StreamSchema, StreamWithRelatedSchema
-    from project.schema.models.teacher_schema import TeacherSchema, TeacherWithRelatedSchema
+    from project.schema.models.mark_list_schema import MarkListSchema
+    from project.schema.models.stream_schema import (
+        StreamSchema,
+        StreamWithRelatedSchema,
+    )
+    from project.schema.models.student_schema import StudentSchema
+    from project.schema.models.teacher_schema import (
+        TeacherSchema,
+        TeacherWithRelatedSchema,
+    )
+    from project.schema.models.year_schema import YearSchema
 
 
 class BasicSubjectSchema(BaseModel):
@@ -54,7 +59,8 @@ class SubjectSchema(BaseModel):
     @classmethod
     def default_fields(cls) -> set[str]:
         """
-        Returns a list of default fields to be used when no specific fields are requested.
+        Returns a list of default fields to be used
+        when no specific fields are requested.
         This can be overridden in subclasses if needed.
         """
         return {"id", "name", "code"}

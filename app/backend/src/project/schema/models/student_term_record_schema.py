@@ -18,7 +18,8 @@ if TYPE_CHECKING:
 
 class StudentTermRecordSchema(BaseModel):
     """
-    This model represents the average result of a student for a particular term and year.
+    This model represents the average result of a student
+    for a particular term and year.
     """
 
     model_config = ConfigDict(
@@ -60,7 +61,8 @@ class StudentTermRecordWithRelatedSchema(
 ):
     """
     This model combines the StudentTermRecordSchema with its relationships.
-    It is used to provide a complete view of a student's term record along with related entities.
+    It is used to provide a complete view of a student's term record
+    along with related entities.
     """
 
     pass

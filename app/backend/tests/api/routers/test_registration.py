@@ -6,11 +6,11 @@ from fastapi.testclient import TestClient
 
 from project.core.config import settings
 from project.models.year import Year
+from project.utils.enum import EmployeePositionEnum
 from tests.factories.api_data import (
     EmployeeRegistrationFactory,
     StudentRegistrationFactory,
 )
-from project.utils.enum import EmployeePositionEnum
 
 
 class TestRegistration:

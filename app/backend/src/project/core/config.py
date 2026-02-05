@@ -2,14 +2,13 @@ import os
 import secrets
 import warnings
 from datetime import date
-from typing import Annotated, Any, Literal
 from pathlib import Path
+from typing import Annotated, Any, Literal
 
 from pydantic import (
     AnyUrl,
     BeforeValidator,
     EmailStr,
-    HttpUrl,
     PostgresDsn,
     computed_field,
     model_validator,
@@ -27,10 +26,12 @@ def parse_cors(v: Any) -> list[str] | str:
         return v
     raise ValueError(v)
 
+
 def get_env_file() -> str:
     """Get environment file path."""
     repo_root = Path(__file__).resolve().parent.parent.parent.parent.parent.parent
     return os.path.join(repo_root, ".env")
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -92,7 +93,7 @@ class Settings(BaseSettings):
                 port=self.DEV_POSTGRES_PORT,
                 path=self.DEV_POSTGRES_DB,
             )
-        elif self.ENVIRONMENT == "testing":    
+        elif self.ENVIRONMENT == "testing":
             return PostgresDsn.build(
                 scheme="postgresql",
                 username=self.TEST_POSTGRES_USER,

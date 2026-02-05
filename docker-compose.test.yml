@@ -25,10 +25,10 @@ services:
       - .env
     ports:
       - "8080:8080"
-      
+
     networks:
       - app-network
-    
+
   # frontend:
   #   container_name: frontend_container
   #   image: ghcr.io/rekebuba/frontend:latest
@@ -39,7 +39,7 @@ services:
 
   #   networks:
   #     - app-network
-  
+
 
 
 networks:

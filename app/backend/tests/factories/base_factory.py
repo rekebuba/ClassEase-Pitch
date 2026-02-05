@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session, scoped_session
 T = TypeVar("T")
 
 
-class BaseFactory(SQLAlchemyModelFactory, Generic[T]):  # type: ignore[type-arg]
+class BaseFactory(SQLAlchemyModelFactory, Generic[T]):
     """Base factory class for creating database models."""
 
     class Meta:
@@ -33,7 +33,7 @@ class BaseFactory(SQLAlchemyModelFactory, Generic[T]):  # type: ignore[type-arg]
 
         existing = session.query(model).filter_by(**lookup_kwargs).first()
         if existing:
-            return existing  # type: ignore[no-any-return]
+            return existing
 
         return cls.create(**kwargs)
 
@@ -52,7 +52,7 @@ class BaseFactory(SQLAlchemyModelFactory, Generic[T]):  # type: ignore[type-arg]
 
         existing = session.query(model).filter_by(**lookup_kwargs).first()
         if existing:
-            return existing  # type: ignore[no-any-return]
+            return existing
 
         return None
 
@@ -79,8 +79,8 @@ class BaseFactory(SQLAlchemyModelFactory, Generic[T]):  # type: ignore[type-arg]
         for k in skip_fields:
             kwargs.pop(k, None)
 
-        return super()._create(model_class, *arg, **kwargs)  # type: ignore[no-any-return]
+        return super()._create(model_class, *arg, **kwargs)
 
     @classmethod
     def create(cls: Type["BaseFactory[T]"], **kwargs: Any) -> T:
-        return super().create(**kwargs)  # type: ignore[no-any-return]
+        return super().create(**kwargs)

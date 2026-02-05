@@ -1,12 +1,9 @@
-from importlib import resources
-import json
 import logging
 import uuid
 from datetime import date
 from typing import Dict, List, Union
 
 from fastapi import HTTPException
-from project.templates import TEM_DATA
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
@@ -18,6 +15,7 @@ from project.models.section import Section
 from project.models.stream import Stream
 from project.models.subject import Subject
 from project.models.year import Year
+from project.templates import TEM_DATA
 from project.utils.enum import AcademicTermEnum, AcademicTermTypeEnum
 from project.utils.type import SetupMethodType
 

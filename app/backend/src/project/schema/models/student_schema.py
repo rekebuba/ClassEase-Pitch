@@ -19,7 +19,9 @@ if TYPE_CHECKING:
     from project.schema.models.student_term_record_schema import StudentTermRecordSchema
     from project.schema.models.student_year_record_schema import StudentYearRecordSchema
     from project.schema.models.subject_schema import SubjectSchema
-    from project.schema.models.subject_yearly_average_schema import SubjectYearlyAverageSchema
+    from project.schema.models.subject_yearly_average_schema import (
+        SubjectYearlyAverageSchema,
+    )
     from project.schema.models.user_schema import UserSchema
     from project.schema.models.year_schema import YearSchema
 
@@ -72,7 +74,8 @@ class StudentSchema(BaseModel):
     @classmethod
     def default_fields(cls) -> set[str]:
         """
-        Returns a list of default fields to be used when no specific fields are requested.
+        Returns a list of default fields to be used
+        when no specific fields are requested.
         This can be overridden in subclasses if needed.
         """
         return {"id", "first_name", "father_name", "date_of_birth"}

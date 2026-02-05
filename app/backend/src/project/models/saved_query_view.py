@@ -4,11 +4,10 @@
 import uuid
 from typing import TYPE_CHECKING, Any, Dict
 
-from sqlalchemy import JSON, Enum, ForeignKey, String
+from sqlalchemy import JSON, UUID, Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
-from sqlalchemy import UUID
 from project.utils.enum import TableEnum
 
 if TYPE_CHECKING:

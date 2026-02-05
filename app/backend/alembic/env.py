@@ -3,9 +3,8 @@ from logging.config import fileConfig
 from os.path import abspath, dirname, join
 
 import alembic_postgresql_enum  # noqa: F401
-from sqlalchemy import engine_from_config, pool
-
 from alembic import context
+from sqlalchemy import engine_from_config, pool
 
 # Get the path to the root directory (where src lives)
 # and append the 'src' folder to sys.path

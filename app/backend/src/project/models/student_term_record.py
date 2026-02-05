@@ -4,11 +4,10 @@
 import uuid
 from typing import TYPE_CHECKING, List
 
-from sqlalchemy import Float, ForeignKey, Integer
+from sqlalchemy import UUID, Float, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
-from sqlalchemy import UUID
 
 if TYPE_CHECKING:
     from project.models.academic_term import AcademicTerm
@@ -21,7 +20,8 @@ if TYPE_CHECKING:
 
 class StudentTermRecord(BaseModel):
     """
-    This model represents the average result of a student for a particular term and year.
+    This model represents the average result of a student
+    for a particular term and year.
     """
 
     __tablename__ = "student_term_records"

@@ -167,7 +167,7 @@ class Employee(BaseModel):
     def full_name(self):
         return self.first_name + " " + self.father_name + " " + self.grand_father_name
 
-    @full_name.expression  # type: ignore
+    @full_name.expression
     def full_name(cls):
         return cls.first_name + " " + cls.father_name + " " + cls.grand_father_name
 

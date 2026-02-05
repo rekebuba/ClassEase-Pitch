@@ -16,7 +16,8 @@ if TYPE_CHECKING:
 
 class TeacherRecordSchema(BaseModel):
     """
-    This model represents the record of teachers, including their associated subjects, grades, and sections.
+    This model represents the record of
+    teachers, including their associated subjects, grades, and sections.
     """
 
     model_config = ConfigDict(

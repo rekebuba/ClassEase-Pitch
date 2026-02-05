@@ -10,12 +10,24 @@ from project.utils.enum import AcademicTermTypeEnum, AcademicYearStatusEnum
 from project.utils.utils import to_camel
 
 if TYPE_CHECKING:
-    from project.schema.models.academic_term_schema import AcademicTermSchema, AcademicTermWithRelatedSchema
+    from project.schema.models.academic_term_schema import (
+        AcademicTermSchema,
+        AcademicTermWithRelatedSchema,
+    )
     from project.schema.models.event_schema import EventSchema, EventWithRelatedSchema
     from project.schema.models.grade_schema import GradeSchema, GradeWithRelatedSchema
-    from project.schema.models.student_schema import StudentSchema, StudentWithRelatedSchema
-    from project.schema.models.subject_schema import SubjectSchema, SubjectWithRelatedSchema
-    from project.schema.models.teacher_schema import TeacherSchema, TeacherWithRelatedSchema
+    from project.schema.models.student_schema import (
+        StudentSchema,
+        StudentWithRelatedSchema,
+    )
+    from project.schema.models.subject_schema import (
+        SubjectSchema,
+        SubjectWithRelatedSchema,
+    )
+    from project.schema.models.teacher_schema import (
+        TeacherSchema,
+        TeacherWithRelatedSchema,
+    )
 
 
 class YearSchema(BaseModel):
@@ -41,7 +53,8 @@ class YearSchema(BaseModel):
     @classmethod
     def default_fields(cls) -> set[str]:
         """
-        Returns a list of default fields to be used when no specific fields are requested.
+        Returns a list of default fields to be used
+        when no specific fields are requested.
         This can be overridden in subclasses if needed.
         """
         return {"id", "name", "status"}
