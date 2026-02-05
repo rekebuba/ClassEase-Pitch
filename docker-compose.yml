@@ -17,6 +17,8 @@ services:
       - .env
     volumes:
       - ./app/backend/src/:/app/src/
+      - ./app/backend/alembic/:/app/alembic/
+      - ./app/backend/alembic.ini:/app/alembic.ini
 
     ports:
       - "8080:8080"
