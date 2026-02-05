@@ -80,7 +80,6 @@ jobs:
 
   local-test-image:
     runs-on: ubuntu-latest
-    needs: build-and-push
 
     steps:
       - uses: actions/checkout@v4
