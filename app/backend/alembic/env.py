@@ -1,8 +1,16 @@
+import sys
 from logging.config import fileConfig
+from os.path import abspath, dirname, join
 
+import alembic_postgresql_enum  # noqa: F401
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
+
+# Get the path to the root directory (where src lives)
+# and append the 'src' folder to sys.path
+sys.path.insert(0, abspath(join(dirname(__file__), "../src")))
+
 from project.core.config import settings
 from project.models.base.base_model import Base
 
