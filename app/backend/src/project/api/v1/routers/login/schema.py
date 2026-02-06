@@ -1,7 +1,15 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+
+from project.utils.utils import to_camel
 
 
 class Token(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
     access_token: str
     token_type: str
 

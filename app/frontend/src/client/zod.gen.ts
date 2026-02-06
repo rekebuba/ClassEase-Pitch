@@ -762,7 +762,8 @@ export const zTeacherWithRelatedSchema = z.object({
 
 /**
  * StudentTermRecordSchema
- * This model represents the average result of a student for a particular term and year.
+ * This model represents the average result of a student
+ * for a particular term and year.
  */
 export const zStudentTermRecordSchema = z.object({
   id: z.optional(z.union([z.uuid(), z.null()])),
@@ -983,6 +984,14 @@ export const zGradeWithRelatedSchema = z.object({
 });
 
 /**
+ * HTTPError
+ * HTTP error schema to be used when an HTTPException is thrown.
+ */
+export const zHttpError = z.object({
+  detail: z.string(),
+});
+
+/**
  * ValidationError
  */
 export const zValidationError = z.object({
@@ -996,6 +1005,14 @@ export const zValidationError = z.object({
  */
 export const zHttpValidationError = z.object({
   detail: z.optional(z.array(zValidationError)),
+});
+
+/**
+ * HealthStatus
+ */
+export const zHealthStatus = z.object({
+  apiStatus: z.string(),
+  dbStatus: z.string(),
 });
 
 /**
@@ -1329,8 +1346,8 @@ export const zTeacherInfo = z.object({
  * Token
  */
 export const zToken = z.object({
-  access_token: z.string(),
-  token_type: z.string(),
+  accessToken: z.string(),
+  tokenType: z.string(),
 });
 
 /**
@@ -1443,6 +1460,17 @@ export const zYearSummary = z.object({
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });
+
+export const zGetHealthData = z.object({
+  body: z.optional(z.never()),
+  path: z.optional(z.never()),
+  query: z.optional(z.never()),
+});
+
+/**
+ * Successful Response
+ */
+export const zGetHealthResponse = zHealthStatus;
 
 export const zLoginData = z.object({
   body: zBodyLoginCredential,

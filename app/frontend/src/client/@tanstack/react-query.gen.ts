@@ -2,6 +2,7 @@
 
 import {
   type Options,
+  getHealth,
   login,
   logout,
   registerNewAdmin,
@@ -56,16 +57,14 @@ import {
   assignTeacher,
   getAcademicTerms,
 } from "../sdk.gen";
-import {
-  queryOptions,
-  type UseMutationOptions,
-  type DefaultError,
-} from "@tanstack/react-query";
+import { queryOptions, type UseMutationOptions } from "@tanstack/react-query";
 import type {
+  GetHealthData,
   LoginData,
   LoginError,
   LoginResponse,
   LogoutData,
+  LogoutError,
   LogoutResponse,
   RegisterNewAdminData,
   RegisterNewAdminError,
@@ -211,6 +210,28 @@ const createQueryKey = <TOptions extends Options>(
   return [params];
 };
 
+export const getHealthQueryKey = (options?: Options<GetHealthData>) =>
+  createQueryKey("getHealth", options);
+
+/**
+ * Get Health
+ * Returns the health status of the API
+ */
+export const getHealthOptions = (options?: Options<GetHealthData>) => {
+  return queryOptions({
+    queryFn: async ({ queryKey, signal }) => {
+      const { data } = await getHealth({
+        ...options,
+        ...queryKey[0],
+        signal,
+        throwOnError: true,
+      });
+      return data;
+    },
+    queryKey: getHealthQueryKey(options),
+  });
+};
+
 export const loginQueryKey = (options: Options<LoginData>) =>
   createQueryKey("login", options);
 
@@ -287,12 +308,12 @@ export const logoutMutation = (
   options?: Partial<Options<LogoutData>>,
 ): UseMutationOptions<
   LogoutResponse,
-  AxiosError<DefaultError>,
+  AxiosError<LogoutError>,
   Options<LogoutData>
 > => {
   const mutationOptions: UseMutationOptions<
     LogoutResponse,
-    AxiosError<DefaultError>,
+    AxiosError<LogoutError>,
     Options<LogoutData>
   > = {
     mutationFn: async (localOptions) => {

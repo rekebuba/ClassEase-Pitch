@@ -1,4 +1,6 @@
 import { loginMutation } from "@/client/@tanstack/react-query.gen";
+import { LoginError } from "@/client/types.gen";
+import { zBodyLoginCredential } from "@/client/zod.gen";
 import { InputWithLabel } from "@/components/inputs/input-labeled";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,29 +12,34 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { decodeToken } from "@/context/auth-context";
 import { BodyLoginCredential } from "@/store/api";
-import { store } from "@/store/main-store";
 import { loginFailure, loginSuccess } from "@/store/slice/auth-slice";
-import { handleError } from "@/utils/utils";
+import { zodResolver } from "@hookform/resolvers/zod/dist/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import { AxiosError } from "axios";
 import { EyeIcon, EyeOffIcon, Loader2Icon } from "lucide-react";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
-
-type LoginRequest = BodyLoginCredential;
+import { toast } from "sonner";
 
 export default function LoginTab() {
   const [showPassword, setShowPassword] = useState(false);
-  const form = useForm<LoginRequest>({
-    mode: "onBlur",
-    criteriaMode: "all",
+  const [rememberMe, setRememberMe] = useState(true);
+  const form = useForm<BodyLoginCredential>({
+    resolver: zodResolver(zBodyLoginCredential),
     defaultValues: {
       username: "",
       password: "",
     },
   });
+
+  const {
+    setError,
+    formState: { errors },
+  } = form;
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -40,23 +47,43 @@ export default function LoginTab() {
   const mutation = useMutation({
     ...loginMutation(),
     onSuccess: (response) => {
-      // save token to redux
-      dispatch(loginSuccess({ token: response.access_token }));
+      const decodedToken = decodeToken(response.accessToken);
 
-      const userRole = store.getState().auth.userInfo?.role;
-
-      // redirect after success
-      if (userRole) {
-        navigate({ to: `/${userRole}` });
+      if (decodedToken === null) {
+        dispatch(loginFailure("Invalid token received"));
+        toast.error("Invalid token received", {
+          style: { color: "red" },
+        });
+        return;
       }
+
+      dispatch(
+        loginSuccess({ token: response.accessToken, userInfo: decodedToken }),
+      );
+
+      const userRole = decodedToken.role;
+
+      navigate({ to: `/${userRole}` });
     },
-    onError: (error) => {
-      const errorMessage = handleError(error);
-      dispatch(loginFailure(errorMessage));
+    onError: (error: AxiosError<LoginError>) => {
+      const detail = error.response?.data?.detail;
+      if (detail && typeof detail === "string") {
+        setError("root", { message: detail });
+        dispatch(loginFailure(detail));
+      } else {
+        dispatch(loginFailure("Something went wrong. Failed to Login."));
+        toast.error("Something went wrong. Failed to Login.", {
+          style: { color: "red" },
+        });
+      }
     },
   });
 
-  const handleLogin = (loginForm: BodyLoginCredential) => {
+  const handleLogin = (
+    loginForm: BodyLoginCredential,
+    e?: React.BaseSyntheticEvent,
+  ) => {
+    e?.preventDefault();
     mutation.mutate({ body: loginForm });
   };
 
@@ -75,22 +102,22 @@ export default function LoginTab() {
           <form onSubmit={form.handleSubmit(handleLogin)}>
             <div className="grid gap-4">
               <div className="grid gap-2">
-                <InputWithLabel<LoginRequest>
-                  id="id"
-                  type="id"
-                  fieldTitle="ID"
+                <InputWithLabel<BodyLoginCredential>
+                  id="username"
+                  fieldTitle="Username/ID"
                   nameInSchema="username"
-                  placeholder="XXX/XXX/XXXX"
+                  placeholder="Enter your username or ID"
                   required
                 />
               </div>
               <div className="grid gap-2">
                 <div className="relative">
-                  <InputWithLabel<LoginRequest>
+                  <InputWithLabel<BodyLoginCredential>
                     id="password"
                     type={showPassword ? "text" : "password"}
                     fieldTitle="Password"
                     nameInSchema="password"
+                    placeholder="Enter your password"
                     required
                   />
                   <button
@@ -108,24 +135,37 @@ export default function LoginTab() {
                     )}
                   </button>
                 </div>
-                <div className="flex items-center justify-between">
-                  <a
-                    href="#"
-                    className="text-sm text-sky-500 hover:text-sky-600"
+              </div>
+              <div className="flex justify-between">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="remember"
+                    checked={rememberMe}
+                    onCheckedChange={() => setRememberMe(!rememberMe)}
+                  />
+                  <label
+                    htmlFor="remember"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
-                    Forgot password?
-                  </a>
+                    Remember me
+                  </label>
                 </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="remember" checked={false} />
-                <label
-                  htmlFor="remember"
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    // handle forgot password logic
+                  }}
+                  className="text-sm text-sky-500 hover:text-sky-600 bg-transparent border-none p-0"
                 >
-                  Remember me
-                </label>
+                  Forgot password?
+                </button>
               </div>
+              {errors.root && (
+                <div className="text-sm text-red-500 text-center">
+                  {errors.root.message}
+                </div>
+              )}
               <Button
                 type="submit"
                 className="w-full"

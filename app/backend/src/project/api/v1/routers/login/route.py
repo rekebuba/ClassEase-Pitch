@@ -7,6 +7,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 from project.api.v1.routers.dependencies import SessionDep, TokenDep, get_db
+from project.api.v1.routers.schema import HTTPError
 from project.core.config import settings
 from project.core.security import ALGORITHM, check_password, create_access_token
 from project.models.blacklist_token import BlacklistToken
@@ -20,7 +21,17 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-@router.post("/login", response_model=Token, operation_id="login_credential")
+@router.post(
+    "/login",
+    response_model=Token,
+    operation_id="login_credential",
+    responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "model": HTTPError,
+            "description": "Incorrect Credential",
+        },
+    },
+)
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Session = Depends(get_db),
@@ -30,7 +41,7 @@ async def login(
     if not user:
         logger.warning(f"Login attempt for non-existent user: {form_data.username}")
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="Incorrect identification or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
@@ -47,7 +58,20 @@ async def login(
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router.post("/logout", response_model=LogOutResponse)
+@router.post(
+    "/logout",
+    response_model=LogOutResponse,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "model": HTTPError,
+            "description": "Invalid token format",
+        },
+        status.HTTP_401_UNAUTHORIZED: {
+            "model": HTTPError,
+            "description": "Invalid token",
+        },
+    },
+)
 async def logout(
     token: TokenDep,
     db: SessionDep,

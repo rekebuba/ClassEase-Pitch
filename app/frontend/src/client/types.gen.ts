@@ -992,6 +992,17 @@ export type GradeWithRelatedSchema = {
 };
 
 /**
+ * HTTPError
+ * HTTP error schema to be used when an HTTPException is thrown.
+ */
+export type HttpError = {
+  /**
+   * Detail
+   */
+  detail: string;
+};
+
+/**
  * HTTPValidationError
  */
 export type HttpValidationError = {
@@ -999,6 +1010,20 @@ export type HttpValidationError = {
    * Detail
    */
   detail?: Array<ValidationError>;
+};
+
+/**
+ * HealthStatus
+ */
+export type HealthStatus = {
+  /**
+   * Apistatus
+   */
+  apiStatus: string;
+  /**
+   * Dbstatus
+   */
+  dbStatus: string;
 };
 
 /**
@@ -1934,7 +1959,8 @@ export type StudentSchema = {
 
 /**
  * StudentTermRecordSchema
- * This model represents the average result of a student for a particular term and year.
+ * This model represents the average result of a student
+ * for a particular term and year.
  */
 export type StudentTermRecordSchema = {
   /**
@@ -2989,13 +3015,13 @@ export type TeacherWithRelatedSchema = {
  */
 export type Token = {
   /**
-   * Access Token
+   * Accesstoken
    */
-  access_token: string;
+  accessToken: string;
   /**
-   * Token Type
+   * Tokentype
    */
-  token_type: string;
+  tokenType: string;
 };
 
 /**
@@ -3330,6 +3356,22 @@ export type YearWithRelatedSchema = {
   updatedAt: string;
 };
 
+export type GetHealthData = {
+  body?: never;
+  path?: never;
+  query?: never;
+  url: "/api/v1/health/";
+};
+
+export type GetHealthResponses = {
+  /**
+   * Successful Response
+   */
+  200: HealthStatus;
+};
+
+export type GetHealthResponse = GetHealthResponses[keyof GetHealthResponses];
+
 export type LoginData = {
   body: BodyLoginCredential;
   path?: never;
@@ -3338,6 +3380,10 @@ export type LoginData = {
 };
 
 export type LoginErrors = {
+  /**
+   * Incorrect Credential
+   */
+  400: HttpError;
   /**
    * Validation Error
    */
@@ -3361,6 +3407,19 @@ export type LogoutData = {
   query?: never;
   url: "/api/v1/auth/logout";
 };
+
+export type LogoutErrors = {
+  /**
+   * Invalid token format
+   */
+  400: HttpError;
+  /**
+   * Invalid token
+   */
+  401: HttpError;
+};
+
+export type LogoutError = LogoutErrors[keyof LogoutErrors];
 
 export type LogoutResponses = {
   /**
@@ -4864,5 +4923,5 @@ export type GetAcademicTermsResponse =
   GetAcademicTermsResponses[keyof GetAcademicTermsResponses];
 
 export type ClientOptions = {
-  baseURL: "http://nginx:8080" | (string & {});
+  baseURL: "http://localhost:8000" | (string & {});
 };

@@ -17,7 +17,7 @@ repos:
     hooks:
     - id: pytest
       name: pytest
-      entry: uv run pytest
+      entry: sh -c 'ENVIRONMENT=testing POSTGRES_SERVER=127.0.0.1 POSTGRES_PORT=5433 uv run pytest'
       language: system
       types: [python]
       pass_filenames: false

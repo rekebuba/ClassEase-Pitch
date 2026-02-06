@@ -1,11 +1,16 @@
 import { client } from "@/client/client.gen";
 import { store } from "@/store/main-store";
 import { loginFailure } from "@/store/slice/auth-slice";
+import { getEnv } from "@/utils/utils";
+
+const ENV = {
+  API_BASE_URL: getEnv("VITE_API_BASE_URL"),
+} as const;
 
 // Create a new client with auth configuration
 client.setConfig({
   auth: () => store.getState().auth.token || "",
-  baseURL: "https://localhost",
+  baseURL: ENV.API_BASE_URL,
 });
 
 client.instance.interceptors.response.use(
