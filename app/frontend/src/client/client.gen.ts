@@ -23,6 +23,6 @@ export type CreateClientConfig<T extends DefaultClientOptions = ClientOptions> =
 
 export const client = createClient(
   createConfig<ClientOptions>({
-    baseURL: "http://nginx:8080",
+    baseURL: "http://localhost:8000",
   }),
 );

@@ -1,4 +1,5 @@
 import { logoutMutation } from "@/client/@tanstack/react-query.gen";
+import { LogoutError } from "@/client/types.gen";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -11,9 +12,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { logout } from "@/store/slice/auth-slice";
-import { handleError } from "@/utils/utils";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
+import { AxiosError } from "axios";
 import { LogOut } from "lucide-react";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
@@ -43,8 +44,16 @@ const Logout = () => {
         style: { color: "green" },
       });
     },
-    onError: (error) => {
-      handleError(error);
+    onError: (error: AxiosError<LogoutError>) => {
+      const err = error.response?.data?.detail;
+      if (err) {
+        toast.error(err, {
+          style: { color: "red" },
+        });
+      }
+      toast.error("Something went wrong. Failed to Logout.", {
+        style: { color: "red" },
+      });
     },
   });
 

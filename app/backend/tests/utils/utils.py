@@ -23,6 +23,6 @@ def get_auth_header(client: TestClient, login_data: Dict[str, str]) -> Dict[str,
     assert response.json is not None
 
     tokens = response.json()
-    a_token = tokens["access_token"]
+    a_token = tokens["accessToken"]
     headers = {"Authorization": f"Bearer {a_token}"}
     return headers

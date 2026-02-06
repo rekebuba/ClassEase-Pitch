@@ -1,4 +1,3 @@
-import { decodeToken } from "@/context/auth-context";
 import { JwtPayloadType } from "@/lib/validations";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
@@ -20,15 +19,13 @@ export const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    loginSuccess: (state, action: PayloadAction<{ token: string }>) => {
-      const decodedToken = decodeToken(action.payload.token);
-      if (decodedToken === null) {
-        state.isLoading = false;
-        state.error = "Invalid token";
-        return;
-      }
+    loginSuccess: (
+      state,
+      action: PayloadAction<{ token: string; userInfo: JwtPayloadType }>,
+    ) => {
       state.token = action.payload.token;
-      state.userInfo = decodedToken;
+      state.userInfo = action.payload.userInfo;
+      state.isLoading = false;
       state.error = null;
     },
     loginFailure: (state, action: PayloadAction<string>) => {

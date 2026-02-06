@@ -11,8 +11,8 @@ def test_login(client: TestClient) -> None:
     r = client.post(f"{settings.API_V1_STR}/auth/login", data=login_data)
     tokens = r.json()
     assert r.status_code == 200
-    assert "access_token" in tokens
-    assert tokens["access_token"]
+    assert "accessToken" in tokens
+    assert tokens["accessToken"]
 
 
 def test_login_incorrect_password(client: TestClient) -> None:
