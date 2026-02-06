@@ -1,4 +1,5 @@
 from fastapi import APIRouter, status
+from fastapi.logger import logger
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
@@ -24,7 +25,8 @@ def get_health(
             api_status="healthy",
             db_status="healthy",
         )
-    except Exception:
+    except Exception as e:
+        logger.error(f"Database health check failed: {e}")
         return JSONResponse(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             content={

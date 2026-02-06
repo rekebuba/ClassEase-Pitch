@@ -150,24 +150,24 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRouteRouteWithChildren
   '/admin/': typeof AdminIndexRoute
-  '/authentication/': typeof AuthenticationIndexRoute
-  '/student/': typeof StudentIndexRoute
+  '/authentication': typeof AuthenticationIndexRoute
+  '/student': typeof StudentIndexRoute
   '/admin/employees/$employeeId': typeof AdminEmployeesEmployeeIdRouteRouteWithChildren
   '/admin/registration/employees': typeof AdminRegistrationEmployeesRoute
   '/admin/registration/new-employee': typeof AdminRegistrationNewEmployeeRoute
   '/admin/registration/new-student': typeof AdminRegistrationNewStudentRoute
   '/admin/registration/students': typeof AdminRegistrationStudentsRoute
-  '/admin/employees/': typeof AdminEmployeesIndexRoute
-  '/admin/grades/': typeof AdminGradesIndexRoute
-  '/admin/manage-teachers/': typeof AdminManageTeachersIndexRoute
-  '/admin/students/': typeof AdminStudentsIndexRoute
-  '/admin/subjects/': typeof AdminSubjectsIndexRoute
-  '/admin/year/': typeof AdminYearIndexRoute
-  '/admin/grades/$gradeId/': typeof AdminGradesGradeIdIndexRoute
-  '/admin/students/$studentId/': typeof AdminStudentsStudentIdIndexRoute
-  '/admin/subjects/$subjectId/': typeof AdminSubjectsSubjectIdIndexRoute
-  '/admin/year/$yearId/': typeof AdminYearYearIdIndexRoute
-  '/admin/employees/$employeeId/profile/': typeof AdminEmployeesEmployeeIdProfileIndexRoute
+  '/admin/employees': typeof AdminEmployeesIndexRoute
+  '/admin/grades': typeof AdminGradesIndexRoute
+  '/admin/manage-teachers': typeof AdminManageTeachersIndexRoute
+  '/admin/students': typeof AdminStudentsIndexRoute
+  '/admin/subjects': typeof AdminSubjectsIndexRoute
+  '/admin/year': typeof AdminYearIndexRoute
+  '/admin/grades/$gradeId': typeof AdminGradesGradeIdIndexRoute
+  '/admin/students/$studentId': typeof AdminStudentsStudentIdIndexRoute
+  '/admin/subjects/$subjectId': typeof AdminSubjectsSubjectIdIndexRoute
+  '/admin/year/$yearId': typeof AdminYearYearIdIndexRoute
+  '/admin/employees/$employeeId/profile': typeof AdminEmployeesEmployeeIdProfileIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -221,24 +221,24 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/admin/'
-    | '/authentication/'
-    | '/student/'
+    | '/authentication'
+    | '/student'
     | '/admin/employees/$employeeId'
     | '/admin/registration/employees'
     | '/admin/registration/new-employee'
     | '/admin/registration/new-student'
     | '/admin/registration/students'
-    | '/admin/employees/'
-    | '/admin/grades/'
-    | '/admin/manage-teachers/'
-    | '/admin/students/'
-    | '/admin/subjects/'
-    | '/admin/year/'
-    | '/admin/grades/$gradeId/'
-    | '/admin/students/$studentId/'
-    | '/admin/subjects/$subjectId/'
-    | '/admin/year/$yearId/'
-    | '/admin/employees/$employeeId/profile/'
+    | '/admin/employees'
+    | '/admin/grades'
+    | '/admin/manage-teachers'
+    | '/admin/students'
+    | '/admin/subjects'
+    | '/admin/year'
+    | '/admin/grades/$gradeId'
+    | '/admin/students/$studentId'
+    | '/admin/subjects/$subjectId'
+    | '/admin/year/$yearId'
+    | '/admin/employees/$employeeId/profile'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -312,14 +312,14 @@ declare module '@tanstack/react-router' {
     '/student/': {
       id: '/student/'
       path: '/student'
-      fullPath: '/student/'
+      fullPath: '/student'
       preLoaderRoute: typeof StudentIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/authentication/': {
       id: '/authentication/'
       path: '/authentication'
-      fullPath: '/authentication/'
+      fullPath: '/authentication'
       preLoaderRoute: typeof AuthenticationIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -333,42 +333,42 @@ declare module '@tanstack/react-router' {
     '/admin/year/': {
       id: '/admin/year/'
       path: '/year'
-      fullPath: '/admin/year/'
+      fullPath: '/admin/year'
       preLoaderRoute: typeof AdminYearIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/subjects/': {
       id: '/admin/subjects/'
       path: '/subjects'
-      fullPath: '/admin/subjects/'
+      fullPath: '/admin/subjects'
       preLoaderRoute: typeof AdminSubjectsIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/students/': {
       id: '/admin/students/'
       path: '/students'
-      fullPath: '/admin/students/'
+      fullPath: '/admin/students'
       preLoaderRoute: typeof AdminStudentsIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/manage-teachers/': {
       id: '/admin/manage-teachers/'
       path: '/manage-teachers'
-      fullPath: '/admin/manage-teachers/'
+      fullPath: '/admin/manage-teachers'
       preLoaderRoute: typeof AdminManageTeachersIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/grades/': {
       id: '/admin/grades/'
       path: '/grades'
-      fullPath: '/admin/grades/'
+      fullPath: '/admin/grades'
       preLoaderRoute: typeof AdminGradesIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/employees/': {
       id: '/admin/employees/'
       path: '/employees'
-      fullPath: '/admin/employees/'
+      fullPath: '/admin/employees'
       preLoaderRoute: typeof AdminEmployeesIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
@@ -410,35 +410,35 @@ declare module '@tanstack/react-router' {
     '/admin/year/$yearId/': {
       id: '/admin/year/$yearId/'
       path: '/year/$yearId'
-      fullPath: '/admin/year/$yearId/'
+      fullPath: '/admin/year/$yearId'
       preLoaderRoute: typeof AdminYearYearIdIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/subjects/$subjectId/': {
       id: '/admin/subjects/$subjectId/'
       path: '/subjects/$subjectId'
-      fullPath: '/admin/subjects/$subjectId/'
+      fullPath: '/admin/subjects/$subjectId'
       preLoaderRoute: typeof AdminSubjectsSubjectIdIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/students/$studentId/': {
       id: '/admin/students/$studentId/'
       path: '/students/$studentId'
-      fullPath: '/admin/students/$studentId/'
+      fullPath: '/admin/students/$studentId'
       preLoaderRoute: typeof AdminStudentsStudentIdIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/grades/$gradeId/': {
       id: '/admin/grades/$gradeId/'
       path: '/grades/$gradeId'
-      fullPath: '/admin/grades/$gradeId/'
+      fullPath: '/admin/grades/$gradeId'
       preLoaderRoute: typeof AdminGradesGradeIdIndexRouteImport
       parentRoute: typeof AdminRouteRoute
     }
     '/admin/employees/$employeeId/profile/': {
       id: '/admin/employees/$employeeId/profile/'
       path: '/profile'
-      fullPath: '/admin/employees/$employeeId/profile/'
+      fullPath: '/admin/employees/$employeeId/profile'
       preLoaderRoute: typeof AdminEmployeesEmployeeIdProfileIndexRouteImport
       parentRoute: typeof AdminEmployeesEmployeeIdRouteRoute
     }

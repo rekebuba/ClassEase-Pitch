@@ -1,5 +1,3 @@
-import { toast } from "sonner";
-
 export const emailPattern = {
   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
   message: "Invalid email address",
@@ -41,22 +39,6 @@ export const confirmPasswordRules = (
   }
 
   return rules;
-};
-
-export const handleError = (err: any) => {
-  const errDetail = err.detail;
-  let errorMessage: string = "Something went wrong.";
-  if (Array.isArray(errDetail) && errDetail.length > 0) {
-    errorMessage = errDetail[0].msg;
-  } else if (typeof errDetail === "string" && errDetail) {
-    errorMessage = errDetail;
-  }
-  toast.error(errorMessage, {
-    style: {
-      color: "red",
-    },
-  });
-  return errorMessage;
 };
 
 // Map RHF's dirtyFields over the `data` received by `handleSubmit` and return the changed subset of that data.
@@ -161,3 +143,15 @@ export const calculateAge = (dateOfBirth: string) => {
   }
   return age;
 };
+
+export function getEnv<K extends keyof ImportMetaEnv>(
+  key: K,
+): ImportMetaEnv[K] {
+  const value = import.meta.env[key];
+
+  if (!value) {
+    throw new Error(`Missing environment variable: ${key}`);
+  }
+
+  return value;
+}

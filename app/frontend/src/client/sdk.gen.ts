@@ -7,11 +7,14 @@ import {
   urlSearchParamsBodySerializer,
 } from "./client";
 import type {
+  GetHealthData,
+  GetHealthResponses,
   LoginData,
   LoginResponses,
   LoginErrors,
   LogoutData,
   LogoutResponses,
+  LogoutErrors,
   RegisterNewAdminData,
   RegisterNewAdminResponses,
   RegisterNewAdminErrors,
@@ -162,6 +165,7 @@ import type {
   GetAcademicTermsErrors,
 } from "./types.gen";
 import {
+  zGetHealthResponse,
   zLoginResponse,
   zLogoutResponse,
   zRegisterNewAdminResponse,
@@ -236,6 +240,27 @@ export type Options<
 };
 
 /**
+ * Get Health
+ * Returns the health status of the API
+ */
+export const getHealth = <ThrowOnError extends boolean = false>(
+  options?: Options<GetHealthData, ThrowOnError>,
+) => {
+  return (options?.client ?? _heyApiClient).get<
+    GetHealthResponses,
+    unknown,
+    ThrowOnError
+  >({
+    responseType: "json",
+    responseValidator: async (data) => {
+      return await zGetHealthResponse.parseAsync(data);
+    },
+    url: "/api/v1/health/",
+    ...options,
+  });
+};
+
+/**
  * Login
  */
 export const login = <ThrowOnError extends boolean = false>(
@@ -268,7 +293,7 @@ export const logout = <ThrowOnError extends boolean = false>(
 ) => {
   return (options?.client ?? _heyApiClient).post<
     LogoutResponses,
-    unknown,
+    LogoutErrors,
     ThrowOnError
   >({
     responseType: "json",

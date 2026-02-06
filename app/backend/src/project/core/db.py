@@ -13,7 +13,6 @@ engine = create_engine(str(settings.SQLALCHEMY_POSTGRES_DATABASE_URI), future=Tr
 
 def init_db(session: Session) -> None:
     """Initialize the database with first super user."""
-
     user = session.execute(
         select(User).where(User.identification == settings.FIRST_SUPERUSER)
     ).first()

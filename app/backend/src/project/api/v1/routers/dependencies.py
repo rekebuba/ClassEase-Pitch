@@ -15,7 +15,7 @@ from sqlalchemy.orm import Session
 
 from project.core import security
 from project.core.config import settings
-from project.core.db import engine
+from project.core.db import engine, init_db
 from project.models.blacklist_token import BlacklistToken
 from project.models.user import User
 from project.schema.schema import TokenPayload
@@ -29,6 +29,7 @@ security_bearer = HTTPBearer(auto_error=True)
 
 def get_db() -> Generator[Session, None, None]:
     with Session(engine) as session:
+        init_db(session)
         yield session
 
 

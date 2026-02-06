@@ -3,9 +3,9 @@ services:
     container_name: frontend_container
     image: ghcr.io/rekebuba/frontend:latest
     ports:
-      - "5173:5173"
+      - "8081:8080"
     env_file:
-      - .env
+      - .env.development
 
     networks:
       - app-network
@@ -14,7 +14,7 @@ services:
     container_name: backend_container
     image: ghcr.io/rekebuba/backend:latest
     env_file:
-      - .env
+      - .env.development
     volumes:
       - ./app/backend/src/:/app/src/
       - ./app/backend/alembic/:/app/alembic/
@@ -29,10 +29,8 @@ services:
   postgres_db:
     container_name: postgres_container
     image: postgres:13.22-alpine3.22
-    environment:
-      - POSTGRES_USER=${DEV_POSTGRES_USER}
-      - POSTGRES_PASSWORD=${DEV_POSTGRES_PASSWORD}
-      - POSTGRES_DB=${DEV_POSTGRES_DB}
+    env_file:
+      - .env.development
     ports:
       - "5432:5432"
     networks:
@@ -41,10 +39,8 @@ services:
   test_postgres_db:
     container_name: test_postgres_container
     image: postgres:13.22-alpine3.22
-    environment:
-      - POSTGRES_USER=${TEST_POSTGRES_USER}
-      - POSTGRES_PASSWORD=${TEST_POSTGRES_PASSWORD}
-      - POSTGRES_DB=${TEST_POSTGRES_DB}
+    env_file:
+      - .env.testing
     ports:
       - "5433:5432"
     networks:
