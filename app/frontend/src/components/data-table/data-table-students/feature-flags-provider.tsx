@@ -9,17 +9,19 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { type FlagConfig, flagConfig } from "@/config/flag";
+import { flagConfig } from "@/config/flag";
+
+import type { FlagConfig } from "@/config/flag";
 
 type FilterFlag = FlagConfig["featureFlags"][number]["value"];
 
-interface FeatureFlagsContextValue {
+type FeatureFlagsContextValue = {
   filterFlag: FilterFlag;
   enableAdvancedFilter: boolean;
-}
+};
 
-const FeatureFlagsContext =
-  React.createContext<FeatureFlagsContextValue | null>(null);
+const FeatureFlagsContext
+  = React.createContext<FeatureFlagsContextValue | null>(null);
 
 export function useFeatureFlags() {
   const context = React.useContext(FeatureFlagsContext);
@@ -31,22 +33,23 @@ export function useFeatureFlags() {
   return context;
 }
 
-interface FeatureFlagsProviderProps {
+type FeatureFlagsProviderProps = {
   children: React.ReactNode;
-}
+};
 
 export function FeatureFlagsProvider({ children }: FeatureFlagsProviderProps) {
   const [filterFlag, setFilterFlag] = useQueryState<FilterFlag | null>(
     "filterFlag",
     {
       parse: (value) => {
-        if (!value) return null;
-        const validValues = flagConfig.featureFlags.map((flag) => flag.value);
+        if (!value)
+          return null;
+        const validValues = flagConfig.featureFlags.map(flag => flag.value);
         return validValues.includes(value as FilterFlag)
           ? (value as FilterFlag)
           : null;
       },
-      serialize: (value) => value ?? "",
+      serialize: value => value ?? "",
       defaultValue: null,
       clearOnDefault: true,
       shallow: false,
@@ -81,7 +84,7 @@ export function FeatureFlagsProvider({ children }: FeatureFlagsProviderProps) {
           onValueChange={onFilterFlagChange}
           className="w-fit gap-0"
         >
-          {flagConfig.featureFlags.map((flag) => (
+          {flagConfig.featureFlags.map(flag => (
             <Tooltip key={flag.value} delayDuration={700}>
               <ToggleGroupItem
                 value={flag.value}

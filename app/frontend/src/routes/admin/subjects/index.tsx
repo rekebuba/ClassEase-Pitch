@@ -1,9 +1,19 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { BookOpen, Edit, Loader, Plus, Search } from "lucide-react";
+import { useState } from "react";
+import {
+  FormProvider,
+  useForm,
+} from "react-hook-form";
+import { toast } from "sonner";
+
 import {
   getSubjectsSetupOptions,
   getSubjectsSetupQueryKey,
   postSubjectMutation,
 } from "@/client/@tanstack/react-query.gen";
-import { NewSubject } from "@/client/types.gen";
 import { zGetSubjectsSetupData, zNewSubject } from "@/client/zod.gen";
 import DetailSubjectCard from "@/components/academic-year/detail-subject-card";
 import { ApiState } from "@/components/api-state";
@@ -26,18 +36,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { queryClient } from "@/lib/query-client";
 import { store } from "@/store/main-store";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { BookOpen, Edit, Loader, Plus, Search } from "lucide-react";
-import { useState } from "react";
-import {
-  FormProvider,
+
+import type { NewSubject } from "@/client/types.gen";
+import type {
   SubmitHandler,
-  useForm,
   UseFormReturn,
 } from "react-hook-form";
-import { toast } from "sonner";
 
 const zSearch = zGetSubjectsSetupData.shape.query.pick({ q: true });
 
@@ -49,7 +53,7 @@ export const Route = createFileRoute("/admin/subjects/")({
     if (yearId) {
       await queryClient.ensureQueryData(
         getSubjectsSetupOptions({
-          query: { yearId: yearId, q: q },
+          query: { yearId, q },
         }),
       );
     }
@@ -65,7 +69,7 @@ function RouteComponent() {
 
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     navigate({
-      search: (prev) => ({ ...prev, q: e.target.value }),
+      search: prev => ({ ...prev, q: e.target.value }),
     });
   }
 
@@ -112,7 +116,8 @@ function RouteComponent() {
             message: message as string,
           });
         });
-      } else {
+      }
+      else {
         toast.error("Something went wrong. Please try again.");
       }
     },
@@ -175,7 +180,7 @@ function RouteComponent() {
 
           {/* Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {subjects?.map((subject) => (
+            {subjects?.map(subject => (
               <DetailSubjectCard
                 key={subject.id}
                 subject={subject}
@@ -189,7 +194,7 @@ function RouteComponent() {
                     className="flex-1 border-gray-300 hover:bg-blue-50"
                   >
                     <Link
-                      to={"/admin/subjects/$subjectId"}
+                      to="/admin/subjects/$subjectId"
                       params={{ subjectId: subject.id }}
                     >
                       <Edit className="h-4 w-4 mr-1" />
@@ -257,14 +262,14 @@ function FormDialog({
             <div>
               <InputWithLabel<NewSubject>
                 fieldTitle="Subject Name *"
-                nameInSchema={`name`}
+                nameInSchema="name"
                 placeholder="e.g., Mathematics"
               />
             </div>
             <div>
               <InputWithLabel<NewSubject>
                 fieldTitle="Subject Code *"
-                nameInSchema={`code`}
+                nameInSchema="code"
                 placeholder="e.g., MATH"
               />
             </div>

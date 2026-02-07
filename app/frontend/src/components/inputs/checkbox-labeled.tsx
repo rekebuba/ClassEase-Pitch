@@ -1,11 +1,10 @@
+import { isEqual } from "lodash";
 import {
-  FieldValues,
-  Path,
-  PathValue,
   useFormContext,
   useWatch,
 } from "react-hook-form";
 
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   FormControl,
   FormField,
@@ -13,8 +12,11 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { Checkbox } from "@/components/ui/checkbox";
-import { isEqual } from "lodash";
+import type {
+  FieldValues,
+  Path,
+  PathValue,
+} from "react-hook-form";
 
 type CheckboxWithLabelProps<T extends FieldValues, V> = {
   fieldTitle: string;
@@ -40,8 +42,8 @@ export function CheckboxWithLabel<T extends FieldValues, V>({
 
   // --- Object toggle mode ---
   const values = value ? watchedValue || [] : undefined;
-  const checked =
-    value && values
+  const checked
+    = value && values
       ? (values as T[]).some((v: T) => isEqual(v, value))
       : undefined;
 
@@ -55,7 +57,8 @@ export function CheckboxWithLabel<T extends FieldValues, V>({
         shouldValidate: true,
         shouldDirty: true,
       });
-    } else {
+    }
+    else {
       // Remove the item
       const next = current.filter((item: T) => !isEqual(item, value));
       form.setValue(nameInSchema, next as PathValue<T, Path<T>>, {

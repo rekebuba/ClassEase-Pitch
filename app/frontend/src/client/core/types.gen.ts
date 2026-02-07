@@ -7,16 +7,16 @@ import type {
   QuerySerializerOptions,
 } from "./bodySerializer.gen";
 
-export type HttpMethod =
-  | "connect"
-  | "delete"
-  | "get"
-  | "head"
-  | "options"
-  | "patch"
-  | "post"
-  | "put"
-  | "trace";
+export type HttpMethod
+  = | "connect"
+    | "delete"
+    | "get"
+    | "head"
+    | "options"
+    | "patch"
+    | "post"
+    | "put"
+    | "trace";
 
 export type Client<
   RequestFn = never,
@@ -35,10 +35,10 @@ export type Client<
 } & {
   [K in HttpMethod]: MethodFn;
 } & ([SseFn] extends [never]
-    ? { sse?: never }
-    : { sse: { [K in HttpMethod]: SseFn } });
+  ? { sse?: never }
+  : { sse: { [K in HttpMethod]: SseFn } });
 
-export interface Config {
+export type Config = {
   /**
    * Auth token or a function returning auth token. The resolved value will be
    * added to the request payload as defined by its `security` array.
@@ -58,15 +58,15 @@ export interface Config {
   headers?:
     | RequestInit["headers"]
     | Record<
-        string,
-        | string
-        | number
-        | boolean
-        | (string | number | boolean)[]
-        | null
-        | undefined
-        | unknown
-      >;
+      string,
+      | string
+      | number
+      | boolean
+      | (string | number | boolean)[]
+      | null
+      | undefined
+      | unknown
+    >;
   /**
    * The request method.
    *
@@ -101,15 +101,15 @@ export interface Config {
    * the transformers and returned to the user.
    */
   responseValidator?: (data: unknown) => Promise<unknown>;
-}
+};
 
 type IsExactlyNeverOrNeverUndefined<T> = [T] extends [never]
   ? true
   : [T] extends [never | undefined]
-    ? [undefined] extends [T]
-      ? false
-      : true
-    : false;
+      ? [undefined] extends [T]
+          ? false
+          : true
+      : false;
 
 export type OmitNever<T extends Record<string, unknown>> = {
   [K in keyof T as IsExactlyNeverOrNeverUndefined<T[K]> extends true

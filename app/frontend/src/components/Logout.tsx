@@ -1,5 +1,11 @@
+import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import { LogOut } from "lucide-react";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+import { toast } from "sonner";
+
 import { logoutMutation } from "@/client/@tanstack/react-query.gen";
-import { LogoutError } from "@/client/types.gen";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,13 +18,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { logout } from "@/store/slice/auth-slice";
-import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
-import { AxiosError } from "axios";
-import { LogOut } from "lucide-react";
-import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { toast } from "sonner";
+
+import type { LogoutError } from "@/client/types.gen";
+import type { AxiosError } from "axios";
 
 /**
  * Logout component that handles user logout functionality.
@@ -27,7 +29,7 @@ import { toast } from "sonner";
  * - Clears the 'apiKey' token from local storage.
  * - Redirects the user to the login page.
  */
-const Logout = () => {
+function Logout() {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
@@ -87,6 +89,6 @@ const Logout = () => {
       </AlertDialogContent>
     </AlertDialog>
   );
-};
+}
 
 export default Logout;

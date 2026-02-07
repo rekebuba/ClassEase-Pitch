@@ -8,30 +8,28 @@ import {
   REGISTER,
   REHYDRATE,
 } from "redux-persist";
-import { api } from "./api"; // this is the generated file
+
 import { rtkQueryErrorLogger } from "./middleware/global-error";
 import {
   persistedAuthReducer,
-  persistedStudentRegistrationForm,
   persistedEmployeeRegistrationForm,
+  persistedStudentRegistrationForm,
   persistedYearReducer,
 } from "./persist";
 
 export const store = configureStore({
   reducer: {
-    [api.reducerPath]: api.reducer,
     auth: persistedAuthReducer,
     year: persistedYearReducer,
     studentRegistrationForm: persistedStudentRegistrationForm,
     employeeRegistrationForm: persistedEmployeeRegistrationForm,
   },
-  middleware: (getDefaultMiddleware) =>
+  middleware: getDefaultMiddleware =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
     })
-      .concat(api.middleware)
       .concat(rtkQueryErrorLogger),
 });
 

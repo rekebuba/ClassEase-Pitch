@@ -1,53 +1,54 @@
 "use client";
 
+import {
+    Filter,
+    RotateCcw,
+    Search,
+    Settings2,
+    X,
+    Zap,
+} from "lucide-react";
 import * as React from "react";
 
-import { cn } from "@/lib/utils";
-import { DataTableFilterOption } from "@/types";
-import type { Column } from "@tanstack/react-table";
-
-import { Button } from "@/components/ui/button";
-
 import {
-  DataTableDateFilter,
-  DataTableFacetedFilter,
-  DataTableInputFilter,
-  useTableInstanceContext
+    DataTableDateFilter,
+    DataTableFacetedFilter,
+    DataTableInputFilter,
+    useTableInstanceContext,
 } from "@/components/data-table";
 import {
-  CreateViewPopover,
-  DataTableViewsDropdown,
+    CreateViewPopover,
+    DataTableViewsDropdown,
 } from "@/components/data-table/views";
-import { SearchParams, StudentsViews } from "@/lib/types";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { useFilters } from "@/utils/filter-context";
-import {
-  Filter,
-  RotateCcw,
-  Search,
-  Settings2,
-  X,
-  Zap
-} from "lucide-react";
+
 import { Badge } from "../ui/badge";
 import { Card } from "../ui/card";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
 } from "../ui/select";
 import { Switch } from "../ui/switch";
+
 import { StudentsTableToolbarActions } from "./data-table-students/student-table-toolbar-action";
 
-interface DataTableSimpleFilterProps {
+import type { SearchParams, StudentsViews } from "@/lib/types";
+import type { DataTableFilterOption } from "@/types";
+import type { Column } from "@tanstack/react-table";
+
+type DataTableSimpleFilterProps = {
   searchParams: SearchParams;
   views: StudentsViews[];
   refetchViews: () => void;
   currentViewId: string | null;
   setCurrentViewId: (viewId: string | null) => void;
   setSearchParams: (params: SearchParams) => void;
-}
+};
 
 export function DataTableSimpleFilter({
   searchParams,
@@ -62,7 +63,7 @@ export function DataTableSimpleFilter({
   const [isAdvancedMode, setIsAdvancedMode] = React.useState(false);
 
   const columns = React.useMemo(
-    () => table.getAllColumns().filter((column) => column.getCanFilter()),
+    () => table.getAllColumns().filter(column => column.getCanFilter()),
     [table],
   );
 
@@ -83,8 +84,8 @@ export function DataTableSimpleFilter({
     () => (options.length > 0 ? options[0].value : null),
   );
 
-  const { filters, removeFilter, clearFilters, getFilter, debouncedAddFilter } =
-    useFilters();
+  const { filters, removeFilter, clearFilters, getFilter, debouncedAddFilter }
+    = useFilters();
 
   const [appliedFilters, setAppliedFilters] = React.useState<
     Record<string, any>
@@ -92,8 +93,8 @@ export function DataTableSimpleFilter({
     const initialFilters: Record<string, any> = {};
     options.forEach((option) => {
       if (
-        (searchParams as Record<string, any>)[option.value] !== undefined &&
-        (searchParams as Record<string, any>)[option.value] !== ""
+        (searchParams as Record<string, any>)[option.value] !== undefined
+        && (searchParams as Record<string, any>)[option.value] !== ""
       ) {
         initialFilters[option.value] = (searchParams as Record<string, any>)[
           option.value
@@ -104,7 +105,7 @@ export function DataTableSimpleFilter({
   });
 
   const activeFilterOption = React.useMemo(
-    () => options.find((option) => option.value === activeFilterId),
+    () => options.find(option => option.value === activeFilterId),
     [options, activeFilterId],
   );
 
@@ -114,10 +115,12 @@ export function DataTableSimpleFilter({
 
   const handleFilterValueChange = React.useCallback(
     (value: any) => {
-      if (!activeFilterId) return;
+      if (!activeFilterId)
+        return;
 
       setAppliedFilters((prev) => {
-        if (prev[activeFilterId] === value) return prev;
+        if (prev[activeFilterId] === value)
+          return prev;
 
         return {
           ...prev,
@@ -154,7 +157,8 @@ export function DataTableSimpleFilter({
       const column = table.getColumn(columnId);
 
       if (column && typeof column.setFilterValue === "function") {
-        if (value === null) return removeFilter(columnId);
+        if (value === null)
+          return removeFilter(columnId);
         debouncedAddFilter({
           id: column.id,
           value: value?.value ?? "",
@@ -187,17 +191,19 @@ export function DataTableSimpleFilter({
   );
 
   function formatValue(value: unknown): string {
-    if (typeof value === "string") return value;
+    if (typeof value === "string")
+      return value;
 
     if (Array.isArray(value)) {
       const sorted = [...value].sort((a, b) => {
-        const aNum = parseFloat(a);
-        const bNum = parseFloat(b);
+        const aNum = Number.parseFloat(a);
+        const bNum = Number.parseFloat(b);
 
-        const aIsNum = !isNaN(aNum);
-        const bIsNum = !isNaN(bNum);
+        const aIsNum = !Number.isNaN(aNum);
+        const bIsNum = !Number.isNaN(bNum);
 
-        if (aIsNum && bIsNum) return aNum - bNum;
+        if (aIsNum && bIsNum)
+          return aNum - bNum;
         return String(a).localeCompare(String(b));
       });
 
@@ -205,20 +211,20 @@ export function DataTableSimpleFilter({
     }
 
     if (
-      value &&
-      typeof value === "object" &&
-      "min" in value &&
-      "max" in value
+      value
+      && typeof value === "object"
+      && "min" in value
+      && "max" in value
     ) {
       const { min, max } = value as {
         min: number | string;
         max: number | string;
       };
 
-      const isDate =
-        typeof min === "number" &&
-        typeof max === "number" &&
-        min > 1000000000000;
+      const isDate
+        = typeof min === "number"
+          && typeof max === "number"
+          && min > 1000000000000;
 
       if (isDate) {
         const formattedMin = new Date(min).toLocaleDateString();
@@ -336,7 +342,7 @@ export function DataTableSimpleFilter({
               <SelectValue placeholder="Select filter" />
             </SelectTrigger>
             <SelectContent>
-              {options.map((option) => (
+              {options.map(option => (
                 <SelectItem key={option.value} value={option.value}>
                   <div className="flex items-center gap-2">
                     <div
@@ -380,7 +386,9 @@ export function DataTableSimpleFilter({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              Active Filters ({activeFilterBadges.length})
+              Active Filters (
+              {activeFilterBadges.length}
+              )
             </span>
             <div className="flex-1 h-px bg-border" />
           </div>
@@ -393,22 +401,22 @@ export function DataTableSimpleFilter({
                   variant="secondary"
                   className={cn(
                     "group flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-all duration-200 hover:scale-105",
-                    variant === "select" &&
-                      "bg-blue-100 text-blue-800 hover:bg-blue-200",
-                    variant === "number" &&
-                      "bg-green-100 text-green-800 hover:bg-green-200",
-                    variant === "date" &&
-                      "bg-purple-100 text-purple-800 hover:bg-purple-200",
-                    variant === "default" &&
-                      "bg-gray-100 text-gray-800 hover:bg-gray-200",
+                    variant === "select"
+                    && "bg-blue-100 text-blue-800 hover:bg-blue-200",
+                    variant === "number"
+                    && "bg-green-100 text-green-800 hover:bg-green-200",
+                    variant === "date"
+                    && "bg-purple-100 text-purple-800 hover:bg-purple-200",
+                    variant === "default"
+                    && "bg-gray-100 text-gray-800 hover:bg-gray-200",
                   )}
                 >
                   <div
                     className={cn(
                       "w-1.5 h-1.5 rounded-full",
                       variant === "text" && "bg-gray-500",
-                      (variant === "select" || variant === "multiSelect") &&
-                        "bg-blue-500",
+                      (variant === "select" || variant === "multiSelect")
+                      && "bg-blue-500",
                       variant === "number" && "bg-green-500",
                       variant === "date" && "bg-purple-500",
                       variant === "range" && "bg-yellow-500",
@@ -449,12 +457,12 @@ export function DataTableSimpleFilter({
   );
 }
 
-interface DataTableToolbarFilterProps<TData> {
+type DataTableToolbarFilterProps<TData> = {
   column: Column<TData>;
   onFilterChange?: (value: any) => void;
   isActive?: boolean;
   isAdvancedMode?: boolean;
-}
+};
 
 export function DataTableToolbarFilter<TData>({
   column,
@@ -473,7 +481,8 @@ export function DataTableToolbarFilter<TData>({
       isActive,
       isAdvancedMode,
     };
-    if (!columnMeta?.variant) return null;
+    if (!columnMeta?.variant)
+      return null;
 
     switch (columnMeta.variant) {
       case "text":
@@ -484,7 +493,8 @@ export function DataTableToolbarFilter<TData>({
             {...commonProps}
             title={columnMeta.label ?? column.id}
             type={columnMeta.variant}
-          ></DataTableInputFilter>
+          >
+          </DataTableInputFilter>
         );
 
       case "date":
@@ -494,10 +504,8 @@ export function DataTableToolbarFilter<TData>({
             {...commonProps}
             title={columnMeta.label ?? column.id}
             multiple={
-              columnFilter?.operator === "isBetween" ||
-              columnFilter?.operator === "isNotBetween"
-                ? true
-                : false
+              !!(columnFilter?.operator === "isBetween"
+                || columnFilter?.operator === "isNotBetween")
             }
           />
         );

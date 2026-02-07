@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const useAuth = () => {
+function useAuth() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [loading, setLoading] = useState(true); // Add a loading state
@@ -16,7 +16,8 @@ const useAuth = () => {
       if (decodedToken && decodedToken.role) {
         setUserRole(decodedToken.role);
       }
-    } else {
+    }
+    else {
       setIsAuthenticated(false);
       setUserRole(null);
     }
@@ -25,19 +26,20 @@ const useAuth = () => {
   }, []);
 
   return { isAuthenticated, userRole, loading };
-};
+}
 
 // Helper function to decode the JWT token
-const decodeToken = (token: string) => {
+function decodeToken(token: string) {
   try {
     // JWT tokens are in the format: header.payload.signature
     const payload = token.split(".")[1]; // Get the payload part
     const decodedPayload = atob(payload); // Decode base64
     return JSON.parse(decodedPayload); // Parse the JSON payload
-  } catch (error) {
+  }
+  catch (error) {
     console.error("Error decoding token:", error);
     return null;
   }
-};
+}
 
 export default useAuth;

@@ -1,10 +1,11 @@
-import { AcademicYearStatusEnum } from "@/client/types.gen";
 import { Badge } from "@/components/ui/badge";
 
-interface YearStatusBadgeProps {
+import type { AcademicYearStatusEnum } from "@/client/types.gen";
+
+type YearStatusBadgeProps = {
   status: AcademicYearStatusEnum;
   className?: string;
-}
+};
 
 export default function YearStatusBadge({
   status,

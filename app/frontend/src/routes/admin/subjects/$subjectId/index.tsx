@@ -1,14 +1,17 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { ArrowLeft, GraduationCap, Loader } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { toast } from "sonner";
+
 import {
   getGradesOptions,
   getStreamsOptions,
   getSubjectSetupByIdOptions,
   patchSubjectSetupMutation,
 } from "@/client/@tanstack/react-query.gen";
-import {
-  GradeSchema,
-  SubjectSetupSchema,
-  UpdateSubjectSetup,
-} from "@/client/types.gen";
 import { zSubjectSetupSchema, zUpdateSubjectSetup } from "@/client/zod.gen";
 import { ApiState } from "@/components/api-state";
 import { CheckboxWithLabel } from "@/components/inputs/checkbox-labeled";
@@ -21,13 +24,13 @@ import { formatDate } from "@/lib/format";
 import { queryClient } from "@/lib/query-client";
 import { store } from "@/store/main-store";
 import { getDirtyValues } from "@/utils/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, GraduationCap, Loader } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
-import { toast } from "sonner";
+
+import type {
+  GradeSchema,
+  SubjectSetupSchema,
+  UpdateSubjectSetup,
+} from "@/client/types.gen";
+import type { SubmitHandler } from "react-hook-form";
 
 export const Route = createFileRoute("/admin/subjects/$subjectId/")({
   loader: async ({ params: { subjectId } }) => {
@@ -134,7 +137,8 @@ export default function RouteComponent() {
             message: message as string,
           });
         });
-      } else {
+      }
+      else {
         toast.error(
           "Failed to Update Subject Setup. Please Check Your inputs.",
           {
@@ -156,7 +160,8 @@ export default function RouteComponent() {
         path: { subject_id: subjectId },
         body: safeDirtyValues,
       });
-    } else {
+    }
+    else {
       toast.error("Failed to update Subject. Please Check Your Input.");
     }
   };
@@ -164,7 +169,8 @@ export default function RouteComponent() {
   // Form submission
   const handleSave = handleSubmit(onValid);
 
-  if (!subject) return <div>Subject not found</div>;
+  if (!subject)
+    return <div>Subject not found</div>;
 
   return (
     <div className="space-y-6">
@@ -183,7 +189,9 @@ export default function RouteComponent() {
               <div className="flex items-center gap-3 mt-1">
                 <span className="text-sm text-gray-600">
                   <div className="text-xs text-gray-500">
-                    Last updated: {formatDate(subject.updatedAt)}
+                    Last updated:
+                    {" "}
+                    {formatDate(subject.updatedAt)}
                   </div>
                 </span>
               </div>
@@ -199,14 +207,14 @@ export default function RouteComponent() {
               <div>
                 <InputWithLabel<SubjectSetupSchema>
                   fieldTitle="Subject Name *"
-                  nameInSchema={`name`}
+                  nameInSchema="name"
                   placeholder="e.g., Mathematics"
                 />
               </div>
               <div>
                 <InputWithLabel<SubjectSetupSchema>
                   fieldTitle="Subject Code *"
-                  nameInSchema={`code`}
+                  nameInSchema="code"
                   placeholder="e.g., MATH"
                 />
               </div>
@@ -245,7 +253,7 @@ export default function RouteComponent() {
                     error={isGradesError?.message}
                   >
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      {grades?.map((grade) => (
+                      {grades?.map(grade => (
                         <GradesCheckbox
                           key={grade.id}
                           grade={grade}
@@ -292,7 +300,7 @@ function GradesCheckbox({
   subjectGrades: SubjectSetupSchema["grades"];
 }) {
   const streamsByGrade = useMemo(() => {
-    return streams.filter((s) => s.gradeId === grade.id);
+    return streams.filter(s => s.gradeId === grade.id);
   }, [streams, grade.id]);
 
   return (
@@ -300,44 +308,46 @@ function GradesCheckbox({
       key={grade.id}
       className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
     >
-      {!grade.hasStream ? (
-        <div className="flex flex-col space-x-4 space-y-4">
-          <CheckboxWithLabel<
-            SubjectSetupSchema,
-            SubjectSetupSchema["grades"][number]
-          >
-            fieldTitle={`Grade ${grade.grade}`}
-            nameInSchema="grades"
-            value={subjectGrades.find((g) => g.id === grade.id) || grade}
-            className="h-5 w-5 text-primary"
-          />
-          <Label className="text-sm font-medium">
-            <p className="text-xs text-gray-400 italic">No Stream assigned</p>
-          </Label>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          <div className="flex items-center space-x-3">
-            <label>{`Grade ${grade.grade}`}</label>
-          </div>
-
-          <div className="ml-8 space-y-2">
-            {streamsByGrade.map((stream) => (
-              <div key={stream.id} className="flex items-center space-x-3">
-                <CheckboxWithLabel<
-                  SubjectSetupSchema,
-                  SubjectSetupSchema["streams"][number]
-                >
-                  fieldTitle={`Grade ${grade.grade} (${stream.name})`}
-                  nameInSchema="streams"
-                  value={streams.find((s) => s.id === stream.id) || stream}
-                  className="h-4 w-4 text-primary"
-                />
+      {!grade.hasStream
+        ? (
+            <div className="flex flex-col space-x-4 space-y-4">
+              <CheckboxWithLabel<
+                SubjectSetupSchema,
+                SubjectSetupSchema["grades"][number]
+              >
+                fieldTitle={`Grade ${grade.grade}`}
+                nameInSchema="grades"
+                value={subjectGrades.find(g => g.id === grade.id) || grade}
+                className="h-5 w-5 text-primary"
+              />
+              <Label className="text-sm font-medium">
+                <p className="text-xs text-gray-400 italic">No Stream assigned</p>
+              </Label>
+            </div>
+          )
+        : (
+            <div className="space-y-3">
+              <div className="flex items-center space-x-3">
+                <label>{`Grade ${grade.grade}`}</label>
               </div>
-            ))}
-          </div>
-        </div>
-      )}
+
+              <div className="ml-8 space-y-2">
+                {streamsByGrade.map(stream => (
+                  <div key={stream.id} className="flex items-center space-x-3">
+                    <CheckboxWithLabel<
+                      SubjectSetupSchema,
+                      SubjectSetupSchema["streams"][number]
+                    >
+                      fieldTitle={`Grade ${grade.grade} (${stream.name})`}
+                      nameInSchema="streams"
+                      value={streams.find(s => s.id === stream.id) || stream}
+                      className="h-4 w-4 text-primary"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
     </div>
   );
 }

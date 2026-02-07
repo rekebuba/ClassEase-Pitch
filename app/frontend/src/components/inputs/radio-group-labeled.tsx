@@ -1,4 +1,4 @@
-import { FieldValues, Path, useFormContext } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
 import {
   FormControl,
@@ -8,6 +8,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+
+import type { FieldValues, Path } from "react-hook-form";
 
 type RadioGroupWithLabelProps<T extends FieldValues, K extends string> = {
   fieldTitle: string;
@@ -38,7 +40,7 @@ export function RadioGroupLabel<T extends FieldValues, K extends string>({
               value={field.value}
               className={`flex gap-4 ${className}`}
             >
-              {options.map((option) => (
+              {options.map(option => (
                 <FormItem key={option.value}>
                   <FormControl>
                     <div className="flex items-center space-x-2">

@@ -1,15 +1,14 @@
-import { Layout } from "@/components";
-import { Shell } from "@/components/shell";
 import { StudentsTable } from "@/components/data-table/data-table-students";
+import { Shell } from "@/components/shell";
 
-interface SearchParams {
+type SearchParams = {
   [key: string]: string | string[] | undefined;
-}
-interface IndexPageProps {
+};
+type IndexPageProps = {
   searchParams: Promise<SearchParams>;
-}
+};
 
-const AdminManageStudents = () => {
+function AdminManageStudents() {
   return (
     <div className="container mx-auto py-5">
       <Shell className="gap-2">
@@ -17,7 +16,7 @@ const AdminManageStudents = () => {
       </Shell>
     </div>
   );
-};
+}
 
 export default AdminManageStudents;
 function useEffect(arg0: () => void, arg1: URLSearchParams[]) {

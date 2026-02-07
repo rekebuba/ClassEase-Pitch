@@ -1,6 +1,6 @@
 "use client";
 
-import type { Column } from "@tanstack/react-table";
+import { PlusCircle } from "lucide-react";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -14,14 +14,15 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
-import { PlusCircle } from "lucide-react";
 import { useFilters } from "@/utils/filter-context";
-import { RangeSchema } from "@/lib/types";
 
-interface Range {
+import type { RangeSchema } from "@/lib/types";
+import type { Column } from "@tanstack/react-table";
+
+type Range = {
   min: number;
   max: number;
-}
+};
 
 type RangeValue = {
   min: number;
@@ -29,24 +30,25 @@ type RangeValue = {
 };
 
 function getIsValidRange(value: RangeSchema | undefined): value is Range {
-  if (!value) return false;
+  if (!value)
+    return false;
   return (
-    Object(value) &&
-    "min" in value &&
-    "max" in value &&
-    typeof value.min === "number" &&
-    typeof value.max === "number" &&
-    value.min <= value.max
+    new Object(value)
+      && "min" in value
+      && "max" in value
+      && typeof value.min === "number"
+      && typeof value.max === "number"
+      && value.min <= value.max
   );
 }
 
-interface DataTableSliderFilterProps<TData> {
+type DataTableSliderFilterProps<TData> = {
   column: Column<TData>;
   title: string;
   onFilterChange?: (value: any) => void;
   isActive?: boolean;
   selectedOperator: string;
-}
+};
 
 export function DataTableSliderFilter<TData>({
   column,
@@ -74,13 +76,14 @@ export function DataTableSliderFilter<TData>({
     if (defaultRange && getIsValidRange(defaultRange)) {
       minValue = defaultRange.min;
       maxValue = defaultRange.max;
-    } else {
+    }
+    else {
       const values = column.getFacetedMinMaxValues();
       if (values && Array.isArray(values) && values.length === 2) {
         const [facetMinValue, facetMaxValue] = values;
         if (
-          typeof facetMinValue === "number" &&
-          typeof facetMaxValue === "number"
+          typeof facetMinValue === "number"
+          && typeof facetMaxValue === "number"
         ) {
           minValue = facetMinValue;
           maxValue = facetMaxValue;
@@ -89,8 +92,8 @@ export function DataTableSliderFilter<TData>({
     }
 
     const rangeSize = maxValue - minValue;
-    const step =
-      rangeSize <= 20
+    const step
+      = rangeSize <= 20
         ? 1
         : rangeSize <= 100
           ? Math.ceil(rangeSize / 20)
@@ -100,7 +103,7 @@ export function DataTableSliderFilter<TData>({
   }, [column, defaultRange]);
 
   const range = React.useMemo((): RangeValue => {
-    return columnFilterValue ?? { min: min, max: max };
+    return columnFilterValue ?? { min, max };
   }, [columnFilterValue, min, max]);
 
   const formatValue = React.useCallback((value: number) => {
@@ -108,7 +111,7 @@ export function DataTableSliderFilter<TData>({
   }, []);
 
   const onFromInputChange = React.useCallback(
-    (value: String, operator: String) => {
+    (value: string, operator: string) => {
       const numValue = Number(value);
 
       if (value !== "" && !Number.isNaN(numValue)) {
@@ -122,7 +125,7 @@ export function DataTableSliderFilter<TData>({
   );
 
   const onToInputChange = React.useCallback(
-    (value: String, operator: String) => {
+    (value: string, operator: string) => {
       const numValue = Number(value);
 
       if (value !== "" && !Number.isNaN(numValue)) {
@@ -136,7 +139,7 @@ export function DataTableSliderFilter<TData>({
   );
 
   const onSliderValueChange = React.useCallback(
-    (value: RangeValue, operator: String) => {
+    (value: RangeValue, operator: string) => {
       onFilterChange?.({ value, operator });
     },
     [column, selectedOperator],
@@ -156,17 +159,22 @@ export function DataTableSliderFilter<TData>({
         >
           <PlusCircle />
           <span>{title}</span>
-          {columnFilterValue ? (
-            <>
-              <Separator
-                orientation="vertical"
-                className="mx-0.5 data-[orientation=vertical]:h-4"
-              />
-              {formatValue(columnFilterValue.min)} -{" "}
-              {formatValue(columnFilterValue.max)}
-              {unit ? ` ${unit}` : ""}
-            </>
-          ) : null}
+          {columnFilterValue
+            ? (
+                <>
+                  <Separator
+                    orientation="vertical"
+                    className="mx-0.5 data-[orientation=vertical]:h-4"
+                  />
+                  {formatValue(columnFilterValue.min)}
+                  {" "}
+                  -
+                  {" "}
+                  {formatValue(columnFilterValue.max)}
+                  {unit ? ` ${unit}` : ""}
+                </>
+              )
+            : null}
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="flex w-auto flex-col gap-4">
@@ -187,9 +195,8 @@ export function DataTableSliderFilter<TData>({
                 min={min}
                 max={max}
                 value={range.min}
-                onChange={(e) =>
-                  onFromInputChange(e.target.value, selectedOperator)
-                }
+                onChange={e =>
+                  onFromInputChange(e.target.value, selectedOperator)}
                 className={cn("h-8 w-24", unit && "pr-8")}
               />
               {unit && (
@@ -213,9 +220,8 @@ export function DataTableSliderFilter<TData>({
                 min={min}
                 max={max}
                 value={range.max}
-                onChange={(e) =>
-                  onToInputChange(e.target.value, selectedOperator)
-                }
+                onChange={e =>
+                  onToInputChange(e.target.value, selectedOperator)}
                 className={cn("h-8 w-24", unit && "pr-8")}
               />
               {unit && (
@@ -226,7 +232,9 @@ export function DataTableSliderFilter<TData>({
             </div>
           </div>
           <Label htmlFor={`${id}-slider`} className="sr-only">
-            {title} slider
+            {title}
+            {" "}
+            slider
           </Label>
           <Slider
             id={`${id}-slider`}
@@ -249,8 +257,7 @@ export function DataTableSliderFilter<TData>({
           variant="outline"
           size="sm"
           onClick={() =>
-            onFilterChange?.({ value: {}, operator: selectedOperator })
-          }
+            onFilterChange?.({ value: {}, operator: selectedOperator })}
         >
           Clear
         </Button>

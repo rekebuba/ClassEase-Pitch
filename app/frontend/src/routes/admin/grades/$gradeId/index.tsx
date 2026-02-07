@@ -1,14 +1,31 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import {
+  ArrowLeft,
+  BookOpen,
+  GraduationCap,
+  Layers,
+  Loader,
+  PencilIcon,
+  Plus,
+  Trash,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  FormProvider,
+  useFieldArray,
+  useForm,
+  useFormContext,
+} from "react-hook-form";
+import { toast } from "sonner";
+
 import {
   getGradesOptions,
   getGradesSetupByIdOptions,
   getSubjectsOptions,
   patchGradeSetupMutation,
 } from "@/client/@tanstack/react-query.gen";
-import {
-  GradeSetupSchema,
-  SubjectSchema,
-  UpdateGradeSetup,
-} from "@/client/types.gen";
 import {
   zGradeEnum,
   zGradeLevelEnum,
@@ -39,28 +56,15 @@ import { formatDate } from "@/lib/format";
 import { queryClient } from "@/lib/query-client";
 import { store } from "@/store/main-store";
 import { getDirtyValues } from "@/utils/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import {
-  ArrowLeft,
-  BookOpen,
-  GraduationCap,
-  Layers,
-  Loader,
-  PencilIcon,
-  Plus,
-  Trash,
-} from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  FormProvider,
+
+import type {
+  GradeSetupSchema,
+  SubjectSchema,
+  UpdateGradeSetup,
+} from "@/client/types.gen";
+import type {
   SubmitHandler,
-  useFieldArray,
-  useForm,
-  useFormContext,
 } from "react-hook-form";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/grades/$gradeId/")({
   loader: async ({ params: { gradeId } }) => {
@@ -116,12 +120,12 @@ function RouteComponent() {
 
   const availableGrades = useMemo(() => {
     // Get all currently selected grades from parent
-    const otherSelectedGrades =
-      grades?.filter((g) => g.grade !== grade?.grade).map((g) => g.grade) || [];
+    const otherSelectedGrades
+      = grades?.filter(g => g.grade !== grade?.grade).map(g => g.grade) || [];
 
     // Filter out already selected grades
     return zGradeEnum.options.filter(
-      (gradeOption) => !otherSelectedGrades.includes(gradeOption),
+      gradeOption => !otherSelectedGrades.includes(gradeOption),
     );
   }, [grade?.grade, grades]);
 
@@ -160,6 +164,12 @@ function RouteComponent() {
   const watchForm = watch();
   const watchSection = watchForm.sections;
 
+  const handleCancel = useCallback(() => {
+    navigate({
+      to: "/admin/grades",
+    });
+  }, [navigate]);
+
   const mutation = useMutation({
     ...patchGradeSetupMutation(),
     onSuccess: (success) => {
@@ -178,19 +188,15 @@ function RouteComponent() {
             message: message as string,
           });
         });
-      } else {
+      }
+      else {
         toast.error("Something went wrong. Failed to Update Grade Setup.");
       }
     },
   });
 
-  const handleCancel = useCallback(() => {
-    navigate({
-      to: "/admin/grades",
-    });
-  }, [navigate]);
-
-  if (!grade) return <div>Grade not found</div>;
+  if (!grade)
+    return <div>Grade not found</div>;
 
   const onValid: SubmitHandler<GradeSetupSchema> = (data) => {
     if (!watchForm.hasStream) {
@@ -207,7 +213,8 @@ function RouteComponent() {
         path: { grade_id: gradeId },
         body: safeDirtyValues,
       });
-    } else {
+    }
+    else {
       toast.error("Failed to update grade. Please check your input.");
     }
   };
@@ -220,9 +227,9 @@ function RouteComponent() {
   const getSectionObjects = (
     countStr: string,
   ): GradeSetupSchema["sections"] => {
-    const sectionCount = parseInt(countStr, 10);
+    const sectionCount = Number.parseInt(countStr, 10);
 
-    if (isNaN(sectionCount) || sectionCount < 1 || sectionCount > 26) {
+    if (Number.isNaN(sectionCount) || sectionCount < 1 || sectionCount > 26) {
       console.error(
         "Invalid section count. Must be a number between 1 and 26.",
       );
@@ -248,12 +255,17 @@ function RouteComponent() {
             <div>
               <div className="flex gap-2 items-center">
                 <GraduationCap className="text-blue-600" />
-                <h1 className="text-2xl font-bold">Grade {grade?.grade}</h1>
+                <h1 className="text-2xl font-bold">
+                  Grade
+                  {grade?.grade}
+                </h1>
               </div>
               <div className="flex items-center gap-3 mt-1">
                 <span className="text-sm text-gray-600">
                   <div className="text-xs text-gray-500">
-                    Last updated: {formatDate(grade.updatedAt)}
+                    Last updated:
+                    {" "}
+                    {formatDate(grade.updatedAt)}
                   </div>
                 </span>
               </div>
@@ -269,11 +281,13 @@ function RouteComponent() {
               {/* Grade Name */}
               <SelectWithLabel<GradeSetupSchema, string>
                 fieldTitle="Grade Level *"
-                nameInSchema={`grade`}
+                nameInSchema="grade"
               >
-                {availableGrades.map((grade) => (
+                {availableGrades.map(grade => (
                   <SelectItem key={grade} value={grade}>
-                    Grade {grade}
+                    Grade
+                    {" "}
+                    {grade}
                   </SelectItem>
                 ))}
               </SelectWithLabel>
@@ -281,9 +295,9 @@ function RouteComponent() {
               {/* Grade Level */}
               <SelectWithLabel<GradeSetupSchema, string>
                 fieldTitle="Grade Level *"
-                nameInSchema={`level`}
+                nameInSchema="level"
               >
-                {zGradeLevelEnum.options.map((level) => (
+                {zGradeLevelEnum.options.map(level => (
                   <SelectItem key={level} value={level}>
                     {level}
                   </SelectItem>
@@ -294,20 +308,28 @@ function RouteComponent() {
             {/* Sections */}
             <SelectWithLabel<GradeSetupSchema, GradeSetupSchema["sections"]>
               fieldTitle="Sections *"
-              nameInSchema={`sections`}
-              getObjects={(index) => getSectionObjects(index)}
+              nameInSchema="sections"
+              getObjects={index => getSectionObjects(index)}
             >
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((num) => (
+              {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
                 <SelectItem key={num} value={num.toString()}>
-                  {num} Section{num > 1 ? "s" : ""} (
-                  {generateSections(num).join(", ")})
+                  {num}
+                  {" "}
+                  Section
+                  {num > 1 ? "s" : ""}
+                  {" "}
+                  (
+                  {generateSections(num).join(", ")}
+                  )
                 </SelectItem>
               ))}
             </SelectWithLabel>
             <div className="flex gap-1 mt-2">
-              {grade?.sections.map((section) => (
+              {grade?.sections.map(section => (
                 <Badge key={section.id} variant="outline">
-                  Section {section.section}
+                  Section
+                  {" "}
+                  {section.section}
                 </Badge>
               ))}
             </div>
@@ -319,7 +341,7 @@ function RouteComponent() {
                   Enable different academic tracks for this grade
                 </p>
               </div>
-              <SwitchWithLabel fieldTitle="" nameInSchema={`hasStream`} />
+              <SwitchWithLabel fieldTitle="" nameInSchema="hasStream" />
             </div>
 
             {/* Streams Management */}
@@ -351,7 +373,7 @@ function RouteComponent() {
                       error={isSubjectsError?.message}
                     >
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        {subjects?.map((subject) => (
+                        {subjects?.map(subject => (
                           <div
                             key={subject.id}
                             className="flex items-center space-x-2"
@@ -361,10 +383,10 @@ function RouteComponent() {
                               GradeSetupSchema["subjects"][number]
                             >
                               fieldTitle={subject.name}
-                              nameInSchema={`subjects`}
+                              nameInSchema="subjects"
                               value={
                                 grade.subjects.find(
-                                  (s) => s.id === subject.id,
+                                  s => s.id === subject.id,
                                 ) || subject
                               }
                               className="w-4 h-4"
@@ -400,9 +422,9 @@ function RouteComponent() {
   );
 }
 
-interface StreamsManagementProps {
+type StreamsManagementProps = {
   subjects: SubjectSchema[] | undefined;
-}
+};
 
 function StreamsManagement({ subjects }: StreamsManagementProps) {
   const { control, watch } = useFormContext<GradeSetupSchema>();
@@ -419,7 +441,8 @@ function StreamsManagement({ subjects }: StreamsManagementProps) {
   const watchGrade = watch(); // watch only this grade
 
   const handleSave = async () => {
-    if (newStreamName === "") return;
+    if (newStreamName === "")
+      return;
 
     prependStream({
       id: crypto.randomUUID(),
@@ -462,7 +485,7 @@ function StreamsManagement({ subjects }: StreamsManagementProps) {
             <div>
               <Input
                 value={newStreamName}
-                onChange={(e) => setNewStreamName(e.target.value)}
+                onChange={e => setNewStreamName(e.target.value)}
                 placeholder="e.g, Natural Stream, Social Stream..."
               />
             </div>
@@ -531,7 +554,7 @@ function StreamsManagement({ subjects }: StreamsManagementProps) {
             )}
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {subjects?.map((subject) => (
+              {subjects?.map(subject => (
                 <div key={subject.id} className="flex items-center space-x-2">
                   <CheckboxWithLabel<
                     GradeSetupSchema,
@@ -541,7 +564,7 @@ function StreamsManagement({ subjects }: StreamsManagementProps) {
                     nameInSchema={`streams.${streamIndex}.subjects`}
                     value={
                       watchGrade.streams[streamIndex].subjects.find(
-                        (s) => s.name === subject.name,
+                        s => s.name === subject.name,
                       ) || subject
                     }
                     className="w-4 h-4"

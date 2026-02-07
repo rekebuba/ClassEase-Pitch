@@ -1,4 +1,4 @@
-import { FieldValues, Path, useFormContext } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
 import {
   FormControl,
@@ -8,6 +8,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
+
+import type { FieldValues, Path } from "react-hook-form";
 
 type SwitchWithLabelProps<T extends FieldValues> = {
   fieldTitle: string;

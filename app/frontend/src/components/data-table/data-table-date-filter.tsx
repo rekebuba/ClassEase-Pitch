@@ -1,19 +1,9 @@
 "use client";
 
-import type { Column } from "@tanstack/react-table";
-import { CalendarIcon, X, XCircle } from "lucide-react";
-import * as React from "react";
-import type { DateRange } from "react-day-picker";
 import { format } from "date-fns";
+import { CalendarIcon, X } from "lucide-react";
+import * as React from "react";
 
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -21,18 +11,26 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { useFilters } from "@/utils/filter-context";
-import { DataTableFilterOption } from "@/types";
-import { on } from "events";
-import { cn } from "@/lib/utils";
 import { dataTableConfig } from "@/config/data-table";
+import { cn } from "@/lib/utils";
+import { useFilters } from "@/utils/filter-context";
+
+import type { Column } from "@tanstack/react-table";
+import type { DateRange } from "react-day-picker";
 
 type DateSelection = Date | Date[] | DateRange;
 
 type DateSelectionRange = {
-  min: Number | undefined;
-  max: Number | undefined;
+  min: number | undefined;
+  max: number | undefined;
 };
 
 type DateSelectionValueRange = {
@@ -45,21 +43,22 @@ function getIsDateRange(value: DateSelection): value is DateRange {
 }
 
 function parseAsDate(timestamp: number | string | undefined): Date | undefined {
-  if (!timestamp) return undefined;
-  const numericTimestamp =
-    typeof timestamp === "string" ? Number(timestamp) : timestamp;
+  if (!timestamp)
+    return undefined;
+  const numericTimestamp
+    = typeof timestamp === "string" ? Number(timestamp) : timestamp;
   const date = new Date(numericTimestamp);
   return !Number.isNaN(date.getTime()) ? date : undefined;
 }
 
-interface DataTableDateFilterProps<TData> {
+type DataTableDateFilterProps<TData> = {
   column: Column<TData, unknown>;
   title?: string;
   multiple?: boolean;
   onFilterChange?: (value: any) => void;
   isActive?: boolean;
   isAdvancedMode?: boolean;
-}
+};
 
 export function DataTableDateFilter<TData>({
   column,
@@ -74,8 +73,8 @@ export function DataTableDateFilter<TData>({
   const columnFilterValue = getFilter(column?.id);
 
   const comparisonOperators = dataTableConfig.dateOperators;
-  const selectedOperator =
-    columnFilterValue?.operator || comparisonOperators[0].value;
+  const selectedOperator
+    = columnFilterValue?.operator || comparisonOperators[0].value;
 
   const selectedDateRange = React.useMemo<
     DateSelectionValueRange | undefined
@@ -98,7 +97,7 @@ export function DataTableDateFilter<TData>({
     }
     if (!multiple) {
       const date = parseAsDate(columnFilterValue.value as number);
-      return date ? date : undefined;
+      return date || undefined;
     }
     return undefined;
   }, [columnFilterValue, multiple]);
@@ -120,7 +119,7 @@ export function DataTableDateFilter<TData>({
   }, [columnFilterValue, multiple]);
 
   const onSelect = React.useCallback(
-    (date: DateSelectionRange | Number | undefined, operator: String) => {
+    (date: DateSelectionRange | number | undefined, operator: string) => {
       onFilterChange?.({
         value: date || "",
         operator,
@@ -130,7 +129,8 @@ export function DataTableDateFilter<TData>({
   );
 
   const formatDateRange = React.useCallback((range: DateRange) => {
-    if (!range.from && !range.to) return "";
+    if (!range.from && !range.to)
+      return "";
     if (range.from && range.to) {
       return `${format(range.from, "LLL dd, y")} - ${format(range.to, "LLL dd, y")}`;
     }
@@ -139,7 +139,8 @@ export function DataTableDateFilter<TData>({
 
   const label = React.useMemo(() => {
     if (multiple) {
-      if (!selectedDateRange) return null;
+      if (!selectedDateRange)
+        return null;
 
       const hasSelectedDates = selectedDateRange.from || selectedDateRange.to;
       const dateText = hasSelectedDates
@@ -199,7 +200,6 @@ export function DataTableDateFilter<TData>({
               return;
             }
             onSelect(selectedDate?.getTime(), operator);
-            return;
           }}
         >
           <SelectTrigger className="h-9 w-[150px] bg-white border-2 hover:border-blue-300 transition-colors">
@@ -224,9 +224,9 @@ export function DataTableDateFilter<TData>({
                 size="sm"
                 className={cn(
                   "h-9 min-w-[180px] pl-3 transition-all duration-200",
-                  isActive &&
-                    selectedDates &&
-                    "ring-2 ring-blue-500/20 border-blue-300",
+                  isActive
+                  && selectedDates
+                  && "ring-2 ring-blue-500/20 border-blue-300",
                 )}
               >
                 <CalendarIcon className="h-4 w-4" />
@@ -246,44 +246,46 @@ export function DataTableDateFilter<TData>({
           </div>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0" align="start">
-          {multiple ? (
-            <Calendar
-              initialFocus
-              mode="range"
-              selected={
-                columnFilterValue?.value.min || columnFilterValue?.value.max
-                  ? {
-                      from: parseAsDate(columnFilterValue?.value.min),
-                      to: parseAsDate(columnFilterValue?.value.max),
-                    }
-                  : undefined
-              }
-              onSelect={(date) => {
-                const from = date?.from?.getTime();
-                const to = date?.to?.getTime();
-                onSelect(
-                  {
-                    min: from && from !== to ? from : undefined,
-                    max: to && to !== from ? to : undefined,
-                  },
-                  selectedOperator,
-                );
-              }}
-              numberOfMonths={2}
-              defaultMonth={
-                parseAsDate(columnFilterValue?.value.min) || undefined
-              }
-            />
-          ) : (
-            <Calendar
-              initialFocus
-              mode="single"
-              selected={
-                parseAsDate(columnFilterValue?.value as number) || undefined
-              }
-              onSelect={(date) => onSelect(date?.getTime(), selectedOperator)}
-            />
-          )}
+          {multiple
+            ? (
+                <Calendar
+                  initialFocus
+                  mode="range"
+                  selected={
+                    columnFilterValue?.value.min || columnFilterValue?.value.max
+                      ? {
+                          from: parseAsDate(columnFilterValue?.value.min),
+                          to: parseAsDate(columnFilterValue?.value.max),
+                        }
+                      : undefined
+                  }
+                  onSelect={(date) => {
+                    const from = date?.from?.getTime();
+                    const to = date?.to?.getTime();
+                    onSelect(
+                      {
+                        min: from && from !== to ? from : undefined,
+                        max: to && to !== from ? to : undefined,
+                      },
+                      selectedOperator,
+                    );
+                  }}
+                  numberOfMonths={2}
+                  defaultMonth={
+                    parseAsDate(columnFilterValue?.value.min) || undefined
+                  }
+                />
+              )
+            : (
+                <Calendar
+                  initialFocus
+                  mode="single"
+                  selected={
+                    parseAsDate(columnFilterValue?.value as number) || undefined
+                  }
+                  onSelect={date => onSelect(date?.getTime(), selectedOperator)}
+                />
+              )}
         </PopoverContent>
       </Popover>
     </>

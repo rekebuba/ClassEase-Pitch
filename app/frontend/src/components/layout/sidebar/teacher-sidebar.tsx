@@ -1,3 +1,22 @@
+import { Link } from "@tanstack/react-router";
+import {
+  Award,
+  BadgeCheck,
+  BarChart3,
+  Bell,
+  Calendar,
+  ChevronsUpDown,
+  Clock,
+  CreditCard,
+  FileText,
+  GraduationCap,
+  Layers,
+  Lightbulb,
+  Settings,
+  Sparkles,
+  Users,
+} from "lucide-react";
+
 import { Logout } from "@/components";
 import FadeIn from "@/components/fade-in";
 import { NavMain } from "@/components/nav-main";
@@ -25,25 +44,9 @@ import {
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAppSelector } from "@/hooks/use-store";
-import { api, TeacherInfo } from "@/store/api";
-import { Link } from "@tanstack/react-router";
-import {
-  Award,
-  BadgeCheck,
-  BarChart3,
-  Bell,
-  Calendar,
-  ChevronsUpDown,
-  Clock,
-  CreditCard,
-  FileText,
-  GraduationCap,
-  Layers,
-  Lightbulb,
-  Settings,
-  Sparkles,
-  Users,
-} from "lucide-react";
+import { api } from "@/store/api";
+
+import type { TeacherInfo } from "@/store/api";
 
 const data = {
   navMain: [],
@@ -63,7 +66,7 @@ const data = {
 type TeacherSidebarProps = React.ComponentProps<typeof Sidebar>;
 
 export default function TeacherSidebar({ ...props }: TeacherSidebarProps) {
-  const { token } = useAppSelector((state) => state.auth);
+  const { token } = useAppSelector(state => state.auth);
   const { data: teacherInfo, isLoading } = api.useGetTeacherBasicInfoQuery(
     undefined,
     {
@@ -81,7 +84,7 @@ export default function TeacherSidebar({ ...props }: TeacherSidebarProps) {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Link
-                to={`/teacher`}
+                to="/teacher"
                 className="flex items-center gap-2 font-semibold"
               >
                 <GraduationCap className="h-6 w-6 text-sky-500" />
@@ -100,7 +103,7 @@ export default function TeacherSidebar({ ...props }: TeacherSidebarProps) {
       <SidebarFooter className="border-t p-4">
         <FadeIn
           isLoading={isLoading}
-          loader={
+          loader={(
             <SidebarFooter className="p-0">
               <div className="flex items-center space-x-2">
                 <Skeleton className="h-10 w-10 rounded-full" />
@@ -110,7 +113,7 @@ export default function TeacherSidebar({ ...props }: TeacherSidebarProps) {
                 </div>
               </div>
             </SidebarFooter>
-          }
+          )}
         >
           {teacherInfo && <TeacherProfile user={teacherInfo} />}
         </FadeIn>
@@ -140,14 +143,18 @@ function TeacherProfile({ user }: { user: TeacherInfo }) {
                 />
                 {teacher.firstName && teacher.fatherName && (
                   <AvatarFallback className="rounded-lg">
-                    {teacher.firstName.charAt(0).toUpperCase() +
-                      teacher.fatherName.charAt(0).toUpperCase()}
+                    {teacher.firstName.charAt(0).toUpperCase()
+                      + teacher.fatherName.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 )}
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  Mr. {teacher.firstName} {teacher.fatherName}
+                  Mr.
+                  {" "}
+                  {teacher.firstName}
+                  {" "}
+                  {teacher.fatherName}
                 </span>
                 <span className="truncate text-xs font-bold">{user.role}</span>
               </div>
@@ -169,14 +176,19 @@ function TeacherProfile({ user }: { user: TeacherInfo }) {
                   />
                   {teacher.firstName && teacher.fatherName && (
                     <AvatarFallback className="rounded-lg">
-                      {teacher.firstName.charAt(0).toUpperCase() +
-                        teacher.fatherName.charAt(0).toUpperCase()}
+                      {teacher.firstName.charAt(0).toUpperCase()
+                        + teacher.fatherName.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   )}
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">
-                    Mr. {teacher.firstName} {teacher.fatherName}{" "}
+                    Mr.
+                    {" "}
+                    {teacher.firstName}
+                    {" "}
+                    {teacher.fatherName}
+                    {" "}
                     {teacher.grandFatherName}
                   </span>
                   <span className="truncate text-xs">
@@ -208,7 +220,7 @@ function TeacherProfile({ user }: { user: TeacherInfo }) {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+            <DropdownMenuItem onSelect={e => e.preventDefault()}>
               <Logout />
             </DropdownMenuItem>
           </DropdownMenuContent>

@@ -1,7 +1,9 @@
-import { type VariantProps, cva } from "class-variance-authority";
-import type * as React from "react";
+import { cva } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
+
+import type { VariantProps } from "class-variance-authority";
+import type * as React from "react";
 
 const shellVariants = cva("grid items-center gap-8 pt-6 pb-8 md:py-8", {
   variants: {
@@ -17,11 +19,9 @@ const shellVariants = cva("grid items-center gap-8 pt-6 pb-8 md:py-8", {
   },
 });
 
-interface ShellProps
-  extends React.HTMLAttributes<HTMLDivElement>,
-    VariantProps<typeof shellVariants> {
+type ShellProps = {
   as?: React.ElementType;
-}
+} & React.HTMLAttributes<HTMLDivElement> & VariantProps<typeof shellVariants>;
 
 function Shell({
   className,

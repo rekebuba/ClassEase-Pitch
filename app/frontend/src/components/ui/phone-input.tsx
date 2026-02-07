@@ -24,13 +24,13 @@ import { cn } from "@/lib/utils";
 type PhoneInputProps = Omit<
   React.ComponentProps<"input">,
   "onChange" | "value" | "ref"
-> &
-  Omit<RPNInput.Props<typeof RPNInput.default>, "onChange"> & {
-    onChange?: (value: RPNInput.Value) => void;
-  };
+>
+& Omit<RPNInput.Props<typeof RPNInput.default>, "onChange"> & {
+  onChange?: (value: RPNInput.Value) => void;
+};
 
-const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
-  React.forwardRef<React.ElementRef<typeof RPNInput.default>, PhoneInputProps>(
+const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps>
+  = React.forwardRef<React.ElementRef<typeof RPNInput.default>, PhoneInputProps>(
     ({ className, onChange, value, ...props }, ref) => {
       return (
         <RPNInput.default
@@ -50,7 +50,7 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
            *
            * @param {E164Number | undefined} value - The entered value
            */
-          onChange={(value) => onChange?.(value || ("" as RPNInput.Value))}
+          onChange={value => onChange?.(value || ("" as RPNInput.Value))}
           {...props}
         />
       );
@@ -79,12 +79,12 @@ type CountrySelectProps = {
   onChange: (country: RPNInput.Country) => void;
 };
 
-const CountrySelect = ({
+function CountrySelect({
   disabled,
   value: selectedCountry,
   options: countryList,
   onChange,
-}: CountrySelectProps) => {
+}: CountrySelectProps) {
   const scrollAreaRef = React.useRef<HTMLDivElement>(null);
   const [searchValue, setSearchValue] = React.useState("");
   const [isOpen, setIsOpen] = React.useState(false);
@@ -141,16 +141,18 @@ const CountrySelect = ({
               <CommandEmpty>No country found.</CommandEmpty>
               <CommandGroup>
                 {countryList.map(({ value, label }) =>
-                  value ? (
-                    <CountrySelectOption
-                      key={value}
-                      country={value}
-                      countryName={label}
-                      selectedCountry={selectedCountry}
-                      onChange={onChange}
-                      onSelectComplete={() => setIsOpen(false)}
-                    />
-                  ) : null,
+                  value
+                    ? (
+                        <CountrySelectOption
+                          key={value}
+                          country={value}
+                          countryName={label}
+                          selectedCountry={selectedCountry}
+                          onChange={onChange}
+                          onSelectComplete={() => setIsOpen(false)}
+                        />
+                      )
+                    : null,
                 )}
               </CommandGroup>
             </ScrollArea>
@@ -159,21 +161,21 @@ const CountrySelect = ({
       </PopoverContent>
     </Popover>
   );
-};
+}
 
-interface CountrySelectOptionProps extends RPNInput.FlagProps {
+type CountrySelectOptionProps = {
   selectedCountry: RPNInput.Country;
   onChange: (country: RPNInput.Country) => void;
   onSelectComplete: () => void;
-}
+} & RPNInput.FlagProps;
 
-const CountrySelectOption = ({
+function CountrySelectOption({
   country,
   countryName,
   selectedCountry,
   onChange,
   onSelectComplete,
-}: CountrySelectOptionProps) => {
+}: CountrySelectOptionProps) {
   const handleSelect = () => {
     onChange(country);
     onSelectComplete();
@@ -189,9 +191,9 @@ const CountrySelectOption = ({
       />
     </CommandItem>
   );
-};
+}
 
-const FlagComponent = ({ country, countryName }: RPNInput.FlagProps) => {
+function FlagComponent({ country, countryName }: RPNInput.FlagProps) {
   const Flag = flags[country];
 
   return (
@@ -199,6 +201,6 @@ const FlagComponent = ({ country, countryName }: RPNInput.FlagProps) => {
       {Flag && <Flag title={countryName} />}
     </span>
   );
-};
+}
 
 export { PhoneInput };

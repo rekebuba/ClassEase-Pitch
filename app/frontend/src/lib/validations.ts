@@ -1,11 +1,12 @@
-import { dataTableConfig } from "@/config/data-table";
 import { z } from "zod";
-import { RoleEnum } from "./enums";
+
+import { zRoleEnum } from "@/client/zod.gen";
+import { dataTableConfig } from "@/config/data-table";
 
 export const jwtPayloadSchema = z.object({
   sub: z.string(),
   exp: z.number(),
-  role: RoleEnum,
+  role: zRoleEnum,
   jti: z.string(),
   iat: z.number(),
 });
@@ -27,7 +28,7 @@ export const DOBSchema = z
 
 export const ISODateString = z
   .string()
-  .refine((val) => !isNaN(Date.parse(val)), {
+  .refine(val => !Number.isNaN(Date.parse(val)), {
     message: "Invalid datetime format",
   });
 
@@ -36,8 +37,8 @@ export const logoutSchema = z.object({
 });
 
 const roleSchema = z.preprocess(
-  (val) => (typeof val === "string" ? val.toLowerCase() : val),
-  RoleEnum,
+  val => (typeof val === "string" ? val.toLowerCase() : val),
+  zRoleEnum,
 );
 
 export const loginSchema = z.object({
@@ -60,10 +61,10 @@ export const userSchema = z.object({
 
 const intOrNull = z
   .union([z.number(), z.literal("N/A"), z.null()])
-  .transform((val) => val ?? "N/A");
+  .transform(val => val ?? "N/A");
 const stringOrNull = z
   .union([z.string(), z.literal("N/A"), z.null()])
-  .transform((val) => val ?? "N/A");
+  .transform(val => val ?? "N/A");
 
 export const StudentSchema = z.object({
   identification: z.string(),
@@ -82,7 +83,7 @@ export const StudentSchema = z.object({
   rank: intOrNull,
   isActive: z
     .union([z.boolean(), z.enum(["active", "inactive", "suspended"])])
-    .transform((val) => (val ? "active" : "inactive")),
+    .transform(val => (val ? "active" : "inactive")),
   createdAt: z.string(),
 });
 
@@ -96,7 +97,7 @@ export const tableId = z.record(StudentSchema.keyof(), tableIdValue).optional();
 export const StudentsDataSchema = z.object({
   data: z.array(StudentSchema),
   pageCount: z.number(),
-  tableId: tableId,
+  tableId,
 });
 
 const StatusFieldSchema = StudentSchema.pick({ isActive: true });

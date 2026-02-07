@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { Layout } from "@/components";
+
 import {
-  AdminTeacherProfile,
-  AdminTeacherList,
   AdminAssignTeacher,
+  AdminTeacherList,
 } from "@/features/admin";
 
 /**
@@ -26,9 +25,9 @@ import {
  *
  * @property {boolean} isDetailOpen - State to track if the detail profile is open.
  * @property {boolean} isEditOpen - State to track if the edit profile is open.
- * @property {Object} teacherSummary - State to store the summary data of a selected teacher.
+ * @property {object} teacherSummary - State to store the summary data of a selected teacher.
  */
-const AdminManageTeacher = () => {
+function AdminManageTeacher() {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [teacherSummary, setTeacherSummary] = useState({});
@@ -57,19 +56,6 @@ const AdminManageTeacher = () => {
     setIsEditOpen(false);
   };
 
-  /**
-   * @method
-   * @name summary
-   * @description Sets the summary data for a selected teacher.
-   * @param {Object} data - The summary data of the teacher.
-   * @returns {Object} The summary data of the teacher.
-   * @example
-   * summary({
-   *  name: "John Doe",
-   *  email: "
-   * })
-   *
-   */
   const summary = (data) => {
     setTeacherSummary(data);
   };
@@ -87,6 +73,6 @@ const AdminManageTeacher = () => {
       />
     </>
   );
-};
+}
 
 export default AdminManageTeacher;

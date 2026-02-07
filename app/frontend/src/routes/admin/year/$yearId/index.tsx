@@ -1,3 +1,8 @@
+import { useQuery } from "@tanstack/react-query";
+import { createFileRoute, useLocation } from "@tanstack/react-router";
+import { ArrowLeft, Calendar, Search } from "lucide-react";
+import z from "zod";
+
 import {
   getGradesSetupOptions,
   getSubjectsSetupOptions,
@@ -13,11 +18,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatDate } from "@/lib/format";
 import { queryClient } from "@/lib/query-client";
-import { useQuery } from "@tanstack/react-query";
-import { createFileRoute, useLocation } from "@tanstack/react-router";
-import { ArrowLeft, Calendar, Search } from "lucide-react";
-import z from "zod";
 
 export const Route = createFileRoute("/admin/year/$yearId/")({
   validateSearch: z.object({ q: z.string().optional() }),
@@ -31,13 +33,14 @@ export const Route = createFileRoute("/admin/year/$yearId/")({
     if (hash === "grades") {
       await queryClient.ensureQueryData(
         getGradesSetupOptions({
-          query: { yearId: params.yearId, q: q },
+          query: { yearId: params.yearId, q },
         }),
       );
-    } else if (hash === "subjects") {
+    }
+    else if (hash === "subjects") {
       await queryClient.ensureQueryData(
         getSubjectsSetupOptions({
-          query: { yearId: params.yearId, q: q },
+          query: { yearId: params.yearId, q },
         }),
       );
     }
@@ -58,7 +61,7 @@ export default function RouteComponent() {
 
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     navigate({
-      search: (prev) => ({ ...prev, q: e.target.value }),
+      search: prev => ({ ...prev, q: e.target.value }),
       hash: activeTab,
     });
   }
@@ -85,15 +88,8 @@ export default function RouteComponent() {
     enabled: activeTab === "subjects",
   });
 
-  if (!year) return <div>Loading...</div>;
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
-  };
+  if (!year)
+    return <div>Loading...</div>;
 
   const getDuration = () => {
     const start = new Date(year.startDate);
@@ -121,7 +117,10 @@ export default function RouteComponent() {
             <div className="flex items-center gap-3 mt-1">
               <YearStatusBadge status={year.status} />
               <span className="text-sm text-gray-600">
-                {formatDate(year.startDate)} - {formatDate(year.endDate)}
+                {formatDate(year.startDate)}
+                {" "}
+                -
+                {formatDate(year.endDate)}
               </span>
             </div>
           </div>
@@ -190,7 +189,7 @@ export default function RouteComponent() {
       <Tabs
         defaultValue="grades"
         value={activeTab}
-        onValueChange={(value) => navigate({ hash: value })}
+        onValueChange={value => navigate({ hash: value })}
         className="w-full"
       >
         <TabsList className="grid w-full grid-cols-2">
@@ -200,12 +199,13 @@ export default function RouteComponent() {
         <TabsContent value="grades" className="flex-1 mt-5">
           <ApiState isLoading={isGradesLoading} error={isGradesError?.message}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {grades?.map((grade) => (
+              {grades?.map(grade => (
                 <DetailGradeCard
                   key={grade.id}
                   grade={grade}
                   subjects={grade.subjects}
-                ></DetailGradeCard>
+                >
+                </DetailGradeCard>
               ))}
             </div>
           </ApiState>
@@ -216,12 +216,13 @@ export default function RouteComponent() {
             error={isSubjectsError?.message}
           >
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {subjects?.map((subject) => (
+              {subjects?.map(subject => (
                 <DetailSubjectCard
                   key={subject.id}
                   subject={subject}
                   grades={subject.grades}
-                ></DetailSubjectCard>
+                >
+                </DetailSubjectCard>
               ))}
             </div>
           </ApiState>

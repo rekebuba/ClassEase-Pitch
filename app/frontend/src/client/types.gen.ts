@@ -45,11 +45,7 @@ export type AcademicTermTypeEnum = "Semester" | "Quarter";
 /**
  * AcademicYearStatusEnum
  */
-export type AcademicYearStatusEnum =
-  | "upcoming"
-  | "active"
-  | "completed"
-  | "archived";
+export type AcademicYearStatusEnum = "upcoming" | "active" | "completed" | "archived";
 
 /**
  * AdminInfo
@@ -209,16 +205,7 @@ export type BasicSubjectSchema = {
 /**
  * BloodTypeEnum
  */
-export type BloodTypeEnum =
-  | "A+"
-  | "A-"
-  | "B+"
-  | "B-"
-  | "AB+"
-  | "AB-"
-  | "O+"
-  | "O-"
-  | "unknown";
+export type BloodTypeEnum = "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-" | "unknown";
 
 /**
  * Body_login_credential
@@ -263,14 +250,7 @@ export type DeleteYearSuccess = {
 /**
  * EmployeeApplicationStatusEnum
  */
-export type EmployeeApplicationStatusEnum =
-  | "pending"
-  | "approved"
-  | "rejected"
-  | "interview-scheduled"
-  | "active"
-  | "inactive"
-  | "withdrawn";
+export type EmployeeApplicationStatusEnum = "pending" | "approved" | "rejected" | "interview-scheduled" | "active" | "inactive" | "withdrawn";
 
 /**
  * EmployeeBasicInfo
@@ -403,15 +383,7 @@ export type EmployeeBasicInfo = {
 /**
  * EmployeePositionEnum
  */
-export type EmployeePositionEnum =
-  | "administrative staff"
-  | "teaching staff"
-  | "support staff"
-  | "maintenance staff"
-  | "counselor"
-  | "librarian"
-  | "IT support"
-  | "other";
+export type EmployeePositionEnum = "administrative staff" | "teaching staff" | "support staff" | "maintenance staff" | "counselor" | "librarian" | "IT support" | "other";
 
 /**
  * EmployeeRegStep1
@@ -687,42 +659,22 @@ export type EmployeeRegistrationForm = {
 /**
  * EventEligibilityEnum
  */
-export type EventEligibilityEnum =
-  | "all"
-  | "students only"
-  | "faculty only"
-  | "invitation only";
+export type EventEligibilityEnum = "all" | "students only" | "faculty only" | "invitation only";
 
 /**
  * EventLocationEnum
  */
-export type EventLocationEnum =
-  | "auditorium"
-  | "classroom"
-  | "sports field"
-  | "online"
-  | "other";
+export type EventLocationEnum = "auditorium" | "classroom" | "sports field" | "online" | "other";
 
 /**
  * EventOrganizerEnum
  */
-export type EventOrganizerEnum =
-  | "school"
-  | "school administration"
-  | "student club"
-  | "external organizer";
+export type EventOrganizerEnum = "school" | "school administration" | "student club" | "external organizer";
 
 /**
  * EventPurposeEnum
  */
-export type EventPurposeEnum =
-  | "academic"
-  | "cultural"
-  | "sports"
-  | "graduation"
-  | "administration"
-  | "new semester"
-  | "other";
+export type EventPurposeEnum = "academic" | "cultural" | "sports" | "graduation" | "administration" | "new semester" | "other";
 
 /**
  * EventSchema
@@ -786,14 +738,7 @@ export type EventSchema = {
 /**
  * ExperienceYearEnum
  */
-export type ExperienceYearEnum =
-  | "0"
-  | "1-2"
-  | "3-5"
-  | "6-10"
-  | "11-15"
-  | "16-20"
-  | "20+";
+export type ExperienceYearEnum = "0" | "1-2" | "3-5" | "6-10" | "11-15" | "16-20" | "20+";
 
 /**
  * GenderEnum
@@ -803,19 +748,7 @@ export type GenderEnum = "male" | "female";
 /**
  * GradeEnum
  */
-export type GradeEnum =
-  | "1"
-  | "2"
-  | "3"
-  | "4"
-  | "5"
-  | "6"
-  | "7"
-  | "8"
-  | "9"
-  | "10"
-  | "11"
-  | "12";
+export type GradeEnum = "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | "10" | "11" | "12";
 
 /**
  * GradeLevelEnum
@@ -1044,12 +977,7 @@ export type LogOutResponse = {
 /**
  * MaritalStatusEnum
  */
-export type MaritalStatusEnum =
-  | "single"
-  | "married"
-  | "divorced"
-  | "widowed"
-  | "prefer-not-to-say";
+export type MaritalStatusEnum = "single" | "married" | "divorced" | "widowed" | "prefer-not-to-say";
 
 /**
  * MarkListSchema
@@ -1086,12 +1014,7 @@ export type MarkListSchema = {
 /**
  * MarkListTypeEnum
  */
-export type MarkListTypeEnum =
-  | "Test"
-  | "Quiz"
-  | "Assignment"
-  | "Midterm"
-  | "Final";
+export type MarkListTypeEnum = "Test" | "Quiz" | "Assignment" | "Midterm" | "Final";
 
 /**
  * NewGrade
@@ -1231,11 +1154,7 @@ export type RoleEnum = "admin" | "teacher" | "student" | "other";
 /**
  * ScheduleEnum
  */
-export type ScheduleEnum =
-  | "full-time"
-  | "part-time"
-  | "flexible-hours"
-  | "substitute";
+export type ScheduleEnum = "full-time" | "part-time" | "flexible-hours" | "substitute";
 
 /**
  * SectionIDs
@@ -1513,14 +1432,7 @@ export type StudRegStep5 = {
 /**
  * StudentApplicationStatusEnum
  */
-export type StudentApplicationStatusEnum =
-  | "pending"
-  | "rejected"
-  | "active"
-  | "inactive"
-  | "graduated"
-  | "suspended"
-  | "withdrawn";
+export type StudentApplicationStatusEnum = "pending" | "rejected" | "active" | "inactive" | "graduated" | "suspended" | "withdrawn";
 
 /**
  * StudentBasicInfo
@@ -3444,8 +3356,7 @@ export type RegisterNewAdminErrors = {
   422: HttpValidationError;
 };
 
-export type RegisterNewAdminError =
-  RegisterNewAdminErrors[keyof RegisterNewAdminErrors];
+export type RegisterNewAdminError = RegisterNewAdminErrors[keyof RegisterNewAdminErrors];
 
 export type RegisterNewAdminResponses = {
   /**
@@ -3454,8 +3365,7 @@ export type RegisterNewAdminResponses = {
   200: RegistrationResponse;
 };
 
-export type RegisterNewAdminResponse =
-  RegisterNewAdminResponses[keyof RegisterNewAdminResponses];
+export type RegisterNewAdminResponse = RegisterNewAdminResponses[keyof RegisterNewAdminResponses];
 
 export type RegisterStudentStep1Data = {
   body: StudRegStep1;
@@ -3471,8 +3381,7 @@ export type RegisterStudentStep1Errors = {
   422: HttpValidationError;
 };
 
-export type RegisterStudentStep1Error =
-  RegisterStudentStep1Errors[keyof RegisterStudentStep1Errors];
+export type RegisterStudentStep1Error = RegisterStudentStep1Errors[keyof RegisterStudentStep1Errors];
 
 export type RegisterStudentStep1Responses = {
   /**
@@ -3481,8 +3390,7 @@ export type RegisterStudentStep1Responses = {
   200: RegistrationStep;
 };
 
-export type RegisterStudentStep1Response =
-  RegisterStudentStep1Responses[keyof RegisterStudentStep1Responses];
+export type RegisterStudentStep1Response = RegisterStudentStep1Responses[keyof RegisterStudentStep1Responses];
 
 export type RegisterStudentStep2Data = {
   body: StudRegStep2;
@@ -3498,8 +3406,7 @@ export type RegisterStudentStep2Errors = {
   422: HttpValidationError;
 };
 
-export type RegisterStudentStep2Error =
-  RegisterStudentStep2Errors[keyof RegisterStudentStep2Errors];
+export type RegisterStudentStep2Error = RegisterStudentStep2Errors[keyof RegisterStudentStep2Errors];
 
 export type RegisterStudentStep2Responses = {
   /**
@@ -3508,8 +3415,7 @@ export type RegisterStudentStep2Responses = {
   200: RegistrationStep;
 };
 
-export type RegisterStudentStep2Response =
-  RegisterStudentStep2Responses[keyof RegisterStudentStep2Responses];
+export type RegisterStudentStep2Response = RegisterStudentStep2Responses[keyof RegisterStudentStep2Responses];
 
 export type RegisterStudentStep3Data = {
   body: StudRegStep3;
@@ -3525,8 +3431,7 @@ export type RegisterStudentStep3Errors = {
   422: HttpValidationError;
 };
 
-export type RegisterStudentStep3Error =
-  RegisterStudentStep3Errors[keyof RegisterStudentStep3Errors];
+export type RegisterStudentStep3Error = RegisterStudentStep3Errors[keyof RegisterStudentStep3Errors];
 
 export type RegisterStudentStep3Responses = {
   /**
@@ -3535,8 +3440,7 @@ export type RegisterStudentStep3Responses = {
   200: RegistrationStep;
 };
 
-export type RegisterStudentStep3Response =
-  RegisterStudentStep3Responses[keyof RegisterStudentStep3Responses];
+export type RegisterStudentStep3Response = RegisterStudentStep3Responses[keyof RegisterStudentStep3Responses];
 
 export type RegisterStudentStep4Data = {
   body: StudRegStep4;
@@ -3552,8 +3456,7 @@ export type RegisterStudentStep4Errors = {
   422: HttpValidationError;
 };
 
-export type RegisterStudentStep4Error =
-  RegisterStudentStep4Errors[keyof RegisterStudentStep4Errors];
+export type RegisterStudentStep4Error = RegisterStudentStep4Errors[keyof RegisterStudentStep4Errors];
 
 export type RegisterStudentStep4Responses = {
   /**
@@ -3562,8 +3465,7 @@ export type RegisterStudentStep4Responses = {
   200: RegistrationStep;
 };
 
-export type RegisterStudentStep4Response =
-  RegisterStudentStep4Responses[keyof RegisterStudentStep4Responses];
+export type RegisterStudentStep4Response = RegisterStudentStep4Responses[keyof RegisterStudentStep4Responses];
 
 export type RegisterStudentStep5Data = {
   body: StudRegStep5;
@@ -3579,8 +3481,7 @@ export type RegisterStudentStep5Errors = {
   422: HttpValidationError;
 };
 
-export type RegisterStudentStep5Error =
-  RegisterStudentStep5Errors[keyof RegisterStudentStep5Errors];
+export type RegisterStudentStep5Error = RegisterStudentStep5Errors[keyof RegisterStudentStep5Errors];
 
 export type RegisterStudentStep5Responses = {
   /**
@@ -3589,8 +3490,7 @@ export type RegisterStudentStep5Responses = {
   200: RegistrationStep;
 };
 
-export type RegisterStudentStep5Response =
-  RegisterStudentStep5Responses[keyof RegisterStudentStep5Responses];
+export type RegisterStudentStep5Response = RegisterStudentStep5Responses[keyof RegisterStudentStep5Responses];
 
 export type RegisterNewStudentData = {
   body: StudentRegistrationForm;
@@ -3606,8 +3506,7 @@ export type RegisterNewStudentErrors = {
   422: HttpValidationError;
 };
 
-export type RegisterNewStudentError =
-  RegisterNewStudentErrors[keyof RegisterNewStudentErrors];
+export type RegisterNewStudentError = RegisterNewStudentErrors[keyof RegisterNewStudentErrors];
 
 export type RegisterNewStudentResponses = {
   /**
@@ -3616,8 +3515,7 @@ export type RegisterNewStudentResponses = {
   201: RegistrationResponse;
 };
 
-export type RegisterNewStudentResponse =
-  RegisterNewStudentResponses[keyof RegisterNewStudentResponses];
+export type RegisterNewStudentResponse = RegisterNewStudentResponses[keyof RegisterNewStudentResponses];
 
 export type RegisterEmployeeStep1Data = {
   body: EmployeeRegStep1;
@@ -3633,8 +3531,7 @@ export type RegisterEmployeeStep1Errors = {
   422: HttpValidationError;
 };
 
-export type RegisterEmployeeStep1Error =
-  RegisterEmployeeStep1Errors[keyof RegisterEmployeeStep1Errors];
+export type RegisterEmployeeStep1Error = RegisterEmployeeStep1Errors[keyof RegisterEmployeeStep1Errors];
 
 export type RegisterEmployeeStep1Responses = {
   /**
@@ -3643,8 +3540,7 @@ export type RegisterEmployeeStep1Responses = {
   200: RegistrationStep;
 };
 
-export type RegisterEmployeeStep1Response =
-  RegisterEmployeeStep1Responses[keyof RegisterEmployeeStep1Responses];
+export type RegisterEmployeeStep1Response = RegisterEmployeeStep1Responses[keyof RegisterEmployeeStep1Responses];
 
 export type RegisterEmployeeStep2Data = {
   body: EmployeeRegStep2;
@@ -3660,8 +3556,7 @@ export type RegisterEmployeeStep2Errors = {
   422: HttpValidationError;
 };
 
-export type RegisterEmployeeStep2Error =
-  RegisterEmployeeStep2Errors[keyof RegisterEmployeeStep2Errors];
+export type RegisterEmployeeStep2Error = RegisterEmployeeStep2Errors[keyof RegisterEmployeeStep2Errors];
 
 export type RegisterEmployeeStep2Responses = {
   /**
@@ -3670,8 +3565,7 @@ export type RegisterEmployeeStep2Responses = {
   200: RegistrationStep;
 };
 
-export type RegisterEmployeeStep2Response =
-  RegisterEmployeeStep2Responses[keyof RegisterEmployeeStep2Responses];
+export type RegisterEmployeeStep2Response = RegisterEmployeeStep2Responses[keyof RegisterEmployeeStep2Responses];
 
 export type RegisterEmployeeStep3Data = {
   body: EmployeeRegStep3;
@@ -3687,8 +3581,7 @@ export type RegisterEmployeeStep3Errors = {
   422: HttpValidationError;
 };
 
-export type RegisterEmployeeStep3Error =
-  RegisterEmployeeStep3Errors[keyof RegisterEmployeeStep3Errors];
+export type RegisterEmployeeStep3Error = RegisterEmployeeStep3Errors[keyof RegisterEmployeeStep3Errors];
 
 export type RegisterEmployeeStep3Responses = {
   /**
@@ -3697,8 +3590,7 @@ export type RegisterEmployeeStep3Responses = {
   200: RegistrationStep;
 };
 
-export type RegisterEmployeeStep3Response =
-  RegisterEmployeeStep3Responses[keyof RegisterEmployeeStep3Responses];
+export type RegisterEmployeeStep3Response = RegisterEmployeeStep3Responses[keyof RegisterEmployeeStep3Responses];
 
 export type RegisterEmployeeStep4Data = {
   body: EmployeeRegStep4;
@@ -3714,8 +3606,7 @@ export type RegisterEmployeeStep4Errors = {
   422: HttpValidationError;
 };
 
-export type RegisterEmployeeStep4Error =
-  RegisterEmployeeStep4Errors[keyof RegisterEmployeeStep4Errors];
+export type RegisterEmployeeStep4Error = RegisterEmployeeStep4Errors[keyof RegisterEmployeeStep4Errors];
 
 export type RegisterEmployeeStep4Responses = {
   /**
@@ -3724,8 +3615,7 @@ export type RegisterEmployeeStep4Responses = {
   200: RegistrationStep;
 };
 
-export type RegisterEmployeeStep4Response =
-  RegisterEmployeeStep4Responses[keyof RegisterEmployeeStep4Responses];
+export type RegisterEmployeeStep4Response = RegisterEmployeeStep4Responses[keyof RegisterEmployeeStep4Responses];
 
 export type RegisterEmployeeStep5Data = {
   body: EmployeeRegStep5;
@@ -3741,8 +3631,7 @@ export type RegisterEmployeeStep5Errors = {
   422: HttpValidationError;
 };
 
-export type RegisterEmployeeStep5Error =
-  RegisterEmployeeStep5Errors[keyof RegisterEmployeeStep5Errors];
+export type RegisterEmployeeStep5Error = RegisterEmployeeStep5Errors[keyof RegisterEmployeeStep5Errors];
 
 export type RegisterEmployeeStep5Responses = {
   /**
@@ -3751,8 +3640,7 @@ export type RegisterEmployeeStep5Responses = {
   200: RegistrationStep;
 };
 
-export type RegisterEmployeeStep5Response =
-  RegisterEmployeeStep5Responses[keyof RegisterEmployeeStep5Responses];
+export type RegisterEmployeeStep5Response = RegisterEmployeeStep5Responses[keyof RegisterEmployeeStep5Responses];
 
 export type RegisterNewEmployeeData = {
   body: EmployeeRegistrationForm;
@@ -3768,8 +3656,7 @@ export type RegisterNewEmployeeErrors = {
   422: HttpValidationError;
 };
 
-export type RegisterNewEmployeeError =
-  RegisterNewEmployeeErrors[keyof RegisterNewEmployeeErrors];
+export type RegisterNewEmployeeError = RegisterNewEmployeeErrors[keyof RegisterNewEmployeeErrors];
 
 export type RegisterNewEmployeeResponses = {
   /**
@@ -3778,8 +3665,7 @@ export type RegisterNewEmployeeResponses = {
   201: RegistrationResponse;
 };
 
-export type RegisterNewEmployeeResponse =
-  RegisterNewEmployeeResponses[keyof RegisterNewEmployeeResponses];
+export type RegisterNewEmployeeResponse = RegisterNewEmployeeResponses[keyof RegisterNewEmployeeResponses];
 
 export type GetYearsData = {
   body?: never;
@@ -3842,8 +3728,7 @@ export type GetYearSummaryErrors = {
   422: HttpValidationError;
 };
 
-export type GetYearSummaryError =
-  GetYearSummaryErrors[keyof GetYearSummaryErrors];
+export type GetYearSummaryError = GetYearSummaryErrors[keyof GetYearSummaryErrors];
 
 export type GetYearSummaryResponses = {
   /**
@@ -3853,8 +3738,7 @@ export type GetYearSummaryResponses = {
   200: Array<YearSummary>;
 };
 
-export type GetYearSummaryResponse =
-  GetYearSummaryResponses[keyof GetYearSummaryResponses];
+export type GetYearSummaryResponse = GetYearSummaryResponses[keyof GetYearSummaryResponses];
 
 export type DeleteYearData = {
   body?: never;
@@ -3914,8 +3798,7 @@ export type GetYearByIdResponses = {
   200: YearSchema;
 };
 
-export type GetYearByIdResponse =
-  GetYearByIdResponses[keyof GetYearByIdResponses];
+export type GetYearByIdResponse = GetYearByIdResponses[keyof GetYearByIdResponses];
 
 export type GetDetailGradesByYearIdData = {
   body?: never;
@@ -3936,8 +3819,7 @@ export type GetDetailGradesByYearIdErrors = {
   422: HttpValidationError;
 };
 
-export type GetDetailGradesByYearIdError =
-  GetDetailGradesByYearIdErrors[keyof GetDetailGradesByYearIdErrors];
+export type GetDetailGradesByYearIdError = GetDetailGradesByYearIdErrors[keyof GetDetailGradesByYearIdErrors];
 
 export type GetDetailGradesByYearIdResponses = {
   /**
@@ -3947,8 +3829,7 @@ export type GetDetailGradesByYearIdResponses = {
   200: Array<GradeNestedSchema>;
 };
 
-export type GetDetailGradesByYearIdResponse =
-  GetDetailGradesByYearIdResponses[keyof GetDetailGradesByYearIdResponses];
+export type GetDetailGradesByYearIdResponse = GetDetailGradesByYearIdResponses[keyof GetDetailGradesByYearIdResponses];
 
 export type GetDetailSubjectsByYearIdData = {
   body?: never;
@@ -3969,8 +3850,7 @@ export type GetDetailSubjectsByYearIdErrors = {
   422: HttpValidationError;
 };
 
-export type GetDetailSubjectsByYearIdError =
-  GetDetailSubjectsByYearIdErrors[keyof GetDetailSubjectsByYearIdErrors];
+export type GetDetailSubjectsByYearIdError = GetDetailSubjectsByYearIdErrors[keyof GetDetailSubjectsByYearIdErrors];
 
 export type GetDetailSubjectsByYearIdResponses = {
   /**
@@ -3980,8 +3860,7 @@ export type GetDetailSubjectsByYearIdResponses = {
   200: Array<SubjectNestedSchema>;
 };
 
-export type GetDetailSubjectsByYearIdResponse =
-  GetDetailSubjectsByYearIdResponses[keyof GetDetailSubjectsByYearIdResponses];
+export type GetDetailSubjectsByYearIdResponse = GetDetailSubjectsByYearIdResponses[keyof GetDetailSubjectsByYearIdResponses];
 
 export type GetGradesData = {
   body?: never;
@@ -4066,8 +3945,7 @@ export type GetGradesSetupErrors = {
   422: HttpValidationError;
 };
 
-export type GetGradesSetupError =
-  GetGradesSetupErrors[keyof GetGradesSetupErrors];
+export type GetGradesSetupError = GetGradesSetupErrors[keyof GetGradesSetupErrors];
 
 export type GetGradesSetupResponses = {
   /**
@@ -4077,8 +3955,7 @@ export type GetGradesSetupResponses = {
   200: Array<GradeSetupSchema>;
 };
 
-export type GetGradesSetupResponse =
-  GetGradesSetupResponses[keyof GetGradesSetupResponses];
+export type GetGradesSetupResponse = GetGradesSetupResponses[keyof GetGradesSetupResponses];
 
 export type GetGradesSetupByIdData = {
   body?: never;
@@ -4099,8 +3976,7 @@ export type GetGradesSetupByIdErrors = {
   422: HttpValidationError;
 };
 
-export type GetGradesSetupByIdError =
-  GetGradesSetupByIdErrors[keyof GetGradesSetupByIdErrors];
+export type GetGradesSetupByIdError = GetGradesSetupByIdErrors[keyof GetGradesSetupByIdErrors];
 
 export type GetGradesSetupByIdResponses = {
   /**
@@ -4109,8 +3985,7 @@ export type GetGradesSetupByIdResponses = {
   200: GradeSetupSchema;
 };
 
-export type GetGradesSetupByIdResponse =
-  GetGradesSetupByIdResponses[keyof GetGradesSetupByIdResponses];
+export type GetGradesSetupByIdResponse = GetGradesSetupByIdResponses[keyof GetGradesSetupByIdResponses];
 
 export type PatchGradeSetupData = {
   body: UpdateGradeSetup;
@@ -4131,8 +4006,7 @@ export type PatchGradeSetupErrors = {
   422: HttpValidationError;
 };
 
-export type PatchGradeSetupError =
-  PatchGradeSetupErrors[keyof PatchGradeSetupErrors];
+export type PatchGradeSetupError = PatchGradeSetupErrors[keyof PatchGradeSetupErrors];
 
 export type PatchGradeSetupResponses = {
   /**
@@ -4141,8 +4015,7 @@ export type PatchGradeSetupResponses = {
   200: UpdateGradeSetupSuccess;
 };
 
-export type PatchGradeSetupResponse =
-  PatchGradeSetupResponses[keyof PatchGradeSetupResponses];
+export type PatchGradeSetupResponse = PatchGradeSetupResponses[keyof PatchGradeSetupResponses];
 
 export type GetGradeByIdData = {
   body?: never;
@@ -4172,8 +4045,7 @@ export type GetGradeByIdResponses = {
   200: GradeSchema;
 };
 
-export type GetGradeByIdResponse =
-  GetGradeByIdResponses[keyof GetGradeByIdResponses];
+export type GetGradeByIdResponse = GetGradeByIdResponses[keyof GetGradeByIdResponses];
 
 export type GetSubjectsData = {
   body?: never;
@@ -4208,8 +4080,7 @@ export type GetSubjectsResponses = {
   200: Array<SubjectSchema>;
 };
 
-export type GetSubjectsResponse =
-  GetSubjectsResponses[keyof GetSubjectsResponses];
+export type GetSubjectsResponse = GetSubjectsResponses[keyof GetSubjectsResponses];
 
 export type PostSubjectData = {
   body: NewSubject;
@@ -4234,8 +4105,7 @@ export type PostSubjectResponses = {
   200: NewSubjectSuccess;
 };
 
-export type PostSubjectResponse =
-  PostSubjectResponses[keyof PostSubjectResponses];
+export type PostSubjectResponse = PostSubjectResponses[keyof PostSubjectResponses];
 
 export type GetSubjectsSetupData = {
   body?: never;
@@ -4260,8 +4130,7 @@ export type GetSubjectsSetupErrors = {
   422: HttpValidationError;
 };
 
-export type GetSubjectsSetupError =
-  GetSubjectsSetupErrors[keyof GetSubjectsSetupErrors];
+export type GetSubjectsSetupError = GetSubjectsSetupErrors[keyof GetSubjectsSetupErrors];
 
 export type GetSubjectsSetupResponses = {
   /**
@@ -4271,8 +4140,7 @@ export type GetSubjectsSetupResponses = {
   200: Array<SubjectSetupSchema>;
 };
 
-export type GetSubjectsSetupResponse =
-  GetSubjectsSetupResponses[keyof GetSubjectsSetupResponses];
+export type GetSubjectsSetupResponse = GetSubjectsSetupResponses[keyof GetSubjectsSetupResponses];
 
 export type GetSubjectSetupByIdData = {
   body?: never;
@@ -4293,8 +4161,7 @@ export type GetSubjectSetupByIdErrors = {
   422: HttpValidationError;
 };
 
-export type GetSubjectSetupByIdError =
-  GetSubjectSetupByIdErrors[keyof GetSubjectSetupByIdErrors];
+export type GetSubjectSetupByIdError = GetSubjectSetupByIdErrors[keyof GetSubjectSetupByIdErrors];
 
 export type GetSubjectSetupByIdResponses = {
   /**
@@ -4303,8 +4170,7 @@ export type GetSubjectSetupByIdResponses = {
   200: SubjectSetupSchema;
 };
 
-export type GetSubjectSetupByIdResponse =
-  GetSubjectSetupByIdResponses[keyof GetSubjectSetupByIdResponses];
+export type GetSubjectSetupByIdResponse = GetSubjectSetupByIdResponses[keyof GetSubjectSetupByIdResponses];
 
 export type PatchSubjectSetupData = {
   body: UpdateSubjectSetup;
@@ -4325,8 +4191,7 @@ export type PatchSubjectSetupErrors = {
   422: HttpValidationError;
 };
 
-export type PatchSubjectSetupError =
-  PatchSubjectSetupErrors[keyof PatchSubjectSetupErrors];
+export type PatchSubjectSetupError = PatchSubjectSetupErrors[keyof PatchSubjectSetupErrors];
 
 export type PatchSubjectSetupResponses = {
   /**
@@ -4335,8 +4200,7 @@ export type PatchSubjectSetupResponses = {
   200: UpdateSubjectSetupSuccess;
 };
 
-export type PatchSubjectSetupResponse =
-  PatchSubjectSetupResponses[keyof PatchSubjectSetupResponses];
+export type PatchSubjectSetupResponse = PatchSubjectSetupResponses[keyof PatchSubjectSetupResponses];
 
 export type GetSubjectByIdData = {
   body?: never;
@@ -4357,8 +4221,7 @@ export type GetSubjectByIdErrors = {
   422: HttpValidationError;
 };
 
-export type GetSubjectByIdError =
-  GetSubjectByIdErrors[keyof GetSubjectByIdErrors];
+export type GetSubjectByIdError = GetSubjectByIdErrors[keyof GetSubjectByIdErrors];
 
 export type GetSubjectByIdResponses = {
   /**
@@ -4367,8 +4230,7 @@ export type GetSubjectByIdResponses = {
   200: SubjectSchema;
 };
 
-export type GetSubjectByIdResponse =
-  GetSubjectByIdResponses[keyof GetSubjectByIdResponses];
+export type GetSubjectByIdResponse = GetSubjectByIdResponses[keyof GetSubjectByIdResponses];
 
 export type GetStreamsData = {
   body?: never;
@@ -4433,8 +4295,7 @@ export type GetStreamByIdResponses = {
   200: StreamSchema;
 };
 
-export type GetStreamByIdResponse =
-  GetStreamByIdResponses[keyof GetStreamByIdResponses];
+export type GetStreamByIdResponse = GetStreamByIdResponses[keyof GetStreamByIdResponses];
 
 export type GetSectionsData = {
   body?: never;
@@ -4469,8 +4330,7 @@ export type GetSectionsResponses = {
   200: Array<SectionSchema>;
 };
 
-export type GetSectionsResponse =
-  GetSectionsResponses[keyof GetSectionsResponses];
+export type GetSectionsResponse = GetSectionsResponses[keyof GetSectionsResponses];
 
 export type GetSectionByIdData = {
   body?: never;
@@ -4491,8 +4351,7 @@ export type GetSectionByIdErrors = {
   422: HttpValidationError;
 };
 
-export type GetSectionByIdError =
-  GetSectionByIdErrors[keyof GetSectionByIdErrors];
+export type GetSectionByIdError = GetSectionByIdErrors[keyof GetSectionByIdErrors];
 
 export type GetSectionByIdResponses = {
   /**
@@ -4501,8 +4360,7 @@ export type GetSectionByIdResponses = {
   200: SectionSchema;
 };
 
-export type GetSectionByIdResponse =
-  GetSectionByIdResponses[keyof GetSectionByIdResponses];
+export type GetSectionByIdResponse = GetSectionByIdResponses[keyof GetSectionByIdResponses];
 
 export type GetLoggedInUserData = {
   body?: never;
@@ -4518,8 +4376,7 @@ export type GetLoggedInUserResponses = {
   200: UserSchema;
 };
 
-export type GetLoggedInUserResponse =
-  GetLoggedInUserResponses[keyof GetLoggedInUserResponses];
+export type GetLoggedInUserResponse = GetLoggedInUserResponses[keyof GetLoggedInUserResponses];
 
 export type GetAdminBasicInfoData = {
   body?: never;
@@ -4535,8 +4392,7 @@ export type GetAdminBasicInfoResponses = {
   200: AdminInfo;
 };
 
-export type GetAdminBasicInfoResponse =
-  GetAdminBasicInfoResponses[keyof GetAdminBasicInfoResponses];
+export type GetAdminBasicInfoResponse = GetAdminBasicInfoResponses[keyof GetAdminBasicInfoResponses];
 
 export type GetTeacherBasicInfoData = {
   body?: never;
@@ -4552,8 +4408,7 @@ export type GetTeacherBasicInfoResponses = {
   200: TeacherInfo;
 };
 
-export type GetTeacherBasicInfoResponse =
-  GetTeacherBasicInfoResponses[keyof GetTeacherBasicInfoResponses];
+export type GetTeacherBasicInfoResponse = GetTeacherBasicInfoResponses[keyof GetTeacherBasicInfoResponses];
 
 export type GetStudentBasicInfoData = {
   body?: never;
@@ -4569,8 +4424,7 @@ export type GetStudentBasicInfoResponses = {
   200: StudentInfo;
 };
 
-export type GetStudentBasicInfoResponse =
-  GetStudentBasicInfoResponses[keyof GetStudentBasicInfoResponses];
+export type GetStudentBasicInfoResponse = GetStudentBasicInfoResponses[keyof GetStudentBasicInfoResponses];
 
 export type DeleteStudentsData = {
   body?: never;
@@ -4591,8 +4445,7 @@ export type DeleteStudentsErrors = {
   422: HttpValidationError;
 };
 
-export type DeleteStudentsError =
-  DeleteStudentsErrors[keyof DeleteStudentsErrors];
+export type DeleteStudentsError = DeleteStudentsErrors[keyof DeleteStudentsErrors];
 
 export type DeleteStudentsResponses = {
   /**
@@ -4601,8 +4454,7 @@ export type DeleteStudentsResponses = {
   200: SuccessResponseSchema;
 };
 
-export type DeleteStudentsResponse =
-  DeleteStudentsResponses[keyof DeleteStudentsResponses];
+export type DeleteStudentsResponse = DeleteStudentsResponses[keyof DeleteStudentsResponses];
 
 export type GetStudentsData = {
   body?: never;
@@ -4637,8 +4489,7 @@ export type GetStudentsResponses = {
   200: Array<StudentBasicInfo>;
 };
 
-export type GetStudentsResponse =
-  GetStudentsResponses[keyof GetStudentsResponses];
+export type GetStudentsResponse = GetStudentsResponses[keyof GetStudentsResponses];
 
 export type GetStudentData = {
   body?: never;
@@ -4684,8 +4535,7 @@ export type UpdateStudentStatusErrors = {
   422: HttpValidationError;
 };
 
-export type UpdateStudentStatusError =
-  UpdateStudentStatusErrors[keyof UpdateStudentStatusErrors];
+export type UpdateStudentStatusError = UpdateStudentStatusErrors[keyof UpdateStudentStatusErrors];
 
 export type UpdateStudentStatusResponses = {
   /**
@@ -4694,8 +4544,7 @@ export type UpdateStudentStatusResponses = {
   200: SuccessResponseSchema;
 };
 
-export type UpdateStudentStatusResponse =
-  UpdateStudentStatusResponses[keyof UpdateStudentStatusResponses];
+export type UpdateStudentStatusResponse = UpdateStudentStatusResponses[keyof UpdateStudentStatusResponses];
 
 export type DeleteEmployeesData = {
   body?: never;
@@ -4716,8 +4565,7 @@ export type DeleteEmployeesErrors = {
   422: HttpValidationError;
 };
 
-export type DeleteEmployeesError =
-  DeleteEmployeesErrors[keyof DeleteEmployeesErrors];
+export type DeleteEmployeesError = DeleteEmployeesErrors[keyof DeleteEmployeesErrors];
 
 export type DeleteEmployeesResponses = {
   /**
@@ -4726,8 +4574,7 @@ export type DeleteEmployeesResponses = {
   200: SuccessResponseSchema;
 };
 
-export type DeleteEmployeesResponse =
-  DeleteEmployeesResponses[keyof DeleteEmployeesResponses];
+export type DeleteEmployeesResponse = DeleteEmployeesResponses[keyof DeleteEmployeesResponses];
 
 export type GetEmployeesData = {
   body?: never;
@@ -4758,8 +4605,7 @@ export type GetEmployeesResponses = {
   200: Array<EmployeeBasicInfo>;
 };
 
-export type GetEmployeesResponse =
-  GetEmployeesResponses[keyof GetEmployeesResponses];
+export type GetEmployeesResponse = GetEmployeesResponses[keyof GetEmployeesResponses];
 
 export type GetEmployeeData = {
   body?: never;
@@ -4789,8 +4635,7 @@ export type GetEmployeeResponses = {
   200: EmployeeBasicInfo;
 };
 
-export type GetEmployeeResponse =
-  GetEmployeeResponses[keyof GetEmployeeResponses];
+export type GetEmployeeResponse = GetEmployeeResponses[keyof GetEmployeeResponses];
 
 export type UpdateEmployeeStatusData = {
   body: UpdateEmployeeStatusSchema;
@@ -4806,8 +4651,7 @@ export type UpdateEmployeeStatusErrors = {
   422: HttpValidationError;
 };
 
-export type UpdateEmployeeStatusError =
-  UpdateEmployeeStatusErrors[keyof UpdateEmployeeStatusErrors];
+export type UpdateEmployeeStatusError = UpdateEmployeeStatusErrors[keyof UpdateEmployeeStatusErrors];
 
 export type UpdateEmployeeStatusResponses = {
   /**
@@ -4816,8 +4660,7 @@ export type UpdateEmployeeStatusResponses = {
   200: SuccessResponseSchema;
 };
 
-export type UpdateEmployeeStatusResponse =
-  UpdateEmployeeStatusResponses[keyof UpdateEmployeeStatusResponses];
+export type UpdateEmployeeStatusResponse = UpdateEmployeeStatusResponses[keyof UpdateEmployeeStatusResponses];
 
 export type GetTeachersData = {
   body?: never;
@@ -4856,8 +4699,7 @@ export type GetTeachersResponses = {
   200: Array<TeacherBasicInfo>;
 };
 
-export type GetTeachersResponse =
-  GetTeachersResponses[keyof GetTeachersResponses];
+export type GetTeachersResponse = GetTeachersResponses[keyof GetTeachersResponses];
 
 export type AssignTeacherData = {
   body: AssignTeacher;
@@ -4882,8 +4724,7 @@ export type AssignTeacherResponses = {
   200: SuccessResponseSchema;
 };
 
-export type AssignTeacherResponse =
-  AssignTeacherResponses[keyof AssignTeacherResponses];
+export type AssignTeacherResponse = AssignTeacherResponses[keyof AssignTeacherResponses];
 
 export type GetAcademicTermsData = {
   body?: never;
@@ -4908,8 +4749,7 @@ export type GetAcademicTermsErrors = {
   422: HttpValidationError;
 };
 
-export type GetAcademicTermsError =
-  GetAcademicTermsErrors[keyof GetAcademicTermsErrors];
+export type GetAcademicTermsError = GetAcademicTermsErrors[keyof GetAcademicTermsErrors];
 
 export type GetAcademicTermsResponses = {
   /**
@@ -4919,8 +4759,7 @@ export type GetAcademicTermsResponses = {
   200: Array<AcademicTermSchema>;
 };
 
-export type GetAcademicTermsResponse =
-  GetAcademicTermsResponses[keyof GetAcademicTermsResponses];
+export type GetAcademicTermsResponse = GetAcademicTermsResponses[keyof GetAcademicTermsResponses];
 
 export type ClientOptions = {
   baseURL: "http://localhost:8000" | (string & {});

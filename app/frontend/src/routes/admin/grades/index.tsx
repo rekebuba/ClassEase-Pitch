@@ -1,14 +1,19 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Edit, GraduationCap, Loader, Plus, Search } from "lucide-react";
+import { useMemo, useState } from "react";
+import {
+  FormProvider,
+  useForm,
+} from "react-hook-form";
+import { toast } from "sonner";
+
 import {
   getGradesSetupOptions,
   getGradesSetupQueryKey,
   postGradeMutation,
 } from "@/client/@tanstack/react-query.gen";
-import {
-  GradeEnum,
-  GradeLevelEnum,
-  GradeSetupSchema,
-  NewGrade,
-} from "@/client/types.gen";
 import {
   zGetGradesSetupData,
   zGradeEnum,
@@ -37,18 +42,17 @@ import { Label } from "@/components/ui/label";
 import { SelectItem } from "@/components/ui/select";
 import { queryClient } from "@/lib/query-client";
 import { store } from "@/store/main-store";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { Edit, GraduationCap, Loader, Plus, Search } from "lucide-react";
-import { useMemo, useState } from "react";
-import {
-  FormProvider,
+
+import type {
+  GradeEnum,
+  GradeLevelEnum,
+  GradeSetupSchema,
+  NewGrade,
+} from "@/client/types.gen";
+import type {
   SubmitHandler,
-  useForm,
   UseFormReturn,
 } from "react-hook-form";
-import { toast } from "sonner";
 
 const zSearch = zGetGradesSetupData.shape.query.pick({ q: true });
 
@@ -60,7 +64,7 @@ export const Route = createFileRoute("/admin/grades/")({
     if (yearId) {
       await queryClient.ensureQueryData(
         getGradesSetupOptions({
-          query: { yearId: yearId, q: q },
+          query: { yearId, q },
         }),
       );
     }
@@ -76,7 +80,7 @@ function RouteComponent() {
 
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     navigate({
-      search: (prev) => ({ ...prev, q: e.target.value }),
+      search: prev => ({ ...prev, q: e.target.value }),
     });
   }
 
@@ -124,7 +128,8 @@ function RouteComponent() {
             message: message as string,
           });
         });
-      } else {
+      }
+      else {
         toast.error("Something went wrong. Please Check Your inputs.");
       }
     },
@@ -187,7 +192,7 @@ function RouteComponent() {
 
           {/* Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {grades?.map((grade) => (
+            {grades?.map(grade => (
               <DetailGradeCard
                 key={grade.id}
                 grade={grade}
@@ -201,7 +206,7 @@ function RouteComponent() {
                     className="flex-1 border-gray-300 hover:bg-blue-50"
                   >
                     <Link
-                      to={"/admin/grades/$gradeId"}
+                      to="/admin/grades/$gradeId"
                       params={{ gradeId: grade.id }}
                     >
                       <Edit className="h-4 w-4 mr-1" />
@@ -259,7 +264,7 @@ function FormDialog({
   const availableGrades = useMemo(() => {
     // Filter out already selected grades
     return zGradeEnum.options.filter(
-      (gradeOption) => !grades?.map((g) => g.grade).includes(gradeOption),
+      gradeOption => !grades?.map(g => g.grade).includes(gradeOption),
     );
   }, [grades]);
 
@@ -278,11 +283,13 @@ function FormDialog({
             <div>
               <SelectWithLabel<NewGrade, string>
                 fieldTitle="Grade Name *"
-                nameInSchema={`grade`}
+                nameInSchema="grade"
               >
-                {availableGrades.map((grade) => (
+                {availableGrades.map(grade => (
                   <SelectItem key={grade} value={grade}>
-                    Grade {grade}
+                    Grade
+                    {" "}
+                    {grade}
                   </SelectItem>
                 ))}
               </SelectWithLabel>
@@ -290,9 +297,9 @@ function FormDialog({
             <div>
               <SelectWithLabel<NewGrade, string>
                 fieldTitle="Grade Level *"
-                nameInSchema={`level`}
+                nameInSchema="level"
               >
-                {zGradeLevelEnum.options.map((level) => (
+                {zGradeLevelEnum.options.map(level => (
                   <SelectItem key={level} value={level}>
                     {level}
                   </SelectItem>
@@ -307,7 +314,7 @@ function FormDialog({
                 Enable different academic tracks for this grade
               </p>
             </div>
-            <SwitchWithLabel fieldTitle="" nameInSchema={`hasStream`} />
+            <SwitchWithLabel fieldTitle="" nameInSchema="hasStream" />
           </div>
         </div>
 

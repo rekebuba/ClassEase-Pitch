@@ -1,5 +1,4 @@
-import { type Table as TanstackTable, flexRender } from "@tanstack/react-table";
-import type * as React from "react";
+import { flexRender } from "@tanstack/react-table";
 
 import { DataTablePagination } from "@/components/data-table";
 import {
@@ -13,10 +12,13 @@ import {
 import { getCommonPinningStyles } from "@/lib/data-table";
 import { cn } from "@/lib/utils";
 
-interface DataTableProps<TData> extends React.ComponentProps<"div"> {
+import type { Table as TanstackTable } from "@tanstack/react-table";
+import type * as React from "react";
+
+type DataTableProps<TData> = {
   table: TanstackTable<TData>;
   floatingBar?: React.ReactNode;
-}
+} & React.ComponentProps<"div">;
 
 export function DataTable<TData>({
   table,
@@ -34,9 +36,9 @@ export function DataTable<TData>({
       <div className="overflow-hidden rounded-md border">
         <Table>
           <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
+            {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
+                {headerGroup.headers.map(header => (
                   <TableHead
                     key={header.id}
                     colSpan={header.colSpan}
@@ -56,45 +58,47 @@ export function DataTable<TData>({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell
-                      key={cell.id}
-                      style={{
-                        ...getCommonPinningStyles({ column: cell.column }),
-                      }}
+            {table.getRowModel().rows?.length
+              ? (
+                  table.getRowModel().rows.map(row => (
+                    <TableRow
+                      key={row.id}
+                      data-state={row.getIsSelected() && "selected"}
                     >
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
+                      {row.getVisibleCells().map(cell => (
+                        <TableCell
+                          key={cell.id}
+                          style={{
+                            ...getCommonPinningStyles({ column: cell.column }),
+                          }}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                )
+              : (
+                  <TableRow>
+                    <TableCell
+                      colSpan={table.getAllColumns().length}
+                      className="h-24 text-center"
+                    >
+                      No results.
                     </TableCell>
-                  ))}
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={table.getAllColumns().length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
+                  </TableRow>
+                )}
           </TableBody>
         </Table>
       </div>
       <div className="flex flex-col gap-2.5">
         <DataTablePagination table={table} />
-        {floatingBar &&
-          table.getFilteredSelectedRowModel().rows.length > 0 &&
-          floatingBar}
+        {floatingBar
+          && table.getFilteredSelectedRowModel().rows.length > 0
+          && floatingBar}
       </div>
     </div>
   );

@@ -1,8 +1,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { useEffect } from "react";
 import {
-  FieldValues,
-  Path,
-  PathValue,
   useForm,
   useFormContext,
 } from "react-hook-form";
@@ -24,9 +24,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
-import { InputHTMLAttributes, useEffect } from "react";
+
+import type { InputHTMLAttributes } from "react";
+import type {
+  FieldValues,
+  Path,
+  PathValue,
+} from "react-hook-form";
 
 const schema = z.object({
   dateRange: z.object({
@@ -88,17 +92,19 @@ export default function DateRangeLabeled<T extends FieldValues>({
                 <PopoverTrigger asChild>
                   <FormControl>
                     <Button
-                      variant={"outline"}
+                      variant="outline"
                       className={cn(
                         "pl-3 text-left font-normal",
                         !field.value && "text-muted-foreground",
                       )}
                     >
-                      {field.value && field.value.from && field.value.to ? (
-                        `${format(field.value.from, "PPP")} - ${format(field.value.to, "PPP")}`
-                      ) : (
-                        <span>Pick Range of Dates</span>
-                      )}
+                      {field.value && field.value.from && field.value.to
+                        ? (
+                            `${format(field.value.from, "PPP")} - ${format(field.value.to, "PPP")}`
+                          )
+                        : (
+                            <span>Pick Range of Dates</span>
+                          )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
                   </FormControl>
@@ -113,7 +119,7 @@ export default function DateRangeLabeled<T extends FieldValues>({
                     numberOfMonths={2}
                     selected={{ from: field.value?.from, to: field.value?.to }}
                     onSelect={field.onChange}
-                    disabled={(date) => date > disableTo || date < disableFrom}
+                    disabled={date => date > disableTo || date < disableFrom}
                     startMonth={disableFrom}
                     endMonth={disableTo}
                   />

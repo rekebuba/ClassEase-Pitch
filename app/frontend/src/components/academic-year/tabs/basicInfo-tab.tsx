@@ -1,4 +1,7 @@
-import { AcademicTermEnum, YearSetupSchemaOutput } from "@/client/types.gen";
+import { Calendar } from "lucide-react";
+import { useEffect } from "react";
+import { useFieldArray, useFormContext } from "react-hook-form";
+
 import { zAcademicTermTypeEnum } from "@/client/zod.gen";
 import { DateWithLabel } from "@/components/inputs/date-labeled";
 import DateRangeLabeled from "@/components/inputs/date-range-labeled";
@@ -6,9 +9,8 @@ import { InputWithLabel } from "@/components/inputs/input-labeled";
 import { SelectWithLabel } from "@/components/inputs/select-labeled";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { SelectItem } from "@/components/ui/select";
-import { Calendar } from "lucide-react";
-import { useEffect } from "react";
-import { useFieldArray, useFormContext } from "react-hook-form";
+
+import type { AcademicTermEnum, YearSetupSchemaOutput } from "@/client/types.gen";
 
 export default function BasicInfoTab({
   onDirty,
@@ -49,9 +51,10 @@ export default function BasicInfoTab({
     // This effect runs when the form state changes
     if (form.academicTerms.length === 4 && form.calendarType === "Semester") {
       setValue("academicTerms", form.academicTerms.slice(0, 2));
-    } else if (
-      form.academicTerms.length === 2 &&
-      form.calendarType === "Quarter"
+    }
+    else if (
+      form.academicTerms.length === 2
+      && form.calendarType === "Quarter"
     ) {
       appendTerm({
         id: String(Date.now()),
@@ -117,7 +120,7 @@ export default function BasicInfoTab({
             fieldTitle="Term System"
             nameInSchema="calendarType"
           >
-            {zAcademicTermTypeEnum.options.map((option) => (
+            {zAcademicTermTypeEnum.options.map(option => (
               <SelectItem value={option}>{option}</SelectItem>
             ))}
           </SelectWithLabel>

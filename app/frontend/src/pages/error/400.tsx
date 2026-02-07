@@ -1,5 +1,6 @@
-import { ErrorPage } from "@/components/ui/error-page";
 import { AlertTriangle } from "lucide-react";
+
+import { ErrorPage } from "@/components/ui/error-page";
 
 export default function BadRequestPage() {
   return (

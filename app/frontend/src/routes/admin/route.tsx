@@ -1,3 +1,5 @@
+import { createFileRoute, Outlet } from "@tanstack/react-router";
+
 import {
   getAdminBasicInfoOptions,
   getYearsOptions,
@@ -6,7 +8,6 @@ import AdminHeader from "@/components/layout/header/admin-header";
 import AdminSidebar from "@/components/layout/sidebar/admin-sidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { queryClient } from "@/lib/query-client";
-import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/admin")({
   component: RouteComponent,

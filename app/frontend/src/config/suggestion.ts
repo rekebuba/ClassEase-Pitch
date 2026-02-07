@@ -1,4 +1,4 @@
-import { GradeLevelType } from "@/lib/enums";
+import type { GradeLevelType } from "@/lib/enums";
 
 type SubjectInfo = {
   id: string;
@@ -421,22 +421,19 @@ export const allSubjectsData: SubjectInfo[] = [
   },
 ];
 
-export const getSubjectsByGrade = (grade: number) => {
+export function getSubjectsByGrade(grade: number) {
   return allSubjectsData
-    .filter((s) => s.grade === grade)
+    .filter(s => s.grade === grade)
     .map(({ id, name, code }) => ({ id, name, code }));
-};
+}
 
-const getSubjectsForStream = (
-  grade: number,
-  stream: "Natural Science" | "Social Science",
-) => {
+function getSubjectsForStream(grade: number, stream: "Natural Science" | "Social Science") {
   return allSubjectsData
-    .filter((s) => s.grade === grade && s.stream === stream)
+    .filter(s => s.grade === grade && s.stream === stream)
     .map(({ id, name, code }) => ({ id, name, code }));
-};
+}
 
-export const getStreamsByGrade = (grade: number) => {
+export function getStreamsByGrade(grade: number) {
   if (grade < 11) {
     return [];
   }
@@ -448,46 +445,48 @@ export const getStreamsByGrade = (grade: number) => {
 
   const gradeSubjects = getSubjectsByGrade(grade);
 
-  return ["Natural Science", "Social Science"].map((stream) => ({
+  return ["Natural Science", "Social Science"].map(stream => ({
     id: crypto.randomUUID(),
     gradeId: "",
     name: stream,
     subjects: gradeSubjects.filter(
-      (gradeSubj) =>
+      gradeSubj =>
         !getSubjectsForStream(
           grade,
           stream as "Natural Science" | "Social Science",
-        ).some((streamSubj) => streamSubj.id === gradeSubj.id),
+        ).some(streamSubj => streamSubj.id === gradeSubj.id),
     ),
   }));
-};
+}
 
-export const hasStreamByGrade = (grade: number) => {
+export function hasStreamByGrade(grade: number) {
   // Only grades 11 and 12 have streams
   return grade >= 11;
-};
+}
 
-export const getDefaultSections = () => {
+export function getDefaultSections() {
   return [
     { id: crypto.randomUUID(), gradeId: "", section: "A" },
     { id: crypto.randomUUID(), gradeId: "", section: "B" },
     { id: crypto.randomUUID(), gradeId: "", section: "C" },
   ];
-};
+}
 
-export const getGradeLevel = (grade: number): GradeLevelType => {
+export function getGradeLevel(grade: number): GradeLevelType {
   if (grade >= 1 && grade <= 5) {
     return "primary";
-  } else if (grade >= 6 && grade <= 8) {
+  }
+  else if (grade >= 6 && grade <= 8) {
     return "middle school";
-  } else {
+  }
+  else {
     return "high school";
   }
-};
+}
 
 export const SocialStreamSubjects = Object.values(
   allSubjectsData
-    .filter((s) => s.stream === "Natural Science")
+    .filter(s => s.stream === "Natural Science")
     .reduce(
       (acc, { name, code, grade }) => {
         if (!acc[name]) {
@@ -503,7 +502,7 @@ export const SocialStreamSubjects = Object.values(
 
 export const NaturalStreamSubjects = Object.values(
   allSubjectsData
-    .filter((s) => s.stream === "Natural Science")
+    .filter(s => s.stream === "Natural Science")
     .reduce(
       (acc, { name, code, grade }) => {
         if (!acc[name]) {

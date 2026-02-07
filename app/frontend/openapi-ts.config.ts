@@ -5,7 +5,6 @@ export default defineConfig({
   output: {
     path: "./src/client",
     clean: true,
-    format: "prettier",
     lint: "eslint",
   },
   plugins: [

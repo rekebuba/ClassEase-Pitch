@@ -1,16 +1,17 @@
-import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
 
 /**
  * PopupScore component displays a popup with assessment scores.
  *
  * @component
- * @param {Object} props - The component props.
+ * @param {object} props - The component props.
  * @param {boolean} props.isAssesOpen - Flag to determine if the popup is open.
  * @param {Function} props.closeAssessment - Function to close the popup.
- * @param {Object} props.assessmentSummary - Summary of the assessment.
+ * @param {object} props.assessmentSummary - Summary of the assessment.
  * @param {string} props.assessmentSummary.subject - Subject of the assessment.
  * @param {Array} props.assessmentSummary.assessment - Array of assessment objects.
  * @param {string} props.assessmentSummary.assessment[].assessment_type - Type of the assessment.
@@ -19,11 +20,11 @@ import { toast } from "sonner";
  *
  * @returns {JSX.Element} The rendered PopupScore component.
  */
-const StudentPopupScore = ({
+function StudentPopupScore({
   isAssesOpen,
   closeAssessment,
   assessmentSummary,
-}) => {
+}) {
   const [assessmentData, setAssessmentData] = useState({});
 
   /**
@@ -46,9 +47,10 @@ const StudentPopupScore = ({
           console.log(res.data);
           setAssessmentData(res.data);
         }
-      } catch (error) {
+      }
+      catch (error) {
         if (error.response?.data?.error) {
-          toast.error(error.response.data["error"], {
+          toast.error(error.response.data.error, {
             description:
               "Please try again later, if the problem persists, contact the administrator.",
             style: { color: "red" },
@@ -60,7 +62,7 @@ const StudentPopupScore = ({
   }, [assessmentSummary]);
 
   const calculateTotalScore = (assessments) => {
-    return parseFloat(
+    return Number.parseFloat(
       assessments.reduce((total, item) => total + item.score, 0).toFixed(2),
     );
   };
@@ -81,15 +83,17 @@ const StudentPopupScore = ({
             </Button>
           </div>
           <div className="flex flex-wrap justify-between p-2 gap-10">
-            {assessmentData &&
-              Object.entries(assessmentData).length !== 0 &&
-              Object.keys(assessmentData).map((semester) => (
+            {assessmentData
+              && Object.entries(assessmentData).length !== 0
+              && Object.keys(assessmentData).map(semester => (
                 <div
                   key={semester}
                   className="flex-1 p-4 w-96 min-w-[250px] border border-gray-300 rounded-lg shadow-md bg-white"
                 >
                   <h3 className="text-center text-lg font-bold">
-                    Semester {semester}
+                    Semester
+                    {" "}
+                    {semester}
                   </h3>
                   <table className="w-full text-left border-collapse">
                     <thead>
@@ -107,8 +111,11 @@ const StudentPopupScore = ({
                         >
                           <td className="p-2">{i + 1}</td>
                           <td className="text-left p-2">
-                            {assessment.assessment_type} (
-                            {assessment.percentage}%)
+                            {assessment.assessment_type}
+                            {" "}
+                            (
+                            {assessment.percentage}
+                            %)
                           </td>
                           <td className="p-2">{assessment.score || "N/A"}</td>
                         </tr>
@@ -118,10 +125,12 @@ const StudentPopupScore = ({
                   <div className="text-right text-lg p-2">
                     <h3>
                       <strong>
-                        Total Score:{" "}
+                        Total Score:
+                        {" "}
                         {assessmentData[semester]
                           ? calculateTotalScore(assessmentData[semester])
-                          : "N/A"}{" "}
+                          : "N/A"}
+                        {" "}
                         / 100
                       </strong>
                     </h3>
@@ -133,6 +142,6 @@ const StudentPopupScore = ({
       </div>
     </div>
   );
-};
+}
 
 export default StudentPopupScore;

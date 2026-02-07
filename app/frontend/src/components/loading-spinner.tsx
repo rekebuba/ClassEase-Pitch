@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils";
 
-interface LoadingSpinnerProps {
+type LoadingSpinnerProps = {
   size?: "sm" | "md" | "lg";
   className?: string;
   text?: string;
-}
+};
 
 export default function LoadingSpinner({
   size = "md",

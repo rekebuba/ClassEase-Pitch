@@ -1,10 +1,12 @@
-import { StudentRegistrationForm } from "@/client/types.gen";
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 
-interface StudentRegistrationFormState {
+import type { StudentRegistrationForm } from "@/client/types.gen";
+import type { PayloadAction } from "@reduxjs/toolkit";
+
+type StudentRegistrationFormState = {
   data: StudentRegistrationForm;
   step: number;
-}
+};
 
 const initialFormData: StudentRegistrationForm = {
   registeredForGradeId: "",
@@ -61,6 +63,6 @@ export const studentRegistrationFormSlice = createSlice({
   },
 });
 
-export const { setFormData, setFormStep, resetForm } =
-  studentRegistrationFormSlice.actions;
+export const { setFormData, setFormStep, resetForm }
+  = studentRegistrationFormSlice.actions;
 export default studentRegistrationFormSlice.reducer;

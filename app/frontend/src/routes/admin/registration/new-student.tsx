@@ -1,3 +1,12 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Loader, RefreshCcw, Save } from "lucide-react";
+import { useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { toast } from "sonner";
+
 import {
   getGradesOptions,
   registerNewStudentMutation,
@@ -7,14 +16,6 @@ import {
   registerStudentStep4Mutation,
   registerStudentStep5Mutation,
 } from "@/client/@tanstack/react-query.gen";
-import {
-  StudentRegistrationForm,
-  StudRegStep1,
-  StudRegStep2,
-  StudRegStep3,
-  StudRegStep4,
-  StudRegStep5,
-} from "@/client/types.gen";
 import {
   zBloodTypeEnum,
   zStudentRegistrationForm,
@@ -58,14 +59,15 @@ import {
   setFormStep,
 } from "@/store/slice/student-registration-slice";
 import { extractFirstWord } from "@/utils/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Loader, RefreshCcw, Save } from "lucide-react";
-import { useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
-import { toast } from "sonner";
+
+import type {
+  StudentRegistrationForm,
+  StudRegStep1,
+  StudRegStep2,
+  StudRegStep3,
+  StudRegStep4,
+  StudRegStep5,
+} from "@/client/types.gen";
 
 // undefined fields are optional
 
@@ -208,11 +210,16 @@ function RouteComponent() {
             message: message as string,
           });
         });
-      } else {
+      }
+      else {
         toast.error("Something went wrong. Failed to Register Student.");
       }
     },
   });
+
+  const handleSave = () => {
+    mutation.mutate({ body: form.getValues() });
+  };
 
   const step1Mutation = useMutation({
     ...registerStudentStep1Mutation(),
@@ -237,7 +244,8 @@ function RouteComponent() {
             message: msg,
           });
         });
-      } else {
+      }
+      else {
         toast.error("Something went wrong. Failed to Validate Step 1.");
       }
     },
@@ -266,7 +274,8 @@ function RouteComponent() {
             message: msg,
           });
         });
-      } else {
+      }
+      else {
         toast.error("Something went wrong. Failed to Validate Step 2.");
       }
     },
@@ -287,7 +296,6 @@ function RouteComponent() {
     },
     onError: (error: any) => {
       const detail = error.response?.data?.detail;
-      console.log(detail);
 
       if (detail && Array.isArray(detail)) {
         detail.forEach(({ loc, msg }: { loc: string[]; msg: string }) => {
@@ -296,7 +304,8 @@ function RouteComponent() {
             message: msg,
           });
         });
-      } else {
+      }
+      else {
         toast.error("Something went wrong. Failed to Validate Step 3.");
       }
     },
@@ -325,7 +334,8 @@ function RouteComponent() {
             message: msg,
           });
         });
-      } else {
+      }
+      else {
         toast.error("Something went wrong. Failed to Validate Step 4.");
       }
     },
@@ -354,35 +364,32 @@ function RouteComponent() {
             message: msg,
           });
         });
-      } else {
+      }
+      else {
         toast.error("Something went wrong. Failed to Validate Step 5.");
       }
     },
   });
 
-  const onStep1Submit = step1Form.handleSubmit((data) =>
+  const onStep1Submit = step1Form.handleSubmit(data =>
     step1Mutation.mutate({ body: data }),
   );
 
-  const onStep2Submit = step2Form.handleSubmit((data) =>
+  const onStep2Submit = step2Form.handleSubmit(data =>
     step2Mutation.mutate({ body: data }),
   );
 
-  const onStep3Submit = step3Form.handleSubmit((data) =>
+  const onStep3Submit = step3Form.handleSubmit(data =>
     step3Mutation.mutate({ body: data }),
   );
 
-  const onStep4Submit = step4Form.handleSubmit((data) =>
+  const onStep4Submit = step4Form.handleSubmit(data =>
     step4Mutation.mutate({ body: data }),
   );
 
-  const onStep5Submit = step5Form.handleSubmit((data) =>
+  const onStep5Submit = step5Form.handleSubmit(data =>
     step5Mutation.mutate({ body: data }),
   );
-
-  const handleSave = () => {
-    mutation.mutate({ body: form.getValues() });
-  };
 
   const renderStep = () => {
     switch (currentStep) {
@@ -492,9 +499,11 @@ function RouteComponent() {
                   nameInSchema="registeredForGradeId"
                   description="Select the grade the student will be entering"
                 >
-                  {grades?.map((grade) => (
+                  {grades?.map(grade => (
                     <SelectItem key={grade.id} value={grade.id}>
-                      Grade {grade.grade}
+                      Grade
+                      {" "}
+                      {grade.grade}
                     </SelectItem>
                   ))}
                 </SelectWithLabel>
@@ -749,7 +758,7 @@ function RouteComponent() {
                   nameInSchema="bloodType"
                   description="Student's blood type (optional but recommended for emergencies)"
                 >
-                  {zBloodTypeEnum.options.map((type) => (
+                  {zBloodTypeEnum.options.map(type => (
                     <SelectItem key={type} value={type}>
                       {type}
                     </SelectItem>
@@ -810,7 +819,8 @@ function RouteComponent() {
                   <Loader className="animate-spin" />
                 )}
                 Submit Registration
-              </Button>{" "}
+              </Button>
+              {" "}
             </div>
           </FormProvider>
         );

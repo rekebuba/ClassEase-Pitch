@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+
 import ExamAssessmentReports from "./AdminExamAssessmentReports";
 import CollapsibleTable from "./CollapsibleTable";
 
@@ -7,12 +8,12 @@ import CollapsibleTable from "./CollapsibleTable";
  * StudentProfile component displays a detailed profile of a student including their personal information and performance overview.
  *
  * @component
- * @param {Object} props - The properties object.
- * @param {Object} props.student - An object containing the summary of the student's profile.
+ * @param {object} props - The properties object.
+ * @param {object} props.student - An object containing the summary of the student's profile.
  *
  * @returns {JSX.Element} The rendered StudentProfile component.
  */
-const AdminStudentProfile = ({ student }) => {
+function AdminStudentProfile({ student }) {
   const [allSubjects, setAllSubjects] = useState([]);
   const [studentAssessment, setStudentAssessment] = useState([]);
   const [studentReport, setStudentReport] = useState([]);
@@ -43,18 +44,20 @@ const AdminStudentProfile = ({ student }) => {
       try {
         if (student !== undefined && Object.keys(student).length > 0) {
         }
-      } catch (error) {
+      }
+      catch (error) {
         if (
-          error.response &&
-          error.response.data &&
-          error.response.data["error"]
+          error.response
+          && error.response.data
+          && error.response.data.error
         ) {
-          toast.error(error.response.data["error"], {
+          toast.error(error.response.data.error, {
             description:
               "Please try again later, if the problem persists, contact the administrator.",
             style: { color: "red" },
           });
-        } else {
+        }
+        else {
           toast.error("An unexpected error occurred.", {
             description:
               "Please try again later, if the problem persists, contact the administrator.",
@@ -78,12 +81,25 @@ const AdminStudentProfile = ({ student }) => {
         </div>
         <div className="flex-1">
           <h2 className="mt-0 mb-2.5 mx-0">
-            {student.name} {student.father_name}{" "}
-            {student.grand_father_name}{" "}
+            {student.name}
+            {" "}
+            {student.father_name}
+            {" "}
+            {student.grand_father_name}
+            {" "}
           </h2>
-          <p>Age: {calculateAge(student.date_of_birth)}</p>
-          <p>Grade: {student.grade}</p>
-          <p style={{ margin: 0 }}>Section: {student.section}</p>
+          <p>
+            Age:
+            {calculateAge(student.date_of_birth)}
+          </p>
+          <p>
+            Grade:
+            {student.grade}
+          </p>
+          <p style={{ margin: 0 }}>
+            Section:
+            {student.section}
+          </p>
         </div>
       </div>
 
@@ -106,6 +122,6 @@ const AdminStudentProfile = ({ student }) => {
       </div>
     </>
   );
-};
+}
 
 export default AdminStudentProfile;

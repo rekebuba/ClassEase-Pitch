@@ -1,3 +1,6 @@
+import { Link } from "@tanstack/react-router";
+import { ChevronRight } from "lucide-react";
+
 import {
   Collapsible,
   CollapsibleContent,
@@ -13,17 +16,16 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { type NavMainItem } from "@/lib/types";
-import { Link } from "@tanstack/react-router";
-import { ChevronRight } from "lucide-react";
-import { JSX } from "react";
+
+import type { NavMainItem } from "@/lib/types";
+import type { JSX } from "react";
 
 export function NavMain({ items }: { items: NavMainItem[] }): JSX.Element {
   return (
     <SidebarGroup>
       <SidebarGroupLabel>System</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
+        {items.map(item => (
           <Collapsible
             key={item.title}
             asChild
@@ -40,7 +42,7 @@ export function NavMain({ items }: { items: NavMainItem[] }): JSX.Element {
               </CollapsibleTrigger>
               <CollapsibleContent>
                 <SidebarMenuSub>
-                  {item.items?.map((subItem) => (
+                  {item.items?.map(subItem => (
                     <SidebarMenuSubItem key={subItem.title}>
                       <SidebarMenuSubButton asChild>
                         <Link

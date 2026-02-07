@@ -1,16 +1,3 @@
-import {
-  getStudentOptions,
-  getStudentQueryKey,
-  updateStudentStatusMutation,
-} from "@/client/@tanstack/react-query.gen";
-import { StudentApplicationStatusEnum as Status } from "@/client/types.gen";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { formatDate } from "@/lib/format";
-import { queryClient } from "@/lib/query-client";
-import { calculateAge, getInitials } from "@/utils/utils";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import {
@@ -35,6 +22,21 @@ import {
   XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+
+import {
+  getStudentOptions,
+  getStudentQueryKey,
+  updateStudentStatusMutation,
+} from "@/client/@tanstack/react-query.gen";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatDate } from "@/lib/format";
+import { queryClient } from "@/lib/query-client";
+import { calculateAge, getInitials } from "@/utils/utils";
+
+import type { StudentApplicationStatusEnum as Status } from "@/client/types.gen";
 
 export const Route = createFileRoute("/admin/students/$studentId/")({
   component: RouteComponent,
@@ -82,7 +84,8 @@ export default function RouteComponent() {
     });
   };
 
-  if (!student) return null;
+  if (!student)
+    return null;
 
   const contentNav = [
     { name: "Overview", icon: Info },
@@ -105,16 +108,20 @@ export default function RouteComponent() {
             <div>
               <div className="flex flex-col items-center gap-2">
                 <span>
-                  {student.firstName} {student.fatherName}
+                  {student.firstName}
+                  {" "}
+                  {student.fatherName}
                 </span>
                 {/* <StudentApplicationStatusBadge status={student.status} /> */}
                 <p className="text-sm text-gray-500">
-                  Grade {student.grade.grade}
+                  Grade
+                  {" "}
+                  {student.grade.grade}
                 </p>
               </div>
             </div>
           </div>
-          {contentNav.map((item) => (
+          {contentNav.map(item => (
             <button
               key={item.name}
               className="flex items-center w-full gap-3 px-3 py-2 rounded-md hover:bg-gray-100"
@@ -146,7 +153,9 @@ export default function RouteComponent() {
                     Full Name
                   </p>
                   <p className="font-medium">
-                    {student.firstName} {student.fatherName}
+                    {student.firstName}
+                    {" "}
+                    {student.fatherName}
                   </p>
                 </div>
                 {student.grandFatherName && (
@@ -162,8 +171,12 @@ export default function RouteComponent() {
                     Date of Birth
                   </p>
                   <p>
-                    {formatDate(student.dateOfBirth)} (
-                    {calculateAge(student.dateOfBirth)} years old)
+                    {formatDate(student.dateOfBirth)}
+                    {" "}
+                    (
+                    {calculateAge(student.dateOfBirth)}
+                    {" "}
+                    years old)
                   </p>
                 </div>
               </div>
@@ -229,45 +242,51 @@ export default function RouteComponent() {
                   <h4 className="font-medium text-orange-600">
                     Additional Contacts
                   </h4>
-                  {student.guardianName ? (
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">
-                        Guardian
-                      </p>
-                      <p>{student.guardianName}</p>
-                      {student.guardianRelation && (
-                        <p className="text-sm text-gray-600">
-                          Relationship: ({student.guardianRelation})
+                  {student.guardianName
+                    ? (
+                        <div>
+                          <p className="text-sm font-medium text-gray-500">
+                            Guardian
+                          </p>
+                          <p>{student.guardianName}</p>
+                          {student.guardianRelation && (
+                            <p className="text-sm text-gray-600">
+                              Relationship: (
+                              {student.guardianRelation}
+                              )
+                            </p>
+                          )}
+                          {student.guardianPhone && (
+                            <p className="text-sm text-gray-600">
+                              {student.guardianPhone}
+                            </p>
+                          )}
+                        </div>
+                      )
+                    : (
+                        <p className="text-sm text-gray-500">
+                          No guardian specified
                         </p>
                       )}
-                      {student.guardianPhone && (
-                        <p className="text-sm text-gray-600">
-                          {student.guardianPhone}
+                  {student.emergencyContactName
+                    ? (
+                        <div>
+                          <p className="text-sm font-medium text-gray-500">
+                            Emergency Contact
+                          </p>
+                          <p>{student.emergencyContactName}</p>
+                          {student.emergencyContactPhone && (
+                            <p className="text-sm text-gray-600">
+                              {student.emergencyContactPhone}
+                            </p>
+                          )}
+                        </div>
+                      )
+                    : (
+                        <p className="text-sm text-gray-500">
+                          No emergency contact specified
                         </p>
                       )}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-500">
-                      No guardian specified
-                    </p>
-                  )}
-                  {student.emergencyContactName ? (
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">
-                        Emergency Contact
-                      </p>
-                      <p>{student.emergencyContactName}</p>
-                      {student.emergencyContactPhone && (
-                        <p className="text-sm text-gray-600">
-                          {student.emergencyContactPhone}
-                        </p>
-                      )}
-                    </div>
-                  ) : (
-                    <p className="text-sm text-gray-500">
-                      No emergency contact specified
-                    </p>
-                  )}
                 </div>
               </div>
             </CardContent>
@@ -287,7 +306,11 @@ export default function RouteComponent() {
                 </p>
                 <p>{student.address}</p>
                 <p>
-                  {student.city}, {student.state} {student.postalCode}
+                  {student.city}
+                  ,
+                  {student.state}
+                  {" "}
+                  {student.postalCode}
                 </p>
               </div>
               <div>
@@ -295,8 +318,14 @@ export default function RouteComponent() {
                   <Phone className="h-4 w-4" />
                   Parent Contact
                 </p>
-                <p>Father: {student.fatherPhone}</p>
-                <p>Mother: {student.motherPhone}</p>
+                <p>
+                  Father:
+                  {student.fatherPhone}
+                </p>
+                <p>
+                  Mother:
+                  {student.motherPhone}
+                </p>
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500 flex items-center gap-1">
@@ -319,7 +348,9 @@ export default function RouteComponent() {
               <div>
                 <p className="text-sm font-medium text-gray-500">Grade Level</p>
                 <Badge className="bg-blue-100 text-blue-800">
-                  Grade {student.grade.grade}
+                  Grade
+                  {" "}
+                  {student.grade.grade}
                 </Badge>
               </div>
               <div>
@@ -332,21 +363,23 @@ export default function RouteComponent() {
                 <p className="text-sm font-medium text-gray-500">
                   Transfer Student
                 </p>
-                {student.isTransfer ? (
-                  <Badge
-                    variant="outline"
-                    className="bg-orange-100 text-orange-800"
-                  >
-                    Yes
-                  </Badge>
-                ) : (
-                  <Badge
-                    variant="outline"
-                    className="bg-green-100 text-green-800"
-                  >
-                    No
-                  </Badge>
-                )}
+                {student.isTransfer
+                  ? (
+                      <Badge
+                        variant="outline"
+                        className="bg-orange-100 text-orange-800"
+                      >
+                        Yes
+                      </Badge>
+                    )
+                  : (
+                      <Badge
+                        variant="outline"
+                        className="bg-green-100 text-green-800"
+                      >
+                        No
+                      </Badge>
+                    )}
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-500">
@@ -382,21 +415,23 @@ export default function RouteComponent() {
                 <p className="text-sm font-medium text-gray-500">
                   Has Siblings
                 </p>
-                {student.siblingInSchool ? (
-                  <Badge
-                    variant="outline"
-                    className="bg-orange-100 text-orange-800"
-                  >
-                    Yes
-                  </Badge>
-                ) : (
-                  <Badge
-                    variant="outline"
-                    className="bg-green-100 text-green-800"
-                  >
-                    No
-                  </Badge>
-                )}
+                {student.siblingInSchool
+                  ? (
+                      <Badge
+                        variant="outline"
+                        className="bg-orange-100 text-orange-800"
+                      >
+                        Yes
+                      </Badge>
+                    )
+                  : (
+                      <Badge
+                        variant="outline"
+                        className="bg-green-100 text-green-800"
+                      >
+                        No
+                      </Badge>
+                    )}
               </div>
             </CardContent>
           </Card>
@@ -413,39 +448,43 @@ export default function RouteComponent() {
                 <p className="text-sm font-medium text-gray-500">
                   Medical Conditions:
                 </p>
-                {student.hasMedicalCondition ? (
-                  <Badge
-                    variant="destructive"
-                    className="flex items-center gap-1"
-                  >
-                    <AlertTriangle className="h-3 w-3" />
-                    Yes
-                  </Badge>
-                ) : (
-                  <Badge className="bg-green-100 text-green-800 flex items-center gap-1">
-                    <CheckCircle className="h-3 w-3" />
-                    No
-                  </Badge>
-                )}
+                {student.hasMedicalCondition
+                  ? (
+                      <Badge
+                        variant="destructive"
+                        className="flex items-center gap-1"
+                      >
+                        <AlertTriangle className="h-3 w-3" />
+                        Yes
+                      </Badge>
+                    )
+                  : (
+                      <Badge className="bg-green-100 text-green-800 flex items-center gap-1">
+                        <CheckCircle className="h-3 w-3" />
+                        No
+                      </Badge>
+                    )}
               </div>
               <div className="flex items-center gap-2">
                 <p className="text-sm font-medium text-gray-500">
                   Disabilities:
                 </p>
-                {student.hasDisability ? (
-                  <Badge
-                    variant="destructive"
-                    className="flex items-center gap-1"
-                  >
-                    <AlertTriangle className="h-3 w-3" />
-                    Yes
-                  </Badge>
-                ) : (
-                  <Badge className="bg-green-100 text-green-800 flex items-center gap-1">
-                    <CheckCircle className="h-3 w-3" />
-                    No
-                  </Badge>
-                )}
+                {student.hasDisability
+                  ? (
+                      <Badge
+                        variant="destructive"
+                        className="flex items-center gap-1"
+                      >
+                        <AlertTriangle className="h-3 w-3" />
+                        Yes
+                      </Badge>
+                    )
+                  : (
+                      <Badge className="bg-green-100 text-green-800 flex items-center gap-1">
+                        <CheckCircle className="h-3 w-3" />
+                        No
+                      </Badge>
+                    )}
               </div>
               {student.medicalDetails && (
                 <div className="p-4 bg-red-50 rounded-lg">
@@ -475,10 +514,10 @@ export default function RouteComponent() {
   );
 }
 
-interface StudentStatusActionsProps {
+type StudentStatusActionsProps = {
   currentStatus: Status;
   onStatusChange: (newStatus: Status) => void;
-}
+};
 
 const statusTransitions: Record<Status, Status[]> = {
   pending: ["active", "rejected"],

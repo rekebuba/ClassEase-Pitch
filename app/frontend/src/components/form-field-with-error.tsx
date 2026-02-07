@@ -1,17 +1,19 @@
-import type React from "react";
-import { Label } from "@/components/ui/label";
+import { AlertCircle, CheckCircle } from "lucide-react";
+
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AlertCircle, CheckCircle } from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
-interface FormFieldProps {
+import type React from "react";
+
+type FormFieldProps = {
   label: string;
   id: string;
   error?: string;
@@ -19,7 +21,7 @@ interface FormFieldProps {
   required?: boolean;
   children: React.ReactNode;
   description?: string;
-}
+};
 
 export function FormField({
   label,
@@ -55,10 +57,9 @@ export function FormField({
   );
 }
 
-interface InputWithErrorProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
+type InputWithErrorProps = {
   error?: string;
-}
+} & React.InputHTMLAttributes<HTMLInputElement>;
 
 export function InputWithError({
   error,
@@ -77,10 +78,9 @@ export function InputWithError({
   );
 }
 
-interface TextareaWithErrorProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+type TextareaWithErrorProps = {
   error?: string;
-}
+} & React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 
 export function TextareaWithError({
   error,
@@ -99,13 +99,13 @@ export function TextareaWithError({
   );
 }
 
-interface SelectWithErrorProps {
+type SelectWithErrorProps = {
   error?: string;
   children: React.ReactNode;
   value?: string;
   onValueChange?: (value: string) => void;
   placeholder?: string;
-}
+};
 
 export function SelectWithError({
   error,

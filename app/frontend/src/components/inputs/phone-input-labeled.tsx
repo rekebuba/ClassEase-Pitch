@@ -1,4 +1,4 @@
-import { FieldValues, Path, useFormContext } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
 import {
   FormControl,
@@ -9,7 +9,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { PhoneInput } from "@/components/ui/phone-input";
-import { InputHTMLAttributes } from "react";
+
+import type { InputHTMLAttributes } from "react";
+import type { FieldValues, Path } from "react-hook-form";
 
 type InputWithLabelProps<T extends FieldValues> = {
   fieldTitle: string;
@@ -42,11 +44,13 @@ export function PhoneInputWithLabel<T extends FieldValues>({
               className={className}
             />
           </FormControl>
-          {form.formState.errors[nameInSchema] ? (
-            <FormMessage />
-          ) : (
-            description && <FormDescription>{description}</FormDescription>
-          )}
+          {form.formState.errors[nameInSchema]
+            ? (
+                <FormMessage />
+              )
+            : (
+                description && <FormDescription>{description}</FormDescription>
+              )}
         </FormItem>
       )}
     />

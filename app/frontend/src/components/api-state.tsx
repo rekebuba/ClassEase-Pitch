@@ -1,8 +1,9 @@
-import type React from "react";
 import { ApiError } from "./api-error";
 import LoadingSpinner from "./loading-spinner";
 
-interface ApiStateProps {
+import type React from "react";
+
+type ApiStateProps = {
   isLoading: boolean;
   error?: string | null;
   onRetry?: () => void;
@@ -10,7 +11,7 @@ interface ApiStateProps {
   errorTitle?: string;
   children: React.ReactNode;
   className?: string;
-}
+};
 
 export function ApiState({
   isLoading,

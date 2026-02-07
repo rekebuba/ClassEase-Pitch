@@ -1,26 +1,25 @@
 "use client";
 
-import type React from "react";
-
-import { useEffect, useRef, useState } from "react";
 import { ChevronLeftIcon } from "@radix-ui/react-icons";
+import { LoaderIcon } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
+import { useTableInstanceContext } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { LoaderIcon } from "lucide-react";
 
-import { useTableInstanceContext } from "@/components/data-table";
-import { SearchParams } from "@/lib/types";
+import type { SearchParams } from "@/lib/types";
+import type React from "react";
 
-interface CreateViewFormProps {
+type CreateViewFormProps = {
   backButton?: true;
   onBack?: () => void;
   onSuccess?: () => void;
   SearchParams?: SearchParams;
   onCreateView?: (newView: any) => void;
-}
+};
 
 export function CreateViewForm({
   backButton,
@@ -35,14 +34,14 @@ export function CreateViewForm({
 
   const { tableInstance } = useTableInstanceContext();
 
-  const visibleColumns =
-    tableInstance
+  const visibleColumns
+    = tableInstance
       ?.getVisibleFlatColumns()
       .filter(
-        (column) =>
+        column =>
           typeof column.accessorFn !== "undefined" && column.getCanHide(),
       )
-      .map((column) => column.id) || [];
+      .map(column => column.id) || [];
 
   useEffect(() => {
     nameInputRef.current?.focus();
@@ -105,14 +104,16 @@ export function CreateViewForm({
           placeholder="Name"
           autoComplete="off"
           value={viewName}
-          onChange={(e) => setViewName(e.target.value)}
+          onChange={e => setViewName(e.target.value)}
         />
         <Button disabled={pending} size="sm" type="submit">
-          {pending ? (
-            <LoaderIcon aria-hidden="true" className="size-3.5 animate-spin" />
-          ) : (
-            "Create"
-          )}
+          {pending
+            ? (
+                <LoaderIcon aria-hidden="true" className="size-3.5 animate-spin" />
+              )
+            : (
+                "Create"
+              )}
         </Button>
       </form>
     </div>

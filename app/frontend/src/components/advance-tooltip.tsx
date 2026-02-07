@@ -1,3 +1,6 @@
+import { Loader } from "lucide-react";
+import * as React from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -5,14 +8,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { Loader } from "lucide-react";
-import * as React from "react";
 
-interface AdvanceTooltipProps extends React.ComponentProps<typeof Button> {
+type AdvanceTooltipProps = {
   tooltip?: string;
   isPending?: boolean;
   side?: "top" | "right" | "bottom" | "left";
-}
+} & React.ComponentProps<typeof Button>;
 
 export default function AdvanceTooltip({
   size = "sm",
@@ -40,7 +41,8 @@ export default function AdvanceTooltip({
     </Button>
   );
 
-  if (!tooltip) return trigger;
+  if (!tooltip)
+    return trigger;
 
   return (
     <Tooltip>

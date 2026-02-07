@@ -1,5 +1,25 @@
+import { useQuery } from "@tanstack/react-query";
+import { Link } from "@tanstack/react-router";
+import {
+  BadgeCheck,
+  BarChart3,
+  Bell,
+  BookOpen,
+  Calendar,
+  ChevronsUpDown,
+  Clock,
+  Cog,
+  CreditCard,
+  DollarSign,
+  FileText,
+  GraduationCap,
+  Layers,
+  MessageSquare,
+  Sparkles,
+  Users,
+} from "lucide-react";
+
 import { getAdminBasicInfoOptions } from "@/client/@tanstack/react-query.gen";
-import { AdminInfo } from "@/client/types.gen";
 import { Logout } from "@/components";
 import FadeIn from "@/components/fade-in";
 import { NavMain } from "@/components/nav-main";
@@ -26,28 +46,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { MainNavItem } from "@/lib/types";
 import { store } from "@/store/main-store";
-import { useQuery } from "@tanstack/react-query";
-import { Link } from "@tanstack/react-router";
-import {
-  BadgeCheck,
-  BarChart3,
-  Bell,
-  BookOpen,
-  Calendar,
-  ChevronsUpDown,
-  Clock,
-  Cog,
-  CreditCard,
-  DollarSign,
-  FileText,
-  GraduationCap,
-  Layers,
-  MessageSquare,
-  Sparkles,
-  Users,
-} from "lucide-react";
+
+import type { AdminInfo } from "@/client/types.gen";
+import type { MainNavItem } from "@/lib/types";
 
 const data: MainNavItem = {
   navBar: [
@@ -134,7 +136,7 @@ export default function AdminSidebar({ ...props }: AdminSidebarProps) {
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <Link
-                to={`/admin`}
+                to="/admin"
                 params={{ yearId: state.year.id }}
                 className="flex items-center gap-2 font-semibold"
               >
@@ -154,7 +156,7 @@ export default function AdminSidebar({ ...props }: AdminSidebarProps) {
       <SidebarFooter className="border-t p-4">
         <FadeIn
           isLoading={isLoading}
-          loader={
+          loader={(
             <SidebarFooter className="p-0">
               <div className="flex items-center space-x-2">
                 <Skeleton className="h-10 w-10 rounded-full" />
@@ -164,7 +166,7 @@ export default function AdminSidebar({ ...props }: AdminSidebarProps) {
                 </div>
               </div>
             </SidebarFooter>
-          }
+          )}
         >
           {adminInfo && <AdminProfile user={adminInfo} />}
         </FadeIn>
@@ -194,14 +196,18 @@ function AdminProfile({ user }: { user: AdminInfo }) {
                 />
                 {admin.firstName && admin.fatherName && (
                   <AvatarFallback className="rounded-lg">
-                    {admin.firstName.charAt(0).toUpperCase() +
-                      admin.fatherName.charAt(0).toUpperCase()}
+                    {admin.firstName.charAt(0).toUpperCase()
+                      + admin.fatherName.charAt(0).toUpperCase()}
                   </AvatarFallback>
                 )}
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  Mr. {admin.firstName} {admin.fatherName}
+                  Mr.
+                  {" "}
+                  {admin.firstName}
+                  {" "}
+                  {admin.fatherName}
                 </span>
                 <span className="truncate text-xs font-bold">{user.role}</span>
               </div>
@@ -223,14 +229,19 @@ function AdminProfile({ user }: { user: AdminInfo }) {
                   />
                   {admin.firstName && admin.fatherName && (
                     <AvatarFallback className="rounded-lg">
-                      {admin.firstName.charAt(0).toUpperCase() +
-                        admin.fatherName.charAt(0).toUpperCase()}
+                      {admin.firstName.charAt(0).toUpperCase()
+                        + admin.fatherName.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   )}
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-semibold">
-                    Mr. {admin.firstName} {admin.fatherName}{" "}
+                    Mr.
+                    {" "}
+                    {admin.firstName}
+                    {" "}
+                    {admin.fatherName}
+                    {" "}
                     {admin.grandFatherName}
                   </span>
                   <span className="truncate text-xs">
@@ -262,7 +273,7 @@ function AdminProfile({ user }: { user: AdminInfo }) {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+            <DropdownMenuItem onSelect={e => e.preventDefault()}>
               <Logout />
             </DropdownMenuItem>
           </DropdownMenuContent>

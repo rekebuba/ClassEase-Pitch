@@ -1,5 +1,3 @@
-import { EmployeeApplicationStatusEnum } from "@/client";
-import { Badge } from "@/components/ui/badge";
 import {
   Calendar,
   CheckCircle,
@@ -9,9 +7,13 @@ import {
   XCircle,
 } from "lucide-react";
 
-interface EmployeeStatusBadgeProps {
+import { Badge } from "@/components/ui/badge";
+
+import type { EmployeeApplicationStatusEnum } from "@/client";
+
+type EmployeeStatusBadgeProps = {
   status: EmployeeApplicationStatusEnum;
-}
+};
 
 type StatusConfig = {
   [key in EmployeeApplicationStatusEnum]: {
@@ -26,25 +28,25 @@ export default function EmployeeApplicationStatusBadge({
   status,
 }: EmployeeStatusBadgeProps) {
   const statusConfig: StatusConfig = {
-    pending: {
+    "pending": {
       label: "Pending",
       variant: "secondary" as const,
       icon: Clock,
       className: "bg-yellow-100 text-yellow-800 border-yellow-200",
     },
-    rejected: {
+    "rejected": {
       label: "Rejected",
       variant: "secondary" as const,
       icon: XCircle,
       className: "bg-red-100 text-red-800 border-red-200",
     },
-    active: {
+    "active": {
       label: "Active",
       variant: "secondary" as const,
       icon: CheckCircle,
       className: "bg-green-100 text-green-800 border-green-200",
     },
-    inactive: {
+    "inactive": {
       label: "Inactive",
       variant: "secondary" as const,
       icon: Pause,
@@ -56,13 +58,13 @@ export default function EmployeeApplicationStatusBadge({
       icon: Calendar,
       className: "bg-blue-100 text-blue-800 border-blue-200",
     },
-    approved: {
+    "approved": {
       label: "Approved",
       variant: "secondary" as const,
       icon: CheckCircle,
       className: "bg-purple-100 text-purple-800 border-purple-200",
     },
-    withdrawn: {
+    "withdrawn": {
       label: "Withdrawn",
       variant: "secondary" as const,
       icon: LogOut,

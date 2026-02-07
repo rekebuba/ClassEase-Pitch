@@ -1,7 +1,17 @@
 "use client";
 
 import * as React from "react";
+
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Sheet,
   SheetContent,
@@ -10,24 +20,16 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import type { Student } from "@/lib/types";
 
-interface UpdateStudentSheetProps {
+type UpdateStudentSheetProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   student: Student | null;
   onSuccess?: () => void;
-}
+};
 
 export function UpdateStudentSheet({
   open,
@@ -65,7 +67,8 @@ export function UpdateStudentSheet({
         parentEmail: student.parentEmail,
         // Set other fields
       });
-    } else {
+    }
+    else {
       setFormData({
         name: "",
         email: "",
@@ -81,11 +84,11 @@ export function UpdateStudentSheet({
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -94,16 +97,18 @@ export function UpdateStudentSheet({
 
     try {
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Close the sheet
       onOpenChange(false);
 
       // Show success message or trigger refresh
       console.log("Student saved:", formData);
-    } catch (error) {
+    }
+    catch (error) {
       console.error("Error saving student:", error);
-    } finally {
+    }
+    finally {
       setIsSubmitting(false);
     }
   };
@@ -159,9 +164,8 @@ export function UpdateStudentSheet({
                   <Label htmlFor="status">Status</Label>
                   <Select
                     value={formData.status}
-                    onValueChange={(value) =>
-                      handleSelectChange("status", value)
-                    }
+                    onValueChange={value =>
+                      handleSelectChange("status", value)}
                   >
                     <SelectTrigger id="status">
                       <SelectValue placeholder="Select status" />
@@ -182,9 +186,8 @@ export function UpdateStudentSheet({
                   <Label htmlFor="grade">Grade</Label>
                   <Select
                     value={formData.grade}
-                    onValueChange={(value) =>
-                      handleSelectChange("grade", value)
-                    }
+                    onValueChange={value =>
+                      handleSelectChange("grade", value)}
                   >
                     <SelectTrigger id="grade">
                       <SelectValue placeholder="Select grade" />
@@ -202,9 +205,8 @@ export function UpdateStudentSheet({
                   <Label htmlFor="section">Section</Label>
                   <Select
                     value={formData.section}
-                    onValueChange={(value) =>
-                      handleSelectChange("section", value)
-                    }
+                    onValueChange={value =>
+                      handleSelectChange("section", value)}
                   >
                     <SelectTrigger id="section">
                       <SelectValue placeholder="Select section" />

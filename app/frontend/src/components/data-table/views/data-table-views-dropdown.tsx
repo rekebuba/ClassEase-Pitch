@@ -3,6 +3,7 @@
 import { CaretDownIcon, Pencil1Icon, PlusIcon } from "@radix-ui/react-icons";
 import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
+import { toast } from "sonner";
 
 import { Kbd } from "@/components/kbd";
 import { Button } from "@/components/ui/button";
@@ -28,20 +29,21 @@ import {
 } from "@/components/ui/tooltip";
 import { getIsMacOS } from "@/lib/utils";
 
-import { SearchParams, StudentsViews, View } from "@/lib/types";
-import { toast } from "sonner";
 import { useTableInstanceContext } from "../table-instance-provider";
+
 import { CreateViewForm } from "./create-view-form";
 import { EditViewForm } from "./edit-view-form";
 
-interface DataTableViewsDropdownProps {
+import type { SearchParams, StudentsViews, View } from "@/lib/types";
+
+type DataTableViewsDropdownProps = {
   views: StudentsViews[];
   SearchParams: SearchParams;
   setSearchParams: (params: SearchParams) => void;
   refetchViews: () => void;
   currentViewId: string | null;
   setCurrentViewId: (viewId: string | null) => void;
-}
+};
 
 export function DataTableViewsDropdown({
   views,
@@ -55,17 +57,17 @@ export function DataTableViewsDropdown({
   const [isCreateViewFormOpen, setIsCreateViewFormOpen] = useState(false);
   const [isEditViewFormOpen, setIsEditViewFormOpen] = useState(false);
   const [selectedView, setSelectedView] = useState<StudentsViews | null>(null);
-  const currentView = views.find((view) => view.viewId === currentViewId);
+  const currentView = views.find(view => view.viewId === currentViewId);
 
   const { tableInstance: table } = useTableInstanceContext();
-  const visibleColumns =
-    table
+  const visibleColumns
+    = table
       ?.getVisibleFlatColumns()
       .filter(
-        (column) =>
+        column =>
           typeof column.accessorFn !== "undefined" && column.getCanHide(),
       )
-      .map((column) => column.id) || [];
+      .map(column => column.id) || [];
 
   const [defaultColumnState] = useState<string[]>(visibleColumns);
 
@@ -89,7 +91,8 @@ export function DataTableViewsDropdown({
       setCurrentViewId(view.viewId);
       setSearchParams(view.searchParams);
       setColumns(view.columns);
-    } else {
+    }
+    else {
       // Clear view selection
       setSearchParams({
         page: 1,
@@ -174,7 +177,8 @@ export function DataTableViewsDropdown({
               <div>
                 <Kbd variant="outline" className="font-sans">
                   {isMac ? "⌘" : "ctrl"}
-                </Kbd>{" "}
+                </Kbd>
+                {" "}
                 <Kbd variant="outline" className="font-sans">
                   V
                 </Kbd>
@@ -220,7 +224,7 @@ export function DataTableViewsDropdown({
                   >
                     All Items
                   </CommandItem>
-                  {views.map((view) => (
+                  {views.map(view => (
                     <CommandItem
                       key={view.viewId}
                       value={view.name}

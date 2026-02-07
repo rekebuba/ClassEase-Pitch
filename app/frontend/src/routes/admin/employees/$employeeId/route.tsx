@@ -1,26 +1,8 @@
-import {
-  getEmployeeOptions,
-  getEmployeeQueryKey,
-  updateEmployeeStatusMutation,
-} from "@/client/@tanstack/react-query.gen";
-import { EmployeeApplicationStatusEnum as Status } from "@/client/types.gen";
-import AdvanceTooltip from "@/components/advance-tooltip";
-import EmployeeApplicationStatusBadge from "@/components/enum-badge/employee-application-status-badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { formatDate } from "@/lib/format";
-import { queryClient } from "@/lib/query-client";
-import { MainNavItem } from "@/lib/types";
-import { cn } from "@/lib/utils";
-import { store } from "@/store/main-store";
-import { getInitials } from "@/utils/utils";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import {
   createFileRoute,
   Link,
   Outlet,
-  useNavigate,
   useRouter,
 } from "@tanstack/react-router";
 import { motion, useScroll, useTransform } from "framer-motion";
@@ -35,17 +17,31 @@ import {
   Phone,
 } from "lucide-react";
 import { useRef } from "react";
-import { toast } from "sonner";
+
+import {
+  getEmployeeOptions,
+} from "@/client/@tanstack/react-query.gen";
+import AdvanceTooltip from "@/components/advance-tooltip";
+import EmployeeApplicationStatusBadge from "@/components/enum-badge/employee-application-status-badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { formatDate } from "@/lib/format";
+import { cn } from "@/lib/utils";
+import { getInitials } from "@/utils/utils";
+
+import type { MainNavItem } from "@/lib/types";
 
 export const Route = createFileRoute("/admin/employees/$employeeId")({
   component: RouteComponent,
 });
 
-const SimpleSidebarNavigation = () => {
+function SimpleSidebarNavigation() {
   const router = useRouter();
   const employeeId = Route.useParams().employeeId;
 
-  if (!employeeId) return null;
+  if (!employeeId)
+    return null;
 
   const contentNav: MainNavItem = {
     navBar: [
@@ -53,25 +49,25 @@ const SimpleSidebarNavigation = () => {
         title: "Profile",
         icon: Info,
         to: "/admin/employees/$employeeId/profile",
-        params: { employeeId: employeeId },
+        params: { employeeId },
       },
       {
         title: "Schedule",
         icon: BookOpen,
         to: "/admin/employees/$employeeId/schedule",
-        params: { employeeId: employeeId },
+        params: { employeeId },
       },
       {
         title: "Interview",
         icon: BookOpen,
         to: "/admin/employees/$employeeId/interview",
-        params: { employeeId: employeeId },
+        params: { employeeId },
       },
       {
         title: "Notes",
         icon: FileText,
         to: "/admin/employees/$employeeId/notes",
-        params: { employeeId: employeeId },
+        params: { employeeId },
       },
     ],
     navMain: [],
@@ -113,11 +109,11 @@ const SimpleSidebarNavigation = () => {
       })}
     </nav>
   );
-};
+}
 
 function RouteComponent() {
-  const yearId = store.getState().year.id;
-  const navigate = useNavigate();
+  // const yearId = store.getState().year.id;
+  // const navigate = useNavigate();
   const employeeId = Route.useParams().employeeId;
 
   const { data: employee } = useQuery({
@@ -127,29 +123,29 @@ function RouteComponent() {
     enabled: !!employeeId,
   });
 
-  const updateEmployeeStatus = useMutation({
-    ...updateEmployeeStatusMutation(),
-    onSuccess: (success) => {
-      toast.success(success.message, {
-        style: { color: "green" },
-      });
-      queryClient.invalidateQueries({
-        queryKey: getEmployeeQueryKey({
-          path: { employee_id: employeeId },
-        }),
-      });
-      navigate({ to: "/admin/registration/employees" });
-    },
-    onError: () => {
-      toast.error("Something went wrong.", { style: { color: "red" } });
-    },
-  });
+  // const updateEmployeeStatus = useMutation({
+  //   ...updateEmployeeStatusMutation(),
+  //   onSuccess: (success) => {
+  //     toast.success(success.message, {
+  //       style: { color: "green" },
+  //     });
+  //     queryClient.invalidateQueries({
+  //       queryKey: getEmployeeQueryKey({
+  //         path: { employee_id: employeeId },
+  //       }),
+  //     });
+  //     navigate({ to: "/admin/registration/employees" });
+  //   },
+  //   onError: () => {
+  //     toast.error("Something went wrong.", { style: { color: "red" } });
+  //   },
+  // });
 
-  const onStatusChange = (newStatus: Status) => {
-    updateEmployeeStatus.mutate({
-      body: { yearId: yearId!, status: newStatus, employeeIds: [employeeId] },
-    });
-  };
+  // const onStatusChange = (newStatus: Status) => {
+  //   updateEmployeeStatus.mutate({
+  //     body: { yearId: yearId!, status: newStatus, employeeIds: [employeeId] },
+  //   });
+  // };
 
   const scrollRef = useRef(null);
   const { scrollYProgress } = useScroll({
@@ -210,10 +206,11 @@ function RouteComponent() {
   ); // gap-6 -> gap-3
   const boxShadow = useTransform(
     shadowOpacity,
-    (value) => `0 2px 8px rgba(0,0,0,${value * 0.1})`,
+    value => `0 2px 8px rgba(0,0,0,${value * 0.1})`,
   );
 
-  if (!employee) return null;
+  if (!employee)
+    return null;
 
   return (
     <Card className="border-none h-screen flex flex-col overflow-hidden">
@@ -221,7 +218,7 @@ function RouteComponent() {
       <motion.div
         style={{
           height: headerHeight,
-          boxShadow: boxShadow,
+          boxShadow,
         }}
         className="sticky bg-white z-20 flex items-center px-6 top-0"
       >
@@ -257,7 +254,9 @@ function RouteComponent() {
                   style={{ fontSize: nameFont }}
                   className="font-bold text-foreground truncate mr-2"
                 >
-                  {employee.firstName} {employee.fatherName}
+                  {employee.firstName}
+                  {" "}
+                  {employee.fatherName}
                 </motion.h1>
                 <EmployeeApplicationStatusBadge status={employee.status} />
               </motion.div>
@@ -265,7 +264,9 @@ function RouteComponent() {
                 style={{ fontSize: roleFontSize, opacity: roleOpacity }}
                 className=" font-bold text-muted-foreground truncate m-0"
               >
-                {employee.subject?.name} Teacher
+                {employee.subject?.name}
+                {" "}
+                Teacher
               </motion.p>
 
               <motion.div
@@ -288,13 +289,17 @@ function RouteComponent() {
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Calendar className="w-4 h-4 flex-shrink-0" />
                   <span className="truncate">
-                    Hired: {formatDate(employee.createdAt)}
+                    Hired:
+                    {" "}
+                    {formatDate(employee.createdAt)}
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Clock className="w-4 h-4 flex-shrink-0" />
                   <span className="truncate">
-                    {employee.yearsOfExperience} years experience
+                    {employee.yearsOfExperience}
+                    {" "}
+                    years experience
                   </span>
                 </div>
               </motion.div>

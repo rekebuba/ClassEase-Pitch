@@ -11,7 +11,8 @@ export default function PageLoader() {
   useEffect(() => {
     if (navigation.state === "loading") {
       NProgress.start();
-    } else {
+    }
+    else {
       NProgress.done();
     }
   }, [navigation.state]);

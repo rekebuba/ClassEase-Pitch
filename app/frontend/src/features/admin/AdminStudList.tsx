@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -6,8 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
 
 /**
  * AdminStudentsList component for managing and displaying a list of students.
@@ -20,10 +21,10 @@ import { toast } from "sonner";
  *
  * @property {number} selectedGrade - The currently selected grade for filtering students.
  * @property {string} selectedYear - The currently selected year for filtering students.
- * @property {Object} allStudents - The state storing all students data.
+ * @property {object} allStudents - The state storing all students data.
  * @property {number} currentYear - The current year.
  */
-const AdminStudentList = () => {
+function AdminStudentList() {
   const [selectedGrade, setSelectedGrade] = useState(1);
   const [selectedYear, setSelectedYear] = useState("2024/25");
   const [allStudents, setAllStudents] = useState({ students: [], meta: {} }); // Store all students
@@ -50,24 +51,26 @@ const AdminStudentList = () => {
       console.log("Response:", response.data);
 
       const data = {
-        students: response.data["students"],
-        meta: response.data["meta"],
-        header: response.data["header"],
+        students: response.data.students,
+        meta: response.data.meta,
+        header: response.data.header,
       };
 
       setAllStudents(data); // Store all students
-    } catch (error) {
+    }
+    catch (error) {
       if (
-        error.response &&
-        error.response.data &&
-        error.response.data["error"]
+        error.response
+        && error.response.data
+        && error.response.data.error
       ) {
-        toast.error(error.response.data["error"], {
+        toast.error(error.response.data.error, {
           description:
             "Please try again later, if the problem persists, contact the administrator.",
           style: { color: "red" },
         });
-      } else {
+      }
+      else {
         toast.error("An unexpected error occurred.", {
           description:
             "Please try again later, if the problem persists, contact the administrator.",
@@ -83,7 +86,8 @@ const AdminStudentList = () => {
         const response = await adminApi.getStudents();
 
         console.log("Response:", response.data);
-      } catch (error) {
+      }
+      catch (error) {
         console.log("Error fetching students:", error);
       }
     };
@@ -96,7 +100,7 @@ const AdminStudentList = () => {
    * @param {Event} e - The change event.
    * @returns {void}
    */
-  const handleGradeChange = (value) => setSelectedGrade(value);
+  const handleGradeChange = value => setSelectedGrade(value);
 
   /**
    * @function handleYearChange
@@ -104,11 +108,11 @@ const AdminStudentList = () => {
    * @param {Event} e - The change event.
    * @returns {void}
    */
-  const handleYearChange = (value) => setSelectedYear(value);
+  const handleYearChange = value => setSelectedYear(value);
 
   return (
     <div className="bg-gray-100">
-      <form onSubmit={(e) => handleSearch(e, 1, {})}>
+      <form onSubmit={e => handleSearch(e, 1, {})}>
         <section className="flex flex-wrap justify-between bg-white p-4 rounded shadow w-full mb-10">
           <div style={{ width: "9rem" }}>
             <Select onValueChange={handleGradeChange} required>
@@ -116,9 +120,11 @@ const AdminStudentList = () => {
                 <SelectValue placeholder="Select Grade" />
               </SelectTrigger>
               <SelectContent>
-                {Array.from({ length: 12 }, (_, i) => i + 1).map((grade) => (
+                {Array.from({ length: 12 }, (_, i) => i + 1).map(grade => (
                   <SelectItem key={grade} value={`${grade}`}>
-                    Grade {grade}
+                    Grade
+                    {" "}
+                    {grade}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -131,12 +137,14 @@ const AdminStudentList = () => {
               </SelectTrigger>
               <SelectContent>
                 {Array.from({ length: 3 }, (_, i) => currentYear - i).map(
-                  (year) => (
+                  year => (
                     <SelectItem
                       key={year}
                       value={`${year}/${(year + 1) % 100}`}
                     >
-                      {year}/{(year + 1) % 100}
+                      {year}
+                      /
+                      {(year + 1) % 100}
                     </SelectItem>
                   ),
                 )}
@@ -150,6 +158,6 @@ const AdminStudentList = () => {
       {/* <StudentTable data={allStudents.students} /> */}
     </div>
   );
-};
+}
 
 export default AdminStudentList;

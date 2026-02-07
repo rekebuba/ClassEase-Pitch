@@ -6,10 +6,10 @@ import { toast } from "sonner";
  * AdminAssignTeacher component allows an admin to assign a teacher to classes.
  *
  * @component
- * @param {Object} props - The properties object.
+ * @param {object} props - The properties object.
  * @param {boolean} props.isEditOpen - Indicates if the edit profile popup is open.
  * @param {Function} props.toggleEditProfile - Function to toggle the edit profile popup.
- * @param {Object} props.teacherData - Data of the teacher to be assigned.
+ * @param {object} props.teacherData - Data of the teacher to be assigned.
  * @param {string} props.teacherData.name - Name of the teacher.
  * @param {Array<string>} props.teacherData.subjects - List of subjects the teacher can teach.
  * @param {string} props.teacherData.id - ID of the teacher.
@@ -23,7 +23,7 @@ import { toast } from "sonner";
  *   teacherData={{ name: 'John Doe', subjects: ['Math', 'Science'], id: '123' }}
  * />
  */
-const AdminAssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
+function AdminAssignTeacher({ isEditOpen, toggleEditProfile, teacherData }) {
   const [teachers, setTeachers] = useState({ name: "", subjects: [] });
   const [classGrade, setClassGrade] = useState("");
   const [selectedSection, setSelectedSection] = useState([]);
@@ -36,7 +36,8 @@ const AdminAssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
    * @description React hook to fetch teacher data.
    */
   useEffect(() => {
-    if (!teacherData || Object.keys(teacherData).length === 0) return;
+    if (!teacherData || Object.keys(teacherData).length === 0)
+      return;
     const data = {
       name: teacherData.name || "",
       subjects: teacherData.subjects || [],
@@ -61,22 +62,24 @@ const AdminAssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
         subjects_taught: subjects,
         mark_list_year: selectedYear,
       });
-      toast.success(response.data["message"], {
+      toast.success(response.data.message, {
         description: currentTime,
         style: { color: "green" },
       });
-    } catch (error) {
+    }
+    catch (error) {
       if (
-        error.response &&
-        error.response.data &&
-        error.response.data["error"]
+        error.response
+        && error.response.data
+        && error.response.data.error
       ) {
-        toast.error(error.response.data["error"], {
+        toast.error(error.response.data.error, {
           description:
             "Please try again later, if the problem persists, contact the administrator.",
           style: { color: "red" },
         });
-      } else {
+      }
+      else {
         toast.error("An unexpected error occurred.", {
           description:
             "Please try again later, if the problem persists, contact the administrator.",
@@ -85,7 +88,7 @@ const AdminAssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
       }
     }
   };
-  const handleYearChange = (e) => setSelectedYear(e.target.value);
+  const handleYearChange = e => setSelectedYear(e.target.value);
 
   /**
    * @function handleSectionChange
@@ -96,9 +99,10 @@ const AdminAssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
     const { value, checked } = e.target;
     if (checked) {
       setSelectedSection([...selectedSection, value]);
-    } else {
+    }
+    else {
       setSelectedSection(
-        selectedSection.filter((section) => section !== value),
+        selectedSection.filter(section => section !== value),
       );
     }
   };
@@ -119,9 +123,8 @@ const AdminAssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
               id="teacher"
               name="teacher"
               value={teachers.name}
-              onChange={(e) =>
-                setTeachers({ ...teachers, name: e.target.value })
-              }
+              onChange={e =>
+                setTeachers({ ...teachers, name: e.target.value })}
               required
             >
               <option key="default" value={teachers.name}>
@@ -135,13 +138,15 @@ const AdminAssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
               id="classGrade"
               name="classGrade"
               value={classGrade}
-              onChange={(e) => setClassGrade(e.target.value)}
+              onChange={e => setClassGrade(e.target.value)}
               required
             >
               <option value="">Select Grade</option>
-              {Array.from({ length: 12 }, (_, i) => i + 1).map((grade) => (
+              {Array.from({ length: 12 }, (_, i) => i + 1).map(grade => (
                 <option key={grade} value={grade}>
-                  Grade {grade}
+                  Grade
+                  {" "}
+                  {grade}
                 </option>
               ))}
             </select>
@@ -149,7 +154,7 @@ const AdminAssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
           <div className="form-group subjects">
             <label htmlFor="section">Section:</label>
             <div className="checkbox-group">
-              {["A", "B", "C"].map((section) => (
+              {["A", "B", "C"].map(section => (
                 <div className="subject-container" key={section}>
                   <label>
                     <input
@@ -169,9 +174,11 @@ const AdminAssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
             <select id="year" value={selectedYear} onChange={handleYearChange}>
               {/* Dynamic Year Options */}
               {Array.from({ length: 3 }, (_, i) => currentYear - i).map(
-                (year) => (
+                year => (
                   <option key={year} value={year}>
-                    {year}/{(year + 1) % 100}
+                    {year}
+                    /
+                    {(year + 1) % 100}
                   </option>
                 ),
               )}
@@ -183,26 +190,27 @@ const AdminAssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
               id="subjects"
               name="subjects"
               value={subjects}
-              onChange={(e) =>
+              onChange={e =>
                 setSubjects(
                   Array.from(
                     e.target.selectedOptions,
-                    (option) => option.value,
+                    option => option.value,
                   ),
-                )
-              }
+                )}
               required
               multiple
             >
-              {teachers.subjects && teachers.subjects.length > 0 ? (
-                teachers.subjects.map((subject, index) => (
-                  <option key={index} value={subject}>
-                    {subject}
-                  </option>
-                ))
-              ) : (
-                <option disabled>No subjects available</option>
-              )}
+              {teachers.subjects && teachers.subjects.length > 0
+                ? (
+                    teachers.subjects.map((subject, index) => (
+                      <option key={index} value={subject}>
+                        {subject}
+                      </option>
+                    ))
+                  )
+                : (
+                    <option disabled>No subjects available</option>
+                  )}
             </select>
           </div>
           <button type="submit" className="teacher-assign-btn">
@@ -212,6 +220,6 @@ const AdminAssignTeacher = ({ isEditOpen, toggleEditProfile, teacherData }) => {
       </div>
     </div>
   );
-};
+}
 
 export default AdminAssignTeacher;

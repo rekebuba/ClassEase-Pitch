@@ -5,62 +5,62 @@ import type { Config } from "./types.gen";
 export type ServerSentEventsOptions<TData = unknown> = Omit<
   RequestInit,
   "method"
-> &
-  Pick<Config, "method" | "responseTransformer" | "responseValidator"> & {
-    /**
-     * Callback invoked when a network or parsing error occurs during streaming.
-     *
-     * This option applies only if the endpoint returns a stream of events.
-     *
-     * @param error The error that occurred.
-     */
-    onSseError?: (error: unknown) => void;
-    /**
-     * Callback invoked when an event is streamed from the server.
-     *
-     * This option applies only if the endpoint returns a stream of events.
-     *
-     * @param event Event streamed from the server.
-     * @returns Nothing (void).
-     */
-    onSseEvent?: (event: StreamEvent<TData>) => void;
-    /**
-     * Default retry delay in milliseconds.
-     *
-     * This option applies only if the endpoint returns a stream of events.
-     *
-     * @default 3000
-     */
-    sseDefaultRetryDelay?: number;
-    /**
-     * Maximum number of retry attempts before giving up.
-     */
-    sseMaxRetryAttempts?: number;
-    /**
-     * Maximum retry delay in milliseconds.
-     *
-     * Applies only when exponential backoff is used.
-     *
-     * This option applies only if the endpoint returns a stream of events.
-     *
-     * @default 30000
-     */
-    sseMaxRetryDelay?: number;
-    /**
-     * Optional sleep function for retry backoff.
-     *
-     * Defaults to using `setTimeout`.
-     */
-    sseSleepFn?: (ms: number) => Promise<void>;
-    url: string;
-  };
+>
+& Pick<Config, "method" | "responseTransformer" | "responseValidator"> & {
+  /**
+   * Callback invoked when a network or parsing error occurs during streaming.
+   *
+   * This option applies only if the endpoint returns a stream of events.
+   *
+   * @param error The error that occurred.
+   */
+  onSseError?: (error: unknown) => void;
+  /**
+   * Callback invoked when an event is streamed from the server.
+   *
+   * This option applies only if the endpoint returns a stream of events.
+   *
+   * @param event Event streamed from the server.
+   * @returns Nothing (void).
+   */
+  onSseEvent?: (event: StreamEvent<TData>) => void;
+  /**
+   * Default retry delay in milliseconds.
+   *
+   * This option applies only if the endpoint returns a stream of events.
+   *
+   * @default 3000
+   */
+  sseDefaultRetryDelay?: number;
+  /**
+   * Maximum number of retry attempts before giving up.
+   */
+  sseMaxRetryAttempts?: number;
+  /**
+   * Maximum retry delay in milliseconds.
+   *
+   * Applies only when exponential backoff is used.
+   *
+   * This option applies only if the endpoint returns a stream of events.
+   *
+   * @default 30000
+   */
+  sseMaxRetryDelay?: number;
+  /**
+   * Optional sleep function for retry backoff.
+   *
+   * Defaults to using `setTimeout`.
+   */
+  sseSleepFn?: (ms: number) => Promise<void>;
+  url: string;
+};
 
-export interface StreamEvent<TData = unknown> {
+export type StreamEvent<TData = unknown> = {
   data: TData;
   event?: string;
   id?: string;
   retry?: number;
-}
+};
 
 export type ServerSentEventsResult<
   TData = unknown,
@@ -74,7 +74,7 @@ export type ServerSentEventsResult<
   >;
 };
 
-export const createSseClient = <TData = unknown>({
+export function createSseClient<TData = unknown>({
   onSseError,
   onSseEvent,
   responseTransformer,
@@ -85,12 +85,12 @@ export const createSseClient = <TData = unknown>({
   sseSleepFn,
   url,
   ...options
-}: ServerSentEventsOptions): ServerSentEventsResult<TData> => {
+}: ServerSentEventsOptions): ServerSentEventsResult<TData> {
   let lastEventId: string | undefined;
 
-  const sleep =
-    sseSleepFn ??
-    ((ms: number) => new Promise((resolve) => setTimeout(resolve, ms)));
+  const sleep
+    = sseSleepFn
+      ?? ((ms: number) => new Promise(resolve => setTimeout(resolve, ms)));
 
   const createStream = async function* () {
     let retryDelay: number = sseDefaultRetryDelay ?? 3000;
@@ -98,12 +98,13 @@ export const createSseClient = <TData = unknown>({
     const signal = options.signal ?? new AbortController().signal;
 
     while (true) {
-      if (signal.aborted) break;
+      if (signal.aborted)
+        break;
 
       attempt++;
 
-      const headers =
-        options.headers instanceof Headers
+      const headers
+        = options.headers instanceof Headers
           ? options.headers
           : new Headers(options.headers as Record<string, string> | undefined);
 
@@ -114,12 +115,14 @@ export const createSseClient = <TData = unknown>({
       try {
         const response = await fetch(url, { ...options, headers, signal });
 
-        if (!response.ok)
+        if (!response.ok) {
           throw new Error(
             `SSE failed: ${response.status} ${response.statusText}`,
           );
+        }
 
-        if (!response.body) throw new Error("No body in SSE response");
+        if (!response.body)
+          throw new Error("No body in SSE response");
 
         const reader = response.body
           .pipeThrough(new TextDecoderStream())
@@ -130,7 +133,8 @@ export const createSseClient = <TData = unknown>({
         const abortHandler = () => {
           try {
             reader.cancel();
-          } catch {
+          }
+          catch {
             // noop
           }
         };
@@ -140,7 +144,8 @@ export const createSseClient = <TData = unknown>({
         try {
           while (true) {
             const { done, value } = await reader.read();
-            if (done) break;
+            if (done)
+              break;
             buffer += value;
 
             const chunks = buffer.split("\n\n");
@@ -154,11 +159,14 @@ export const createSseClient = <TData = unknown>({
               for (const line of lines) {
                 if (line.startsWith("data:")) {
                   dataLines.push(line.replace(/^data:\s*/, ""));
-                } else if (line.startsWith("event:")) {
+                }
+                else if (line.startsWith("event:")) {
                   eventName = line.replace(/^event:\s*/, "");
-                } else if (line.startsWith("id:")) {
+                }
+                else if (line.startsWith("id:")) {
                   lastEventId = line.replace(/^id:\s*/, "");
-                } else if (line.startsWith("retry:")) {
+                }
+                else if (line.startsWith("retry:")) {
                   const parsed = Number.parseInt(
                     line.replace(/^retry:\s*/, ""),
                     10,
@@ -177,7 +185,8 @@ export const createSseClient = <TData = unknown>({
                 try {
                   data = JSON.parse(rawData);
                   parsedJson = true;
-                } catch {
+                }
+                catch {
                   data = rawData;
                 }
               }
@@ -204,19 +213,21 @@ export const createSseClient = <TData = unknown>({
               }
             }
           }
-        } finally {
+        }
+        finally {
           signal.removeEventListener("abort", abortHandler);
           reader.releaseLock();
         }
 
         break; // exit loop on normal completion
-      } catch (error) {
+      }
+      catch (error) {
         // connection failed or aborted; retry after delay
         onSseError?.(error);
 
         if (
-          sseMaxRetryAttempts !== undefined &&
-          attempt >= sseMaxRetryAttempts
+          sseMaxRetryAttempts !== undefined
+          && attempt >= sseMaxRetryAttempts
         ) {
           break; // stop after firing error
         }
@@ -234,4 +245,4 @@ export const createSseClient = <TData = unknown>({
   const stream = createStream();
 
   return { stream };
-};
+}

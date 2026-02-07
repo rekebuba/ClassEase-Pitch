@@ -1,8 +1,3 @@
-import { SubjectSchema, YearSetupSchemaOutput } from "@/client/types.gen";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { formatDate } from "@/lib/format";
 import {
   BookOpen,
   Building,
@@ -13,6 +8,13 @@ import {
   Users,
 } from "lucide-react";
 import { useState } from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Card, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { formatDate } from "@/lib/format";
+
+import type { SubjectSchema, YearSetupSchemaOutput } from "@/client/types.gen";
 
 type Subject = SubjectSchema[];
 type Grade = YearSetupSchemaOutput["grades"][number];
@@ -35,7 +37,9 @@ export default function DetailGradeCard({
       <div>
         <CardTitle className="flex items-center gap-2 mb-3 text-lg">
           <GraduationCap className="text-blue-600 shrink-0" />
-          Grade {grade.grade}
+          Grade
+          {" "}
+          {grade.grade}
         </CardTitle>
         <div className="flex items-center gap-3 flex-wrap mb-4">
           <Badge variant="outline" className="flex items-center gap-1">
@@ -44,16 +48,22 @@ export default function DetailGradeCard({
           </Badge>
           <Badge variant="outline" className="flex items-center gap-1">
             <BookOpen className="h-3 w-3" />
-            {grade.subjects.length} Subjects
+            {grade.subjects.length}
+            {" "}
+            Subjects
           </Badge>
           <Badge variant="outline" className="flex items-center gap-1">
             <Building className="h-3 w-3" />
-            {grade.sections.length} Sections
+            {grade.sections.length}
+            {" "}
+            Sections
           </Badge>
           {grade.hasStream && (
             <Badge variant="destructive" className="flex items-center gap-1">
               <Layers className="h-3 w-3" />
-              {grade.streams.length} Streams
+              {grade.streams.length}
+              {" "}
+              Streams
             </Badge>
           )}
         </div>
@@ -61,31 +71,35 @@ export default function DetailGradeCard({
         {/* Subject List */}
         <div className="mb-4">
           <h4 className="font-medium mb-3 text-sm text-gray-600">Subjects</h4>
-          {grade.streams?.length === 0 && grade.subjects.length === 0 ? (
-            <p className="text-xs text-gray-400 italic">No subjects assigned</p>
-          ) : (
-            <>
-              {grade.hasStream ? (
-                <div className="mb-3 space-y-2">
-                  {grade.streams?.map((stream, streamIndex) => (
-                    <CollapsibleStreamCard key={streamIndex} stream={stream} />
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-wrap gap-2">
-                  {subjects.map((subject) => (
-                    <Badge
-                      key={subject.id}
-                      variant="secondary"
-                      className="text-xs"
-                    >
-                      {subject.name}
-                    </Badge>
-                  ))}
-                </div>
+          {grade.streams?.length === 0 && grade.subjects.length === 0
+            ? (
+                <p className="text-xs text-gray-400 italic">No subjects assigned</p>
+              )
+            : (
+                <>
+                  {grade.hasStream
+                    ? (
+                        <div className="mb-3 space-y-2">
+                          {grade.streams?.map((stream, streamIndex) => (
+                            <CollapsibleStreamCard key={streamIndex} stream={stream} />
+                          ))}
+                        </div>
+                      )
+                    : (
+                        <div className="flex flex-wrap gap-2">
+                          {subjects.map(subject => (
+                            <Badge
+                              key={subject.id}
+                              variant="secondary"
+                              className="text-xs"
+                            >
+                              {subject.name}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                </>
               )}
-            </>
-          )}
         </div>
       </div>
 
@@ -93,7 +107,9 @@ export default function DetailGradeCard({
       <div className="flex flex-col gap-2">
         <Separator />
         <div className="text-xs text-gray-500">
-          Last updated: {formatDate(grade.updatedAt)}
+          Last updated:
+          {" "}
+          {formatDate(grade.updatedAt)}
         </div>
         {children}
       </div>
@@ -101,7 +117,7 @@ export default function DetailGradeCard({
   );
 }
 
-const CollapsibleStreamCard = ({ stream }: { stream: Stream }) => {
+function CollapsibleStreamCard({ stream }: { stream: Stream }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
@@ -123,14 +139,18 @@ const CollapsibleStreamCard = ({ stream }: { stream: Stream }) => {
             variant="outline"
             className="bg-red-100 text-black-700 text-xs"
           >
-            {stream.subjects?.length || 0} Subjects
+            {stream.subjects?.length || 0}
+            {" "}
+            Subjects
           </Badge>
         </div>
-        {isExpanded ? (
-          <ChevronUp className="h-4 w-4 text-gray-500" />
-        ) : (
-          <ChevronDown className="h-4 w-4 text-gray-500" />
-        )}
+        {isExpanded
+          ? (
+              <ChevronUp className="h-4 w-4 text-gray-500" />
+            )
+          : (
+              <ChevronDown className="h-4 w-4 text-gray-500" />
+            )}
       </div>
 
       <div
@@ -150,4 +170,4 @@ const CollapsibleStreamCard = ({ stream }: { stream: Stream }) => {
       </div>
     </Card>
   );
-};
+}

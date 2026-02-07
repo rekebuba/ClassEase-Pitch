@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
-interface FadeInProps {
+type FadeInProps = {
   children: React.ReactNode;
   isLoading: boolean;
   loader: React.ReactNode;
-}
+};
 
 const FadeIn: React.FC<FadeInProps> = ({ children, isLoading, loader }) => {
   const [isLoaded, setIsLoaded] = useState(false);

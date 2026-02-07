@@ -1,26 +1,27 @@
 "use client";
 
+import { Clock, RefreshCw, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
+
 import {
   AlertDialog,
   AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
   AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Clock, RefreshCw, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-interface FormRestorationDialogProps {
+type FormRestorationDialogProps = {
   isOpen: boolean;
   onRestore: () => void;
   onStartFresh: () => void;
   savedStep: number;
   savedStepName: string;
   lastSaved?: Date;
-}
+};
 
 export default function FormRestorationDialog({
   isOpen,
@@ -33,20 +34,22 @@ export default function FormRestorationDialog({
   const [isLoading, setIsLoading] = useState(false);
   const handleRestore = async () => {
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 500)); // Small delay for UX
+    await new Promise(resolve => setTimeout(resolve, 500)); // Small delay for UX
     onRestore();
     setIsLoading(false);
   };
 
   const formatLastSaved = (date?: Date) => {
-    if (!date) return "Recently";
+    if (!date)
+      return "Recently";
 
     const now = new Date();
     const diffInMinutes = Math.floor(
       (now.getTime() - date.getTime()) / (1000 * 60),
     );
 
-    if (diffInMinutes < 1) return "Just now";
+    if (diffInMinutes < 1)
+      return "Just now";
     if (diffInMinutes < 60)
       return `${diffInMinutes} minute${diffInMinutes > 1 ? "s" : ""} ago`;
 
@@ -79,7 +82,11 @@ export default function FormRestorationDialog({
                 Progress Saved
               </span>
               <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                Step {savedStep} of 6
+                Step
+                {" "}
+                {savedStep}
+                {" "}
+                of 6
               </Badge>
             </div>
             <p className="text-sm text-blue-700">
@@ -87,12 +94,16 @@ export default function FormRestorationDialog({
             </p>
             <div className="flex items-center gap-1 text-xs text-blue-600">
               <Clock className="h-3 w-3" />
-              Last saved {formatLastSaved(lastSaved)}
+              Last saved
+              {" "}
+              {formatLastSaved(lastSaved)}
             </div>
           </div>
 
           <div className="bg-gray-50 p-3 rounded text-xs text-gray-600">
-            <strong>Note:</strong> Your form data is saved locally on this
+            <strong>Note:</strong>
+            {" "}
+            Your form data is saved locally on this
             device. If you start fresh, your previous progress will be
             permanently deleted.
           </div>

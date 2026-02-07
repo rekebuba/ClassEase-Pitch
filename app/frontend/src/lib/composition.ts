@@ -13,8 +13,8 @@ function composeEventHandlers<E>(
     originalEventHandler?.(event);
 
     if (
-      checkForDefaultPrevented === false ||
-      !(event as unknown as Event).defaultPrevented
+      checkForDefaultPrevented === false
+      || !(event as unknown as Event).defaultPrevented
     ) {
       return ourEventHandler?.(event);
     }
@@ -66,7 +66,8 @@ function composeRefs<T>(...refs: PossibleRef<T>[]): React.RefCallback<T> {
           const cleanup = cleanups[i];
           if (typeof cleanup === "function") {
             cleanup();
-          } else {
+          }
+          else {
             setRef(refs[i], null);
           }
         }
@@ -80,7 +81,6 @@ function composeRefs<T>(...refs: PossibleRef<T>[]): React.RefCallback<T> {
  * Accepts callback refs and RefObject(s).
  */
 function useComposedRefs<T>(...refs: PossibleRef<T>[]): React.RefCallback<T> {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   return React.useCallback(composeRefs(...refs), refs);
 }
 

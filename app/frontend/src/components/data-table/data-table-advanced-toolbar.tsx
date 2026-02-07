@@ -4,12 +4,11 @@ import * as React from "react";
 
 import { cn } from "@/lib/utils";
 
-import { SearchParams } from "@/lib/types";
+import type { SearchParams } from "@/lib/types";
 
-interface DataTableAdvancedToolbarProps<TData>
-  extends React.ComponentProps<"div"> {
+type DataTableAdvancedToolbarProps<TData> = {
   searchParams: SearchParams;
-}
+} & React.ComponentProps<"div">;
 
 export function DataTableAdvancedToolbar<TData>({
   children,

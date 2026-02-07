@@ -14,7 +14,6 @@ import type {
   TableId,
 } from "@/lib/types";
 
-
 export function useStudentsData(
   validQuery: SearchParams | null,
 ): StudentsDataResult {
@@ -135,7 +134,7 @@ export function studentsView() {
     setViewError(null);
     const result = await getAllStudentsViews();
     setViews(
-      result.map((view) => ({
+      result.map(view => ({
         ...view,
         searchParams: {
           page: view.searchParams.page ?? 1,

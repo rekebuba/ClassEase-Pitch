@@ -1,14 +1,15 @@
 "use client";
+import { Separator } from "@radix-ui/react-separator";
+import { Download, Trash2 } from "lucide-react";
+import { useCallback, useState, useTransition } from "react";
+import { toast } from "sonner";
+
 import {
   DataTableActionBar,
   DataTableActionBarAction,
   DataTableActionBarSelection,
   useTableInstanceContext,
 } from "@/components/data-table";
-import { Separator } from "@radix-ui/react-separator";
-import { Download, Trash2 } from "lucide-react";
-import { useCallback, useState, useTransition } from "react";
-import { toast } from "sonner";
 
 const actions = ["export", "delete"] as const;
 
@@ -35,19 +36,19 @@ export function StudentsTableFloatingBar() {
   const onTaskDelete = useCallback(() => {
     setCurrentAction("delete");
     startTransition(() => {
-      new Promise<{ error?: string }>((resolve) =>
+      new Promise<{ error?: string }>(resolve =>
         setTimeout(() => resolve({}), 1000),
       ).then(({ error }) => {
         if (error) {
           toast.error(error);
-          return;
         }
       });
       table.toggleAllRowsSelected(false);
     });
   }, [selectedRows, table]);
 
-  if (!hasSelectedRows) return null;
+  if (!hasSelectedRows)
+    return null;
 
   return (
     <DataTableActionBar table={table} visible={selectedRows.length > 0}>

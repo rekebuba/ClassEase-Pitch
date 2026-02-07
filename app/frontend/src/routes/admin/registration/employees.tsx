@@ -1,3 +1,8 @@
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Users } from "lucide-react";
+import { toast } from "sonner";
+
 import {
   deleteEmployeesMutation,
   getEmployeesOptions,
@@ -16,10 +21,6 @@ import {
 } from "@/components/ui/card";
 import { queryClient } from "@/lib/query-client";
 import { store } from "@/store/main-store";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Users } from "lucide-react";
-import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/registration/employees")({
   component: RouteComponent,
@@ -86,7 +87,9 @@ function RouteComponent() {
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="text-lg px-3 py-1">
-              {employees?.length} Total Applications
+              {employees?.length}
+              {" "}
+              Total Applications
             </Badge>
           </div>
         </div>
@@ -105,8 +108,7 @@ function RouteComponent() {
               </div>
               <Button
                 onClick={() =>
-                  navigate({ to: "/admin/registration/new-employee" })
-                }
+                  navigate({ to: "/admin/registration/new-employee" })}
                 className="bg-blue-600 text-white hover:bg-blue-700"
               >
                 New Application

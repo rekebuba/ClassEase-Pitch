@@ -1,3 +1,12 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Loader, RefreshCcw, Save } from "lucide-react";
+import { useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { toast } from "sonner";
+
 import {
   getSubjectsOptions,
   registerEmployeeStep1Mutation,
@@ -7,15 +16,6 @@ import {
   registerEmployeeStep5Mutation,
   registerNewEmployeeMutation,
 } from "@/client/@tanstack/react-query.gen";
-import {
-  EmployeePositionEnum,
-  EmployeeRegistrationForm,
-  EmployeeRegStep1,
-  EmployeeRegStep2,
-  EmployeeRegStep3,
-  EmployeeRegStep4,
-  EmployeeRegStep5,
-} from "@/client/types.gen";
 import {
   zEmployeePositionEnum,
   zEmployeeRegistrationForm,
@@ -61,14 +61,16 @@ import {
   setFormStep,
 } from "@/store/slice/employee-registration-slice";
 import { extractFirstWord } from "@/utils/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Loader, RefreshCcw, Save } from "lucide-react";
-import { useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
-import { toast } from "sonner";
+
+import type {
+  EmployeePositionEnum,
+  EmployeeRegistrationForm,
+  EmployeeRegStep1,
+  EmployeeRegStep2,
+  EmployeeRegStep3,
+  EmployeeRegStep4,
+  EmployeeRegStep5,
+} from "@/client/types.gen";
 
 const steps = [
   { step: 1, title: "Step One", description: "Personal Information" },
@@ -196,11 +198,16 @@ function RouteComponent() {
             message: message as string,
           });
         });
-      } else {
+      }
+      else {
         toast.error("Something went wrong. Failed to Register Employee.");
       }
     },
   });
+
+  const handleSave = () => {
+    mutation.mutate({ body: form.getValues() });
+  };
 
   const step1Mutation = useMutation({
     ...registerEmployeeStep1Mutation(),
@@ -228,7 +235,8 @@ function RouteComponent() {
             },
           );
         });
-      } else {
+      }
+      else {
         toast.error("Something went wrong. Failed to Validate Step 1.");
       }
     },
@@ -260,7 +268,8 @@ function RouteComponent() {
             },
           );
         });
-      } else {
+      }
+      else {
         toast.error("Something went wrong. Failed to Validate Step 2.");
       }
     },
@@ -281,7 +290,6 @@ function RouteComponent() {
     },
     onError: (error: any) => {
       const detail = error.response?.data?.detail;
-      console.log(detail);
 
       if (detail && Array.isArray(detail)) {
         detail.forEach(({ loc, msg }: { loc: string[]; msg: string }) => {
@@ -293,7 +301,8 @@ function RouteComponent() {
             },
           );
         });
-      } else {
+      }
+      else {
         toast.error("Something went wrong. Failed to Validate Step 3.");
       }
     },
@@ -325,7 +334,8 @@ function RouteComponent() {
             },
           );
         });
-      } else {
+      }
+      else {
         toast.error("Something went wrong. Failed to Validate Step 4.");
       }
     },
@@ -357,31 +367,28 @@ function RouteComponent() {
             },
           );
         });
-      } else {
+      }
+      else {
         toast.error("Something went wrong. Failed to Validate Step 5.");
       }
     },
   });
 
-  const onStep1Submit = step1Form.handleSubmit((data) =>
+  const onStep1Submit = step1Form.handleSubmit(data =>
     step1Mutation.mutate({ body: data }),
   );
-  const onStep2Submit = step2Form.handleSubmit((data) =>
+  const onStep2Submit = step2Form.handleSubmit(data =>
     step2Mutation.mutate({ body: data }),
   );
-  const onStep3Submit = step3Form.handleSubmit((data) =>
+  const onStep3Submit = step3Form.handleSubmit(data =>
     step3Mutation.mutate({ body: data }),
   );
-  const onStep4Submit = step4Form.handleSubmit((data) =>
+  const onStep4Submit = step4Form.handleSubmit(data =>
     step4Mutation.mutate({ body: data }),
   );
-  const onStep5Submit = step5Form.handleSubmit((data) =>
+  const onStep5Submit = step5Form.handleSubmit(data =>
     step5Mutation.mutate({ body: data }),
   );
-
-  const handleSave = () => {
-    mutation.mutate({ body: form.getValues() });
-  };
 
   const renderStep = () => {
     switch (currentStep) {
@@ -587,7 +594,7 @@ function RouteComponent() {
                   fieldTitle="Position Applying For *"
                   nameInSchema="position"
                 >
-                  {zEmployeePositionEnum.options.map((position) => (
+                  {zEmployeePositionEnum.options.map(position => (
                     <SelectItem value={position}>{position}</SelectItem>
                   ))}
                 </SelectWithLabel>
@@ -596,7 +603,7 @@ function RouteComponent() {
                     fieldTitle="Available Positions *"
                     nameInSchema="subjectId"
                   >
-                    {subjects?.map((subject) => (
+                    {subjects?.map(subject => (
                       <SelectItem value={subject.id}>{subject.name}</SelectItem>
                     ))}
                   </SelectWithLabel>
@@ -608,7 +615,7 @@ function RouteComponent() {
                   nameInSchema="highestEducation"
                   placeholder="Select highest degree"
                 >
-                  {zHighestEducationEnum.options.map((degree) => (
+                  {zHighestEducationEnum.options.map(degree => (
                     <SelectItem value={degree}>{degree}</SelectItem>
                   ))}
                 </SelectWithLabel>
@@ -637,7 +644,7 @@ function RouteComponent() {
                 nameInSchema="yearsOfExperience"
                 placeholder="Select years of experience"
               >
-                {zExperienceYearEnum.options.map((experience) => (
+                {zExperienceYearEnum.options.map(experience => (
                   <SelectItem value={experience}>{experience}</SelectItem>
                 ))}
               </SelectWithLabel>
@@ -770,7 +777,9 @@ function RouteComponent() {
 
             <div className="bg-blue-50 p-4 rounded-lg">
               <p className="text-sm text-blue-800">
-                <strong>Note:</strong> Please review all information carefully
+                <strong>Note:</strong>
+                {" "}
+                Please review all information carefully
                 before submitting. After submission, you will receive a
                 confirmation email and our HR team will contact you within 5-7
                 business days regarding the next steps in the hiring process.
@@ -795,7 +804,8 @@ function RouteComponent() {
                   <Loader className="animate-spin" />
                 )}
                 Submit Registration
-              </Button>{" "}
+              </Button>
+              {" "}
             </div>
           </FormProvider>
         );

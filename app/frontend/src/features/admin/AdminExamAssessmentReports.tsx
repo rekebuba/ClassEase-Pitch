@@ -1,17 +1,17 @@
-import { useState, useEffect } from "react";
-import { Bar, Line } from "react-chartjs-2";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
+  ArcElement,
   BarElement,
-  Title,
-  Tooltip,
+  CategoryScale,
+  Chart as ChartJS,
   Legend,
+  LinearScale,
   LineElement,
   PointElement,
-  ArcElement,
+  Title,
+  Tooltip,
 } from "chart.js";
+import { useEffect, useState } from "react";
+import { Bar, Line } from "react-chartjs-2";
 
 ChartJS.register(
   CategoryScale,
@@ -36,7 +36,7 @@ ChartJS.register(
  * ];
  * <ExamAssessmentReports subjectSummary={subjectSummary} />
  */
-const ExamAssessmentReports = ({ subjectSummary }) => {
+function ExamAssessmentReports({ subjectSummary }) {
   const [studentPerformance, setStudentPerformance] = useState({
     subjects: [],
     scores: [],
@@ -71,7 +71,7 @@ const ExamAssessmentReports = ({ subjectSummary }) => {
     datasets: [
       {
         label: "Progress Over Time",
-        data: studentPerformance.progress.map((p) => p.score),
+        data: studentPerformance.progress.map(p => p.score),
         fill: false,
         backgroundColor: "rgba(75,192,192,0.6)",
         borderColor: "rgba(75,192,192,1)",
@@ -90,13 +90,13 @@ const ExamAssessmentReports = ({ subjectSummary }) => {
    */
   useEffect(() => {
     if (
-      subjectSummary !== undefined &&
-      Object.keys(subjectSummary).length > 0
+      subjectSummary !== undefined
+      && Object.keys(subjectSummary).length > 0
     ) {
-      const subjects = subjectSummary.map((subject) => subject.subject);
-      const scores = subjectSummary.map((subject) => subject.subject_average);
-      const timePeriod = subjectSummary.map((subject) => subject.semester);
-      const progress = subjectSummary.map((subject) => ({
+      const subjects = subjectSummary.map(subject => subject.subject);
+      const scores = subjectSummary.map(subject => subject.subject_average);
+      const timePeriod = subjectSummary.map(subject => subject.semester);
+      const progress = subjectSummary.map(subject => ({
         semester: subject.semester,
         score: subject.subject_average,
       }));
@@ -145,6 +145,6 @@ const ExamAssessmentReports = ({ subjectSummary }) => {
       </div>
     </div>
   );
-};
+}
 
 export default ExamAssessmentReports;

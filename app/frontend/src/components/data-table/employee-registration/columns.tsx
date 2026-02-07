@@ -1,4 +1,6 @@
-import { EmployeeBasicInfo } from "@/client/types.gen";
+import { createColumnHelper } from "@tanstack/react-table";
+import { MapPin, MoreHorizontalIcon, Phone } from "lucide-react";
+
 import { EmployeeApplicationStatusBadge } from "@/components/enum-badge";
 import {
   AlertDialog,
@@ -24,8 +26,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { formatDate } from "@/lib/format";
 import { getInitials } from "@/utils/utils";
-import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
-import { MapPin, MoreHorizontalIcon, Phone } from "lucide-react";
+
+import type { EmployeeBasicInfo } from "@/client/types.gen";
+import type { ColumnDef } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<EmployeeBasicInfo>();
 
@@ -40,10 +43,10 @@ export const employeeBasicInfoColumns: EmployeeBasicInfoColumnProps = (
 ) => [
   columnHelper.display({
     id: "checkbox",
-    cell: (props) => (
+    cell: props => (
       <Checkbox
         checked={props.row.getIsSelected()}
-        onCheckedChange={(value) => props.row.toggleSelected(!!value)}
+        onCheckedChange={value => props.row.toggleSelected(!!value)}
         aria-label="Select row"
       />
     ),
@@ -64,7 +67,7 @@ export const employeeBasicInfoColumns: EmployeeBasicInfoColumnProps = (
         <div>
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={"/placeholder.svg"} />
+              <AvatarImage src="/placeholder.svg" />
               <AvatarFallback>
                 {getInitials(firstName, fatherName)}
               </AvatarFallback>
@@ -104,7 +107,11 @@ export const employeeBasicInfoColumns: EmployeeBasicInfoColumnProps = (
             </div>
           )}
           <div className="space-y-1 text-sm text-gray-500">
-            <p>{yearsOfExperience} Years</p>
+            <p>
+              {yearsOfExperience}
+              {" "}
+              Years
+            </p>
           </div>
         </div>
       );
@@ -125,7 +132,10 @@ export const employeeBasicInfoColumns: EmployeeBasicInfoColumnProps = (
             <p className="truncate max-w-[150px]">{university}</p>
           </div>
           <div className="space-y-1 text-sm text-gray-500">
-            <p>GPA: {gpa}</p>
+            <p>
+              GPA:
+              {gpa}
+            </p>
           </div>
         </div>
       );
@@ -134,7 +144,7 @@ export const employeeBasicInfoColumns: EmployeeBasicInfoColumnProps = (
   }),
   columnHelper.accessor("createdAt", {
     header: "Registration",
-    cell: (props) => <div>{formatDate(props.getValue())}</div>,
+    cell: props => <div>{formatDate(props.getValue())}</div>,
   }),
   columnHelper.accessor("status", {
     header: "Status",
@@ -168,7 +178,7 @@ export const employeeBasicInfoColumns: EmployeeBasicInfoColumnProps = (
             </DropdownMenuItem>
             <AlertDialogTrigger asChild>
               <DropdownMenuItem
-                onSelect={(e) => e.preventDefault()}
+                onSelect={e => e.preventDefault()}
                 className="text-destructive focus:text-destructive"
               >
                 Delete

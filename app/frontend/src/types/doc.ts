@@ -1,17 +1,11 @@
 import type { DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import type { EmptyProps } from "@/types";
 import type { ExtendedColumnFilter, Option } from "@/types/data-table";
-
 import type { Column, Table, TableOptions } from "@tanstack/react-table";
 import type { motion } from "motion/react";
 import type * as React from "react";
 
-export interface UseDataTableProps<TData>
-  extends Required<Pick<TableOptions<TData>, "pageCount">>,
-    Pick<
-      TableOptions<TData>,
-      "data" | "columns" | "getRowId" | "defaultColumn" | "initialState"
-    > {
+export type UseDataTableProps<TData> = {
   /**
    * Determines how query updates affect history.
    * `push` creates a new history entry; `replace` (default) updates the current entry.
@@ -68,29 +62,30 @@ export interface UseDataTableProps<TData>
    * @see https://react.dev/reference/react/useTransition
    */
   startTransition?: React.TransitionStartFunction;
-}
+} & Required<Pick<TableOptions<TData>, "pageCount">> & Pick<
+  TableOptions<TData>,
+      "data" | "columns" | "getRowId" | "defaultColumn" | "initialState"
+>;
 
-export interface DataTableProps<TData> extends EmptyProps<"div"> {
+export type DataTableProps<TData> = {
   /** The table instance. */
   table: Table<TData>;
 
   /** The action bar to display above the table. */
   actionBar?: React.ReactNode;
-}
+} & EmptyProps<"div">;
 
-export interface DataTableToolbarProps<TData> extends EmptyProps<"div"> {
+export type DataTableToolbarProps<TData> = {
   /** The table instance. */
   table: Table<TData>;
-}
+} & EmptyProps<"div">;
 
-export interface DataTableAdvancedToolbarProps<TData>
-  extends EmptyProps<"div"> {
+export type DataTableAdvancedToolbarProps<TData> = {
   /** The table instance. */
   table: Table<TData>;
-}
+} & EmptyProps<"div">;
 
-export interface DataTableActionBarProps<TData>
-  extends EmptyProps<typeof motion.div> {
+export type DataTableActionBarProps<TData> = {
   /** The table instance. */
   table: Table<TData>;
 
@@ -102,18 +97,17 @@ export interface DataTableActionBarProps<TData>
    * @default document.body
    */
   container?: Element | DocumentFragment | null;
-}
+} & EmptyProps<typeof motion.div>;
 
-export interface DataTableColumnHeaderProps<TData, TValue>
-  extends EmptyProps<typeof DropdownMenuTrigger> {
+export type DataTableColumnHeaderProps<TData, TValue> = {
   /** The column instance. */
   column: Column<TData, TValue>;
 
   /** The column title. */
   title: string;
-}
+} & EmptyProps<typeof DropdownMenuTrigger>;
 
-export interface DataTableDateFilterProps<TData> {
+export type DataTableDateFilterProps<TData> = {
   /** The column instance. */
   column: Column<TData, unknown>;
 
@@ -122,9 +116,9 @@ export interface DataTableDateFilterProps<TData> {
 
   /** Whether to enable range selection. */
   multiple?: boolean;
-}
+};
 
-export interface DataTableFacetedFilterProps<TData, TValue> {
+export type DataTableFacetedFilterProps<TData, TValue> = {
   /** The column instance. */
   column?: Column<TData, TValue>;
 
@@ -136,17 +130,17 @@ export interface DataTableFacetedFilterProps<TData, TValue> {
 
   /** Whether to enable multiple selection. */
   multiple?: boolean;
-}
+};
 
-export interface DataTableSliderFilterProps<TData> {
+export type DataTableSliderFilterProps<TData> = {
   /** The column instance. */
   column: Column<TData, unknown>;
 
   /** The title of the slider filter. */
   title?: string;
-}
+};
 
-export interface DataTableRangeFilterProps<TData> extends EmptyProps<"div"> {
+export type DataTableRangeFilterProps<TData> = {
   /** The extended column filter. */
   filter: ExtendedColumnFilter<TData>;
 
@@ -161,9 +155,9 @@ export interface DataTableRangeFilterProps<TData> extends EmptyProps<"div"> {
     filterId: string,
     updates: Partial<Omit<ExtendedColumnFilter<TData>, "filterId">>,
   ) => void;
-}
+} & EmptyProps<"div">;
 
-export interface DataTableFilterListProps<TData> {
+export type DataTableFilterListProps<TData> = {
   /** The table instance. */
   table: Table<TData>;
 
@@ -186,15 +180,13 @@ export interface DataTableFilterListProps<TData> {
    * @default true
    */
   shallow?: boolean;
-}
+};
 
-export interface DataTableFilterMenuProps<TData>
-  extends DataTableFilterListProps<TData> {}
+export type DataTableFilterMenuProps<TData> = {} & DataTableFilterListProps<TData>;
 
-export interface DataTableSortListProps<TData>
-  extends DataTableFilterListProps<TData> {}
+export type DataTableSortListProps<TData> = {} & DataTableFilterListProps<TData>;
 
-export interface DataTablePaginationProps<TData> extends EmptyProps<"div"> {
+export type DataTablePaginationProps<TData> = {
   /** The table instance. */
   table: Table<TData>;
 
@@ -203,14 +195,14 @@ export interface DataTablePaginationProps<TData> extends EmptyProps<"div"> {
    * @default [10, 20, 30, 40, 50]
    */
   pageSizeOptions?: number[];
-}
+} & EmptyProps<"div">;
 
-export interface DataTableColumnsVisibilityProps<TData> {
+export type DataTableColumnsVisibilityProps<TData> = {
   /** The table instance. */
   table: Table<TData>;
-}
+};
 
-export interface DataTableSkeletonProps extends EmptyProps<"div"> {
+export type DataTableSkeletonProps = {
   /** The number of columns in the table. */
   columnCount: number;
 
@@ -250,4 +242,4 @@ export interface DataTableSkeletonProps extends EmptyProps<"div"> {
    * @default false
    */
   shrinkZero?: boolean;
-}
+} & EmptyProps<"div">;

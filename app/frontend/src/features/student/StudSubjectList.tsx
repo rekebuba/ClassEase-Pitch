@@ -25,9 +25,9 @@ export function SubjectList({
           </tr>
         </thead>
         <tbody>
-          {studentAssessment &&
-            studentAssessment.assessment &&
-            studentAssessment.assessment.map((assessment, index) => {
+          {studentAssessment
+            && studentAssessment.assessment
+            && studentAssessment.assessment.map((assessment, index) => {
               const { subject, avg_total, avg_rank, semI, semII } = assessment;
               // Compute averages; adjust logic if necessary
               return (
@@ -71,13 +71,17 @@ export function SubjectList({
                         {/* Semester I Section */}
                         <div className="text-center">
                           <div className="text-sm font-medium text-gray-600">
-                            Semester {semester.semester}
+                            Semester
+                            {" "}
+                            {semester.semester}
                           </div>
                           <div className="text-lg font-bold text-gray-800">
                             {semester.semester_average}
                           </div>
                           <div className="text-sm text-gray-500">
-                            Rank: {semester.semester_rank}
+                            Rank:
+                            {" "}
+                            {semester.semester_rank}
                           </div>
                         </div>
                       </React.Fragment>
@@ -93,7 +97,9 @@ export function SubjectList({
                       {studentAssessment.summary.final_score}
                     </div>
                     <div className="text-sm text-gray-500">
-                      Rank: {studentAssessment.summary.final_rank}
+                      Rank:
+                      {" "}
+                      {studentAssessment.summary.final_rank}
                     </div>
                   </div>
                 </div>
@@ -101,7 +107,8 @@ export function SubjectList({
                 <div className="flex justify-between items-center px-6 mr-28 mt-5">
                   {/* status */}
                   <div className="text-lg font-semibold text-gray-700">
-                    Academic Status:{" "}
+                    Academic Status:
+                    {" "}
                     <span className="text-lg font-bold text-green-600">
                       Pending
                     </span>
@@ -120,9 +127,9 @@ export function SubjectList({
  * Component for displaying the list of subjects for a student.
  *
  * @component
- * @param {Object} props - The component props.
+ * @param {object} props - The component props.
  * @param {Function} props.toggleAssessment - Function to toggle the assessment view.
- * @param {Object} props.assessmentSummary - Summary of the student's assessments.
+ * @param {object} props.assessmentSummary - Summary of the student's assessments.
  * @returns {JSX.Element} The rendered component.
  *
  * @example
@@ -131,16 +138,16 @@ export function SubjectList({
  *   assessmentSummary={assessmentSummaryObject}
  * />
  *
- * @typedef {Object} Alert
+ * @typedef {object} Alert
  * @property {string} type - The type of alert (e.g., "warning", "success").
  * @property {string} message - The alert message.
  * @property {boolean} show - Whether the alert is visible.
  *
- * @typedef {Object} Student
+ * @typedef {object} Student
  * @property {string} name - The name of the student.
  * @property {number} id - The ID of the student.
  */
-const StudentSubjectList = ({ toggleAssessment, assessmentSummary }) => {
+function StudentSubjectList({ toggleAssessment, assessmentSummary }) {
   const [selectedSemester, setSelectedSemester] = useState(1);
   const [gradeAssigned, setGradeAssigned] = useState([]);
   const [selectedGrade, setSelectedGrade] = useState(
@@ -156,7 +163,7 @@ const StudentSubjectList = ({ toggleAssessment, assessmentSummary }) => {
    * @returns {Promise<void>} A promise that resolves when the search is complete.
    * @throws {Error} An error if the search fails.
    * @throws {string} An error message if the search fails.
-   * @throws {Object[]} An array of subjects if the search is successful.
+   * @throws {object[]} An array of subjects if the search is successful.
    */
   const handleSearch = async () => {
     try {
@@ -167,20 +174,22 @@ const StudentSubjectList = ({ toggleAssessment, assessmentSummary }) => {
         },
       });
 
-      setAllSubjects(response.data["student_assessment"]);
-      setStudent(response.data["student"]);
-    } catch (error) {
+      setAllSubjects(response.data.student_assessment);
+      setStudent(response.data.student);
+    }
+    catch (error) {
       if (
-        error.response &&
-        error.response.data &&
-        error.response.data["error"]
+        error.response
+        && error.response.data
+        && error.response.data.error
       ) {
-        toast.error(error.response.data["error"], {
+        toast.error(error.response.data.error, {
           description:
             "Please try again later, if the problem persists, contact the administrator.",
           style: { color: "red" },
         });
-      } else {
+      }
+      else {
         toast.error("An unexpected error occurred.", {
           description:
             "Please try again later, if the problem persists, contact the administrator.",
@@ -199,7 +208,7 @@ const StudentSubjectList = ({ toggleAssessment, assessmentSummary }) => {
    * @returns {void}
    */
   const handleSemesterChange = (e) => {
-    setSelectedSemester(parseFloat(e.target.value));
+    setSelectedSemester(Number.parseFloat(e.target.value));
   };
 
   /**
@@ -208,7 +217,7 @@ const StudentSubjectList = ({ toggleAssessment, assessmentSummary }) => {
    * @returns {void}
    */
   const handleGradeChange = (e) => {
-    setSelectedGrade(parseFloat(e.target.value));
+    setSelectedGrade(Number.parseFloat(e.target.value));
   };
 
   /**
@@ -228,20 +237,22 @@ const StudentSubjectList = ({ toggleAssessment, assessmentSummary }) => {
     const fetchAssignedGrade = async () => {
       try {
         const response = await api.get("/student/assigned_grade");
-        setGradeAssigned(response.data["grade"]);
-        setSelectedGrade(response.data["grade"][0]);
-      } catch (error) {
+        setGradeAssigned(response.data.grade);
+        setSelectedGrade(response.data.grade[0]);
+      }
+      catch (error) {
         if (
-          error.response &&
-          error.response.data &&
-          error.response.data["error"]
+          error.response
+          && error.response.data
+          && error.response.data.error
         ) {
-          toast.error(error.response.data["error"], {
+          toast.error(error.response.data.error, {
             description:
               "Please try again later, if the problem persists, contact the administrator.",
             style: { color: "red" },
           });
-        } else {
+        }
+        else {
           toast.error("An unexpected error occurred.", {
             description:
               "Please try again later, if the problem persists, contact the administrator.",
@@ -259,9 +270,11 @@ const StudentSubjectList = ({ toggleAssessment, assessmentSummary }) => {
         <div className="filter-group">
           <label htmlFor="grade">Grade:</label>
           <select id="grade" value={selectedGrade} onChange={handleGradeChange}>
-            {gradeAssigned.map((grade) => (
+            {gradeAssigned.map(grade => (
               <option key={grade} value={grade}>
-                Grade {grade}
+                Grade
+                {" "}
+                {grade}
               </option>
             ))}
           </select>
@@ -273,9 +286,11 @@ const StudentSubjectList = ({ toggleAssessment, assessmentSummary }) => {
             value={selectedSemester}
             onChange={handleSemesterChange}
           >
-            {[1, 2].map((semester) => (
+            {[1, 2].map(semester => (
               <option key={semester} value={semester}>
-                Semester {semester}
+                Semester
+                {" "}
+                {semester}
               </option>
             ))}
           </select>
@@ -291,7 +306,7 @@ const StudentSubjectList = ({ toggleAssessment, assessmentSummary }) => {
       />
     </div>
   );
-};
+}
 SubjectList.propTypes = {
   studentAssessment: PropTypes.object,
   student: PropTypes.shape({

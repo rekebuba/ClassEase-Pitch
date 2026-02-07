@@ -1,5 +1,10 @@
 "use client";
 
+import { Loader, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import * as React from "react";
+import * as ReactDOM from "react-dom";
+
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -8,18 +13,14 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import type { Table } from "@tanstack/react-table";
-import { Loader, X } from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
-import * as React from "react";
-import * as ReactDOM from "react-dom";
 
-interface DataTableActionBarProps<TData>
-  extends React.ComponentProps<typeof motion.div> {
+import type { Table } from "@tanstack/react-table";
+
+type DataTableActionBarProps<TData> = {
   table: Table<TData>;
   visible?: boolean;
   container?: Element | DocumentFragment | null;
-}
+} & React.ComponentProps<typeof motion.div>;
 
 function DataTableActionBar<TData>({
   table,
@@ -46,13 +47,14 @@ function DataTableActionBar<TData>({
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [table]);
 
-  const container =
-    containerProp ?? (mounted ? globalThis.document?.body : null);
+  const container
+    = containerProp ?? (mounted ? globalThis.document?.body : null);
 
-  if (!container) return null;
+  if (!container)
+    return null;
 
-  const visible =
-    visibleProp ?? table.getFilteredSelectedRowModel().rows.length > 0;
+  const visible
+    = visibleProp ?? table.getFilteredSelectedRowModel().rows.length > 0;
 
   return ReactDOM.createPortal(
     <AnimatePresence>
@@ -78,11 +80,10 @@ function DataTableActionBar<TData>({
   );
 }
 
-interface DataTableActionBarActionProps
-  extends React.ComponentProps<typeof Button> {
+type DataTableActionBarActionProps = {
   tooltip?: string;
   isPending?: boolean;
-}
+} & React.ComponentProps<typeof Button>;
 
 function DataTableActionBarAction({
   size = "sm",
@@ -109,7 +110,8 @@ function DataTableActionBarAction({
     </Button>
   );
 
-  if (!tooltip) return trigger;
+  if (!tooltip)
+    return trigger;
 
   return (
     <Tooltip>
@@ -124,9 +126,9 @@ function DataTableActionBarAction({
   );
 }
 
-interface DataTableActionBarSelectionProps<TData> {
+type DataTableActionBarSelectionProps<TData> = {
   table: Table<TData>;
-}
+};
 
 function DataTableActionBarSelection<TData>({
   table,
@@ -138,7 +140,9 @@ function DataTableActionBarSelection<TData>({
   return (
     <div className="flex h-7 items-center rounded-md border pr-1 pl-2.5">
       <span className="whitespace-nowrap text-xs">
-        {table.getFilteredSelectedRowModel().rows.length} selected
+        {table.getFilteredSelectedRowModel().rows.length}
+        {" "}
+        selected
       </span>
       <Separator
         orientation="vertical"
