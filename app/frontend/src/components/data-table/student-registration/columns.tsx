@@ -1,4 +1,13 @@
-import { StudentBasicInfo } from "@/client";
+import { createColumnHelper } from "@tanstack/react-table";
+import {
+  AlertTriangle,
+  CheckCircle,
+  Heart,
+  MapPin,
+  MoreHorizontalIcon,
+  Phone,
+} from "lucide-react";
+
 import { StudentApplicationStatusBadge } from "@/components/enum-badge";
 import {
   AlertDialog,
@@ -25,15 +34,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { formatDate } from "@/lib/format";
 import { calculateAge, getInitials } from "@/utils/utils";
-import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
-import {
-  AlertTriangle,
-  CheckCircle,
-  Heart,
-  MapPin,
-  MoreHorizontalIcon,
-  Phone,
-} from "lucide-react";
+
+import type { StudentBasicInfo } from "@/client";
+import type { ColumnDef } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<StudentBasicInfo>();
 
@@ -48,10 +51,10 @@ export const studentBasicInfoColumns: StudentBasicInfoColumnProps = (
 ) => [
   columnHelper.display({
     id: "checkbox",
-    cell: (props) => (
+    cell: props => (
       <Checkbox
         checked={props.row.getIsSelected()}
-        onCheckedChange={(value) => props.row.toggleSelected(!!value)}
+        onCheckedChange={value => props.row.toggleSelected(!!value)}
         aria-label="Select row"
       />
     ),
@@ -73,7 +76,7 @@ export const studentBasicInfoColumns: StudentBasicInfoColumnProps = (
         <div>
           <div className="flex items-center gap-3">
             <Avatar className="h-10 w-10">
-              <AvatarImage src={"/placeholder.svg"} />
+              <AvatarImage src="/placeholder.svg" />
               <AvatarFallback>
                 {getInitials(firstName, fatherName)}
               </AvatarFallback>
@@ -104,11 +107,13 @@ export const studentBasicInfoColumns: StudentBasicInfoColumnProps = (
   }),
   columnHelper.accessor("dateOfBirth", {
     header: "Date of Birth",
-    cell: (props) => (
+    cell: props => (
       <div>
         <div>{formatDate(props.getValue())}</div>
         <div className="text-sm text-gray-500">
-          Age: {calculateAge(props.getValue())}
+          Age:
+          {" "}
+          {calculateAge(props.getValue())}
         </div>
       </div>
     ),
@@ -123,7 +128,9 @@ export const studentBasicInfoColumns: StudentBasicInfoColumnProps = (
       return (
         <div className="flex flex-col">
           <Badge className="bg-blue-100 text-blue-800 mb-1">
-            Grade {grade}
+            Grade
+            {" "}
+            {grade}
           </Badge>
           {isTransfer && (
             <Badge
@@ -176,7 +183,7 @@ export const studentBasicInfoColumns: StudentBasicInfoColumnProps = (
   }),
   columnHelper.accessor("createdAt", {
     header: "Registration",
-    cell: (props) => <div>{formatDate(props.getValue())}</div>,
+    cell: props => <div>{formatDate(props.getValue())}</div>,
   }),
   columnHelper.accessor("status", {
     header: "Status",
@@ -210,7 +217,7 @@ export const studentBasicInfoColumns: StudentBasicInfoColumnProps = (
             </DropdownMenuItem>
             <AlertDialogTrigger asChild>
               <DropdownMenuItem
-                onSelect={(e) => e.preventDefault()}
+                onSelect={e => e.preventDefault()}
                 className="text-destructive focus:text-destructive"
               >
                 Delete

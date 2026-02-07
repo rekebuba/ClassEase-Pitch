@@ -13,21 +13,21 @@ export type EmptyProps<T extends React.ElementType> = Omit<
 //   [key: string]: string | string[] | undefined;
 // }
 
-export interface QueryBuilderOpts {
+export type QueryBuilderOpts = {
   where?: SQL;
   orderBy?: SQL;
   distinct?: boolean;
   nullish?: boolean;
-}
+};
 
-export interface Option {
+export type Option = {
   label: string;
   value: string;
   icon?: React.ComponentType<{ className?: string }>;
   withCount?: boolean;
-}
+};
 
-export interface DataTableFilterOption {
+export type DataTableFilterOption = {
   id: string;
   label: string;
   value: string;
@@ -36,4 +36,4 @@ export interface DataTableFilterOption {
   filterValues?: string[];
   filterOperator?: string;
   isMulti?: boolean;
-}
+};

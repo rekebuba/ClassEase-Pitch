@@ -1,13 +1,13 @@
-import { useTableInstanceContext } from "@/components/data-table";
-import { getFiltersStateParser, getSortingStateParser } from "@/lib/parsers";
 import {
   parseAsInteger,
-  parseAsStringEnum,
   parseAsString,
+  parseAsStringEnum,
   useQueryStates,
 } from "nuqs";
-import React from "react";
-import { createContext, useContext } from "react";
+import React, { createContext, useContext } from "react";
+
+import { useTableInstanceContext } from "@/components/data-table";
+import { getFiltersStateParser, getSortingStateParser } from "@/lib/parsers";
 
 type SearchParamsContextType = ReturnType<
   typeof useQueryStates<typeof searchParamMap>
@@ -25,8 +25,8 @@ export function SearchParamsProvider({
   const columnIds = React.useMemo(() => {
     return table
       .getAllColumns()
-      .filter((column) => column.columnDef.enableColumnFilter)
-      .map((column) => column.id);
+      .filter(column => column.columnDef.enableColumnFilter)
+      .map(column => column.id);
   }, [table]);
 
   const searchParamMap = {

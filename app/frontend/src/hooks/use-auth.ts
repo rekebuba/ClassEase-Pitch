@@ -1,17 +1,21 @@
+import { useQuery } from "@tanstack/react-query";
+import { redirect } from "@tanstack/react-router";
+
 import { getLoggedInUserOptions } from "@/client/@tanstack/react-query.gen";
-import { api, BodyLoginCredential } from "@/store/api";
+import { api } from "@/store/api";
 import {
   clearError,
   loginFailure,
   loginSuccess,
 } from "@/store/slice/auth-slice";
-import { useQuery } from "@tanstack/react-query";
-import { redirect } from "@tanstack/react-router";
+
 import { useAppDispatch, useAppSelector } from "./use-store";
 
-const useAuth = () => {
+import type { BodyLoginCredential } from "@/store/api";
+
+function useAuth() {
   const dispatch = useAppDispatch();
-  const { userRole, error } = useAppSelector((state) => state.auth);
+  const { userRole, error } = useAppSelector(state => state.auth);
 
   // current logged-in user (only run if token exists)
   const {
@@ -34,7 +38,8 @@ const useAuth = () => {
       if (userRole) {
         throw redirect({ to: `/${userRole}` });
       }
-    } catch (err: any) {
+    }
+    catch (err: any) {
       dispatch(loginFailure(err.message || "Login failed"));
     }
   };
@@ -55,6 +60,6 @@ const useAuth = () => {
     error,
     resetError: () => dispatch(clearError()),
   };
-};
+}
 
 export default useAuth;

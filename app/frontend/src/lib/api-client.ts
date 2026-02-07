@@ -14,7 +14,7 @@ client.setConfig({
 });
 
 client.instance.interceptors.response.use(
-  (response) => response,
+  response => response,
   (error) => {
     if (error.response?.status === 401) {
       // clear auth state, redirect, etc.

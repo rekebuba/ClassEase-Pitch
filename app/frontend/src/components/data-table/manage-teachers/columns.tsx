@@ -1,4 +1,6 @@
-import { TeacherBasicInfo } from "@/client/types.gen";
+import { createColumnHelper } from "@tanstack/react-table";
+import { MoreHorizontalIcon } from "lucide-react";
+
 import { EmployeeApplicationStatusBadge } from "@/components/enum-badge";
 import { AlertDialog } from "@/components/ui/alert-dialog";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -13,9 +15,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { getInitials } from "@/utils/utils";
-import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
-import { MoreHorizontalIcon } from "lucide-react";
-import { JSX } from "react/jsx-runtime";
+
+import type { TeacherBasicInfo } from "@/client/types.gen";
+import type { ColumnDef } from "@tanstack/react-table";
+import type { JSX } from "react/jsx-runtime";
 
 const columnHelper = createColumnHelper<TeacherBasicInfo>();
 
@@ -31,7 +34,7 @@ export const teacherBasicInfoColumns: TeacherBasicInfoColumnProps = (
   const createTermColumns = () => {
     // Get all unique term names from all teachers
 
-    return ["1", "2"].map((termName) =>
+    return ["1", "2"].map(termName =>
       columnHelper.display({
         id: `term${termName}`,
         header: `Term ${termName}`,
@@ -45,7 +48,7 @@ export const teacherBasicInfoColumns: TeacherBasicInfoColumnProps = (
           yearRecords.forEach((year) => {
             // Find the academic term that matches our current column term
             const academicTerm = year.academicTerms.find(
-              (term) => term.name === termName,
+              term => term.name === termName,
             );
 
             if (academicTerm) {
@@ -54,22 +57,27 @@ export const teacherBasicInfoColumns: TeacherBasicInfoColumnProps = (
                 // Get unique sections for this grade and format them
                 const sections = [
                   ...new Set(
-                    gradeObj.sections.map((section) => section.section),
+                    gradeObj.sections.map(section => section.section),
                   ),
                 ];
 
                 // Get unique subject names for this grade
                 const subjects = [
-                  ...new Set(gradeObj.subjects.map((subject) => subject.code)),
+                  ...new Set(gradeObj.subjects.map(subject => subject.code)),
                 ];
 
                 // Create the summary with proper styling
                 const summary = (
                   <div key={gradeObj.id} className="mb-2 last:mb-0">
                     <div className="font-semibold text-gray-800 truncate max-w-[150px]">
-                      <span>Grade {gradeObj.grade}</span>
+                      <span>
+                        Grade
+                        {gradeObj.grade}
+                      </span>
                       <span className="inline-flex items-center px-1 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                        ({sections.join(",")})
+                        (
+                        {sections.join(",")}
+                        )
                       </span>
                       <span className="text-gray-400 mx-1">•</span>
                       <span className="text-sm text-gray-600">
@@ -84,11 +92,13 @@ export const teacherBasicInfoColumns: TeacherBasicInfoColumnProps = (
           });
 
           // Return all summaries or a default message
-          return gradeSummaries.length > 0 ? (
-            <div className="space-y-2 py-1">{gradeSummaries}</div>
-          ) : (
-            <span className="text-gray-400 text-sm italic">No assignments</span>
-          );
+          return gradeSummaries.length > 0
+            ? (
+                <div className="space-y-2 py-1">{gradeSummaries}</div>
+              )
+            : (
+                <span className="text-gray-400 text-sm italic">No assignments</span>
+              );
         },
       }),
     );
@@ -97,10 +107,10 @@ export const teacherBasicInfoColumns: TeacherBasicInfoColumnProps = (
   return [
     columnHelper.display({
       id: "checkbox",
-      cell: (props) => (
+      cell: props => (
         <Checkbox
           checked={props.row.getIsSelected()}
-          onCheckedChange={(value) => props.row.toggleSelected(!!value)}
+          onCheckedChange={value => props.row.toggleSelected(!!value)}
           aria-label="Select row"
         />
       ),
@@ -119,7 +129,7 @@ export const teacherBasicInfoColumns: TeacherBasicInfoColumnProps = (
           <div>
             <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">
-                <AvatarImage src={"/placeholder.svg"} />
+                <AvatarImage src="/placeholder.svg" />
                 <AvatarFallback>
                   {getInitials(firstName, fatherName)}
                 </AvatarFallback>

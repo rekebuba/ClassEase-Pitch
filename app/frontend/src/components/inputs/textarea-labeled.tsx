@@ -1,4 +1,4 @@
-import { FieldValues, Path, useFormContext } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
 
 import {
   FormControl,
@@ -7,9 +7,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
 import { Textarea } from "@/components/ui/textarea";
-import { TextareaHTMLAttributes } from "react";
+
+import type { TextareaHTMLAttributes } from "react";
+import type { FieldValues, Path } from "react-hook-form";
 
 type TextareaWithLabelProps<T extends FieldValues> = {
   fieldTitle: string;

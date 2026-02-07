@@ -1,3 +1,24 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  BookOpen,
+  Edit,
+  Eye,
+  Filter,
+  GraduationCap,
+  Loader,
+  Mail,
+  MoreHorizontal,
+  Plus,
+  Search,
+  UserPlus,
+  Users,
+} from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { toast } from "sonner";
+
 import {
   assignTeacherMutation,
   getAcademicTermsOptions,
@@ -6,7 +27,6 @@ import {
   getSubjectsOptions,
   getTeachersOptions,
 } from "@/client/@tanstack/react-query.gen";
-import { AssignTeacher, TeacherBasicInfo } from "@/client/types.gen";
 import { zAssignTeacher } from "@/client/zod.gen";
 import { ApiState } from "@/components/api-state";
 import EmployeeApplicationStatusBadge from "@/components/enum-badge/employee-application-status-badge";
@@ -46,26 +66,9 @@ import { Separator } from "@/components/ui/separator";
 import { queryClient } from "@/lib/query-client";
 import { store } from "@/store/main-store";
 import { getInitials } from "@/utils/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import {
-  BookOpen,
-  Edit,
-  Eye,
-  Filter,
-  GraduationCap,
-  Loader,
-  Mail,
-  MoreHorizontal,
-  Plus,
-  Search,
-  UserPlus,
-  Users,
-} from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
-import { toast } from "sonner";
+
+import type { AssignTeacher, TeacherBasicInfo } from "@/client/types.gen";
+import type { SubmitHandler } from "react-hook-form";
 
 export const Route = createFileRoute("/admin/manage-teachers/")({
   component: RouteComponent,
@@ -74,7 +77,7 @@ export const Route = createFileRoute("/admin/manage-teachers/")({
     if (yearId) {
       const academicTerms = await queryClient.ensureQueryData(
         getAcademicTermsOptions({
-          query: { yearId: yearId },
+          query: { yearId },
         }),
       );
 
@@ -82,7 +85,7 @@ export const Route = createFileRoute("/admin/manage-teachers/")({
         getTeachersOptions({
           query: {
             q: "",
-            yearId: yearId,
+            yearId,
             academicTermId: academicTerms[0]?.id,
           },
         }),
@@ -93,7 +96,6 @@ export const Route = createFileRoute("/admin/manage-teachers/")({
 
 function RouteComponent() {
   const yearId = store.getState().year.id;
-  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedAcademicTerm, setSelectedAcademicTerm] = useState<string>("");
@@ -157,7 +159,7 @@ function RouteComponent() {
           <div className="flex items-center gap-2">
             <FormDialog
               teachers={teachers || []}
-              trigger={
+              trigger={(
                 <Button
                   size="sm"
                   className="flex-1 bg-primary hover:bg-primary/90"
@@ -165,7 +167,7 @@ function RouteComponent() {
                   <UserPlus className="w-3.5 h-3.5 mr-1.5" />
                   Assign
                 </Button>
-              }
+              )}
             />
           </div>
         </div>
@@ -176,7 +178,7 @@ function RouteComponent() {
             <Input
               placeholder="Search teachers..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={e => setSearchTerm(e.target.value)}
               className="pl-10 bg-input border-border"
             />
           </div>
@@ -193,9 +195,11 @@ function RouteComponent() {
                 <SelectValue placeholder="Academic Term" />
               </SelectTrigger>
               <SelectContent>
-                {academicTerms?.map((term) => (
+                {academicTerms?.map(term => (
                   <SelectItem key={term.id} value={term.id}>
-                    Term {term.name}
+                    Term
+                    {" "}
+                    {term.name}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -209,7 +213,9 @@ function RouteComponent() {
                 className="border-border bg-transparent"
               >
                 <Filter className="w-4 h-4 mr-2" />
-                Status: {statusFilter === "all" ? "All" : statusFilter}
+                Status:
+                {" "}
+                {statusFilter === "all" ? "All" : statusFilter}
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
@@ -231,7 +237,7 @@ function RouteComponent() {
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {teachers?.map((teacher) => (
+          {teachers?.map(teacher => (
             <Card
               key={teacher.id}
               className="bg-muted/30 border-border hover:border-primary/50 transition-all duration-300 hover:shadow-lg"
@@ -248,7 +254,9 @@ function RouteComponent() {
                     </Avatar>
                     <div>
                       <h3 className="font-semibold text-lg text-foreground">
-                        {teacher.firstName} {teacher.fatherName}
+                        {teacher.firstName}
+                        {" "}
+                        {teacher.fatherName}
                       </h3>
                       <div className="flex items-center gap-2 mt-1">
                         {EmployeeApplicationStatusBadge({
@@ -317,7 +325,9 @@ function RouteComponent() {
                       </div>
                       <div className="flex flex-wrap gap-1.5">
                         <Badge variant="secondary" className="text-xs">
-                          {teacher.otherSubjects.length} Subjects
+                          {teacher.otherSubjects.length}
+                          {" "}
+                          Subjects
                         </Badge>
                       </div>
                     </div>
@@ -331,32 +341,39 @@ function RouteComponent() {
                   </span>
                   {teacher.grades.length > 4 && (
                     <Badge variant="outline" className="text-xs">
-                      +{teacher.grades.length - 4} more
+                      +
+                      {teacher.grades.length - 4}
+                      {" "}
+                      more
                     </Badge>
                   )}
                 </div>
                 <div
                   className={`grid gap-3 pt-4 border-t ${teacherGrades(teacher.grades.length)}`}
                 >
-                  {teacher.grades.length > 0 ? (
-                    teacher.grades.slice(0, 4).map((grade) => (
-                      <div className="text-center">
-                        <div className="flex items-center justify-center gap-1 mb-1">
-                          <GraduationCap className="w-3.5 h-3.5 text-muted-foreground" />
-                        </div>
-                        <div className="font-semibold text-foreground">
-                          Grade {grade.grade}
-                        </div>
-                        <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
-                          {grade.subjects.map((subject) => (
-                            <span key={subject.id}>{subject.code}</span>
-                          ))}
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="text-center">No grades assigned</div>
-                  )}
+                  {teacher.grades.length > 0
+                    ? (
+                        teacher.grades.slice(0, 4).map(grade => (
+                          <div className="text-center">
+                            <div className="flex items-center justify-center gap-1 mb-1">
+                              <GraduationCap className="w-3.5 h-3.5 text-muted-foreground" />
+                            </div>
+                            <div className="font-semibold text-foreground">
+                              Grade
+                              {" "}
+                              {grade.grade}
+                            </div>
+                            <div className="flex items-center justify-center gap-1 text-xs text-muted-foreground">
+                              {grade.subjects.map(subject => (
+                                <span key={subject.id}>{subject.code}</span>
+                              ))}
+                            </div>
+                          </div>
+                        ))
+                      )
+                    : (
+                        <div className="text-center">No grades assigned</div>
+                      )}
                 </div>
 
                 {/* Quick Actions */}
@@ -379,7 +396,7 @@ function RouteComponent() {
                     teachers={teachers || []}
                     teacherId={teacher.id}
                     subjectId={teacher.mainSubject?.id}
-                    trigger={
+                    trigger={(
                       <Button
                         size="sm"
                         className="flex-1 bg-primary hover:bg-primary/90"
@@ -387,7 +404,7 @@ function RouteComponent() {
                         <Plus className="w-3.5 h-3.5 mr-1.5" />
                         Assign
                       </Button>
-                    }
+                    )}
                   />
                 </div>
               </CardContent>
@@ -492,7 +509,8 @@ function FormDialog({
             message: first.msg,
           });
         }
-      } else if (detail && typeof detail === "string") {
+      }
+      else if (detail && typeof detail === "string") {
         toast.error(detail || "Something went wrong. Please try again.");
       }
     },
@@ -505,13 +523,15 @@ function FormDialog({
   };
 
   const selectedGrade = useMemo(() => {
-    return subject?.grades.find((grade) => grade.id === watchForm.grade.id);
+    return subject?.grades.find(grade => grade.id === watchForm.grade.id);
   }, [subject, watchForm.grade.id]);
 
   const defaultSubject = useMemo(() => {
-    if (!watchForm.teacherId) return undefined;
-    return teachers.find((teacher) => teacher.id === watchForm.teacherId)
-      ?.mainSubject?.id;
+    if (!watchForm.teacherId)
+      return undefined;
+    return teachers.find(teacher => teacher.id === watchForm.teacherId)
+      ?.mainSubject
+      ?.id;
   }, [teachers, watchForm.teacherId]);
 
   useEffect(() => {
@@ -532,7 +552,7 @@ function FormDialog({
   };
 
   const getGradeObject = (joinedId: string): AssignTeacher["grade"] => {
-    const [gradeId, streamId] = joinedId.split(",").map((id) => id.trim());
+    const [gradeId, streamId] = joinedId.split(",").map(id => id.trim());
 
     return {
       id: gradeId,
@@ -548,7 +568,6 @@ function FormDialog({
     </Button>
   );
 
-  console.log(watchForm);
   return (
     <AlertDialog open={formDialogOpen} onOpenChange={setFormDialogOpen}>
       <AlertDialogTrigger asChild>
@@ -568,9 +587,12 @@ function FormDialog({
               fieldTitle="Teacher *"
               nameInSchema="teacherId"
             >
-              {teachers.map((teacher) => (
+              {teachers.map(teacher => (
                 <SelectItem key={teacher.id} value={teacher.id}>
-                  {teacher.fullName} - {teacher.mainSubject?.name}
+                  {teacher.fullName}
+                  {" "}
+                  -
+                  {teacher.mainSubject?.name}
                 </SelectItem>
               ))}
             </SelectWithLabel>
@@ -583,7 +605,7 @@ function FormDialog({
                   isLoading={isSubjectsLoading}
                   error={isSubjectsError?.message}
                 >
-                  {subjects?.map((subject) => (
+                  {subjects?.map(subject => (
                     <SelectItem key={subject.id} value={subject.id}>
                       {subject.name}
                     </SelectItem>
@@ -593,32 +615,42 @@ function FormDialog({
               <SelectWithLabel<AssignTeacher, AssignTeacher["grade"]>
                 fieldTitle="Grade *"
                 nameInSchema="grade"
-                getObjects={(joinedId) => getGradeObject(joinedId)}
+                getObjects={joinedId => getGradeObject(joinedId)}
               >
                 <ApiState
                   isLoading={isSubjectLoading}
                   error={isSubjectError?.message}
                 >
-                  {subject?.grades.map((grade) => (
+                  {subject?.grades.map(grade => (
                     <>
-                      {!grade.hasStream ? (
-                        <SelectItem key={grade.id} value={joinId(grade.id)}>
-                          Grade {grade.grade}
-                        </SelectItem>
-                      ) : (
-                        <div>
-                          {subject.streams
-                            .filter((s) => s.gradeId === grade.id)
-                            .map((stream) => (
-                              <SelectItem
-                                key={stream.id}
-                                value={joinId(grade.id, stream.id)}
-                              >
-                                Grade {grade.grade} - {stream.name}
-                              </SelectItem>
-                            ))}
-                        </div>
-                      )}
+                      {!grade.hasStream
+                        ? (
+                            <SelectItem key={grade.id} value={joinId(grade.id)}>
+                              Grade
+                              {" "}
+                              {grade.grade}
+                            </SelectItem>
+                          )
+                        : (
+                            <div>
+                              {subject.streams
+                                .filter(s => s.gradeId === grade.id)
+                                .map(stream => (
+                                  <SelectItem
+                                    key={stream.id}
+                                    value={joinId(grade.id, stream.id)}
+                                  >
+                                    Grade
+                                    {" "}
+                                    {grade.grade}
+                                    {" "}
+                                    -
+                                    {" "}
+                                    {stream.name}
+                                  </SelectItem>
+                                ))}
+                            </div>
+                          )}
                     </>
                   ))}
                 </ApiState>
@@ -632,20 +664,24 @@ function FormDialog({
                 {sections && (
                   <div className="">
                     <Label className="text-sm">
-                      Grade {selectedGrade?.grade || ""} Sections *
+                      Grade
+                      {" "}
+                      {selectedGrade?.grade || ""}
+                      {" "}
+                      Sections *
                     </Label>
                   </div>
                 )}
-                {sections?.map((section) => (
+                {sections?.map(section => (
                   <CheckboxWithLabel<
                     AssignTeacher,
                     AssignTeacher["grade"]["sections"][number]
                   >
-                    nameInSchema={`grade.sections`}
+                    nameInSchema="grade.sections"
                     fieldTitle={`Section ${section.section}`}
                     value={
                       watchForm.grade.sections.find(
-                        (s) => s.id === section.id,
+                        s => s.id === section.id,
                       ) || section
                     }
                   />

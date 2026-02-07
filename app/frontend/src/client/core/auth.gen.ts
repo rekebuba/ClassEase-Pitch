@@ -2,7 +2,7 @@
 
 export type AuthToken = string | undefined;
 
-export interface Auth {
+export type Auth = {
   /**
    * Which part of the request do we use to send the auth?
    *
@@ -17,14 +17,11 @@ export interface Auth {
   name?: string;
   scheme?: "basic" | "bearer";
   type: "apiKey" | "http";
-}
+};
 
-export const getAuthToken = async (
-  auth: Auth,
-  callback: ((auth: Auth) => Promise<AuthToken> | AuthToken) | AuthToken,
-): Promise<string | undefined> => {
-  const token =
-    typeof callback === "function" ? await callback(auth) : callback;
+export async function getAuthToken(auth: Auth, callback: ((auth: Auth) => Promise<AuthToken> | AuthToken) | AuthToken): Promise<string | undefined> {
+  const token
+    = typeof callback === "function" ? await callback(auth) : callback;
 
   if (!token) {
     return;
@@ -39,4 +36,4 @@ export const getAuthToken = async (
   }
 
   return token;
-};
+}

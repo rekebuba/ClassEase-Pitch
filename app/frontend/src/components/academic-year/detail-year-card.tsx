@@ -1,12 +1,14 @@
-import { YearWithRelatedSchema } from "@/client/types.gen";
+import { useNavigate } from "@tanstack/react-router";
+import { BookOpen, Calendar, Eye, GraduationCap } from "lucide-react";
+
 import { YearStatusBadge } from "@/components/academic-year";
 import AdvanceTooltip from "@/components/advance-tooltip";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/format";
-import { useNavigate } from "@tanstack/react-router";
-import { BookOpen, Calendar, Eye, GraduationCap } from "lucide-react";
+
+import type { YearWithRelatedSchema } from "@/client/types.gen";
 
 export default function DetailYearCard({
   academicYear,
@@ -36,7 +38,10 @@ export default function DetailYearCard({
               <div className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />
                 <span>
-                  {formatDate(academicYear.startDate)} -{" "}
+                  {formatDate(academicYear.startDate)}
+                  {" "}
+                  -
+                  {" "}
                   {formatDate(academicYear.endDate)}
                 </span>
               </div>
@@ -58,8 +63,7 @@ export default function DetailYearCard({
                 navigate({
                   to: `/admin/year/{-$yearId}/year-setup/$yearId/view`,
                   params: { yearId: academicYear.id },
-                })
-              }
+                })}
               className="ml-2"
             >
               <Eye className="h-5 w-5" />
@@ -121,10 +125,12 @@ export default function DetailYearCard({
           <div className="flex flex-wrap gap-2">
             {[...academicYear.grades]
               .sort((a, b) => Number(a.grade) - Number(b.grade))
-              .map((grade) => (
+              .map(grade => (
                 <div key={grade.id} className="flex items-center gap-1">
                   <Badge variant="secondary" className="text-xs">
-                    Grade {grade.grade}
+                    Grade
+                    {" "}
+                    {grade.grade}
                   </Badge>
                 </div>
               ))}
@@ -135,7 +141,7 @@ export default function DetailYearCard({
         <div>
           <h4 className="font-medium mb-3 text-sm">Subjects</h4>
           <div className="flex flex-wrap gap-2">
-            {academicYear.subjects.map((subjects) => (
+            {academicYear.subjects.map(subjects => (
               <div key={subjects.id} className="flex items-center gap-1">
                 <Badge variant="secondary" className="text-xs">
                   {subjects.name}
@@ -149,7 +155,9 @@ export default function DetailYearCard({
         {/* Action Buttons */}
         <div className="flex items-center justify-between">
           <div className="text-xs text-gray-500">
-            Last updated: {formatDate(academicYear.updatedAt)}
+            Last updated:
+            {" "}
+            {formatDate(academicYear.updatedAt)}
           </div>
         </div>
       </CardContent>

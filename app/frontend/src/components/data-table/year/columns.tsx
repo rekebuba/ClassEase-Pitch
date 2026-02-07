@@ -1,4 +1,6 @@
-import { YearSummary } from "@/client";
+import { createColumnHelper } from "@tanstack/react-table";
+import { MoreHorizontalIcon } from "lucide-react";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,8 +24,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { formatDate } from "@/lib/format";
-import { ColumnDef, createColumnHelper } from "@tanstack/react-table";
-import { MoreHorizontalIcon } from "lucide-react";
+
+import type { YearSummary } from "@/client";
+import type { ColumnDef } from "@tanstack/react-table";
 
 const columnHelper = createColumnHelper<YearSummary>();
 
@@ -36,10 +39,10 @@ export const yearColumns: yearColumnProps = (handleView, handleDelete) => [
   // Display Column
   columnHelper.display({
     id: "checkbox",
-    cell: (props) => (
+    cell: props => (
       <Checkbox
         checked={props.row.getIsSelected()}
-        onCheckedChange={(value) => props.row.toggleSelected(!!value)}
+        onCheckedChange={value => props.row.toggleSelected(!!value)}
         aria-label="Select row"
       />
     ),
@@ -47,12 +50,12 @@ export const yearColumns: yearColumnProps = (handleView, handleDelete) => [
 
   columnHelper.accessor("name", {
     header: "Year Name",
-    cell: (props) => <span className="font-medium">{props.getValue()}</span>,
+    cell: props => <span className="font-medium">{props.getValue()}</span>,
     enableSorting: false,
   }),
   columnHelper.accessor("status", {
     header: "Status",
-    cell: (props) => (
+    cell: props => (
       <Badge>
         {props.getValue().charAt(0).toUpperCase() + props.getValue().slice(1)}
       </Badge>
@@ -60,15 +63,15 @@ export const yearColumns: yearColumnProps = (handleView, handleDelete) => [
   }),
   columnHelper.accessor("calendarType", {
     header: "Calendar Type",
-    cell: (props) => props.getValue(),
+    cell: props => props.getValue(),
   }),
   columnHelper.accessor("startDate", {
     header: "Start Date",
-    cell: (props) => formatDate(props.getValue()),
+    cell: props => formatDate(props.getValue()),
   }),
   columnHelper.accessor("endDate", {
     header: "End Date",
-    cell: (props) => formatDate(props.getValue()),
+    cell: props => formatDate(props.getValue()),
   }),
 
   columnHelper.display({
@@ -96,7 +99,7 @@ export const yearColumns: yearColumnProps = (handleView, handleDelete) => [
             </DropdownMenuItem>
             <AlertDialogTrigger asChild>
               <DropdownMenuItem
-                onSelect={(e) => e.preventDefault()}
+                onSelect={e => e.preventDefault()}
                 className="text-destructive focus:text-destructive"
               >
                 Delete

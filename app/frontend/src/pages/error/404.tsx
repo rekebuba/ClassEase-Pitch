@@ -16,7 +16,7 @@ import { ErrorPage } from "@/components/ui/error-page";
  *
  * @returns {JSX.Element} A JSX element containing the 404 error message.
  */
-const NotFound = () => {
+function NotFound() {
   return (
     <ErrorPage
       statusCode={404}
@@ -34,6 +34,6 @@ const NotFound = () => {
       }}
     />
   );
-};
+}
 
 export default NotFound;

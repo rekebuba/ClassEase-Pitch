@@ -1,8 +1,7 @@
 "use client";
 
-import type React from "react";
-
 import { ChevronLeftIcon } from "@radix-ui/react-icons";
+import { LoaderIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -10,16 +9,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 
-import { renameViewData, StudentsViews } from "@/lib/types";
-import { LoaderIcon } from "lucide-react";
 import { DeleteViewForm } from "./delete-view-form";
 
-interface EditViewFormProps {
+import type { renameViewData, StudentsViews } from "@/lib/types";
+import type React from "react";
+
+type EditViewFormProps = {
   view: StudentsViews;
   setIsEditViewFormOpen: React.Dispatch<React.SetStateAction<boolean>>;
   refetchViews: () => void;
   onDelete: (viewId: string) => void;
-}
+};
 
 export function EditViewForm({
   view,
@@ -46,7 +46,7 @@ export function EditViewForm({
 
     // Simulate API call
     setTimeout(async () => {
-      const updatedView: renameViewData = { viewId: view.viewId, name: name };
+      const updatedView: renameViewData = { viewId: view.viewId, name };
       const result = await renameView(updatedView);
       setIsEditViewFormOpen(false);
 
@@ -83,15 +83,17 @@ export function EditViewForm({
           name="name"
           placeholder="Name"
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={e => setName(e.target.value)}
           autoComplete="off"
         />
         <Button disabled={pending} size="sm" type="submit">
-          {pending ? (
-            <LoaderIcon aria-hidden="true" className="size-3.5 animate-spin" />
-          ) : (
-            "Save"
-          )}
+          {pending
+            ? (
+                <LoaderIcon aria-hidden="true" className="size-3.5 animate-spin" />
+              )
+            : (
+                "Save"
+              )}
         </Button>
       </form>
 

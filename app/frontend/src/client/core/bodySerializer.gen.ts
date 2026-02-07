@@ -10,37 +10,32 @@ export type QuerySerializer = (query: Record<string, unknown>) => string;
 
 export type BodySerializer = (body: any) => any;
 
-export interface QuerySerializerOptions {
+export type QuerySerializerOptions = {
   allowReserved?: boolean;
   array?: SerializerOptions<ArrayStyle>;
   object?: SerializerOptions<ObjectStyle>;
-}
+};
 
-const serializeFormDataPair = (
-  data: FormData,
-  key: string,
-  value: unknown,
-): void => {
+function serializeFormDataPair(data: FormData, key: string, value: unknown): void {
   if (typeof value === "string" || value instanceof Blob) {
     data.append(key, value);
-  } else if (value instanceof Date) {
+  }
+  else if (value instanceof Date) {
     data.append(key, value.toISOString());
-  } else {
+  }
+  else {
     data.append(key, JSON.stringify(value));
   }
-};
+}
 
-const serializeUrlSearchParamsPair = (
-  data: URLSearchParams,
-  key: string,
-  value: unknown,
-): void => {
+function serializeUrlSearchParamsPair(data: URLSearchParams, key: string, value: unknown): void {
   if (typeof value === "string") {
     data.append(key, value);
-  } else {
+  }
+  else {
     data.append(key, JSON.stringify(value));
   }
-};
+}
 
 export const formDataBodySerializer = {
   bodySerializer: <T extends Record<string, any> | Array<Record<string, any>>>(
@@ -53,8 +48,9 @@ export const formDataBodySerializer = {
         return;
       }
       if (Array.isArray(value)) {
-        value.forEach((v) => serializeFormDataPair(data, key, v));
-      } else {
+        value.forEach(v => serializeFormDataPair(data, key, v));
+      }
+      else {
         serializeFormDataPair(data, key, value);
       }
     });
@@ -66,8 +62,7 @@ export const formDataBodySerializer = {
 export const jsonBodySerializer = {
   bodySerializer: <T>(body: T): string =>
     JSON.stringify(body, (_key, value) =>
-      typeof value === "bigint" ? value.toString() : value,
-    ),
+      typeof value === "bigint" ? value.toString() : value),
 };
 
 export const urlSearchParamsBodySerializer = {
@@ -81,8 +76,9 @@ export const urlSearchParamsBodySerializer = {
         return;
       }
       if (Array.isArray(value)) {
-        value.forEach((v) => serializeUrlSearchParamsPair(data, key, v));
-      } else {
+        value.forEach(v => serializeUrlSearchParamsPair(data, key, v));
+      }
+      else {
         serializeUrlSearchParamsPair(data, key, value);
       }
     });

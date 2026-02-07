@@ -1,18 +1,17 @@
 "use client";
 
-import type React from "react";
-
+import { LoaderIcon } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
-import { LoaderIcon } from "lucide-react";
 
-interface DeleteViewFormProps {
+import type React from "react";
+
+type DeleteViewFormProps = {
   viewId: string;
   setIsEditViewFormOpen: React.Dispatch<React.SetStateAction<boolean>>;
   onDelete: (viewId: string) => void;
-}
+};
 
 export function DeleteViewForm({
   viewId,
@@ -42,11 +41,13 @@ export function DeleteViewForm({
         type="submit"
         className="w-full border-red-800/50 bg-destructive/5 text-red-600 hover:bg-destructive/10 hover:text-red-600 active:bg-destructive/10"
       >
-        {pending ? (
-          <LoaderIcon aria-hidden="true" className="size-3.5 animate-spin" />
-        ) : (
-          "Delete"
-        )}
+        {pending
+          ? (
+              <LoaderIcon aria-hidden="true" className="size-3.5 animate-spin" />
+            )
+          : (
+              "Delete"
+            )}
       </Button>
     </form>
   );

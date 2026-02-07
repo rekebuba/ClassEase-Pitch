@@ -1,4 +1,5 @@
-import { FieldValues, Path, useFormContext } from "react-hook-form";
+import { useFormContext } from "react-hook-form";
+import { toast } from "sonner";
 
 import {
   FormControl,
@@ -8,13 +9,13 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
 import {
   Dropzone,
   DropzoneContent,
   DropzoneEmptyState,
 } from "@/components/ui/shadcn-io/dropzone";
-import { toast } from "sonner";
+
+import type { FieldValues, Path } from "react-hook-form";
 
 type FileUploadFieldProps<T extends FieldValues> = {
   fieldTitle: string;
@@ -42,19 +43,21 @@ export function FileUploadField<T extends FieldValues>({
             <Dropzone
               {...dropzoneProps}
               src={field.value as File[] | undefined}
-              onDrop={(files) => field.onChange(files)}
-              onError={(message) => toast.error(message.message)}
+              onDrop={files => field.onChange(files)}
+              onError={message => toast.error(message.message)}
             >
               <DropzoneEmptyState />
               <DropzoneContent />
             </Dropzone>
           </FormControl>
 
-          {form.formState.errors[nameInSchema] ? (
-            <FormMessage />
-          ) : (
-            description && <FormDescription>{description}</FormDescription>
-          )}
+          {form.formState.errors[nameInSchema]
+            ? (
+                <FormMessage />
+              )
+            : (
+                description && <FormDescription>{description}</FormDescription>
+              )}
         </FormItem>
       )}
     />

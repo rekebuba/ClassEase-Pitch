@@ -1,23 +1,3 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Progress } from "@/components/ui/progress";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   AlertTriangle,
@@ -38,6 +18,27 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 export const Route = createFileRoute("/admin/")({
   component: AdminDashboard,
 });
@@ -48,7 +49,7 @@ export const Route = createFileRoute("/admin/")({
  * as well as student performance data.
  */
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [,setActiveTab] = useState("overview");
 
   return (
     <div className="flex flex-col gap-4 md:gap-8">
@@ -72,7 +73,9 @@ export default function AdminDashboard() {
             <div className="text-2xl font-bold">1,248</div>
             <div className="flex items-center text-xs text-muted-foreground">
               <ArrowUpRight className="mr-1 h-3 w-3 text-emerald-500" />
-              <span className="text-emerald-500 font-medium">+5.2%</span> from
+              <span className="text-emerald-500 font-medium">+5.2%</span>
+              {" "}
+              from
               last semester
             </div>
           </CardContent>
@@ -88,7 +91,9 @@ export default function AdminDashboard() {
             <div className="text-2xl font-bold">87</div>
             <div className="flex items-center text-xs text-muted-foreground">
               <ArrowUpRight className="mr-1 h-3 w-3 text-emerald-500" />
-              <span className="text-emerald-500 font-medium">+2.3%</span> from
+              <span className="text-emerald-500 font-medium">+2.3%</span>
+              {" "}
+              from
               last semester
             </div>
           </CardContent>
@@ -104,7 +109,9 @@ export default function AdminDashboard() {
             <div className="text-2xl font-bold">94.3%</div>
             <div className="flex items-center text-xs text-muted-foreground">
               <ArrowUpRight className="mr-1 h-3 w-3 text-emerald-500" />
-              <span className="text-emerald-500 font-medium">+1.1%</span> from
+              <span className="text-emerald-500 font-medium">+1.1%</span>
+              {" "}
+              from
               last month
             </div>
           </CardContent>
@@ -118,7 +125,9 @@ export default function AdminDashboard() {
             <div className="text-2xl font-bold">3.42</div>
             <div className="flex items-center text-xs text-muted-foreground">
               <ArrowDownRight className="mr-1 h-3 w-3 text-red-500" />
-              <span className="text-red-500 font-medium">-0.3%</span> from last
+              <span className="text-red-500 font-medium">-0.3%</span>
+              {" "}
+              from last
               semester
             </div>
           </CardContent>
@@ -204,14 +213,17 @@ export default function AdminDashboard() {
                       score: 92,
                       change: "+0.5%",
                     },
-                  ].map((subject) => (
+                  ].map(subject => (
                     <div key={subject.subject} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <span className="font-medium">{subject.subject}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="font-medium">{subject.score}%</span>
+                          <span className="font-medium">
+                            {subject.score}
+                            %
+                          </span>
                           <span
                             className={
                               subject.change.startsWith("+")
@@ -365,14 +377,16 @@ export default function AdminDashboard() {
                         <AvatarFallback>
                           {activity.user
                             .split(" ")
-                            .map((n) => n[0])
+                            .map(n => n[0])
                             .join("")}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 space-y-1">
                         <p className="text-sm font-medium leading-none">
-                          <span className="font-semibold">{activity.user}</span>{" "}
-                          {activity.action}{" "}
+                          <span className="font-semibold">{activity.user}</span>
+                          {" "}
+                          {activity.action}
+                          {" "}
                           <span className="font-semibold">
                             {activity.target}
                           </span>
@@ -429,11 +443,13 @@ export default function AdminDashboard() {
                     >
                       <div className="flex items-center gap-3">
                         <div className="rounded-full bg-red-100 p-2">
-                          {student.status === "critical" ? (
-                            <AlertTriangle className="h-4 w-4 text-red-500" />
-                          ) : (
-                            <Clock className="h-4 w-4 text-amber-500" />
-                          )}
+                          {student.status === "critical"
+                            ? (
+                                <AlertTriangle className="h-4 w-4 text-red-500" />
+                              )
+                            : (
+                                <Clock className="h-4 w-4 text-amber-500" />
+                              )}
                         </div>
                         <div>
                           <p className="font-medium">{student.name}</p>
@@ -449,7 +465,9 @@ export default function AdminDashboard() {
                             : "outline"
                         }
                       >
-                        {student.absences} absences
+                        {student.absences}
+                        {" "}
+                        absences
                       </Badge>
                     </div>
                   ))}
@@ -502,7 +520,10 @@ export default function AdminDashboard() {
                         <div>
                           <p className="font-medium">{student.name}</p>
                           <p className="text-sm text-muted-foreground">
-                            {student.grade} - {student.subject}
+                            {student.grade}
+                            {" "}
+                            -
+                            {student.subject}
                           </p>
                         </div>
                       </div>

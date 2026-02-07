@@ -1,9 +1,9 @@
 /// <reference types="vite-plugin-svgr/client" />
 
-interface ImportMetaEnv {
+type ImportMetaEnv = {
   readonly VITE_API_BASE_URL: string;
-}
+};
 
-interface ImportMeta {
+type ImportMeta = {
   readonly env: ImportMetaEnv;
-}
+};

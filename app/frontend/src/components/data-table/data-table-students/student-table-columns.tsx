@@ -1,31 +1,26 @@
 "use client";
 
-import type * as React from "react";
-import type { ColumnDef } from "@tanstack/react-table";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DataTableColumnHeader } from "@/components/data-table";
-import { Edit, Trash2, Eye, Mail, UserCog, Ellipsis } from "lucide-react";
-import type { DataTableRowAction } from "@/types/data-table";
-import { AverageRange, SectionCounts, Student, TableId } from "@/lib/types";
-import { MoreHorizontal, Pencil, Trash, User } from "lucide-react";
+import { Ellipsis, Trash, User } from "lucide-react";
+import { useTransition } from "react";
 
+import { DataTableColumnHeader } from "@/components/data-table";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { useTransition } from "react";
-import { types } from "util";
-import { number, object } from "zod";
 
-interface GetStudentsTableColumnsOptions {
+import type { AverageRange, SectionCounts, Student, TableId } from "@/lib/types";
+import type { DataTableRowAction } from "@/types/data-table";
+import type { ColumnDef } from "@tanstack/react-table";
+import type * as React from "react";
+
+type GetStudentsTableColumnsOptions = {
   tableId: TableId;
   statusCounts: Record<string, number>;
   gradeCounts: Record<string, number>;
@@ -34,7 +29,7 @@ interface GetStudentsTableColumnsOptions {
   setRowAction: React.Dispatch<
     React.SetStateAction<DataTableRowAction<Student> | null>
   >;
-}
+};
 
 export function getStudentsTableColumns({
   tableId,
@@ -50,17 +45,17 @@ export function getStudentsTableColumns({
       header: ({ table }) => (
         <Checkbox
           checked={
-            table.getIsAllPageRowsSelected() ||
-            (table.getIsSomePageRowsSelected() && "indeterminate")
+            table.getIsAllPageRowsSelected()
+            || (table.getIsSomePageRowsSelected() && "indeterminate")
           }
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
           aria-label="Select all"
         />
       ),
       cell: ({ row }) => (
         <Checkbox
           checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          onCheckedChange={value => row.toggleSelected(!!value)}
           aria-label="Select row"
         />
       ),
@@ -78,7 +73,7 @@ export function getStudentsTableColumns({
         const initials = row.original.firstName_fatherName_grandFatherName
           .split(" ")
           .slice(0, 2)
-          .map((n) => n[0])
+          .map(n => n[0])
           .join("")
           .toUpperCase();
 
@@ -87,8 +82,8 @@ export function getStudentsTableColumns({
             <Avatar className="h-8 w-8">
               <AvatarImage
                 src={
-                  row.original.imagePath ||
-                  `/placeholder.svg?height=32&width=32&text=${initials}`
+                  row.original.imagePath
+                  || `/placeholder.svg?height=32&width=32&text=${initials}`
                 }
                 alt={row.original.firstName_fatherName_grandFatherName}
               />
@@ -140,10 +135,16 @@ export function getStudentsTableColumns({
       ),
       cell: ({ row }) => (
         <div className="flex flex-col">
-          <span className="font-medium">Grade {row.original.grade}</span>
+          <span className="font-medium">
+            Grade
+            {row.original.grade}
+          </span>
           <span className="ml-2 text-muted-foreground">
-            ({row.original.sectionSemesterOne})-(
-            {row.original.sectionSemesterTwo})
+            (
+            {row.original.sectionSemesterOne}
+            )-(
+            {row.original.sectionSemesterTwo}
+            )
           </span>
         </div>
       ),
@@ -153,8 +154,8 @@ export function getStudentsTableColumns({
         label: "Grade",
         options: Object.entries(gradeCounts).map(([value, count]) => ({
           label: `Grade ${value}`,
-          value: value,
-          count: count,
+          value,
+          count,
         })),
         tableId: tableId?.grade,
       },
@@ -174,8 +175,8 @@ export function getStudentsTableColumns({
           .filter(([_, count]) => count > 0)
           .map(([value, count]) => ({
             label: `Section ${value}`,
-            value: value,
-            count: count,
+            value,
+            count,
           })),
         tableId: tableId?.sectionSemesterOne,
       },
@@ -195,8 +196,8 @@ export function getStudentsTableColumns({
           .filter(([_, count]) => count > 0)
           .map(([value, count]) => ({
             label: `Section ${value}`,
-            value: value,
-            count: count,
+            value,
+            count,
           })),
         tableId: tableId?.sectionSemesterTwo,
       },
@@ -211,12 +212,17 @@ export function getStudentsTableColumns({
         const score = row.original.averageSemesterOne;
         let color = "text-green-600";
         if (typeof score === "number") {
-          if (score < 70) color = "text-red-600";
-          else if (score < 80) color = "text-amber-600";
+          if (score < 70)
+            color = "text-red-600";
+          else if (score < 80)
+            color = "text-amber-600";
         }
         return (
           <div className="flex items-center">
-            <span className={color}>{score}%</span>
+            <span className={color}>
+              {score}
+              %
+            </span>
           </div>
         );
       },
@@ -239,12 +245,17 @@ export function getStudentsTableColumns({
         const score = row.original.averageSemesterTwo;
         let color = "text-green-600";
         if (typeof score === "number") {
-          if (score < 70) color = "text-red-600";
-          else if (score < 80) color = "text-amber-600";
+          if (score < 70)
+            color = "text-red-600";
+          else if (score < 80)
+            color = "text-amber-600";
         }
         return (
           <div className="flex items-center">
-            <span className={color}>{score}%</span>
+            <span className={color}>
+              {score}
+              %
+            </span>
           </div>
         );
       },
@@ -267,16 +278,23 @@ export function getStudentsTableColumns({
         const score = row.original.finalScore;
         let color = "text-green-600";
         if (typeof score === "number") {
-          if (score < 70) color = "text-red-600";
-          else if (score < 80) color = "text-amber-600";
+          if (score < 70)
+            color = "text-red-600";
+          else if (score < 80)
+            color = "text-amber-600";
         }
 
         return (
           <div className="flex flex-col">
-            <span className={`font-medium ${color}`}>{score}%</span>
+            <span className={`font-medium ${color}`}>
+              {score}
+              %
+            </span>
             <span className="text-xs text-muted-foreground">
-              {row.original.averageSemesterOne}%-
-              {row.original.averageSemesterTwo}%
+              {row.original.averageSemesterOne}
+              %-
+              {row.original.averageSemesterTwo}
+              %
             </span>
           </div>
         );
@@ -300,12 +318,17 @@ export function getStudentsTableColumns({
         const score = row.original.rankSemesterOne;
         let color = "text-green-600";
         if (typeof score === "number") {
-          if (score < 70) color = "text-red-600";
-          else if (score < 80) color = "text-amber-600";
+          if (score < 70)
+            color = "text-red-600";
+          else if (score < 80)
+            color = "text-amber-600";
         }
         return (
           <div className="flex items-center">
-            <span className={color}>{score}%</span>
+            <span className={color}>
+              {score}
+              %
+            </span>
           </div>
         );
       },
@@ -327,12 +350,17 @@ export function getStudentsTableColumns({
         const score = row.original.rankSemesterTwo;
         let color = "text-green-600";
         if (typeof score === "number") {
-          if (score < 70) color = "text-red-600";
-          else if (score < 80) color = "text-amber-600";
+          if (score < 70)
+            color = "text-red-600";
+          else if (score < 80)
+            color = "text-amber-600";
         }
         return (
           <div className="flex items-center">
-            <span className={color}>{score}%</span>
+            <span className={color}>
+              {score}
+              %
+            </span>
           </div>
         );
       },
@@ -354,14 +382,18 @@ export function getStudentsTableColumns({
         const score = row.original.rank;
         let color = "text-green-600";
         if (typeof score === "number") {
-          if (score < 70) color = "text-red-600";
-          else if (score < 80) color = "text-amber-600";
+          if (score < 70)
+            color = "text-red-600";
+          else if (score < 80)
+            color = "text-amber-600";
         }
         return (
           <div className="flex flex-col">
             <span className={`font-medium ${color}`}>{score}</span>
             <span className="text-xs text-muted-foreground">
-              {row.original.rankSemesterOne}-{row.original.rankSemesterTwo}
+              {row.original.rankSemesterOne}
+              -
+              {row.original.rankSemesterTwo}
             </span>
           </div>
         );

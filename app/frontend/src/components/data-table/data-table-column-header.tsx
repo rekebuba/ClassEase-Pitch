@@ -1,13 +1,14 @@
 "use client";
 
-import type { Column } from "@tanstack/react-table";
 import {
   ChevronDown,
-  ChevronUp,
   ChevronsUpDown,
+  ChevronUp,
   EyeOff,
   X,
 } from "lucide-react";
+import { useQueryState } from "nuqs";
+import React from "react";
 
 import {
   DropdownMenu,
@@ -16,17 +17,16 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { cn } from "@/lib/utils";
-import React from "react";
-import { useQueryState } from "nuqs";
 import { getSortingStateParser } from "@/lib/parsers";
-import { ExtendedColumnSort } from "@/types/data-table";
+import { cn } from "@/lib/utils";
 
-interface DataTableColumnHeaderProps<TData, TValue>
-  extends React.ComponentProps<typeof DropdownMenuTrigger> {
+import type { ExtendedColumnSort } from "@/types/data-table";
+import type { Column } from "@tanstack/react-table";
+
+type DataTableColumnHeaderProps<TData, TValue> = {
   column: Column<TData, TValue>;
   title: string;
-}
+} & React.ComponentProps<typeof DropdownMenuTrigger>;
 
 export function DataTableColumnHeader<TData, TValue>({
   column,
@@ -50,7 +50,7 @@ export function DataTableColumnHeader<TData, TValue>({
         {
           id: column.id,
           desc: value,
-          tableId: tableId,
+          tableId,
         } as ExtendedColumnSort<unknown>,
       ]);
     },
@@ -67,14 +67,18 @@ export function DataTableColumnHeader<TData, TValue>({
         {...props}
       >
         {title}
-        {column.getCanSort() &&
-          (column.getIsSorted() === "desc" ? (
-            <ChevronDown />
-          ) : column.getIsSorted() === "asc" ? (
-            <ChevronUp />
-          ) : (
-            <ChevronsUpDown />
-          ))}
+        {column.getCanSort()
+          && (column.getIsSorted() === "desc"
+            ? (
+                <ChevronDown />
+              )
+            : column.getIsSorted() === "asc"
+              ? (
+                  <ChevronUp />
+                )
+              : (
+                  <ChevronsUpDown />
+                ))}
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-28">
         {column.getCanSort() && (

@@ -8,39 +8,39 @@ import {
   useQueryStates,
 } from "nuqs";
 import * as React from "react";
+import { toast } from "sonner";
 
 import {
   DataTable,
   DataTableColumnsVisibility,
   DataTableSimpleFilter,
   DataTableSortList,
+  TableInstanceProvider,
 } from "@/components/data-table";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
-
 import { useDataTable } from "@/hooks/use-data-table";
 import { studentsView, useStudentsData } from "@/hooks/use-students-data";
 import { getFiltersStateParser, getSortingStateParser } from "@/lib/parsers";
+import { searchParamsCache } from "@/lib/validations";
+import { FilterProvider } from "@/utils/filter-context";
+
 import { getStudentsTableColumns } from "./student-table-columns";
 import { StudentsTableFloatingBar } from "./students-table-floating-bar";
 import { UpdateStudentSheet } from "./update-student-sheet";
 
-import { TableInstanceProvider } from "@/components/data-table";
 import type { SearchParams, Student } from "@/lib/types";
-import { searchParamsCache } from "@/lib/validations";
 import type { DataTableRowAction } from "@/types/data-table";
-import { FilterProvider } from "@/utils/filter-context";
-import { toast } from "sonner";
 
 // Constants
 const COLUMN_PINNING = { right: ["actions"] };
 
 export function StudentsTable() {
-  const [rowAction, setRowAction] =
-    React.useState<DataTableRowAction<Student> | null>(null);
-  // Search params state with debouncing
-  const [debouncedParams, setDebouncedParams] =
-    React.useState<SearchParams | null>(null);
+  const [rowAction, setRowAction]
+    = React.useState<DataTableRowAction<Student> | null>(null);
+    // Search params state with debouncing
+  const [debouncedParams, setDebouncedParams]
+    = React.useState<SearchParams | null>(null);
   const [columnVisibility, setColumnVisibility] = React.useState({});
 
   // Data fetching with the custom hook
@@ -91,7 +91,7 @@ export function StudentsTable() {
         guardianPhone: false,
       },
     },
-    getRowId: (originalRow) => originalRow.identification,
+    getRowId: originalRow => originalRow.identification,
     shallow: false,
     clearOnDefault: true,
   });
@@ -113,8 +113,8 @@ export function StudentsTable() {
   const columnIds = React.useMemo(() => {
     return table
       .getAllColumns()
-      .filter((column) => column.columnDef.enableColumnFilter)
-      .map((column) => column.id);
+      .filter(column => column.columnDef.enableColumnFilter)
+      .map(column => column.id);
   }, [table]);
 
   // Filter out empty values
@@ -122,17 +122,18 @@ export function StudentsTable() {
     (acc, [key, value]) => {
       if (key === "filters" && Array.isArray(value)) {
         const cleanedFilters = value.filter(
-          (filter) =>
-            !(typeof filter.value === "string" && filter.value === "") &&
-            !(Array.isArray(filter.value) && filter.value.length === 0),
+          filter =>
+            !(typeof filter.value === "string" && filter.value === "")
+            && !(Array.isArray(filter.value) && filter.value.length === 0),
         );
         if (cleanedFilters.length > 0) {
           acc[key] = cleanedFilters;
         }
-      } else if (
+      }
+      else if (
         !(
-          (typeof value === "string" && value === "") ||
-          (Array.isArray(value) && value.length === 0)
+          (typeof value === "string" && value === "")
+          || (Array.isArray(value) && value.length === 0)
         )
       ) {
         acc[key] = value;
@@ -154,7 +155,7 @@ export function StudentsTable() {
       return;
     }
     // console.log("validQuery", validQuery.data)
-    setDebouncedParams((prev) =>
+    setDebouncedParams(prev =>
       JSON.stringify(prev) !== JSON.stringify(validQuery.data)
         ? validQuery.data
         : prev,

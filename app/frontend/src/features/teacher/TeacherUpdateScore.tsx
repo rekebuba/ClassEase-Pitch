@@ -1,20 +1,21 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 /**
  * TeacherUpdateScore component allows teachers to update student scores.
  *
  * @component
- * @param {Object} props - The component props.
- * @param {Object} props.student - Data of the student including assessments.
+ * @param {object} props - The component props.
+ * @param {object} props.student - Data of the student including assessments.
  *
  * @example
  *
  * @returns {JSX.Element} The TeacherUpdateScore component.
  */
-const TeacherUpdateScore = ({ student, setStudents }) => {
+function TeacherUpdateScore({ student, setStudents }) {
   const [isEditing, setIsEditing] = useState(false);
   const [updateAssessmentData, setUpdateAssessmentData] = useState([]);
   const [individualAssessment, setIndividualAssessment] = useState({});
@@ -33,9 +34,10 @@ const TeacherUpdateScore = ({ student, setStudents }) => {
         const updatedData = { ...student, ...res.data };
         setIndividualAssessment(updatedData);
       }
-    } catch (error) {
+    }
+    catch (error) {
       if (error.response?.data?.error) {
-        toast.error(error.response.data["error"], {
+        toast.error(error.response.data.error, {
           description:
             "Please try again later, if the problem persists, contact the administrator.",
           style: { color: "red" },
@@ -72,7 +74,7 @@ const TeacherUpdateScore = ({ student, setStudents }) => {
   const handleEdit = () => {
     setIsEditing(true);
     const updatedAssessments = individualAssessment.assessment.map(
-      (assessment) => ({
+      assessment => ({
         ...assessment,
       }),
     );
@@ -101,18 +103,19 @@ const TeacherUpdateScore = ({ student, setStudents }) => {
           minute: "2-digit",
           hour12: true,
         });
-        toast.success(res.data["message"], {
+        toast.success(res.data.message, {
           description: currentTime,
           style: { color: "green" },
         });
       }
-    } catch (error) {
+    }
+    catch (error) {
       if (
-        error.response &&
-        error.response.data &&
-        error.response.data["error"]
+        error.response
+        && error.response.data
+        && error.response.data.error
       ) {
-        toast.error(error.response.data["error"], {
+        toast.error(error.response.data.error, {
           description:
             "Please try again later, if the problem persists, contact the administrator.",
           style: { color: "red" },
@@ -124,17 +127,23 @@ const TeacherUpdateScore = ({ student, setStudents }) => {
   };
 
   const calculateTotalScore = (assessments) => {
-    return parseFloat(
+    return Number.parseFloat(
       assessments.reduce((total, item) => total + item.score, 0).toFixed(2),
     );
   };
 
   return (
     <>
-      <form action="" onSubmit={(e) => handleSave(e)}>
+      <form action="" onSubmit={e => handleSave(e)}>
         <div className="flex justify-between items-center p-2">
           <h3 className="text-center text-lg font-bold">
-            {student.name} {student.father_name} ({student.student_id})
+            {student.name}
+            {" "}
+            {student.father_name}
+            {" "}
+            (
+            {student.student_id}
+            )
           </h3>
         </div>
         <table className="w-full text-left border-collapse">
@@ -145,34 +154,43 @@ const TeacherUpdateScore = ({ student, setStudents }) => {
             </tr>
           </thead>
           <tbody>
-            {individualAssessment.assessment &&
-              individualAssessment.assessment.length > 0 &&
-              individualAssessment.assessment.map((assessment, index) => (
+            {individualAssessment.assessment
+              && individualAssessment.assessment.length > 0
+              && individualAssessment.assessment.map((assessment, index) => (
                 <tr
                   key={index}
                   className={`text-left bg-${index % 2 === 0 ? "white" : "gray-100"} hover:bg-gray-200`}
                 >
                   <td className="text-left p-2">
-                    {assessment.assessment_type} ( {assessment.percentage}% )
+                    {assessment.assessment_type}
+                    {" "}
+                    (
+                    {assessment.percentage}
+                    % )
                   </td>
                   <td>
-                    {isEditing ? (
-                      <Input
-                        className="w-12 text-center border-solid border-2 border-gray-300"
-                        id={index}
-                        value={updateAssessmentData[index].score || ""}
-                        onChange={(e) => {
-                          let newScore = parseFloat(e.target.value);
-                          if (newScore > assessment.percentage)
-                            newScore = assessment.percentage;
-                          handleScoreChange(index, newScore);
-                        }}
-                      ></Input>
-                    ) : assessment.score !== null ? (
-                      assessment.score
-                    ) : (
-                      "-"
-                    )}
+                    {isEditing
+                      ? (
+                          <Input
+                            className="w-12 text-center border-solid border-2 border-gray-300"
+                            id={index}
+                            value={updateAssessmentData[index].score || ""}
+                            onChange={(e) => {
+                              let newScore = Number.parseFloat(e.target.value);
+                              if (newScore > assessment.percentage)
+                                newScore = assessment.percentage;
+                              handleScoreChange(index, newScore);
+                            }}
+                          >
+                          </Input>
+                        )
+                      : assessment.score !== null
+                        ? (
+                            assessment.score
+                          )
+                        : (
+                            "-"
+                          )}
                   </td>
                 </tr>
               ))}
@@ -181,39 +199,43 @@ const TeacherUpdateScore = ({ student, setStudents }) => {
         <div className="text-right text-lg p-2">
           <h3>
             <strong>
-              Total Score:{" "}
+              Total Score:
+              {" "}
               {individualAssessment.assessment
                 ? calculateTotalScore(individualAssessment.assessment)
-                : "N/A"}{" "}
+                : "N/A"}
+              {" "}
               / 100
             </strong>
           </h3>
         </div>
         <div className="mt-1 flex justify-between">
-          {isEditing ? (
-            <Button
-              type="button"
-              variant="destructive"
-              className="min-w-16"
-              onClick={() => {
-                setIsEditing(false);
-                setUpdateAssessmentData([]);
-              }}
-              disabled={!isEditing}
-            >
-              Cancel
-            </Button>
-          ) : (
-            <Button
-              type="button"
-              variant="default"
-              className="min-w-16"
-              onClick={handleEdit}
-              disabled={isEditing}
-            >
-              Edit
-            </Button>
-          )}
+          {isEditing
+            ? (
+                <Button
+                  type="button"
+                  variant="destructive"
+                  className="min-w-16"
+                  onClick={() => {
+                    setIsEditing(false);
+                    setUpdateAssessmentData([]);
+                  }}
+                  disabled={!isEditing}
+                >
+                  Cancel
+                </Button>
+              )
+            : (
+                <Button
+                  type="button"
+                  variant="default"
+                  className="min-w-16"
+                  onClick={handleEdit}
+                  disabled={isEditing}
+                >
+                  Edit
+                </Button>
+              )}
           <Button
             type="submit"
             style={{ pointerEvents: "auto" }}
@@ -226,6 +248,6 @@ const TeacherUpdateScore = ({ student, setStudents }) => {
       </form>
     </>
   );
-};
+}
 
 export default TeacherUpdateScore;

@@ -1,13 +1,14 @@
-import { TeacherTable } from "@/features/admin/tables";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+
+import { TeacherTable } from "@/features/admin/tables";
 // import Pagination from "../../library/pagination";
 
 /**
  * AdminTeachList Component
  *
  * @component
- * @param {Object} props - The component props.
+ * @param {object} props - The component props.
  * @param {Function} props.toggleDropdown - Function to toggle the dropdown menu.
  * @param {Function} props.teacherSummary - Function to display the teacher summary.
  *
@@ -20,7 +21,7 @@ import { toast } from "sonner";
  * @example
  * <AdminTeachList toggleDropdown={toggleDropdown} teacherSummary={teacherSummary} />
  */
-const AdminTeachList = () => {
+function AdminTeachList() {
   const [allTeacher, setAllStudents] = useState({ teachers: [], meta: {} }); // Store all teachers
 
   useEffect(() => {
@@ -29,23 +30,25 @@ const AdminTeachList = () => {
         const response = await adminApi.getTeachers();
 
         const data = {
-          teachers: response.data["teachers"],
-          meta: response.data["meta"],
+          teachers: response.data.teachers,
+          meta: response.data.meta,
         };
 
         setAllStudents(data); // Store all teachers
-      } catch (error) {
+      }
+      catch (error) {
         if (
-          error.response &&
-          error.response.data &&
-          error.response.data["error"]
+          error.response
+          && error.response.data
+          && error.response.data.error
         ) {
-          toast.error(error.response.data["error"], {
+          toast.error(error.response.data.error, {
             description:
               "Please try again later, if the problem persists, contact the administrator.",
             style: { color: "red" },
           });
-        } else {
+        }
+        else {
           toast.error("An unexpected error occurred.", {
             description:
               "Please try again later, if the problem persists, contact the administrator.",
@@ -63,6 +66,6 @@ const AdminTeachList = () => {
       <TeacherTable data={allTeacher.teachers} />
     </section>
   );
-};
+}
 
 export default AdminTeachList;

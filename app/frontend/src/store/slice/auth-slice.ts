@@ -1,12 +1,14 @@
-import { JwtPayloadType } from "@/lib/validations";
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 
-interface AuthState {
+import type { JwtPayloadType } from "@/lib/validations";
+import type { PayloadAction } from "@reduxjs/toolkit";
+
+type AuthState = {
   token: string | null;
   userInfo: JwtPayloadType | null;
   isLoading: boolean;
   error: string | null;
-}
+};
 
 const initialState: AuthState = {
   token: null,
@@ -46,7 +48,7 @@ export const authSlice = createSlice({
   },
 });
 
-export const { loginSuccess, loginFailure, logout, clearError } =
-  authSlice.actions;
+export const { loginSuccess, loginFailure, logout, clearError }
+  = authSlice.actions;
 
 export default authSlice.reducer;

@@ -16,20 +16,20 @@ export function exportTableToCSV<TData>(
 
   const headers = table
     .getAllLeafColumns()
-    .map((column) => column.id)
-    .filter((id) => !excludeColumns.includes(id));
+    .map(column => column.id)
+    .filter(id => !excludeColumns.includes(id));
 
   const csvContent = [
     headers.join(","),
     ...(onlySelected
       ? table.getFilteredSelectedRowModel().rows
       : table.getRowModel().rows
-    ).map((row) =>
+    ).map(row =>
       headers
         .map((header) => {
           const cellValue = row.getValue(header);
           return typeof cellValue === "string"
-            ? `"${cellValue.replace(/"/g, '""')}"`
+            ? `"${cellValue.replace(/"/g, "\"\"")}"`
             : cellValue;
         })
         .join(","),

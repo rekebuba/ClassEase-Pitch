@@ -1,12 +1,14 @@
-import { SubjectSetupGrade, YearSetupSchemaOutput } from "@/client/types.gen";
+import { BookOpen } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { Card, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/format";
-import { BookOpen } from "lucide-react";
+
+import type { SubjectSetupSchema, YearSetupSchemaOutput } from "@/client/types.gen";
 
 type Subject = YearSetupSchemaOutput["subjects"][number];
-type Grades = SubjectSetupGrade[];
+type Grades = SubjectSetupSchema[];
 
 export default function DetailSubjectCard({
   subject,
@@ -37,20 +39,26 @@ export default function DetailSubjectCard({
           <h4 className="font-medium mb-3 text-sm text-gray-600">Taught In</h4>
           {subject.grades.length > 0 || subject.streams.length > 0 ? (
             <div className="flex flex-wrap gap-2">
-              {grades.map((grade) => (
+              {grades.map(grade => (
                 <div key={`grade-${grade.id}`}>
                   {grade.hasStream && grade.streams ? (
                     grade.streams
-                      // .filter((stream) =>
-                      //   stream.subjects.some((s) => s.id === subject.id),
-                      // )
-                      .map((stream) => (
+                    // .filter((stream) =>
+                    //   stream.subjects.some((s) => s.id === subject.id),
+                    // )
+                      .map(stream => (
                         <Badge
                           key={`stream-${stream.id}`}
                           variant="default"
                           className="text-xs"
                         >
-                          Grade {grade.grade} ({stream.name})
+                          Grade
+                          {" "}
+                          {grade.grade}
+                          {" "}
+                          (
+                          {stream.name}
+                          )
                         </Badge>
                       ))
                   ) : (
@@ -59,7 +67,9 @@ export default function DetailSubjectCard({
                       variant="secondary"
                       className="text-xs"
                     >
-                      Grade {grade.grade}
+                      Grade
+                      {" "}
+                      {grade.grade}
                     </Badge>
                   )}
                 </div>
@@ -75,7 +85,9 @@ export default function DetailSubjectCard({
       <div className="flex flex-col gap-2">
         <Separator />
         <div className="text-xs text-gray-500">
-          Last updated: {formatDate(subject.updatedAt)}
+          Last updated:
+          {" "}
+          {formatDate(subject.updatedAt)}
         </div>
         {children}
       </div>

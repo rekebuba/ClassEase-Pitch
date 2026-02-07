@@ -1,8 +1,8 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useContext, useState } from "react";
 
 const DataContext = createContext();
 
-export const DataProvider = ({ children }: { children: React.ReactNode }) => {
+export function DataProvider({ children }: { children: React.ReactNode }) {
   const [data, setData] = useState(null);
 
   return (
@@ -10,6 +10,6 @@ export const DataProvider = ({ children }: { children: React.ReactNode }) => {
       {children}
     </DataContext.Provider>
   );
-};
+}
 
 export const useData = () => useContext(DataContext);

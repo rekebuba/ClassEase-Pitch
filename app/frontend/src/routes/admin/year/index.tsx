@@ -1,3 +1,15 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createFileRoute } from "@tanstack/react-router";
+import { Filter, Loader, Plus, Search } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  FormProvider,
+  useForm,
+} from "react-hook-form";
+import { toast } from "sonner";
+import z from "zod";
+
 import {
   deleteYearMutation,
   getYearsOptions,
@@ -5,7 +17,6 @@ import {
   getYearSummaryQueryKey,
   postYearMutation,
 } from "@/client/@tanstack/react-query.gen";
-import { NewYear, YearSummary } from "@/client/types.gen";
 import { zAcademicTermTypeEnum, zNewYear } from "@/client/zod.gen";
 import { ApiState } from "@/components/api-state";
 import { yearColumns } from "@/components/data-table/year/columns";
@@ -38,19 +49,12 @@ import {
 import { queryClient } from "@/lib/query-client";
 import { store } from "@/store/main-store";
 import { academicYearRange } from "@/utils/utils";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { Filter, Loader, Plus, Search } from "lucide-react";
-import { useEffect, useState } from "react";
-import {
-  FormProvider,
+
+import type { NewYear, YearSummary } from "@/client/types.gen";
+import type {
   SubmitHandler,
-  useForm,
   UseFormReturn,
 } from "react-hook-form";
-import { toast } from "sonner";
-import z from "zod";
 
 export const Route = createFileRoute("/admin/year/")({
   validateSearch: z.object({ q: z.string().optional() }),
@@ -58,7 +62,7 @@ export const Route = createFileRoute("/admin/year/")({
   loader: async ({ deps: { q } }) => {
     await queryClient.ensureQueryData(
       getYearSummaryOptions({
-        query: { q: q },
+        query: { q },
       }),
     );
   },
@@ -83,7 +87,7 @@ function RouteComponent() {
 
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     navigate({
-      search: (prev) => ({ ...prev, q: e.target.value }),
+      search: prev => ({ ...prev, q: e.target.value }),
     });
   }
 
@@ -265,7 +269,8 @@ function FormDialog({
         shouldDirty: true,
         shouldValidate: true,
       });
-    } else if (watchForm.setupMethods === "Last Year Copy") {
+    }
+    else if (watchForm.setupMethods === "Last Year Copy") {
       newYearForm.setValue("copyFromYearId", currentYear.id, {
         shouldDirty: true,
         shouldValidate: true,
@@ -296,7 +301,7 @@ function FormDialog({
               fieldTitle="Term System"
               nameInSchema="calendarType"
             >
-              {zAcademicTermTypeEnum.options.map((option) => (
+              {zAcademicTermTypeEnum.options.map(option => (
                 <SelectItem value={option}>{option}</SelectItem>
               ))}
             </SelectWithLabel>

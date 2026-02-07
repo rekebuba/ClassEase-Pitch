@@ -1,5 +1,6 @@
-import { ErrorPage } from "@/components/ui/error-page";
 import { ShieldAlert } from "lucide-react";
+
+import { ErrorPage } from "@/components/ui/error-page";
 
 export default function ForbiddenPage() {
   return (

@@ -1,24 +1,23 @@
-import { Button } from "@/components/ui/button";
-import { ArrowUpDown } from "lucide-react";
-import { MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { FaUserCircle } from "react-icons/fa";
+
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogPortal,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
   DropdownMenuPortal,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-import {
-  Dialog,
-  DialogPortal,
-  DialogTrigger,
-  DialogContent,
-  DialogDescription,
-} from "@/components/ui/dialog";
 import { AdminTeacherProfile } from "@/features/admin";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const teacherColumn = [
   {

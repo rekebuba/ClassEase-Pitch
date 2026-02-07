@@ -72,9 +72,10 @@ function Row(props) {
       if (res.status === 200) {
         setDetailAssessment(res.data);
       }
-    } catch (error) {
+    }
+    catch (error) {
       if (error.response?.data?.error) {
-        toast.error(error.response.data["error"], {
+        toast.error(error.response.data.error, {
           description:
             "Please try again later, if the problem persists, contact the administrator.",
           style: { color: "red" },
@@ -118,15 +119,17 @@ function Row(props) {
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
               <div className="flex flex-wrap justify-between p-2 gap-10">
-                {detailAssessment &&
-                  Object.entries(detailAssessment).length !== 0 &&
-                  Object.keys(detailAssessment).map((semester) => (
+                {detailAssessment
+                  && Object.entries(detailAssessment).length !== 0
+                  && Object.keys(detailAssessment).map(semester => (
                     <div
                       key={semester}
                       className="flex-1 p-4 min-w-[250px] max-w-md border border-gray-300 rounded-lg shadow-md bg-white"
                     >
                       <h3 className="text-center text-lg font-bold">
-                        Semester {semester}
+                        Semester
+                        {" "}
+                        {semester}
                       </h3>
                       <Table size="small" aria-label="purchases">
                         <TableHead className="bg-gray-200">
@@ -147,8 +150,13 @@ function Row(props) {
                                   {index + 1}
                                 </TableCell>
                                 <TableCell>
-                                  {assessment.assessment_type} ({" "}
-                                  {assessment.percentage} )%
+                                  {assessment.assessment_type}
+                                  {" "}
+                                  (
+                                  {" "}
+                                  {assessment.percentage}
+                                  {" "}
+                                  )%
                                 </TableCell>
                                 <TableCell align="center">
                                   {assessment.score}
@@ -161,8 +169,11 @@ function Row(props) {
                       <div className="text-right text-lg p-2">
                         <h3>
                           <strong>
-                            Total:{" "}
-                            {semester == 1 ? row.semITotal : row.semIITotal} /
+                            Total:
+                            {" "}
+                            {semester == 1 ? row.semITotal : row.semIITotal}
+                            {" "}
+                            /
                             100
                           </strong>
                         </h3>
@@ -246,7 +257,7 @@ export default function CollapsibleTable(props) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
+          {rows.map(row => (
             <Row key={row.subject} row={row} />
           ))}
           {studentReport && (
@@ -257,19 +268,23 @@ export default function CollapsibleTable(props) {
                   <div className="text-lg font-semibold text-gray-700">
                     Total
                   </div>
-                  {studentReport.semesters &&
-                    studentReport.semesters.map((semester, index) => (
+                  {studentReport.semesters
+                    && studentReport.semesters.map((semester, index) => (
                       <React.Fragment key={index}>
                         {/* Semester I Section */}
                         <div className="text-center">
                           <div className="text-sm font-medium text-gray-600">
-                            Semester {semester.semester}
+                            Semester
+                            {" "}
+                            {semester.semester}
                           </div>
                           <div className="text-lg font-bold text-gray-800">
                             {semester.semester_average}
                           </div>
                           <div className="text-sm text-gray-500">
-                            Rank: {semester.semester_rank}
+                            Rank:
+                            {" "}
+                            {semester.semester_rank}
                           </div>
                         </div>
                       </React.Fragment>
@@ -285,14 +300,17 @@ export default function CollapsibleTable(props) {
                       {studentReport.final_score}
                     </div>
                     <div className="text-sm text-gray-500">
-                      Rank: {studentReport.final_rank}
+                      Rank:
+                      {" "}
+                      {studentReport.final_rank}
                     </div>
                   </div>
                 </div>
                 <div className="flex justify-between items-center px-6 mr-28 mt-5">
                   {/* status */}
                   <div className="text-lg font-semibold text-gray-700">
-                    Academic Status:{" "}
+                    Academic Status:
+                    {" "}
                     <span
                       className={`text-lg font-bold ${studentReport.final_score >= 60 ? "text-green-600" : "text-red-600"}`}
                     >

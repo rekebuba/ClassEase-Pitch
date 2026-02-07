@@ -4,22 +4,23 @@
  * @see https://github.com/dubinc/dub/blob/main/packages/ui/src/animated-size-container.tsx
  */
 
+import { motion } from "motion/react";
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
-import { type TargetAndTransition, motion } from "motion/react";
 
-interface Dimensions extends TargetAndTransition {
+import type { TargetAndTransition } from "motion/react";
+
+type Dimensions = {
   width: string | number;
   height: string | number;
-}
+} & TargetAndTransition;
 
-interface DynamicContainerProps
-  extends React.ComponentProps<typeof motion.div> {
+type DynamicContainerProps = {
   width?: boolean;
   height?: boolean;
   children?: React.ReactNode;
-}
+} & React.ComponentProps<typeof motion.div>;
 
 function DynamicContainer({
   width,
@@ -43,7 +44,8 @@ function DynamicContainer({
 
   React.useEffect(() => {
     const node = containerRef?.current;
-    if (!node) return;
+    if (!node)
+      return;
 
     function updateDimensions([entry]: ResizeObserverEntry[]) {
       if (rafRef.current) {

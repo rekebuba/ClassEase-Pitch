@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { FieldValues, Path, useFormContext } from "react-hook-form";
+import React from "react";
+import { useFormContext } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -18,7 +19,9 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import React, { InputHTMLAttributes } from "react";
+
+import type { InputHTMLAttributes } from "react";
+import type { FieldValues, Path } from "react-hook-form";
 
 type DateWithLabelProps<T extends FieldValues> = {
   fieldTitle: string;
@@ -54,17 +57,19 @@ export function DateWithLabel<T extends FieldValues>({
             <PopoverTrigger asChild>
               <FormControl>
                 <Button
-                  variant={"outline"}
+                  variant="outline"
                   className={cn(
                     "pl-3 text-left font-normal",
                     !field.value && "text-muted-foreground",
                   )}
                 >
-                  {field.value ? (
-                    format(field.value, "PPP")
-                  ) : (
-                    <span>{placeholder || "Pick a date"}</span>
-                  )}
+                  {field.value
+                    ? (
+                        format(field.value, "PPP")
+                      )
+                    : (
+                        <span>{placeholder || "Pick a date"}</span>
+                      )}
                   <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                 </Button>
               </FormControl>
@@ -79,17 +84,19 @@ export function DateWithLabel<T extends FieldValues>({
                 month={month}
                 onMonthChange={setMonth}
                 captionLayout="dropdown"
-                disabled={(date) => date > disableTo || date < disableFrom}
+                disabled={date => date > disableTo || date < disableFrom}
                 startMonth={disableFrom}
                 endMonth={disableTo}
               />
             </PopoverContent>
           </Popover>
-          {form.formState.errors[nameInSchema] ? (
-            <FormMessage />
-          ) : (
-            description && <FormDescription>{description}</FormDescription>
-          )}
+          {form.formState.errors[nameInSchema]
+            ? (
+                <FormMessage />
+              )
+            : (
+                description && <FormDescription>{description}</FormDescription>
+              )}
         </FormItem>
       )}
     />

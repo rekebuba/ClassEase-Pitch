@@ -2,12 +2,11 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
 
-const StudentEventPanel = ({ events }) => {
+function StudentEventPanel({ events }) {
   return (
     <div className="flex flex-col space-y-10">
       {/* Upcoming Events */}
@@ -51,6 +50,6 @@ const StudentEventPanel = ({ events }) => {
       </Card>
     </div>
   );
-};
+}
 
 export default StudentEventPanel;

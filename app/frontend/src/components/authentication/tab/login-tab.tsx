@@ -1,5 +1,13 @@
+import { zodResolver } from "@hookform/resolvers/zod/dist/zod";
+import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import { EyeIcon, EyeOffIcon, Loader2Icon } from "lucide-react";
+import { useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { toast } from "sonner";
+
 import { loginMutation } from "@/client/@tanstack/react-query.gen";
-import { LoginError } from "@/client/types.gen";
 import { zBodyLoginCredential } from "@/client/zod.gen";
 import { InputWithLabel } from "@/components/inputs/input-labeled";
 import { Button } from "@/components/ui/button";
@@ -12,18 +20,11 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { decodeToken } from "@/context/auth-context";
-import { BodyLoginCredential } from "@/store/api";
 import { loginFailure, loginSuccess } from "@/store/slice/auth-slice";
-import { zodResolver } from "@hookform/resolvers/zod/dist/zod";
-import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
-import { AxiosError } from "axios";
-import { EyeIcon, EyeOffIcon, Loader2Icon } from "lucide-react";
-import { useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
-import { useDispatch } from "react-redux";
-import { toast } from "sonner";
+import { decodeToken } from "@/utils/utils";
+
+import type { BodyLoginCredential, LoginError } from "@/client/types.gen";
+import type { AxiosError } from "axios";
 
 export default function LoginTab() {
   const [showPassword, setShowPassword] = useState(false);
@@ -70,7 +71,8 @@ export default function LoginTab() {
       if (detail && typeof detail === "string") {
         setError("root", { message: detail });
         dispatch(loginFailure(detail));
-      } else {
+      }
+      else {
         dispatch(loginFailure("Something went wrong. Failed to Login."));
         toast.error("Something went wrong. Failed to Login.", {
           style: { color: "red" },
@@ -128,11 +130,13 @@ export default function LoginTab() {
                       showPassword ? "Hide password" : "Show password"
                     }
                   >
-                    {showPassword ? (
-                      <EyeOffIcon className="h-4 w-4" />
-                    ) : (
-                      <EyeIcon className="h-4 w-4" />
-                    )}
+                    {showPassword
+                      ? (
+                          <EyeOffIcon className="h-4 w-4" />
+                        )
+                      : (
+                          <EyeIcon className="h-4 w-4" />
+                        )}
                   </button>
                 </div>
               </div>
@@ -181,14 +185,17 @@ export default function LoginTab() {
 
       <CardFooter className="flex flex-col">
         <p className="mt-2 text-xs text-center text-muted-foreground">
-          By logging in, you agree to our{" "}
+          By logging in, you agree to our
+          {" "}
           <a
             href="#"
             className="underline underline-offset-4 hover:text-primary"
           >
             Terms of Service
-          </a>{" "}
-          and{" "}
+          </a>
+          {" "}
+          and
+          {" "}
           <a
             href="#"
             className="underline underline-offset-4 hover:text-primary"

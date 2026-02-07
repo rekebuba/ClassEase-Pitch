@@ -1,17 +1,17 @@
-import { useState, useEffect } from "react";
-import { Line, Bar } from "react-chartjs-2";
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
+  ArcElement,
   BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  LineElement,
+  PointElement,
   Title,
   Tooltip,
-  Legend,
-  ArcElement,
 } from "chart.js";
+import { useEffect, useState } from "react";
+import { Bar, Line } from "react-chartjs-2";
 
 ChartJS.register(
   CategoryScale,
@@ -33,11 +33,11 @@ ChartJS.register(
  * `performanceBySubject`, which are arrays of objects containing the necessary data for the charts.
  *
  * Props:
- * @param {Object[]} enrollmentByGrade - Array of objects representing student enrollment by grade.
+ * @param {object[]} enrollmentByGrade - Array of objects representing student enrollment by grade.
  * @param {number} enrollmentByGrade[].grade - The grade level.
  * @param {number} enrollmentByGrade[].student_count - The number of students enrolled in the grade.
  *
- * @param {Object[]} performanceBySubject - Array of objects representing performance by subject.
+ * @param {object[]} performanceBySubject - Array of objects representing performance by subject.
  * @param {string} performanceBySubject[].subject - The name of the subject.
  * @param {number} performanceBySubject[].average_percentage - The average performance percentage in the subject.
  *
@@ -49,10 +49,10 @@ ChartJS.register(
  *    performanceBySubject={[{ subject: 'Math', average_percentage: 75 }, { subject: 'Science', average_percentage: 80 }]}
  * />
  */
-const AdminStudentPerformance = ({
+function AdminStudentPerformance({
   enrollmentByGrade,
   performanceBySubject,
-}) => {
+}) {
   // Data for charts
   const [studentEnrollmentData, setStudentEnrollmentData] = useState({
     labels: [],
@@ -90,8 +90,8 @@ const AdminStudentPerformance = ({
    */
   useEffect(() => {
     if (enrollmentByGrade) {
-      const grades = enrollmentByGrade.map((item) => `Grade ${item.grade}`);
-      const studentCounts = enrollmentByGrade.map((item) => item.student_count);
+      const grades = enrollmentByGrade.map(item => `Grade ${item.grade}`);
+      const studentCounts = enrollmentByGrade.map(item => item.student_count);
 
       setStudentEnrollmentData({
         labels: grades,
@@ -104,9 +104,9 @@ const AdminStudentPerformance = ({
       });
     }
     if (performanceBySubject) {
-      const subjects = performanceBySubject.map((item) => item.subject);
+      const subjects = performanceBySubject.map(item => item.subject);
       const averagePerformance = performanceBySubject.map(
-        (item) => item.average_percentage,
+        item => item.average_percentage,
       );
 
       setSubjectPerformanceData({
@@ -140,6 +140,6 @@ const AdminStudentPerformance = ({
       </div>
     </>
   );
-};
+}
 
 export default AdminStudentPerformance;

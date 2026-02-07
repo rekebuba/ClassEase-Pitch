@@ -1,10 +1,11 @@
 import { useState } from "react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import LoginTab from "./tab/login-tab";
 import SignupTab from "./tab/signup-tab";
 
-const AuthActionBar = () => {
+function AuthActionBar() {
   const [activeTab, setActiveTab] = useState("login");
 
   return (
@@ -27,6 +28,6 @@ const AuthActionBar = () => {
       </TabsContent>
     </Tabs>
   );
-};
+}
 
 export default AuthActionBar;

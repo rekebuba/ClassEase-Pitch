@@ -6,20 +6,23 @@ import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { Toaster } from "sonner";
-import "../src/globals.css";
-import "./lib/api-client";
+
 import { queryClient } from "./lib/query-client";
 import { routeTree } from "./routeTree.gen";
 import { persister, store } from "./store/main-store";
+
+import "../src/globals.css";
+
+import "./lib/api-client";
 
 // Create a new router instance
 const router = createRouter({ routeTree });
 
 // Register the router instance for type safety
 declare module "@tanstack/react-router" {
-  interface Register {
+  type Register = {
     router: typeof router;
-  }
+  };
 }
 
 const rootElement = document.getElementById("root")!;

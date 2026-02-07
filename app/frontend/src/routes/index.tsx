@@ -1,12 +1,3 @@
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   ArrowRight,
@@ -35,6 +26,17 @@ import {
   Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
+
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 import classEaseImage from "../assets/images/ClassEase-no-slogan.png";
 
 export const Route = createFileRoute("/")({
@@ -63,7 +65,7 @@ export default function LandingPage() {
   // For testimonial auto-rotation
   useEffect(() => {
     const interval = setInterval(() => {
-      setActiveTestimonial((prev) => (prev + 1) % 3);
+      setActiveTestimonial(prev => (prev + 1) % 3);
     }, 5000);
     return () => clearInterval(interval);
   }, []);
@@ -187,7 +189,9 @@ export default function LandingPage() {
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
                   <a href="/signup">
                     <Button size="lg" className="gap-1">
-                      Get Started <ArrowRight className="h-4 w-4" />
+                      Get Started
+                      {" "}
+                      <ArrowRight className="h-4 w-4" />
                     </Button>
                   </a>
                   <a href="/demo">
@@ -198,7 +202,7 @@ export default function LandingPage() {
                 </div>
                 <div className="flex items-center space-x-4 pt-4">
                   <div className="flex -space-x-2">
-                    {[1, 2, 3, 4].map((i) => (
+                    {[1, 2, 3, 4].map(i => (
                       <div
                         key={i}
                         className="inline-block h-8 w-8 rounded-full bg-gray-200 ring-2 ring-white overflow-hidden"
@@ -212,8 +216,10 @@ export default function LandingPage() {
                     ))}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    Trusted by{" "}
-                    <span className="font-medium text-foreground">2,000+</span>{" "}
+                    Trusted by
+                    {" "}
+                    <span className="font-medium text-foreground">2,000+</span>
+                    {" "}
                     schools worldwide
                   </div>
                 </div>
@@ -261,7 +267,8 @@ export default function LandingPage() {
                   className="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition-shadow duration-300"
                 >
                   <h3 className="text-4xl font-bold text-blue-600">
-                    {stat.value.toLocaleString()}+
+                    {stat.value.toLocaleString()}
+                    +
                   </h3>
                   <p className="mt-2 text-gray-600">{stat.label}</p>
                 </div>
@@ -416,7 +423,9 @@ export default function LandingPage() {
                       ))}
                     </ul>
                     <Button className="mt-6">
-                      Learn More <ChevronRight className="h-4 w-4 ml-1" />
+                      Learn More
+                      {" "}
+                      <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
                   </div>
                   <div className="rounded-lg overflow-hidden shadow-xl">
@@ -451,7 +460,9 @@ export default function LandingPage() {
                       ))}
                     </ul>
                     <Button className="mt-6">
-                      Learn More <ChevronRight className="h-4 w-4 ml-1" />
+                      Learn More
+                      {" "}
+                      <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
                   </div>
                   <div className="rounded-lg overflow-hidden shadow-xl">
@@ -486,7 +497,9 @@ export default function LandingPage() {
                       ))}
                     </ul>
                     <Button className="mt-6">
-                      Learn More <ChevronRight className="h-4 w-4 ml-1" />
+                      Learn More
+                      {" "}
+                      <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
                   </div>
                   <div className="rounded-lg overflow-hidden shadow-xl">
@@ -521,7 +534,9 @@ export default function LandingPage() {
                       ))}
                     </ul>
                     <Button className="mt-6">
-                      Learn More <ChevronRight className="h-4 w-4 ml-1" />
+                      Learn More
+                      {" "}
+                      <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
                   </div>
                   <div className="rounded-lg overflow-hidden shadow-xl">
@@ -590,7 +605,9 @@ export default function LandingPage() {
 
                 <div className="mt-8">
                   <Button size="lg">
-                    Schedule a Demo <ArrowRight className="ml-2 h-4 w-4" />
+                    Schedule a Demo
+                    {" "}
+                    <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </div>
               </div>
@@ -629,7 +646,7 @@ export default function LandingPage() {
               <div className="relative bg-white rounded-xl shadow-lg p-6 md:p-12">
                 <div className="flex justify-center mb-6">
                   <div className="flex space-x-2">
-                    {[0, 1, 2].map((i) => (
+                    {[0, 1, 2].map(i => (
                       <button
                         key={i}
                         className={`h-2 rounded-full transition-all ${
@@ -679,7 +696,7 @@ export default function LandingPage() {
                       <div className="flex flex-col items-center text-center">
                         <div className="mb-6">
                           <div className="flex justify-center mb-4">
-                            {[1, 2, 3, 4, 5].map((star) => (
+                            {[1, 2, 3, 4, 5].map(star => (
                               <Star
                                 key={star}
                                 className="h-6 w-6 text-yellow-400 fill-yellow-400"
@@ -687,7 +704,9 @@ export default function LandingPage() {
                             ))}
                           </div>
                           <p className="text-lg italic text-muted-foreground mb-6">
-                            &quot;{testimonial.quote}&quot;
+                            &quot;
+                            {testimonial.quote}
+                            &quot;
                           </p>
                         </div>
                         <div className="flex flex-col items-center">
@@ -1423,7 +1442,11 @@ export default function LandingPage() {
         <div className="mt-12 pt-8 border-t px-5 md:px-7">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} ClassEase. All rights reserved.
+              ©
+              {" "}
+              {new Date().getFullYear()}
+              {" "}
+              ClassEase. All rights reserved.
             </p>
             <div className="mt-4 md:mt-0">
               <select className="text-sm bg-transparent border rounded px-2 py-1 text-muted-foreground">

@@ -1,25 +1,29 @@
-import { QueryParams } from "@/lib/types";
-import { ZodArray, ZodObject, ZodTypeAny } from "zod";
+import { ZodArray, ZodObject } from "zod";
 
-const toSnakeCase = (str: string): string =>
-  str
+import type { QueryParams } from "@/lib/types";
+import type { ZodTypeAny } from "zod";
+
+function toSnakeCase(str: string): string {
+  return str
     .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
     .replace(/([A-Z])([A-Z][a-z])/g, "$1_$2")
     .replace(/[-\s]+/g, "_")
-    .replace(/__+/g, "_")
+    .replace(/_{2,}/g, "_")
     .toLowerCase();
+}
 
-const toSnakeCasePath = (str: string): string =>
-  str.split(".").map(toSnakeCase).join(".");
+function toSnakeCasePath(str: string): string {
+  return str.split(".").map(toSnakeCase).join(".");
+}
 
-export const buildQueryParams = (schema: ZodTypeAny, options?: QueryParams) => {
+export function buildQueryParams(schema: ZodTypeAny, options?: QueryParams) {
   const params: Record<string, string> = {};
   if (!options) {
     options = parseZodSchema(schema);
   }
 
   // Flatten nested fields into fields array
-  let fields: string[] = [];
+  const fields: string[] = [];
 
   if (options.fields?.length) {
     fields.push(...options.fields.map(toSnakeCasePath));
@@ -28,7 +32,7 @@ export const buildQueryParams = (schema: ZodTypeAny, options?: QueryParams) => {
   if (options.nestedFields) {
     for (const [key, nested] of Object.entries(options.nestedFields)) {
       const skey = toSnakeCase(key);
-      fields.push(...nested.map((f) => `${skey}.${toSnakeCase(f)}`));
+      fields.push(...nested.map(f => `${skey}.${toSnakeCase(f)}`));
     }
   }
 
@@ -47,7 +51,7 @@ export const buildQueryParams = (schema: ZodTypeAny, options?: QueryParams) => {
   }
 
   return params;
-};
+}
 
 // Recursively build query params from Zod schema
 function parseZodSchema(
@@ -78,7 +82,8 @@ function parseZodSchema(
 
         // Assign nested fields
         nestedFields[key] = nested.fields;
-      } else {
+      }
+      else {
         fields.push(key);
       }
     }

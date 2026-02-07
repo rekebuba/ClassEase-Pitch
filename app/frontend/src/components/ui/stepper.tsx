@@ -29,29 +29,29 @@ const StepItemContext = createContext<StepItemContextValue | undefined>(
   undefined,
 );
 
-const useStepper = () => {
+function useStepper() {
   const context = useContext(StepperContext);
   if (!context) {
     throw new Error("useStepper must be used within a Stepper");
   }
   return context;
-};
+}
 
-const useStepItem = () => {
+function useStepItem() {
   const context = useContext(StepItemContext);
   if (!context) {
     throw new Error("useStepItem must be used within a StepperItem");
   }
   return context;
-};
+}
 
 // Components
-interface StepperProps extends React.HTMLAttributes<HTMLDivElement> {
+type StepperProps = {
   defaultValue?: number;
   value?: number;
   onValueChange?: (value: number) => void;
   orientation?: "horizontal" | "vertical";
-}
+} & React.HTMLAttributes<HTMLDivElement>;
 
 function Stepper({
   defaultValue = 0,
@@ -97,12 +97,12 @@ function Stepper({
 }
 
 // StepperItem
-interface StepperItemProps extends React.HTMLAttributes<HTMLDivElement> {
+type StepperItemProps = {
   step: number;
   completed?: boolean;
   disabled?: boolean;
   loading?: boolean;
-}
+} & React.HTMLAttributes<HTMLDivElement>;
 
 function StepperItem({
   step,
@@ -115,8 +115,8 @@ function StepperItem({
 }: StepperItemProps) {
   const { activeStep } = useStepper();
 
-  const state: StepState =
-    completed || step < activeStep
+  const state: StepState
+    = completed || step < activeStep
       ? "completed"
       : activeStep === step
         ? "active"
@@ -145,10 +145,9 @@ function StepperItem({
 }
 
 // StepperTrigger
-interface StepperTriggerProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+type StepperTriggerProps = {
   asChild?: boolean;
-}
+} & React.ButtonHTMLAttributes<HTMLButtonElement>;
 
 function StepperTrigger({
   asChild = false,
@@ -185,9 +184,9 @@ function StepperTrigger({
 }
 
 // StepperIndicator
-interface StepperIndicatorProps extends React.HTMLAttributes<HTMLDivElement> {
+type StepperIndicatorProps = {
   asChild?: boolean;
-}
+} & React.HTMLAttributes<HTMLDivElement>;
 
 function StepperIndicator({
   asChild = false,
@@ -207,29 +206,31 @@ function StepperIndicator({
       data-state={state}
       {...props}
     >
-      {asChild ? (
-        children
-      ) : (
-        <>
-          <span className="transition-all group-data-loading/step:scale-0 group-data-loading/step:opacity-0 group-data-loading/step:transition-none group-data-[state=completed]/step:scale-0 group-data-[state=completed]/step:opacity-0">
-            {step}
-          </span>
-          <CheckIcon
-            className="absolute scale-0 opacity-0 transition-all group-data-[state=completed]/step:scale-100 group-data-[state=completed]/step:opacity-100"
-            size={16}
-            aria-hidden="true"
-          />
-          {isLoading && (
-            <span className="absolute transition-all">
-              <LoaderCircleIcon
-                className="animate-spin"
-                size={14}
+      {asChild
+        ? (
+            children
+          )
+        : (
+            <>
+              <span className="transition-all group-data-loading/step:scale-0 group-data-loading/step:opacity-0 group-data-loading/step:transition-none group-data-[state=completed]/step:scale-0 group-data-[state=completed]/step:opacity-0">
+                {step}
+              </span>
+              <CheckIcon
+                className="absolute scale-0 opacity-0 transition-all group-data-[state=completed]/step:scale-100 group-data-[state=completed]/step:opacity-100"
+                size={16}
                 aria-hidden="true"
               />
-            </span>
+              {isLoading && (
+                <span className="absolute transition-all">
+                  <LoaderCircleIcon
+                    className="animate-spin"
+                    size={14}
+                    aria-hidden="true"
+                  />
+                </span>
+              )}
+            </>
           )}
-        </>
-      )}
     </span>
   );
 }
@@ -286,5 +287,5 @@ export {
   StepperItem,
   StepperSeparator,
   StepperTitle,
-  StepperTrigger
+  StepperTrigger,
 };

@@ -1,20 +1,20 @@
 "use client";
 
+import { LoaderIcon, Save } from "lucide-react";
+import { useState } from "react";
+
+import { useTableInstanceContext } from "@/components/data-table";
+import { Button } from "@/components/ui/button";
+
+import type { SearchParams, StudentsViews } from "@/lib/types";
 import type React from "react";
 
-import { useState } from "react";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { LoaderIcon, Save } from "lucide-react";
-import { useTableInstanceContext } from "@/components/data-table";
-import { SearchParams, StudentsViews } from "@/lib/types";
-
-interface UpdateViewFormProps {
+type UpdateViewFormProps = {
   isUpdated: boolean;
   currentView: StudentsViews;
   searchParams: SearchParams;
   handleUpdateView: (updatedView: StudentsViews) => void;
-}
+};
 
 export default function UpdateViewForm({
   isUpdated,
@@ -25,18 +25,19 @@ export default function UpdateViewForm({
   const [isLoading, setIsLoading] = useState(false);
   const { tableInstance } = useTableInstanceContext();
 
-  const visibleColumns =
-    tableInstance
+  const visibleColumns
+    = tableInstance
       ?.getVisibleFlatColumns()
       .filter(
-        (column) =>
+        column =>
           typeof column.accessorFn !== "undefined" && column.getCanHide(),
       )
-      .map((column) => column.id) || [];
+      .map(column => column.id) || [];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!currentView) return;
+    if (!currentView)
+      return;
 
     setIsLoading(true);
 
@@ -46,7 +47,7 @@ export default function UpdateViewForm({
       name: currentView.name,
       tableName: currentView.tableName,
       columns: visibleColumns,
-      searchParams: searchParams,
+      searchParams,
     };
 
     // Simulate API call
@@ -56,7 +57,8 @@ export default function UpdateViewForm({
     }, 500);
   };
 
-  if (!isUpdated || !currentView) return null;
+  if (!isUpdated || !currentView)
+    return null;
 
   return (
     <form onSubmit={handleSubmit}>

@@ -1,5 +1,3 @@
-import { StudentApplicationStatusEnum } from "@/client";
-import { Badge } from "@/components/ui/badge";
 import {
   Ban,
   CheckCircle,
@@ -10,9 +8,13 @@ import {
   XCircle,
 } from "lucide-react";
 
-interface StudentApplicationStatusBadgeProps {
+import { Badge } from "@/components/ui/badge";
+
+import type { StudentApplicationStatusEnum } from "@/client";
+
+type StudentApplicationStatusBadgeProps = {
   status: StudentApplicationStatusEnum;
-}
+};
 
 type StatusConfig = {
   [key in StudentApplicationStatusEnum]: {

@@ -1,44 +1,46 @@
-import { EmployeeApplicationStatusEnum as Status } from "@/client/types.gen";
 import { Ban, CheckCircle, Clock, LogOut, Pause, XCircle } from "lucide-react";
 import React from "react";
+
 import { Button } from "./ui/button";
 
-interface EmployeeStatusActionsProps {
+import type { EmployeeApplicationStatusEnum as Status } from "@/client/types.gen";
+
+type EmployeeStatusActionsProps = {
   currentStatus: Status;
   onStatusChange: (newStatus: Status) => void;
-}
+};
 
 const statusTransitions: Record<Status, Status[]> = {
-  pending: ["active", "approved", "rejected"],
-  rejected: ["pending", "interview-scheduled"],
-  active: ["inactive", "withdrawn"],
-  inactive: ["active", "withdrawn"],
+  "pending": ["active", "approved", "rejected"],
+  "rejected": ["pending", "interview-scheduled"],
+  "active": ["inactive", "withdrawn"],
+  "inactive": ["active", "withdrawn"],
   "interview-scheduled": ["approved", "rejected"],
-  approved: ["active", "withdrawn"],
-  withdrawn: ["pending"],
+  "approved": ["active", "withdrawn"],
+  "withdrawn": ["pending"],
 };
 
 const statusMeta: Record<
   Status,
   { label: string; icon: React.ElementType; className?: string }
 > = {
-  pending: {
+  "pending": {
     label: "Pending",
     icon: Clock,
     className:
       "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-500",
   },
-  rejected: {
+  "rejected": {
     label: "Reject",
     icon: XCircle,
     className: "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-500",
   },
-  active: {
+  "active": {
     label: "Activate",
     icon: CheckCircle,
     className: "bg-green-100 hover:bg-green-500",
   },
-  inactive: {
+  "inactive": {
     label: "Deactivate",
     icon: Pause,
     className: "bg-red-100 hover:bg-red-500",
@@ -48,12 +50,12 @@ const statusMeta: Record<
     icon: Ban,
     className: "bg-purple-100 text-purple-800 hover:bg-purple-500",
   },
-  approved: {
+  "approved": {
     label: "Approve",
     icon: CheckCircle,
     className: "bg-green-100 text-green-800 hover:bg-green-500",
   },
-  withdrawn: {
+  "withdrawn": {
     label: "Withdraw",
     icon: LogOut,
     className: "bg-gray-100 text-gray-800 hover:bg-gray-500",

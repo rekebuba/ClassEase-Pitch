@@ -1,7 +1,7 @@
 "use client";
 
-import type { Table } from "@tanstack/react-table";
-import { Check, ChevronsUpDown, LayoutIcon, Settings2 } from "lucide-react";
+import { Check, ChevronsUpDown, LayoutIcon } from "lucide-react";
+import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,11 +18,12 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import * as React from "react";
 
-interface DataTableColumnsVisibilityProps<TData> {
+import type { Table } from "@tanstack/react-table";
+
+type DataTableColumnsVisibilityProps<TData> = {
   table: Table<TData>;
-}
+};
 
 export function DataTableColumnsVisibility<TData>({
   table,
@@ -32,7 +33,7 @@ export function DataTableColumnsVisibility<TData>({
       table
         .getAllColumns()
         .filter(
-          (column) =>
+          column =>
             typeof column.accessorFn !== "undefined" && column.getCanHide(),
         ),
     [table],
@@ -62,12 +63,11 @@ export function DataTableColumnsVisibility<TData>({
           <CommandList>
             <CommandEmpty>No columns found.</CommandEmpty>
             <CommandGroup>
-              {columns.map((column) => (
+              {columns.map(column => (
                 <CommandItem
                   key={column.id}
                   onSelect={() =>
-                    column.toggleVisibility(!column.getIsVisible())
-                  }
+                    column.toggleVisibility(!column.getIsVisible())}
                 >
                   <span className="truncate">
                     {column.columnDef.meta?.label ?? column.id}

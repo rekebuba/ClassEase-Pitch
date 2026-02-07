@@ -1,10 +1,12 @@
-import { EmployeeRegistrationForm } from "@/client/types.gen";
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 
-interface EmployeeRegistrationFormState {
+import type { EmployeeRegistrationForm } from "@/client/types.gen";
+import type { PayloadAction } from "@reduxjs/toolkit";
+
+type EmployeeRegistrationFormState = {
   data: EmployeeRegistrationForm;
   step: number;
-}
+};
 
 const initialFormData: EmployeeRegistrationForm = {
   // Personal Information
@@ -81,6 +83,6 @@ export const employeeRegistrationFormSlice = createSlice({
   },
 });
 
-export const { setFormData, setFormStep, resetForm } =
-  employeeRegistrationFormSlice.actions;
+export const { setFormData, setFormStep, resetForm }
+  = employeeRegistrationFormSlice.actions;
 export default employeeRegistrationFormSlice.reducer;

@@ -1,12 +1,12 @@
-import { teacherColumn } from "./teacherColumns";
 import { DataTable } from "./data-table";
+import { teacherColumn } from "./teacherColumns";
 
-const TeacherTable = ({ data }) => {
+function TeacherTable({ data }) {
   return (
     <div className="container mx-auto py-10">
       <DataTable columns={teacherColumn} data={data} />
     </div>
   );
-};
+}
 
 export default TeacherTable;

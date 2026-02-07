@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Check, Cloud, CloudOff } from "lucide-react";
+import { useEffect, useState } from "react";
 
-interface AutoSaveIndicatorProps {
+import { Badge } from "@/components/ui/badge";
+
+type AutoSaveIndicatorProps = {
   lastSaved?: Date;
   isOnline?: boolean;
-}
+};
 
 export default function AutoSaveIndicator({
   lastSaved,
@@ -46,7 +47,9 @@ export default function AutoSaveIndicator({
         className="bg-green-100 text-green-800 border-green-200"
       >
         <Check className="h-3 w-3 mr-1" />
-        Saved at {formatTime(lastSaved)}
+        Saved at
+        {" "}
+        {formatTime(lastSaved)}
       </Badge>
     );
   }

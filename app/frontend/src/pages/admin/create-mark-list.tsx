@@ -30,15 +30,15 @@ import { toast } from "sonner";
  * @property {Array<string>} selectedSubjects - State for managing the selected subjects.
  * @property {string} newCheckboxLabel - State for managing the label of a new subject checkbox.
  * @property {boolean} AddNewCheckbox - State for toggling the addition of a new subject checkbox.
- * @property {Array<Object>} assessmentTypes - State for managing the list of assessment types and their percentages.
+ * @property {Array<object>} assessmentTypes - State for managing the list of assessment types and their percentages.
  * @property {number} selectedSemester - State for managing the selected semester.
  * @property {string} schoolYear - State for managing the selected school year.
  * @property {boolean} selectAll - State for toggling the selection of all subjects.
  * @property {number} totalAssessment - State for managing the total percentage of assessments.
  * @property {number} currentYear - State for managing the current year.
- * @property {Object} alert - State for managing alert messages.
+ * @property {object} alert - State for managing alert messages.
  */
-const AdminCreateMarkList = () => {
+function AdminCreateMarkList() {
   const subjectsList = [
     "Math",
     "Science",
@@ -72,7 +72,7 @@ const AdminCreateMarkList = () => {
    * @param {Event} e - The change event.
    */
   const handleGradeChange = (e) => {
-    setSelectedGrade(parseFloat(e.target.value));
+    setSelectedGrade(Number.parseFloat(e.target.value));
   };
 
   /**
@@ -82,7 +82,7 @@ const AdminCreateMarkList = () => {
    * @param {*} e
    */
   const handleSemesterChange = (e) => {
-    setSelectedSemester(parseFloat(e.target.value));
+    setSelectedSemester(Number.parseFloat(e.target.value));
   };
 
   /**
@@ -94,9 +94,10 @@ const AdminCreateMarkList = () => {
     const { value, checked } = e.target;
     if (checked) {
       setSelectedSection([...selectedSection, value]);
-    } else {
+    }
+    else {
       setSelectedSection(
-        selectedSection.filter((section) => section !== value),
+        selectedSection.filter(section => section !== value),
       );
     }
   };
@@ -110,9 +111,10 @@ const AdminCreateMarkList = () => {
     const { value, checked } = e.target;
     if (checked) {
       setSelectedSubjects([...selectedSubjects, value]);
-    } else {
+    }
+    else {
       setSelectedSubjects(
-        selectedSubjects.filter((subject) => subject !== value),
+        selectedSubjects.filter(subject => subject !== value),
       );
     }
   };
@@ -124,21 +126,21 @@ const AdminCreateMarkList = () => {
    */
   const addCheckbox = (e) => {
     e.preventDefault();
-    var modifiedLabel = newCheckboxLabel.trim();
-    modifiedLabel =
-      modifiedLabel.charAt(0).toUpperCase() + modifiedLabel.slice(1);
+    let modifiedLabel = newCheckboxLabel.trim();
+    modifiedLabel
+      = modifiedLabel.charAt(0).toUpperCase() + modifiedLabel.slice(1);
     if (modifiedLabel !== "" && !subjects.includes(modifiedLabel)) {
       setSubjects([...subjects, modifiedLabel]);
       setNewCheckboxLabel("");
     }
   };
-  /**
-   * @function handleTotalAssessment
-   * @description Calculates and sets the total percentage of assessments.
-   */
+    /**
+     * @function handleTotalAssessment
+     * @description Calculates and sets the total percentage of assessments.
+     */
   const handleTotalAssessment = () => {
     const totalPercentage = assessmentTypes.reduce((acc, { percentage }) => {
-      return acc + (percentage ? parseFloat(percentage) : 0); // ensure it's a number
+      return acc + (percentage ? Number.parseFloat(percentage) : 0); // ensure it's a number
     }, 0);
     setTotalAssessment(totalPercentage);
   };
@@ -151,11 +153,12 @@ const AdminCreateMarkList = () => {
   const handleValidAssessment = () => {
     // Calculate sum using reduce
     const totalPercentage = assessmentTypes.reduce((acc, { percentage }) => {
-      return acc + (percentage ? parseFloat(percentage) : 0); // ensure it's a number
+      return acc + (percentage ? Number.parseFloat(percentage) : 0); // ensure it's a number
     }, 0);
     if (totalPercentage >= 100) {
       return false;
-    } else {
+    }
+    else {
       return true;
     }
   };
@@ -167,7 +170,8 @@ const AdminCreateMarkList = () => {
   const handleSelectAll = () => {
     if (selectAll) {
       setSelectedSubjects([]);
-    } else {
+    }
+    else {
       setSelectedSubjects(subjectsList);
     }
     setSelectAll(!selectAll);
@@ -211,17 +215,20 @@ const AdminCreateMarkList = () => {
         style: { color: "red" },
       });
       return;
-    } else if (selectedSubjects.length === 0) {
+    }
+    else if (selectedSubjects.length === 0) {
       toast.error("Please select at least one subject.", {
         style: { color: "red" },
       });
       return;
-    } else if (assessmentTypes.length < 1) {
+    }
+    else if (assessmentTypes.length < 1) {
       toast.error("Please add assessment.", {
         style: { color: "red" },
       });
       return;
-    } else if (totalAssessment !== 100) {
+    }
+    else if (totalAssessment !== 100) {
       toast.error("Total assessment percentage should be 100%.", {
         style: { color: "red" },
       });
@@ -249,22 +256,24 @@ const AdminCreateMarkList = () => {
       const response = await adminApi.createMarkList(markListData);
 
       // If successful, show a success alert
-      toast.success(response.data["message"], {
+      toast.success(response.data.message, {
         description: currentTime,
         style: { color: "green" },
       });
-    } catch (error) {
+    }
+    catch (error) {
       if (
-        error.response &&
-        error.response.data &&
-        error.response.data["error"]
+        error.response
+        && error.response.data
+        && error.response.data.error
       ) {
-        toast.error(error.response.data["error"], {
+        toast.error(error.response.data.error, {
           description:
             "Please try again later, if the problem persists, contact the administrator.",
           style: { color: "red" },
         });
-      } else {
+      }
+      else {
         toast.error("An unexpected error occurred.", {
           description:
             "Please try again later, if the problem persists, contact the administrator.",
@@ -277,7 +286,7 @@ const AdminCreateMarkList = () => {
   return (
     <div className="admin-create-marklist-container">
       <h2>Create Students Mark List</h2>
-      <form onSubmit={(e) => checkValidData(e)} className="marklist-form">
+      <form onSubmit={e => checkValidData(e)} className="marklist-form">
         <div className="grade-section">
           <div className="form-group">
             <label htmlFor="grade">Grade:</label>
@@ -286,9 +295,11 @@ const AdminCreateMarkList = () => {
               value={selectedGrade}
               onChange={handleGradeChange}
             >
-              {Array.from({ length: 12 }, (_, i) => i + 1).map((grade) => (
+              {Array.from({ length: 12 }, (_, i) => i + 1).map(grade => (
                 <option key={grade} value={grade}>
-                  Grade {grade}
+                  Grade
+                  {" "}
+                  {grade}
                 </option>
               ))}
             </select>
@@ -300,9 +311,11 @@ const AdminCreateMarkList = () => {
               value={selectedSemester}
               onChange={handleSemesterChange}
             >
-              {Array.from({ length: 2 }, (_, i) => i + 1).map((semester) => (
+              {Array.from({ length: 2 }, (_, i) => i + 1).map(semester => (
                 <option key={semester} value={semester}>
-                  Semester {semester}
+                  Semester
+                  {" "}
+                  {semester}
                 </option>
               ))}
             </select>
@@ -315,9 +328,11 @@ const AdminCreateMarkList = () => {
               onChange={handleYearChange}
             >
               {Array.from({ length: 3 }, (_, i) => currentYear - i).map(
-                (year) => (
+                year => (
                   <option key={year} value={year}>
-                    {year}/{(year + 1) % 100}
+                    {year}
+                    /
+                    {(year + 1) % 100}
                   </option>
                 ),
               )}
@@ -328,7 +343,7 @@ const AdminCreateMarkList = () => {
         <div className="form-group subjects">
           <label htmlFor="section">Section:</label>
           <div className="checkbox-group">
-            {["A", "B", "C"].map((section) => (
+            {["A", "B", "C"].map(section => (
               <div className="subject-container" key={section}>
                 <label>
                   <input
@@ -353,7 +368,7 @@ const AdminCreateMarkList = () => {
             />
           </label>
           <div className="checkbox-group">
-            {subjects.map((subject) => (
+            {subjects.map(subject => (
               <div className="subject-container" key={subject}>
                 <label>
                   <input
@@ -376,7 +391,9 @@ const AdminCreateMarkList = () => {
                   marginLeft: "10px",
                 }}
               >
-                <FaPlus /> Add
+                <FaPlus />
+                {" "}
+                Add
               </button>
             )}
           </div>
@@ -385,10 +402,10 @@ const AdminCreateMarkList = () => {
               <input
                 type="text"
                 value={newCheckboxLabel}
-                onChange={(e) => setNewCheckboxLabel(e.target.value)}
+                onChange={e => setNewCheckboxLabel(e.target.value)}
                 placeholder="New subject"
               />
-              <button onClick={(e) => addCheckbox(e)}>Add Subject</button>
+              <button onClick={e => addCheckbox(e)}>Add Subject</button>
               <button onClick={() => setAddNewCheckbox(false)}>Cancel</button>
             </div>
           )}
@@ -407,7 +424,8 @@ const AdminCreateMarkList = () => {
                       : "",
               }}
             >
-              {totalAssessment}%
+              {totalAssessment}
+              %
             </span>
           </h3>
           {assessmentTypes.map((assessment, index) => (
@@ -458,22 +476,25 @@ const AdminCreateMarkList = () => {
                 required
                 onChange={(e) => {
                   const newAssessments = [...assessmentTypes];
-                  newAssessments[index].percentage = parseFloat(e.target.value);
+                  newAssessments[index].percentage = Number.parseFloat(e.target.value);
                   setAssessmentTypes(newAssessments);
                   handleTotalAssessment(e);
                 }}
               >
                 <option value="">Percentage</option>
-                {percentages.map((percentage) => (
+                {percentages.map(percentage => (
                   <option key={percentage} value={percentage}>
-                    {percentage}%
+                    {percentage}
+                    %
                   </option>
                 ))}
               </select>
             </div>
           ))}
           <button className="add-assessment-btn" onClick={addAssessmentType}>
-            <FaPlus /> Add Assessment
+            <FaPlus />
+            {" "}
+            Add Assessment
           </button>
         </div>
         <button type="submit" className="submit-btn">
@@ -482,6 +503,6 @@ const AdminCreateMarkList = () => {
       </form>
     </div>
   );
-};
+}
 
 export default AdminCreateMarkList;

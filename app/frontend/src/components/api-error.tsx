@@ -1,16 +1,17 @@
+import { AlertCircle, RefreshCw } from "lucide-react";
+
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { AlertCircle, RefreshCw } from "lucide-react";
 
-interface ApiErrorProps {
+type ApiErrorProps = {
   title?: string;
   message?: string;
   onRetry?: () => void;
   retryText?: string;
   className?: string;
   variant?: "default" | "destructive";
-}
+};
 
 export function ApiError({
   title = "Something went wrong",

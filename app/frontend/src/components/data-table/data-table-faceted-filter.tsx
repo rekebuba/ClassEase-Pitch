@@ -1,10 +1,10 @@
 "use client";
 
-import type { Option } from "@/types/data-table";
-import type { Column } from "@tanstack/react-table";
 import { Check, PlusCircle } from "lucide-react";
+import * as React from "react";
+import { useState } from "react";
 
-import { Badge, badgeVariants } from "@/components/ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -21,12 +21,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
-import * as React from "react";
-import { useFilters } from "@/utils/filter-context";
 import { dataTableConfig } from "@/config/data-table";
-import { useState } from "react";
-import { DataTableFilterOption } from "@/types";
+import { cn } from "@/lib/utils";
+import { useFilters } from "@/utils/filter-context";
+
 import {
   Select,
   SelectContent,
@@ -35,7 +33,10 @@ import {
   SelectValue,
 } from "../ui/select";
 
-interface DataTableFacetedFilterProps<TData> {
+import type { Option } from "@/types/data-table";
+import type { Column } from "@tanstack/react-table";
+
+type DataTableFacetedFilterProps<TData> = {
   column: Column<TData>;
   title: string;
   options: any[];
@@ -43,7 +44,7 @@ interface DataTableFacetedFilterProps<TData> {
   onFilterChange?: (value: any) => void;
   isActive?: boolean;
   isAdvancedMode?: boolean;
-}
+};
 
 export function DataTableFacetedFilter<TData>({
   column,
@@ -66,8 +67,8 @@ export function DataTableFacetedFilter<TData>({
 
   const operator = React.useMemo(
     () =>
-      comparisonOperators.find((op) => op.value === columnFilter?.toString()) ??
-      comparisonOperators[0],
+      comparisonOperators.find(op => op.value === columnFilter?.toString())
+      ?? comparisonOperators[0],
     [column, comparisonOperators],
   );
 
@@ -77,18 +78,21 @@ export function DataTableFacetedFilter<TData>({
 
   const onItemSelect = React.useCallback(
     (option: Option, isSelected: boolean) => {
-      if (!column) return;
+      if (!column)
+        return;
 
       if (multiple) {
         const newSelectedValues = new Set(selectedValues);
         if (isSelected) {
           newSelectedValues.delete(option.value);
-        } else {
+        }
+        else {
           newSelectedValues.add(option.value);
         }
         const filterValues = Array.from(newSelectedValues);
         onFilterChange?.({ value: filterValues, operator: selectedOperator });
-      } else {
+      }
+      else {
         removeFilter(column.id);
       }
     },
@@ -97,7 +101,8 @@ export function DataTableFacetedFilter<TData>({
 
   const onOperatorSelect = React.useCallback(
     (value: string) => {
-      if (!column) return;
+      if (!column)
+        return;
 
       setSelectedOperator(value);
       const filterValues = Array.from(selectedValues);
@@ -111,7 +116,7 @@ export function DataTableFacetedFilter<TData>({
       {isAdvancedMode && (
         <Select
           value={selectedOperator}
-          onValueChange={(value) => onOperatorSelect(value)}
+          onValueChange={value => onOperatorSelect(value)}
         >
           <SelectTrigger className="h-9 w-[150px] bg-white border-2 hover:border-blue-300 transition-colors">
             <SelectValue placeholder="Select filter" />
@@ -135,9 +140,9 @@ export function DataTableFacetedFilter<TData>({
               className={cn(
                 "h-9 min-w-[180px] rounded-md border border-input bg-background text-sm ring-offset-background transition-all duration-200",
                 "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
-                isActive &&
-                  selectedValues &&
-                  "ring-2 ring-blue-500/20 border-blue-300",
+                isActive
+                && selectedValues
+                && "ring-2 ring-blue-500/20 border-blue-300",
               )}
             >
               <PlusCircle />
@@ -155,26 +160,30 @@ export function DataTableFacetedFilter<TData>({
                     {selectedValues.size}
                   </Badge>
                   <div className="hidden items-center gap-1 lg:flex">
-                    {selectedValues.size > 2 ? (
-                      <Badge
-                        variant="secondary"
-                        className="rounded-sm px-1 font-normal"
-                      >
-                        {selectedValues.size} selected
-                      </Badge>
-                    ) : (
-                      options
-                        .filter((option) => selectedValues.has(option.value))
-                        .map((option) => (
+                    {selectedValues.size > 2
+                      ? (
                           <Badge
                             variant="secondary"
-                            key={option.value}
                             className="rounded-sm px-1 font-normal"
                           >
-                            {option.value}
+                            {selectedValues.size}
+                            {" "}
+                            selected
                           </Badge>
-                        ))
-                    )}
+                        )
+                      : (
+                          options
+                            .filter(option => selectedValues.has(option.value))
+                            .map(option => (
+                              <Badge
+                                variant="secondary"
+                                key={option.value}
+                                className="rounded-sm px-1 font-normal"
+                              >
+                                {option.value}
+                              </Badge>
+                            ))
+                        )}
                   </div>
                 </>
               )}

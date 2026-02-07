@@ -1,21 +1,23 @@
-import { AcademicTermTypeEnum } from "@/client/types.gen";
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
 
-interface YearState {
+import type { AcademicTermTypeEnum } from "@/client/types.gen";
+import type { PayloadAction } from "@reduxjs/toolkit";
+
+type YearState = {
   id: string | undefined;
   name: string | undefined;
   startDate: string | undefined;
   endDate: string | undefined;
   calendarType: AcademicTermTypeEnum | undefined;
-}
+};
 
-interface YearPayload {
+type YearPayload = {
   id: string;
   name: string;
   startDate: string;
   endDate: string;
   calendarType: AcademicTermTypeEnum;
-}
+};
 
 const initialState: YearState = {
   id: undefined,

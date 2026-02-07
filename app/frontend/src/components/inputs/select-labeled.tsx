@@ -1,4 +1,5 @@
-import { FieldValues, Path, PathValue, useFormContext } from "react-hook-form";
+import { useState } from "react";
+import { useFormContext } from "react-hook-form";
 
 import {
   FormControl,
@@ -8,14 +9,15 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
 import {
   Select,
   SelectContent,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ReactNode, useState } from "react";
+
+import type { ReactNode } from "react";
+import type { FieldValues, Path, PathValue } from "react-hook-form";
 
 type SelectWithLabelProps<T extends FieldValues, V> = {
   fieldTitle: string;
@@ -67,7 +69,8 @@ export function SelectWithLabel<T extends FieldValues, V>({
                   shouldDirty: true,
                 });
                 setValue(val);
-              } else {
+              }
+              else {
                 field.onChange(val);
               }
             }}
@@ -82,11 +85,13 @@ export function SelectWithLabel<T extends FieldValues, V>({
             </FormControl>
             <SelectContent>{children}</SelectContent>
           </Select>
-          {form.formState.errors[nameInSchema] ? (
-            <FormMessage />
-          ) : (
-            description && <FormDescription>{description}</FormDescription>
-          )}
+          {form.formState.errors[nameInSchema]
+            ? (
+                <FormMessage />
+              )
+            : (
+                description && <FormDescription>{description}</FormDescription>
+              )}
         </FormItem>
       )}
     />

@@ -1,9 +1,13 @@
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Users } from "lucide-react";
+import { toast } from "sonner";
+
 import {
   deleteStudentsMutation,
   getStudentsOptions,
   getStudentsQueryKey,
 } from "@/client/@tanstack/react-query.gen";
-import { StudentBasicInfo } from "@/client/types.gen";
 import { studentBasicInfoColumns } from "@/components/data-table/student-registration/columns";
 import { StudentRegistrationTable } from "@/components/data-table/student-registration/student-registration-table";
 import { Badge } from "@/components/ui/badge";
@@ -17,10 +21,8 @@ import {
 } from "@/components/ui/card";
 import { queryClient } from "@/lib/query-client";
 import { store } from "@/store/main-store";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Users } from "lucide-react";
-import { toast } from "sonner";
+
+import type { StudentBasicInfo } from "@/client/types.gen";
 
 export const Route = createFileRoute("/admin/registration/students")({
   component: RouteComponent,
@@ -86,7 +88,9 @@ function RouteComponent() {
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="text-lg px-3 py-1">
-              {students?.length} Total Registrations
+              {students?.length}
+              {" "}
+              Total Registrations
             </Badge>
           </div>
         </div>
@@ -105,8 +109,7 @@ function RouteComponent() {
               </div>
               <Button
                 onClick={() =>
-                  navigate({ to: "/admin/registration/new-student" })
-                }
+                  navigate({ to: "/admin/registration/new-student" })}
                 className="bg-blue-600 text-white hover:bg-blue-700"
               >
                 New Application

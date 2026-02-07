@@ -1,11 +1,12 @@
-import { RoleType } from "@/lib/enums";
 import { createContext, useContext, useState } from "react";
 
-interface AppSidebarContextType {
+import type { RoleType } from "@/lib/enums";
+
+type AppSidebarContextType = {
   role: RoleType;
   isCollapsed: boolean;
   toggleSidebar: () => void;
-}
+};
 
 const AppSidebarContext = createContext<AppSidebarContextType | undefined>(
   undefined,

@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -7,17 +10,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { DataTable } from "@/features/teacher/tables";
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+
 import { studentColumn } from "./tables/studentColumns";
 
 /**
  * TeacherStudentsList component for managing and displaying a list of students.
  *
  * @component
- * @param {Object} props - The component props.
+ * @param {object} props - The component props.
  * @param {Function} props.toggleDropdown - Function to toggle dropdown visibility.
- * @param {Object} props.studentSummary - Summary information about students.
+ * @param {object} props.studentSummary - Summary information about students.
  *
  * @returns {JSX.Element} The rendered component.
  *
@@ -27,7 +29,7 @@ import { studentColumn } from "./tables/studentColumns";
  * @description
  * This component allows teachers to manage and filter a list of students based on various criteria such as grade, section, semester, and year. It also provides search functionality and pagination for navigating through the list of students.
  */
-const TeacherStudentList = () => {
+function TeacherStudentList() {
   const [selectedGrade, setSelectedGrade] = useState("");
   const [selectedSubject, setSelectedSubject] = useState("");
   const [selectedSemester, setSelectedSemester] = useState(1);
@@ -46,31 +48,33 @@ const TeacherStudentList = () => {
     e?.preventDefault(); // Prevent default if event exists
     try {
       const response = await teacherApi.getStudents({
-        subject_code: assigned[selectedSubject]["subject_code"] || "",
+        subject_code: assigned[selectedSubject].subject_code || "",
         grade: selectedGrade,
         year: selectedYear,
         semester: selectedSemester,
       });
 
       const data = {
-        students: response.data["students"],
-        meta: response.data["meta"],
-        header: response.data["header"],
+        students: response.data.students,
+        meta: response.data.meta,
+        header: response.data.header,
       };
 
       setAllStudents(data); // Store all students
-    } catch (error) {
+    }
+    catch (error) {
       if (
-        error.response &&
-        error.response.data &&
-        error.response.data["error"]
+        error.response
+        && error.response.data
+        && error.response.data.error
       ) {
-        toast.error(error.response.data["error"], {
+        toast.error(error.response.data.error, {
           description:
             "Please try again later, if the problem persists, contact the administrator.",
           style: { color: "red" },
         });
-      } else {
+      }
+      else {
         toast.error("An unexpected error occurred.", {
           description:
             "Please try again later, if the problem persists, contact the administrator.",
@@ -86,7 +90,7 @@ const TeacherStudentList = () => {
    * @param {Event} e - The change event.
    * @returns {void}
    */
-  const handleGradeChange = (value) => setSelectedGrade(value);
+  const handleGradeChange = value => setSelectedGrade(value);
 
   /**
    * @function handleSemesterChange
@@ -94,8 +98,8 @@ const TeacherStudentList = () => {
    * @param {Event} e - The change event.
    * @returns {void}
    */
-  const handleSemesterChange = (value) =>
-    setSelectedSemester(parseFloat(value));
+  const handleSemesterChange = value =>
+    setSelectedSemester(Number.parseFloat(value));
 
   /**
    * @function handleYearChange
@@ -103,9 +107,9 @@ const TeacherStudentList = () => {
    * @param {Event} e - The change event.
    * @returns {void}
    */
-  const handleYearChange = (value) => setSelectedYear(value);
+  const handleYearChange = value => setSelectedYear(value);
 
-  const handleSubjectChange = (value) => setSelectedSubject(value);
+  const handleSubjectChange = value => setSelectedSubject(value);
 
   /**
    * @hook useEffect
@@ -123,18 +127,20 @@ const TeacherStudentList = () => {
         if (response.status === 200) {
           setAssigned(response.data);
         }
-      } catch (error) {
+      }
+      catch (error) {
         if (
-          error.response &&
-          error.response.data &&
-          error.response.data["error"]
+          error.response
+          && error.response.data
+          && error.response.data.error
         ) {
-          toast.error(error.response.data["error"], {
+          toast.error(error.response.data.error, {
             description:
               "Please try again later, if the problem persists, contact the administrator.",
             style: { color: "red" },
           });
-        } else {
+        }
+        else {
           toast.error("An unexpected error occurred.", {
             description:
               "Please try again later, if the problem persists, contact the administrator.",
@@ -148,7 +154,7 @@ const TeacherStudentList = () => {
 
   return (
     <div className="flex flex-col p-6 bg-gray-100">
-      <form onSubmit={(e) => handleSearch(e)}>
+      <form onSubmit={e => handleSearch(e)}>
         <section className="flex flex-wrap justify-between bg-white p-4 rounded shadow w-full mb-10">
           <div style={{ width: "9rem" }}>
             <Select onValueChange={handleSubjectChange} required>
@@ -156,9 +162,9 @@ const TeacherStudentList = () => {
                 <SelectValue placeholder="Select Subject" />
               </SelectTrigger>
               <SelectContent>
-                {assigned &&
-                  Object.keys(assigned).length !== 0 &&
-                  Object.keys(assigned).map((subject) => (
+                {assigned
+                  && Object.keys(assigned).length !== 0
+                  && Object.keys(assigned).map(subject => (
                     <SelectItem key={subject} type="text" value={subject}>
                       {subject}
                     </SelectItem>
@@ -172,11 +178,13 @@ const TeacherStudentList = () => {
                 <SelectValue placeholder="Select Grade" />
               </SelectTrigger>
               <SelectContent>
-                {assigned &&
-                  assigned[selectedSubject] &&
-                  assigned[selectedSubject]["grades"].map((grade) => (
+                {assigned
+                  && assigned[selectedSubject]
+                  && assigned[selectedSubject].grades.map(grade => (
                     <SelectItem key={grade} value={`${grade}`}>
-                      Grade {grade}
+                      Grade
+                      {" "}
+                      {grade}
                     </SelectItem>
                   ))}
               </SelectContent>
@@ -188,9 +196,11 @@ const TeacherStudentList = () => {
                 <SelectValue placeholder="Select Semester" />
               </SelectTrigger>
               <SelectContent>
-                {Array.from({ length: 2 }, (_, i) => i + 1).map((semester) => (
+                {Array.from({ length: 2 }, (_, i) => i + 1).map(semester => (
                   <SelectItem key={semester} value={`${semester}`}>
-                    Semester {semester}
+                    Semester
+                    {" "}
+                    {semester}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -203,12 +213,14 @@ const TeacherStudentList = () => {
               </SelectTrigger>
               <SelectContent>
                 {Array.from({ length: 3 }, (_, i) => currentYear - i).map(
-                  (year) => (
+                  year => (
                     <SelectItem
                       key={year}
                       value={`${year}/${(year + 1) % 100}`}
                     >
-                      {year}/{(year + 1) % 100}
+                      {year}
+                      /
+                      {(year + 1) % 100}
                     </SelectItem>
                   ),
                 )}
@@ -225,6 +237,6 @@ const TeacherStudentList = () => {
       />
     </div>
   );
-};
+}
 
 export default TeacherStudentList;

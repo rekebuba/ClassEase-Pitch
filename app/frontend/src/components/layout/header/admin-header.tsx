@@ -1,3 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
+import { Bell, Search } from "lucide-react";
+
 import { getYearsOptions } from "@/client/@tanstack/react-query.gen";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,9 +25,6 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAppDispatch } from "@/hooks/use-store";
 import { store } from "@/store/main-store";
 import { setYear } from "@/store/slice/year-slice";
-import { useQuery } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
-import { Bell, Search } from "lucide-react";
 
 export default function AdminHeader() {
   const navigate = useNavigate();
@@ -49,7 +50,7 @@ export default function AdminHeader() {
         <Select
           defaultValue={store.getState().year.name || yearData?.[0]?.name}
           onValueChange={(value) => {
-            const year = yearData?.find((y) => y.name === value);
+            const year = yearData?.find(y => y.name === value);
             if (year) {
               dispatch(
                 setYear({
@@ -68,7 +69,7 @@ export default function AdminHeader() {
             <SelectValue placeholder="Select Academic Year" />
           </SelectTrigger>
           <SelectContent>
-            {yearData?.map((year) => (
+            {yearData?.map(year => (
               <SelectItem value={year.name}>{year.name}</SelectItem>
             ))}
           </SelectContent>

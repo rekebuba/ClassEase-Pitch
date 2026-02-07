@@ -1,14 +1,18 @@
+import { jwtPayloadSchema } from "@/lib/validations";
+
+import type { JwtPayloadType } from "@/lib/validations";
+
 export const emailPattern = {
-  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+  value: /^[\w.%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
   message: "Invalid email address",
 };
 
 export const namePattern = {
-  value: /^[A-Za-z\s\u00C0-\u017F]{1,30}$/,
+  value: /^[A-Z\s\u00C0-\u017F]{1,30}$/i,
   message: "Invalid name",
 };
 
-export const passwordRules = (isRequired = true) => {
+export function passwordRules(isRequired = true) {
   const rules: any = {
     minLength: {
       value: 8,
@@ -21,12 +25,9 @@ export const passwordRules = (isRequired = true) => {
   }
 
   return rules;
-};
+}
 
-export const confirmPasswordRules = (
-  getValues: () => any,
-  isRequired = true,
-) => {
+export function confirmPasswordRules(getValues: () => any, isRequired = true) {
   const rules: any = {
     validate: (value: string) => {
       const password = getValues().password || getValues().new_password;
@@ -39,7 +40,7 @@ export const confirmPasswordRules = (
   }
 
   return rules;
-};
+}
 
 // Map RHF's dirtyFields over the `data` received by `handleSubmit` and return the changed subset of that data.
 export function getDirtyValues<T extends object>(
@@ -54,10 +55,10 @@ export function getDirtyValues<T extends object>(
   // Handle arrays - if any item is dirty, return entire array
   if (Array.isArray(dirtyFields)) {
     const hasDirtyItems = dirtyFields.some(
-      (item) =>
-        item === true ||
-        (typeof item === "object" && item !== null) ||
-        Array.isArray(item),
+      item =>
+        item === true
+        || (typeof item === "object" && item !== null)
+        || Array.isArray(item),
     );
     return hasDirtyItems ? allValues : undefined!;
   }
@@ -88,7 +89,7 @@ export function uniqueByKey<T, K extends keyof T>(
   array: T[],
   key: K = "id" as K,
 ): T[] {
-  return [...new Map(array.map((item) => [item[key], item])).values()];
+  return [...new Map(array.map(item => [item[key], item])).values()];
 }
 
 export function academicYearRange(
@@ -102,7 +103,7 @@ export function academicYearRange(
   const end = new Date(endDate);
   const startYear = start.getFullYear();
   const endYear = end.getFullYear();
-  if (isNaN(startYear) || isNaN(endYear)) {
+  if (Number.isNaN(startYear) || Number.isNaN(endYear)) {
     return "";
   }
   if (startYear === endYear) {
@@ -119,30 +120,31 @@ export function extractFirstWord(loc: string[], msg: string): string | null {
 
   const [, afterComma] = msg.split(",", 2);
 
-  if (!afterComma) return null;
+  if (!afterComma)
+    return null;
 
   // Trim spaces and split into words
   const firstWord = afterComma.trim().split(/\s+/)[0];
   return firstWord || null;
 }
 
-export const getInitials = (firstName: string, fatherName: string) => {
+export function getInitials(firstName: string, fatherName: string) {
   return `${firstName.charAt(0)}${fatherName.charAt(0)}`.toUpperCase();
-};
+}
 
-export const calculateAge = (dateOfBirth: string) => {
+export function calculateAge(dateOfBirth: string) {
   const today = new Date();
   const birthDate = new Date(dateOfBirth);
   let age = today.getFullYear() - birthDate.getFullYear();
   const monthDiff = today.getMonth() - birthDate.getMonth();
   if (
-    monthDiff < 0 ||
-    (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    monthDiff < 0
+    || (monthDiff === 0 && today.getDate() < birthDate.getDate())
   ) {
     age--;
   }
   return age;
-};
+}
 
 export function getEnv<K extends keyof ImportMetaEnv>(
   key: K,
@@ -154,4 +156,26 @@ export function getEnv<K extends keyof ImportMetaEnv>(
   }
 
   return value;
+}
+
+// Helper function to decode the JWT token
+export function decodeToken(token: string): JwtPayloadType | null {
+  try {
+    // JWT tokens are in the format: header.payload.signature
+    const payload = token.split(".")[1]; // Get the payload part
+    const decodedPayload = atob(payload); // Decode base64
+    const parsed = JSON.parse(decodedPayload); // Parse the JSON payload
+
+    const result = jwtPayloadSchema.safeParse(parsed);
+    if (!result.success) {
+      console.error(result.error);
+      return null;
+    }
+
+    return result.data;
+  }
+  catch (error) {
+    console.error("Error decoding token:", error);
+    return null;
+  }
 }

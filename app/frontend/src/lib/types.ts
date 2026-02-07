@@ -1,6 +1,4 @@
-import { LinkOptions } from "@tanstack/react-router";
-import { z } from "zod";
-import {
+import type {
   AverageRangeSchema,
   GradeCountsSchema,
   RangeSchema,
@@ -15,6 +13,8 @@ import {
   userSchema,
   ViewSchema,
 } from "./validations";
+import type { LinkOptions } from "@tanstack/react-router";
+import type { z } from "zod";
 
 export type RoleProps = "admin" | "teacher" | "student";
 export type UserDataProps = z.infer<typeof userSchema>;
@@ -108,7 +108,7 @@ export type RangeSchema = z.infer<typeof RangeSchema>;
 export type AverageRange = z.infer<typeof AverageRangeSchema>;
 export type GradeCounts = z.infer<typeof GradeCountsSchema>;
 export type SectionCounts = z.infer<typeof SectionCountSchema>;
-export interface StudentsDataResult {
+export type StudentsDataResult = {
   data: Student[];
   pageCount: number;
   tableId: TableId;
@@ -119,7 +119,7 @@ export interface StudentsDataResult {
   isLoading: boolean;
   error: Error | null;
   refetch: () => Promise<void>;
-}
+};
 
 export type SearchParams = z.infer<typeof searchParamsCache>;
 export type View = z.infer<typeof ViewSchema>;

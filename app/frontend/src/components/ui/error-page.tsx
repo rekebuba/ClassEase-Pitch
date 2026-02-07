@@ -1,13 +1,12 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { ArrowLeft, Home } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import errorIllustration from "@/assets/illustrations/error.svg";
+import { Link, useNavigate } from "react-router-dom";
 
-interface ErrorPageProps {
+import errorIllustration from "@/assets/illustrations/error.svg";
+import { Button } from "@/components/ui/button";
+
+type ErrorPageProps = {
   statusCode: number;
   title: string;
   description: string;
@@ -26,7 +25,7 @@ interface ErrorPageProps {
       icon?: React.ReactNode;
     };
   };
-}
+};
 
 export function ErrorPage({
   statusCode,
@@ -72,57 +71,63 @@ export function ErrorPage({
         <p className="mb-8 text-lg text-muted-foreground">{description}</p>
 
         <div className="flex flex-col space-y-3 sm:flex-row sm:space-x-3 sm:space-y-0">
-          {actions?.primary ? (
-            <Button asChild size="lg" className="shadow-lg">
-              <Link to={actions.primary.href || "/"}>
-                {actions.primary.icon || <Home className="mr-2 h-5 w-5" />}
-                {actions.primary.label}
-              </Link>
-            </Button>
-          ) : (
-            <Button asChild size="lg" className="shadow-lg">
-              <Link to="/">
-                <Home className="mr-2 h-5 w-5" />
-                Back to Home
-              </Link>
-            </Button>
-          )}
-
-          {actions?.secondary ? (
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={actions.secondary.onClick}
-              asChild={!!actions.secondary.href}
-              className="bg-background/80 backdrop-blur-sm"
-            >
-              {actions.secondary.href ? (
-                <Link to={actions.secondary.href}>
-                  {actions.secondary.icon || (
-                    <ArrowLeft className="mr-2 h-5 w-5" />
-                  )}
-                  {actions.secondary.label}
-                </Link>
-              ) : (
-                <>
-                  {actions.secondary.icon || (
-                    <ArrowLeft className="mr-2 h-5 w-5" />
-                  )}
-                  {actions.secondary.label}
-                </>
+          {actions?.primary
+            ? (
+                <Button asChild size="lg" className="shadow-lg">
+                  <Link to={actions.primary.href || "/"}>
+                    {actions.primary.icon || <Home className="mr-2 h-5 w-5" />}
+                    {actions.primary.label}
+                  </Link>
+                </Button>
+              )
+            : (
+                <Button asChild size="lg" className="shadow-lg">
+                  <Link to="/">
+                    <Home className="mr-2 h-5 w-5" />
+                    Back to Home
+                  </Link>
+                </Button>
               )}
-            </Button>
-          ) : (
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={handleBack}
-              className="bg-background/80 backdrop-blur-sm"
-            >
-              <ArrowLeft className="mr-2 h-5 w-5" />
-              Go Back
-            </Button>
-          )}
+
+          {actions?.secondary
+            ? (
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={actions.secondary.onClick}
+                  asChild={!!actions.secondary.href}
+                  className="bg-background/80 backdrop-blur-sm"
+                >
+                  {actions.secondary.href
+                    ? (
+                        <Link to={actions.secondary.href}>
+                          {actions.secondary.icon || (
+                            <ArrowLeft className="mr-2 h-5 w-5" />
+                          )}
+                          {actions.secondary.label}
+                        </Link>
+                      )
+                    : (
+                        <>
+                          {actions.secondary.icon || (
+                            <ArrowLeft className="mr-2 h-5 w-5" />
+                          )}
+                          {actions.secondary.label}
+                        </>
+                      )}
+                </Button>
+              )
+            : (
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={handleBack}
+                  className="bg-background/80 backdrop-blur-sm"
+                >
+                  <ArrowLeft className="mr-2 h-5 w-5" />
+                  Go Back
+                </Button>
+              )}
         </div>
       </div>
     </div>

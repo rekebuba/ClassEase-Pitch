@@ -1,8 +1,9 @@
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { GraduationCap } from "lucide-react";
+
 import { AuthLayout } from "@/components";
 import AuthActionBar from "@/components/authentication/auth-action-bar";
 import { store } from "@/store/main-store";
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { GraduationCap } from "lucide-react";
 
 export const Route = createFileRoute("/authentication/")({
   component: AuthPage,

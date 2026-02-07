@@ -1,4 +1,4 @@
-const DateDisplay = () => {
+function DateDisplay() {
   const date = new Date();
   const week = [
     "Sunday",
@@ -23,6 +23,6 @@ const DateDisplay = () => {
       </section>
     </figure>
   );
-};
+}
 
 export default DateDisplay;

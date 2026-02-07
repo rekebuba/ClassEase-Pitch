@@ -1,40 +1,51 @@
 // eslint.config.js
-import tsPlugin from "@typescript-eslint/eslint-plugin";
-import parser from "@typescript-eslint/parser";
-import jsxA11y from "eslint-plugin-jsx-a11y";
-import prettier from "eslint-plugin-prettier";
-import reactPlugin from "eslint-plugin-react";
-import reactHooks from "eslint-plugin-react-hooks";
+import antfu from "@antfu/eslint-config";
 
-export default [
-  {
-    files: ["**/*.{ts,tsx,js,jsx}"],
-    languageOptions: {
-      parser,
-      ecmaVersion: "latest",
-      sourceType: "module",
-    },
-    plugins: {
-      "@typescript-eslint": tsPlugin,
-      react: reactPlugin,
-      "react-hooks": reactHooks,
-      "jsx-a11y": jsxA11y,
-      prettier: prettier,
-    },
-    rules: {
-      "prettier/prettier": "warn",
-      "react/react-in-jsx-scope": "off",
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        { argsIgnorePattern: "^_", vars: "all", varsIgnorePattern: "^_" },
-      ],
-      "react-hooks/rules-of-hooks": "error",
-      "react-hooks/exhaustive-deps": "warn",
-      eqeqeq: "warn",
-      semi: ["error", "always"],
-    },
-    settings: {
-      react: { version: "detect" },
-    },
+export default antfu({
+  type: "app",
+  typescript: true,
+  formatters: true,
+  stylistic: {
+    indent: 2,
+    semi: true,
+    quotes: "double",
   },
-];
+}, {
+  rules: {
+    "ts/no-redeclare": "off",
+    "ts/consistent-type-definitions": ["error", "type"],
+    "no-console": ["warn"],
+    "antfu/no-top-level-await": ["off"],
+    "node/prefer-global/process": ["off"],
+    "node/no-process-env": ["error"],
+    "unused-imports/no-unused-imports": "warn",
+    "no-unused-vars": "off",
+    "unused-imports/no-unused-vars": [
+      "warn",
+      {
+        vars: "all",
+        varsIgnorePattern: "^_",
+        args: "after-used",
+        argsIgnorePattern: "^_",
+      },
+    ],
+    "perfectionist/sort-imports": ["error", {
+      type: "alphabetical",
+      order: "asc",
+      groups: [
+        "builtin",
+        "external",
+        "internal",
+        "parent",
+        "sibling",
+        "index",
+        "type",
+      ],
+      newlinesBetween: 1,
+    }],
+    "unicorn/filename-case": ["error", {
+      case: "kebabCase",
+      ignore: ["README.md", "Dockerfile"],
+    }],
+  },
+});

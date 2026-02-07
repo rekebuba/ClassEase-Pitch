@@ -1,3 +1,5 @@
+import { Link } from "@tanstack/react-router";
+
 import {
   SidebarGroup,
   SidebarGroupLabel,
@@ -5,16 +7,16 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { type NavBarItem } from "@/lib/types";
-import { Link } from "@tanstack/react-router";
-import { JSX } from "react";
+
+import type { NavBarItem } from "@/lib/types";
+import type { JSX } from "react";
 
 export function NavSidebar({ items }: { items: NavBarItem[] }): JSX.Element {
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Reports</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
+        {items.map(item => (
           <SidebarMenuItem key={item.title}>
             <SidebarMenuButton asChild>
               <Link
