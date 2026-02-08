@@ -22,6 +22,8 @@ def init_db(session: Session) -> None:
             identification=settings.FIRST_SUPERUSER,
             password=hash_password,
             role=RoleEnum.ADMIN,
+            email=settings.FIRST_SUPERUSER_EMAIL,
+            phone=settings.FIRST_SUPERUSER_PHONE,
         )
         admin = Admin(
             user_id=user_in.id,
@@ -30,9 +32,6 @@ def init_db(session: Session) -> None:
             grand_father_name=settings.FIRST_SUPERUSER_GRAND_FATHER_NAME,
             date_of_birth=settings.FIRST_SUPERUSER_DATE_OF_BIRTH,
             gender=settings.FIRST_SUPERUSER_GENDER,
-            email=settings.FIRST_SUPERUSER_EMAIL,
-            phone=settings.FIRST_SUPERUSER_PHONE,
-            address=settings.FIRST_SUPERUSER_ADDRESS,
         )
 
         session.add(user_in)

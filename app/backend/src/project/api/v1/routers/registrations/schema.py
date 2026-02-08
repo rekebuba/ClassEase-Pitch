@@ -1,5 +1,4 @@
 import uuid
-from datetime import date
 from typing import Optional
 
 from pydantic import (
@@ -7,6 +6,7 @@ from pydantic import (
     ConfigDict,
     EmailStr,
     Field,
+    PastDate,
     model_validator,
 )
 from pydantic_extra_types.phone_numbers import PhoneNumber
@@ -18,7 +18,6 @@ from project.utils.enum import (
     ExperienceYearEnum,
     GenderEnum,
     HighestEducationEnum,
-    MaritalStatusEnum,
     StudentApplicationStatusEnum,
 )
 from project.utils.utils import to_camel
@@ -37,6 +36,40 @@ class RegistrationResponse(BaseModel):
     message: str
 
 
+class AdminRegistration(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    first_name: str
+    father_name: str
+    grand_father_name: str
+    date_of_birth: PastDate
+    gender: GenderEnum
+    username: str
+    password: str
+    phone: str
+    email: EmailStr
+
+
+class ParentRegistrationForm(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    first_name: str = Field(min_length=2, max_length=50)
+    last_name: str = Field(min_length=2, max_length=50)
+    gender: GenderEnum
+    email: EmailStr
+    phone: PhoneNumber
+    relation: str = Field(min_length=2, max_length=50)
+    emergency_contact_phone: Optional[PhoneNumber] = Field(default=None)
+
+
 class StudRegStep1(BaseModel):
     model_config = ConfigDict(
         from_attributes=True,
@@ -47,7 +80,7 @@ class StudRegStep1(BaseModel):
     first_name: str = Field(min_length=2, max_length=50)
     father_name: str = Field(min_length=2, max_length=50)
     grand_father_name: Optional[str] = Field(default=None)
-    date_of_birth: date
+    date_of_birth: PastDate
     gender: GenderEnum
     nationality: Optional[str] = Field(default=None, min_length=2, max_length=100)
     student_photo: Optional[str] = Field(default=None)
@@ -83,13 +116,9 @@ class StudRegStep3(BaseModel):
         alias_generator=to_camel,
     )
 
-    address: str
     city: str = Field(min_length=2, max_length=50)
     state: str = Field(min_length=2, max_length=50)
     postal_code: str = Field(min_length=2, max_length=20)
-    father_phone: PhoneNumber
-    mother_phone: PhoneNumber
-    parent_email: EmailStr
 
 
 class StudRegStep4(BaseModel):
@@ -99,13 +128,8 @@ class StudRegStep4(BaseModel):
         alias_generator=to_camel,
     )
 
-    guardian_name: Optional[str] = Field(default=None)
-    guardian_phone: Optional[PhoneNumber] = Field(default=None)
-    guardian_relation: Optional[str] = Field(default=None)
     emergency_contact_name: Optional[str] = Field(default=None)
     emergency_contact_phone: Optional[PhoneNumber]
-    sibling_in_school: bool = Field(default=False)
-    sibling_details: Optional[str] = Field(default=None)
 
 
 class StudRegStep5(BaseModel):
@@ -145,6 +169,7 @@ class StudentRegistrationForm(
     StudRegStep4,
     StudRegStep5,
 ):
+    parent_id: uuid.UUID
     status: StudentApplicationStatusEnum = Field(
         default=StudentApplicationStatusEnum.PENDING
     )
@@ -159,11 +184,10 @@ class EmployeeRegStep1(BaseModel):
 
     first_name: str = Field(min_length=2, max_length=50)
     father_name: str = Field(min_length=2, max_length=50)
-    grand_father_name: Optional[str] = Field(default=None)
-    date_of_birth: date
+    grand_father_name: str
+    date_of_birth: PastDate
     gender: GenderEnum
-    nationality: Optional[str] = Field(default=None, min_length=2, max_length=100)
-    marital_status: Optional[MaritalStatusEnum] = Field(default=None)
+    nationality: str
     social_security_number: str
 
 
@@ -174,13 +198,12 @@ class EmployeeRegStep2(BaseModel):
         alias_generator=to_camel,
     )
 
-    address: str
     city: str = Field(min_length=2, max_length=50)
     state: str = Field(min_length=2, max_length=50)
     country: str
-    primary_phone: PhoneNumber
+    phone: PhoneNumber
     secondary_phone: Optional[PhoneNumber] = Field(default=None)
-    personal_email: EmailStr
+    email: EmailStr
     emergency_contact_name: str = Field(min_length=2, max_length=50)
     emergency_contact_relation: str = Field(min_length=2, max_length=50)
     emergency_contact_phone: PhoneNumber
@@ -222,21 +245,7 @@ class EmployeeRegStep4(BaseModel):
         alias_generator=to_camel,
     )
 
-    reference1_name: str
-    reference1_organization: str
-    reference1_phone: str
-    reference1_email: Optional[EmailStr] = Field(default=None)
-
-
-class EmployeeRegStep5(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
     resume: Optional[str] = Field(default=None)
-    background_check: Optional[str] = Field(default=None)
     agree_to_terms: bool = Field(validate_default=True)
     agree_to_background_check: bool = Field(validate_default=True)
 
@@ -246,6 +255,5 @@ class EmployeeRegistrationForm(
     EmployeeRegStep2,
     EmployeeRegStep3,
     EmployeeRegStep4,
-    EmployeeRegStep5,
 ):
     status: EmployeeApplicationStatusEnum = EmployeeApplicationStatusEnum.PENDING
