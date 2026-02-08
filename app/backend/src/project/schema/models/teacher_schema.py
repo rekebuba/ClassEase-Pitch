@@ -12,7 +12,6 @@ from project.utils.enum import (
     ExperienceYearEnum,
     GenderEnum,
     HighestEducationEnum,
-    MaritalStatusEnum,
     ScheduleEnum,
 )
 from project.utils.utils import to_camel
@@ -45,12 +44,6 @@ class TeacherSchema(BaseModel):
     state: str
     postal_code: str
     country: str
-    primary_phone: str
-    personal_email: str
-    emergency_contact_name: str
-    emergency_contact_relation: str
-    emergency_contact_phone: str
-    emergency_contact_email: str
     highest_degree: HighestEducationEnum
     university: str
     graduation_year: int
@@ -58,12 +51,6 @@ class TeacherSchema(BaseModel):
     position_applying_for: str
     years_of_experience: ExperienceYearEnum
     preferred_schedule: ScheduleEnum
-    reference1_name: str
-    reference1_title: str
-    reference1_organization: str
-    reference1_phone: str
-    reference1_email: str
-    marital_status: Optional[MaritalStatusEnum] = None
     secondary_phone: Optional[str] = None
     additional_degrees: Optional[str] = None
     teaching_license: Optional[bool] = False
@@ -78,17 +65,6 @@ class TeacherSchema(BaseModel):
     has_convictions: bool = False
     conviction_details: Optional[str] = None
     has_disciplinary_actions: bool = False
-    disciplinary_details: Optional[str] = None
-    reference2_name: Optional[str] = None
-    reference2_title: Optional[str] = None
-    reference2_organization: Optional[str] = None
-    reference2_phone: Optional[str] = None
-    reference2_email: Optional[str] = None
-    reference3_name: Optional[str] = None
-    reference3_title: Optional[str] = None
-    reference3_organization: Optional[str] = None
-    reference3_phone: Optional[str] = None
-    reference3_email: Optional[str] = None
     resume: Optional[str] = None
     cover_letter: Optional[str] = None
     transcripts: Optional[str] = None

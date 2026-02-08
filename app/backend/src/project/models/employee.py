@@ -1,4 +1,5 @@
 import uuid
+from datetime import date
 from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import (
@@ -25,7 +26,6 @@ from project.utils.enum import (
     ExperienceYearEnum,
     GenderEnum,
     HighestEducationEnum,
-    MaritalStatusEnum,
 )
 from project.utils.utils import sort_grade_key
 
@@ -46,7 +46,7 @@ class Employee(BaseModel):
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
     father_name: Mapped[str] = mapped_column(String(50), nullable=False)
     grand_father_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    date_of_birth: Mapped[Date] = mapped_column(Date, nullable=False)
+    date_of_birth: Mapped[date] = mapped_column(Date, nullable=False)
     gender: Mapped[GenderEnum] = mapped_column(
         Enum(
             GenderEnum,
@@ -60,12 +60,9 @@ class Employee(BaseModel):
     social_security_number: Mapped[str] = mapped_column(String(50), nullable=False)
 
     # Contact Information
-    address: Mapped[str] = mapped_column(Text, nullable=False)
     city: Mapped[str] = mapped_column(String(50), nullable=False)
     state: Mapped[str] = mapped_column(String(50), nullable=False)
     country: Mapped[str] = mapped_column(String(50), nullable=False)
-    primary_phone: Mapped[str] = mapped_column(String(50), nullable=False)
-    personal_email: Mapped[str] = mapped_column(String(50), nullable=False)
 
     # Emergency Contact
     emergency_contact_name: Mapped[str] = mapped_column(String(50), nullable=False)
@@ -103,24 +100,6 @@ class Employee(BaseModel):
         nullable=False,
     )
 
-    # Background & References
-    reference1_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    reference1_organization: Mapped[str] = mapped_column(String(50), nullable=False)
-    reference1_phone: Mapped[str] = mapped_column(String(50), nullable=False)
-
-    # Additional Information (Default values)
-    reference1_email: Mapped[Optional[str]] = mapped_column(String(50), default=None)
-    marital_status: Mapped[Optional[MaritalStatusEnum]] = mapped_column(
-        Enum(
-            MaritalStatusEnum,
-            name="marital_status_enum",
-            values_callable=lambda x: [e.value for e in x],
-            native_enum=False,
-        ),
-        nullable=True,
-        default=None,
-    )
-
     secondary_phone: Mapped[Optional[str]] = mapped_column(
         String(50), nullable=True, default=None
     )
@@ -132,7 +111,6 @@ class Employee(BaseModel):
     resume: Mapped[Optional[str]] = mapped_column(
         String(50), nullable=True, default=None
     )
-    background_check: Mapped[Optional[str]] = mapped_column(Text, default=None)
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(),
@@ -147,11 +125,6 @@ class Employee(BaseModel):
         nullable=True,
         default=None,
     )  # For Teaching positions
-    major_subject: AssociationProxy[Optional["Subject"]] = association_proxy(
-        "subject",
-        "name",
-        default=None,
-    )
     status: Mapped[EmployeeApplicationStatusEnum] = mapped_column(
         Enum(
             EmployeeApplicationStatusEnum,

@@ -13,6 +13,8 @@ from project.models.grade_section_link import GradeSectionLink
 from project.models.grade_stream_link import GradeStreamLink
 from project.models.grade_stream_subject import GradeStreamSubject
 from project.models.mark_list import MarkList
+from project.models.parent import Parent
+from project.models.parent_student_link import ParentStudentLink
 from project.models.registration import Registration
 from project.models.saved_query_view import SavedQueryView
 from project.models.section import Section
@@ -40,12 +42,16 @@ __all__ = [
     "Admin",
     "Assessment",
     "BlacklistToken",
+    "Employee",
+    "EmployeeYearLink",
     "Event",
     "Grade",
     "GradeSectionLink",
     "GradeStreamLink",
     "GradeStreamSubject",
     "MarkList",
+    "Parent",
+    "ParentStudentLink",
     "Registration",
     "SavedQueryView",
     "Section",
@@ -62,11 +68,9 @@ __all__ = [
     "Subject",
     "SubjectYearlyAverage",
     "Table",
-    "Employee",
-    "TeacherRecordLink",
     "TeacherRecord",
+    "TeacherRecordLink",
     "User",
     "Year",
     "YearlySubject",
-    "EmployeeYearLink",
 ]

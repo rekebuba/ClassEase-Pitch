@@ -3,7 +3,7 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, Optional
 
-from pydantic import BaseModel, ConfigDict, PastDate
+from pydantic import BaseModel, ConfigDict, EmailStr, PastDate
 
 from project.utils.enum import GenderEnum
 from project.utils.utils import to_camel
@@ -30,18 +30,8 @@ class AdminSchema(BaseModel):
     grand_father_name: str
     date_of_birth: PastDate
     gender: GenderEnum
-    email: str
     phone: str
-    address: str
-
-    @classmethod
-    def default_fields(cls) -> set[str]:
-        return {
-            "id",
-            "first_name",
-            "father_name",
-            "grand_father_name",
-        }
+    email: EmailStr
 
 
 class AdminRelatedSchema(BaseModel):

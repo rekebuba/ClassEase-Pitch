@@ -6,6 +6,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
+from project.api.v1.routers.auth.service import (
+    get_google_user,
+    verify_google_token,
+)
 from project.api.v1.routers.dependencies import SessionDep, TokenDep, get_db
 from project.api.v1.routers.schema import HTTPError
 from project.core.config import settings
@@ -55,6 +59,32 @@ async def login(
         )
 
     access_token = create_access_token(subject=str(user.id), role=user.role)
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.post(
+    "/google",
+    response_model=Token,
+    responses={
+        status.HTTP_401_UNAUTHORIZED: {
+            "model": HTTPError,
+            "description": "Invalid Google token or user not found",
+        },
+    },
+)
+def google_login(token: str, db: Session = Depends(get_db)):
+    google_data = verify_google_token(token)
+
+    user = get_google_user(db, google_data)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+        )
+
+    access_token = create_access_token(subject=str(user.id), role=user.role)
+
     return {"access_token": access_token, "token_type": "bearer"}
 
 

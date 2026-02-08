@@ -2,16 +2,16 @@ import uuid
 from datetime import date
 from typing import List, Optional
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, EmailStr
+from pydantic import AwareDatetime, BaseModel, ConfigDict
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
 from project.schema.models.subject_schema import BasicSubjectSchema
 from project.utils.enum import (
     EmployeeApplicationStatusEnum,
+    EmployeePositionEnum,
     ExperienceYearEnum,
     GenderEnum,
     HighestEducationEnum,
-    MaritalStatusEnum,
 )
 from project.utils.utils import to_camel
 
@@ -36,8 +36,6 @@ class EmployeeBasicInfo(BaseModel):
     city: str
     state: str
     country: str
-    primary_phone: PhoneNumber
-    personal_email: EmailStr
     emergency_contact_name: str
     emergency_contact_relation: str
     emergency_contact_phone: PhoneNumber
@@ -45,13 +43,8 @@ class EmployeeBasicInfo(BaseModel):
     university: str
     graduation_year: int
     gpa: float
-    position: str
+    position: EmployeePositionEnum
     years_of_experience: ExperienceYearEnum
-    reference1_name: str
-    reference1_organization: str
-    reference1_phone: PhoneNumber
-    reference1_email: Optional[EmailStr]
-    marital_status: Optional[MaritalStatusEnum]
     secondary_phone: Optional[str]
     resume: Optional[str]
     status: EmployeeApplicationStatusEnum

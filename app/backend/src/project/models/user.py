@@ -3,7 +3,7 @@
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Enum, String
+from sqlalchemy import Boolean, Enum, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
@@ -12,6 +12,7 @@ from project.utils.enum import RoleEnum
 if TYPE_CHECKING:
     from project.models.admin import Admin
     from project.models.employee import Employee
+    from project.models.parent import Parent
     from project.models.saved_query_view import SavedQueryView
     from project.models.student import Student
 
@@ -38,10 +39,18 @@ class User(BaseModel):
         ),
         nullable=False,
     )
+    email: Mapped[str] = mapped_column(String(120), nullable=True)
+    phone: Mapped[str] = mapped_column(String(50), nullable=False)
+    google_sub: Mapped[str] = mapped_column(
+        String(120),
+        unique=True,
+        nullable=True,
+        default=None,
+    )
     image_path: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
-    # is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+    is_active: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    # One-to-many relationship
+    # One-to-One relationship
     admin: Mapped["Admin"] = relationship(
         "Admin",
         back_populates="user",
@@ -52,6 +61,14 @@ class User(BaseModel):
     )
     employee: Mapped["Employee"] = relationship(
         "Employee",
+        back_populates="user",
+        uselist=False,
+        init=False,
+        repr=False,
+        passive_deletes=True,
+    )
+    parent: Mapped["Parent"] = relationship(
+        "Parent",
         back_populates="user",
         uselist=False,
         init=False,

@@ -8,6 +8,7 @@ class RoleEnum(str, Enum):
     ADMIN = "admin"
     TEACHER = "teacher"
     STUDENT = "student"
+    PARENT = "parent"
     OTHER = "other"
 
 
