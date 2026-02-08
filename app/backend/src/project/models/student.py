@@ -2,6 +2,7 @@
 """Module for Student class"""
 
 import uuid
+from datetime import date
 from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import (
@@ -24,6 +25,7 @@ if TYPE_CHECKING:
     from project.models.assessment import Assessment
     from project.models.grade import Grade
     from project.models.mark_list import MarkList
+    from project.models.parent import Parent
     from project.models.section import Section
     from project.models.stream import Stream
     from project.models.student_term_record import StudentTermRecord
@@ -47,7 +49,7 @@ class Student(BaseModel):
     # Personal Information
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
     father_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    date_of_birth: Mapped[Date] = mapped_column(Date, nullable=False)
+    date_of_birth: Mapped[date] = mapped_column(Date, nullable=False)
     gender: Mapped[GenderEnum] = mapped_column(
         Enum(
             GenderEnum,
@@ -59,13 +61,9 @@ class Student(BaseModel):
     )
 
     # Contact Information
-    address: Mapped[str] = mapped_column(Text, nullable=False)
     city: Mapped[str] = mapped_column(String(50), nullable=False)
     state: Mapped[str] = mapped_column(String(50), nullable=False)
     postal_code: Mapped[str] = mapped_column(String(20), nullable=False)
-    father_phone: Mapped[str] = mapped_column(String(25), nullable=False)
-    mother_phone: Mapped[str] = mapped_column(String(25), nullable=False)
-    parent_email: Mapped[str] = mapped_column(String(120), nullable=False)
 
     grand_father_name: Mapped[Optional[str]] = mapped_column(
         String(50), nullable=True, default=None
@@ -89,31 +87,10 @@ class Student(BaseModel):
     previous_school: Mapped[Optional[str]] = mapped_column(
         String(100), nullable=True, default=None
     )
-    previous_grades: Mapped[Optional[str]] = mapped_column(
-        Text, nullable=True, default=None
-    )
     transportation: Mapped[Optional[str]] = mapped_column(
         String(50), nullable=True, default=None
     )
-    guardian_name: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-    guardian_phone: Mapped[Optional[str]] = mapped_column(
-        String(25), nullable=True, default=None
-    )
-    guardian_relation: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-    emergency_contact_name: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-    emergency_contact_phone: Mapped[Optional[str]] = mapped_column(
-        String(25), nullable=True, default=None
-    )
     disability_details: Mapped[Optional[str]] = mapped_column(
-        Text, nullable=True, default=None
-    )
-    sibling_details: Mapped[Optional[str]] = mapped_column(
         Text, nullable=True, default=None
     )
     medical_details: Mapped[Optional[str]] = mapped_column(
@@ -121,7 +98,6 @@ class Student(BaseModel):
     )
 
     # Defaulted Fields
-    sibling_in_school: Mapped[bool] = mapped_column(Boolean, default=False)
     has_medical_condition: Mapped[bool] = mapped_column(Boolean, default=False)
     has_disability: Mapped[bool] = mapped_column(Boolean, default=False)
     is_transfer: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -159,6 +135,16 @@ class Student(BaseModel):
         repr=False,
         passive_deletes=True,
         init=False,
+    )
+
+    # Many-to-many relationships
+    parents: Mapped[List["Parent"]] = relationship(
+        "Parent",
+        secondary="parent_student_links",
+        back_populates="students",
+        default_factory=list,
+        repr=False,
+        passive_deletes=True,
     )
 
     # Relationships

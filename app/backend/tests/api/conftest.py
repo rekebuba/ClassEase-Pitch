@@ -8,12 +8,14 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
 from project.api.v1.routers.dependencies import get_db
+from project.api.v1.routers.registrations.schema import RegistrationResponse
 from project.core.config import settings
 from project.core.db import engine, init_db
 from project.main import app
+from project.models import Parent
 from project.models.base.base_model import Base
 from project.models.year import Year
-from tests.factories.api_data import NewYearFactory
+from tests.factories.api_data import NewYearFactory, ParentRegistrationFactory
 from tests.utils.utils import get_auth_header
 
 # Session factory
@@ -138,3 +140,32 @@ def year(
     assert year is not None
 
     return year
+
+
+@pytest.fixture(scope="module")
+def parent(
+    client: TestClient,
+    db_session: Session,
+    admin_token_headers: Dict[str, str],
+) -> Parent:
+    """Fixture to create a parent for testing"""
+
+    parent = ParentRegistrationFactory.build()
+
+    r = client.post(
+        f"{settings.API_V1_STR}/register/parents",
+        json=parent.model_dump(mode="json", by_alias=True),
+        headers=admin_token_headers,
+    )
+
+    assert r.status_code == 201
+
+    result = RegistrationResponse.model_validate_json(r.text)
+
+    assert "Parent Registered Successfully" == result.message
+
+    parent = db_session.get(Parent, result.id)
+
+    assert parent is not None
+
+    return parent

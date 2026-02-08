@@ -5,7 +5,7 @@ import uuid
 from datetime import date
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import UUID, Date, Enum, ForeignKey, String, Text
+from sqlalchemy import UUID, Date, Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
@@ -34,9 +34,6 @@ class Admin(BaseModel):
         ),
         nullable=False,
     )
-    email: Mapped[str] = mapped_column(String(120), nullable=False)
-    phone: Mapped[str] = mapped_column(String(25), nullable=False)
-    address: Mapped[str] = mapped_column(Text, nullable=False)
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(),
         ForeignKey("users.id", ondelete="CASCADE"),
@@ -44,6 +41,7 @@ class Admin(BaseModel):
         default=None,
     )
 
+    # One-to-One Relationship
     user: Mapped[Optional["User"]] = relationship(
         "User",
         back_populates="admin",

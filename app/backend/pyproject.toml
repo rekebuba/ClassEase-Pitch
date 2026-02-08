@@ -26,6 +26,7 @@ dependencies = [
     "gunicorn>=25.0.1",
     "alembic>=1.18.3",
     "alembic-postgresql-enum>=1.9.0",
+    "google-auth>=2.48.0",
 ]
 
 [project.optional-dependencies]
@@ -36,7 +37,7 @@ dev = [
     "sqlalchemy[mypy]>=2.0.40",
     "mypy>=1.15.0",
     "pre-commit>=4.2.0",
-    "pytest>=8.3.5",
+    "pytest>=9.0.2",
     "pytest-cov>=6.1.1",
     "pytest-xdist>=3.6.1",
     "types-factory-boy>=0.4.1",
@@ -47,25 +48,26 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools]
-package-dir = {"" = "src"}
+package-dir = { "" = "src" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
-[tool.pytest.ini_options]
-testpaths = ["tests"]       # Replaces pytestArgs
-pythonpath = ["."]       # Ensures correct import resolution
-addopts = "-rav -s"           # Optional: Add verbose flag
+[tool.pytest]
+testpaths = ["tests"]    # Replaces pytestArgs
+addopts = ["-rav", "-s"] # Optional: Add verbose flag
 
 [dependency-groups]
-dev = [
-    "ruff>=0.12.0",
-]
+dev = ["ruff>=0.12.0"]
 
 [tool.ruff]
 extend-include = ["*.ipynb"]
 line-length = 88
-lint.select = ["E", "F", "I"] # E: pycodestyle errors, F: Pyflakes errors, I: isort
+lint.select = [
+    "E",
+    "F",
+    "I",
+] # E: pycodestyle errors, F: Pyflakes errors, I: isort
 lint.fixable = ["ALL"] # Only auto-fix import errors
 src = ["src"]
 
@@ -99,9 +101,7 @@ script_location = "%(here)s/alembic"
 # file_template = "%%(year)d/%%(month).2d/%%(day).2d_%%(hour).2d%%(minute).2d_%%(second).2d_%%(rev)s_%%(slug)s"
 
 # additional paths to be prepended to sys.path. defaults to the current working directory.
-prepend_sys_path = [
-    "./src/"
-]
+prepend_sys_path = ["./src/"]
 
 # timezone to use when rendering the date within the migration file
 # as well as the filename.

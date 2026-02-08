@@ -6,7 +6,9 @@ from factory import LazyAttribute
 from faker import Faker
 
 from project.api.v1.routers.registrations.schema import (
+    AdminRegistration,
     EmployeeRegistrationForm,
+    ParentRegistrationForm,
     StudentRegistrationForm,
 )
 from project.api.v1.routers.year.schema import NewYear
@@ -45,11 +47,43 @@ class NewYearFactory(TypedFactory[NewYear]):
     )
 
 
+class AdminRegistrationFactory(TypedFactory[AdminRegistration]):
+    class Meta:
+        model = AdminRegistration
+
+    first_name = LazyAttribute(lambda x: fake.first_name())
+    father_name = LazyAttribute(lambda x: fake.last_name())
+    grand_father_name = LazyAttribute(lambda x: fake.first_name())
+    date_of_birth = LazyAttribute(lambda x: fake.date_of_birth())
+    gender = LazyAttribute(lambda x: fake.random_element(elements=list(GenderEnum)))
+    email = LazyAttribute(lambda x: fake.email())
+    phone = LazyAttribute(lambda x: "+251912345678")
+    username = LazyAttribute(lambda x: fake.user_name())
+    password = LazyAttribute(lambda x: fake.password(length=12))
+
+
+class ParentRegistrationFactory(TypedFactory[ParentRegistrationForm]):
+    class Meta:
+        model = ParentRegistrationForm
+
+    first_name = LazyAttribute(lambda x: fake.first_name())
+    last_name = LazyAttribute(lambda x: fake.last_name())
+    gender = LazyAttribute(lambda x: fake.random_element(elements=list(GenderEnum)))
+    email = LazyAttribute(lambda x: fake.email())
+    phone = LazyAttribute(lambda x: "+251912345678")
+    relation = LazyAttribute(
+        lambda x: fake.random_element(elements=("Father", "Mother", "Guardian"))
+    )
+    emergency_contact_phone = LazyAttribute(lambda x: "+251912345678")
+
+
 class StudentRegistrationFactory(TypedFactory[StudentRegistrationForm]):
     class Meta:
         model = StudentRegistrationForm
 
-    registered_for_grade_id = None  # To be set explicitly
+    # To be set explicitly
+    registered_for_grade_id = None
+    parent_id = None
 
     # Personal Information
     first_name = LazyAttribute(lambda x: fake.first_name())
@@ -68,34 +102,18 @@ class StudentRegistrationFactory(TypedFactory[StudentRegistrationForm]):
     previous_school = LazyAttribute(
         lambda obj: fake.company() if obj.is_transfer else None
     )
-    previous_grades = LazyAttribute(
-        lambda obj: fake.text() if obj.is_transfer else None
-    )
     transportation = LazyAttribute(
         lambda x: fake.random_element(elements=("Bus", "Walk", "Parent"))
     )
 
     # Contact Information
-    address = LazyAttribute(lambda x: fake.address())
     city = LazyAttribute(lambda x: fake.city())
     state = LazyAttribute(lambda x: fake.state())
     postal_code = LazyAttribute(lambda x: fake.postcode())
-    father_phone = LazyAttribute(lambda x: "+251912345678")
-    mother_phone = LazyAttribute(lambda x: "+251912345678")
-    parent_email = LazyAttribute(lambda x: fake.email())
 
     # Guardian Information
-    guardian_name = LazyAttribute(lambda x: fake.name())
-    guardian_phone = LazyAttribute(lambda x: "+251912345678")
-    guardian_relation = LazyAttribute(
-        lambda x: fake.random_element(elements=("Parent", "Sibling", "Other"))
-    )
     emergency_contact_name = LazyAttribute(lambda x: fake.name())
     emergency_contact_phone = LazyAttribute(lambda x: "+251912345678")
-    sibling_in_school = LazyAttribute(lambda x: fake.boolean())
-    sibling_details = LazyAttribute(
-        lambda obj: fake.text() if obj.sibling_in_school else None
-    )
 
     # Medical Information
     has_medical_condition = LazyAttribute(lambda _: fake.boolean())
@@ -123,13 +141,12 @@ class EmployeeRegistrationFactory(TypedFactory[EmployeeRegistrationForm]):
     )
     social_security_number = LazyAttribute(lambda x: str(fake.uuid4()))
     # Contact Information
-    address = LazyAttribute(lambda x: fake.address())
     city = LazyAttribute(lambda x: fake.city())
     state = LazyAttribute(lambda x: fake.state())
     country = LazyAttribute(lambda x: fake.country()[:50])
-    primary_phone = LazyAttribute(lambda x: "+251912345678")
+    phone = LazyAttribute(lambda x: "+251912345678")
     secondary_phone = LazyAttribute(lambda x: "+251912345678")
-    personal_email = LazyAttribute(lambda x: fake.email())
+    email = LazyAttribute(lambda x: fake.email())
 
     # Emergency Contact
     emergency_contact_name = LazyAttribute(lambda x: fake.name())
@@ -139,7 +156,6 @@ class EmployeeRegistrationFactory(TypedFactory[EmployeeRegistrationForm]):
         )
     )
     emergency_contact_phone = LazyAttribute(lambda x: "+251912345678")
-    emergency_contact_email = LazyAttribute(lambda x: fake.email())
 
     # Educational Background
     highest_education = LazyAttribute(
@@ -160,12 +176,6 @@ class EmployeeRegistrationFactory(TypedFactory[EmployeeRegistrationForm]):
         lambda x: fake.random_element(elements=list(EmployeePositionEnum))
     )
     subject_id = None  # To be set explicitly if position is Teacher
-
-    # Background & References
-    reference1_name = LazyAttribute(lambda x: fake.name())
-    reference1_organization = LazyAttribute(lambda x: fake.company())
-    reference1_phone = LazyAttribute(lambda x: "+251912345678")
-    reference1_email = LazyAttribute(lambda x: fake.email())
 
     # Documents
     resume = LazyAttribute(lambda x: fake.file_name(extension="pdf"))
