@@ -17,9 +17,13 @@ class Token(BaseModel):
 class LoginRequest(BaseModel):
     """Schema for validating user authentication data."""
 
-    identification: str
+    username: str
     password: str
 
 
 class LogOutResponse(BaseModel):
+    message: str
+
+
+class VerifyEmailResponse(BaseModel):
     message: str

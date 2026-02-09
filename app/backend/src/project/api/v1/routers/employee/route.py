@@ -115,15 +115,11 @@ def update_employee_status(
             and employee.position == EmployeePositionEnum.TEACHING_STAFF
             and employee.user_id is None
         ):
-            identification = generate_id(
-                session=session, role=RoleEnum.TEACHER, year=year
-            )
+            username = generate_id(session=session, role=RoleEnum.TEACHER, year=year)
             new_user = User(
                 role=RoleEnum.TEACHER,
-                identification=generate_id(
-                    session=session, role=RoleEnum.TEACHER, year=year
-                ),
-                password=get_password_hash(identification),
+                username=generate_id(session=session, role=RoleEnum.TEACHER, year=year),
+                password=get_password_hash(username),
             )
             session.add(new_user)
             session.commit()

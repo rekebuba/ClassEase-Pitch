@@ -76,7 +76,7 @@ def client() -> Generator[TestClient, None, None]:
 def admin_token_headers(client: TestClient) -> dict[str, str]:
     login_data = {
         "username": settings.FIRST_SUPERUSER,
-        "password": settings.FIRST_SUPERUSER_PASSWORD,
+        "password": settings.FIRST_SUPERUSER_PASSWORD.get_secret_value(),
     }
     return get_auth_header(client, login_data)
 

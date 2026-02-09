@@ -23,7 +23,7 @@ class UserSchema(BaseModel):
     )
 
     id: uuid.UUID
-    identification: str
+    username: str
     role: RoleEnum
     image_path: Optional[str] = None
     created_at: AwareDatetime
@@ -32,7 +32,7 @@ class UserSchema(BaseModel):
     def default_fields(cls) -> set[str]:
         return {
             "id",
-            "identification",
+            "username",
             "role",
             "imagePath",
         }

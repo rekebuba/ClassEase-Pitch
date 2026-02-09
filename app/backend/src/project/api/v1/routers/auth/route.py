@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from project.api.v1.routers.auth.service import (
     get_google_user,
+    verify_email_verification_token,
     verify_google_token,
 )
 from project.api.v1.routers.dependencies import SessionDep, TokenDep, get_db
@@ -17,7 +18,7 @@ from project.core.security import ALGORITHM, check_password, create_access_token
 from project.models.blacklist_token import BlacklistToken
 from project.models.user import User
 
-from .schema import LogOutResponse, Token
+from .schema import LogOutResponse, Token, VerifyEmailResponse
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -40,13 +41,13 @@ async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: Session = Depends(get_db),
 ) -> Dict[str, Any]:
-    user = db.query(User).filter(User.identification == form_data.username).first()
+    user = db.query(User).filter(User.username == form_data.username).first()
 
     if not user:
         logger.warning(f"Login attempt for non-existent user: {form_data.username}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect identification or password",
+            detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -54,7 +55,7 @@ async def login(
         logger.warning(f"Failed password attempt for user: {user.id}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect identification or password",
+            detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -88,6 +89,44 @@ def google_login(token: str, db: Session = Depends(get_db)):
     return {"access_token": access_token, "token_type": "bearer"}
 
 
+@router.get(
+    "/verify-email",
+    response_model=VerifyEmailResponse,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "model": HTTPError,
+            "description": "Invalid or expired token",
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": HTTPError,
+            "description": "User not found",
+        },
+    },
+)
+def verify_email(
+    token: str,
+    db: SessionDep,
+) -> VerifyEmailResponse:
+    email = verify_email_verification_token(token)
+    if not email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired token",
+        )
+
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found",
+        )
+
+    user.is_verified = True
+    db.commit()
+
+    return VerifyEmailResponse(message="Email successfully verified")
+
+
 @router.post(
     "/logout",
     response_model=LogOutResponse,
@@ -109,7 +148,7 @@ async def logout(
     try:
         payload = jwt.decode(
             token,
-            settings.SECRET_KEY,
+            settings.SECRET_KEY.get_secret_value(),
             algorithms=[ALGORITHM],
             options={"verify_exp": False},  # Allow logout with expired tokens
         )

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Verify your email</title>
+</head>
+
+<body style="
+      margin: 0;
+      padding: 0;
+      background-color: #f4f6f8;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
+        Roboto, Helvetica, Arial, sans-serif;
+    ">
+    <table width="100%" cellpadding="0" cellspacing="0" style="padding: 40px 0">
+        <tr>
+            <td align="center">
+                <table width="100%" cellpadding="0" cellspacing="0" style="
+              max-width: 520px;
+              background-color: #ffffff;
+              border-radius: 8px;
+              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+              padding: 32px;
+            ">
+                    <!-- Header -->
+                    <tr>
+                        <td align="center" style="padding-bottom: 24px">
+                            <h1 style="
+                    margin: 0;
+                    font-size: 24px;
+                    color: #111827;
+                  ">
+                                Welcome to {{ app_name }}
+                            </h1>
+                        </td>
+                    </tr>
+
+                    <!-- Body -->
+                    <tr>
+                        <td style="color: #374151; font-size: 16px; line-height: 1.6">
+                            <p style="margin: 0 0 16px 0">Hi {{ user_name or "there" }},</p>
+
+                            <p style="margin: 0 0 16px 0">
+                                Thanks for signing up! Please confirm your email address
+                                by clicking the button below.
+                            </p>
+
+                            <!-- Button -->
+                            <div style="text-align: center; margin: 32px 0">
+                                <a href="{{ verification_link }}" style="
+                      background-color: #2563eb;
+                      color: #ffffff;
+                      text-decoration: none;
+                      padding: 14px 24px;
+                      border-radius: 6px;
+                      font-weight: 600;
+                      display: inline-block;
+                    ">
+                                    Verify Email
+                                </a>
+                            </div>
+
+                            <p style="margin: 0 0 16px 0; font-size: 14px; color: #6b7280">
+                                This link will expire in {{ expires_in }} hours.
+                            </p>
+
+                            <p style="margin: 0; font-size: 14px; color: #6b7280">
+                                If you didn’t create an account, you can safely ignore this
+                                email.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="
+                  padding-top: 32px;
+                  font-size: 12px;
+                  color: #9ca3af;
+                  text-align: center;
+                ">
+                            © {{ year }} {{ app_name }}. All rights reserved.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

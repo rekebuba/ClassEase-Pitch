@@ -1,9 +1,11 @@
 #!/usr/bin/python3
 """Public views module for the API"""
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException
+from pydantic import NameEmail
 from starlette import status
 
+from project.api.v1.routers.auth.service import send_verification_email
 from project.api.v1.routers.dependencies import SessionDep, admin_route
 from project.api.v1.routers.registrations.schema import (
     AdminRegistration,
@@ -40,16 +42,18 @@ def register_new_admin(
     session: SessionDep,
     admin_data: AdminRegistration,
     user_in: admin_route,
+    background_tasks: BackgroundTasks,
 ) -> RegistrationResponse:
     """Registers a new admin in the system."""
     hash_password = get_password_hash(admin_data.password)
 
     user = User(
-        identification=admin_data.username,
+        username=admin_data.username,
         password=hash_password,
         role=RoleEnum.ADMIN,
         email=admin_data.email,
         phone=admin_data.phone,
+        is_active=False,
     )
 
     session.add(user)
@@ -67,6 +71,10 @@ def register_new_admin(
 
     session.add(new_admin)
     session.commit()
+
+    background_tasks.add_task(
+        send_verification_email, NameEmail(name=new_admin.first_name, email=user.email)
+    )
 
     return RegistrationResponse(
         id=new_admin.id, message="Admin Registered Successfully"
