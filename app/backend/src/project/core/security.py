@@ -4,6 +4,7 @@ from typing import Any
 
 import bcrypt
 import jwt
+from pydantic import SecretStr
 from sqlalchemy.orm import Session
 
 from project.core.config import settings
@@ -24,10 +25,10 @@ def check_password(plain_password: str, hashed_password: str) -> bool:
         return False
 
 
-def get_password_hash(password: str) -> str:
+def get_password_hash(password: SecretStr) -> str:
     """Hash a password using bcrypt with auto-generated salt."""
     salt = bcrypt.gensalt()
-    hashed_bytes = bcrypt.hashpw(password.encode("utf-8"), salt)
+    hashed_bytes = bcrypt.hashpw(password.get_secret_value().encode("utf-8"), salt)
     return hashed_bytes.decode("utf-8")
 
 
@@ -51,14 +52,18 @@ def create_access_token(
         "jti": str(uuid.uuid4()),  # Unique identifier for token
         "iat": datetime.now(timezone.utc),  # Issued at time
     }
-    return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(
+        to_encode,
+        settings.SECRET_KEY.get_secret_value(),
+        algorithm=ALGORITHM,
+    )
 
 
 def is_token_blacklisted(token: str, db: Session) -> bool:
     try:
         payload: dict[str, Any] = jwt.decode(
             token,
-            settings.SECRET_KEY,
+            settings.SECRET_KEY.get_secret_value(),
             algorithms=[ALGORITHM],
             options={
                 "verify_exp": False

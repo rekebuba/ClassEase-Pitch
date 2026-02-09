@@ -26,10 +26,6 @@ class User(BaseModel):
     """
 
     __tablename__ = "users"
-    identification: Mapped[str] = mapped_column(
-        String(120), unique=True, nullable=False
-    )
-    password: Mapped[str] = mapped_column(String(120), nullable=False)
     role: Mapped[RoleEnum] = mapped_column(
         Enum(
             RoleEnum,
@@ -41,6 +37,13 @@ class User(BaseModel):
     )
     email: Mapped[str] = mapped_column(String(120), nullable=True)
     phone: Mapped[str] = mapped_column(String(50), nullable=False)
+    password: Mapped[str] = mapped_column(String(120), nullable=True, default=None)
+    username: Mapped[str] = mapped_column(
+        String(120),
+        unique=True,
+        nullable=True,
+        default=None,
+    )
     google_sub: Mapped[str] = mapped_column(
         String(120),
         unique=True,
@@ -49,6 +52,7 @@ class User(BaseModel):
     )
     image_path: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
     is_active: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
 
     # One-to-One relationship
     admin: Mapped["Admin"] = relationship(

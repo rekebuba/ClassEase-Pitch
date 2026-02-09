@@ -10,9 +10,11 @@ from pydantic import (
     BeforeValidator,
     EmailStr,
     PostgresDsn,
+    SecretStr,
     computed_field,
     model_validator,
 )
+from pydantic_extra_types.phone_numbers import PhoneNumber
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing_extensions import Self
 
@@ -42,7 +44,7 @@ class Settings(BaseSettings):
 
     ENVIRONMENT: Literal["development", "testing", "production"] = "development"
     API_V1_STR: str
-    SECRET_KEY: str
+    SECRET_KEY: SecretStr
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     FRONTEND_HOST: str
     GOOGLE_CLIENT_ID: str
@@ -51,14 +53,14 @@ class Settings(BaseSettings):
     PROJECT_NAME: str
 
     FIRST_SUPERUSER: str
-    FIRST_SUPERUSER_PASSWORD: str
+    FIRST_SUPERUSER_PASSWORD: SecretStr
     FIRST_SUPERUSER_NAME: str
     FIRST_SUPERUSER_FATHER_NAME: str
     FIRST_SUPERUSER_GRAND_FATHER_NAME: str
     FIRST_SUPERUSER_DATE_OF_BIRTH: date
     FIRST_SUPERUSER_GENDER: GenderEnum
-    FIRST_SUPERUSER_EMAIL: str
-    FIRST_SUPERUSER_PHONE: str
+    FIRST_SUPERUSER_EMAIL: EmailStr
+    FIRST_SUPERUSER_PHONE: PhoneNumber
     FIRST_SUPERUSER_ADDRESS: str
 
     POSTGRES_SERVER: str
@@ -93,11 +95,11 @@ class Settings(BaseSettings):
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
     SMTP_PORT: int = 587
-    SMTP_HOST: str | None = None
-    SMTP_USER: str | None = None
-    SMTP_PASSWORD: str | None = None
-    EMAILS_FROM_EMAIL: EmailStr | None = None
-    EMAILS_FROM_NAME: EmailStr | None = None
+    SMTP_HOST: str
+    SMTP_USER: str
+    SMTP_PASSWORD: SecretStr
+    EMAILS_FROM_EMAIL: EmailStr
+    EMAILS_FROM_NAME: EmailStr
     EMAIL_RESET_TOKEN_EXPIRE_HOURS: int = 48
 
     @model_validator(mode="after")
@@ -111,7 +113,7 @@ class Settings(BaseSettings):
     def emails_enabled(self) -> bool:
         return bool(self.SMTP_HOST and self.EMAILS_FROM_EMAIL)
 
-    def _check_default_secret(self, var_name: str, value: str | None) -> None:
+    def _check_default_secret(self, var_name: str, value: SecretStr | None) -> None:
         if value == "changethis":
             message = (
                 f'The value of {var_name} is "changethis", '

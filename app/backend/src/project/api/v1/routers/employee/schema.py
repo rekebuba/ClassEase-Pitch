@@ -45,7 +45,7 @@ class EmployeeBasicInfo(BaseModel):
     gpa: float
     position: EmployeePositionEnum
     years_of_experience: ExperienceYearEnum
-    secondary_phone: Optional[str]
+    secondary_phone: Optional[PhoneNumber]
     resume: Optional[str]
     status: EmployeeApplicationStatusEnum
     subject: BasicSubjectSchema | None

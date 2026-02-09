@@ -7,6 +7,7 @@ from pydantic import (
     EmailStr,
     Field,
     PastDate,
+    SecretStr,
     model_validator,
 )
 from pydantic_extra_types.phone_numbers import PhoneNumber
@@ -49,8 +50,8 @@ class AdminRegistration(BaseModel):
     date_of_birth: PastDate
     gender: GenderEnum
     username: str
-    password: str
-    phone: str
+    password: SecretStr
+    phone: PhoneNumber
     email: EmailStr
 
 

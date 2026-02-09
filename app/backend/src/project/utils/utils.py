@@ -42,6 +42,10 @@ class EmailData:
     subject: str
 
 
+def build_verification_link(token: str) -> str:
+    return f"{settings.FRONTEND_HOST}/verify-email?token={token}"
+
+
 def render_email_template(*, template_name: str, context: dict[str, Any]) -> str:
     template_str = (
         Path(__file__).parent / "email-templates" / "build" / template_name
@@ -127,7 +131,7 @@ def generate_password_reset_token(email: str) -> str:
     exp = expires.timestamp()
     encoded_jwt = jwt.encode(
         {"exp": exp, "nbf": now, "sub": email},
-        settings.SECRET_KEY,
+        settings.SECRET_KEY.get_secret_value(),
         algorithm=security.ALGORITHM,
     )
     return encoded_jwt
@@ -136,7 +140,9 @@ def generate_password_reset_token(email: str) -> str:
 def verify_password_reset_token(token: str) -> str | None:
     try:
         decoded_token = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[security.ALGORITHM]
+            token,
+            settings.SECRET_KEY.get_secret_value(),
+            algorithms=[security.ALGORITHM],
         )
         return str(decoded_token["sub"])
     except InvalidTokenError:
@@ -314,7 +320,7 @@ def generate_id(
     - Year suffix: Last 2 digits of the current Ethiopian year
 
     Returns:
-        A unique identification string.
+        A unique username string.
 
     Raises:
         ValueError: If a unique ID could not be generated in time.
@@ -341,8 +347,8 @@ def generate_id(
         random_ids = {random.randint(min_val, max_val) for _ in range(sample_size)}
 
         existing_ids = session.scalars(
-            select(User.identification).where(
-                User.identification.in_(
+            select(User.username).where(
+                User.username.in_(
                     [f"{section}/{rid}/{academic_year % 100}" for rid in random_ids]
                 )
             )
@@ -363,5 +369,5 @@ def generate_id(
         attempts += 1
 
     raise ValueError(
-        "Failed to generate a unique identification number after multiple attempts."
+        "Failed to generate a unique username number after multiple attempts."
     )
