@@ -37,5 +37,9 @@ class SavedQueryView(BaseModel):
 
     # Relationships
     user: Mapped["User"] = relationship(
-        "User", back_populates="saved_query_views", init=False
+        "User",
+        back_populates="saved_query_views",
+        init=False,
+        repr=False,
+        passive_deletes=True,
     )

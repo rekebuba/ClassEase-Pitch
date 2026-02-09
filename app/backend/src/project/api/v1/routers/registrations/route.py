@@ -25,14 +25,14 @@ from project.api.v1.routers.registrations.schema import (
     StudRegStep5,
 )
 from project.core.security import get_password_hash
-from project.models import User
+from project.models import AuthIdentity, User
 from project.models.admin import Admin
 from project.models.employee import Employee
 from project.models.grade import Grade
 from project.models.parent import Parent
 from project.models.parent_student_link import ParentStudentLink
 from project.models.student import Student
-from project.utils.enum import RoleEnum
+from project.utils.enum import AuthProviderEnum, RoleEnum
 
 router = APIRouter(prefix="/register", tags=["registration"])
 
@@ -49,7 +49,6 @@ def register_new_admin(
 
     user = User(
         username=admin_data.username,
-        password=hash_password,
         role=RoleEnum.ADMIN,
         email=admin_data.email,
         phone=admin_data.phone,
@@ -58,6 +57,12 @@ def register_new_admin(
 
     session.add(user)
     session.flush()
+
+    provider = AuthIdentity(
+        user_id=user.id,
+        provider=AuthProviderEnum.PASSWORD,
+        password=hash_password,
+    )
 
     # Create SQLAlchemy model instance
     new_admin = Admin(
@@ -70,10 +75,12 @@ def register_new_admin(
     )
 
     session.add(new_admin)
+    session.add(provider)
     session.commit()
 
     background_tasks.add_task(
-        send_verification_email, NameEmail(name=new_admin.first_name, email=user.email)
+        send_verification_email,
+        NameEmail(name=new_admin.first_name, email=admin_data.email),
     )
 
     return RegistrationResponse(

@@ -1,16 +1,18 @@
 #!/usr/bin/python3
 """Module for User class"""
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, List
 
 from sqlalchemy import Boolean, Enum, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from typing_extensions import Optional
 
 from project.models.base.base_model import BaseModel
 from project.utils.enum import RoleEnum
 
 if TYPE_CHECKING:
     from project.models.admin import Admin
+    from project.models.auth_identity import AuthIdentity
     from project.models.employee import Employee
     from project.models.parent import Parent
     from project.models.saved_query_view import SavedQueryView
@@ -35,22 +37,19 @@ class User(BaseModel):
         ),
         nullable=False,
     )
-    email: Mapped[str] = mapped_column(String(120), nullable=True)
+    email: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     phone: Mapped[str] = mapped_column(String(50), nullable=False)
-    password: Mapped[str] = mapped_column(String(120), nullable=True, default=None)
-    username: Mapped[str] = mapped_column(
+    username: Mapped[Optional[str]] = mapped_column(
         String(120),
         unique=True,
         nullable=True,
         default=None,
     )
-    google_sub: Mapped[str] = mapped_column(
-        String(120),
-        unique=True,
+    image_path: Mapped[Optional[str]] = mapped_column(
+        String(255),
         nullable=True,
         default=None,
     )
-    image_path: Mapped[str] = mapped_column(String(255), nullable=True, default=None)
     is_active: Mapped[bool] = mapped_column(Boolean, default=False)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
 
@@ -92,6 +91,15 @@ class User(BaseModel):
         back_populates="user",
         cascade="all, delete-orphan",
         init=False,
+        repr=False,
+        passive_deletes=True,
+    )
+
+    auth_identities: Mapped[List["AuthIdentity"]] = relationship(
+        "AuthIdentity",
+        back_populates="user",
+        default_factory=list,
+        cascade="all, delete-orphan",
         repr=False,
         passive_deletes=True,
     )

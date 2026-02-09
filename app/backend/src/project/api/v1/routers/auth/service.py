@@ -10,7 +10,8 @@ from pydantic import BaseModel, EmailStr, NameEmail
 from sqlalchemy.orm import Session
 
 from project.core.config import settings
-from project.models import User
+from project.models import AuthIdentity, User
+from project.utils.enum import AuthProviderEnum
 
 serializer = URLSafeTimedSerializer(settings.SECRET_KEY.get_secret_value())
 
@@ -85,7 +86,59 @@ def verify_google_token(token: str) -> dict:
         )
 
 
-def get_google_user(db: Session, google_data: dict) -> User | None:
-    user = db.query(User).filter(User.google_sub == google_data["sub"]).first()
+def get_google_user(db: Session, token: str) -> User:
+    """Retrieve or link a user based on Google token data."""
+
+    google_data = verify_google_token(token)
+
+    if not google_data.get("email_verified", False):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Google account email is not verified",
+        )
+
+    google_sub = google_data["sub"]
+    email = google_data["email"]
+
+    # Try to find a user linked by Google
+    linked_identity = (
+        db.query(AuthIdentity)
+        .filter(
+            AuthIdentity.provider == AuthProviderEnum.GOOGLE,
+            AuthIdentity.provider_user_id == google_sub,
+        )
+        .first()
+    )
+
+    if linked_identity:
+        return linked_identity.user
+
+    # Try to find user by email (existing known user)
+    user = db.query(User).filter(User.email == email).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+        )
+
+    # Check if Google identity already exists for this user (safety)
+    existing_identity = (
+        db.query(AuthIdentity)
+        .filter(
+            AuthIdentity.user_id == user.id,
+            AuthIdentity.provider == AuthProviderEnum.GOOGLE,
+        )
+        .first()
+    )
+    if not existing_identity:
+        # Create new Google identity linked to the user
+        identity = AuthIdentity(
+            user_id=user.id,
+            provider=AuthProviderEnum.GOOGLE,
+            provider_user_id=google_sub,
+        )
+        user.is_verified = True  # Mark user as verified since Google email is verified
+        db.add(identity)
+        db.commit()
 
     return user
