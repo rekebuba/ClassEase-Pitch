@@ -119,15 +119,11 @@ def update_student_status(
             students.status == StudentApplicationStatusEnum.ACTIVE
             and student.user_id is None
         ):
-            identification = generate_id(
-                session=session, role=RoleEnum.STUDENT, year=year
-            )
+            username = generate_id(session=session, role=RoleEnum.STUDENT, year=year)
             new_user = User(
                 role=RoleEnum.STUDENT,
-                identification=generate_id(
-                    session=session, role=RoleEnum.STUDENT, year=year
-                ),
-                password=get_password_hash(identification),
+                username=generate_id(session=session, role=RoleEnum.STUDENT, year=year),
+                password=get_password_hash(username),
             )
             session.add(new_user)
             session.commit()

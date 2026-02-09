@@ -30,7 +30,7 @@ IncEx = Union[Set[str], Dict[str, Union["IncEx", Set[str]]]]
 class AuthType(TypedDict):
     """for valid user data."""
 
-    identification: str
+    username: str
     role: RoleEnum
 
 
@@ -87,7 +87,7 @@ class PostLoadParam(TypedDict):
 class QueryStudentsData(TypedDict):
     """for all students data after post dump."""
 
-    identification: str
+    username: str
     imagePath: str
     createdAt: str
     guardianName: str
@@ -110,7 +110,7 @@ class QueryStudentsData(TypedDict):
 class QueryStudentTableId(TypedDict):
     finalScore: str
     rank: str
-    identification: str
+    username: str
     imagePath: str
     createdAt: str
     guardianName: str

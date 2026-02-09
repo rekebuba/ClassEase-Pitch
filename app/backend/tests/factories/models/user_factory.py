@@ -49,8 +49,8 @@ class UserFactory(TypedFactory[User]):
     )
 
     role: Any = LazyAttribute(lambda x: random.choice(list(RoleEnum)))
-    identification = LazyAttribute(lambda x: str(fake.uuid4()))
-    password: Any = LazyAttribute(lambda x: get_password_hash(x.identification))
+    username = LazyAttribute(lambda x: str(fake.uuid4()))
+    password: Any = LazyAttribute(lambda x: get_password_hash(x.username))
     image_path: Any = LazyAttribute(
         lambda x: UserFactory.generate_fake_profile_picture()
     )
