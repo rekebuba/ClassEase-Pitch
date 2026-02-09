@@ -27,3 +27,7 @@ class LogOutResponse(BaseModel):
 
 class VerifyEmailResponse(BaseModel):
     message: str
+
+
+class ProviderTokenResponse(BaseModel):
+    token: str

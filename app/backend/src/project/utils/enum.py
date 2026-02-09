@@ -368,3 +368,8 @@ class MarkListTypeEnum(str, Enum):
     ASSIGNMENT = "Assignment"
     MIDTERM = "Midterm"
     FINAL = "Final"
+
+
+class AuthProviderEnum(str, Enum):
+    GOOGLE = "google"
+    PASSWORD = "password"

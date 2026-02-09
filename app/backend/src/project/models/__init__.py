@@ -4,6 +4,7 @@
 from project.models.academic_term import AcademicTerm
 from project.models.admin import Admin
 from project.models.assessment import Assessment
+from project.models.auth_identity import AuthIdentity
 from project.models.blacklist_token import BlacklistToken
 from project.models.employee import Employee
 from project.models.employee_year_link import EmployeeYearLink
@@ -41,6 +42,7 @@ __all__ = [
     "AcademicTerm",
     "Admin",
     "Assessment",
+    "AuthIdentity",
     "BlacklistToken",
     "Employee",
     "EmployeeYearLink",
