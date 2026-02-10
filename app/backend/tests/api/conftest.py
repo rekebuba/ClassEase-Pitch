@@ -3,14 +3,16 @@ from collections.abc import Generator
 from typing import Dict
 
 import pytest
+import pytest_asyncio
 from fastapi.testclient import TestClient
+from httpx import ASGITransport, AsyncClient
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
 from project.api.v1.routers.dependencies import get_db
 from project.api.v1.routers.registrations.schema import RegistrationResponse
 from project.core.config import settings
-from project.core.db import engine, init_db
+from project.core.db import engine, init_db, redis_client
 from project.main import app
 from project.models import Parent
 from project.models.base.base_model import Base
@@ -70,6 +72,17 @@ def client() -> Generator[TestClient, None, None]:
 
     with TestClient(app) as c:
         yield c
+
+
+@pytest_asyncio.fixture(scope="function")
+async def async_client():
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
+        yield ac
+
+    # Ensure Redis connections are closed after every test to avoid loop conflicts.
+    await redis_client.aclose()
 
 
 @pytest.fixture(scope="module")
