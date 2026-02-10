@@ -5,11 +5,13 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Annotated, Any, Literal, Union
 
+from fastapi_mail import ConnectionConfig
 from pydantic import (
     AnyUrl,
     BeforeValidator,
     EmailStr,
     PostgresDsn,
+    RedisDsn,
     SecretStr,
     computed_field,
     model_validator,
@@ -66,8 +68,13 @@ class Settings(BaseSettings):
     POSTGRES_SERVER: str
     POSTGRES_PORT: int
     POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
+    POSTGRES_PASSWORD: SecretStr
     POSTGRES_DB: str
+
+    REDIS_SERVER: str
+    REDIS_PORT: int
+    REDIS_USER: str
+    REDIS_PASSWORD: SecretStr
 
     @computed_field
     @property
@@ -75,10 +82,21 @@ class Settings(BaseSettings):
         return PostgresDsn.build(
             scheme="postgresql",
             username=self.POSTGRES_USER,
-            password=self.POSTGRES_PASSWORD,
+            password=self.POSTGRES_PASSWORD.get_secret_value(),
             host=self.POSTGRES_SERVER,
             port=self.POSTGRES_PORT,
             path=self.POSTGRES_DB,
+        )
+
+    @computed_field
+    @property
+    def REDIS_URL(self) -> RedisDsn:
+        return RedisDsn.build(
+            scheme="redis",
+            username=self.REDIS_USER,
+            password=self.REDIS_PASSWORD.get_secret_value(),
+            host=self.REDIS_SERVER,
+            port=self.REDIS_PORT,
         )
 
     BACKEND_CORS_ORIGINS: Annotated[
@@ -167,3 +185,17 @@ def get_settings() -> Union[DevSettings, TestSettings, ProdSettings]:
 
 
 settings = get_settings()
+
+EmailConf = ConnectionConfig(
+    MAIL_USERNAME=settings.SMTP_USER,
+    MAIL_PASSWORD=settings.SMTP_PASSWORD,
+    MAIL_FROM=settings.EMAILS_FROM_EMAIL,
+    MAIL_PORT=settings.SMTP_PORT,
+    MAIL_SERVER=settings.SMTP_HOST,
+    MAIL_FROM_NAME=settings.EMAILS_FROM_NAME,
+    MAIL_STARTTLS=settings.SMTP_TLS,
+    MAIL_SSL_TLS=settings.SMTP_SSL,
+    USE_CREDENTIALS=True,
+    VALIDATE_CERTS=True,
+    TEMPLATE_FOLDER=Path(__file__).parent.parent / "templates",
+)

@@ -5,8 +5,7 @@ services:
     ports:
       - "8081:8080"
     env_file:
-      - .env.development
-
+      - ./app/frontend/.env.development
     networks:
       - app-network
 
@@ -14,7 +13,7 @@ services:
     container_name: backend_container
     image: ghcr.io/rekebuba/backend:latest
     env_file:
-      - .env.development
+      - ./app/backend/.env.development
     volumes:
       - ./app/backend/src/:/app/src/
       - ./app/backend/alembic/:/app/alembic/
@@ -30,7 +29,7 @@ services:
     container_name: postgres_container
     image: postgres:13.22-alpine3.22
     env_file:
-      - .env.development
+      - ./app/backend/.env.development
     ports:
       - "5432:5432"
     networks:
@@ -40,9 +39,23 @@ services:
     container_name: test_postgres_container
     image: postgres:13.22-alpine3.22
     env_file:
-      - .env.testing
+      - ./app/backend/.env.testing
     ports:
       - "5433:5432"
+    networks:
+      - app-network
+
+  redis:
+    container_name: redis_container
+    image: redis:8.2-bookworm
+    env_file:
+      - ./app/backend/.env.development
+    ports:
+      - "6379:6379"
+      # double $$. Tells Docker Compose:
+      # "Ignore this variable and pass it literally to the container's shell."
+      # Since env_file loads the variable into the container, the container's shell will find it successfully.
+    command: ["redis-server", "--requirepass", "$${REDIS_PASSWORD}"]
     networks:
       - app-network
 
