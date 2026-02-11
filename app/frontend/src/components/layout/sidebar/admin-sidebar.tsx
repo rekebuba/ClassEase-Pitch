@@ -245,7 +245,7 @@ function AdminProfile({ user }: { user: AdminInfo }) {
                     {admin.grandFatherName}
                   </span>
                   <span className="truncate text-xs">
-                    {user.identification}
+                    {user.username}
                   </span>
                 </div>
               </div>

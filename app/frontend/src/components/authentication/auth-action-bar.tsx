@@ -9,8 +9,8 @@ function AuthActionBar() {
   const [activeTab, setActiveTab] = useState("login");
 
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-      <TabsList className="grid w-full grid-cols-2 mb-8">
+    <Tabs value={activeTab} onValueChange={setActiveTab}>
+      <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="login">
           <a href="#login">Log In</a>
         </TabsTrigger>
@@ -18,11 +18,9 @@ function AuthActionBar() {
           <a href="#signup">Sign Up</a>
         </TabsTrigger>
       </TabsList>
-
       <TabsContent value="login" id="login">
-        <LoginTab />
+        <LoginTab setActiveTab={setActiveTab} />
       </TabsContent>
-
       <TabsContent value="signup" id="signup">
         <SignupTab />
       </TabsContent>

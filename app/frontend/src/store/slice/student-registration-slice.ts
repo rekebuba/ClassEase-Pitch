@@ -9,6 +9,7 @@ type StudentRegistrationFormState = {
 };
 
 const initialFormData: StudentRegistrationForm = {
+  parentId: "",
   registeredForGradeId: "",
   firstName: "",
   fatherName: "",
@@ -20,16 +21,9 @@ const initialFormData: StudentRegistrationForm = {
   studentPhoto: undefined,
   isTransfer: false,
   previousSchool: "",
-  address: "",
   city: "",
   state: "",
   postalCode: "1000",
-  fatherPhone: "",
-  motherPhone: "",
-  parentEmail: "",
-  guardianName: "",
-  guardianPhone: "",
-  guardianRelation: null,
   emergencyContactName: null,
   emergencyContactPhone: null,
   hasMedicalCondition: false,
@@ -37,8 +31,6 @@ const initialFormData: StudentRegistrationForm = {
   hasDisability: false,
   disabilityDetails: "",
   transportation: null,
-  siblingInSchool: false,
-  siblingDetails: "",
 };
 
 const initialState: StudentRegistrationFormState = {

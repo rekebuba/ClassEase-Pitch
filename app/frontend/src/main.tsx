@@ -1,3 +1,4 @@
+import { GoogleOAuthProvider } from "@react-oauth/google";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { NuqsAdapter } from "nuqs/adapters/react";
@@ -7,13 +8,13 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { Toaster } from "sonner";
 
-import { queryClient } from "./lib/query-client";
-import { routeTree } from "./routeTree.gen";
-import { persister, store } from "./store/main-store";
-
 import "../src/globals.css";
 
 import "./lib/api-client";
+import { queryClient } from "./lib/query-client";
+import { routeTree } from "./routeTree.gen";
+import { persister, store } from "./store/main-store";
+import { ENV } from "./utils/utils";
 
 // Create a new router instance
 const router = createRouter({ routeTree });
@@ -24,6 +25,8 @@ declare module "@tanstack/react-router" {
     router: typeof router;
   };
 }
+
+export { router };
 
 const rootElement = document.getElementById("root")!;
 if (!rootElement.innerHTML) {
@@ -36,7 +39,9 @@ if (!rootElement.innerHTML) {
             <NuqsAdapter>
               <Suspense fallback={<div />}>
                 {/* <PageLoader /> */}
-                <RouterProvider router={router} />
+                <GoogleOAuthProvider clientId={ENV.VITE_GOOGLE_CLIENT_ID}>
+                  <RouterProvider router={router} />
+                </GoogleOAuthProvider>
               </Suspense>
             </NuqsAdapter>
             <Toaster />

@@ -1,14 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod/dist/zod";
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
-import { EyeIcon, EyeOffIcon, Loader2Icon } from "lucide-react";
-import { useState } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { Loader2Icon } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 
 import { loginMutation } from "@/client/@tanstack/react-query.gen";
 import { zBodyLoginCredential } from "@/client/zod.gen";
+import GoogleAuth from "@/components/authentication/google-auth";
 import { InputWithLabel } from "@/components/inputs/input-labeled";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,16 +19,23 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Field,
+  FieldDescription,
+  FieldGroup,
+  FieldLabel,
+  FieldSeparator,
+} from "@/components/ui/field";
 import { loginFailure, loginSuccess } from "@/store/slice/auth-slice";
 import { decodeToken } from "@/utils/utils";
 
 import type { BodyLoginCredential, LoginError } from "@/client/types.gen";
 import type { AxiosError } from "axios";
+import type { SubmitHandler } from "react-hook-form";
 
-export default function LoginTab() {
-  const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
+export default function LoginTab(
+  { setActiveTab }: { setActiveTab: (tab: string) => void },
+) {
   const form = useForm<BodyLoginCredential>({
     resolver: zodResolver(zBodyLoginCredential),
     defaultValues: {
@@ -40,6 +47,7 @@ export default function LoginTab() {
   const {
     setError,
     formState: { errors },
+    handleSubmit,
   } = form;
 
   const dispatch = useDispatch();
@@ -81,12 +89,10 @@ export default function LoginTab() {
     },
   });
 
-  const handleLogin = (
-    loginForm: BodyLoginCredential,
-    e?: React.BaseSyntheticEvent,
-  ) => {
-    e?.preventDefault();
-    mutation.mutate({ body: loginForm });
+  const submitLogin: SubmitHandler<BodyLoginCredential> = (data) => {
+    mutation.mutate({
+      body: data,
+    });
   };
 
   return (
@@ -101,9 +107,9 @@ export default function LoginTab() {
       </CardHeader>
       <CardContent>
         <FormProvider {...form}>
-          <form onSubmit={form.handleSubmit(handleLogin)}>
-            <div className="grid gap-4">
-              <div className="grid gap-2">
+          <form onSubmit={handleSubmit(submitLogin)}>
+            <FieldGroup>
+              <Field>
                 <InputWithLabel<BodyLoginCredential>
                   id="username"
                   fieldTitle="Username/ID"
@@ -111,74 +117,52 @@ export default function LoginTab() {
                   placeholder="Enter your username or ID"
                   required
                 />
-              </div>
-              <div className="grid gap-2">
-                <div className="relative">
-                  <InputWithLabel<BodyLoginCredential>
-                    id="password"
-                    type={showPassword ? "text" : "password"}
-                    fieldTitle="Password"
-                    nameInSchema="password"
-                    placeholder="Enter your password"
-                    required
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-2/3 -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
-                  >
-                    {showPassword
-                      ? (
-                          <EyeOffIcon className="h-4 w-4" />
-                        )
-                      : (
-                          <EyeIcon className="h-4 w-4" />
-                        )}
-                  </button>
+              </Field>
+              <Field>
+                <div className="flex items-center">
+                  <FieldLabel htmlFor="passwords">Password</FieldLabel>
+                  <Link to="/forgot-password" className="ml-auto text-sm underline-offset-4 hover:underline">
+                    Forgot your password?
+                  </Link>
                 </div>
-              </div>
-              <div className="flex justify-between">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="remember"
-                    checked={rememberMe}
-                    onCheckedChange={() => setRememberMe(!rememberMe)}
-                  />
-                  <label
-                    htmlFor="remember"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Remember me
-                  </label>
-                </div>
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    // handle forgot password logic
-                  }}
-                  className="text-sm text-sky-500 hover:text-sky-600 bg-transparent border-none p-0"
-                >
-                  Forgot password?
-                </button>
-              </div>
+                <InputWithLabel<BodyLoginCredential>
+                  id="password"
+                  type="password"
+                  nameInSchema="password"
+                  placeholder="Enter your password"
+                  required
+                />
+              </Field>
               {errors.root && (
-                <div className="text-sm text-red-500 text-center">
-                  {errors.root.message}
-                </div>
+                <Field>
+                  <div className="text-sm text-red-500 text-center">
+                    {errors.root.message}
+                  </div>
+                </Field>
               )}
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={mutation.isPending}
-              >
-                {mutation.isPending && <Loader2Icon className="animate-spin" />}
-                {mutation.isPending ? "Logging in..." : "Log in"}
-              </Button>
-            </div>
+              <Field>
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={mutation.isPending}
+                >
+                  {mutation.isPending && <Loader2Icon className="animate-spin" />}
+                  {mutation.isPending ? "Logging in..." : "Log in"}
+                </Button>
+              </Field>
+              <FieldSeparator>Or continue with</FieldSeparator>
+              <GoogleAuth />
+              <FieldDescription className="text-center">
+                Don&apos;t have an account?
+                {" "}
+                <a
+                  className="underline underline-offset-4 hover:cursor-pointer"
+                  onClick={() => setActiveTab("signup")}
+                >
+                  Sign up
+                </a>
+              </FieldDescription>
+            </FieldGroup>
           </form>
         </FormProvider>
       </CardContent>
@@ -188,7 +172,6 @@ export default function LoginTab() {
           By logging in, you agree to our
           {" "}
           <a
-            href="#"
             className="underline underline-offset-4 hover:text-primary"
           >
             Terms of Service
@@ -197,7 +180,6 @@ export default function LoginTab() {
           and
           {" "}
           <a
-            href="#"
             className="underline underline-offset-4 hover:text-primary"
           >
             Privacy Policy

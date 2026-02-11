@@ -13,7 +13,6 @@ import {
   registerEmployeeStep2Mutation,
   registerEmployeeStep3Mutation,
   registerEmployeeStep4Mutation,
-  registerEmployeeStep5Mutation,
   registerNewEmployeeMutation,
 } from "@/client/@tanstack/react-query.gen";
 import {
@@ -23,7 +22,6 @@ import {
   zEmployeeRegStep2,
   zEmployeeRegStep3,
   zEmployeeRegStep4,
-  zEmployeeRegStep5,
   zExperienceYearEnum,
   zHighestEducationEnum,
 } from "@/client/zod.gen";
@@ -69,7 +67,6 @@ import type {
   EmployeeRegStep2,
   EmployeeRegStep3,
   EmployeeRegStep4,
-  EmployeeRegStep5,
 } from "@/client/types.gen";
 
 const steps = [
@@ -101,18 +98,16 @@ function RouteComponent() {
     dateOfBirth: initialData.dateOfBirth,
     gender: initialData.gender,
     nationality: initialData.nationality,
-    maritalStatus: initialData.maritalStatus,
     socialSecurityNumber: initialData.socialSecurityNumber,
   });
 
   const [step2InitialValues] = useState<EmployeeRegStep2>({
-    address: initialData.address,
     city: initialData.city,
     state: initialData.state,
     country: initialData.country,
-    primaryPhone: initialData.primaryPhone,
+    phone: initialData.phone,
     secondaryPhone: initialData.secondaryPhone,
-    personalEmail: initialData.personalEmail,
+    email: initialData.email,
     emergencyContactName: initialData.emergencyContactName,
     emergencyContactRelation: initialData.emergencyContactRelation,
     emergencyContactPhone: initialData.emergencyContactPhone,
@@ -129,15 +124,7 @@ function RouteComponent() {
   });
 
   const [step4InitialValues] = useState<EmployeeRegStep4>({
-    reference1Name: initialData.reference1Name,
-    reference1Organization: initialData.reference1Organization,
-    reference1Phone: initialData.reference1Phone,
-    reference1Email: initialData.reference1Email,
-  });
-
-  const [step5InitialValues] = useState<EmployeeRegStep5>({
     resume: initialData.resume,
-    backgroundCheck: initialData.backgroundCheck,
     agreeToTerms: initialData.agreeToTerms,
     agreeToBackgroundCheck: initialData.agreeToBackgroundCheck,
   });
@@ -168,10 +155,6 @@ function RouteComponent() {
   const step4Form = useForm<EmployeeRegStep4>({
     resolver: zodResolver(zEmployeeRegStep4),
     defaultValues: step4InitialValues,
-  });
-  const step5Form = useForm<EmployeeRegStep5>({
-    resolver: zodResolver(zEmployeeRegStep5),
-    defaultValues: step5InitialValues,
   });
 
   const { reset, setError, setValue } = form;
@@ -319,7 +302,7 @@ function RouteComponent() {
       });
       setCurrentStep(5);
       dispatch(setFormData(form.getValues()));
-      dispatch(setFormStep(5));
+      handleSave();
     },
     onError: (error: any) => {
       const detail = error.response?.data?.detail;
@@ -341,39 +324,6 @@ function RouteComponent() {
     },
   });
 
-  const step5Mutation = useMutation({
-    ...registerEmployeeStep5Mutation(),
-    onSuccess: () => {
-      const step5Values = step5Form.getValues();
-      Object.entries(step5Values).forEach(([key, value]) => {
-        setValue(key as keyof EmployeeRegStep5, value, {
-          shouldDirty: true,
-        });
-      });
-      dispatch(setFormData(form.getValues()));
-      dispatch(setFormStep(5));
-      handleSave();
-    },
-    onError: (error: any) => {
-      const detail = error.response?.data?.detail;
-
-      if (detail && Array.isArray(detail)) {
-        detail.forEach(({ loc, msg }: { loc: string[]; msg: string }) => {
-          step5Form.setError(
-            extractFirstWord(loc, msg) as keyof EmployeeRegStep5,
-            {
-              type: "server",
-              message: msg,
-            },
-          );
-        });
-      }
-      else {
-        toast.error("Something went wrong. Failed to Validate Step 5.");
-      }
-    },
-  });
-
   const onStep1Submit = step1Form.handleSubmit(data =>
     step1Mutation.mutate({ body: data }),
   );
@@ -385,9 +335,6 @@ function RouteComponent() {
   );
   const onStep4Submit = step4Form.handleSubmit(data =>
     step4Mutation.mutate({ body: data }),
-  );
-  const onStep5Submit = step5Form.handleSubmit(data =>
-    step5Mutation.mutate({ body: data }),
   );
 
   const renderStep = () => {
@@ -443,16 +390,6 @@ function RouteComponent() {
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <SelectWithLabel<EmployeeRegStep1, string>
-                  fieldTitle="Marital Status"
-                  nameInSchema="maritalStatus"
-                  placeholder="Select marital status"
-                >
-                  <SelectItem value="single">Single</SelectItem>
-                  <SelectItem value="married">Married</SelectItem>
-                  <SelectItem value="divorced">Divorced</SelectItem>
-                  <SelectItem value="widowed">Widowed</SelectItem>
-                </SelectWithLabel>
                 <InputWithLabel<EmployeeRegStep1>
                   nameInSchema="socialSecurityNumber"
                   fieldTitle="Social Security Number"
@@ -489,11 +426,6 @@ function RouteComponent() {
               </p>
             </div>
             <div className="space-y-6">
-              <InputWithLabel<EmployeeRegStep2>
-                nameInSchema="address"
-                fieldTitle="Street Address *"
-                placeholder="Enter street address"
-              />
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <InputWithLabel<EmployeeRegStep2>
                   nameInSchema="city"
@@ -514,7 +446,7 @@ function RouteComponent() {
               <Separator />
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <PhoneInputWithLabel<EmployeeRegStep2>
-                  nameInSchema="primaryPhone"
+                  nameInSchema="phone"
                   fieldTitle="Primary Phone Number *"
                   description="Use Country Code +251"
                 />
@@ -525,7 +457,7 @@ function RouteComponent() {
                 />
               </div>
               <InputWithLabel<EmployeeRegStep2>
-                nameInSchema="personalEmail"
+                nameInSchema="email"
                 fieldTitle="Personal Email *"
                 placeholder="personal@example.com"
               />
@@ -595,7 +527,7 @@ function RouteComponent() {
                   nameInSchema="position"
                 >
                   {zEmployeePositionEnum.options.map(position => (
-                    <SelectItem value={position}>{position}</SelectItem>
+                    <SelectItem key={position} value={position}>{position}</SelectItem>
                   ))}
                 </SelectWithLabel>
                 {step3Form.watch("position") === "teaching staff" && (
@@ -604,7 +536,7 @@ function RouteComponent() {
                     nameInSchema="subjectId"
                   >
                     {subjects?.map(subject => (
-                      <SelectItem value={subject.id}>{subject.name}</SelectItem>
+                      <SelectItem key={subject.id} value={subject.id}>{subject.name}</SelectItem>
                     ))}
                   </SelectWithLabel>
                 )}
@@ -616,7 +548,7 @@ function RouteComponent() {
                   placeholder="Select highest degree"
                 >
                   {zHighestEducationEnum.options.map(degree => (
-                    <SelectItem value={degree}>{degree}</SelectItem>
+                    <SelectItem key={degree} value={degree}>{degree}</SelectItem>
                   ))}
                 </SelectWithLabel>
                 <InputWithLabel<EmployeeRegStep3>
@@ -645,7 +577,7 @@ function RouteComponent() {
                 placeholder="Select years of experience"
               >
                 {zExperienceYearEnum.options.map(experience => (
-                  <SelectItem value={experience}>{experience}</SelectItem>
+                  <SelectItem key={experience} value={experience}>{experience}</SelectItem>
                 ))}
               </SelectWithLabel>
             </div>
@@ -675,69 +607,7 @@ function RouteComponent() {
           <FormProvider {...step4Form}>
             <div className="mb-6 p-4 bg-blue-50 rounded-lg">
               <h3 className="font-medium text-blue-800">
-                Step 4: Background Check & References
-              </h3>
-              <p className="text-sm text-gray-600 mt-1">
-                Please provide this information for background screening
-                purposes.
-              </p>
-            </div>
-            <div className="space-y-6">
-              <h4 className="font-medium text-blue-600">
-                Professional References
-              </h4>
-              <div className="space-y-4 p-4 bg-blue-50 rounded-lg">
-                <h5 className="font-medium">Reference 1 (Required)</h5>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <InputWithLabel<EmployeeRegStep4>
-                    nameInSchema="reference1Name"
-                    fieldTitle="Name *"
-                  />
-                  <InputWithLabel<EmployeeRegStep4>
-                    nameInSchema="reference1Organization"
-                    fieldTitle="Organization *"
-                  />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <PhoneInputWithLabel<EmployeeRegStep4>
-                    nameInSchema="reference1Phone"
-                    fieldTitle="Phone Number *"
-                  />
-                  <InputWithLabel<EmployeeRegStep4>
-                    nameInSchema="reference1Email"
-                    fieldTitle="Email (Optional)"
-                    type="email"
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="flex justify-between mt-8 pt-6 border-t">
-              <Button
-                variant="outline"
-                onClick={() => setCurrentStep(3)}
-                className="px-8"
-              >
-                Previous
-              </Button>
-              <Button
-                type="submit"
-                onClick={onStep4Submit}
-                disabled={step4Mutation.isPending}
-                className="px-8"
-              >
-                {step4Mutation.isPending && <Loader className="animate-spin" />}
-                Next Step
-              </Button>
-            </div>
-          </FormProvider>
-        );
-
-      case 5:
-        return (
-          <FormProvider {...step5Form}>
-            <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-              <h3 className="font-medium text-blue-800">
-                Step 6: Documents & Final Information
+                Step 4: Documents & Final Information
               </h3>
               <p className="text-sm text-gray-600 mt-1">
                 Upload required documents and provide final statements.
@@ -745,7 +615,7 @@ function RouteComponent() {
             </div>
             <div className="space-y-6">
               <h4 className="font-medium text-blue-600">Required Documents</h4>
-              <FileUploadField<EmployeeRegStep5>
+              <FileUploadField<EmployeeRegStep4>
                 nameInSchema="resume"
                 fieldTitle="Resume/CV *"
                 description="Upload Recent Resume or CV"
@@ -760,14 +630,14 @@ function RouteComponent() {
 
               <div className="space-y-4 p-4 bg-gray-50 rounded-lg">
                 <div className="flex items-start space-x-2">
-                  <CheckboxWithLabel<EmployeeRegStep5, boolean>
+                  <CheckboxWithLabel<EmployeeRegStep4, boolean>
                     nameInSchema="agreeToTerms"
                     fieldTitle="I agree to the terms and conditions of employment and understand that all information provided is accurate and complete. I understand that any false information may result in rejection of my application or termination of employment. *"
                   />
                 </div>
 
                 <div className="flex items-start space-x-2">
-                  <CheckboxWithLabel<EmployeeRegStep5, boolean>
+                  <CheckboxWithLabel<EmployeeRegStep4, boolean>
                     nameInSchema="agreeToBackgroundCheck"
                     fieldTitle="I authorize the school district to conduct a comprehensive background check, including criminal history, employment verification, and reference checks. I understand this is required for all teaching positions. *"
                   />
@@ -789,18 +659,18 @@ function RouteComponent() {
             <div className="flex justify-between mt-8 pt-6 border-t">
               <Button
                 variant="outline"
-                onClick={() => setCurrentStep(4)}
+                onClick={() => setCurrentStep(3)}
                 className="px-8"
               >
                 Previous
               </Button>
               <Button
                 type="submit"
-                onClick={onStep5Submit}
-                disabled={step5Mutation.isPending || mutation.isPending}
+                onClick={onStep4Submit}
+                disabled={step4Mutation.isPending || mutation.isPending}
                 className="px-8 bg-green-600 hover:bg-green-700"
               >
-                {(step5Mutation.isPending || mutation.isPending) && (
+                {(step4Mutation.isPending || mutation.isPending) && (
                   <Loader className="animate-spin" />
                 )}
                 Submit Registration
@@ -832,7 +702,6 @@ function RouteComponent() {
                   ...step2Form.getValues(),
                   ...step3Form.getValues(),
                   ...step4Form.getValues(),
-                  ...step5Form.getValues(),
                 }),
               );
               dispatch(setFormStep(currentStep));
@@ -857,7 +726,6 @@ function RouteComponent() {
               step2Form.reset(step2InitialValues);
               step3Form.reset(step3InitialValues);
               step4Form.reset(step4InitialValues);
-              step5Form.reset(step5InitialValues);
               setCurrentStep(1);
             }}
             className="ml-2 h-10 w-10 rounded-full"

@@ -9,12 +9,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 import type { InputHTMLAttributes } from "react";
 import type { FieldValues, Path } from "react-hook-form";
 
 type InputWithLabelProps<T extends FieldValues> = {
-  fieldTitle: string;
+  fieldTitle?: string;
   nameInSchema: Path<T>;
   className?: string;
   description?: string;
@@ -27,7 +28,7 @@ export function InputWithLabel<T extends FieldValues>({
   description,
   ...props
 }: InputWithLabelProps<T>) {
-  const form = useFormContext();
+  const form = useFormContext<T>();
 
   return (
     <FormField
@@ -35,12 +36,19 @@ export function InputWithLabel<T extends FieldValues>({
       name={nameInSchema}
       render={({ field }) => (
         <FormItem>
-          <FormLabel htmlFor={nameInSchema}>{fieldTitle}</FormLabel>
+          {fieldTitle && (
+            <FormLabel htmlFor={nameInSchema}>
+              {fieldTitle}
+            </FormLabel>
+          )}
 
           <FormControl>
             <Input
               id={nameInSchema}
-              className={`disabled:text-blue-500 dark:disabled:text-yellow-300 disabled:opacity-75 ${className}`}
+              className={cn(
+                "disabled:text-blue-500 dark:disabled:text-yellow-300 disabled:opacity-75",
+                className,
+              )}
               {...props}
               {...field}
               onChange={(e) => {
@@ -50,17 +58,17 @@ export function InputWithLabel<T extends FieldValues>({
                       ? undefined
                       : +e.target.value
                     : e.target.value;
+
                 field.onChange(value);
               }}
             />
           </FormControl>
-          {form.formState.errors[nameInSchema]
-            ? (
-                <FormMessage />
-              )
-            : (
-                description && <FormDescription>{description}</FormDescription>
-              )}
+
+          {description && !form.getFieldState(nameInSchema).error && (
+            <FormDescription>{description}</FormDescription>
+          )}
+
+          <FormMessage />
         </FormItem>
       )}
     />

@@ -4,15 +4,16 @@ from typing import Annotated, Any, Dict
 import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from pydantic import EmailStr, NameEmail
+from pydantic import NameEmail
 from sqlalchemy.orm import Session
 
 from project.api.v1.routers.auth.schema import (
     LoginTokenResponse,
     MessageResponse,
     OTPRequest,
+    PasswordRecovery,
     PasswordResetRequest,
-    ProviderTokenResponse,
+    ProviderResponse,
     VerifyOTPResponse,
 )
 from project.api.v1.routers.auth.service import (
@@ -100,13 +101,19 @@ async def login(
 )
 def login_provider(
     provider: AuthProviderEnum,
-    token: ProviderTokenResponse,
+    data: ProviderResponse,
     db: Session = Depends(get_db),
 ) -> LoginTokenResponse:
+    if data.credential is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Credential is required for provider login",
+        )
+
     p = {
         provider.GOOGLE: get_google_user,
     }
-    user = p[provider](db, token.token)
+    user = p[provider](db, data.credential)
 
     if not user:
         raise HTTPException(
@@ -212,7 +219,7 @@ async def logout(
 
 
 @router.post(
-    "/password-recovery/{email}",
+    "/password-recovery",
     status_code=status.HTTP_200_OK,
     response_model=MessageResponse,
     responses={
@@ -222,16 +229,16 @@ async def logout(
         },
     },
 )
-async def password_recovery(email: EmailStr, db: SessionDep) -> MessageResponse:
+async def password_recovery(data: PasswordRecovery, db: SessionDep) -> MessageResponse:
     """Endpoint to initiate password recovery by sending an OTP to the user's email."""
     # Check if user exists
-    user = db.query(User).filter(User.email == email).first()
+    user = db.query(User).filter(User.email == data.email).first()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
-    await send_reset_password_email(NameEmail(email=email, name=email))
+    await send_reset_password_email(NameEmail(email=data.email, name=data.email))
 
     return MessageResponse(message="Password recovery email sent")
 
