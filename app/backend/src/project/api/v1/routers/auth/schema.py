@@ -1,4 +1,13 @@
-from pydantic import BaseModel, ConfigDict, EmailStr, SecretStr
+from typing import Optional
+
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    EmailStr,
+    SecretStr,
+    ValidationInfo,
+    field_validator,
+)
 
 from project.utils.utils import to_camel
 
@@ -30,8 +39,12 @@ class VerifyOTPResponse(BaseModel):
     token: str
 
 
-class ProviderTokenResponse(BaseModel):
-    token: str
+class ProviderResponse(BaseModel):
+    credential: Optional[str]
+
+
+class PasswordRecovery(BaseModel):
+    email: EmailStr
 
 
 class OTPRequest(BaseModel):
@@ -49,3 +62,14 @@ class PasswordResetRequest(BaseModel):
     email: EmailStr
     token: str
     new_password: SecretStr
+    confirm_password: SecretStr
+
+    @field_validator("confirm_password")
+    @classmethod
+    def passwords_match(cls, v: SecretStr, info: ValidationInfo) -> SecretStr:
+        # info.data contains the values of previously validated fields
+        if "new_password" in info.data:
+            new_pass = info.data["new_password"].get_secret_value()
+            if v.get_secret_value() != new_pass:
+                raise ValueError("Passwords do not match")
+        return v

@@ -1,7 +1,6 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { GraduationCap } from "lucide-react";
 
-import { AuthLayout } from "@/components";
 import AuthActionBar from "@/components/authentication/auth-action-bar";
 import { store } from "@/store/main-store";
 
@@ -20,15 +19,16 @@ export const Route = createFileRoute("/authentication/")({
 
 export default function AuthPage() {
   return (
-    <AuthLayout>
-      <div className="flex justify-center mb-8 lg:hidden">
-        <div className="flex items-center gap-2">
-          <GraduationCap className="h-8 w-8 text-sky-500" />
-          <span className="text-2xl font-bold text-sky-500">ClassEase</span>
-        </div>
+    <div className="bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10">
+      <div className="flex w-full max-w-lg flex-col gap-6">
+        <Link to="/" className="flex items-center gap-2 self-center font-medium">
+          <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
+            <GraduationCap className="size-4" />
+          </div>
+          ClassEase
+        </Link>
+        <AuthActionBar />
       </div>
-
-      <AuthActionBar />
-    </AuthLayout>
+    </div>
   );
 }

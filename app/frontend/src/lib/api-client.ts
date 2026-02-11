@@ -1,11 +1,8 @@
 import { client } from "@/client/client.gen";
+import { router } from "@/main";
 import { store } from "@/store/main-store";
 import { loginFailure } from "@/store/slice/auth-slice";
-import { getEnv } from "@/utils/utils";
-
-const ENV = {
-  API_BASE_URL: getEnv("VITE_API_BASE_URL"),
-} as const;
+import { ENV } from "@/utils/utils";
 
 // Create a new client with auth configuration
 client.setConfig({
@@ -16,13 +13,15 @@ client.setConfig({
 client.instance.interceptors.response.use(
   response => response,
   (error) => {
-    if (error.response?.status === 401) {
-      // clear auth state, redirect, etc.
-      store.dispatch(
-        loginFailure(error.response?.data?.message || "Unauthorized"),
-      );
-      window.location.href = "/authentication";
+    const status = error.response?.status;
+    const state = store.getState();
+    const isLoggedIn = !!state.auth.token;
+
+    if (status === 401 && isLoggedIn) {
+      store.dispatch(loginFailure("Session expired"));
+      router.navigate({ to: "/authentication" });
     }
+
     return Promise.reject(error);
   },
 );

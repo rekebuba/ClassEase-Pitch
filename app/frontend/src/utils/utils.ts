@@ -146,7 +146,7 @@ export function calculateAge(dateOfBirth: string) {
   return age;
 }
 
-export function getEnv<K extends keyof ImportMetaEnv>(
+function getEnv<K extends keyof ImportMetaEnv>(
   key: K,
 ): ImportMetaEnv[K] {
   const value = import.meta.env[key];
@@ -157,6 +157,11 @@ export function getEnv<K extends keyof ImportMetaEnv>(
 
   return value;
 }
+
+export const ENV = {
+  API_BASE_URL: getEnv("VITE_API_BASE_URL"),
+  VITE_GOOGLE_CLIENT_ID: getEnv("VITE_GOOGLE_CLIENT_ID"),
+} as const;
 
 // Helper function to decode the JWT token
 export function decodeToken(token: string): JwtPayloadType | null {

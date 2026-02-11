@@ -16,17 +16,15 @@ const initialFormData: EmployeeRegistrationForm = {
   dateOfBirth: "",
   gender: undefined as any,
   nationality: "",
-  maritalStatus: undefined,
   socialSecurityNumber: "",
 
   // Contact Information
-  address: "",
   city: "",
   state: "",
   country: "",
-  primaryPhone: "",
+  phone: "",
   secondaryPhone: "",
-  personalEmail: "",
+  email: "",
 
   // Emergency Contact
   emergencyContactName: "",
@@ -46,15 +44,8 @@ const initialFormData: EmployeeRegistrationForm = {
   position: undefined as any,
   subjectId: undefined,
 
-  // Background & References
-  reference1Name: "",
-  reference1Organization: "",
-  reference1Phone: "",
-  reference1Email: undefined,
-
   // Documents
   resume: undefined,
-  backgroundCheck: undefined,
 
   // Additional Information
   agreeToTerms: false,

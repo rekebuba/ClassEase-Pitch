@@ -1,9 +1,8 @@
-export { default as AuthLayout } from "./auth-layout";
 export {
   FormField,
   InputWithError,
   SelectWithError,
-  TextareaWithError,
+  TextareaWithError
 } from "./form-field-with-error";
 export { default as FormRestorationDialog } from "./form-restoration-dialog";
 export { default as LoadingSpinner } from "./loading-spinner";

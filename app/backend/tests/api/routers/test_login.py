@@ -130,7 +130,8 @@ def test_forgot_password_non_existent_email(client: TestClient) -> None:
     """Test the forgot password endpoint with a non-existent email."""
 
     r = client.post(
-        f"{settings.API_V1_STR}/auth/password-recovery/nonexistent@example.com",
+        f"{settings.API_V1_STR}/auth/password-recovery",
+        json={"email": "nonexistent@example.com"},
     )
     assert r.status_code == 404
 
@@ -139,7 +140,8 @@ def test_forgot_password_invalid_email_format(client: TestClient) -> None:
     """Test the forgot password endpoint with an invalid email format."""
 
     r = client.post(
-        f"{settings.API_V1_STR}/auth/password-recovery/invalid-email-format",
+        f"{settings.API_V1_STR}/auth/password-recovery",
+        json={"email": "invalid-email-format"},
     )
     assert r.status_code == 422
 
@@ -149,8 +151,9 @@ def test_forgot_password_empty_email(client: TestClient) -> None:
 
     r = client.post(
         f"{settings.API_V1_STR}/auth/password-recovery/",
+        json={"email": ""},
     )
-    assert r.status_code == 404
+    assert r.status_code == 422
 
 
 @pytest.mark.asyncio
@@ -239,6 +242,7 @@ async def test_password_reset_invalid_token(client: TestClient) -> None:
         "email": settings.FIRST_SUPERUSER_EMAIL,
         "token": "invalidtoken",
         "newPassword": "NewSecurePassword123!",
+        "confirmPassword": "NewSecurePassword123!",
     }
     r = client.post(f"{settings.API_V1_STR}/auth/password-reset", json=reset_data)
     assert r.status_code == 400

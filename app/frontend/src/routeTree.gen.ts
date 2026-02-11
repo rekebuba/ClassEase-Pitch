@@ -12,8 +12,10 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as StudentIndexRouteImport } from './routes/student/index'
+import { Route as ForgotPasswordIndexRouteImport } from './routes/forgot-password/index'
 import { Route as AuthenticationIndexRouteImport } from './routes/authentication/index'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as ForgotPasswordTokenIndexRouteImport } from './routes/forgot-password/$token/index'
 import { Route as AdminYearIndexRouteImport } from './routes/admin/year/index'
 import { Route as AdminSubjectsIndexRouteImport } from './routes/admin/subjects/index'
 import { Route as AdminStudentsIndexRouteImport } from './routes/admin/students/index'
@@ -46,6 +48,11 @@ const StudentIndexRoute = StudentIndexRouteImport.update({
   path: '/student/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ForgotPasswordIndexRoute = ForgotPasswordIndexRouteImport.update({
+  id: '/forgot-password/',
+  path: '/forgot-password/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticationIndexRoute = AuthenticationIndexRouteImport.update({
   id: '/authentication/',
   path: '/authentication/',
@@ -56,6 +63,12 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminRouteRoute,
 } as any)
+const ForgotPasswordTokenIndexRoute =
+  ForgotPasswordTokenIndexRouteImport.update({
+    id: '/forgot-password/$token/',
+    path: '/forgot-password/$token/',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AdminYearIndexRoute = AdminYearIndexRouteImport.update({
   id: '/year/',
   path: '/year/',
@@ -151,6 +164,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRouteRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/authentication': typeof AuthenticationIndexRoute
+  '/forgot-password': typeof ForgotPasswordIndexRoute
   '/student': typeof StudentIndexRoute
   '/admin/employees/$employeeId': typeof AdminEmployeesEmployeeIdRouteRouteWithChildren
   '/admin/registration/employees': typeof AdminRegistrationEmployeesRoute
@@ -163,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/admin/students': typeof AdminStudentsIndexRoute
   '/admin/subjects': typeof AdminSubjectsIndexRoute
   '/admin/year': typeof AdminYearIndexRoute
+  '/forgot-password/$token': typeof ForgotPasswordTokenIndexRoute
   '/admin/grades/$gradeId': typeof AdminGradesGradeIdIndexRoute
   '/admin/students/$studentId': typeof AdminStudentsStudentIdIndexRoute
   '/admin/subjects/$subjectId': typeof AdminSubjectsSubjectIdIndexRoute
@@ -173,6 +188,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminIndexRoute
   '/authentication': typeof AuthenticationIndexRoute
+  '/forgot-password': typeof ForgotPasswordIndexRoute
   '/student': typeof StudentIndexRoute
   '/admin/employees/$employeeId': typeof AdminEmployeesEmployeeIdRouteRouteWithChildren
   '/admin/registration/employees': typeof AdminRegistrationEmployeesRoute
@@ -185,6 +201,7 @@ export interface FileRoutesByTo {
   '/admin/students': typeof AdminStudentsIndexRoute
   '/admin/subjects': typeof AdminSubjectsIndexRoute
   '/admin/year': typeof AdminYearIndexRoute
+  '/forgot-password/$token': typeof ForgotPasswordTokenIndexRoute
   '/admin/grades/$gradeId': typeof AdminGradesGradeIdIndexRoute
   '/admin/students/$studentId': typeof AdminStudentsStudentIdIndexRoute
   '/admin/subjects/$subjectId': typeof AdminSubjectsSubjectIdIndexRoute
@@ -197,6 +214,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRouteWithChildren
   '/admin/': typeof AdminIndexRoute
   '/authentication/': typeof AuthenticationIndexRoute
+  '/forgot-password/': typeof ForgotPasswordIndexRoute
   '/student/': typeof StudentIndexRoute
   '/admin/employees/$employeeId': typeof AdminEmployeesEmployeeIdRouteRouteWithChildren
   '/admin/registration/employees': typeof AdminRegistrationEmployeesRoute
@@ -209,6 +227,7 @@ export interface FileRoutesById {
   '/admin/students/': typeof AdminStudentsIndexRoute
   '/admin/subjects/': typeof AdminSubjectsIndexRoute
   '/admin/year/': typeof AdminYearIndexRoute
+  '/forgot-password/$token/': typeof ForgotPasswordTokenIndexRoute
   '/admin/grades/$gradeId/': typeof AdminGradesGradeIdIndexRoute
   '/admin/students/$studentId/': typeof AdminStudentsStudentIdIndexRoute
   '/admin/subjects/$subjectId/': typeof AdminSubjectsSubjectIdIndexRoute
@@ -222,6 +241,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/'
     | '/authentication'
+    | '/forgot-password'
     | '/student'
     | '/admin/employees/$employeeId'
     | '/admin/registration/employees'
@@ -234,6 +254,7 @@ export interface FileRouteTypes {
     | '/admin/students'
     | '/admin/subjects'
     | '/admin/year'
+    | '/forgot-password/$token'
     | '/admin/grades/$gradeId'
     | '/admin/students/$studentId'
     | '/admin/subjects/$subjectId'
@@ -244,6 +265,7 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/authentication'
+    | '/forgot-password'
     | '/student'
     | '/admin/employees/$employeeId'
     | '/admin/registration/employees'
@@ -256,6 +278,7 @@ export interface FileRouteTypes {
     | '/admin/students'
     | '/admin/subjects'
     | '/admin/year'
+    | '/forgot-password/$token'
     | '/admin/grades/$gradeId'
     | '/admin/students/$studentId'
     | '/admin/subjects/$subjectId'
@@ -267,6 +290,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/admin/'
     | '/authentication/'
+    | '/forgot-password/'
     | '/student/'
     | '/admin/employees/$employeeId'
     | '/admin/registration/employees'
@@ -279,6 +303,7 @@ export interface FileRouteTypes {
     | '/admin/students/'
     | '/admin/subjects/'
     | '/admin/year/'
+    | '/forgot-password/$token/'
     | '/admin/grades/$gradeId/'
     | '/admin/students/$studentId/'
     | '/admin/subjects/$subjectId/'
@@ -290,7 +315,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRouteRoute: typeof AdminRouteRouteWithChildren
   AuthenticationIndexRoute: typeof AuthenticationIndexRoute
+  ForgotPasswordIndexRoute: typeof ForgotPasswordIndexRoute
   StudentIndexRoute: typeof StudentIndexRoute
+  ForgotPasswordTokenIndexRoute: typeof ForgotPasswordTokenIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -316,6 +343,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof StudentIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/forgot-password/': {
+      id: '/forgot-password/'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/authentication/': {
       id: '/authentication/'
       path: '/authentication'
@@ -329,6 +363,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/'
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof AdminRouteRoute
+    }
+    '/forgot-password/$token/': {
+      id: '/forgot-password/$token/'
+      path: '/forgot-password/$token'
+      fullPath: '/forgot-password/$token'
+      preLoaderRoute: typeof ForgotPasswordTokenIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/year/': {
       id: '/admin/year/'
@@ -507,7 +548,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRouteRoute: AdminRouteRouteWithChildren,
   AuthenticationIndexRoute: AuthenticationIndexRoute,
+  ForgotPasswordIndexRoute: ForgotPasswordIndexRoute,
   StudentIndexRoute: StudentIndexRoute,
+  ForgotPasswordTokenIndexRoute: ForgotPasswordTokenIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
