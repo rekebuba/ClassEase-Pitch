@@ -70,7 +70,7 @@ export default function AdminHeader() {
           </SelectTrigger>
           <SelectContent>
             {yearData?.map(year => (
-              <SelectItem value={year.name}>{year.name}</SelectItem>
+              <SelectItem key={year.id} value={year.name}>{year.name}</SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -103,9 +103,9 @@ export default function AdminHeader() {
                   description: "ClassEase will be updated tonight at 2:00 AM",
                   time: "3 hours ago",
                 },
-              ].map((notification, index) => (
+              ].map(notification => (
                 <DropdownMenuItem
-                  key={index}
+                  key={notification.title}
                   className="flex flex-col items-start p-4"
                 >
                   <div className="font-medium">{notification.title}</div>

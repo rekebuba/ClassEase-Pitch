@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import * as React from "react";
+import { useEffect, useState } from "react";
 
 type FadeInProps = {
   children: React.ReactNode;
@@ -11,6 +12,7 @@ const FadeIn: React.FC<FadeInProps> = ({ children, isLoading, loader }) => {
 
   useEffect(() => {
     if (!isLoading) {
+      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
       setIsLoaded(true);
     }
   }, [isLoading]);

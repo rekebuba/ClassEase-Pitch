@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { BookOpen, Edit, Loader, Plus, Search } from "lucide-react";
+import * as React from "react";
 import { useState } from "react";
 import {
   FormProvider,
@@ -69,7 +70,7 @@ function RouteComponent() {
 
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     navigate({
-      search: prev => ({ ...prev, q: e.target.value }),
+      search: (prev: Record<string, any>) => ({ ...prev, q: e.target.value }),
     });
   }
 

@@ -77,6 +77,7 @@ export default function LandingPage() {
       if (statsSection) {
         const rect = statsSection.getBoundingClientRect();
         const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
+        // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
         setIsVisible(isVisible);
       }
     };
@@ -113,6 +114,7 @@ export default function LandingPage() {
 
       return () => clearInterval(timer);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isVisible]);
 
   return (
@@ -261,9 +263,9 @@ export default function LandingPage() {
                 { label: "Students", value: counts.students },
                 { label: "Teachers", value: counts.teachers },
                 { label: "Countries", value: counts.countries },
-              ].map((stat, i) => (
+              ].map(stat => (
                 <div
-                  key={i}
+                  key={stat.label}
                   className="bg-white rounded-xl shadow-md p-6 hover:shadow-xl transition-shadow duration-300"
                 >
                   <h3 className="text-4xl font-bold text-blue-600">
@@ -350,9 +352,9 @@ export default function LandingPage() {
                   description:
                     "Tailor the platform to your school's specific needs with flexible settings.",
                 },
-              ].map((feature, index) => (
+              ].map(feature => (
                 <Card
-                  key={index}
+                  key={feature.title}
                   className="border-0 shadow-md hover:shadow-lg transition-shadow duration-300"
                 >
                   <CardContent className="p-6 flex flex-col items-center text-center space-y-2">
@@ -415,8 +417,8 @@ export default function LandingPage() {
                         "Budget planning and financial oversight",
                         "Customizable reporting and compliance tools",
                         "Campus-wide scheduling and resource allocation",
-                      ].map((item, i) => (
-                        <li key={i} className="flex items-start">
+                      ].map(item => (
+                        <li key={item} className="flex items-start">
                           <CheckCircle className="h-5 w-5 text-sky-500 mr-2 mt-0.5 flex-shrink-0" />
                           <span>{item}</span>
                         </li>
@@ -452,8 +454,8 @@ export default function LandingPage() {
                         "Student performance analytics and insights",
                         "Parent-teacher communication tools",
                         "Resource sharing and collaboration features",
-                      ].map((item, i) => (
-                        <li key={i} className="flex items-start">
+                      ].map(item => (
+                        <li key={item} className="flex items-start">
                           <CheckCircle className="h-5 w-5 text-sky-500 mr-2 mt-0.5 flex-shrink-0" />
                           <span>{item}</span>
                         </li>
@@ -489,8 +491,8 @@ export default function LandingPage() {
                         "Grade monitoring and performance insights",
                         "Calendar integration for classes and events",
                         "Collaboration tools for group projects",
-                      ].map((item, i) => (
-                        <li key={i} className="flex items-start">
+                      ].map(item => (
+                        <li key={item} className="flex items-start">
                           <CheckCircle className="h-5 w-5 text-sky-500 mr-2 mt-0.5 flex-shrink-0" />
                           <span>{item}</span>
                         </li>
@@ -526,8 +528,8 @@ export default function LandingPage() {
                         "School announcements and calendar events",
                         "Permission slips and form submissions",
                         "Fee payment and financial management",
-                      ].map((item, i) => (
-                        <li key={i} className="flex items-start">
+                      ].map(item => (
+                        <li key={item} className="flex items-start">
                           <CheckCircle className="h-5 w-5 text-sky-500 mr-2 mt-0.5 flex-shrink-0" />
                           <span>{item}</span>
                         </li>
@@ -588,8 +590,8 @@ export default function LandingPage() {
                       description:
                         "Use data-driven insights to identify areas for improvement and track progress.",
                     },
-                  ].map((item, i) => (
-                    <div key={i} className="flex gap-4">
+                  ].map(item => (
+                    <div key={item.title} className="flex gap-4">
                       <div className="rounded-full bg-sky-100 p-2 h-10 w-10 flex items-center justify-center flex-shrink-0">
                         <item.icon className="h-5 w-5 text-sky-500" />
                       </div>
@@ -686,7 +688,7 @@ export default function LandingPage() {
                     },
                   ].map((testimonial, index) => (
                     <div
-                      key={index}
+                      key={testimonial.name}
                       className={`absolute top-0 left-0 w-full transition-opacity duration-500 ${
                         activeTestimonial === index
                           ? "opacity-100 z-10"
@@ -747,9 +749,9 @@ export default function LandingPage() {
                   description:
                     "of parents feel more connected to their child's education",
                 },
-              ].map((item, i) => (
+              ].map(item => (
                 <div
-                  key={i}
+                  key={item.stat + item.description}
                   className="bg-white rounded-lg p-6 text-center shadow-md"
                 >
                   <div className="text-4xl font-bold text-sky-500 mb-2">
@@ -830,7 +832,7 @@ export default function LandingPage() {
                     },
                   ].map((plan, index) => (
                     <Card
-                      key={index}
+                      key={plan.name + plan.price}
                       className={`border-0 shadow-md relative ${plan.popular ? "border-sky-500 border-2" : ""}`}
                     >
                       {plan.popular && (
@@ -854,8 +856,8 @@ export default function LandingPage() {
                           </span>
                         </div>
                         <ul className="space-y-2">
-                          {plan.features.map((feature, i) => (
-                            <li key={i} className="flex items-center">
+                          {plan.features.map(feature => (
+                            <li key={feature} className="flex items-center">
                               <CheckCircle className="h-4 w-4 text-sky-500 mr-2" />
                               <span className="text-sm">{feature}</span>
                             </li>
@@ -916,7 +918,7 @@ export default function LandingPage() {
                     },
                   ].map((plan, index) => (
                     <Card
-                      key={index}
+                      key={plan.name}
                       className={`border-0 shadow-md relative ${plan.popular ? "border-sky-500 border-2" : ""}`}
                     >
                       {plan.popular && (
@@ -940,8 +942,8 @@ export default function LandingPage() {
                           </span>
                         </div>
                         <ul className="space-y-2">
-                          {plan.features.map((feature, i) => (
-                            <li key={i} className="flex items-center">
+                          {plan.features.map(feature => (
+                            <li key={feature} className="flex items-center">
                               <CheckCircle className="h-4 w-4 text-sky-500 mr-2" />
                               <span className="text-sm">{feature}</span>
                             </li>
@@ -1032,8 +1034,8 @@ export default function LandingPage() {
                     answer:
                       "ClassEase is designed with accessibility in mind and complies with WCAG 2.1 guidelines. We regularly test our platform with assistive technologies to ensure all users can effectively use our system.",
                   },
-                ].map((item, i) => (
-                  <AccordionItem key={i} value={`item-${i}`}>
+                ].map(item => (
+                  <AccordionItem key={item.question} value={`item-${item.question}`}>
                     <AccordionTrigger className="text-left">
                       {item.question}
                     </AccordionTrigger>

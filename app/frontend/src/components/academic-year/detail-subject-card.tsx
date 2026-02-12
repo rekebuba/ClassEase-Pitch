@@ -5,20 +5,21 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/format";
 
-import type { SubjectSetupSchema, YearSetupSchemaOutput } from "@/client/types.gen";
-
-type Subject = YearSetupSchemaOutput["subjects"][number];
-type Grades = SubjectSetupSchema[];
+import type { SubjectSetupSchema } from "@/client/types.gen";
 
 export default function DetailSubjectCard({
   subject,
   grades,
   children,
 }: {
-  subject: Subject;
-  grades: Grades;
+  subject: SubjectSetupSchema;
+  grades: SubjectSetupSchema["grades"];
   children?: React.ReactNode;
 }) {
+  const gradesWithStreams = (gradeId: string) => {
+    return subject.streams.filter(stream => stream.gradeId === gradeId).map(stream => stream.name.charAt(0)).join(", ");
+  };
+
   return (
     <Card
       key={subject.id}
@@ -37,47 +38,35 @@ export default function DetailSubjectCard({
         {/* Grades */}
         <div className="mt-3">
           <h4 className="font-medium mb-3 text-sm text-gray-600">Taught In</h4>
-          {subject.grades.length > 0 || subject.streams.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {grades.map(grade => (
-                <div key={`grade-${grade.id}`}>
-                  {grade.hasStream && grade.streams ? (
-                    grade.streams
-                    // .filter((stream) =>
-                    //   stream.subjects.some((s) => s.id === subject.id),
-                    // )
-                      .map(stream => (
-                        <Badge
-                          key={`stream-${stream.id}`}
-                          variant="default"
-                          className="text-xs"
-                        >
-                          Grade
-                          {" "}
-                          {grade.grade}
-                          {" "}
-                          (
-                          {stream.name}
-                          )
-                        </Badge>
-                      ))
-                  ) : (
-                    <Badge
-                      key={`grade-only-${grade.id}`}
-                      variant="secondary"
-                      className="text-xs"
-                    >
-                      Grade
-                      {" "}
-                      {grade.grade}
-                    </Badge>
-                  )}
+          {subject.grades.length > 0 || subject.streams.length > 0
+            ? (
+                <div className="flex flex-wrap gap-2">
+                  {grades.map((grade) => {
+                    const streams = gradesWithStreams(grade.id);
+                    return (
+                      <Badge
+                        key={`grade-only-${grade.id}`}
+                        variant="secondary"
+                        className="text-xs"
+                      >
+                        Grade&nbsp;
+                        {grade.grade}
+                        {grade.hasStream && streams && (
+                          <p className="text-xs text-amber-600">
+                            &nbsp;
+                            (
+                            {streams}
+                            )
+                          </p>
+                        )}
+                      </Badge>
+                    );
+                  })}
                 </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-xs text-gray-400 italic">No grades assigned</p>
-          )}
+              )
+            : (
+                <p className="text-xs text-gray-400 italic">No grades assigned</p>
+              )}
         </div>
       </div>
 

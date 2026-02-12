@@ -14,19 +14,15 @@ import { Card, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { formatDate } from "@/lib/format";
 
-import type { SubjectSchema, YearSetupSchemaOutput } from "@/client/types.gen";
-
-type Subject = SubjectSchema[];
-type Grade = YearSetupSchemaOutput["grades"][number];
-type Stream = YearSetupSchemaOutput["grades"][number]["streams"][number];
+import type { GradeSetupSchema } from "@/client/types.gen";
 
 export default function DetailGradeCard({
   grade,
   subjects,
   children,
 }: {
-  grade: Grade;
-  subjects: Subject;
+  grade: GradeSetupSchema;
+  subjects: GradeSetupSchema["subjects"];
   children?: React.ReactNode;
 }) {
   return (
@@ -80,8 +76,8 @@ export default function DetailGradeCard({
                   {grade.hasStream
                     ? (
                         <div className="mb-3 space-y-2">
-                          {grade.streams?.map((stream, streamIndex) => (
-                            <CollapsibleStreamCard key={streamIndex} stream={stream} />
+                          {grade.streams?.map(stream => (
+                            <CollapsibleStreamCard key={stream.id} stream={stream} />
                           ))}
                         </div>
                       )
@@ -117,7 +113,7 @@ export default function DetailGradeCard({
   );
 }
 
-function CollapsibleStreamCard({ stream }: { stream: Stream }) {
+function CollapsibleStreamCard({ stream }: { stream: GradeSetupSchema["streams"][number] }) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
@@ -157,9 +153,9 @@ function CollapsibleStreamCard({ stream }: { stream: Stream }) {
         className={`overflow-hidden transition-all duration-300 ease-in-out ${isExpanded ? "max-h-96 mt-2" : "max-h-0"}`}
       >
         <div className="flex flex-wrap gap-1 ml-4">
-          {stream.subjects.map((subject, index) => (
+          {stream.subjects.map(subject => (
             <Badge
-              key={`${subject.name}-${index}`}
+              key={subject.id}
               variant="outline"
               className="text-[10px] px-1 py-0.5"
             >

@@ -87,7 +87,7 @@ function RouteComponent() {
 
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     navigate({
-      search: prev => ({ ...prev, q: e.target.value }),
+      search: (prev: Record<string, unknown>) => ({ ...prev, q: e.target.value }),
     });
   }
 
@@ -302,7 +302,7 @@ function FormDialog({
               nameInSchema="calendarType"
             >
               {zAcademicTermTypeEnum.options.map(option => (
-                <SelectItem value={option}>{option}</SelectItem>
+                <SelectItem key={option} value={option}>{option}</SelectItem>
               ))}
             </SelectWithLabel>
           </div>

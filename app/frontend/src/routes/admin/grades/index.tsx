@@ -80,7 +80,7 @@ function RouteComponent() {
 
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     navigate({
-      search: prev => ({ ...prev, q: e.target.value }),
+      search: (prev: Record<string, any>) => ({ ...prev, q: e.target.value }),
     });
   }
 
