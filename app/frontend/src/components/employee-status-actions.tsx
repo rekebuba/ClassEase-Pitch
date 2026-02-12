@@ -1,5 +1,5 @@
 import { Ban, CheckCircle, Clock, LogOut, Pause, XCircle } from "lucide-react";
-import React from "react";
+import * as React from "react";
 
 import { Button } from "./ui/button";
 

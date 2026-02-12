@@ -278,9 +278,9 @@ export default function AdminDashboard() {
                       location: "Sports Complex",
                       type: "sports",
                     },
-                  ].map((event, index) => (
+                  ].map(event => (
                     <div
-                      key={index}
+                      key={event.title}
                       className="flex items-start gap-4 rounded-lg border p-3"
                     >
                       <div className="rounded-full bg-primary/10 p-2">
@@ -367,8 +367,8 @@ export default function AdminDashboard() {
                       time: "Yesterday",
                       avatar: "/placeholder.svg",
                     },
-                  ].map((activity, index) => (
-                    <div key={index} className="flex items-center gap-4">
+                  ].map(activity => (
+                    <div key={activity.user + activity.time} className="flex items-center gap-4">
                       <Avatar className="h-9 w-9">
                         <AvatarImage
                           src={activity.avatar || "/placeholder.svg"}
@@ -436,9 +436,9 @@ export default function AdminDashboard() {
                       absences: 4,
                       status: "warning",
                     },
-                  ].map((student, index) => (
+                  ].map(student => (
                     <div
-                      key={index}
+                      key={student.name}
                       className="flex items-center justify-between rounded-lg border p-3"
                     >
                       <div className="flex items-center gap-3">
@@ -508,9 +508,9 @@ export default function AdminDashboard() {
                       subject: "English",
                       score: "68%",
                     },
-                  ].map((student, index) => (
+                  ].map(student => (
                     <div
-                      key={index}
+                      key={student.name + student.score}
                       className="flex items-center justify-between rounded-lg border p-3"
                     >
                       <div className="flex items-center gap-3">
@@ -631,9 +631,9 @@ export default function AdminDashboard() {
                     description: "Overview of budget allocation and expenses",
                     date: "Generated on March 1, 2023",
                   },
-                ].map((report, index) => (
+                ].map(report => (
                   <div
-                    key={index}
+                    key={report.title}
                     className="flex items-start justify-between rounded-lg border p-4"
                   >
                     <div className="space-y-1">
@@ -694,9 +694,9 @@ export default function AdminDashboard() {
                     type: "error",
                     time: "1 hour ago",
                   },
-                ].map((notification, index) => (
+                ].map(notification => (
                   <div
-                    key={index}
+                    key={notification.title + notification.time}
                     className="flex items-start gap-4 rounded-lg border p-4"
                   >
                     <div

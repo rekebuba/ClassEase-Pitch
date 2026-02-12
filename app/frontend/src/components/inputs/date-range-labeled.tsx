@@ -73,10 +73,11 @@ export default function DateRangeLabeled<T extends FieldValues>({
   useEffect(() => {
     parentForm.setValue(fromInSchema, from as PathValue<T, Path<T>>);
     parentForm.setValue(toInSchema, to as PathValue<T, Path<T>>);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [from, to]);
 
   function onSubmit(values: z.infer<typeof schema>) {
-    console.log("Form values:", values);
+    return values;
   }
 
   return (

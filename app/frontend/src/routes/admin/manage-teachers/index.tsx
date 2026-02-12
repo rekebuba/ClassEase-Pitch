@@ -114,6 +114,7 @@ function RouteComponent() {
   useEffect(() => {
     if (academicTerms && academicTerms.length > 0) {
       const firstTerm = academicTerms[0];
+      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
       setSelectedAcademicTerm(firstTerm.id);
     }
   }, [academicTerms]);
@@ -354,7 +355,7 @@ function RouteComponent() {
                   {teacher.grades.length > 0
                     ? (
                         teacher.grades.slice(0, 4).map(grade => (
-                          <div className="text-center">
+                          <div key={grade.id} className="text-center">
                             <div className="flex items-center justify-center gap-1 mb-1">
                               <GraduationCap className="w-3.5 h-3.5 text-muted-foreground" />
                             </div>
@@ -622,7 +623,7 @@ function FormDialog({
                   error={isSubjectError?.message}
                 >
                   {subject?.grades.map(grade => (
-                    <>
+                    <div key={grade.id}>
                       {!grade.hasStream
                         ? (
                             <SelectItem key={grade.id} value={joinId(grade.id)}>
@@ -651,7 +652,7 @@ function FormDialog({
                                 ))}
                             </div>
                           )}
-                    </>
+                    </div>
                   ))}
                 </ApiState>
               </SelectWithLabel>
@@ -677,6 +678,7 @@ function FormDialog({
                     AssignTeacher,
                     AssignTeacher["grade"]["sections"][number]
                   >
+                    key={section.id}
                     nameInSchema="grade.sections"
                     fieldTitle={`Section ${section.section}`}
                     value={

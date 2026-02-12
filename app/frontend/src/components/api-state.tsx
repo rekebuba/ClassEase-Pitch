@@ -1,7 +1,7 @@
 import { ApiError } from "./api-error";
 import LoadingSpinner from "./loading-spinner";
 
-import type React from "react";
+import type * as React from "react";
 
 type ApiStateProps = {
   isLoading: boolean;

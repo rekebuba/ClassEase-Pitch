@@ -11,7 +11,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
-import type React from "react";
+import type * as React from "react";
 
 type FormFieldProps = {
   label: string;

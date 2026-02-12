@@ -6,6 +6,17 @@ export default antfu({
   type: "app",
   typescript: true,
   formatters: true,
+  ignores: [
+    "src/client/**", // ignore open-api client codegen output
+    "src/components/ui/**", // ignore auto-generated UI components from shadcn/ui
+    "**/*.gen.*",
+    "dist",
+    "build",
+    "node_modules",
+    "coverage",
+    "public",
+    "vendor",
+  ],
   stylistic: {
     indent: 2,
     semi: true,
