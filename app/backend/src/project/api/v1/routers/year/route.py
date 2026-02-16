@@ -2,6 +2,7 @@ import uuid
 from typing import Any, Dict, List, Sequence
 
 from fastapi import APIRouter, HTTPException
+from fastapi.logger import logger
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from starlette import status
@@ -138,7 +139,7 @@ def post_year(
         session.rollback()
         raise
     except Exception as e:
-        print(f"Error creating year: {e}")
+        logger.error(f"Error creating year: {e}")
         session.rollback()
         raise HTTPException(status_code=500, detail=f"Creation failed: {str(e)}")
 

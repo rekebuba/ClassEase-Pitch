@@ -164,10 +164,22 @@ class TestSettings(Settings):
 class ProdSettings(Settings):
     model_config = SettingsConfigDict(env_file=get_env_file())
 
+    PROD_TEST: bool = False
+
     @computed_field
     @property
-    def SQLALCHEMY_POSTGRES_DATABASE_URI(self) -> str:
-        return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@/{self.POSTGRES_DB}?host=/cloudsql/{self.POSTGRES_SERVER}"
+    def SQLALCHEMY_POSTGRES_DATABASE_URI(self) -> str | PostgresDsn:
+        if self.PROD_TEST:
+            return PostgresDsn.build(
+                scheme="postgresql",
+                username=self.POSTGRES_USER,
+                password=self.POSTGRES_PASSWORD.get_secret_value(),
+                host=self.POSTGRES_SERVER,
+                port=self.POSTGRES_PORT,
+                path=self.POSTGRES_DB,
+            )
+        else:
+            return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD.get_secret_value()}@/{self.POSTGRES_DB}?host=/cloudsql/{self.POSTGRES_SERVER}"
 
 
 @lru_cache
