@@ -23,7 +23,7 @@ from project.api.v1.routers.auth.service import (
     verify_otp_and_generate_token,
     verify_password_reset_token,
 )
-from project.api.v1.routers.dependencies import SessionDep, TokenDep, get_db
+from project.api.v1.routers.dependencies import RedisDep, SessionDep, TokenDep, get_db
 from project.api.v1.routers.schema import HTTPError
 from project.core.config import settings
 from project.core.security import (
@@ -229,7 +229,11 @@ async def logout(
         },
     },
 )
-async def password_recovery(data: PasswordRecovery, db: SessionDep) -> MessageResponse:
+async def password_recovery(
+    data: PasswordRecovery,
+    db: SessionDep,
+    redis: RedisDep,
+) -> MessageResponse:
     """Endpoint to initiate password recovery by sending an OTP to the user's email."""
     # Check if user exists
     user = db.query(User).filter(User.email == data.email).first()
@@ -238,8 +242,7 @@ async def password_recovery(data: PasswordRecovery, db: SessionDep) -> MessageRe
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
-    await send_reset_password_email(NameEmail(email=data.email, name=data.email))
-
+    await send_reset_password_email(NameEmail(email=data.email, name=data.email), redis)
     return MessageResponse(message="Password recovery email sent")
 
 
@@ -254,10 +257,10 @@ async def password_recovery(data: PasswordRecovery, db: SessionDep) -> MessageRe
         },
     },
 )
-async def verify_otp(otp_request: OTPRequest) -> VerifyOTPResponse:
+async def verify_otp(otp_request: OTPRequest, redis: RedisDep) -> VerifyOTPResponse:
     """Endpoint to verify the OTP sent to the user's email for password recovery."""
     is_valid_with_token = await verify_otp_and_generate_token(
-        otp_request.email, otp_request.otp
+        otp_request.email, otp_request.otp, redis
     )
 
     if not is_valid_with_token:
@@ -289,9 +292,10 @@ async def verify_otp(otp_request: OTPRequest) -> VerifyOTPResponse:
 async def password_reset(
     request: PasswordResetRequest,
     db: SessionDep,
+    redis: RedisDep,
 ) -> MessageResponse:
     """Endpoint to reset the user's password using a valid token."""
-    is_verified = await verify_password_reset_token(request.email, request.token)
+    is_verified = await verify_password_reset_token(request.email, request.token, redis)
     if not is_verified:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,

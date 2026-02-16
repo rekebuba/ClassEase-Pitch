@@ -38,7 +38,7 @@ class User(BaseModel):
         nullable=False,
     )
     email: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
-    phone: Mapped[str] = mapped_column(String(50), nullable=False)
+    phone: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
     username: Mapped[Optional[str]] = mapped_column(
         String(120),
         unique=True,

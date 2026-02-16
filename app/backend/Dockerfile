@@ -27,8 +27,8 @@ RUN pip install -r requirements-prod.txt
 FROM python:3.12-slim
 
 # Runtime OS deps only
-RUN apt-get update && apt-get install -y \
-    libpq5 \
+RUN apt-get update && apt-get install -y libpq5 \
+    && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

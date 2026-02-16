@@ -74,7 +74,7 @@ class Settings(BaseSettings):
     REDIS_SERVER: str
     REDIS_PORT: int
     REDIS_USER: str
-    REDIS_PASSWORD: SecretStr
+    REDIS_PASSWORD: SecretStr | None = None
 
     @computed_field
     @property
@@ -93,8 +93,9 @@ class Settings(BaseSettings):
     def REDIS_URL(self) -> RedisDsn:
         return RedisDsn.build(
             scheme="redis",
-            username=self.REDIS_USER,
-            password=self.REDIS_PASSWORD.get_secret_value(),
+            password=(
+                self.REDIS_PASSWORD.get_secret_value() if self.REDIS_PASSWORD else None
+            ),
             host=self.REDIS_SERVER,
             port=self.REDIS_PORT,
         )

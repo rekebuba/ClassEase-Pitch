@@ -13,3 +13,4 @@ class HealthStatus(BaseModel):
 
     api_status: str
     db_status: str
+    redis_status: str

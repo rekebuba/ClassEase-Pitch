@@ -1,8 +1,8 @@
-"""create tables
+"""create_table
 
-Revision ID: 8a3919813bad
+Revision ID: 06299fedaf34
 Revises:
-Create Date: 2026-02-05 12:43:40.638529
+Create Date: 2026-02-14 15:35:23.654217
 
 """
 
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
-revision: str = "8a3919813bad"
+revision: str = "06299fedaf34"
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -37,8 +37,8 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("jti"),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_blacklist_tokens")),
+        sa.UniqueConstraint("jti", name=op.f("uq_blacklist_tokens_jti")),
     )
     op.create_table(
         "tables",
@@ -56,26 +56,30 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("name"),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_tables")),
+        sa.UniqueConstraint("name", name=op.f("uq_tables_name")),
     )
     op.create_table(
         "users",
-        sa.Column("identification", sa.String(length=120), nullable=False),
-        sa.Column("password", sa.String(length=120), nullable=False),
         sa.Column(
             "role",
             sa.Enum(
                 "admin",
                 "teacher",
                 "student",
+                "parent",
                 "other",
                 name="role_enum",
                 native_enum=False,
             ),
             nullable=False,
         ),
+        sa.Column("email", sa.String(length=120), nullable=True),
+        sa.Column("phone", sa.String(length=50), nullable=True),
+        sa.Column("username", sa.String(length=120), nullable=True),
         sa.Column("image_path", sa.String(length=255), nullable=True),
+        sa.Column("is_active", sa.Boolean(), nullable=False),
+        sa.Column("is_verified", sa.Boolean(), nullable=False),
         sa.Column("id", sa.UUID(), nullable=False),
         sa.Column(
             "created_at",
@@ -89,8 +93,8 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("identification"),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_users")),
+        sa.UniqueConstraint("username", name=op.f("uq_users_username")),
     )
     op.create_table(
         "years",
@@ -122,7 +126,7 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.PrimaryKeyConstraint("id"),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_years")),
     )
     op.create_table(
         "academic_terms",
@@ -151,11 +155,18 @@ def upgrade() -> None:
         ),
         sa.CheckConstraint(
             "registration_start <= registration_end",
-            name="check_term_registration_dates",
+            name=op.f("ck_academic_terms_check_term_registration_dates"),
         ),
-        sa.CheckConstraint("start_date <= end_date", name="check_term_dates"),
-        sa.ForeignKeyConstraint(["year_id"], ["years.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
+        sa.CheckConstraint(
+            "start_date <= end_date", name=op.f("ck_academic_terms_check_term_dates")
+        ),
+        sa.ForeignKeyConstraint(
+            ["year_id"],
+            ["years.id"],
+            name=op.f("fk_academic_terms_year_id_years"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_academic_terms")),
     )
     op.create_table(
         "admins",
@@ -168,9 +179,6 @@ def upgrade() -> None:
             sa.Enum("male", "female", name="gender_enum", native_enum=False),
             nullable=False,
         ),
-        sa.Column("email", sa.String(length=120), nullable=False),
-        sa.Column("phone", sa.String(length=25), nullable=False),
-        sa.Column("address", sa.Text(), nullable=False),
         sa.Column("user_id", sa.UUID(), nullable=True),
         sa.Column("id", sa.UUID(), nullable=False),
         sa.Column(
@@ -185,8 +193,47 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
+        sa.ForeignKeyConstraint(
+            ["user_id"],
+            ["users.id"],
+            name=op.f("fk_admins_user_id_users"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_admins")),
+    )
+    op.create_table(
+        "auth_identities",
+        sa.Column("user_id", sa.UUID(), nullable=False),
+        sa.Column(
+            "provider",
+            sa.Enum("google", "password", name="auth_provider_enum", native_enum=False),
+            nullable=False,
+        ),
+        sa.Column("provider_user_id", sa.String(length=255), nullable=True),
+        sa.Column("password", sa.String(length=255), nullable=True),
+        sa.Column("id", sa.UUID(), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.ForeignKeyConstraint(
+            ["user_id"],
+            ["users.id"],
+            name=op.f("fk_auth_identities_user_id_users"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_auth_identities")),
+        sa.UniqueConstraint(
+            "provider_user_id", name=op.f("uq_auth_identities_provider_user_id")
+        ),
     )
     op.create_table(
         "events",
@@ -218,10 +265,19 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.CheckConstraint("start_date <= end_date", name="check_event_dates"),
-        sa.CheckConstraint("start_time <= end_time", name="check_event_times"),
-        sa.ForeignKeyConstraint(["year_id"], ["years.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
+        sa.CheckConstraint(
+            "start_date <= end_date", name=op.f("ck_events_check_event_dates")
+        ),
+        sa.CheckConstraint(
+            "start_time <= end_time", name=op.f("ck_events_check_event_times")
+        ),
+        sa.ForeignKeyConstraint(
+            ["year_id"],
+            ["years.id"],
+            name=op.f("fk_events_year_id_years"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_events")),
     )
     op.create_table(
         "grades",
@@ -271,10 +327,48 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.ForeignKeyConstraint(["year_id"], ["years.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
+        sa.ForeignKeyConstraint(
+            ["year_id"],
+            ["years.id"],
+            name=op.f("fk_grades_year_id_years"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_grades")),
     )
     op.create_index(op.f("ix_grades_year_id"), "grades", ["year_id"], unique=False)
+    op.create_table(
+        "parents",
+        sa.Column("first_name", sa.String(length=50), nullable=False),
+        sa.Column("last_name", sa.String(length=50), nullable=False),
+        sa.Column(
+            "gender",
+            sa.Enum("male", "female", name="gender_enum", native_enum=False),
+            nullable=False,
+        ),
+        sa.Column("email", sa.String(length=120), nullable=True),
+        sa.Column("phone", sa.String(length=25), nullable=False),
+        sa.Column("relation", sa.String(length=50), nullable=False),
+        sa.Column("emergency_contact_phone", sa.String(length=25), nullable=True),
+        sa.Column("user_id", sa.UUID(), nullable=True),
+        sa.Column("id", sa.UUID(), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.ForeignKeyConstraint(
+            ["user_id"], ["users.id"], name=op.f("fk_parents_user_id_users")
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_parents")),
+        sa.UniqueConstraint("email", name=op.f("uq_parents_email")),
+    )
     op.create_table(
         "saved_query_views",
         sa.Column("user_id", sa.UUID(), nullable=False),
@@ -305,8 +399,13 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
+        sa.ForeignKeyConstraint(
+            ["user_id"],
+            ["users.id"],
+            name=op.f("fk_saved_query_views_user_id_users"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_saved_query_views")),
     )
     op.create_table(
         "subjects",
@@ -326,8 +425,13 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.ForeignKeyConstraint(["year_id"], ["years.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
+        sa.ForeignKeyConstraint(
+            ["year_id"],
+            ["years.id"],
+            name=op.f("fk_subjects_year_id_years"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_subjects")),
     )
     op.create_index(op.f("ix_subjects_year_id"), "subjects", ["year_id"], unique=False)
     op.create_table(
@@ -343,12 +447,9 @@ def upgrade() -> None:
         ),
         sa.Column("nationality", sa.String(length=50), nullable=False),
         sa.Column("social_security_number", sa.String(length=50), nullable=False),
-        sa.Column("address", sa.Text(), nullable=False),
         sa.Column("city", sa.String(length=50), nullable=False),
         sa.Column("state", sa.String(length=50), nullable=False),
         sa.Column("country", sa.String(length=50), nullable=False),
-        sa.Column("primary_phone", sa.String(length=50), nullable=False),
-        sa.Column("personal_email", sa.String(length=50), nullable=False),
         sa.Column("emergency_contact_name", sa.String(length=50), nullable=False),
         sa.Column("emergency_contact_relation", sa.String(length=50), nullable=False),
         sa.Column("emergency_contact_phone", sa.String(length=50), nullable=False),
@@ -397,27 +498,9 @@ def upgrade() -> None:
             ),
             nullable=False,
         ),
-        sa.Column("reference1_name", sa.String(length=50), nullable=False),
-        sa.Column("reference1_organization", sa.String(length=50), nullable=False),
-        sa.Column("reference1_phone", sa.String(length=50), nullable=False),
-        sa.Column("reference1_email", sa.String(length=50), nullable=True),
-        sa.Column(
-            "marital_status",
-            sa.Enum(
-                "single",
-                "married",
-                "divorced",
-                "widowed",
-                "prefer-not-to-say",
-                name="marital_status_enum",
-                native_enum=False,
-            ),
-            nullable=True,
-        ),
         sa.Column("secondary_phone", sa.String(length=50), nullable=True),
         sa.Column("certifications", sa.Text(), nullable=True),
         sa.Column("resume", sa.String(length=50), nullable=True),
-        sa.Column("background_check", sa.Text(), nullable=True),
         sa.Column("user_id", sa.UUID(), nullable=True),
         sa.Column("subject_id", sa.UUID(), nullable=True),
         sa.Column(
@@ -449,12 +532,23 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.CheckConstraint(
-            "gpa >= 0.0 AND gpa <= 4.0", name="check_employee_gpa_range"
+            "gpa >= 0.0 AND gpa <= 4.0",
+            name=op.f("ck_employees_check_employee_gpa_range"),
         ),
-        sa.ForeignKeyConstraint(["subject_id"], ["subjects.id"], ondelete="SET NULL"),
-        sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("user_id"),
+        sa.ForeignKeyConstraint(
+            ["subject_id"],
+            ["subjects.id"],
+            name=op.f("fk_employees_subject_id_subjects"),
+            ondelete="SET NULL",
+        ),
+        sa.ForeignKeyConstraint(
+            ["user_id"],
+            ["users.id"],
+            name=op.f("fk_employees_user_id_users"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_employees")),
+        sa.UniqueConstraint("user_id", name=op.f("uq_employees_user_id")),
     )
     op.create_table(
         "sections",
@@ -473,8 +567,13 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.ForeignKeyConstraint(["grade_id"], ["grades.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
+        sa.ForeignKeyConstraint(
+            ["grade_id"],
+            ["grades.id"],
+            name=op.f("fk_sections_grade_id_grades"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_sections")),
     )
     op.create_table(
         "streams",
@@ -493,8 +592,13 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.ForeignKeyConstraint(["grade_id"], ["grades.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
+        sa.ForeignKeyConstraint(
+            ["grade_id"],
+            ["grades.id"],
+            name=op.f("fk_streams_grade_id_grades"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_streams")),
         sa.UniqueConstraint("grade_id", "name", name="uq_grade_name"),
     )
     op.create_table(
@@ -508,13 +612,9 @@ def upgrade() -> None:
             sa.Enum("male", "female", name="gender_enum", native_enum=False),
             nullable=False,
         ),
-        sa.Column("address", sa.Text(), nullable=False),
         sa.Column("city", sa.String(length=50), nullable=False),
         sa.Column("state", sa.String(length=50), nullable=False),
         sa.Column("postal_code", sa.String(length=20), nullable=False),
-        sa.Column("father_phone", sa.String(length=25), nullable=False),
-        sa.Column("mother_phone", sa.String(length=25), nullable=False),
-        sa.Column("parent_email", sa.String(length=120), nullable=False),
         sa.Column("grand_father_name", sa.String(length=50), nullable=True),
         sa.Column("nationality", sa.String(length=100), nullable=True),
         sa.Column(
@@ -536,17 +636,9 @@ def upgrade() -> None:
         ),
         sa.Column("student_photo", sa.String(length=255), nullable=True),
         sa.Column("previous_school", sa.String(length=100), nullable=True),
-        sa.Column("previous_grades", sa.Text(), nullable=True),
         sa.Column("transportation", sa.String(length=50), nullable=True),
-        sa.Column("guardian_name", sa.String(length=50), nullable=True),
-        sa.Column("guardian_phone", sa.String(length=25), nullable=True),
-        sa.Column("guardian_relation", sa.String(length=50), nullable=True),
-        sa.Column("emergency_contact_name", sa.String(length=50), nullable=True),
-        sa.Column("emergency_contact_phone", sa.String(length=25), nullable=True),
         sa.Column("disability_details", sa.Text(), nullable=True),
-        sa.Column("sibling_details", sa.Text(), nullable=True),
         sa.Column("medical_details", sa.Text(), nullable=True),
-        sa.Column("sibling_in_school", sa.Boolean(), nullable=False),
         sa.Column("has_medical_condition", sa.Boolean(), nullable=False),
         sa.Column("has_disability", sa.Boolean(), nullable=False),
         sa.Column("is_transfer", sa.Boolean(), nullable=False),
@@ -582,35 +674,77 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ["registered_for_grade_id"],
             ["grades.id"],
+            name=op.f("fk_students_registered_for_grade_id_grades"),
         ),
-        sa.ForeignKeyConstraint(["user_id"], ["users.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
-        sa.UniqueConstraint("user_id"),
+        sa.ForeignKeyConstraint(
+            ["user_id"],
+            ["users.id"],
+            name=op.f("fk_students_user_id_users"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_students")),
+        sa.UniqueConstraint("user_id", name=op.f("uq_students_user_id")),
     )
     op.create_table(
         "employee_year_links",
         sa.Column("employee_id", sa.UUID(), nullable=False),
         sa.Column("year_id", sa.UUID(), nullable=False),
-        sa.ForeignKeyConstraint(["employee_id"], ["employees.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["year_id"], ["years.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("employee_id", "year_id"),
+        sa.ForeignKeyConstraint(
+            ["employee_id"],
+            ["employees.id"],
+            name=op.f("fk_employee_year_links_employee_id_employees"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["year_id"],
+            ["years.id"],
+            name=op.f("fk_employee_year_links_year_id_years"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint(
+            "employee_id", "year_id", name=op.f("pk_employee_year_links")
+        ),
         sa.UniqueConstraint("employee_id", "year_id", name="uq_employee_year_links"),
     )
     op.create_table(
         "grade_section_links",
         sa.Column("section_id", sa.UUID(), nullable=False),
         sa.Column("grade_id", sa.UUID(), nullable=False),
-        sa.ForeignKeyConstraint(["grade_id"], ["grades.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["section_id"], ["sections.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("section_id", "grade_id"),
+        sa.ForeignKeyConstraint(
+            ["grade_id"],
+            ["grades.id"],
+            name=op.f("fk_grade_section_links_grade_id_grades"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["section_id"],
+            ["sections.id"],
+            name=op.f("fk_grade_section_links_section_id_sections"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint(
+            "section_id", "grade_id", name=op.f("pk_grade_section_links")
+        ),
     )
     op.create_table(
         "grade_stream_links",
         sa.Column("grade_id", sa.UUID(), nullable=False),
         sa.Column("stream_id", sa.UUID(), nullable=False),
-        sa.ForeignKeyConstraint(["grade_id"], ["grades.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["stream_id"], ["streams.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("grade_id", "stream_id"),
+        sa.ForeignKeyConstraint(
+            ["grade_id"],
+            ["grades.id"],
+            name=op.f("fk_grade_stream_links_grade_id_grades"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["stream_id"],
+            ["streams.id"],
+            name=op.f("fk_grade_stream_links_stream_id_streams"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint(
+            "grade_id", "stream_id", name=op.f("pk_grade_stream_links")
+        ),
     )
     op.create_table(
         "grade_stream_subjects",
@@ -630,13 +764,62 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.ForeignKeyConstraint(["grade_id"], ["grades.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["stream_id"], ["streams.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["subject_id"], ["subjects.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
+        sa.ForeignKeyConstraint(
+            ["grade_id"],
+            ["grades.id"],
+            name=op.f("fk_grade_stream_subjects_grade_id_grades"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["stream_id"],
+            ["streams.id"],
+            name=op.f("fk_grade_stream_subjects_stream_id_streams"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["subject_id"],
+            ["subjects.id"],
+            name=op.f("fk_grade_stream_subjects_subject_id_subjects"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_grade_stream_subjects")),
         sa.UniqueConstraint(
             "grade_id", "stream_id", "subject_id", name="uq_grade_stream_subject"
         ),
+    )
+    op.create_table(
+        "parent_student_links",
+        sa.Column("parent_id", sa.UUID(), nullable=False),
+        sa.Column("student_id", sa.UUID(), nullable=False),
+        sa.Column("id", sa.UUID(), nullable=False),
+        sa.Column(
+            "created_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.Column(
+            "updated_at",
+            sa.DateTime(timezone=True),
+            server_default=sa.text("now()"),
+            nullable=False,
+        ),
+        sa.ForeignKeyConstraint(
+            ["parent_id"],
+            ["parents.id"],
+            name=op.f("fk_parent_student_links_parent_id_parents"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["student_id"],
+            ["students.id"],
+            name=op.f("fk_parent_student_links_student_id_students"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint(
+            "parent_id", "student_id", "id", name=op.f("pk_parent_student_links")
+        ),
+        sa.UniqueConstraint("parent_id", "student_id", name="uq_parent_student_links"),
     )
     op.create_table(
         "registrations",
@@ -656,9 +839,19 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.ForeignKeyConstraint(["student_id"], ["students.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["subject_id"], ["subjects.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
+        sa.ForeignKeyConstraint(
+            ["student_id"],
+            ["students.id"],
+            name=op.f("fk_registrations_student_id_students"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["subject_id"],
+            ["subjects.id"],
+            name=op.f("fk_registrations_subject_id_subjects"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_registrations")),
     )
     op.create_table(
         "student_academic_term_links",
@@ -667,34 +860,82 @@ def upgrade() -> None:
         sa.Column("average", sa.Float(), nullable=True),
         sa.Column("rank", sa.Integer(), nullable=True),
         sa.ForeignKeyConstraint(
-            ["academic_term_id"], ["academic_terms.id"], ondelete="CASCADE"
+            ["academic_term_id"],
+            ["academic_terms.id"],
+            name=op.f("fk_student_academic_term_links_academic_term_id_academic_terms"),
+            ondelete="CASCADE",
         ),
-        sa.ForeignKeyConstraint(["student_id"], ["students.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("student_id", "academic_term_id"),
+        sa.ForeignKeyConstraint(
+            ["student_id"],
+            ["students.id"],
+            name=op.f("fk_student_academic_term_links_student_id_students"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint(
+            "student_id",
+            "academic_term_id",
+            name=op.f("pk_student_academic_term_links"),
+        ),
     )
     op.create_table(
         "student_grade_links",
         sa.Column("student_id", sa.UUID(), nullable=False),
         sa.Column("grade_id", sa.UUID(), nullable=False),
-        sa.ForeignKeyConstraint(["grade_id"], ["grades.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["student_id"], ["students.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("student_id", "grade_id"),
+        sa.ForeignKeyConstraint(
+            ["grade_id"],
+            ["grades.id"],
+            name=op.f("fk_student_grade_links_grade_id_grades"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["student_id"],
+            ["students.id"],
+            name=op.f("fk_student_grade_links_student_id_students"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint(
+            "student_id", "grade_id", name=op.f("pk_student_grade_links")
+        ),
     )
     op.create_table(
         "student_section_links",
         sa.Column("student_id", sa.UUID(), nullable=False),
         sa.Column("section_id", sa.UUID(), nullable=False),
-        sa.ForeignKeyConstraint(["section_id"], ["sections.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["student_id"], ["students.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("student_id", "section_id"),
+        sa.ForeignKeyConstraint(
+            ["section_id"],
+            ["sections.id"],
+            name=op.f("fk_student_section_links_section_id_sections"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["student_id"],
+            ["students.id"],
+            name=op.f("fk_student_section_links_student_id_students"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint(
+            "student_id", "section_id", name=op.f("pk_student_section_links")
+        ),
     )
     op.create_table(
         "student_stream_links",
         sa.Column("student_id", sa.UUID(), nullable=False),
         sa.Column("stream_id", sa.UUID(), nullable=False),
-        sa.ForeignKeyConstraint(["stream_id"], ["streams.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["student_id"], ["students.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("student_id", "stream_id"),
+        sa.ForeignKeyConstraint(
+            ["stream_id"],
+            ["streams.id"],
+            name=op.f("fk_student_stream_links_stream_id_streams"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["student_id"],
+            ["students.id"],
+            name=op.f("fk_student_stream_links_student_id_students"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint(
+            "student_id", "stream_id", name=op.f("pk_student_stream_links")
+        ),
     )
     op.create_table(
         "student_subject_links",
@@ -702,9 +943,21 @@ def upgrade() -> None:
         sa.Column("subject_id", sa.UUID(), nullable=False),
         sa.Column("average", sa.Float(), nullable=True),
         sa.Column("rank", sa.Integer(), nullable=True),
-        sa.ForeignKeyConstraint(["student_id"], ["students.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["subject_id"], ["subjects.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("student_id", "subject_id"),
+        sa.ForeignKeyConstraint(
+            ["student_id"],
+            ["students.id"],
+            name=op.f("fk_student_subject_links_student_id_students"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["subject_id"],
+            ["subjects.id"],
+            name=op.f("fk_student_subject_links_subject_id_subjects"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint(
+            "student_id", "subject_id", name=op.f("pk_student_subject_links")
+        ),
     )
     op.create_table(
         "student_term_records",
@@ -729,13 +982,36 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.ForeignKeyConstraint(
-            ["academic_term_id"], ["academic_terms.id"], ondelete="CASCADE"
+            ["academic_term_id"],
+            ["academic_terms.id"],
+            name=op.f("fk_student_term_records_academic_term_id_academic_terms"),
+            ondelete="CASCADE",
         ),
-        sa.ForeignKeyConstraint(["grade_id"], ["grades.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["section_id"], ["sections.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["stream_id"], ["streams.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["student_id"], ["students.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
+        sa.ForeignKeyConstraint(
+            ["grade_id"],
+            ["grades.id"],
+            name=op.f("fk_student_term_records_grade_id_grades"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["section_id"],
+            ["sections.id"],
+            name=op.f("fk_student_term_records_section_id_sections"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["stream_id"],
+            ["streams.id"],
+            name=op.f("fk_student_term_records_stream_id_streams"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["student_id"],
+            ["students.id"],
+            name=op.f("fk_student_term_records_student_id_students"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_student_term_records")),
     )
     op.create_table(
         "student_year_links",
@@ -743,9 +1019,21 @@ def upgrade() -> None:
         sa.Column("year_id", sa.UUID(), nullable=False),
         sa.Column("average", sa.Float(), nullable=True),
         sa.Column("rank", sa.Integer(), nullable=True),
-        sa.ForeignKeyConstraint(["student_id"], ["students.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["year_id"], ["years.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("student_id", "year_id"),
+        sa.ForeignKeyConstraint(
+            ["student_id"],
+            ["students.id"],
+            name=op.f("fk_student_year_links_student_id_students"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["year_id"],
+            ["years.id"],
+            name=op.f("fk_student_year_links_year_id_years"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint(
+            "student_id", "year_id", name=op.f("pk_student_year_links")
+        ),
     )
     op.create_table(
         "student_year_records",
@@ -768,11 +1056,31 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.ForeignKeyConstraint(["grade_id"], ["grades.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["stream_id"], ["streams.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["student_id"], ["students.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["year_id"], ["years.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
+        sa.ForeignKeyConstraint(
+            ["grade_id"],
+            ["grades.id"],
+            name=op.f("fk_student_year_records_grade_id_grades"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["stream_id"],
+            ["streams.id"],
+            name=op.f("fk_student_year_records_stream_id_streams"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["student_id"],
+            ["students.id"],
+            name=op.f("fk_student_year_records_student_id_students"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["year_id"],
+            ["years.id"],
+            name=op.f("fk_student_year_records_year_id_years"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_student_year_records")),
     )
     op.create_table(
         "yearly_subjects",
@@ -794,11 +1102,31 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.ForeignKeyConstraint(["grade_id"], ["grades.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["stream_id"], ["streams.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["subject_id"], ["subjects.id"], ondelete="CASCADE"),
-        sa.ForeignKeyConstraint(["year_id"], ["years.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
+        sa.ForeignKeyConstraint(
+            ["grade_id"],
+            ["grades.id"],
+            name=op.f("fk_yearly_subjects_grade_id_grades"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["stream_id"],
+            ["streams.id"],
+            name=op.f("fk_yearly_subjects_stream_id_streams"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["subject_id"],
+            ["subjects.id"],
+            name=op.f("fk_yearly_subjects_subject_id_subjects"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["year_id"],
+            ["years.id"],
+            name=op.f("fk_yearly_subjects_year_id_years"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_yearly_subjects")),
     )
     op.create_table(
         "assessments",
@@ -820,14 +1148,25 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.ForeignKeyConstraint(["student_id"], ["students.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(
-            ["student_term_record_id"], ["student_term_records.id"], ondelete="CASCADE"
+            ["student_id"],
+            ["students.id"],
+            name=op.f("fk_assessments_student_id_students"),
+            ondelete="CASCADE",
         ),
         sa.ForeignKeyConstraint(
-            ["yearly_subject_id"], ["yearly_subjects.id"], ondelete="CASCADE"
+            ["student_term_record_id"],
+            ["student_term_records.id"],
+            name=op.f("fk_assessments_student_term_record_id_student_term_records"),
+            ondelete="CASCADE",
         ),
-        sa.PrimaryKeyConstraint("id"),
+        sa.ForeignKeyConstraint(
+            ["yearly_subject_id"],
+            ["yearly_subjects.id"],
+            name=op.f("fk_assessments_yearly_subject_id_yearly_subjects"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_assessments")),
     )
     op.create_table(
         "mark_lists",
@@ -862,12 +1201,25 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.ForeignKeyConstraint(["student_id"], ["students.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(
-            ["student_term_record_id"], ["student_term_records.id"], ondelete="CASCADE"
+            ["student_id"],
+            ["students.id"],
+            name=op.f("fk_mark_lists_student_id_students"),
+            ondelete="CASCADE",
         ),
-        sa.ForeignKeyConstraint(["subject_id"], ["subjects.id"], ondelete="CASCADE"),
-        sa.PrimaryKeyConstraint("id"),
+        sa.ForeignKeyConstraint(
+            ["student_term_record_id"],
+            ["student_term_records.id"],
+            name=op.f("fk_mark_lists_student_term_record_id_student_term_records"),
+            ondelete="CASCADE",
+        ),
+        sa.ForeignKeyConstraint(
+            ["subject_id"],
+            ["subjects.id"],
+            name=op.f("fk_mark_lists_subject_id_subjects"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_mark_lists")),
     )
     op.create_table(
         "subject_yearly_averages",
@@ -889,14 +1241,27 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.ForeignKeyConstraint(["student_id"], ["students.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(
-            ["student_year_record_id"], ["student_year_records.id"], ondelete="CASCADE"
+            ["student_id"],
+            ["students.id"],
+            name=op.f("fk_subject_yearly_averages_student_id_students"),
+            ondelete="CASCADE",
         ),
         sa.ForeignKeyConstraint(
-            ["yearly_subject_id"], ["yearly_subjects.id"], ondelete="CASCADE"
+            ["student_year_record_id"],
+            ["student_year_records.id"],
+            name=op.f(
+                "fk_subject_yearly_averages_student_year_record_id_student_year_records"
+            ),
+            ondelete="CASCADE",
         ),
-        sa.PrimaryKeyConstraint("id"),
+        sa.ForeignKeyConstraint(
+            ["yearly_subject_id"],
+            ["yearly_subjects.id"],
+            name=op.f("fk_subject_yearly_averages_yearly_subject_id_yearly_subjects"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_subject_yearly_averages")),
     )
     op.create_table(
         "teacher_records",
@@ -917,15 +1282,26 @@ def upgrade() -> None:
             nullable=False,
         ),
         sa.ForeignKeyConstraint(
-            ["academic_term_id"], ["academic_terms.id"], ondelete="CASCADE"
+            ["academic_term_id"],
+            ["academic_terms.id"],
+            name=op.f("fk_teacher_records_academic_term_id_academic_terms"),
+            ondelete="CASCADE",
         ),
-        sa.ForeignKeyConstraint(["employee_id"], ["employees.id"], ondelete="CASCADE"),
+        sa.ForeignKeyConstraint(
+            ["employee_id"],
+            ["employees.id"],
+            name=op.f("fk_teacher_records_employee_id_employees"),
+            ondelete="CASCADE",
+        ),
         sa.ForeignKeyConstraint(
             ["grade_stream_subject_id"],
             ["grade_stream_subjects.id"],
+            name=op.f(
+                "fk_teacher_records_grade_stream_subject_id_grade_stream_subjects"
+            ),
             ondelete="SET NULL",
         ),
-        sa.PrimaryKeyConstraint("id"),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_teacher_records")),
         sa.UniqueConstraint(
             "employee_id",
             "academic_term_id",
@@ -950,11 +1326,19 @@ def upgrade() -> None:
             server_default=sa.text("now()"),
             nullable=False,
         ),
-        sa.ForeignKeyConstraint(["section_id"], ["sections.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(
-            ["teacher_record_id"], ["teacher_records.id"], ondelete="CASCADE"
+            ["section_id"],
+            ["sections.id"],
+            name=op.f("fk_teacher_record_links_section_id_sections"),
+            ondelete="CASCADE",
         ),
-        sa.PrimaryKeyConstraint("id"),
+        sa.ForeignKeyConstraint(
+            ["teacher_record_id"],
+            ["teacher_records.id"],
+            name=op.f("fk_teacher_record_links_teacher_record_id_teacher_records"),
+            ondelete="CASCADE",
+        ),
+        sa.PrimaryKeyConstraint("id", name=op.f("pk_teacher_record_links")),
         sa.UniqueConstraint(
             "teacher_record_id", "section_id", name="uq_teacher_record_links"
         ),
@@ -980,6 +1364,7 @@ def downgrade() -> None:
     op.drop_table("student_grade_links")
     op.drop_table("student_academic_term_links")
     op.drop_table("registrations")
+    op.drop_table("parent_student_links")
     op.drop_table("grade_stream_subjects")
     op.drop_table("grade_stream_links")
     op.drop_table("grade_section_links")
@@ -991,9 +1376,11 @@ def downgrade() -> None:
     op.drop_index(op.f("ix_subjects_year_id"), table_name="subjects")
     op.drop_table("subjects")
     op.drop_table("saved_query_views")
+    op.drop_table("parents")
     op.drop_index(op.f("ix_grades_year_id"), table_name="grades")
     op.drop_table("grades")
     op.drop_table("events")
+    op.drop_table("auth_identities")
     op.drop_table("admins")
     op.drop_table("academic_terms")
     op.drop_table("years")
