@@ -17,7 +17,12 @@ from project.models.base.base_model import Base
 # access to the values within the .ini file in use.
 config = context.config
 
-config.set_main_option("sqlalchemy.url", str(settings.SQLALCHEMY_POSTGRES_DATABASE_URI))
+database_url = str(settings.SQLALCHEMY_POSTGRES_DATABASE_URI)
+
+# Escape % for ConfigParser compatibility
+escaped_url = database_url.replace("%", "%%")
+
+config.set_main_option("sqlalchemy.url", escaped_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

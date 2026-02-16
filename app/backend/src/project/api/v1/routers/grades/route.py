@@ -3,6 +3,7 @@ import uuid
 from typing import Annotated, Any, Dict, List, Sequence
 
 from fastapi import APIRouter, HTTPException, Query
+from fastapi.logger import logger
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
@@ -90,7 +91,7 @@ def post_grade(
 
         return {"message": "Grade created Successfully", "id": grade.id}
     except Exception as e:
-        print(f"Error creating grade: {e}")
+        logger.error(f"Error creating grade: {e}")
         session.rollback()
         raise HTTPException(status_code=500, detail=f"Creation failed: {str(e)}")
 
@@ -193,7 +194,7 @@ def patch_grade_setup(
             )
         raise HTTPException(status_code=500, detail=f"Update failed: {str(e)}")
     except Exception as e:
-        print(f"Error updating grade setup: {e}")
+        logger.error(f"Error updating grade setup: {e}")
         session.rollback()
         raise HTTPException(status_code=500, detail=f"Update failed: {str(e)}")
 
