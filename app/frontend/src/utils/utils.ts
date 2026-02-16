@@ -160,7 +160,6 @@ function getEnv<K extends keyof ImportMetaEnv>(
 
 export const ENV = {
   API_BASE_URL: getEnv("VITE_API_BASE_URL"),
-  VITE_GOOGLE_CLIENT_ID: getEnv("VITE_GOOGLE_CLIENT_ID"),
 } as const;
 
 // Helper function to decode the JWT token

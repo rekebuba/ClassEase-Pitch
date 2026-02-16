@@ -1,4 +1,3 @@
-import redis
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
@@ -11,9 +10,6 @@ from project.utils.enum import AuthProviderEnum, RoleEnum
 
 # Create the engine
 engine = create_engine(str(settings.SQLALCHEMY_POSTGRES_DATABASE_URI), future=True)
-redis_client = redis.asyncio.Redis.from_url(
-    str(settings.REDIS_URL), decode_responses=True
-)
 
 
 def init_db(session: Session) -> None:

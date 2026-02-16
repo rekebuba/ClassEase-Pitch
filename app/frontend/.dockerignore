@@ -7,3 +7,6 @@ logs/
 .gitignore
 npm-debug.log
 dist
+.env.testing
+.env.development
+.pre-commit-config.yaml

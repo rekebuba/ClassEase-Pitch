@@ -8,10 +8,10 @@ from google.auth.transport import requests
 from google.oauth2 import id_token
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from pydantic import BaseModel, EmailStr, NameEmail
+from redis.asyncio import Redis
 from sqlalchemy.orm import Session
 
 from project.core.config import EmailConf, settings
-from project.core.db import redis_client
 from project.models import AuthIdentity, User
 from project.utils.enum import AuthProviderEnum
 
@@ -135,7 +135,7 @@ def get_google_user(db: Session, token: str) -> User:
     return user
 
 
-async def generate_and_store_otp_secret(email: EmailStr) -> str:
+async def generate_and_store_otp_secret(email: EmailStr, redis_client: Redis) -> str:
     """
     Generates a secret, saves it to Redis, and returns the 6-digit OTP.
     """
@@ -150,7 +150,10 @@ async def generate_and_store_otp_secret(email: EmailStr) -> str:
     return totp.now()
 
 
-async def generate_and_store_password_reset_token(email: EmailStr) -> str:
+async def generate_and_store_password_reset_token(
+    email: EmailStr,
+    redis_client: Redis,
+) -> str:
     """Generates a password reset token, saves it to Redis, and returns the token."""
     reset_token = pyotp.random_base32()
 
@@ -162,7 +165,9 @@ async def generate_and_store_password_reset_token(email: EmailStr) -> str:
 
 
 async def verify_otp_and_generate_token(
-    email: EmailStr, user_submitted_code: str
+    email: EmailStr,
+    user_submitted_code: str,
+    redis_client: Redis,
 ) -> str | None:
     """
     Retrieves secret from Redis, verifies the OTP, and deletes if valid.
@@ -184,12 +189,16 @@ async def verify_otp_and_generate_token(
     await redis_client.delete(redis_key)
 
     # generate a token
-    token = await generate_and_store_password_reset_token(email)
+    token = await generate_and_store_password_reset_token(email, redis_client)
 
     return token
 
 
-async def verify_password_reset_token(email: EmailStr, token: str) -> bool:
+async def verify_password_reset_token(
+    email: EmailStr,
+    token: str,
+    redis_client: Redis,
+) -> bool:
     """Verify the password reset token from Redis."""
     redis_key = f"password_reset:{email}"
     stored_token = await redis_client.get(redis_key)
@@ -205,10 +214,10 @@ async def verify_password_reset_token(email: EmailStr, token: str) -> bool:
     return True
 
 
-async def send_reset_password_email(email_to: NameEmail) -> None:
+async def send_reset_password_email(email_to: NameEmail, redis_client: Redis) -> None:
     """Send a password reset email with a tokenized link."""
 
-    otp = await generate_and_store_otp_secret(email_to.email)
+    otp = await generate_and_store_otp_secret(email_to.email, redis_client)
 
     project_name = settings.PROJECT_NAME
     message = MessageSchema(

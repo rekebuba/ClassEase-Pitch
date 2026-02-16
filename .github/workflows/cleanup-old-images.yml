@@ -1,0 +1,32 @@
+name: Weekly cleanup of old images
+
+on:
+  schedule:
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
+
+env:
+  IMAGE_RETENTION_DAYS: 30
+  KEEP_RECENT_VERSIONS: 5
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+
+    permissions:
+      packages: write
+    concurrency:
+      group: cleanup-${{ github.ref }}
+
+    steps:
+      - name: Cleanup old images
+        uses: dataaxiom/ghcr-cleanup-action@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          keep-n-tagged: ${{ env.KEEP_RECENT_VERSIONS }}
+          exclude-tags: dev,main
+          older-than: ${{ env.IMAGE_RETENTION_DAYS }} days
+          delete-untagged: true
+          delete-partial-images: true
+          dry-run: false
+          log-level: info

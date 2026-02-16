@@ -39,7 +39,7 @@ if (!rootElement.innerHTML) {
             <NuqsAdapter>
               <Suspense fallback={<div />}>
                 {/* <PageLoader /> */}
-                <GoogleOAuthProvider clientId={ENV.VITE_GOOGLE_CLIENT_ID}>
+                <GoogleOAuthProvider clientId="553158623204-f65bpgp3pjg22o2ohainiafte64sil0r.apps.googleusercontent.com">
                   <RouterProvider router={router} />
                 </GoogleOAuthProvider>
               </Suspense>

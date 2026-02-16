@@ -6,13 +6,14 @@ import pytest
 import pytest_asyncio
 from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
+from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.orm import Session, sessionmaker
 
-from project.api.v1.routers.dependencies import get_db
+from project.api.v1.routers.dependencies import get_db, get_redis
 from project.api.v1.routers.registrations.schema import RegistrationResponse
 from project.core.config import settings
-from project.core.db import engine, init_db, redis_client
+from project.core.db import engine, init_db
 from project.main import app
 from project.models import Parent
 from project.models.base.base_model import Base
@@ -75,14 +76,23 @@ def client() -> Generator[TestClient, None, None]:
 
 
 @pytest_asyncio.fixture(scope="function")
-async def async_client():
+async def test_redis():
+    redis_client = Redis.from_url(str(settings.REDIS_URL), decode_responses=True)
+    yield redis_client
+    await redis_client.aclose()
+
+
+@pytest_asyncio.fixture(scope="function")
+async def async_client(test_redis: Redis):
+    app.dependency_overrides[get_redis] = lambda: test_redis
+
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
         yield ac
 
     # Ensure Redis connections are closed after every test to avoid loop conflicts.
-    await redis_client.aclose()
+    app.dependency_overrides.clear()
 
 
 @pytest.fixture(scope="module")

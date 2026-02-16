@@ -1,6 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from httpx import AsyncClient
+from redis.asyncio import Redis
 
 from project.api.v1.routers.auth.schema import VerifyOTPResponse
 from project.api.v1.routers.auth.service import (
@@ -157,14 +158,20 @@ def test_forgot_password_empty_email(client: TestClient) -> None:
 
 
 @pytest.mark.asyncio
-async def test_verify_otp(async_client: AsyncClient) -> None:
+async def test_verify_otp(async_client: AsyncClient, test_redis: Redis) -> None:
     """Test the OTP verification endpoint with a valid OTP."""
-    otp = await generate_and_store_otp_secret(settings.FIRST_SUPERUSER_EMAIL)
+    otp = await generate_and_store_otp_secret(
+        settings.FIRST_SUPERUSER_EMAIL, test_redis
+    )
+
     otp_data = {
         "email": settings.FIRST_SUPERUSER_EMAIL,
         "otp": otp,
     }
-    r = await async_client.post(f"{settings.API_V1_STR}/auth/verify-otp", json=otp_data)
+    r = await async_client.post(
+        f"{settings.API_V1_STR}/auth/verify-otp",
+        json=otp_data,
+    )
 
     assert r.status_code == 200
     result = VerifyOTPResponse.model_validate_json(r.text)
@@ -201,12 +208,18 @@ an asynchronous session (AsyncSession) and use an async test client.
 
 # @pytest.mark.asyncio
 # async def test_password_reset(
-#     async_client: AsyncClient, db_session: Session, reset_superuser_password
+#     async_client: AsyncClient,
+#     db_session: Session,
+#     reset_superuser_password,
+#     test_redis: Redis,
 # ) -> None:
 #     """Test the password reset endpoint with valid data."""
 
 #     # First, generate a valid OTP and token for the test user
-#     otp = await generate_and_store_otp_secret(settings.FIRST_SUPERUSER_EMAIL)
+#     otp = await generate_and_store_otp_secret(
+#         settings.FIRST_SUPERUSER_EMAIL,
+#         test_redis,
+#     )
 #     token = await verify_otp_and_generate_token(settings.FIRST_SUPERUSER_EMAIL, otp)
 
 #     reset_data = {

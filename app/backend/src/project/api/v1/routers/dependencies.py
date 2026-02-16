@@ -10,6 +10,7 @@ from fastapi.security import (
 )
 from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel, ValidationError
+from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -33,8 +34,14 @@ def get_db() -> Generator[Session, None, None]:
         yield session
 
 
+def get_redis() -> Generator[Redis, None, None]:
+    redis_client = Redis.from_url(str(settings.REDIS_URL), decode_responses=True)
+    yield redis_client
+
+
 SessionDep = Annotated[Session, Depends(get_db)]
 TokenDep = Annotated[str, Depends(oauth2_scheme)]
+RedisDep = Annotated[Redis, Depends(get_redis)]
 
 
 async def get_current_user(
