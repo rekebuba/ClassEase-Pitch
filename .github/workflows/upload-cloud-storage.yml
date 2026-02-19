@@ -1,0 +1,61 @@
+name: Upload Production Masked file to Cloud Storage
+
+on:
+  push:
+    branches: [ci-cd-playground]
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: "read"
+      id-token: "write"
+
+    steps:
+      - id: "checkout"
+        uses: "actions/checkout@v4"
+
+      - id: "auth"
+        uses: "google-github-actions/auth@v2"
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - name: "Install Cloud SQL Proxy & Postgres Client"
+        run: |
+          curl -o cloud-sql-proxy https://storage.googleapis.com/cloud-sql-connectors/cloud-sql-proxy/v2.8.1/cloud-sql-proxy.linux.amd64
+          chmod +x cloud-sql-proxy
+          sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: "Create database backup"
+        run: |
+          # Start the proxy in the background
+          ./cloud-sql-proxy ${{ secrets.CLOUD_SQL_CONNECTION_NAME }} --port 5432 &
+          sleep 5 # Give it a second to initialize
+
+          # Generate a filename with a timestamp
+          export BACKUP_NAME="backup-$(date +%Y-%m-%d-%H%M).sql.gz"
+          echo "FILENAME=$BACKUP_NAME" >> $GITHUB_ENV
+
+          # Dump, compress on the fly, and save
+          pg_dump \
+            -h 127.0.0.1 \
+            -p 5432 \
+            -U ${{ secrets.PROD_MASKED_USER }} \
+            -d ${{ secrets.PROD_MASKED_DB }} \
+            --no-security-labels \
+            --exclude-extension="anon" \
+            --no-owner \
+            -O | gzip > $BACKUP_NAME
+        env:
+          PGPASSWORD: ${{ secrets.PROD_MASKED_PASSWORD }}
+
+      - id: "upload-file"
+        name: "Upload backup to Google Cloud Storage"
+        uses: "google-github-actions/upload-cloud-storage@v2"
+        with:
+          path: ${{ env.FILENAME }}
+          destination: ${{ secrets.GCS_BUCKET_NAME }}
