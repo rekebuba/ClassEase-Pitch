@@ -58,6 +58,7 @@ jobs:
 
       - name: Load environment variables
         run: |
+          export ENVIRONMENT=testing
           echo "${{ secrets.TEST_ENV_BASE64 }}" | base64 -d > .env.testing
           echo "POSTGRES_SERVER=127.0.0.1" >> .env.testing
           echo "REDIS_SERVER=127.0.0.1" >> .env.testing
@@ -82,6 +83,10 @@ jobs:
 
   test-db-migrations:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: "read"
+      id-token: "write"
 
     steps:
       - uses: actions/checkout@v4
@@ -196,6 +201,10 @@ jobs:
   test-pushed-image:
     runs-on: ubuntu-latest
     needs: build-and-push
+
+    permissions:
+      contents: "read"
+      id-token: "write"
 
     steps:
       - uses: actions/checkout@v4
