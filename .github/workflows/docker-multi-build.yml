@@ -80,7 +80,7 @@ jobs:
           name: test-results-for-codecov
           files: test-reports/coverage.xml
 
-  local-test-image:
+  test-db-migrations:
     runs-on: ubuntu-latest
 
     steps:
@@ -92,9 +92,37 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - id: "auth"
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      # Set up gcloud CLI
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Download Sanitized Dump
+        run: |
+          gsutil cp gs://${{ secrets.GCS_BUCKET_NAME }}/backup-latest.sql.gz .
+          gzip --stdout --decompress backup-latest.sql.gz > backup-latest.sql
+
       - name: Load environment variables
         run: |
           echo "${{ secrets.TEST_ENV_BASE64 }}" | base64 -d > ./app/backend/.env.testing
+
+      - name: Start Database Only
+        run: docker compose -f docker-compose.local-test.yml up -d test_postgres_db --wait
+
+        # HYDRATION (Import data into the service container)
+      - name: "Hydrate Test Database"
+        run: |
+          docker compose -f docker-compose.local-test.yml run \
+            --rm \
+            -e PGPASSWORD=${{ secrets.TEST_POSTGRES_PASSWORD }} \
+            -v $(pwd)/backup-latest.sql:/backup-latest.sql \
+            test_postgres_db \
+            psql -h test_postgres_db -U ${{ secrets.POSTGRES_USER }} -d ${{ secrets.POSTGRES_DB }} -f /backup-latest.sql
 
       - name: Build images
         run: docker compose -f docker-compose.local-test.yml build
@@ -109,7 +137,7 @@ jobs:
 
   build-and-push:
     runs-on: ubuntu-latest
-    needs: [test, local-test-image]
+    needs: [test, test-db-migrations]
     strategy:
       fail-fast: false # Let all matrix jobs complete
       matrix:
@@ -178,12 +206,40 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - id: "auth"
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      # Set up gcloud CLI
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+
+      - name: Download Sanitized Dump
+        run: |
+          gsutil cp gs://${{ secrets.GCS_BUCKET_NAME }}/backup-latest.sql.gz .
+          gzip --stdout --decompress backup-latest.sql.gz > backup-latest.sql
+
       - name: Load environment variables
         run: |
           echo "${{ secrets.TEST_ENV_BASE64 }}" | base64 -d > ./app/backend/.env.testing
 
+      - name: Start Database Only
+        run: docker compose -f docker-compose.test.yml up -d test_postgres_db --wait
+
+        # HYDRATION (Import data into the service container)
+      - name: "Hydrate Test Database"
+        run: |
+          docker compose -f docker-compose.local-test.yml run \
+            --rm \
+            -e PGPASSWORD=${{ secrets.TEST_POSTGRES_PASSWORD }} \
+            -v $(pwd)/backup-latest.sql:/backup-latest.sql \
+            test_postgres_db \
+            psql -h test_postgres_db -U ${{ secrets.POSTGRES_USER }} -d ${{ secrets.POSTGRES_DB }} -f /backup-latest.sql
+
       - name: Build images
-        run: docker compose -f docker-compose.test.yml build
+        run: docker compose -f docker-compose.test.yml pull
 
       # Use 'run' instead of 'exec' before the full stack is up
       - name: Run migrations
