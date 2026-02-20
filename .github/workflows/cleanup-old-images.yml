@@ -53,16 +53,13 @@ jobs:
 
       - name: Load environment variables
         run: |
-          export ENVIRONMENT=testing
           echo "${{ secrets.TEST_ENV_BASE64 }}" | base64 -d > .env.testing
           echo "POSTGRES_SERVER=127.0.0.1" >> .env.testing
           echo "REDIS_SERVER=127.0.0.1" >> .env.testing
-          pwd
-          ls -la
-          cat .env.testing
 
       - name: Run tests
         run: |
+          export ENVIRONMENT=testing
           uv run pytest --cov --cov-branch --cov-report=xml:test-reports/coverage.xml
 
       - name: Upload test results for artifact
