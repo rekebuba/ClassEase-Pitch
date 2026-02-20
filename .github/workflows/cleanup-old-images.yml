@@ -1,6 +1,8 @@
 name: Weekly cleanup of old images
 
 on:
+  push:
+    branches: [ci-cd-playground]
   schedule:
     - cron: "0 0 * * 0"
   workflow_dispatch:
@@ -10,7 +12,74 @@ env:
   KEEP_RECENT_VERSIONS: 5
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: app/backend
+
+    services:
+      postgres_db:
+        image: postgres:13.22-alpine3.22
+        env:
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+        # Expose the port so the runner can see it
+        ports:
+          - 5432:5432
+        # Health check ensures the DB is ready before tests start
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:8.2-bookworm
+        ports:
+          - "6379:6379"
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install uv
+          uv sync --all-extras
+
+      - name: Load environment variables
+        run: |
+          export ENVIRONMENT=testing
+          echo "${{ secrets.TEST_ENV_BASE64 }}" | base64 -d > .env.testing
+          echo "POSTGRES_SERVER=127.0.0.1" >> .env.testing
+          echo "REDIS_SERVER=127.0.0.1" >> .env.testing
+          pwd
+          ls -la
+
+      - name: Run tests
+        run: |
+          uv run pytest --cov --cov-branch --cov-report=xml:test-reports/coverage.xml
+
+      - name: Upload test results for artifact
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results-for-artifact
+          path: test-reports/
+          retention-days: 15
+
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          name: test-results-for-codecov
+          files: test-reports/coverage.xml
+
   cleanup:
+    needs: test
     runs-on: ubuntu-latest
 
     permissions:
