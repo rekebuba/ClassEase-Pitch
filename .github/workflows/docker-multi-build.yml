@@ -65,6 +65,7 @@ jobs:
 
       - name: Run tests
         run: |
+          export ENVIRONMENT=testing
           uv run pytest --cov --cov-branch --cov-report=xml:test-reports/coverage.xml
 
       - name: Upload test results for artifact
