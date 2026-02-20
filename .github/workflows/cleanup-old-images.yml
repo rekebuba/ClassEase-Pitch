@@ -59,6 +59,7 @@ jobs:
           echo "REDIS_SERVER=127.0.0.1" >> .env.testing
           pwd
           ls -la
+          cat .env.testing
 
       - name: Run tests
         run: |
