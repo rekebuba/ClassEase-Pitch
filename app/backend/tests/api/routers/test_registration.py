@@ -2,12 +2,12 @@ import random
 from typing import Dict
 
 import pytest
-from fastapi.testclient import TestClient
+from httpx import AsyncClient
 
 from project.api.v1.routers.registrations.schema import RegistrationResponse
 from project.core.config import settings
 from project.models.parent import Parent
-from project.models.year import Year
+from project.schema.models import YearWithRelatedSchema
 from project.utils.enum import EmployeePositionEnum
 from tests.factories.api_data import (
     EmployeeRegistrationFactory,
@@ -25,7 +25,7 @@ class TestRegistration:
 
     # def test_admin_registration(
     #     self,
-    #     client: TestClient,
+    #     client: AsyncClient,
     #     admin_token_headers: Dict[str, str],
     # ) -> None:
     #     """Test Admin Registration"""
@@ -45,16 +45,16 @@ class TestRegistration:
     #     assert "Admin Registered Successfully" == result.message
     #     assert result.id is not None
 
-    def test_parent_registration(
+    async def test_parent_registration(
         self,
-        client: TestClient,
+        client: AsyncClient,
         admin_token_headers: Dict[str, str],
     ) -> None:
         """Test Parent Registration"""
 
         parent = ParentRegistrationFactory.build()
 
-        r = client.post(
+        r = await client.post(
             f"{settings.API_V1_STR}/register/parents",
             json=parent.model_dump(mode="json", by_alias=True),
             headers=admin_token_headers,
@@ -67,21 +67,21 @@ class TestRegistration:
         assert "Parent Registered Successfully" == result.message
         assert result.id is not None
 
-    def test_student_registration(
+    async def test_student_registration(
         self,
-        client: TestClient,
+        client: AsyncClient,
         admin_token_headers: Dict[str, str],
-        year: Year,
+        year_relation: YearWithRelatedSchema,
         parent: Parent,
     ) -> None:
         """Test Student Registration"""
 
-        grade = random.choice(year.grades)
+        grade = random.choice(year_relation.grades)
         student = StudentRegistrationFactory.build(
             registered_for_grade_id=grade.id, parent_id=parent.id
         )
 
-        r = client.post(
+        r = await client.post(
             f"{settings.API_V1_STR}/register/students",
             json=student.model_dump(
                 mode="json",
@@ -101,21 +101,21 @@ class TestRegistration:
         "position",
         [EmployeePositionEnum.TEACHING_STAFF] * 2,
     )
-    def test_employee_registration(
+    async def test_employee_registration(
         self,
-        client: TestClient,
+        client: AsyncClient,
         admin_token_headers: Dict[str, str],
-        year: Year,
+        year_relation: YearWithRelatedSchema,
         position: EmployeePositionEnum,
     ) -> None:
         """Test Employee Registration"""
 
-        subject = random.choice(year.subjects)
+        subject = random.choice(year_relation.subjects)
         employee = EmployeeRegistrationFactory.build(
             position=position, subject_id=subject.id
         )
 
-        r = client.post(
+        r = await client.post(
             f"{settings.API_V1_STR}/register/employees",
             json=employee.model_dump(mode="json", by_alias=True),
             headers=admin_token_headers,

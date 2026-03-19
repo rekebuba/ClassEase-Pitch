@@ -37,15 +37,6 @@ class StreamSchema(BaseModel):
     grade_id: uuid.UUID
     name: str
 
-    @classmethod
-    def default_fields(cls) -> set[str]:
-        """
-        Returns a list of default fields to be used
-        when no specific fields are requested.
-        This can be overridden in subclasses if needed.
-        """
-        return {"id", "name"}
-
 
 class StreamRelatedSchema(BaseModel):
     """This model represents the relationships of a StreamSchema."""
@@ -56,10 +47,10 @@ class StreamRelatedSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    student_term_records: Optional[List[StudentTermRecordSchema]] = []
-    grade: Optional[GradeSchema] = None
-    students: Optional[List[StudentYearRecordSchema]] = None
-    subjects: Optional[List[SubjectSchema]] = []
+    student_term_records: Optional[List[StudentTermRecordSchema]]
+    grade: Optional[GradeSchema]
+    students: Optional[List[StudentYearRecordSchema]]
+    subjects: Optional[List[SubjectSchema]]
 
 
 class StreamNestedSchema(StreamSchema):

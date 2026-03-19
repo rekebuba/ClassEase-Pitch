@@ -5,7 +5,8 @@ from typing import Any
 import bcrypt
 import jwt
 from pydantic import SecretStr
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from project.core.config import settings
 from project.models.blacklist_token import BlacklistToken
@@ -59,7 +60,7 @@ def create_access_token(
     )
 
 
-def is_token_blacklisted(token: str, db: Session) -> bool:
+async def is_token_blacklisted(token: str, session: AsyncSession) -> bool:
     try:
         payload: dict[str, Any] = jwt.decode(
             token,
@@ -74,8 +75,9 @@ def is_token_blacklisted(token: str, db: Session) -> bool:
             return False
 
         return (
-            db.query(BlacklistToken).filter(BlacklistToken.jti == jti).first()
-            is not None
-        )
+            await session.execute(
+                select(BlacklistToken).filter(BlacklistToken.jti == jti)
+            )
+        ).scalar_one_or_none() is not None
     except jwt.PyJWTError:
         return False

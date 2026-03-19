@@ -2,7 +2,7 @@ import uuid
 from typing import List, Sequence
 
 from sqlalchemy import delete, select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from project.api.v1.routers.subjects.schema import (
     UpdateSubjectGrade,
@@ -15,8 +15,8 @@ from project.models.stream import Stream
 from project.models.subject import Subject
 
 
-def update_subject_relationships(
-    subject: Subject, update_data: UpdateSubjectSetup, session: Session
+async def update_subject_relationships(
+    subject: Subject, update_data: UpdateSubjectSetup, session: AsyncSession
 ) -> None:
     """
     Update subject relationships (streams and grades) efficiently.
@@ -40,7 +40,7 @@ def update_subject_relationships(
             "streams" in update_data.model_fields_set
             and update_data.streams is not None
         ):
-            _update_subject_streams(
+            await _update_subject_streams(
                 subject=subject,
                 new_streams=update_data.streams,
                 session=session,
@@ -48,15 +48,22 @@ def update_subject_relationships(
 
         # --- GRADES UPDATE ---
         if "grades" in update_data.model_fields_set and update_data.grades is not None:
-            existing_grades = session.scalars(
-                select(Grade)
-                .join(GradeStreamSubject)
-                .where(
-                    GradeStreamSubject.subject_id == subject.id,
-                    GradeStreamSubject.stream_id == None,  # noqa: E711
+            existing_grades = (
+                (
+                    await session.execute(
+                        select(Grade)
+                        .join(GradeStreamSubject)
+                        .where(
+                            GradeStreamSubject.subject_id == subject.id,
+                            GradeStreamSubject.stream_id == None,  # noqa: E711
+                        )
+                    )
                 )
-            ).all()
-            _update_subject_grades(
+                .scalars()
+                .all()
+            )
+
+            await _update_subject_grades(
                 subject=subject,
                 new_grades=update_data.grades,
                 session=session,
@@ -64,28 +71,34 @@ def update_subject_relationships(
                 stream_id=None,
             )
 
-        session.flush()  # Batch all changes before commit
+        await session.flush()  # Batch all changes before commit
     except Exception as e:
-        session.rollback()
+        await session.rollback()
         raise e
 
 
-def _update_subject_streams(
+async def _update_subject_streams(
     *,
     subject: Subject,
     new_streams: List[UpdateSubjectStream],
-    session: Session,
+    session: AsyncSession,
 ) -> None:
     """
     Updates the streams associated with a subject using bulk operations.
     """
     # Get existing stream associations for this subject
-    existing_gss_items = session.scalars(
-        select(GradeStreamSubject).where(
-            GradeStreamSubject.subject_id == subject.id,
-            GradeStreamSubject.stream_id.isnot(None),
+    existing_gss_items = (
+        (
+            await session.execute(
+                select(GradeStreamSubject).where(
+                    GradeStreamSubject.subject_id == subject.id,
+                    GradeStreamSubject.stream_id.isnot(None),
+                )
+            )
         )
-    ).all()
+        .scalars()
+        .all()
+    )
 
     # Create mapping for efficient lookup
     existing_associations = {
@@ -101,7 +114,7 @@ def _update_subject_streams(
 
     # Validate new associations exist
     if associations_to_add:
-        _validate_grade_stream_associations(associations_to_add, session)
+        await _validate_grade_stream_associations(associations_to_add, session)
 
     # Bulk add new associations
     if associations_to_add:
@@ -122,14 +135,14 @@ def _update_subject_streams(
         stmt = delete(GradeStreamSubject).where(
             GradeStreamSubject.id.in_(gss_to_delete_ids)
         )
-        session.execute(stmt)
+        await session.execute(stmt)
 
 
-def _update_subject_grades(
+async def _update_subject_grades(
     *,
     subject: Subject,
     new_grades: List[UpdateSubjectGrade],
-    session: Session,
+    session: AsyncSession,
     existing_grades: Sequence[Grade],
     stream_id: uuid.UUID | None,
 ) -> None:
@@ -148,7 +161,7 @@ def _update_subject_grades(
 
     # Validate grades exist
     if grade_ids_to_add:
-        _validate_grades_exist(grade_ids_to_add, session)
+        await _validate_grades_exist(grade_ids_to_add, session)
 
         session.add_all(
             [
@@ -168,21 +181,25 @@ def _update_subject_grades(
             GradeStreamSubject.stream_id == stream_id,
             GradeStreamSubject.grade_id.in_(grade_ids_to_remove),
         )
-        session.execute(stmt)
+        await session.execute(stmt)
 
 
-def _validate_grade_stream_associations(
-    associations: set[tuple[uuid.UUID, uuid.UUID]], session: Session
+async def _validate_grade_stream_associations(
+    associations: set[tuple[uuid.UUID, uuid.UUID]], session: AsyncSession
 ) -> None:
     """Validate that grade-stream combinations exist in the database."""
     grade_ids, stream_ids = zip(*associations) if associations else ([], [])
 
-    existing_grades = session.scalars(
-        select(Grade.id).where(Grade.id.in_(grade_ids))
-    ).all()
-    existing_streams = session.scalars(
-        select(Stream.id).where(Stream.id.in_(stream_ids))
-    ).all()
+    existing_grades = (
+        (await session.execute(select(Grade.id).where(Grade.id.in_(grade_ids))))
+        .scalars()
+        .all()
+    )
+    existing_streams = (
+        (await session.execute(select(Stream.id).where(Stream.id.in_(stream_ids))))
+        .scalars()
+        .all()
+    )
 
     missing_grades = set(grade_ids) - set(existing_grades)
     missing_streams = set(stream_ids) - set(existing_streams)
@@ -195,14 +212,18 @@ def _validate_grade_stream_associations(
         )
 
 
-def _validate_grades_exist(grade_ids: set[uuid.UUID], session: Session) -> None:
+async def _validate_grades_exist(
+    grade_ids: set[uuid.UUID], session: AsyncSession
+) -> None:
     """Validate that grades exist in the database."""
     if not grade_ids:
         return
 
-    existing_grades = session.scalars(
-        select(Grade.id).where(Grade.id.in_(grade_ids))
-    ).all()
+    existing_grades = (
+        (await session.execute(select(Grade.id).where(Grade.id.in_(grade_ids))))
+        .scalars()
+        .all()
+    )
 
     missing_grades = grade_ids - set(existing_grades)
 

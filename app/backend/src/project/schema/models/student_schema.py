@@ -42,7 +42,6 @@ class StudentSchema(BaseModel):
     father_name: str
     date_of_birth: date
     gender: GenderEnum
-    address: str
     city: str
     state: str
     postal_code: str

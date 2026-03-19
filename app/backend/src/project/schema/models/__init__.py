@@ -13,6 +13,7 @@ from project.schema.models.assessment_schema import (
     AssessmentSchema,
 )
 from project.schema.models.blacklist_token_schema import BlacklistTokenSchema
+from project.schema.models.employee_schema import EmployeeSchema
 from project.schema.models.event_schema import (
     EventRelatedSchema,
     EventSchema,
@@ -159,6 +160,7 @@ __all__ = [
     "YearlySubjectSchema",
     "StreamNestedSchema",
     "GradeWithSubjectSchema",
+    "EmployeeSchema",
 ]
 
 AcademicTermSchema.model_rebuild()
@@ -230,3 +232,4 @@ YearlySubjectRelatedSchema.model_rebuild()
 
 # Linking Schemas
 GradeStreamSubjectSchema.model_rebuild()
+EmployeeSchema.model_rebuild()

@@ -80,7 +80,7 @@ class Settings(BaseSettings):
     @property
     def SQLALCHEMY_POSTGRES_DATABASE_URI(self) -> PostgresDsn:
         return PostgresDsn.build(
-            scheme="postgresql",
+            scheme="postgresql+asyncpg",
             username=self.POSTGRES_USER,
             password=self.POSTGRES_PASSWORD.get_secret_value(),
             host=self.POSTGRES_SERVER,
@@ -171,7 +171,7 @@ class ProdSettings(Settings):
     def SQLALCHEMY_POSTGRES_DATABASE_URI(self) -> str | PostgresDsn:
         if self.PROD_TEST:
             return PostgresDsn.build(
-                scheme="postgresql",
+                scheme="postgresql+asyncpg",
                 username=self.POSTGRES_USER,
                 password=self.POSTGRES_PASSWORD.get_secret_value(),
                 host=self.POSTGRES_SERVER,
@@ -179,7 +179,7 @@ class ProdSettings(Settings):
                 path=self.POSTGRES_DB,
             )
         else:
-            return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD.get_secret_value()}@/{self.POSTGRES_DB}?host=/cloudsql/{self.POSTGRES_SERVER}"
+            return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD.get_secret_value()}@/{self.POSTGRES_DB}?host=/cloudsql/{self.POSTGRES_SERVER}"
 
 
 @lru_cache

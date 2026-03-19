@@ -20,7 +20,7 @@ from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel
 from pyethiodate import EthDate
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from project.core import security
 from project.core.config import settings
@@ -195,9 +195,9 @@ def classify_model_fields(model: Type[BaseModel]) -> ModelClassification:
     return result
 
 
-def generate_id(
+async def generate_id(
     *,
-    session: Session,
+    session: AsyncSession,
     role: RoleEnum,
     year: Year,
     min_val: int = 1000,
@@ -248,13 +248,22 @@ def generate_id(
     while attempts < max_attempts:
         random_ids = {random.randint(min_val, max_val) for _ in range(sample_size)}
 
-        existing_ids = session.scalars(
-            select(User.username).where(
-                User.username.in_(
-                    [f"{section}/{rid}/{academic_year % 100}" for rid in random_ids]
+        existing_ids = (
+            (
+                await session.execute(
+                    select(User.username).where(
+                        User.username.in_(
+                            [
+                                f"{section}/{rid}/{academic_year % 100}"
+                                for rid in random_ids
+                            ]
+                        )
+                    )
                 )
             )
-        ).all()
+            .scalars()
+            .all()
+        )
 
         existing_rids = {
             int(id.split("/")[1])

@@ -1,5 +1,5 @@
-from sqlalchemy import create_engine, select
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from project.core.config import settings
 from project.core.security import get_password_hash
@@ -9,14 +9,19 @@ from project.models.user import User
 from project.utils.enum import AuthProviderEnum, RoleEnum
 
 # Create the engine
-engine = create_engine(str(settings.SQLALCHEMY_POSTGRES_DATABASE_URI), future=True)
+engine = create_async_engine(
+    str(settings.SQLALCHEMY_POSTGRES_DATABASE_URI), future=True
+)
 
 
-def init_db(session: Session) -> None:
+async def init_db(session: AsyncSession) -> None:
     """Initialize the database with first super user."""
-    user = session.execute(
-        select(User).where(User.username == settings.FIRST_SUPERUSER)
-    ).first()
+    user = (
+        await session.execute(
+            select(User).where(User.username == settings.FIRST_SUPERUSER)
+        )
+    ).scalar_one_or_none()
+
     if not user:
         hash_password = get_password_hash(settings.FIRST_SUPERUSER_PASSWORD)
         user = User(
@@ -29,7 +34,7 @@ def init_db(session: Session) -> None:
         )
 
         session.add(user)
-        session.flush()
+        await session.flush()
 
         provider = AuthIdentity(
             user_id=user.id,
@@ -48,4 +53,4 @@ def init_db(session: Session) -> None:
 
         session.add(admin)
         session.add(provider)
-        session.commit()
+        await session.commit()

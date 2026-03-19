@@ -1,6 +1,6 @@
 from typing import Dict
 
-from fastapi.testclient import TestClient
+from httpx import AsyncClient
 from pydantic import EmailStr
 
 from project.api.v1.routers.auth.schema import LoginTokenResponse, MessageResponse
@@ -8,7 +8,9 @@ from project.api.v1.routers.auth.service import generate_email_verification_toke
 from project.core.config import settings
 
 
-def get_auth_header(client: TestClient, login_data: Dict[str, str]) -> Dict[str, str]:
+async def get_auth_header(
+    client: AsyncClient, login_data: Dict[str, str]
+) -> Dict[str, str]:
     """
     Authenticate a user and return the authorization header.
 
@@ -20,7 +22,7 @@ def get_auth_header(client: TestClient, login_data: Dict[str, str]) -> Dict[str,
     Returns:
         A dictionary containing the authorization header.
     """
-    r = client.post(
+    r = await client.post(
         "/api/v1/auth/login",
         data=login_data,
     )
@@ -34,10 +36,12 @@ def get_auth_header(client: TestClient, login_data: Dict[str, str]) -> Dict[str,
     return headers
 
 
-def moc_verify_email(client: TestClient, email: EmailStr) -> None:
+async def moc_verify_email(client: AsyncClient, email: EmailStr) -> None:
     token = generate_email_verification_token(email)
 
-    r = client.get(f"{settings.API_V1_STR}/auth/verify-email", params={"token": token})
+    r = await client.get(
+        f"{settings.API_V1_STR}/auth/verify-email", params={"token": token}
+    )
 
     assert r.status_code == 200
 

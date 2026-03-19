@@ -19,14 +19,14 @@ from project.utils.utils import generate_id
 router = APIRouter(prefix="/students", tags=["Students"])
 
 
-@router.get("/", response_model=List[StudentBasicInfo])
-def get_students(
+@router.get("", response_model=List[StudentBasicInfo])
+async def get_students(
     session: SessionDep,
     query: Annotated[FilterParams, Query()],
     user_in: admin_route,
 ) -> Sequence[Student]:
     """This endpoint will return students based on the provided filters."""
-    year = session.get(Year, query.year_id)
+    year = await session.get(Year, query.year_id)
     if not year:
         raise HTTPException(
             status_code=404,
@@ -42,19 +42,19 @@ def get_students(
     if query.q:
         stm = stm.where(Student.first_name.ilike(f"%{query.q}%"))
 
-    students = session.scalars(stm).all()
+    students = (await session.execute(stm)).scalars().all()
 
     return students
 
 
 @router.get("/{student_id}", response_model=StudentBasicInfo)
-def get_student(
+async def get_student(
     session: SessionDep,
     student_id: uuid.UUID,
     user_in: admin_route,
 ) -> Student:
     """This endpoint will return a student based on the provided ID."""
-    student = session.get(Student, student_id)
+    student = await session.get(Student, student_id)
     if not student:
         raise HTTPException(
             status_code=404,
@@ -63,38 +63,40 @@ def get_student(
     return student
 
 
-@router.delete("/", response_model=SuccessResponseSchema)
-def delete_students(
+@router.delete("", response_model=SuccessResponseSchema)
+async def delete_students(
     session: SessionDep,
     student_ids: Annotated[List[uuid.UUID], Query()],
     user_in: admin_route,
 ) -> SuccessResponseSchema:
     """This endpoint will delete students based on the provided IDs."""
     for student_id in student_ids:
-        student = session.get(Student, student_id)
+        student = await session.get(Student, student_id)
         if not student:
             raise HTTPException(
                 status_code=404,
                 detail=f"Student with ID {student_id} not found.",
             )
-        session.delete(student)
-    session.commit()
+        await session.delete(student)
+    await session.commit()
     return SuccessResponseSchema(message="Students deleted successfully.")
 
 
 @router.patch("/status", response_model=SuccessResponseSchema)
-def update_student_status(
+async def update_student_status(
     session: SessionDep,
     students: UpdateStudentStatus,
     user_in: admin_route,
 ) -> SuccessResponseSchema:
     """This endpoint will patch students based on the provided IDs."""
     year = (
-        session.query(Year)
-        .join(Grade, Grade.year_id == Year.id)
-        .join(Student, Student.registered_for_grade_id == Grade.id)
-        .first()
-    )
+        await session.execute(
+            select(Year)
+            .join(Grade, Grade.year_id == Year.id)
+            .join(Student, Student.registered_for_grade_id == Grade.id)
+        )
+    ).scalar_one_or_none()
+
     if not year:
         raise HTTPException(
             status_code=404,
@@ -102,7 +104,7 @@ def update_student_status(
         )
 
     for student_id in students.student_ids:
-        student = session.get(Student, student_id)
+        student = await session.get(Student, student_id)
         if not student:
             raise HTTPException(
                 status_code=404,
@@ -126,12 +128,12 @@ def update_student_status(
                 password=get_password_hash(username),
             )
             session.add(new_user)
-            session.commit()
+            await session.commit()
 
             stmt.values(user_id=new_user.id)
 
-    session.execute(stmt)
-    session.commit()
+    await session.execute(stmt)
+    await session.commit()
 
     return SuccessResponseSchema(
         message=f"Student{'s' if len(students.student_ids) > 1 else ''} Status \

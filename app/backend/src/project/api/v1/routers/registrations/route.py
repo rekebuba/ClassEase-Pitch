@@ -38,7 +38,7 @@ router = APIRouter(prefix="/register", tags=["registration"])
 
 
 @router.post("/admins", status_code=201, response_model=RegistrationResponse)
-def register_new_admin(
+async def register_new_admin(
     session: SessionDep,
     admin_data: AdminRegistration,
     user_in: admin_route,
@@ -56,7 +56,7 @@ def register_new_admin(
     )
 
     session.add(user)
-    session.flush()
+    await session.flush()
 
     provider = AuthIdentity(
         user_id=user.id,
@@ -76,7 +76,7 @@ def register_new_admin(
 
     session.add(new_admin)
     session.add(provider)
-    session.commit()
+    await session.commit()
 
     background_tasks.add_task(
         send_verification_email,
@@ -129,7 +129,7 @@ def register_student_step5(
 
 
 @router.post("/parents", status_code=201)
-def register_new_parent(
+async def register_new_parent(
     session: SessionDep,
     user_id: admin_route,
     parent_data: ParentRegistrationForm,
@@ -147,7 +147,7 @@ def register_new_parent(
     )
 
     session.add(new_parent)
-    session.commit()
+    await session.commit()
 
     return RegistrationResponse(
         id=new_parent.id, message="Parent Registered Successfully"
@@ -155,7 +155,7 @@ def register_new_parent(
 
 
 @router.post("/students", status_code=201, response_model=RegistrationResponse)
-def register_new_student(
+async def register_new_student(
     session: SessionDep,
     student_data: StudentRegistrationForm,
     responses={
@@ -163,12 +163,12 @@ def register_new_student(
     },
 ) -> RegistrationResponse:
     """Registers a new student in the system."""
-    grade = session.get(Grade, student_data.registered_for_grade_id)
+    grade = await session.get(Grade, student_data.registered_for_grade_id)
     if not grade:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid grade"
         )
-    parent = session.get(Parent, student_data.parent_id)
+    parent = await session.get(Parent, student_data.parent_id)
     if not parent:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid parent"
@@ -197,14 +197,14 @@ def register_new_student(
     )
 
     session.add(new_student)
-    session.flush()
+    await session.flush()
 
     student_parent_link = ParentStudentLink(
         parent_id=parent.id, student_id=new_student.id
     )
 
     session.add(student_parent_link)
-    session.commit()
+    await session.commit()
 
     return RegistrationResponse(
         id=new_student.id, message="Student Registered Successfully"
@@ -252,7 +252,7 @@ def register_employee_step4(
 
 
 @router.post("/employees", status_code=201, response_model=RegistrationResponse)
-def register_new_employee(
+async def register_new_employee(
     session: SessionDep,
     employee_data: EmployeeRegistrationForm,
     user_in: admin_route,
@@ -285,7 +285,7 @@ def register_new_employee(
     )
 
     session.add(new_employee)
-    session.commit()
+    await session.commit()
 
     return RegistrationResponse(
         id=new_employee.id, message="Employee Registered Successfully"

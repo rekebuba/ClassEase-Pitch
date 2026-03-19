@@ -5,7 +5,8 @@ from typing import Dict, List, Union
 
 from fastapi import HTTPException
 from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from project.api.v1.routers.year.schema import YearSetupTemplate
 from project.models.academic_term import AcademicTerm
@@ -24,7 +25,7 @@ def create_academic_term(
     *,
     year_id: uuid.UUID,
     calendar_type: AcademicTermTypeEnum,
-    session: Session,
+    session: AsyncSession,
 ) -> None:
     """
     Creates academic terms for a new academic year based on its calendar type.
@@ -48,11 +49,11 @@ def create_academic_term(
         session.add_all(terms_to_create)
 
 
-def handle_setup_methods(
+async def handle_setup_methods(
     *,
     old_year_id: uuid.UUID | None,
     year_id: uuid.UUID,
-    session: Session,
+    session: AsyncSession,
     setup_methods: SetupMethodType,
 ) -> None:
     """
@@ -60,14 +61,16 @@ def handle_setup_methods(
     """
     if setup_methods == "Default Template":
         # Implement the logic for setting up a default template
-        _handle_default_template_setup(
+        await _handle_default_template_setup(
             year_id=year_id,
             session=session,
         )
     elif setup_methods == "Last Year Copy":
         if old_year_id is None:
             raise ValueError("old_year_id must be provided for 'Last Year Copy'")
-        old_year_id_exists = session.scalar(select(Year).where(Year.id == old_year_id))
+        old_year_id_exists = (
+            await session.execute(select(Year).where(Year.id == old_year_id))
+        ).scalar_one_or_none()
 
         if old_year_id_exists is None:
             raise HTTPException(
@@ -75,7 +78,7 @@ def handle_setup_methods(
                 detail={"setupMethods": "Year not found for copying."},
             )
 
-        _handle_year_copy_setup(
+        await _handle_year_copy_setup(
             old_year_id=old_year_id,
             year_id=year_id,
             session=session,
@@ -86,10 +89,10 @@ def handle_setup_methods(
         raise ValueError("Invalid setup method")
 
 
-def _handle_default_template_setup(
+async def _handle_default_template_setup(
     *,
     year_id: uuid.UUID,
-    session: Session,
+    session: AsyncSession,
 ) -> None:
     """
     Handles the default template setup for a new academic year.
@@ -114,7 +117,7 @@ def _handle_default_template_setup(
 
         # Add subjects first to get their IDs
         session.add_all(all_objects_to_add)
-        session.flush()
+        await session.flush()
         all_objects_to_add.clear()  # Reset for next batch
 
         # Process grades
@@ -129,7 +132,7 @@ def _handle_default_template_setup(
 
             # Add grade and flush to get ID
             session.add_all(all_objects_to_add)
-            session.flush()
+            await session.flush()
             all_objects_to_add.clear()
 
             # Create sections
@@ -162,7 +165,7 @@ def _handle_default_template_setup(
 
                 # Add streams and flush to get IDs
                 session.add_all(all_objects_to_add)
-                session.flush()
+                await session.flush()
                 all_objects_to_add.clear()
 
                 # Add stream subjects
@@ -182,7 +185,7 @@ def _handle_default_template_setup(
             # Add remaining objects for this grade
             if all_objects_to_add:
                 session.add_all(all_objects_to_add)
-                session.flush()
+                await session.flush()
                 all_objects_to_add.clear()
 
     except Exception:
@@ -190,11 +193,11 @@ def _handle_default_template_setup(
         raise
 
 
-def _handle_year_copy_setup(
+async def _handle_year_copy_setup(
     *,
     old_year_id: uuid.UUID,
     year_id: uuid.UUID,
-    session: Session,
+    session: AsyncSession,
 ) -> None:
     """
     Handles copying an existing academic year's setup to a new year.
@@ -203,17 +206,37 @@ def _handle_year_copy_setup(
     try:
         # 1. Fetch all required data from the old year in bulk,
         # eager loading relationships
-        old_subjects = session.scalars(
-            select(Subject).where(Subject.year_id == old_year_id)
-        ).all()
-        old_grades = session.scalars(
-            select(Grade)
-            .where(Grade.year_id == old_year_id)
-            .options(selectinload(Grade.sections), selectinload(Grade.streams))
-        ).all()
-        old_gss_items = session.scalars(
-            select(GradeStreamSubject).join(Grade).where(Grade.year_id == old_year_id)
-        ).all()
+        old_subjects = (
+            (
+                await session.execute(
+                    select(Subject).where(Subject.year_id == old_year_id)
+                )
+            )
+            .scalars()
+            .all()
+        )
+        old_grades = (
+            (
+                await session.execute(
+                    select(Grade)
+                    .where(Grade.year_id == old_year_id)
+                    .options(selectinload(Grade.sections), selectinload(Grade.streams))
+                )
+            )
+            .scalars()
+            .all()
+        )
+        old_gss_items = (
+            (
+                await session.execute(
+                    select(GradeStreamSubject)
+                    .join(Grade)
+                    .where(Grade.year_id == old_year_id)
+                )
+            )
+            .scalars()
+            .all()
+        )
 
         # 2. Create new objects in memory and map old IDs to new objects
         subject_mapping: Dict[uuid.UUID, Subject] = {}
@@ -226,7 +249,7 @@ def _handle_year_copy_setup(
             new_subjects.append(new_subject)
 
         session.add_all(new_subjects)
-        session.flush()
+        await session.flush()
 
         grade_mapping: Dict[uuid.UUID, Grade] = {}
         new_grades: List[Grade] = []
@@ -241,7 +264,7 @@ def _handle_year_copy_setup(
             new_grades.append(new_grade)
 
         session.add_all(new_grades)
-        session.flush()
+        await session.flush()
 
         new_sections: List[Section] = []
         new_streams: List[Stream] = []
@@ -263,7 +286,7 @@ def _handle_year_copy_setup(
 
         session.add_all(new_sections)
         session.add_all(new_streams)
-        session.flush()
+        await session.flush()
 
         # 3. Re-create GradeStreamSubject relationships using the new objects
         new_gss_items: List[GradeStreamSubject] = []

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, List, Optional, Set
+from typing import TYPE_CHECKING, List, Optional
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict
 
@@ -28,7 +28,6 @@ if TYPE_CHECKING:
         SubjectSchema,
     )
     from project.schema.models.teacher_schema import (
-        TeacherSchema,
         TeacherWithRelatedSchema,
     )
     from project.schema.models.year_schema import YearSchema, YearWithRelatedSchema
@@ -54,15 +53,6 @@ class GradeSchema(BaseModel):
     created_at: AwareDatetime
     updated_at: AwareDatetime
 
-    @classmethod
-    def default_fields(cls) -> Set[str]:
-        """
-        Returns a list of default fields to be used when
-        no specific fields are requested.
-        This can be overridden in subclasses if needed.
-        """
-        return {"id", "grade"}
-
 
 class GradeWithSubjectSchema(GradeSchema):
     """
@@ -84,7 +74,6 @@ class GradeRelatedSchema(BaseModel):
 
     year: Optional[YearSchema]
     student_term_records: List[StudentTermRecordSchema]
-    teachers: List[TeacherSchema]
     streams: List[StreamSchema]
     students: List[StudentSchema]
     sections: List[SectionSchema]

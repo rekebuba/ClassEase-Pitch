@@ -5,7 +5,7 @@ import jwt
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import NameEmail
-from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 from project.api.v1.routers.auth.schema import (
     LoginTokenResponse,
@@ -23,7 +23,7 @@ from project.api.v1.routers.auth.service import (
     verify_otp_and_generate_token,
     verify_password_reset_token,
 )
-from project.api.v1.routers.dependencies import RedisDep, SessionDep, TokenDep, get_db
+from project.api.v1.routers.dependencies import RedisDep, SessionDep, TokenDep
 from project.api.v1.routers.schema import HTTPError
 from project.core.config import settings
 from project.core.security import (
@@ -56,9 +56,11 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 )
 async def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-    db: Session = Depends(get_db),
+    session: SessionDep,
 ) -> LoginTokenResponse:
-    user = db.query(User).filter(User.username == form_data.username).first()
+    user = (
+        await session.execute(select(User).filter(User.username == form_data.username))
+    ).scalar_one_or_none()
 
     if not user:
         logger.warning(f"Login attempt for non-existent user: {form_data.username}")
@@ -69,8 +71,10 @@ async def login(
         )
 
     identity = (
-        db.query(AuthIdentity).filter_by(user_id=user.id, provider="password").first()
-    )
+        await session.execute(
+            select(AuthIdentity).filter_by(user_id=user.id, provider="password")
+        )
+    ).scalar_one_or_none()
 
     if (
         not identity
@@ -99,10 +103,10 @@ async def login(
         },
     },
 )
-def login_provider(
+async def login_provider(
     provider: AuthProviderEnum,
     data: ProviderResponse,
-    db: Session = Depends(get_db),
+    session: SessionDep,
 ) -> LoginTokenResponse:
     if data.credential is None:
         raise HTTPException(
@@ -113,7 +117,7 @@ def login_provider(
     p = {
         provider.GOOGLE: get_google_user,
     }
-    user = p[provider](db, data.credential)
+    user = await p[provider](session, data.credential)
 
     if not user:
         raise HTTPException(
@@ -140,8 +144,8 @@ def login_provider(
         },
     },
 )
-def verify_email(
-    db: SessionDep,
+async def verify_email(
+    session: SessionDep,
     token: str,
 ) -> MessageResponse:
     """Endpoint to verify a user's email using a token."""
@@ -154,7 +158,10 @@ def verify_email(
             detail="Invalid or expired token",
         )
 
-    user = db.query(User).filter(User.email == email).first()
+    user = (
+        await session.execute(select(User).filter(User.email == email))
+    ).scalar_one_or_none()
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -162,7 +169,7 @@ def verify_email(
         )
 
     user.is_verified = True
-    db.commit()
+    await session.commit()
 
     return MessageResponse(message="Email successfully verified")
 
@@ -183,7 +190,7 @@ def verify_email(
 )
 async def logout(
     token: TokenDep,
-    db: SessionDep,
+    session: SessionDep,
 ) -> Dict[str, Any]:
     """Endpoint to log out a user by blacklisting their JWT token."""
     try:
@@ -201,13 +208,17 @@ async def logout(
             )
 
         # Check if already blacklisted
-        if db.query(BlacklistToken).filter(BlacklistToken.jti == jti).first():
+        if (
+            await session.execute(
+                select(BlacklistToken).filter(BlacklistToken.jti == jti)
+            )
+        ).scalar_one_or_none():
             return {"message": "Token was already invalidated"}
 
         # Add to blacklist
         blacklisted_token = BlacklistToken(jti=jti)
-        db.add(blacklisted_token)
-        db.commit()
+        session.add(blacklisted_token)
+        await session.commit()
 
         return {"message": "Successfully logged out"}
 
@@ -231,12 +242,14 @@ async def logout(
 )
 async def password_recovery(
     data: PasswordRecovery,
-    db: SessionDep,
+    session: SessionDep,
     redis: RedisDep,
 ) -> MessageResponse:
     """Endpoint to initiate password recovery by sending an OTP to the user's email."""
     # Check if user exists
-    user = db.query(User).filter(User.email == data.email).first()
+    user = (
+        await session.execute(select(User).filter(User.email == data.email))
+    ).scalar_one_or_none()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
@@ -260,7 +273,7 @@ async def password_recovery(
 async def verify_otp(otp_request: OTPRequest, redis: RedisDep) -> VerifyOTPResponse:
     """Endpoint to verify the OTP sent to the user's email for password recovery."""
     is_valid_with_token = await verify_otp_and_generate_token(
-        otp_request.email, otp_request.otp, redis
+        email=otp_request.email, user_submitted_code=otp_request.otp, redis_client=redis
     )
 
     if not is_valid_with_token:
@@ -291,7 +304,7 @@ async def verify_otp(otp_request: OTPRequest, redis: RedisDep) -> VerifyOTPRespo
 )
 async def password_reset(
     request: PasswordResetRequest,
-    db: SessionDep,
+    session: SessionDep,
     redis: RedisDep,
 ) -> MessageResponse:
     """Endpoint to reset the user's password using a valid token."""
@@ -302,14 +315,24 @@ async def password_reset(
             detail="Invalid or expired token",
         )
 
-    user = db.query(User).filter(User.email == request.email).first()
+    user = (
+        (await session.execute(select(User).filter(User.email == request.email)))
+        .scalars()
+        .first()
+    )
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
 
     identity = (
-        db.query(AuthIdentity).filter_by(user_id=user.id, provider="password").first()
+        (
+            await session.execute(
+                select(AuthIdentity).filter_by(user_id=user.id, provider="password")
+            )
+        )
+        .scalars()
+        .first()
     )
     if not identity:
         raise HTTPException(
@@ -319,6 +342,6 @@ async def password_reset(
 
     # Update the user's password
     identity.password = get_password_hash(request.new_password)
-    db.commit()
+    await session.commit()
 
     return MessageResponse(message="Password successfully reset")
