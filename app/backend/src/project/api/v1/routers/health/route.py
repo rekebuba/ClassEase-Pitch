@@ -8,7 +8,7 @@ from project.api.v1.routers.health.schema import HealthStatus
 router = APIRouter(prefix="/health", tags=["Health"])
 
 
-@router.get("/", response_model=HealthStatus)
+@router.get("", response_model=HealthStatus)
 async def get_health(session: SessionDep, redis: RedisDep) -> HealthStatus:
     """
     Returns the health status of the API.
@@ -18,7 +18,7 @@ async def get_health(session: SessionDep, redis: RedisDep) -> HealthStatus:
     redis_ok = False
 
     try:
-        session.execute(text("SELECT 1"))
+        await session.execute(text("SELECT 1"))
         db_ok = True
 
         redis_ok = await redis.ping()  # ty:ignore[invalid-await]

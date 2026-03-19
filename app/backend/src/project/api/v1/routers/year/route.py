@@ -21,6 +21,7 @@ from project.api.v1.routers.year.service import (
 from project.models.grade import Grade
 from project.models.subject import Subject
 from project.models.year import Year
+from project.schema.models import YearWithRelatedSchema
 from project.schema.models.grade_schema import GradeNestedSchema
 from project.schema.models.subject_schema import SubjectNestedSchema
 from project.schema.models.year_schema import YearSchema
@@ -29,26 +30,62 @@ router = APIRouter(prefix="/years", tags=["Years"])
 
 
 @router.get(
-    "/",
+    "",
     response_model=List[YearSchema],
 )
-def get_years(
+async def get_years(
     session: SessionDep,
     user_in: shared_route,
 ) -> Sequence[Year]:
     """
     Returns a list of all academic years in the system.
     """
-    years = session.scalars(select(Year)).all()
+    years = (await session.execute(select(Year))).scalars().all()
 
     return years
+
+
+@router.get(
+    "/{year_id}/relation",
+    response_model=YearWithRelatedSchema,
+)
+async def get_year_relation(
+    session: SessionDep,
+    year_id: uuid.UUID,
+    user_in: shared_route,
+) -> Year:
+    """
+    Returns a specific academic year with all its relationship.
+    """
+    year = (
+        await session.execute(
+            select(Year)
+            .where(Year.id == year_id)
+            .options(
+                selectinload(Year.events),
+                selectinload(Year.academic_terms),
+                selectinload(Year.grades),
+                selectinload(Year.subjects),
+                selectinload(Year.students),
+                selectinload(Year.employees),
+            )
+        )
+    ).scalar_one_or_none()
+
+    if not year:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Year with ID {year_id} not found.",
+        )
+
+    return year
 
 
 @router.get(
     "/summary",
     response_model=List[YearSummary],
 )
-def get_year_summary(
+async def get_year_summary(
     session: SessionDep,
     user_in: shared_route,
     q: str | None = None,
@@ -59,7 +96,9 @@ def get_year_summary(
     stmt = select(Year)
     if q:
         stmt = stmt.where(Year.name.ilike(f"%{q}%"))
-    years = session.scalars(stmt.order_by(Year.created_at.desc())).all()
+    years = (
+        (await session.execute(stmt.order_by(Year.created_at.desc()))).scalars().all()
+    )
 
     return years
 
@@ -68,7 +107,7 @@ def get_year_summary(
     "/{year_id}",
     response_model=YearSchema,
 )
-def get_year_by_id(
+async def get_year_by_id(
     session: SessionDep,
     year_id: uuid.UUID,
     user_in: shared_route,
@@ -76,7 +115,7 @@ def get_year_by_id(
     """
     Returns specific academic year
     """
-    year = session.get(Year, year_id)
+    year = await session.get(Year, year_id)
     if not year:
         raise HTTPException(
             status_code=404,
@@ -86,8 +125,8 @@ def get_year_by_id(
     return year
 
 
-@router.post("/", response_model=NewYearSuccess, status_code=status.HTTP_201_CREATED)
-def post_year(
+@router.post("", response_model=NewYearSuccess, status_code=status.HTTP_201_CREATED)
+async def post_year(
     session: SessionDep,
     new_year: NewYear,
     user_in: admin_route,
@@ -97,8 +136,8 @@ def post_year(
     """
     errors = {}
 
-    existing_year_name = session.scalars(
-        select(Year).where(Year.name == new_year.name)
+    existing_year_name = (
+        await session.execute(select(Year).where(Year.name == new_year.name))
     ).first()
 
     if existing_year_name:
@@ -116,7 +155,7 @@ def post_year(
             end_date=new_year.end_date,
         )
         session.add(year)
-        session.flush()
+        await session.flush()
 
         create_academic_term(
             year_id=year.id,
@@ -124,15 +163,15 @@ def post_year(
             session=session,
         )
 
-        handle_setup_methods(
+        await handle_setup_methods(
             old_year_id=new_year.copy_from_year_id,
             year_id=year.id,
             session=session,
             setup_methods=new_year.setup_methods,
         )
 
-        session.commit()
-        session.refresh(year)
+        await session.commit()
+        await session.refresh(year)
 
         return {"message": "Year created Successfully", "id": year.id}
     except HTTPException:
@@ -148,7 +187,7 @@ def post_year(
     "/{year_id}",
     response_model=DeleteYearSuccess,
 )
-def delete_year(
+async def delete_year(
     session: SessionDep,
     year_id: uuid.UUID,
     user_in: admin_route,
@@ -156,7 +195,7 @@ def delete_year(
     """
     Deletes an existing academic year in the system.
     """
-    year = session.get(Year, year_id)
+    year = await session.get(Year, year_id)
     if not year:
         raise HTTPException(
             status_code=404,
@@ -165,7 +204,7 @@ def delete_year(
 
     try:
         session.delete(year)
-        session.commit()
+        await session.commit()
 
         return DeleteYearSuccess(message="Year deleted successfully")
     except Exception as e:
@@ -177,31 +216,38 @@ def delete_year(
     "/{year_id}/grades/detail",
     response_model=List[GradeNestedSchema],
 )
-def get_detail_grades_by_year_id(
+async def get_detail_grades_by_year_id(
     session: SessionDep,
     year_id: uuid.UUID,
 ) -> Sequence[Grade]:
     """
     Returns specific academic year
     """
-    year = session.get(Year, year_id)
+    # TODO: This should be moved to grades route
+    year = await session.get(Year, year_id)
     if not year:
         raise HTTPException(
             status_code=404,
             detail=f"Year with ID {year_id} not found.",
         )
 
-    grades = session.scalars(
-        select(Grade)
-        .where(Grade.year_id == year_id)
-        .options(
-            selectinload(Grade.year),
-            selectinload(Grade.sections),
-            selectinload(Grade.streams),
-            selectinload(Grade.students),
-            selectinload(Grade.student_term_records),
+    grades = (
+        (
+            await session.execute(
+                select(Grade)
+                .where(Grade.year_id == year_id)
+                .options(
+                    selectinload(Grade.year),
+                    selectinload(Grade.sections),
+                    selectinload(Grade.streams),
+                    selectinload(Grade.students),
+                    selectinload(Grade.student_term_records),
+                )
+            )
         )
-    ).all()
+        .scalars()
+        .all()
+    )
 
     return grades
 
@@ -210,28 +256,35 @@ def get_detail_grades_by_year_id(
     "/{year_id}/subjects/detail",
     response_model=List[SubjectNestedSchema],
 )
-def get_detail_subjects_by_year_id(
+async def get_detail_subjects_by_year_id(
     session: SessionDep,
     year_id: uuid.UUID,
 ) -> Sequence[Subject]:
     """
     Returns specific academic year
     """
-    year = session.get(Year, year_id)
+    # TODO: This should be moved to subjects route
+    year = await session.get(Year, year_id)
     if not year:
         raise HTTPException(
             status_code=404,
             detail=f"Year with ID {year_id} not found.",
         )
 
-    subjects = session.scalars(
-        select(Subject)
-        .where(Subject.year_id == year_id)
-        .options(
-            selectinload(Subject.teachers),
-            selectinload(Subject.students),
-            selectinload(Subject.mark_lists),
+    subjects = (
+        (
+            await session.execute(
+                select(Subject)
+                .where(Subject.year_id == year_id)
+                .options(
+                    selectinload(Subject.teachers),
+                    selectinload(Subject.students),
+                    selectinload(Subject.mark_lists),
+                )
+            )
         )
-    ).all()
+        .scalars()
+        .all()
+    )
 
     return subjects

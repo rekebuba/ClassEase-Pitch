@@ -1,4 +1,4 @@
-from collections.abc import Generator
+from collections.abc import AsyncGenerator
 from datetime import datetime, timezone
 from typing import Annotated, Any, Dict, List, Type
 
@@ -12,7 +12,7 @@ from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel, ValidationError
 from redis.asyncio import Redis
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from project.core import security
 from project.core.config import settings
@@ -27,19 +27,25 @@ from project.utils.utils import classify_model_fields, extract_inner_model
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 security_bearer = HTTPBearer(auto_error=True)
 
+AsyncSessionLocal = async_sessionmaker(
+    engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+)
 
-def get_db() -> Generator[Session, None, None]:
-    with Session(engine) as session:
-        init_db(session)
+
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionLocal() as session:
+        await init_db(session)
         yield session
 
 
-def get_redis() -> Generator[Redis, None, None]:
+async def get_redis() -> AsyncGenerator[Redis, None]:
     redis_client = Redis.from_url(str(settings.REDIS_URL), decode_responses=True)
     yield redis_client
 
 
-SessionDep = Annotated[Session, Depends(get_db)]
+SessionDep = Annotated[AsyncSession, Depends(get_db)]
 TokenDep = Annotated[str, Depends(oauth2_scheme)]
 RedisDep = Annotated[Redis, Depends(get_redis)]
 
@@ -66,9 +72,11 @@ async def get_current_user(
             raise credentials_exception
 
         # Check if the token is blacklisted
-        blacklisted = session.scalar(
-            select(BlacklistToken).where(BlacklistToken.jti == str(token_data.jti))
-        )
+        blacklisted = (
+            await session.execute(
+                select(BlacklistToken).where(BlacklistToken.jti == str(token_data.jti))
+            )
+        ).scalar_one_or_none()
 
         if blacklisted:
             raise HTTPException(
@@ -79,7 +87,7 @@ async def get_current_user(
 
     except (InvalidTokenError, ValidationError):
         raise credentials_exception
-    user = session.get(User, token_data.sub)
+    user = await session.get(User, token_data.sub)
     if user is None:
         raise credentials_exception
     return user

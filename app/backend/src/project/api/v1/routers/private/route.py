@@ -14,7 +14,7 @@ router = APIRouter(prefix="/me", tags=["Me"])
 
 
 @router.get(
-    "/",
+    "",
     response_model=UserSchema,
 )
 def get_logged_in_user(user_in: shared_route) -> User:

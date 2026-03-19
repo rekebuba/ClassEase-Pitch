@@ -29,7 +29,7 @@ class EventSchema(BaseModel):
         alias_generator=to_camel,
     )
 
-    id: uuid.UUID | None = None
+    id: uuid.UUID
     year_id: uuid.UUID
     title: str
     purpose: EventPurposeEnum

@@ -1,5 +1,5 @@
 import pytest
-from fastapi.testclient import TestClient
+from httpx import AsyncClient
 
 from project.core.config import settings
 
@@ -12,31 +12,33 @@ from project.core.config import settings
         # "student_token_headers",
     ],
 )
-def test_logged_in_user_info(
-    client: TestClient, request: pytest.FixtureRequest, token_fixture: str
+async def test_logged_in_user_info(
+    client: AsyncClient,
+    request: pytest.FixtureRequest,
+    token_fixture: str,
 ) -> None:
     headers = request.getfixturevalue(token_fixture)
-    r = client.get(f"{settings.API_V1_STR}/me/", headers=headers)
+    r = await client.get(f"{settings.API_V1_STR}/me", headers=headers)
 
     assert r.status_code == 200
 
 
-def test_logged_in_user_info_unauthorized(client: TestClient) -> None:
-    r = client.get(f"{settings.API_V1_STR}/me/")
+async def test_logged_in_user_info_unauthorized(client: AsyncClient) -> None:
+    r = await client.get(f"{settings.API_V1_STR}/me")
 
     assert r.status_code == 401
 
 
-def test_logged_in_user_info_invalid_token(client: TestClient) -> None:
+async def test_logged_in_user_info_invalid_token(client: AsyncClient) -> None:
     headers = {"Authorization": "Bearer invalidtoken"}
-    r = client.get(f"{settings.API_V1_STR}/me/", headers=headers)
+    r = await client.get(f"{settings.API_V1_STR}/me", headers=headers)
 
     assert r.status_code == 401
 
 
-def test_logged_in_admin_info(
-    client: TestClient, admin_token_headers: dict[str, str]
+async def test_logged_in_admin_info(
+    client: AsyncClient, admin_token_headers: dict[str, str]
 ) -> None:
-    r = client.get(f"{settings.API_V1_STR}/me/", headers=admin_token_headers)
+    r = await client.get(f"{settings.API_V1_STR}/me", headers=admin_token_headers)
 
     assert r.status_code == 200

@@ -2,17 +2,20 @@
 """Module for Table class"""
 
 from sqlalchemy import Engine, String, inspect, select
-from sqlalchemy.orm import Mapped, Session, mapped_column
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Mapped, mapped_column
 
 from project.models.base.base_model import BaseModel
 
 
-def seed_table(session: Session, engine: Engine) -> None:
+async def seed_table(session: AsyncSession, engine: Engine) -> None:
     inspector = inspect(engine)
     db_tables = inspector.get_table_names()
 
     # Get names already in your 'tables' model
-    existing_tables = {t.name for t in session.scalars(select(Table)).all()}
+    existing_tables = {
+        t.name for t in (await session.execute(select(Table))).scalars().all()
+    }
 
     for table_name in db_tables:
         if table_name == "tables":
@@ -23,7 +26,7 @@ def seed_table(session: Session, engine: Engine) -> None:
         new_table = Table(name=table_name)
         session.add(new_table)
 
-    session.commit()
+    await session.commit()
 
 
 class Table(BaseModel):

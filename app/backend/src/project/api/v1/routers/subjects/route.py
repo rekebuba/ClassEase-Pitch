@@ -25,10 +25,10 @@ router = APIRouter(prefix="/subjects", tags=["Subjects"])
 
 
 @router.get(
-    "/",
+    "",
     response_model=List[SubjectSchema],
 )
-def get_subjects(
+async def get_subjects(
     session: SessionDep,
     query: Annotated[FilterParams, Query()],
     user_in: shared_route,
@@ -36,25 +36,33 @@ def get_subjects(
     """
     Returns All Subjects with in academic year
     """
-    year = session.get(Year, query.year_id)
+    year = await session.get(Year, query.year_id)
     if not year:
         raise HTTPException(
             status_code=404,
             detail=f"Year with ID {query.year_id} not found.",
         )
 
-    subjects = session.scalars(
-        select(Subject).where(Subject.year_id == query.year_id).order_by(Subject.name)
-    ).all()
+    subjects = (
+        (
+            await session.execute(
+                select(Subject)
+                .where(Subject.year_id == query.year_id)
+                .order_by(Subject.name)
+            )
+        )
+        .scalars()
+        .all()
+    )
 
     return subjects
 
 
 @router.post(
-    "/",
+    "",
     response_model=NewSubjectSuccess,
 )
-def post_subject(
+async def post_subject(
     session: SessionDep,
     new_subject: NewSubject,
     user_in: admin_route,
@@ -64,22 +72,35 @@ def post_subject(
     """
     errors = {}
 
-    existing_subject_name = session.scalars(
-        select(Subject).where(
-            Subject.name == new_subject.name,
-            Subject.year_id == new_subject.year_id,
+    existing_subject_name = (
+        (
+            await session.execute(
+                select(Subject).where(
+                    Subject.name == new_subject.name,
+                    Subject.year_id == new_subject.year_id,
+                )
+            )
         )
-    ).first()
+        .scalars()
+        .first()
+    )
 
     if existing_subject_name:
         errors["name"] = "Subject name for the year already exists."
 
-    existing_subject_code = session.scalars(
-        select(Subject).where(
-            Subject.code == new_subject.code,
-            Subject.year_id == new_subject.year_id,
+    existing_subject_code = (
+        (
+            await session.execute(
+                select(Subject).where(
+                    Subject.code == new_subject.code,
+                    Subject.year_id == new_subject.year_id,
+                )
+            )
         )
-    ).first()
+        .scalars()
+        .first()
+    )
+
     if existing_subject_code:
         errors["code"] = "Subject code for the year already exists."
 
@@ -93,13 +114,13 @@ def post_subject(
             year_id=new_subject.year_id,
         )
         session.add(subject)
-        session.commit()
-        session.refresh(subject)
+        await session.commit()
+        await session.refresh(subject)
 
         return {"message": "Subject created Successfully", "id": subject.id}
     except Exception as e:
         logger.error(f"Error creating subject: {e}")
-        session.rollback()
+        await session.rollback()
         raise HTTPException(status_code=500, detail=f"Creation failed: {str(e)}")
 
 
@@ -107,7 +128,7 @@ def post_subject(
     "/setup",
     response_model=List[SubjectSetupSchema],
 )
-def get_subjects_setup(
+async def get_subjects_setup(
     session: SessionDep,
     query: Annotated[FilterParams, Query()],
     user_in: shared_route,
@@ -115,7 +136,7 @@ def get_subjects_setup(
     """
     Returns All Subjects with in academic year
     """
-    year = session.get(Year, query.year_id)
+    year = await session.get(Year, query.year_id)
     if not year:
         raise HTTPException(
             status_code=404,
@@ -126,7 +147,7 @@ def get_subjects_setup(
     if query.q:
         stmt = stmt.where(Subject.name.ilike(f"%{query.q}%"))
 
-    subjects = session.scalars(stmt.order_by(Subject.name)).all()
+    subjects = (await session.execute(stmt.order_by(Subject.name))).scalars().all()
 
     return subjects
 
@@ -135,7 +156,7 @@ def get_subjects_setup(
     "/setup/{subject_id}",
     response_model=SubjectSetupSchema,
 )
-def get_subject_setup_by_id(
+async def get_subject_setup_by_id(
     session: SessionDep,
     subject_id: uuid.UUID,
     user_in: shared_route,
@@ -143,7 +164,7 @@ def get_subject_setup_by_id(
     """
     Returns specific academic subject
     """
-    subject = session.get(Subject, subject_id)
+    subject = await session.get(Subject, subject_id)
     if not subject:
         raise HTTPException(
             status_code=404,
@@ -157,7 +178,7 @@ def get_subject_setup_by_id(
     "/setup/{subject_id}",
     response_model=UpdateSubjectSetupSuccess,
 )
-def patch_subject_setup(
+async def patch_subject_setup(
     session: SessionDep,
     subject_id: uuid.UUID,
     update_data: UpdateSubjectSetup,
@@ -166,7 +187,7 @@ def patch_subject_setup(
     """
     Updates Subject SetUp
     """
-    subject = session.get(Subject, subject_id)
+    subject = await session.get(Subject, subject_id)
     if not subject:
         raise HTTPException(
             status_code=404,
@@ -185,12 +206,12 @@ def patch_subject_setup(
         # Update relationships
         update_subject_relationships(subject, update_data, session)
 
-        session.commit()
+        await session.commit()
 
         return {"message": "Subject Setup Updated Successfully"}
     except Exception as e:
         logger.error(f"Error updating subject setup: {e}")
-        session.rollback()
+        await session.rollback()
         raise HTTPException(status_code=500, detail=f"Update failed: {str(e)}")
 
 
@@ -198,7 +219,7 @@ def patch_subject_setup(
     "/{subject_id}",
     response_model=SubjectSchema,
 )
-def get_subject_by_id(
+async def get_subject_by_id(
     session: SessionDep,
     subject_id: uuid.UUID,
     user_in: shared_route,
@@ -206,7 +227,7 @@ def get_subject_by_id(
     """
     Returns specific academic subject
     """
-    subject = session.get(Subject, subject_id)
+    subject = await session.get(Subject, subject_id)
     if not subject:
         raise HTTPException(
             status_code=404,

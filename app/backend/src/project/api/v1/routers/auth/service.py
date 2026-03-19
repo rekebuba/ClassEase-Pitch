@@ -9,7 +9,8 @@ from google.oauth2 import id_token
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 from pydantic import BaseModel, EmailStr, NameEmail
 from redis.asyncio import Redis
-from sqlalchemy.orm import Session
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from project.core.config import EmailConf, settings
 from project.models import AuthIdentity, User
@@ -77,7 +78,7 @@ def verify_google_token(token: str) -> dict:
         )
 
 
-def get_google_user(db: Session, token: str) -> User:
+async def get_google_user(session: AsyncSession, token: str) -> User:
     """Retrieve or link a user based on Google token data."""
 
     google_data = verify_google_token(token)
@@ -93,19 +94,21 @@ def get_google_user(db: Session, token: str) -> User:
 
     # Try to find a user linked by Google
     linked_identity = (
-        db.query(AuthIdentity)
-        .filter(
-            AuthIdentity.provider == AuthProviderEnum.GOOGLE,
-            AuthIdentity.provider_user_id == google_sub,
+        await session.execute(
+            select(AuthIdentity).filter(
+                AuthIdentity.provider == AuthProviderEnum.GOOGLE,
+                AuthIdentity.provider_user_id == google_sub,
+            )
         )
-        .first()
-    )
+    ).scalar_one_or_none()
 
     if linked_identity:
         return linked_identity.user
 
     # Try to find user by email (existing known user)
-    user = db.query(User).filter(User.email == email).first()
+    user = (
+        await session.execute(select(User).filter(User.email == email))
+    ).scalar_one_or_none()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -114,13 +117,13 @@ def get_google_user(db: Session, token: str) -> User:
 
     # Check if Google identity already exists for this user (safety)
     existing_identity = (
-        db.query(AuthIdentity)
-        .filter(
-            AuthIdentity.user_id == user.id,
-            AuthIdentity.provider == AuthProviderEnum.GOOGLE,
+        await session.execute(
+            select(AuthIdentity).filter(
+                AuthIdentity.user_id == user.id,
+                AuthIdentity.provider == AuthProviderEnum.GOOGLE,
+            )
         )
-        .first()
-    )
+    ).scalar_one_or_none()
     if not existing_identity:
         # Create new Google identity linked to the user
         identity = AuthIdentity(
@@ -129,8 +132,8 @@ def get_google_user(db: Session, token: str) -> User:
             provider_user_id=google_sub,
         )
         user.is_verified = True  # Mark user as verified since Google email is verified
-        db.add(identity)
-        db.commit()
+        session.add(identity)
+        await session.commit()
 
     return user
 
@@ -165,6 +168,7 @@ async def generate_and_store_password_reset_token(
 
 
 async def verify_otp_and_generate_token(
+    *,
     email: EmailStr,
     user_submitted_code: str,
     redis_client: Redis,

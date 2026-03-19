@@ -2,7 +2,7 @@ import uuid
 from typing import List, Sequence
 
 from sqlalchemy import delete, select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from project.api.v1.routers.grades.schema import (
     UpdateGradeSetup,
@@ -17,8 +17,8 @@ from project.models.stream import Stream
 from project.models.subject import Subject
 
 
-def update_grade_relationships(
-    grade: Grade, update_data: UpdateGradeSetup, session: Session
+async def update_grade_relationships(
+    grade: Grade, update_data: UpdateGradeSetup, session: AsyncSession
 ) -> None:
     """
     Update grade relationships (subjects, streams, sections) efficiently.
@@ -42,19 +42,25 @@ def update_grade_relationships(
             "streams" in update_data.model_fields_set
             and update_data.streams is not None
         ):
-            _update_grade_streams(grade, update_data.streams, session)
+            await _update_grade_streams(grade, update_data.streams, session)
 
         # --- SUBJECTS UPDATE ---
         elif (
             "subjects" in update_data.model_fields_set
             and update_data.subjects is not None
         ):
-            existing_subjects = session.scalars(
-                select(Subject)
-                .join(GradeStreamSubject)
-                .where(GradeStreamSubject.grade_id == grade.id)
-            ).all()
-            _update_grade_subjects(
+            existing_subjects = (
+                (
+                    await session.execute(
+                        select(Subject)
+                        .join(GradeStreamSubject)
+                        .where(GradeStreamSubject.grade_id == grade.id)
+                    )
+                )
+                .scalars()
+                .all()
+            )
+            await _update_grade_subjects(
                 grade=grade,
                 new_subjects=update_data.subjects,
                 session=session,
@@ -67,19 +73,19 @@ def update_grade_relationships(
             "sections" in update_data.model_fields_set
             and update_data.sections is not None
         ):
-            _update_grade_sections(grade, update_data.sections, session)
+            await _update_grade_sections(grade, update_data.sections, session)
 
-        session.flush()  # Batch all changes before commit
+        await session.flush()  # Batch all changes before commit
     except Exception as e:
-        session.rollback()
+        await session.rollback()
         raise e
 
 
-def _update_grade_subjects(
+async def _update_grade_subjects(
     *,
     grade: Grade,
     new_subjects: List[UpdateSubject],
-    session: Session,
+    session: AsyncSession,
     existing_subjects: Sequence[Subject],
     stream_id: uuid.UUID | None,
 ) -> None:
@@ -115,11 +121,11 @@ def _update_grade_subjects(
             GradeStreamSubject.stream_id == stream_id,
             GradeStreamSubject.subject_id.in_(subject_ids_to_remove),
         )
-        session.execute(stmt)
+        await session.execute(stmt)
 
 
-def _update_grade_streams(
-    grade: Grade, new_streams: List[UpdateStreamSetup], session: Session
+async def _update_grade_streams(
+    grade: Grade, new_streams: List[UpdateStreamSetup], session: AsyncSession
 ) -> None:
     """
     Update grade streams with their subjects.
@@ -130,9 +136,11 @@ def _update_grade_streams(
     - Removing deleted streams
     """
     # 1. Fetch all existing data in bulk to avoid N+1 queries
-    existing_streams = session.scalars(
-        select(Stream).where(Stream.grade_id == grade.id)
-    ).all()
+    existing_streams = (
+        (await session.execute(select(Stream).where(Stream.grade_id == grade.id)))
+        .scalars()
+        .all()
+    )
 
     existing_streams_by_name = {s.name: s for s in existing_streams}
     new_streams_by_name = {s.name: s for s in new_streams if s.name}
@@ -159,18 +167,18 @@ def _update_grade_streams(
     # Validate streams exist
     if streams_to_remove:
         stream_ids_to_remove = {s.id for s in streams_to_remove}
-        _validate_streams_exist(stream_ids_to_remove, session)
+        await _validate_streams_exist(stream_ids_to_remove, session)
 
         stmt = delete(Stream).where(
             Stream.id.in_(stream_ids_to_remove),
         )
-        session.execute(stmt)
+        await session.execute(stmt)
 
-    session.flush()
+    await session.flush()
 
     #  Add subjects for New streams
     for new_stream, new_subjects in streams_to_add:
-        _update_grade_subjects(
+        await _update_grade_subjects(
             grade=grade,
             new_subjects=new_subjects,
             session=session,
@@ -180,7 +188,7 @@ def _update_grade_streams(
 
     #  Update subjects for existing streams
     for existing_stream, new_stream_data in streams_to_update:
-        _update_grade_subjects(
+        await _update_grade_subjects(
             grade=grade,
             new_subjects=new_stream_data.subjects,
             session=session,
@@ -189,8 +197,8 @@ def _update_grade_streams(
         )
 
 
-def _update_grade_sections(
-    grade: Grade, new_sections: List[UpdateSection], session: Session
+async def _update_grade_sections(
+    grade: Grade, new_sections: List[UpdateSection], session: AsyncSession
 ) -> None:
     """
     Update grade sections relationship.
@@ -198,9 +206,11 @@ def _update_grade_sections(
     Handles creation of new sections and removal of deleted ones.
     """
     # Batch load existing sections
-    existing_sections = session.scalars(
-        select(Section).where(Section.grade_id == grade.id)
-    ).all()
+    existing_sections = (
+        (await session.execute(select(Section).where(Section.grade_id == grade.id)))
+        .scalars()
+        .all()
+    )
 
     existing_sections_by_name = {s.section: s for s in existing_sections}
     new_sections_by_name = {s.section: s for s in new_sections if s.section}
@@ -223,22 +233,26 @@ def _update_grade_sections(
     # Validate sections exist
     if sections_to_remove:
         section_ids_to_remove = {s.id for s in sections_to_remove}
-        _validate_sections_exist(section_ids_to_remove, session)
+        await _validate_sections_exist(section_ids_to_remove, session)
 
         stmt = delete(Section).where(
             Section.id.in_(section_ids_to_remove),
         )
-        session.execute(stmt)
+        await session.execute(stmt)
 
 
-def _validate_streams_exist(stream_ids: set[uuid.UUID], session: Session) -> None:
+async def _validate_streams_exist(
+    stream_ids: set[uuid.UUID], session: AsyncSession
+) -> None:
     """Validate that Stream ids exist in the database."""
     if not stream_ids:
         return
 
-    existing_streams = session.scalars(
-        select(Stream.id).where(Stream.id.in_(stream_ids))
-    ).all()
+    existing_streams = (
+        (await session.execute(select(Stream.id).where(Stream.id.in_(stream_ids))))
+        .scalars()
+        .all()
+    )
 
     missing_streams = stream_ids - set(existing_streams)
 
@@ -246,14 +260,18 @@ def _validate_streams_exist(stream_ids: set[uuid.UUID], session: Session) -> Non
         raise ValueError(f"Invalid stream IDs provided: {missing_streams}")
 
 
-def _validate_sections_exist(section_ids: set[uuid.UUID], session: Session) -> None:
+async def _validate_sections_exist(
+    section_ids: set[uuid.UUID], session: AsyncSession
+) -> None:
     """Validate that Section ids exist in the database."""
     if not section_ids:
         return
 
-    existing_sections = session.scalars(
-        select(Section.id).where(Section.id.in_(section_ids))
-    ).all()
+    existing_sections = (
+        (await session.execute(select(Section.id).where(Section.id.in_(section_ids))))
+        .scalars()
+        .all()
+    )
 
     missing_sections = section_ids - set(existing_sections)
 

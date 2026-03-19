@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, List
 
 from pydantic import AwareDatetime, BaseModel, ConfigDict
 
+from project.schema.models import EmployeeSchema
 from project.utils.enum import AcademicTermTypeEnum, AcademicYearStatusEnum
 from project.utils.utils import to_camel
 
@@ -25,7 +26,6 @@ if TYPE_CHECKING:
         SubjectWithRelatedSchema,
     )
     from project.schema.models.teacher_schema import (
-        TeacherSchema,
         TeacherWithRelatedSchema,
     )
 
@@ -50,15 +50,6 @@ class YearSchema(BaseModel):
     created_at: AwareDatetime
     updated_at: AwareDatetime
 
-    @classmethod
-    def default_fields(cls) -> set[str]:
-        """
-        Returns a list of default fields to be used
-        when no specific fields are requested.
-        This can be overridden in subclasses if needed.
-        """
-        return {"id", "name", "status"}
-
 
 class YearRelatedSchema(BaseModel):
     """This model represents the relationships of a YearSchema."""
@@ -73,8 +64,8 @@ class YearRelatedSchema(BaseModel):
     academic_terms: List[AcademicTermSchema]
     grades: List[GradeSchema]
     students: List[StudentSchema]
-    teachers: List[TeacherSchema]
     subjects: List[SubjectSchema]
+    employees: List[EmployeeSchema]
 
 
 class YearNestedSchema(YearSchema):

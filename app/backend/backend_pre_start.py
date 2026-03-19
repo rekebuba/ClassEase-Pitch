@@ -17,19 +17,19 @@ wait_seconds = 1
     before=before_log(logger, logging.INFO),
     after=after_log(logger, logging.WARN),
 )
-def init(db_engine: Engine) -> None:
+async def init(db_engine: Engine) -> None:
     try:
         # Try to create session to check if DB is awake
         with db_engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
+            await conn.execute(text("SELECT 1"))
     except Exception as e:
         logger.error(e)
         raise e
 
 
-def main() -> None:
+async def main() -> None:
     logger.info("Initializing service")
-    init(engine)
+    await init(engine)
     logger.info("Service finished initializing")
 
 

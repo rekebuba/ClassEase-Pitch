@@ -14,10 +14,10 @@ router = APIRouter(prefix="/sections", tags=["Sections"])
 
 
 @router.get(
-    "/",
+    "",
     response_model=List[SectionSchema],
 )
-def get_sections(
+async def get_sections(
     session: SessionDep,
     query: Annotated[SectionFilterParams, Query()],
     user_in: shared_route,
@@ -25,16 +25,22 @@ def get_sections(
     """
     Returns specific academic grade
     """
-    grade = session.get(Grade, query.grade_id)
+    grade = await session.get(Grade, query.grade_id)
     if not grade:
         raise HTTPException(
             status_code=404,
             detail=f"Grade with ID {query.grade_id} not found.",
         )
 
-    sections = session.scalars(
-        select(Section).where(Section.grade_id == query.grade_id)
-    ).all()
+    sections = (
+        (
+            await session.execute(
+                select(Section).where(Section.grade_id == query.grade_id)
+            )
+        )
+        .scalars()
+        .all()
+    )
 
     return sections
 
@@ -43,7 +49,7 @@ def get_sections(
     "/{section_id}",
     response_model=SectionSchema,
 )
-def get_section_by_id(
+async def get_section_by_id(
     session: SessionDep,
     section_id: uuid.UUID,
     user_in: shared_route,
@@ -51,7 +57,7 @@ def get_section_by_id(
     """
     Returns specific academic section
     """
-    section = session.get(Section, section_id)
+    section = await session.get(Section, section_id)
     if not section:
         raise HTTPException(
             status_code=404,

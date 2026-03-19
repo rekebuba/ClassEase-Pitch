@@ -25,8 +25,8 @@ from project.utils.utils import generate_id
 router = APIRouter(prefix="/employees", tags=["Employees"])
 
 
-@router.get("/", response_model=List[EmployeeBasicInfo])
-def get_employees(
+@router.get("", response_model=List[EmployeeBasicInfo])
+async def get_employees(
     session: SessionDep,
     user_in: admin_route,
     q: Annotated[Optional[str], Query()] = None,
@@ -37,19 +37,19 @@ def get_employees(
     if q:
         stm = stm.where(Employee.first_name.ilike(f"%{q}%"))
 
-    employees = session.scalars(stm).all()
+    employees = (await session.execute(stm)).scalars().all()
 
     return employees
 
 
 @router.get("/{employee_id}", response_model=EmployeeBasicInfo)
-def get_employee(
+async def get_employee(
     employee_id: uuid.UUID,
     session: SessionDep,
     user_in: admin_route,
 ) -> Employee:
     """This endpoint will return a single employee by ID."""
-    employee = session.get(Employee, employee_id)
+    employee = await session.get(Employee, employee_id)
 
     if not employee:
         raise HTTPException(
@@ -59,34 +59,34 @@ def get_employee(
     return employee
 
 
-@router.delete("/", response_model=SuccessResponseSchema)
-def delete_employees(
+@router.delete("", response_model=SuccessResponseSchema)
+async def delete_employees(
     session: SessionDep,
     employee_ids: Annotated[List[uuid.UUID], Query()],
     user_in: admin_route,
 ) -> SuccessResponseSchema:
     """This endpoint will delete employees by their IDs."""
     for employee_id in employee_ids:
-        employee = session.get(Employee, employee_id)
+        employee = await session.get(Employee, employee_id)
         if not employee:
             raise HTTPException(
                 status_code=404,
                 detail=f"Employee with ID {employee_id} not found.",
             )
         session.delete(employee)
-    session.commit()
+    await session.commit()
 
     return SuccessResponseSchema(message="Employees deleted successfully.")
 
 
 @router.patch("/status", response_model=SuccessResponseSchema)
-def update_employee_status(
+async def update_employee_status(
     session: SessionDep,
     employees: UpdateEmployeeStatusSchema,
     user_in: admin_route,
 ) -> SuccessResponseSchema:
     """This endpoint will update the status of employees by their IDs."""
-    year = session.get(Year, employees.year_id)
+    year = await session.get(Year, employees.year_id)
     if not year:
         raise HTTPException(
             status_code=404,
@@ -94,7 +94,7 @@ def update_employee_status(
         )
 
     for employee_id in employees.employee_ids:
-        employee = session.get(Employee, employee_id)
+        employee = await session.get(Employee, employee_id)
         if not employee:
             raise HTTPException(
                 status_code=404,
@@ -122,10 +122,10 @@ def update_employee_status(
                 password=get_password_hash(username),
             )
             session.add(new_user)
-            session.commit()
+            await session.commit()
 
             stmt.values(user_id=new_user.id)
 
-    session.execute(stmt)
-    session.commit()
+    await session.execute(stmt)
+    await session.commit()
     return SuccessResponseSchema(message="Employees status updated successfully.")

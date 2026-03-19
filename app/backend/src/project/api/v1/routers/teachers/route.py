@@ -28,23 +28,26 @@ from project.utils.enum import EmployeePositionEnum
 router = APIRouter(prefix="/teachers", tags=["Teachers"])
 
 
-@router.get("/", response_model=List[TeacherBasicInfo])
-def get_teachers(
+@router.get("", response_model=List[TeacherBasicInfo])
+async def get_teachers(
     session: SessionDep,
     user_in: admin_route,
     q: Annotated[TeachersQuery, Query()],
 ) -> Sequence[Employee]:
     """This endpoint will return employees based on the provided filters."""
-    if session.query(Year).where(Year.id == q.year_id).first() is None:
+    if (
+        await session.execute(select(Year).where(Year.id == q.year_id))
+    ).scalar_one_or_none() is None:
         raise HTTPException(
             status_code=400,
             detail=f"Year with ID {q.year_id} not found.",
         )
 
     if (
-        session.query(AcademicTerm).where(AcademicTerm.id == q.academic_term_id).first()
-        is None
-    ):
+        await session.execute(
+            select(AcademicTerm).where(AcademicTerm.id == q.academic_term_id)
+        )
+    ).scalar_one_or_none() is None:
         raise HTTPException(
             status_code=400,
             detail=f"Academic Term with ID {q.academic_term_id} not found.",
@@ -80,13 +83,13 @@ def get_teachers(
         .joinedload(GradeStreamSubject.stream),
     )
 
-    result = session.scalars(teachers).unique().all()
+    result = (await session.execute(teachers)).scalars().unique().all()
 
     return result
 
 
-@router.post("/", response_model=SuccessResponseSchema)
-def assign_teacher(
+@router.post("", response_model=SuccessResponseSchema)
+async def assign_teacher(
     session: SessionDep,
     assign_data: AssignTeacher,
     user_in: admin_route,
@@ -97,7 +100,7 @@ def assign_teacher(
         - grade stream subject
         - section
     """
-    teacher = session.get(Employee, assign_data.teacher_id)
+    teacher = await session.get(Employee, assign_data.teacher_id)
 
     if not teacher:
         raise HTTPException(
@@ -111,7 +114,7 @@ def assign_teacher(
             detail=f"Employee with ID {assign_data.teacher_id} is not a teacher.",
         )
 
-    grade = session.scalar(select(Grade).where(Grade.id == assign_data.grade.id))
+    grade = await session.get(Grade, assign_data.grade.id)
     if not grade:
         raise HTTPException(
             status_code=400,
@@ -125,23 +128,27 @@ def assign_teacher(
                 detail="Stream ID is required for the selected grade.",
             )
 
-        stream = session.scalar(
-            select(Stream)
-            .where(Stream.id == assign_data.grade.stream_id)
-            .where(Stream.grade_id == assign_data.grade.id)
-        )
+        stream = (
+            await session.execute(
+                select(Stream)
+                .where(Stream.id == assign_data.grade.stream_id)
+                .where(Stream.grade_id == assign_data.grade.id)
+            )
+        ).scalar_one_or_none()
         if not stream:
             raise HTTPException(
                 status_code=400,
                 detail=f"Stream with ID {assign_data.grade.stream_id} not found.",
             )
 
-    gss = session.scalar(
-        select(GradeStreamSubject)
-        .where(GradeStreamSubject.stream_id == assign_data.grade.stream_id)
-        .where(GradeStreamSubject.subject_id == assign_data.subject_id)
-        .where(GradeStreamSubject.grade_id == assign_data.grade.id)
-    )
+    gss = (
+        await session.execute(
+            select(GradeStreamSubject)
+            .where(GradeStreamSubject.stream_id == assign_data.grade.stream_id)
+            .where(GradeStreamSubject.subject_id == assign_data.subject_id)
+            .where(GradeStreamSubject.grade_id == assign_data.grade.id)
+        )
+    ).scalar_one_or_none()
 
     if not gss:
         raise HTTPException(
@@ -149,8 +156,16 @@ def assign_teacher(
             detail="Grade Stream Subject not found \
                 for the given stream, subject, and grade.",
         )
-    term_ids = session.scalars(
-        select(AcademicTerm.id).where(AcademicTerm.year_id == assign_data.year_id)
+    term_ids = (
+        (
+            await session.execute(
+                select(AcademicTerm.id).where(
+                    AcademicTerm.year_id == assign_data.year_id
+                )
+            )
+        )
+        .scalars()
+        .all()
     )
     if not term_ids:
         raise HTTPException(
@@ -159,13 +174,15 @@ def assign_teacher(
         )
 
     for term_id in term_ids:
-        existing_record = session.scalar(
-            select(TeacherRecord).where(
-                TeacherRecord.employee_id == assign_data.teacher_id,
-                TeacherRecord.academic_term_id == term_id,
-                TeacherRecord.grade_stream_subject_id == gss.id,
+        existing_record = (
+            await session.execute(
+                select(TeacherRecord).where(
+                    TeacherRecord.employee_id == assign_data.teacher_id,
+                    TeacherRecord.academic_term_id == term_id,
+                    TeacherRecord.grade_stream_subject_id == gss.id,
+                )
             )
-        )
+        ).scalar_one_or_none()
 
         if existing_record:
             raise HTTPException(
@@ -180,22 +197,25 @@ def assign_teacher(
         )
 
         session.add(new_record)
-        session.flush()
+        await session.flush()
 
         for section in assign_data.grade.sections:
-            session_exists = session.get(Section, section.id)
+            session_exists = await session.get(Section, section.id)
             if not session_exists:
                 raise HTTPException(
                     status_code=400,
                     detail=f"Section with ID {section.id} not found.",
                 )
 
-            teacher_record_link_exists = session.scalar(
-                select(TeacherRecordLink).where(
-                    TeacherRecordLink.teacher_record_id == new_record.id,
-                    TeacherRecordLink.section_id == section.id,
+            teacher_record_link_exists = (
+                await session.execute(
+                    select(TeacherRecordLink).where(
+                        TeacherRecordLink.teacher_record_id == new_record.id,
+                        TeacherRecordLink.section_id == section.id,
+                    )
                 )
-            )
+            ).scalar_one_or_none()
+
             if teacher_record_link_exists:
                 raise HTTPException(
                     status_code=400,
@@ -210,6 +230,6 @@ def assign_teacher(
             )
 
     session.add(new_record)
-    session.commit()
+    await session.commit()
 
     return SuccessResponseSchema(message="Teacher assigned successfully.")

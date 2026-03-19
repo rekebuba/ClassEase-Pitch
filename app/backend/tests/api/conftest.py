@@ -1,181 +1,247 @@
-import uuid
-from collections.abc import Generator
-from typing import Dict
+import random
+from collections.abc import AsyncGenerator
+from typing import Dict, List
 
 import pytest
 import pytest_asyncio
-from fastapi.testclient import TestClient
 from httpx import ASGITransport, AsyncClient
 from redis.asyncio import Redis
-from sqlalchemy import select
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from project.api.v1.routers.dependencies import get_db, get_redis
 from project.api.v1.routers.registrations.schema import RegistrationResponse
+from project.api.v1.routers.year.schema import NewYearSuccess
 from project.core.config import settings
 from project.core.db import engine, init_db
 from project.main import app
 from project.models import Parent
 from project.models.base.base_model import Base
-from project.models.year import Year
+from project.schema.models import (
+    GradeWithRelatedSchema,
+    StreamSchema,
+    YearSchema,
+    YearWithRelatedSchema,
+)
+from project.schema.models.stream_schema import StreamWithRelatedSchema
 from tests.factories.api_data import NewYearFactory, ParentRegistrationFactory
 from tests.utils.utils import get_auth_header
 
-# Session factory
-TestingSessionLocal = sessionmaker(bind=engine, autoflush=True, expire_on_commit=False)
 
+@pytest_asyncio.fixture(scope="session", loop_scope="session", autouse=True)
+async def db() -> AsyncGenerator[None, None]:
+    """Create tables once at the start and drop them at the end."""
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
-# Override the get_db dependency to use test database
-def override_get_db():
-    try:
-        db = TestingSessionLocal()
-        yield db
-    finally:
-        db.close()
-
-
-# Apply the override
-app.dependency_overrides[get_db] = override_get_db
-
-
-@pytest.fixture(scope="session", autouse=True)
-def db() -> Generator[Session, None, None]:
-    Base.metadata.create_all(bind=engine)
-
-    with TestingSessionLocal() as session:
-        init_db(session)
+    # Seed data that all tests need
+    async with async_sessionmaker(engine, class_=AsyncSession)() as session:
+        await init_db(session)
 
     yield
 
-    Base.metadata.drop_all(bind=engine)
-    engine.dispose()
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+
+    await engine.dispose()
 
 
-@pytest.fixture(scope="module")
-def db_session() -> Generator[Session, None, None]:
-    """Provide a database session for each test with rollback"""
-    connection = engine.connect()
-    transaction = connection.begin()
-    session = TestingSessionLocal(bind=connection)
+@pytest_asyncio.fixture(scope="session")
+async def db_session() -> AsyncGenerator[AsyncSession, None]:
+    """Provide a fresh, transactional session for every single test"""
 
-    try:
-        yield session
-    finally:
-        session.close()
-        transaction.rollback()  # Rollback any changes
-        connection.close()  # Close connection
+    async with engine.connect() as conn:
+        """Start a transaction, yield a session, and rollback after the test."""
+        trans = await conn.begin()
 
+        async_session = async_sessionmaker(
+            bind=conn,
+            class_=AsyncSession,
+            expire_on_commit=False,
+        )
 
-@pytest.fixture(scope="module")
-def client() -> Generator[TestClient, None, None]:
-    with TestingSessionLocal() as session:
-        session.rollback()  # Ensure clean state for each test
+        async with async_session() as session:
+            yield session
 
-    with TestClient(app) as c:
-        yield c
+        await trans.rollback()
 
 
-@pytest_asyncio.fixture(scope="function")
+@pytest_asyncio.fixture(scope="session")
 async def test_redis():
     redis_client = Redis.from_url(str(settings.REDIS_URL), decode_responses=True)
     yield redis_client
     await redis_client.aclose()
 
 
-@pytest_asyncio.fixture(scope="function")
-async def async_client(test_redis: Redis):
+@pytest_asyncio.fixture(scope="session")
+async def client(db_session: AsyncSession, test_redis: Redis):
+    """Setup client with dependency overrides."""
+
+    app.dependency_overrides[get_db] = lambda: db_session
     app.dependency_overrides[get_redis] = lambda: test_redis
 
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
-    ) as ac:
-        yield ac
+    ) as client:
+        yield client
 
-    # Ensure Redis connections are closed after every test to avoid loop conflicts.
     app.dependency_overrides.clear()
 
 
-@pytest.fixture(scope="module")
-def admin_token_headers(client: TestClient) -> dict[str, str]:
+@pytest.fixture(scope="session")
+async def admin_token_headers(client: AsyncClient) -> dict[str, str]:
     login_data = {
         "username": settings.FIRST_SUPERUSER,
         "password": settings.FIRST_SUPERUSER_PASSWORD.get_secret_value(),
     }
-    return get_auth_header(client, login_data)
+    return await get_auth_header(client, login_data)
 
 
-@pytest.fixture(scope="module")
-def teacher_token_headers(client: TestClient) -> dict[str, str]:
-    return get_auth_header(client, {})
+@pytest.fixture(scope="session")
+async def teacher_token_headers(client: AsyncClient) -> dict[str, str]:
+    return await get_auth_header(client, {})
 
 
-@pytest.fixture(scope="module")
-def student_token_headers(client: TestClient) -> dict[str, str]:
-    return get_auth_header(client, {})
+@pytest.fixture(scope="session")
+async def student_token_headers(client: AsyncClient) -> dict[str, str]:
+    return await get_auth_header(client, {})
 
 
-@pytest.fixture(scope="module")
-def existing_year(
-    db_session: Session,
-) -> Year | None:
-    year = db_session.execute(select(Year)).scalars().first()
-    return year
-
-
-@pytest.fixture(scope="module")
-def year(
-    client: TestClient,
-    db_session: Session,
+@pytest.fixture(scope="session")
+async def new_academic_year(
+    client: AsyncClient,
     admin_token_headers: Dict[str, str],
-    existing_year: Year | None,
-) -> Year:
-    if existing_year:
-        return existing_year
-
+    db_session: AsyncSession,
+) -> NewYearSuccess:
     data = NewYearFactory.create(setup_methods="Default Template")
 
-    r = client.post(
+    r = await client.post(
         f"{settings.API_V1_STR}/years",
         json=data.model_dump(mode="json", by_alias=True),
         headers=admin_token_headers,
     )
+
     assert r.status_code == 201
-    assert r.json() is not None
 
-    result = r.json()
+    result = NewYearSuccess.model_validate_json(r.text)
 
-    assert "id" in result
-    assert "message" in result
-    assert "Year created Successfully" == result["message"]
+    return result
 
-    try:
-        year_id = uuid.UUID(result["id"])
-    except ValueError:
-        assert False, "Year ID is not a valid UUID"
 
-    year = db_session.scalar(
-        select(Year)
-        .join(Year.grades)
-        .join(Year.subjects)
-        .where(Year.id == year_id)
-        .distinct()
+@pytest.fixture(scope="session")
+async def year(
+    client: AsyncClient,
+    admin_token_headers: Dict[str, str],
+    new_academic_year: NewYearSuccess,
+) -> YearSchema:
+    """Test retrieving a single academic year by ID."""
+    r = await client.get(
+        f"{settings.API_V1_STR}/years/{new_academic_year.id}",
+        headers=admin_token_headers,
     )
-    assert year is not None
+
+    assert r.status_code == 200
+
+    year = YearSchema.model_validate_json(r.text)
 
     return year
 
 
-@pytest.fixture(scope="module")
-def parent(
-    client: TestClient,
-    db_session: Session,
+@pytest.fixture(scope="session")
+async def year_relation(
+    client: AsyncClient,
+    admin_token_headers: Dict[str, str],
+    year: YearSchema,
+) -> YearWithRelatedSchema:
+    """Retrieving a year with all its relationships."""
+
+    r = await client.get(
+        f"{settings.API_V1_STR}/years/{year.id}/relation",
+        headers=admin_token_headers,
+    )
+
+    assert r.status_code == 200
+
+    year_with_relation = YearWithRelatedSchema.model_validate_json(r.text)
+
+    return year_with_relation
+
+
+@pytest.fixture(scope="session")
+async def grade_relation(
+    client: AsyncClient,
+    admin_token_headers: Dict[str, str],
+    year_relation: YearWithRelatedSchema,
+) -> GradeWithRelatedSchema:
+    """Retrieving a grade with all its relationships."""
+
+    grade = random.choice(year_relation.grades)
+
+    r = await client.get(
+        f"{settings.API_V1_STR}/grades/{grade.id}/relation",
+        headers=admin_token_headers,
+    )
+
+    assert r.status_code == 200
+
+    grade_with_relation = GradeWithRelatedSchema.model_validate_json(r.text)
+
+    return grade_with_relation
+
+
+@pytest.fixture(scope="session")
+async def streams(
+    client: AsyncClient,
+    admin_token_headers: Dict[str, str],
+    year: YearSchema,
+) -> List[StreamSchema]:
+    """Test retrieving all streams."""
+    r = await client.get(
+        f"{settings.API_V1_STR}/streams",
+        params={"yearId": str(year.id)},
+        headers=admin_token_headers,
+    )
+
+    assert r.status_code == 200
+    assert isinstance(r.json(), list)
+
+    streams = [StreamSchema.model_validate(stream) for stream in r.json()]
+
+    return streams
+
+
+@pytest.fixture(scope="session")
+async def stream_relation(
+    client: AsyncClient,
+    admin_token_headers: Dict[str, str],
+    streams: List[StreamSchema],
+) -> StreamWithRelatedSchema:
+    """Retrieving a stream with all its relationships."""
+
+    stream = random.choice(streams)
+
+    r = await client.get(
+        f"{settings.API_V1_STR}/streams/{stream.id}/relation",
+        headers=admin_token_headers,
+    )
+
+    assert r.status_code == 200
+
+    stream_with_relation = StreamWithRelatedSchema.model_validate_json(r.text)
+
+    return stream_with_relation
+
+
+@pytest.fixture(scope="session")
+async def parent(
+    client: AsyncClient,
+    db_session: AsyncSession,
     admin_token_headers: Dict[str, str],
 ) -> Parent:
     """Fixture to create a parent for testing"""
 
     parent = ParentRegistrationFactory.build()
 
-    r = client.post(
+    r = await client.post(
         f"{settings.API_V1_STR}/register/parents",
         json=parent.model_dump(mode="json", by_alias=True),
         headers=admin_token_headers,
@@ -187,7 +253,7 @@ def parent(
 
     assert "Parent Registered Successfully" == result.message
 
-    parent = db_session.get(Parent, result.id)
+    parent = await db_session.get(Parent, result.id)
 
     assert parent is not None
 
