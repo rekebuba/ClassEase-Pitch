@@ -21,8 +21,9 @@ database_url = str(settings.SQLALCHEMY_POSTGRES_DATABASE_URI)
 
 # Escape % for ConfigParser compatibility
 escaped_url = database_url.replace("%", "%%")
+sync_url = escaped_url.replace("+asyncpg", "")
 
-config.set_main_option("sqlalchemy.url", escaped_url)
+config.set_main_option("sqlalchemy.url", sync_url)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

@@ -425,6 +425,14 @@ export const zEmployeeRegistrationForm = z.object({
 });
 
 /**
+ * EmployeeSchema
+ */
+export const zEmployeeSchema = z.object({
+    id: z.uuid(),
+    first_name: z.string()
+});
+
+/**
  * EventEligibilityEnum
  */
 export const zEventEligibilityEnum = z.enum([
@@ -473,10 +481,7 @@ export const zEventPurposeEnum = z.enum([
  * This model represents an event in the system.
  */
 export const zEventSchema = z.object({
-    id: z.optional(z.union([
-        z.uuid(),
-        z.null()
-    ])),
+    id: z.uuid(),
     yearId: z.uuid(),
     title: z.string(),
     purpose: zEventPurposeEnum,
@@ -574,7 +579,6 @@ export const zStudentSchema = z.object({
     fatherName: z.string(),
     dateOfBirth: z.iso.date(),
     gender: zGenderEnum,
-    address: z.string(),
     city: z.string(),
     state: z.string(),
     postalCode: z.string(),
@@ -618,134 +622,6 @@ export const zStudentSchema = z.object({
 });
 
 /**
- * ScheduleEnum
- */
-export const zScheduleEnum = z.enum([
-    'full-time',
-    'part-time',
-    'flexible-hours',
-    'substitute'
-]);
-
-/**
- * TeacherSchema
- */
-export const zTeacherSchema = z.object({
-    id: z.optional(z.union([
-        z.uuid(),
-        z.null()
-    ])),
-    firstName: z.string(),
-    fatherName: z.string(),
-    grandFatherName: z.string(),
-    dateOfBirth: z.iso.date(),
-    gender: zGenderEnum,
-    nationality: z.string(),
-    socialSecurityNumber: z.string(),
-    address: z.string(),
-    city: z.string(),
-    state: z.string(),
-    postalCode: z.string(),
-    country: z.string(),
-    highestDegree: zHighestEducationEnum,
-    university: z.string(),
-    graduationYear: z.int(),
-    gpa: z.number(),
-    positionApplyingFor: z.string(),
-    yearsOfExperience: zExperienceYearEnum,
-    preferredSchedule: zScheduleEnum,
-    secondaryPhone: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    additionalDegrees: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    teachingLicense: z.optional(z.union([
-        z.boolean(),
-        z.null()
-    ])),
-    licenseNumber: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    licenseState: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    licenseExpirationDate: z.optional(z.union([
-        z.iso.date(),
-        z.null()
-    ])),
-    certifications: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    specializations: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    previousSchools: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    specialSkills: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    professionalDevelopment: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    hasConvictions: z.optional(z.boolean()).default(false),
-    convictionDetails: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    hasDisciplinaryActions: z.optional(z.boolean()).default(false),
-    resume: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    coverLetter: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    transcripts: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    teachingCertificate: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    backgroundCheck: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    teachingPhilosophy: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    whyTeaching: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    additionalComments: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    agreeToTerms: z.optional(z.boolean()).default(false),
-    agreeToBackgroundCheck: z.optional(z.boolean()).default(false),
-    userId: z.optional(z.union([
-        z.uuid(),
-        z.null()
-    ])),
-    status: z.optional(zEmployeeApplicationStatusEnum)
-});
-
-/**
  * SubjectSchema
  * This model represents a subject in the system. It inherits from BaseModel.
  */
@@ -767,8 +643,8 @@ export const zYearWithRelatedSchema = z.object({
     academicTerms: z.array(zAcademicTermSchema),
     grades: z.array(zGradeSchema),
     students: z.array(zStudentSchema),
-    teachers: z.array(zTeacherSchema),
     subjects: z.array(zSubjectSchema),
+    employees: z.array(zEmployeeSchema),
     id: z.uuid(),
     calendarType: zAcademicTermTypeEnum,
     name: z.string(),
@@ -817,6 +693,16 @@ export const zYearSchema = z.object({
     createdAt: z.iso.datetime(),
     updatedAt: z.iso.datetime()
 });
+
+/**
+ * ScheduleEnum
+ */
+export const zScheduleEnum = z.enum([
+    'full-time',
+    'part-time',
+    'flexible-hours',
+    'substitute'
+]);
 
 /**
  * TeacherWithRelatedSchema
@@ -1019,22 +905,22 @@ export const zStudentYearRecordSchema = z.object({
  * StreamWithRelatedSchema
  */
 export const zStreamWithRelatedSchema = z.object({
-    studentTermRecords: z.optional(z.union([
+    studentTermRecords: z.union([
         z.array(zStudentTermRecordSchema),
         z.null()
-    ])),
-    grade: z.optional(z.union([
+    ]),
+    grade: z.union([
         zGradeSchema,
         z.null()
-    ])),
-    students: z.optional(z.union([
+    ]),
+    students: z.union([
         z.array(zStudentYearRecordSchema),
         z.null()
-    ])),
-    subjects: z.optional(z.union([
+    ]),
+    subjects: z.union([
         z.array(zSubjectSchema),
         z.null()
-    ])),
+    ]),
     id: z.uuid(),
     gradeId: z.uuid(),
     name: z.string()
@@ -1130,7 +1016,6 @@ export const zStudentWithRelatedSchema = z.object({
     fatherName: z.string(),
     dateOfBirth: z.iso.date(),
     gender: zGenderEnum,
-    address: z.string(),
     city: z.string(),
     state: z.string(),
     postalCode: z.string(),
@@ -1171,6 +1056,124 @@ export const zStudentWithRelatedSchema = z.object({
     hasDisability: z.boolean(),
     isTransfer: z.boolean(),
     status: z.optional(zStudentApplicationStatusEnum)
+});
+
+/**
+ * TeacherSchema
+ */
+export const zTeacherSchema = z.object({
+    id: z.optional(z.union([
+        z.uuid(),
+        z.null()
+    ])),
+    firstName: z.string(),
+    fatherName: z.string(),
+    grandFatherName: z.string(),
+    dateOfBirth: z.iso.date(),
+    gender: zGenderEnum,
+    nationality: z.string(),
+    socialSecurityNumber: z.string(),
+    address: z.string(),
+    city: z.string(),
+    state: z.string(),
+    postalCode: z.string(),
+    country: z.string(),
+    highestDegree: zHighestEducationEnum,
+    university: z.string(),
+    graduationYear: z.int(),
+    gpa: z.number(),
+    positionApplyingFor: z.string(),
+    yearsOfExperience: zExperienceYearEnum,
+    preferredSchedule: zScheduleEnum,
+    secondaryPhone: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    additionalDegrees: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    teachingLicense: z.optional(z.union([
+        z.boolean(),
+        z.null()
+    ])),
+    licenseNumber: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    licenseState: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    licenseExpirationDate: z.optional(z.union([
+        z.iso.date(),
+        z.null()
+    ])),
+    certifications: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    specializations: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    previousSchools: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    specialSkills: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    professionalDevelopment: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    hasConvictions: z.optional(z.boolean()).default(false),
+    convictionDetails: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    hasDisciplinaryActions: z.optional(z.boolean()).default(false),
+    resume: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    coverLetter: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    transcripts: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    teachingCertificate: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    backgroundCheck: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    teachingPhilosophy: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    whyTeaching: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    additionalComments: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    agreeToTerms: z.optional(z.boolean()).default(false),
+    agreeToBackgroundCheck: z.optional(z.boolean()).default(false),
+    userId: z.optional(z.union([
+        z.uuid(),
+        z.null()
+    ])),
+    status: z.optional(zEmployeeApplicationStatusEnum)
 });
 
 /**
@@ -1260,7 +1263,6 @@ export const zGradeWithRelatedSchema = z.object({
         z.null()
     ]),
     studentTermRecords: z.array(zStudentTermRecordSchema),
-    teachers: z.array(zTeacherSchema),
     streams: z.array(zStreamSchema),
     students: z.array(zStudentSchema),
     sections: z.array(zSectionSchema),
@@ -1291,7 +1293,9 @@ export const zValidationError = z.object({
         z.int()
     ])),
     msg: z.string(),
-    type: z.string()
+    type: z.string(),
+    input: z.optional(z.unknown()),
+    ctx: z.optional(z.record(z.string(), z.unknown()))
 });
 
 /**
@@ -1306,7 +1310,8 @@ export const zHttpValidationError = z.object({
  */
 export const zHealthStatus = z.object({
     apiStatus: z.string(),
-    dbStatus: z.string()
+    dbStatus: z.string(),
+    redisStatus: z.string()
 });
 
 /**
@@ -2190,7 +2195,7 @@ export const zGetYearsData = z.object({
 });
 
 /**
- * Response Get Years Api V1 Years  Get
+ * Response Get Years Api V1 Years Get
  * Successful Response
  */
 export const zGetYearsResponse = z.array(zYearSchema);
@@ -2205,6 +2210,19 @@ export const zPostYearData = z.object({
  * Successful Response
  */
 export const zPostYearResponse = zNewYearSuccess;
+
+export const zGetYearRelationData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        year_id: z.uuid()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * Successful Response
+ */
+export const zGetYearRelationResponse = zYearWithRelatedSchema;
 
 export const zGetYearSummaryData = z.object({
     body: z.optional(z.never()),
@@ -2290,7 +2308,7 @@ export const zGetGradesData = z.object({
 });
 
 /**
- * Response Get Grades Api V1 Grades  Get
+ * Response Get Grades Api V1 Grades Get
  * Successful Response
  */
 export const zGetGradesResponse = z.array(zGradeSchema);
@@ -2363,6 +2381,19 @@ export const zGetGradeByIdData = z.object({
  */
 export const zGetGradeByIdResponse = zGradeSchema;
 
+export const zGetGradeRelationData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        grade_id: z.uuid()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * Successful Response
+ */
+export const zGetGradeRelationResponse = zGradeWithRelatedSchema;
+
 export const zGetSubjectsData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
@@ -2376,7 +2407,7 @@ export const zGetSubjectsData = z.object({
 });
 
 /**
- * Response Get Subjects Api V1 Subjects  Get
+ * Response Get Subjects Api V1 Subjects Get
  * Successful Response
  */
 export const zGetSubjectsResponse = z.array(zSubjectSchema);
@@ -2462,7 +2493,7 @@ export const zGetStreamsData = z.object({
 });
 
 /**
- * Response Get Streams Api V1 Streams  Get
+ * Response Get Streams Api V1 Streams Get
  * Successful Response
  */
 export const zGetStreamsResponse = z.array(zStreamSchema);
@@ -2480,6 +2511,19 @@ export const zGetStreamByIdData = z.object({
  */
 export const zGetStreamByIdResponse = zStreamSchema;
 
+export const zGetStreamRelationData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        stream_id: z.uuid()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * Successful Response
+ */
+export const zGetStreamRelationResponse = zStreamWithRelatedSchema;
+
 export const zGetSectionsData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
@@ -2493,7 +2537,7 @@ export const zGetSectionsData = z.object({
 });
 
 /**
- * Response Get Sections Api V1 Sections  Get
+ * Response Get Sections Api V1 Sections Get
  * Successful Response
  */
 export const zGetSectionsResponse = z.array(zSectionSchema);
@@ -2581,7 +2625,7 @@ export const zGetStudentsData = z.object({
 });
 
 /**
- * Response Get Students Api V1 Students  Get
+ * Response Get Students Api V1 Students Get
  * Successful Response
  */
 export const zGetStudentsResponse = z.array(zStudentBasicInfo);
@@ -2635,7 +2679,7 @@ export const zGetEmployeesData = z.object({
 });
 
 /**
- * Response Get Employees Api V1 Employees  Get
+ * Response Get Employees Api V1 Employees Get
  * Successful Response
  */
 export const zGetEmployeesResponse = z.array(zEmployeeBasicInfo);
@@ -2684,7 +2728,7 @@ export const zGetTeachersData = z.object({
 });
 
 /**
- * Response Get Teachers Api V1 Teachers  Get
+ * Response Get Teachers Api V1 Teachers Get
  * Successful Response
  */
 export const zGetTeachersResponse = z.array(zTeacherBasicInfo);
@@ -2713,7 +2757,7 @@ export const zGetAcademicTermsData = z.object({
 });
 
 /**
- * Response Get Academic Terms Api V1 Terms  Get
+ * Response Get Academic Terms Api V1 Terms Get
  * Successful Response
  */
 export const zGetAcademicTermsResponse = z.array(zAcademicTermSchema);

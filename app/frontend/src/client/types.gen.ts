@@ -605,6 +605,20 @@ export type EmployeeRegistrationForm = {
 };
 
 /**
+ * EmployeeSchema
+ */
+export type EmployeeSchema = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * First Name
+     */
+    first_name: string;
+};
+
+/**
  * EventEligibilityEnum
  */
 export type EventEligibilityEnum = 'all' | 'students only' | 'faculty only' | 'invitation only';
@@ -632,7 +646,7 @@ export type EventSchema = {
     /**
      * Id
      */
-    id?: string | null;
+    id: string;
     /**
      * Yearid
      */
@@ -829,10 +843,6 @@ export type GradeWithRelatedSchema = {
      */
     studentTermRecords: Array<StudentTermRecordSchema>;
     /**
-     * Teachers
-     */
-    teachers: Array<TeacherSchema>;
-    /**
      * Streams
      */
     streams: Array<StreamSchema>;
@@ -905,6 +915,10 @@ export type HealthStatus = {
      * Dbstatus
      */
     dbStatus: string;
+    /**
+     * Redisstatus
+     */
+    redisStatus: string;
 };
 
 /**
@@ -1305,16 +1319,16 @@ export type StreamWithRelatedSchema = {
     /**
      * Studenttermrecords
      */
-    studentTermRecords?: Array<StudentTermRecordSchema> | null;
-    grade?: GradeSchema | null;
+    studentTermRecords: Array<StudentTermRecordSchema> | null;
+    grade: GradeSchema | null;
     /**
      * Students
      */
-    students?: Array<StudentYearRecordSchema> | null;
+    students: Array<StudentYearRecordSchema> | null;
     /**
      * Subjects
      */
-    subjects?: Array<SubjectSchema> | null;
+    subjects: Array<SubjectSchema> | null;
     /**
      * Id
      */
@@ -1742,10 +1756,6 @@ export type StudentSchema = {
     dateOfBirth: string;
     gender: GenderEnum;
     /**
-     * Address
-     */
-    address: string;
-    /**
      * City
      */
     city: string;
@@ -1918,10 +1928,6 @@ export type StudentWithRelatedSchema = {
      */
     dateOfBirth: string;
     gender: GenderEnum;
-    /**
-     * Address
-     */
-    address: string;
     /**
      * City
      */
@@ -2848,6 +2854,16 @@ export type ValidationError = {
      * Error Type
      */
     type: string;
+    /**
+     * Input
+     */
+    input?: unknown;
+    /**
+     * Context
+     */
+    ctx?: {
+        [key: string]: unknown;
+    };
 };
 
 /**
@@ -2951,13 +2967,13 @@ export type YearWithRelatedSchema = {
      */
     students: Array<StudentSchema>;
     /**
-     * Teachers
-     */
-    teachers: Array<TeacherSchema>;
-    /**
      * Subjects
      */
     subjects: Array<SubjectSchema>;
+    /**
+     * Employees
+     */
+    employees: Array<EmployeeSchema>;
     /**
      * Id
      */
@@ -2990,7 +3006,7 @@ export type GetHealthData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/v1/health/';
+    url: '/api/v1/health';
 };
 
 export type GetHealthResponses = {
@@ -3554,12 +3570,12 @@ export type GetYearsData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/v1/years/';
+    url: '/api/v1/years';
 };
 
 export type GetYearsResponses = {
     /**
-     * Response Get Years Api V1 Years  Get
+     * Response Get Years Api V1 Years Get
      * Successful Response
      */
     200: Array<YearSchema>;
@@ -3571,7 +3587,7 @@ export type PostYearData = {
     body: NewYear;
     path?: never;
     query?: never;
-    url: '/api/v1/years/';
+    url: '/api/v1/years';
 };
 
 export type PostYearErrors = {
@@ -3591,6 +3607,36 @@ export type PostYearResponses = {
 };
 
 export type PostYearResponse = PostYearResponses[keyof PostYearResponses];
+
+export type GetYearRelationData = {
+    body?: never;
+    path: {
+        /**
+         * Year Id
+         */
+        year_id: string;
+    };
+    query?: never;
+    url: '/api/v1/years/{year_id}/relation';
+};
+
+export type GetYearRelationErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetYearRelationError = GetYearRelationErrors[keyof GetYearRelationErrors];
+
+export type GetYearRelationResponses = {
+    /**
+     * Successful Response
+     */
+    200: YearWithRelatedSchema;
+};
+
+export type GetYearRelationResponse = GetYearRelationResponses[keyof GetYearRelationResponses];
 
 export type GetYearSummaryData = {
     body?: never;
@@ -3758,7 +3804,7 @@ export type GetGradesData = {
          */
         q?: string | null;
     };
-    url: '/api/v1/grades/';
+    url: '/api/v1/grades';
 };
 
 export type GetGradesErrors = {
@@ -3772,7 +3818,7 @@ export type GetGradesError = GetGradesErrors[keyof GetGradesErrors];
 
 export type GetGradesResponses = {
     /**
-     * Response Get Grades Api V1 Grades  Get
+     * Response Get Grades Api V1 Grades Get
      * Successful Response
      */
     200: Array<GradeSchema>;
@@ -3784,7 +3830,7 @@ export type PostGradeData = {
     body: NewGrade;
     path?: never;
     query?: never;
-    url: '/api/v1/grades/';
+    url: '/api/v1/grades';
 };
 
 export type PostGradeErrors = {
@@ -3930,6 +3976,36 @@ export type GetGradeByIdResponses = {
 
 export type GetGradeByIdResponse = GetGradeByIdResponses[keyof GetGradeByIdResponses];
 
+export type GetGradeRelationData = {
+    body?: never;
+    path: {
+        /**
+         * Grade Id
+         */
+        grade_id: string;
+    };
+    query?: never;
+    url: '/api/v1/grades/{grade_id}/relation';
+};
+
+export type GetGradeRelationErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetGradeRelationError = GetGradeRelationErrors[keyof GetGradeRelationErrors];
+
+export type GetGradeRelationResponses = {
+    /**
+     * Successful Response
+     */
+    200: GradeWithRelatedSchema;
+};
+
+export type GetGradeRelationResponse = GetGradeRelationResponses[keyof GetGradeRelationResponses];
+
 export type GetSubjectsData = {
     body?: never;
     path?: never;
@@ -3943,7 +4019,7 @@ export type GetSubjectsData = {
          */
         q?: string | null;
     };
-    url: '/api/v1/subjects/';
+    url: '/api/v1/subjects';
 };
 
 export type GetSubjectsErrors = {
@@ -3957,7 +4033,7 @@ export type GetSubjectsError = GetSubjectsErrors[keyof GetSubjectsErrors];
 
 export type GetSubjectsResponses = {
     /**
-     * Response Get Subjects Api V1 Subjects  Get
+     * Response Get Subjects Api V1 Subjects Get
      * Successful Response
      */
     200: Array<SubjectSchema>;
@@ -3969,7 +4045,7 @@ export type PostSubjectData = {
     body: NewSubject;
     path?: never;
     query?: never;
-    url: '/api/v1/subjects/';
+    url: '/api/v1/subjects';
 };
 
 export type PostSubjectErrors = {
@@ -4128,7 +4204,7 @@ export type GetStreamsData = {
          */
         q?: string | null;
     };
-    url: '/api/v1/streams/';
+    url: '/api/v1/streams';
 };
 
 export type GetStreamsErrors = {
@@ -4142,7 +4218,7 @@ export type GetStreamsError = GetStreamsErrors[keyof GetStreamsErrors];
 
 export type GetStreamsResponses = {
     /**
-     * Response Get Streams Api V1 Streams  Get
+     * Response Get Streams Api V1 Streams Get
      * Successful Response
      */
     200: Array<StreamSchema>;
@@ -4180,6 +4256,36 @@ export type GetStreamByIdResponses = {
 
 export type GetStreamByIdResponse = GetStreamByIdResponses[keyof GetStreamByIdResponses];
 
+export type GetStreamRelationData = {
+    body?: never;
+    path: {
+        /**
+         * Stream Id
+         */
+        stream_id: string;
+    };
+    query?: never;
+    url: '/api/v1/streams/{stream_id}/relation';
+};
+
+export type GetStreamRelationErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetStreamRelationError = GetStreamRelationErrors[keyof GetStreamRelationErrors];
+
+export type GetStreamRelationResponses = {
+    /**
+     * Successful Response
+     */
+    200: StreamWithRelatedSchema;
+};
+
+export type GetStreamRelationResponse = GetStreamRelationResponses[keyof GetStreamRelationResponses];
+
 export type GetSectionsData = {
     body?: never;
     path?: never;
@@ -4193,7 +4299,7 @@ export type GetSectionsData = {
          */
         q?: string | null;
     };
-    url: '/api/v1/sections/';
+    url: '/api/v1/sections';
 };
 
 export type GetSectionsErrors = {
@@ -4207,7 +4313,7 @@ export type GetSectionsError = GetSectionsErrors[keyof GetSectionsErrors];
 
 export type GetSectionsResponses = {
     /**
-     * Response Get Sections Api V1 Sections  Get
+     * Response Get Sections Api V1 Sections Get
      * Successful Response
      */
     200: Array<SectionSchema>;
@@ -4249,7 +4355,7 @@ export type GetLoggedInUserData = {
     body?: never;
     path?: never;
     query?: never;
-    url: '/api/v1/me/';
+    url: '/api/v1/me';
 };
 
 export type GetLoggedInUserResponses = {
@@ -4318,7 +4424,7 @@ export type DeleteStudentsData = {
          */
         student_ids: Array<string>;
     };
-    url: '/api/v1/students/';
+    url: '/api/v1/students';
 };
 
 export type DeleteStudentsErrors = {
@@ -4352,7 +4458,7 @@ export type GetStudentsData = {
          */
         q?: string | null;
     };
-    url: '/api/v1/students/';
+    url: '/api/v1/students';
 };
 
 export type GetStudentsErrors = {
@@ -4366,7 +4472,7 @@ export type GetStudentsError = GetStudentsErrors[keyof GetStudentsErrors];
 
 export type GetStudentsResponses = {
     /**
-     * Response Get Students Api V1 Students  Get
+     * Response Get Students Api V1 Students Get
      * Successful Response
      */
     200: Array<StudentBasicInfo>;
@@ -4438,7 +4544,7 @@ export type DeleteEmployeesData = {
          */
         employee_ids: Array<string>;
     };
-    url: '/api/v1/employees/';
+    url: '/api/v1/employees';
 };
 
 export type DeleteEmployeesErrors = {
@@ -4468,7 +4574,7 @@ export type GetEmployeesData = {
          */
         q?: string | null;
     };
-    url: '/api/v1/employees/';
+    url: '/api/v1/employees';
 };
 
 export type GetEmployeesErrors = {
@@ -4482,7 +4588,7 @@ export type GetEmployeesError = GetEmployeesErrors[keyof GetEmployeesErrors];
 
 export type GetEmployeesResponses = {
     /**
-     * Response Get Employees Api V1 Employees  Get
+     * Response Get Employees Api V1 Employees Get
      * Successful Response
      */
     200: Array<EmployeeBasicInfo>;
@@ -4562,7 +4668,7 @@ export type GetTeachersData = {
          */
         academicTermId?: string | null;
     };
-    url: '/api/v1/teachers/';
+    url: '/api/v1/teachers';
 };
 
 export type GetTeachersErrors = {
@@ -4576,7 +4682,7 @@ export type GetTeachersError = GetTeachersErrors[keyof GetTeachersErrors];
 
 export type GetTeachersResponses = {
     /**
-     * Response Get Teachers Api V1 Teachers  Get
+     * Response Get Teachers Api V1 Teachers Get
      * Successful Response
      */
     200: Array<TeacherBasicInfo>;
@@ -4588,7 +4694,7 @@ export type AssignTeacherData = {
     body: AssignTeacher;
     path?: never;
     query?: never;
-    url: '/api/v1/teachers/';
+    url: '/api/v1/teachers';
 };
 
 export type AssignTeacherErrors = {
@@ -4622,7 +4728,7 @@ export type GetAcademicTermsData = {
          */
         q?: string | null;
     };
-    url: '/api/v1/terms/';
+    url: '/api/v1/terms';
 };
 
 export type GetAcademicTermsErrors = {
@@ -4636,7 +4742,7 @@ export type GetAcademicTermsError = GetAcademicTermsErrors[keyof GetAcademicTerm
 
 export type GetAcademicTermsResponses = {
     /**
-     * Response Get Academic Terms Api V1 Terms  Get
+     * Response Get Academic Terms Api V1 Terms Get
      * Successful Response
      */
     200: Array<AcademicTermSchema>;
@@ -4645,5 +4751,5 @@ export type GetAcademicTermsResponses = {
 export type GetAcademicTermsResponse = GetAcademicTermsResponses[keyof GetAcademicTermsResponses];
 
 export type ClientOptions = {
-    baseURL: 'http://localhost:8000' | (string & {});
+    baseURL: 'http://localhost:8080' | (string & {});
 };
