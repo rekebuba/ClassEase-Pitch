@@ -18,6 +18,8 @@ from project.models import Parent
 from project.models.base.base_model import Base
 from project.schema.models import (
     GradeWithRelatedSchema,
+    SectionSchema,
+    SectionWithRelatedSchema,
     StreamSchema,
     YearSchema,
     YearWithRelatedSchema,
@@ -203,6 +205,7 @@ async def streams(
 
     assert r.status_code == 200
     assert isinstance(r.json(), list)
+    assert len(r.json()) > 0
 
     streams = [StreamSchema.model_validate(stream) for stream in r.json()]
 
@@ -229,6 +232,51 @@ async def stream_relation(
     stream_with_relation = StreamWithRelatedSchema.model_validate_json(r.text)
 
     return stream_with_relation
+
+
+@pytest.fixture(scope="session")
+async def sections(
+    client: AsyncClient,
+    admin_token_headers: Dict[str, str],
+    year_relation: YearWithRelatedSchema,
+) -> List[SectionSchema]:
+    """Retrieve all sections."""
+    grade = random.choice(year_relation.grades)
+    r = await client.get(
+        f"{settings.API_V1_STR}/sections",
+        params={"gradeId": str(grade.id)},
+        headers=admin_token_headers,
+    )
+
+    assert r.status_code == 200
+    assert isinstance(r.json(), list)
+    assert len(r.json()) > 0
+
+    sections = [SectionSchema.model_validate(section) for section in r.json()]
+
+    return sections
+
+
+@pytest.fixture(scope="session")
+async def section_relation(
+    client: AsyncClient,
+    admin_token_headers: Dict[str, str],
+    sections: List[SectionSchema],
+) -> SectionWithRelatedSchema:
+    """Retrieving a section with all its relationships."""
+
+    section = random.choice(sections)
+
+    r = await client.get(
+        f"{settings.API_V1_STR}/sections/{section.id}/relation",
+        headers=admin_token_headers,
+    )
+
+    assert r.status_code == 200
+
+    section_with_relation = SectionWithRelatedSchema.model_validate_json(r.text)
+
+    return section_with_relation
 
 
 @pytest.fixture(scope="session")

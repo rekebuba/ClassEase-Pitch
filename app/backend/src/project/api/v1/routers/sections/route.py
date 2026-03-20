@@ -3,11 +3,13 @@ from typing import Annotated, List, Sequence
 
 from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from project.api.v1.routers.dependencies import SessionDep, shared_route
 from project.api.v1.routers.sections.schema import SectionFilterParams
 from project.models.grade import Grade
 from project.models.section import Section
+from project.schema.models import SectionWithRelatedSchema
 from project.schema.models.section_schema import SectionSchema
 
 router = APIRouter(prefix="/sections", tags=["Sections"])
@@ -58,6 +60,38 @@ async def get_section_by_id(
     Returns specific academic section
     """
     section = await session.get(Section, section_id)
+    if not section:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Section with ID {section_id} not found.",
+        )
+
+    return section
+
+
+@router.get(
+    "/{section_id}/relation",
+    response_model=SectionWithRelatedSchema,
+)
+async def get_section_related(
+    session: SessionDep,
+    section_id: uuid.UUID,
+    user_in: shared_route,
+) -> Section:
+    """
+    Returns specific academic section
+    """
+    section = (
+        await session.execute(
+            select(Section)
+            .where(Section.id == section_id)
+            .options(
+                selectinload(Section.grade),
+                selectinload(Section.students),
+            )
+        )
+    ).scalar_one_or_none()
+
     if not section:
         raise HTTPException(
             status_code=404,
