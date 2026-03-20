@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List
 
 from pydantic import BaseModel, ConfigDict
 
@@ -10,7 +10,6 @@ from project.utils.utils import to_camel
 if TYPE_CHECKING:
     from project.schema.models.grade_schema import GradeSchema
     from project.schema.models.student_schema import StudentSchema
-    from project.schema.models.teacher_schema import TeacherSchema
 
 
 class SectionSchema(BaseModel):
@@ -28,22 +27,13 @@ class SectionSchema(BaseModel):
     grade_id: uuid.UUID
     section: str
 
-    @classmethod
-    def default_fields(cls) -> set[str]:
-        """
-        Returns a list of default fields to be used
-        when no specific fields are requested.
-        This can be overridden in subclasses if needed.
-        """
-        return {"id", "section"}
-
 
 class SectionRelatedSchema(BaseModel):
     """This model represents the relationships of a SectionSchema."""
 
-    grade: Optional[GradeSchema] = None
-    students: Optional[List[StudentSchema]] = []
-    teachers: Optional[List[TeacherSchema]] = []
+    grade: GradeSchema
+    students: List[StudentSchema]
+    # teachers: List[TeacherSchema]
 
 
 class SectionWithRelatedSchema(SectionSchema, SectionRelatedSchema):
