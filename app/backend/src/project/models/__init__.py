@@ -4,7 +4,9 @@
 from project.models.academic_term import AcademicTerm
 from project.models.admin import Admin
 from project.models.assessment import Assessment
+from project.models.audit_log import AuditLog
 from project.models.auth_identity import AuthIdentity
+from project.models.auth_session import AuthSession
 from project.models.blacklist_token import BlacklistToken
 from project.models.employee import Employee
 from project.models.employee_year_link import EmployeeYearLink
@@ -14,10 +16,16 @@ from project.models.grade_section_link import GradeSectionLink
 from project.models.grade_stream_link import GradeStreamLink
 from project.models.grade_stream_subject import GradeStreamSubject
 from project.models.mark_list import MarkList
+from project.models.membership_role import MembershipRole
 from project.models.parent import Parent
 from project.models.parent_student_link import ParentStudentLink
+from project.models.permission import Permission
 from project.models.registration import Registration
+from project.models.role import Role
+from project.models.role_permission import RolePermission
 from project.models.saved_query_view import SavedQueryView
+from project.models.school import School
+from project.models.school_membership import SchoolMembership
 from project.models.section import Section
 from project.models.stream import Stream
 from project.models.student import Student
@@ -34,6 +42,7 @@ from project.models.subject_yearly_average import SubjectYearlyAverage
 from project.models.table import Table
 from project.models.teacher_record import TeacherRecord
 from project.models.teacher_record_link import TeacherRecordLink
+from project.models.transfer_request import TransferRequest
 from project.models.user import User
 from project.models.year import Year
 from project.models.yearly_subject import YearlySubject
@@ -43,6 +52,8 @@ __all__ = [
     "Admin",
     "Assessment",
     "AuthIdentity",
+    "AuditLog",
+    "AuthSession",
     "BlacklistToken",
     "Employee",
     "EmployeeYearLink",
@@ -52,10 +63,16 @@ __all__ = [
     "GradeStreamLink",
     "GradeStreamSubject",
     "MarkList",
+    "MembershipRole",
     "Parent",
     "ParentStudentLink",
+    "Permission",
     "Registration",
+    "Role",
+    "RolePermission",
     "SavedQueryView",
+    "School",
+    "SchoolMembership",
     "Section",
     "Stream",
     "Student",
@@ -72,6 +89,7 @@ __all__ = [
     "Table",
     "TeacherRecord",
     "TeacherRecordLink",
+    "TransferRequest",
     "User",
     "Year",
     "YearlySubject",

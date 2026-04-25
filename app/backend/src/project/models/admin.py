@@ -9,13 +9,16 @@ from sqlalchemy import UUID, Date, Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
+from project.models.base.school_mixin import SchoolScopedMixin
 from project.utils.enum import GenderEnum
 
 if TYPE_CHECKING:
+    from project.models.school import School
+    from project.models.school_membership import SchoolMembership
     from project.models.user import User
 
 
-class Admin(BaseModel):
+class Admin(SchoolScopedMixin, BaseModel):
     """
     This model represents an admin in the system. It inherits from BaseModel and Base.
     """
@@ -40,11 +43,31 @@ class Admin(BaseModel):
         nullable=True,
         default=None,
     )
+    school_membership_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(),
+        ForeignKey("school_memberships.id", ondelete="SET NULL"),
+        nullable=True,
+        default=None,
+    )
 
-    # One-to-One Relationship
+    # Relationships
     user: Mapped[Optional["User"]] = relationship(
         "User",
-        back_populates="admin",
+        back_populates="admin_profiles",
+        init=False,
+        repr=False,
+        passive_deletes=True,
+    )
+    membership: Mapped[Optional["SchoolMembership"]] = relationship(
+        "SchoolMembership",
+        back_populates="admin_profiles",
+        init=False,
+        repr=False,
+        passive_deletes=True,
+    )
+    school: Mapped[Optional["School"]] = relationship(
+        "School",
+        back_populates="admins",
         init=False,
         repr=False,
         passive_deletes=True,

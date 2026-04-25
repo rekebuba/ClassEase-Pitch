@@ -24,6 +24,7 @@ from project.utils.type import SetupMethodType
 def create_academic_term(
     *,
     year_id: uuid.UUID,
+    school_id: uuid.UUID,
     calendar_type: AcademicTermTypeEnum,
     session: AsyncSession,
 ) -> None:
@@ -45,6 +46,8 @@ def create_academic_term(
         )
         for term in term_names
     ]
+    for term in terms_to_create:
+        term.school_id = school_id
     if terms_to_create:
         session.add_all(terms_to_create)
 
@@ -53,6 +56,7 @@ async def handle_setup_methods(
     *,
     old_year_id: uuid.UUID | None,
     year_id: uuid.UUID,
+    school_id: uuid.UUID,
     session: AsyncSession,
     setup_methods: SetupMethodType,
 ) -> None:
@@ -63,6 +67,7 @@ async def handle_setup_methods(
         # Implement the logic for setting up a default template
         await _handle_default_template_setup(
             year_id=year_id,
+            school_id=school_id,
             session=session,
         )
     elif setup_methods == "Last Year Copy":
@@ -81,6 +86,7 @@ async def handle_setup_methods(
         await _handle_year_copy_setup(
             old_year_id=old_year_id,
             year_id=year_id,
+            school_id=school_id,
             session=session,
         )
     elif setup_methods == "Manual":
@@ -92,6 +98,7 @@ async def handle_setup_methods(
 async def _handle_default_template_setup(
     *,
     year_id: uuid.UUID,
+    school_id: uuid.UUID,
     session: AsyncSession,
 ) -> None:
     """
@@ -112,6 +119,7 @@ async def _handle_default_template_setup(
         subject_map: Dict[str, Subject] = {}
         for s in template.subjects:
             new_subject = Subject(name=s.name, code=s.code, year_id=year_id)
+            new_subject.school_id = school_id
             subject_map[s.name] = new_subject
             all_objects_to_add.append(new_subject)
 
@@ -128,6 +136,7 @@ async def _handle_default_template_setup(
                 grade=grade_data.grade,
                 has_stream=grade_data.has_stream,
             )
+            grade.school_id = school_id
             all_objects_to_add.append(grade)
 
             # Add grade and flush to get ID
@@ -140,6 +149,8 @@ async def _handle_default_template_setup(
                 Section(grade_id=grade.id, section=section.section)
                 for section in template.sections
             ]
+            for section in sections:
+                section.school_id = school_id
             all_objects_to_add.extend(sections)
 
             # Add non-streamed subjects
@@ -160,6 +171,7 @@ async def _handle_default_template_setup(
                 streams = []
                 for stream_data in grade_data.streams:
                     stream = Stream(grade_id=grade.id, name=stream_data.name)
+                    stream.school_id = school_id
                     streams.append(stream)
                     all_objects_to_add.append(stream)
 
@@ -197,6 +209,7 @@ async def _handle_year_copy_setup(
     *,
     old_year_id: uuid.UUID,
     year_id: uuid.UUID,
+    school_id: uuid.UUID,
     session: AsyncSession,
 ) -> None:
     """
@@ -245,6 +258,7 @@ async def _handle_year_copy_setup(
             new_subject = Subject(
                 name=old_subject.name, code=old_subject.code, year_id=year_id
             )
+            new_subject.school_id = school_id
             subject_mapping[old_subject.id] = new_subject
             new_subjects.append(new_subject)
 
@@ -260,6 +274,7 @@ async def _handle_year_copy_setup(
                 grade=old_grade.grade,
                 has_stream=old_grade.has_stream,
             )
+            new_grade.school_id = school_id
             grade_mapping[old_grade.id] = new_grade
             new_grades.append(new_grade)
 
@@ -277,10 +292,12 @@ async def _handle_year_copy_setup(
                 new_sections.append(
                     Section(grade_id=new_grade.id, section=old_section.section)
                 )
+                new_sections[-1].school_id = school_id
 
             # Copy streams
             for old_stream in old_grade.streams:
                 new_stream = Stream(grade_id=new_grade.id, name=old_stream.name)
+                new_stream.school_id = school_id
                 stream_mapping[old_stream.id] = new_stream
                 new_streams.append(new_stream)
 

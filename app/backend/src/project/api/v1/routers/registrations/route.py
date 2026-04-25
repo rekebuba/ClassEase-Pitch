@@ -24,15 +24,14 @@ from project.api.v1.routers.registrations.schema import (
     StudRegStep4,
     StudRegStep5,
 )
-from project.core.security import get_password_hash
-from project.models import AuthIdentity, User
+from project.core.access_control import provision_user_membership
 from project.models.admin import Admin
 from project.models.employee import Employee
 from project.models.grade import Grade
 from project.models.parent import Parent
 from project.models.parent_student_link import ParentStudentLink
 from project.models.student import Student
-from project.utils.enum import AuthProviderEnum, RoleEnum
+from project.utils.enum import MfaStateEnum, RoleEnum
 
 router = APIRouter(prefix="/register", tags=["registration"])
 
@@ -45,37 +44,32 @@ async def register_new_admin(
     background_tasks: BackgroundTasks,
 ) -> RegistrationResponse:
     """Registers a new admin in the system."""
-    hash_password = get_password_hash(admin_data.password)
-
-    user = User(
-        username=admin_data.username,
-        role=RoleEnum.ADMIN,
-        email=admin_data.email,
-        phone=admin_data.phone,
+    user, membership = await provision_user_membership(
+        session,
+        school=user_in.membership.school,
+        shell_role=RoleEnum.ADMIN,
+        membership_role_name="school_admin",
+        login_identifier=admin_data.username,
+        password=admin_data.password.get_secret_value(),
+        email=str(admin_data.email),
+        phone=str(admin_data.phone),
         is_active=False,
+        is_verified=False,
+        mfa_state=MfaStateEnum.VERIFIED,
     )
 
-    session.add(user)
-    await session.flush()
-
-    provider = AuthIdentity(
-        user_id=user.id,
-        provider=AuthProviderEnum.PASSWORD,
-        password=hash_password,
-    )
-
-    # Create SQLAlchemy model instance
     new_admin = Admin(
         user_id=user.id,
+        school_membership_id=membership.id,
         first_name=admin_data.first_name,
         father_name=admin_data.father_name,
         grand_father_name=admin_data.grand_father_name,
         date_of_birth=admin_data.date_of_birth,
         gender=admin_data.gender,
     )
+    new_admin.school_id = user_in.membership.school_id
 
     session.add(new_admin)
-    session.add(provider)
     await session.commit()
 
     background_tasks.add_task(
@@ -131,11 +125,10 @@ def register_student_step5(
 @router.post("/parents", status_code=201)
 async def register_new_parent(
     session: SessionDep,
-    user_id: admin_route,
+    user_in: admin_route,
     parent_data: ParentRegistrationForm,
 ) -> RegistrationResponse:
     """Registers a new parent in the system."""
-    # Create SQLAlchemy model instance
     new_parent = Parent(
         first_name=parent_data.first_name,
         last_name=parent_data.last_name,
@@ -145,6 +138,7 @@ async def register_new_parent(
         relation=parent_data.relation,
         emergency_contact_phone=parent_data.emergency_contact_phone,
     )
+    new_parent.school_id = user_in.membership.school_id
 
     session.add(new_parent)
     await session.commit()
@@ -158,23 +152,23 @@ async def register_new_parent(
 async def register_new_student(
     session: SessionDep,
     student_data: StudentRegistrationForm,
+    user_in: admin_route,
     responses={
         status.HTTP_400_BAD_REQUEST: {"description": "Invalid grade or parent ID"}
     },
 ) -> RegistrationResponse:
     """Registers a new student in the system."""
     grade = await session.get(Grade, student_data.registered_for_grade_id)
-    if not grade:
+    if not grade or grade.school_id != user_in.membership.school_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid grade"
         )
     parent = await session.get(Parent, student_data.parent_id)
-    if not parent:
+    if not parent or parent.school_id != user_in.membership.school_id:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid parent"
         )
 
-    # Create SQLAlchemy model instance
     new_student = Student(
         first_name=student_data.first_name,
         father_name=student_data.father_name,
@@ -195,6 +189,7 @@ async def register_new_student(
         is_transfer=student_data.is_transfer,
         registered_for_grade_id=grade.id,
     )
+    new_student.school_id = user_in.membership.school_id
 
     session.add(new_student)
     await session.flush()
@@ -261,7 +256,6 @@ async def register_new_employee(
     Registers a new user (Admin, Student, Employee) in the system.
     """
 
-    # Create SQLAlchemy model instance
     new_employee = Employee(
         first_name=employee_data.first_name,
         father_name=employee_data.father_name,
@@ -282,7 +276,11 @@ async def register_new_employee(
         gpa=employee_data.gpa,
         position=employee_data.position,
         years_of_experience=employee_data.years_of_experience,
+        subject_id=employee_data.subject_id,
+        secondary_phone=employee_data.secondary_phone,
+        resume=employee_data.resume,
     )
+    new_employee.school_id = user_in.membership.school_id
 
     session.add(new_employee)
     await session.commit()

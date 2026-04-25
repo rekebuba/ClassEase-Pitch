@@ -62,6 +62,56 @@ export const zRoleEnum = z.enum([
 ]);
 
 /**
+ * SchoolStatusEnum
+ */
+export const zSchoolStatusEnum = z.enum([
+    'active',
+    'inactive',
+    'suspended'
+]);
+
+/**
+ * SchoolSummary
+ */
+export const zSchoolSummary = z.object({
+    id: z.uuid(),
+    name: z.string(),
+    slug: z.string(),
+    status: zSchoolStatusEnum
+});
+
+/**
+ * SchoolMembershipStatusEnum
+ */
+export const zSchoolMembershipStatusEnum = z.enum([
+    'active',
+    'inactive',
+    'pending',
+    'transferred',
+    'withdrawn',
+    'suspended'
+]);
+
+/**
+ * MembershipSummary
+ */
+export const zMembershipSummary = z.object({
+    id: z.uuid(),
+    schoolId: z.uuid(),
+    schoolSlug: z.string(),
+    schoolName: z.string(),
+    status: zSchoolMembershipStatusEnum,
+    loginIdentifier: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    isPrimary: z.boolean(),
+    roleNames: z.optional(z.array(z.string())).default([]),
+    shellRole: zRoleEnum,
+    permissions: z.optional(z.array(z.string())).default([])
+});
+
+/**
  * GenderEnum
  */
 export const zGenderEnum = z.enum([
@@ -101,6 +151,9 @@ export const zAdminInfo = z.object({
         z.null()
     ])),
     createdAt: z.iso.datetime(),
+    activeSchool: zSchoolSummary,
+    activeMembership: zMembershipSummary,
+    availableMemberships: z.array(zMembershipSummary),
     admin: zAdminSchema
 });
 
@@ -207,12 +260,16 @@ export const zBloodTypeEnum = z.enum([
  * Body_login_credential
  */
 export const zBodyLoginCredential = z.object({
-    grant_type: z.optional(z.union([
-        z.string().regex(/^password$/),
-        z.null()
-    ])),
     username: z.string(),
     password: z.string(),
+    schoolSlug: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    grant_type: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
     scope: z.optional(z.string()).default(''),
     client_id: z.optional(z.union([
         z.string(),
@@ -222,6 +279,23 @@ export const zBodyLoginCredential = z.object({
         z.string(),
         z.null()
     ]))
+});
+
+/**
+ * CurrentUserInfo
+ */
+export const zCurrentUserInfo = z.object({
+    id: z.uuid(),
+    username: z.string(),
+    role: zRoleEnum,
+    imagePath: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    createdAt: z.iso.datetime(),
+    activeSchool: zSchoolSummary,
+    activeMembership: zMembershipSummary,
+    availableMemberships: z.array(zMembershipSummary)
 });
 
 /**
@@ -1059,140 +1133,12 @@ export const zStudentWithRelatedSchema = z.object({
 });
 
 /**
- * TeacherSchema
- */
-export const zTeacherSchema = z.object({
-    id: z.optional(z.union([
-        z.uuid(),
-        z.null()
-    ])),
-    firstName: z.string(),
-    fatherName: z.string(),
-    grandFatherName: z.string(),
-    dateOfBirth: z.iso.date(),
-    gender: zGenderEnum,
-    nationality: z.string(),
-    socialSecurityNumber: z.string(),
-    address: z.string(),
-    city: z.string(),
-    state: z.string(),
-    postalCode: z.string(),
-    country: z.string(),
-    highestDegree: zHighestEducationEnum,
-    university: z.string(),
-    graduationYear: z.int(),
-    gpa: z.number(),
-    positionApplyingFor: z.string(),
-    yearsOfExperience: zExperienceYearEnum,
-    preferredSchedule: zScheduleEnum,
-    secondaryPhone: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    additionalDegrees: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    teachingLicense: z.optional(z.union([
-        z.boolean(),
-        z.null()
-    ])),
-    licenseNumber: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    licenseState: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    licenseExpirationDate: z.optional(z.union([
-        z.iso.date(),
-        z.null()
-    ])),
-    certifications: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    specializations: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    previousSchools: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    specialSkills: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    professionalDevelopment: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    hasConvictions: z.optional(z.boolean()).default(false),
-    convictionDetails: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    hasDisciplinaryActions: z.optional(z.boolean()).default(false),
-    resume: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    coverLetter: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    transcripts: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    teachingCertificate: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    backgroundCheck: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    teachingPhilosophy: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    whyTeaching: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    additionalComments: z.optional(z.union([
-        z.string(),
-        z.null()
-    ])),
-    agreeToTerms: z.optional(z.boolean()).default(false),
-    agreeToBackgroundCheck: z.optional(z.boolean()).default(false),
-    userId: z.optional(z.union([
-        z.uuid(),
-        z.null()
-    ])),
-    status: z.optional(zEmployeeApplicationStatusEnum)
-});
-
-/**
  * SectionWithRelatedSchema
  * This model represents a SectionSchema with its relationships.
  */
 export const zSectionWithRelatedSchema = z.object({
-    grade: z.optional(z.union([
-        zGradeSchema,
-        z.null()
-    ])),
-    students: z.optional(z.union([
-        z.array(zStudentSchema),
-        z.null()
-    ])),
-    teachers: z.optional(z.union([
-        z.array(zTeacherSchema),
-        z.null()
-    ])),
+    grade: zGradeSchema,
+    students: z.array(zStudentSchema),
     id: z.uuid(),
     gradeId: z.uuid(),
     section: z.string()
@@ -1319,7 +1265,27 @@ export const zHealthStatus = z.object({
  */
 export const zLoginTokenResponse = z.object({
     accessToken: z.string(),
-    tokenType: z.string()
+    refreshToken: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    tokenType: z.string(),
+    activeSchool: z.optional(z.union([
+        zSchoolSummary,
+        z.null()
+    ])),
+    activeMembership: z.optional(z.union([
+        zMembershipSummary,
+        z.null()
+    ])),
+    availableMemberships: z.optional(z.array(zMembershipSummary)).default([])
+});
+
+/**
+ * MembershipSelectionRequest
+ */
+export const zMembershipSelectionRequest = z.object({
+    membership_id: z.uuid()
 });
 
 /**
@@ -1441,7 +1407,18 @@ export const zProviderResponse = z.object({
     credential: z.union([
         z.string(),
         z.null()
-    ])
+    ]),
+    school_slug: z.optional(z.union([
+        z.string(),
+        z.null()
+    ]))
+});
+
+/**
+ * RefreshTokenRequest
+ */
+export const zRefreshTokenRequest = z.object({
+    refresh_token: z.string()
 });
 
 /**
@@ -1647,6 +1624,9 @@ export const zStudentInfo = z.object({
         z.null()
     ])),
     createdAt: z.iso.datetime(),
+    activeSchool: zSchoolSummary,
+    activeMembership: zMembershipSummary,
+    availableMemberships: z.array(zMembershipSummary),
     student: zStudentSchema
 });
 
@@ -1781,6 +1761,124 @@ export const zTeacherBasicInfo = z.object({
 });
 
 /**
+ * TeacherSchema
+ */
+export const zTeacherSchema = z.object({
+    id: z.optional(z.union([
+        z.uuid(),
+        z.null()
+    ])),
+    firstName: z.string(),
+    fatherName: z.string(),
+    grandFatherName: z.string(),
+    dateOfBirth: z.iso.date(),
+    gender: zGenderEnum,
+    nationality: z.string(),
+    socialSecurityNumber: z.string(),
+    address: z.string(),
+    city: z.string(),
+    state: z.string(),
+    postalCode: z.string(),
+    country: z.string(),
+    highestDegree: zHighestEducationEnum,
+    university: z.string(),
+    graduationYear: z.int(),
+    gpa: z.number(),
+    positionApplyingFor: z.string(),
+    yearsOfExperience: zExperienceYearEnum,
+    preferredSchedule: zScheduleEnum,
+    secondaryPhone: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    additionalDegrees: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    teachingLicense: z.optional(z.union([
+        z.boolean(),
+        z.null()
+    ])),
+    licenseNumber: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    licenseState: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    licenseExpirationDate: z.optional(z.union([
+        z.iso.date(),
+        z.null()
+    ])),
+    certifications: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    specializations: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    previousSchools: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    specialSkills: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    professionalDevelopment: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    hasConvictions: z.optional(z.boolean()).default(false),
+    convictionDetails: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    hasDisciplinaryActions: z.optional(z.boolean()).default(false),
+    resume: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    coverLetter: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    transcripts: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    teachingCertificate: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    backgroundCheck: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    teachingPhilosophy: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    whyTeaching: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    additionalComments: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    agreeToTerms: z.optional(z.boolean()).default(false),
+    agreeToBackgroundCheck: z.optional(z.boolean()).default(false),
+    userId: z.optional(z.union([
+        z.uuid(),
+        z.null()
+    ])),
+    status: z.optional(zEmployeeApplicationStatusEnum)
+});
+
+/**
  * TeacherInfo
  */
 export const zTeacherInfo = z.object({
@@ -1792,6 +1890,9 @@ export const zTeacherInfo = z.object({
         z.null()
     ])),
     createdAt: z.iso.datetime(),
+    activeSchool: zSchoolSummary,
+    activeMembership: zMembershipSummary,
+    availableMemberships: z.array(zMembershipSummary),
     teacher: zTeacherSchema
 });
 
@@ -1981,6 +2082,28 @@ export const zLoginProviderData = z.object({
  * Successful Response
  */
 export const zLoginProviderResponse = zLoginTokenResponse;
+
+export const zRefreshAccessTokenData = z.object({
+    body: zRefreshTokenRequest,
+    path: z.optional(z.never()),
+    query: z.optional(z.never())
+});
+
+/**
+ * Successful Response
+ */
+export const zRefreshAccessTokenResponse = zLoginTokenResponse;
+
+export const zSelectMembershipData = z.object({
+    body: zMembershipSelectionRequest,
+    path: z.optional(z.never()),
+    query: z.optional(z.never())
+});
+
+/**
+ * Successful Response
+ */
+export const zSelectMembershipResponse = zLoginTokenResponse;
 
 export const zVerifyEmailData = z.object({
     body: z.optional(z.never()),
@@ -2555,6 +2678,19 @@ export const zGetSectionByIdData = z.object({
  */
 export const zGetSectionByIdResponse = zSectionSchema;
 
+export const zGetSectionRelatedData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        section_id: z.uuid()
+    }),
+    query: z.optional(z.never())
+});
+
+/**
+ * Successful Response
+ */
+export const zGetSectionRelatedResponse = zSectionWithRelatedSchema;
+
 export const zGetLoggedInUserData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
@@ -2564,7 +2700,7 @@ export const zGetLoggedInUserData = z.object({
 /**
  * Successful Response
  */
-export const zGetLoggedInUserResponse = zUserSchema;
+export const zGetLoggedInUserResponse = zCurrentUserInfo;
 
 export const zGetAdminBasicInfoData = z.object({
     body: z.optional(z.never()),

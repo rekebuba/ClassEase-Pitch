@@ -18,6 +18,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
+from project.models.base.school_mixin import SchoolScopedMixin
 from project.models.grade import Grade
 from project.models.teacher_record import TeacherRecord
 from project.utils.enum import (
@@ -30,12 +31,14 @@ from project.utils.enum import (
 from project.utils.utils import sort_grade_key
 
 if TYPE_CHECKING:
+    from project.models.school import School
+    from project.models.school_membership import SchoolMembership
     from project.models.subject import Subject
     from project.models.user import User
     from project.models.year import Year
 
 
-class Employee(BaseModel):
+class Employee(SchoolScopedMixin, BaseModel):
     """
     This model represents an employee in the ClassEase system.
     It inherits from BaseModel and Base.
@@ -115,7 +118,12 @@ class Employee(BaseModel):
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(),
         ForeignKey("users.id", ondelete="CASCADE"),
-        unique=True,
+        nullable=True,
+        default=None,
+    )
+    school_membership_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(),
+        ForeignKey("school_memberships.id", ondelete="SET NULL"),
         nullable=True,
         default=None,
     )
@@ -147,7 +155,21 @@ class Employee(BaseModel):
     # Relationship with Default
     user: Mapped[Optional["User"]] = relationship(
         "User",
-        back_populates="employee",
+        back_populates="employee_profiles",
+        init=False,
+        repr=False,
+        passive_deletes=True,
+    )
+    membership: Mapped[Optional["SchoolMembership"]] = relationship(
+        "SchoolMembership",
+        back_populates="employee_profiles",
+        init=False,
+        repr=False,
+        passive_deletes=True,
+    )
+    school: Mapped[Optional["School"]] = relationship(
+        "School",
+        back_populates="employees",
         init=False,
         repr=False,
         passive_deletes=True,

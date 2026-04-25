@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, Iterable, Optional
 
 import bcrypt
 import jwt
@@ -26,10 +26,13 @@ def check_password(plain_password: str, hashed_password: str) -> bool:
         return False
 
 
-def get_password_hash(password: SecretStr) -> str:
+def get_password_hash(password: SecretStr | str) -> str:
     """Hash a password using bcrypt with auto-generated salt."""
+    password_value = (
+        password.get_secret_value() if isinstance(password, SecretStr) else password
+    )
     salt = bcrypt.gensalt()
-    hashed_bytes = bcrypt.hashpw(password.get_secret_value().encode("utf-8"), salt)
+    hashed_bytes = bcrypt.hashpw(password_value.encode("utf-8"), salt)
     return hashed_bytes.decode("utf-8")
 
 
@@ -37,6 +40,13 @@ def create_access_token(
     *,
     subject: str,
     role: RoleEnum,
+    school_id: str | None = None,
+    school_slug: str | None = None,
+    membership_id: str | None = None,
+    session_id: str | None = None,
+    permissions_version: int | None = None,
+    permissions: Optional[Iterable[str]] = None,
+    mfa_state: str | None = None,
     expires_delta: timedelta | None = None,
 ) -> str:
     if expires_delta:
@@ -50,6 +60,13 @@ def create_access_token(
         "exp": expire,
         "sub": subject,
         "role": role.value,
+        "school_id": school_id,
+        "school_slug": school_slug,
+        "membership_id": membership_id,
+        "session_id": session_id,
+        "permissions_version": permissions_version,
+        "permissions": sorted(set(permissions or [])),
+        "mfa_state": mfa_state,
         "jti": str(uuid.uuid4()),  # Unique identifier for token
         "iat": datetime.now(timezone.utc),  # Issued at time
     }

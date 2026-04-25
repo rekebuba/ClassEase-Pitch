@@ -9,6 +9,7 @@ from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
+from project.models.base.school_mixin import SchoolScopedMixin
 from project.utils.enum import GradeEnum, GradeLevelEnum
 
 if TYPE_CHECKING:
@@ -21,7 +22,7 @@ if TYPE_CHECKING:
     from project.models.year import Year
 
 
-class Grade(BaseModel):
+class Grade(SchoolScopedMixin, BaseModel):
     """Grade Model"""
 
     __tablename__ = "grades"

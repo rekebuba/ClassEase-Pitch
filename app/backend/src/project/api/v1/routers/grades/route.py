@@ -88,12 +88,16 @@ async def post_grade(
         raise HTTPException(status_code=400, detail=errors)
 
     try:
+        year = await session.get(Year, new_grade.year_id)
+        if not year:
+            raise HTTPException(status_code=404, detail="Academic year not found.")
         grade = Grade(
             grade=new_grade.grade,
             level=new_grade.level,
             has_stream=new_grade.has_stream,
             year_id=new_grade.year_id,
         )
+        grade.school_id = year.school_id
         session.add(grade)
         await session.commit()
         await session.refresh(grade)

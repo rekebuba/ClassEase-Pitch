@@ -329,6 +329,7 @@ dependencies = [
     { name = "python-jose" },
     { name = "python-multipart" },
     { name = "redis" },
+    { name = "requests" },
     { name = "tenacity" },
     { name = "uvicorn" },
 ]
@@ -390,6 +391,7 @@ requires-dist = [
     { name = "python-jose", specifier = ">=3.5.0" },
     { name = "python-multipart", specifier = ">=0.0.20" },
     { name = "redis", specifier = ">=7.1.1" },
+    { name = "requests", specifier = ">=2.32.4" },
     { name = "sqlalchemy", extras = ["mypy"], marker = "extra == 'dev'", specifier = ">=2.0.40" },
     { name = "tenacity", specifier = ">=9.1.2" },
     { name = "ty", marker = "extra == 'dev'", specifier = ">=0.0.15" },
