@@ -9,6 +9,14 @@ from starlette.middleware.cors import CORSMiddleware
 
 from project.api.v1 import api_router
 from project.core.config import settings
+from project.core.tenant import (
+    TenantContextTokens,
+    reset_tenant_context,
+    resolve_school_slug_from_request,
+    set_current_membership_id,
+    set_current_school_id,
+    set_request_school_slug,
+)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -34,6 +42,20 @@ if settings.all_cors_origins:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+
+@app.middleware("http")
+async def tenant_context_middleware(request: Request, call_next):
+    tokens = TenantContextTokens(
+        school_id=set_current_school_id(None),
+        membership_id=set_current_membership_id(None),
+        school_slug=set_request_school_slug(resolve_school_slug_from_request(request)),
+    )
+    try:
+        response = await call_next(request)
+    finally:
+        reset_tenant_context(tokens)
+    return response
 
 
 def use_route_names_as_operation_ids(app: FastAPI) -> None:

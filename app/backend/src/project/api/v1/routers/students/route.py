@@ -2,18 +2,17 @@ import uuid
 from typing import Annotated, List, Sequence
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlalchemy import select, update
+from sqlalchemy import select
 
 from project.api.v1.routers.dependencies import SessionDep, admin_route
 from project.api.v1.routers.schema import FilterParams
 from project.api.v1.routers.students.schema import StudentBasicInfo, UpdateStudentStatus
-from project.core.security import get_password_hash
+from project.core.access_control import provision_user_membership
 from project.models.grade import Grade
 from project.models.student import Student
-from project.models.user import User
 from project.models.year import Year
 from project.schema.schema import SuccessResponseSchema
-from project.utils.enum import RoleEnum, StudentApplicationStatusEnum
+from project.utils.enum import MfaStateEnum, RoleEnum, StudentApplicationStatusEnum
 from project.utils.utils import generate_id
 
 router = APIRouter(prefix="/students", tags=["Students"])
@@ -89,20 +88,6 @@ async def update_student_status(
     user_in: admin_route,
 ) -> SuccessResponseSchema:
     """This endpoint will patch students based on the provided IDs."""
-    year = (
-        await session.execute(
-            select(Year)
-            .join(Grade, Grade.year_id == Year.id)
-            .join(Student, Student.registered_for_grade_id == Grade.id)
-        )
-    ).scalar_one_or_none()
-
-    if not year:
-        raise HTTPException(
-            status_code=404,
-            detail="No academic year found for the students.",
-        )
-
     for student_id in students.student_ids:
         student = await session.get(Student, student_id)
         if not student:
@@ -111,28 +96,46 @@ async def update_student_status(
                 detail=f"Student with ID {student_id} not found.",
             )
 
-        stmt = (
-            update(Student)
-            .where(Student.id == student_id)
-            .values(status=students.status)
-        )
+        student.status = students.status
 
         if (
             students.status == StudentApplicationStatusEnum.ACTIVE
             and student.user_id is None
         ):
-            username = generate_id(session=session, role=RoleEnum.STUDENT, year=year)
-            new_user = User(
+            year = (
+                await session.execute(
+                    select(Year)
+                    .join(Grade, Grade.year_id == Year.id)
+                    .where(Grade.id == student.registered_for_grade_id)
+                )
+            ).scalar_one_or_none()
+            if year is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail="No academic year found for the student.",
+                )
+            username = await generate_id(
+                session=session,
                 role=RoleEnum.STUDENT,
-                username=generate_id(session=session, role=RoleEnum.STUDENT, year=year),
-                password=get_password_hash(username),
+                year=year,
             )
-            session.add(new_user)
-            await session.commit()
+            new_user, membership = await provision_user_membership(
+                session,
+                school=user_in.membership.school,
+                shell_role=RoleEnum.STUDENT,
+                membership_role_name="student",
+                login_identifier=username,
+                password=username,
+                email=None,
+                phone=None,
+                is_active=True,
+                is_verified=False,
+                mfa_state=MfaStateEnum.NOT_ENROLLED,
+            )
+            student.user_id = new_user.id
+            student.school_membership_id = membership.id
+            student.school_id = membership.school_id
 
-            stmt.values(user_id=new_user.id)
-
-    await session.execute(stmt)
     await session.commit()
 
     return SuccessResponseSchema(

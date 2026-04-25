@@ -45,4 +45,4 @@ ENV PORT=8080
 ENV PYTHONPATH=/app/src
 
 # -k uvicorn.workers.UvicornWorker: Tells Gunicorn to use Uvicorn
-CMD ["sh", "-c", "exec gunicorn --bind :$PORT --workers 1 --worker-class uvicorn.workers.UvicornWorker project.main:app"]
+CMD ["sh", "-c", "exec gunicorn --bind :$PORT --workers 1 --worker-class uvicorn.workers.UvicornWorker project.main:app --reload"]

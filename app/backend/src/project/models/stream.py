@@ -9,6 +9,7 @@ from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
+from project.models.base.school_mixin import SchoolScopedMixin
 
 if TYPE_CHECKING:
     from project.models.grade import Grade
@@ -18,7 +19,7 @@ if TYPE_CHECKING:
     from project.models.subject import Subject
 
 
-class Stream(BaseModel):
+class Stream(SchoolScopedMixin, BaseModel):
     __tablename__ = "streams"
 
     grade_id: Mapped[uuid.UUID] = mapped_column(

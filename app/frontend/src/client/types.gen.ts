@@ -68,6 +68,12 @@ export type AdminInfo = {
      * Createdat
      */
     createdAt: string;
+    activeSchool: SchoolSummary;
+    activeMembership: MembershipSummary;
+    /**
+     * Availablememberships
+     */
+    availableMemberships: Array<MembershipSummary>;
     admin: AdminSchema;
 };
 
@@ -244,10 +250,6 @@ export type BloodTypeEnum = 'A+' | 'A-' | 'B+' | 'B-' | 'AB+' | 'AB-' | 'O+' | '
  */
 export type BodyLoginCredential = {
     /**
-     * Grant Type
-     */
-    grant_type?: string | null;
-    /**
      * Username
      */
     username: string;
@@ -255,6 +257,14 @@ export type BodyLoginCredential = {
      * Password
      */
     password: string;
+    /**
+     * Schoolslug
+     */
+    schoolSlug?: string | null;
+    /**
+     * Grant Type
+     */
+    grant_type?: string | null;
     /**
      * Scope
      */
@@ -267,6 +277,35 @@ export type BodyLoginCredential = {
      * Client Secret
      */
     client_secret?: string | null;
+};
+
+/**
+ * CurrentUserInfo
+ */
+export type CurrentUserInfo = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Username
+     */
+    username: string;
+    role: RoleEnum;
+    /**
+     * Imagepath
+     */
+    imagePath?: string | null;
+    /**
+     * Createdat
+     */
+    createdAt: string;
+    activeSchool: SchoolSummary;
+    activeMembership: MembershipSummary;
+    /**
+     * Availablememberships
+     */
+    availableMemberships: Array<MembershipSummary>;
 };
 
 /**
@@ -935,9 +974,19 @@ export type LoginTokenResponse = {
      */
     accessToken: string;
     /**
+     * Refreshtoken
+     */
+    refreshToken?: string | null;
+    /**
      * Tokentype
      */
     tokenType: string;
+    activeSchool?: SchoolSummary | null;
+    activeMembership?: MembershipSummary | null;
+    /**
+     * Availablememberships
+     */
+    availableMemberships?: Array<MembershipSummary>;
 };
 
 /**
@@ -976,6 +1025,56 @@ export type MarkListSchema = {
  * MarkListTypeEnum
  */
 export type MarkListTypeEnum = 'Test' | 'Quiz' | 'Assignment' | 'Midterm' | 'Final';
+
+/**
+ * MembershipSelectionRequest
+ */
+export type MembershipSelectionRequest = {
+    /**
+     * Membership Id
+     */
+    membership_id: string;
+};
+
+/**
+ * MembershipSummary
+ */
+export type MembershipSummary = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Schoolid
+     */
+    schoolId: string;
+    /**
+     * Schoolslug
+     */
+    schoolSlug: string;
+    /**
+     * Schoolname
+     */
+    schoolName: string;
+    status: SchoolMembershipStatusEnum;
+    /**
+     * Loginidentifier
+     */
+    loginIdentifier?: string | null;
+    /**
+     * Isprimary
+     */
+    isPrimary: boolean;
+    /**
+     * Rolenames
+     */
+    roleNames?: Array<string>;
+    shellRole: RoleEnum;
+    /**
+     * Permissions
+     */
+    permissions?: Array<string>;
+};
 
 /**
  * MessageResponse
@@ -1177,6 +1276,20 @@ export type ProviderResponse = {
      * Credential
      */
     credential: string | null;
+    /**
+     * School Slug
+     */
+    school_slug?: string | null;
+};
+
+/**
+ * RefreshTokenRequest
+ */
+export type RefreshTokenRequest = {
+    /**
+     * Refresh Token
+     */
+    refresh_token: string;
 };
 
 /**
@@ -1215,6 +1328,35 @@ export type RoleEnum = 'admin' | 'teacher' | 'student' | 'parent' | 'other';
 export type ScheduleEnum = 'full-time' | 'part-time' | 'flexible-hours' | 'substitute';
 
 /**
+ * SchoolMembershipStatusEnum
+ */
+export type SchoolMembershipStatusEnum = 'active' | 'inactive' | 'pending' | 'transferred' | 'withdrawn' | 'suspended';
+
+/**
+ * SchoolStatusEnum
+ */
+export type SchoolStatusEnum = 'active' | 'inactive' | 'suspended';
+
+/**
+ * SchoolSummary
+ */
+export type SchoolSummary = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Slug
+     */
+    slug: string;
+    status: SchoolStatusEnum;
+};
+
+/**
  * SectionIDs
  */
 export type SectionIds = {
@@ -1248,15 +1390,11 @@ export type SectionSchema = {
  * This model represents a SectionSchema with its relationships.
  */
 export type SectionWithRelatedSchema = {
-    grade?: GradeSchema | null;
+    grade: GradeSchema;
     /**
      * Students
      */
-    students?: Array<StudentSchema> | null;
-    /**
-     * Teachers
-     */
-    teachers?: Array<TeacherSchema> | null;
+    students: Array<StudentSchema>;
     /**
      * Id
      */
@@ -1611,6 +1749,12 @@ export type StudentInfo = {
      * Createdat
      */
     createdAt: string;
+    activeSchool: SchoolSummary;
+    activeMembership: MembershipSummary;
+    /**
+     * Availablememberships
+     */
+    availableMemberships: Array<MembershipSummary>;
     student: StudentSchema;
 };
 
@@ -2267,6 +2411,12 @@ export type TeacherInfo = {
      * Createdat
      */
     createdAt: string;
+    activeSchool: SchoolSummary;
+    activeMembership: MembershipSummary;
+    /**
+     * Availablememberships
+     */
+    availableMemberships: Array<MembershipSummary>;
     teacher: TeacherSchema;
 };
 
@@ -3077,6 +3227,64 @@ export type LoginProviderResponses = {
 };
 
 export type LoginProviderResponse = LoginProviderResponses[keyof LoginProviderResponses];
+
+export type RefreshAccessTokenData = {
+    body: RefreshTokenRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/refresh';
+};
+
+export type RefreshAccessTokenErrors = {
+    /**
+     * Invalid refresh token
+     */
+    401: HttpError;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type RefreshAccessTokenError = RefreshAccessTokenErrors[keyof RefreshAccessTokenErrors];
+
+export type RefreshAccessTokenResponses = {
+    /**
+     * Successful Response
+     */
+    200: LoginTokenResponse;
+};
+
+export type RefreshAccessTokenResponse = RefreshAccessTokenResponses[keyof RefreshAccessTokenResponses];
+
+export type SelectMembershipData = {
+    body: MembershipSelectionRequest;
+    path?: never;
+    query?: never;
+    url: '/api/v1/auth/select-membership';
+};
+
+export type SelectMembershipErrors = {
+    /**
+     * Membership not found
+     */
+    404: HttpError;
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type SelectMembershipError = SelectMembershipErrors[keyof SelectMembershipErrors];
+
+export type SelectMembershipResponses = {
+    /**
+     * Successful Response
+     */
+    200: LoginTokenResponse;
+};
+
+export type SelectMembershipResponse = SelectMembershipResponses[keyof SelectMembershipResponses];
 
 export type VerifyEmailData = {
     body?: never;
@@ -4351,6 +4559,36 @@ export type GetSectionByIdResponses = {
 
 export type GetSectionByIdResponse = GetSectionByIdResponses[keyof GetSectionByIdResponses];
 
+export type GetSectionRelatedData = {
+    body?: never;
+    path: {
+        /**
+         * Section Id
+         */
+        section_id: string;
+    };
+    query?: never;
+    url: '/api/v1/sections/{section_id}/relation';
+};
+
+export type GetSectionRelatedErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetSectionRelatedError = GetSectionRelatedErrors[keyof GetSectionRelatedErrors];
+
+export type GetSectionRelatedResponses = {
+    /**
+     * Successful Response
+     */
+    200: SectionWithRelatedSchema;
+};
+
+export type GetSectionRelatedResponse = GetSectionRelatedResponses[keyof GetSectionRelatedResponses];
+
 export type GetLoggedInUserData = {
     body?: never;
     path?: never;
@@ -4362,7 +4600,7 @@ export type GetLoggedInUserResponses = {
     /**
      * Successful Response
      */
-    200: UserSchema;
+    200: CurrentUserInfo;
 };
 
 export type GetLoggedInUserResponse = GetLoggedInUserResponses[keyof GetLoggedInUserResponses];

@@ -150,6 +150,8 @@ async def _update_grade_streams(
         for stream in new_streams
         if stream.name and stream.name not in existing_streams_by_name
     ]
+    for stream, _ in streams_to_add:
+        stream.school_id = grade.school_id
 
     streams_to_remove = [
         stream for stream in existing_streams if stream.name not in new_streams_by_name
@@ -220,6 +222,8 @@ async def _update_grade_sections(
         for section in new_sections
         if section.section and section.section not in existing_sections_by_name
     ]
+    for section in sections_to_add:
+        section.school_id = grade.school_id
 
     sections_to_remove = [
         section

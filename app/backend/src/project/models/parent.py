@@ -1,20 +1,24 @@
 #!/usr/bin/python3
 """Module for Parent class"""
 
+import uuid
 from typing import TYPE_CHECKING, List, Optional
 
-from sqlalchemy import Enum, ForeignKey, String
+from sqlalchemy import UUID, Enum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
+from project.models.base.school_mixin import SchoolScopedMixin
 from project.utils.enum import GenderEnum
 
 if TYPE_CHECKING:
+    from project.models.school import School
+    from project.models.school_membership import SchoolMembership
     from project.models.student import Student
     from project.models.user import User
 
 
-class Parent(BaseModel):
+class Parent(SchoolScopedMixin, BaseModel):
     """
     Represents a parent entity in the database.
     """
@@ -43,17 +47,37 @@ class Parent(BaseModel):
         nullable=True,
         default=None,
     )
-    user_id: Mapped[Optional[str]] = mapped_column(
+    user_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(),
         ForeignKey("users.id"),
         nullable=True,
         default=None,
     )
+    school_membership_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(),
+        ForeignKey("school_memberships.id", ondelete="SET NULL"),
+        nullable=True,
+        default=None,
+    )
 
-    # One-To-One Relationship
+    # Relationships
     user: Mapped[Optional["User"]] = relationship(
         "User",
-        back_populates="parent",
-        uselist=False,
+        back_populates="parent_profiles",
+        init=False,
+        repr=False,
+        passive_deletes=True,
+    )
+    membership: Mapped[Optional["SchoolMembership"]] = relationship(
+        "SchoolMembership",
+        back_populates="parent_profiles",
+        init=False,
+        repr=False,
+        passive_deletes=True,
+    )
+    school: Mapped[Optional["School"]] = relationship(
+        "School",
+        back_populates="parents",
         init=False,
         repr=False,
         passive_deletes=True,

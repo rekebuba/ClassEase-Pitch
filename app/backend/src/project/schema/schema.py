@@ -1,7 +1,7 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from project.utils.enum import RoleEnum
 from project.utils.utils import to_camel
@@ -44,5 +44,12 @@ class TokenPayload(BaseModel):
     exp: datetime
     sub: str
     role: RoleEnum
+    school_id: uuid.UUID | None = None
+    school_slug: str | None = None
+    membership_id: uuid.UUID | None = None
+    session_id: uuid.UUID | None = None
+    permissions_version: int | None = None
+    permissions: list[str] = Field(default_factory=list)
+    mfa_state: str | None = None
     jti: uuid.UUID
     iat: datetime

@@ -19,6 +19,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
+from project.models.base.school_mixin import SchoolScopedMixin
 from project.utils.enum import (
     EventEligibilityEnum,
     EventLocationEnum,
@@ -30,7 +31,7 @@ if TYPE_CHECKING:
     from project.models.year import Year
 
 
-class Event(BaseModel):
+class Event(SchoolScopedMixin, BaseModel):
     """docstring for Event."""
 
     __tablename__ = "events"

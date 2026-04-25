@@ -9,6 +9,7 @@ from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
+from project.models.base.school_mixin import SchoolScopedMixin
 
 if TYPE_CHECKING:
     from project.models.grade import Grade
@@ -18,7 +19,7 @@ if TYPE_CHECKING:
     from project.models.teacher_record import TeacherRecord
 
 
-class Section(BaseModel):
+class Section(SchoolScopedMixin, BaseModel):
     """
     Represents a section within a grade.
     """

@@ -18,6 +18,7 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
+from project.models.base.school_mixin import SchoolScopedMixin
 from project.utils.enum import BloodTypeEnum, GenderEnum, StudentApplicationStatusEnum
 
 if TYPE_CHECKING:
@@ -26,6 +27,8 @@ if TYPE_CHECKING:
     from project.models.grade import Grade
     from project.models.mark_list import MarkList
     from project.models.parent import Parent
+    from project.models.school import School
+    from project.models.school_membership import SchoolMembership
     from project.models.section import Section
     from project.models.stream import Stream
     from project.models.student_term_record import StudentTermRecord
@@ -35,7 +38,7 @@ if TYPE_CHECKING:
     from project.models.year import Year
 
 
-class Student(BaseModel):
+class Student(SchoolScopedMixin, BaseModel):
     """
     Represents a student entity in the database.
     """
@@ -123,7 +126,12 @@ class Student(BaseModel):
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(),
         ForeignKey("users.id", ondelete="CASCADE"),
-        unique=True,
+        nullable=True,
+        default=None,
+    )
+    school_membership_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(),
+        ForeignKey("school_memberships.id", ondelete="SET NULL"),
         nullable=True,
         default=None,
     )
@@ -150,7 +158,21 @@ class Student(BaseModel):
     # Relationships
     user: Mapped["User"] = relationship(
         "User",
-        back_populates="student",
+        back_populates="student_profiles",
+        init=False,
+        repr=False,
+        passive_deletes=True,
+    )
+    membership: Mapped[Optional["SchoolMembership"]] = relationship(
+        "SchoolMembership",
+        back_populates="student_profiles",
+        init=False,
+        repr=False,
+        passive_deletes=True,
+    )
+    school: Mapped[Optional["School"]] = relationship(
+        "School",
+        back_populates="students",
         init=False,
         repr=False,
         passive_deletes=True,

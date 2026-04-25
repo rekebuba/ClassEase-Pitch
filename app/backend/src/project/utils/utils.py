@@ -25,7 +25,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from project.core import security
 from project.core.config import settings
 from project.models.grade import Grade
-from project.models.user import User
+from project.models.school_membership import SchoolMembership
 from project.models.year import Year
 from project.utils.enum import RoleEnum
 
@@ -248,16 +248,20 @@ async def generate_id(
     while attempts < max_attempts:
         random_ids = {random.randint(min_val, max_val) for _ in range(sample_size)}
 
+        if year.school_id is None:
+            raise ValueError("Academic year is not linked to a school.")
+
         existing_ids = (
             (
                 await session.execute(
-                    select(User.username).where(
-                        User.username.in_(
+                    select(SchoolMembership.login_identifier).where(
+                        SchoolMembership.school_id == year.school_id,
+                        SchoolMembership.login_identifier.in_(
                             [
                                 f"{section}/{rid}/{academic_year % 100}"
                                 for rid in random_ids
                             ]
-                        )
+                        ),
                     )
                 )
             )
