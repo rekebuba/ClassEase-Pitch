@@ -106,6 +106,13 @@ DEFAULT_ROLE_PERMISSIONS: dict[str, set[str]] = {
     },
 }
 
+PRIVILEGED_MEMBERSHIP_ROLES: set[str] = {
+    "school_owner",
+    "school_admin",
+    "registrar",
+    "teacher",
+}
+
 ROLE_PRIORITY: tuple[str, ...] = (
     "school_owner",
     "school_admin",

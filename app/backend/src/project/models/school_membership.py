@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import (
@@ -49,6 +49,7 @@ class SchoolMembership(BaseModel):
     joined_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,
+        default_factory=lambda: datetime.now(timezone.utc),
     )
     status: Mapped[SchoolMembershipStatusEnum] = mapped_column(
         Enum(

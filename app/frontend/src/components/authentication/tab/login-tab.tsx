@@ -41,6 +41,7 @@ export default function LoginTab(
     defaultValues: {
       username: "",
       password: "",
+      schoolSlug: "",
     },
   });
 
@@ -67,7 +68,14 @@ export default function LoginTab(
       }
 
       dispatch(
-        loginSuccess({ token: response.accessToken, userInfo: decodedToken }),
+        loginSuccess({
+          token: response.accessToken,
+          refreshToken: response.refreshToken,
+          userInfo: decodedToken,
+          activeSchool: response.activeSchool ?? null,
+          activeMembership: response.activeMembership ?? null,
+          availableMemberships: response.availableMemberships ?? [],
+        }),
       );
 
       const userRole = decodedToken.role;
@@ -116,6 +124,14 @@ export default function LoginTab(
                   nameInSchema="username"
                   placeholder="Enter your username or ID"
                   required
+                />
+              </Field>
+              <Field>
+                <InputWithLabel<BodyLoginCredential>
+                  id="schoolSlug"
+                  fieldTitle="School Slug (Optional)"
+                  nameInSchema="schoolSlug"
+                  placeholder="Enter school slug if you belong to multiple schools"
                 />
               </Field>
               <Field>
