@@ -7,6 +7,13 @@ export const jwtPayloadSchema = z.object({
   sub: z.string(),
   exp: z.number(),
   role: zRoleEnum,
+  school_id: z.string().uuid(),
+  school_slug: z.string(),
+  membership_id: z.string().uuid(),
+  session_id: z.string().uuid(),
+  permissions_version: z.number().int(),
+  permissions: z.array(z.string()),
+  mfa_state: z.string(),
   jti: z.string(),
   iat: z.number(),
 });

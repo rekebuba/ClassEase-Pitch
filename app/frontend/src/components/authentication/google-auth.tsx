@@ -30,7 +30,14 @@ function GoogleAuth() {
       }
 
       dispatch(
-        loginSuccess({ token: response.accessToken, userInfo: decodedToken }),
+        loginSuccess({
+          token: response.accessToken,
+          refreshToken: response.refreshToken,
+          userInfo: decodedToken,
+          activeSchool: response.activeSchool ?? null,
+          activeMembership: response.activeMembership ?? null,
+          availableMemberships: response.availableMemberships ?? [],
+        }),
       );
 
       const userRole = decodedToken.role;

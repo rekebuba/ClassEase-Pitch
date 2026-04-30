@@ -17,6 +17,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { queryClient } from "@/lib/query-client";
+import { persister } from "@/store/main-store";
 import { logout } from "@/store/slice/auth-slice";
 
 import type { LogoutError } from "@/client/types.gen";
@@ -39,6 +41,8 @@ function Logout() {
     onSuccess: (response) => {
       // removes token from redux
       dispatch(logout());
+      queryClient.clear();
+      persister.purge();
 
       // redirect after success
       navigate({ to: "/authentication" });

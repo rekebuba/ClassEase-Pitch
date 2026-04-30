@@ -18,6 +18,7 @@ from sqlalchemy.orm import Session, with_loader_criteria
 
 from project.core import security
 from project.core.access_control import (
+    PRIVILEGED_MEMBERSHIP_ROLES,
     get_membership_with_roles,
     resolve_membership_permissions,
     resolve_membership_role_names,
@@ -37,7 +38,7 @@ from project.models.blacklist_token import BlacklistToken
 from project.models.school_membership import SchoolMembership
 from project.models.user import User
 from project.schema.schema import TokenPayload
-from project.utils.enum import RoleEnum, SchoolMembershipStatusEnum
+from project.utils.enum import MfaStateEnum, RoleEnum, SchoolMembershipStatusEnum
 from project.utils.utils import classify_model_fields, extract_inner_model
 
 # OAuth2 scheme
@@ -167,10 +168,20 @@ async def get_current_actor(
     set_current_membership_id(membership.id)
 
     permissions = resolve_membership_permissions(membership)
+    membership_role_names = resolve_membership_role_names(membership)
     shell_role = resolve_shell_role_from_names(
-        resolve_membership_role_names(membership),
+        membership_role_names,
         fallback=membership.user.role,
     )
+
+    if (
+        membership_role_names & PRIVILEGED_MEMBERSHIP_ROLES
+        and membership.mfa_state != MfaStateEnum.VERIFIED
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="MFA_REQUIRED",
+        )
 
     return AuthenticatedActor(
         user=membership.user,
