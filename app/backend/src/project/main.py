@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 """Main module for the API"""
 
+import logging
+
 from fastapi import FastAPI, Request
 from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import JSONResponse
@@ -17,6 +19,9 @@ from project.core.tenant import (
     set_current_school_id,
     set_request_school_slug,
 )
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -77,6 +82,14 @@ use_route_names_as_operation_ids(app)
 async def validation_exception_handler(
     request: Request, exc: ResponseValidationError
 ) -> JSONResponse:
+    logger.exception(
+        "Response validation failed | path=%s | method=%s | errors=%s | body=%s",
+        request.url.path,
+        request.method,
+        exc.errors(),
+        getattr(exc, "body", None),
+    )
+
     return JSONResponse(
         status_code=500,
         content={

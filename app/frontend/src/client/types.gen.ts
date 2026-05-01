@@ -63,7 +63,7 @@ export type AdminInfo = {
     /**
      * Imagepath
      */
-    imagePath?: string | null;
+    imagePath: string | null;
     /**
      * Createdat
      */
@@ -295,7 +295,7 @@ export type CurrentUserInfo = {
     /**
      * Imagepath
      */
-    imagePath?: string | null;
+    imagePath: string | null;
     /**
      * Createdat
      */
@@ -1744,7 +1744,7 @@ export type StudentInfo = {
     /**
      * Imagepath
      */
-    imagePath?: string | null;
+    imagePath: string | null;
     /**
      * Createdat
      */
@@ -1929,10 +1929,6 @@ export type StudentSchema = {
      */
     previousSchool: string | null;
     /**
-     * Previousgrades
-     */
-    previousGrades: string | null;
-    /**
      * Transportation
      */
     transportation: string | null;
@@ -2101,10 +2097,6 @@ export type StudentWithRelatedSchema = {
      * Previousschool
      */
     previousSchool: string | null;
-    /**
-     * Previousgrades
-     */
-    previousGrades: string | null;
     /**
      * Transportation
      */
@@ -2406,7 +2398,7 @@ export type TeacherInfo = {
     /**
      * Imagepath
      */
-    imagePath?: string | null;
+    imagePath: string | null;
     /**
      * Createdat
      */

@@ -334,7 +334,7 @@ async def provision_user_membership(
     await session.flush()
 
     if password is not None:
-        session.add(
+        user.auth_identities.append(
             AuthIdentity(
                 user_id=user.id,
                 provider=AuthProviderEnum.PASSWORD,

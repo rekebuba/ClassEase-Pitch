@@ -1,53 +1,35 @@
 import { GoogleLogin } from "@react-oauth/google";
 import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 
 import { loginProviderMutation } from "@/client/@tanstack/react-query.gen";
-import { loginFailure, loginSuccess } from "@/store/slice/auth-slice";
-import { decodeToken } from "@/utils/utils";
+import { loginFailure } from "@/store/slice/auth-slice";
 
-import type { LoginError } from "@/client/types.gen";
+import type {
+  LoginProviderError,
+  LoginResponse,
+} from "@/client/types.gen";
 import type { CredentialResponse } from "@react-oauth/google";
 import type { AxiosError } from "axios";
 
-function GoogleAuth() {
+type GoogleAuthProps = {
+  schoolSlug?: string;
+  onAuthResponse: (response: LoginResponse) => void;
+};
+
+function GoogleAuth({ schoolSlug, onAuthResponse }: GoogleAuthProps) {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const mutation = useMutation({
     ...loginProviderMutation(),
     onSuccess: (response) => {
-      const decodedToken = decodeToken(response.accessToken);
-
-      if (decodedToken === null) {
-        dispatch(loginFailure("Invalid token received"));
-        toast.error("Invalid token received", {
-          style: { color: "red" },
-        });
-        return;
-      }
-
-      dispatch(
-        loginSuccess({
-          token: response.accessToken,
-          refreshToken: response.refreshToken,
-          userInfo: decodedToken,
-          activeSchool: response.activeSchool ?? null,
-          activeMembership: response.activeMembership ?? null,
-          availableMemberships: response.availableMemberships ?? [],
-        }),
-      );
-
-      const userRole = decodedToken.role;
-
-      navigate({ to: `/${userRole}` });
+      onAuthResponse(response);
     },
-    onError: (error: AxiosError<LoginError>) => {
+    onError: (error: AxiosError<LoginProviderError>) => {
       const detail = error.response?.data?.detail;
       if (detail && typeof detail === "string") {
-        toast.error(detail || "Something went wrong. Failed to Login.", {
+        toast.error(detail || "Something went wrong. Failed to login.", {
           style: { color: "red" },
         });
         dispatch(loginFailure(detail));
@@ -68,7 +50,10 @@ function GoogleAuth() {
     }
 
     mutation.mutate({
-      body: { credential: credentialResponse.credential },
+      body: {
+        credential: credentialResponse.credential,
+        school_slug: schoolSlug || undefined,
+      },
       path: { provider: "google" },
     });
   };

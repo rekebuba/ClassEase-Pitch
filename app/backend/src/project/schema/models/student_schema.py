@@ -50,7 +50,6 @@ class StudentSchema(BaseModel):
     blood_type: BloodTypeEnum = BloodTypeEnum.UNKNOWN
     student_photo: Optional[str]
     previous_school: Optional[str]
-    previous_grades: Optional[str]
     transportation: Optional[str]
     disability_details: Optional[str]
     medical_details: Optional[str]
@@ -58,15 +57,6 @@ class StudentSchema(BaseModel):
     has_disability: bool
     is_transfer: bool
     status: StudentApplicationStatusEnum = StudentApplicationStatusEnum.PENDING
-
-    @classmethod
-    def default_fields(cls) -> set[str]:
-        """
-        Returns a list of default fields to be used
-        when no specific fields are requested.
-        This can be overridden in subclasses if needed.
-        """
-        return {"id", "first_name", "father_name", "date_of_birth"}
 
 
 class StudentRelatedSchema(BaseModel):

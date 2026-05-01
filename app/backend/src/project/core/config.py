@@ -190,6 +190,8 @@ def get_settings() -> Union[DevSettings, TestSettings, ProdSettings]:
     # 1. Peek at the environment or a base .env to see what mode we are in
     env_mode = os.getenv("ENVIRONMENT", "development")
 
+    print(f"Loading settings for environment: {env_mode}")
+
     # 2. Map modes to classes
     config_mapping = {
         "production": ProdSettings,

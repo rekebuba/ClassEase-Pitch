@@ -146,10 +146,10 @@ export const zAdminInfo = z.object({
     id: z.uuid(),
     username: z.string(),
     role: zRoleEnum,
-    imagePath: z.optional(z.union([
+    imagePath: z.union([
         z.string(),
         z.null()
-    ])),
+    ]),
     createdAt: z.iso.datetime(),
     activeSchool: zSchoolSummary,
     activeMembership: zMembershipSummary,
@@ -288,10 +288,10 @@ export const zCurrentUserInfo = z.object({
     id: z.uuid(),
     username: z.string(),
     role: zRoleEnum,
-    imagePath: z.optional(z.union([
+    imagePath: z.union([
         z.string(),
         z.null()
-    ])),
+    ]),
     createdAt: z.iso.datetime(),
     activeSchool: zSchoolSummary,
     activeMembership: zMembershipSummary,
@@ -670,10 +670,6 @@ export const zStudentSchema = z.object({
         z.null()
     ]),
     previousSchool: z.union([
-        z.string(),
-        z.null()
-    ]),
-    previousGrades: z.union([
         z.string(),
         z.null()
     ]),
@@ -1107,10 +1103,6 @@ export const zStudentWithRelatedSchema = z.object({
         z.null()
     ]),
     previousSchool: z.union([
-        z.string(),
-        z.null()
-    ]),
-    previousGrades: z.union([
         z.string(),
         z.null()
     ]),
@@ -1619,10 +1611,10 @@ export const zStudentInfo = z.object({
     id: z.uuid(),
     username: z.string(),
     role: zRoleEnum,
-    imagePath: z.optional(z.union([
+    imagePath: z.union([
         z.string(),
         z.null()
-    ])),
+    ]),
     createdAt: z.iso.datetime(),
     activeSchool: zSchoolSummary,
     activeMembership: zMembershipSummary,
@@ -1885,10 +1877,10 @@ export const zTeacherInfo = z.object({
     id: z.uuid(),
     username: z.string(),
     role: zRoleEnum,
-    imagePath: z.optional(z.union([
+    imagePath: z.union([
         z.string(),
         z.null()
-    ])),
+    ]),
     createdAt: z.iso.datetime(),
     activeSchool: zSchoolSummary,
     activeMembership: zMembershipSummary,

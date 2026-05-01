@@ -4,19 +4,19 @@ import { zRoleEnum } from "@/client/zod.gen";
 import { dataTableConfig } from "@/config/data-table";
 
 export const jwtPayloadSchema = z.object({
-  sub: z.string(),
-  exp: z.number(),
-  role: zRoleEnum,
-  school_id: z.string().uuid(),
-  school_slug: z.string(),
-  membership_id: z.string().uuid(),
-  session_id: z.string().uuid(),
-  permissions_version: z.number().int(),
-  permissions: z.array(z.string()),
-  mfa_state: z.string(),
-  jti: z.string(),
-  iat: z.number(),
-});
+  sub: z.string().catch(""),
+  exp: z.number().catch(0),
+  role: zRoleEnum.catch("other"),
+  school_id: z.string().uuid().optional(),
+  school_slug: z.string().optional(),
+  membership_id: z.string().uuid().optional(),
+  session_id: z.string().uuid().optional(),
+  permissions_version: z.number().int().optional(),
+  permissions: z.array(z.string()).catch([]),
+  mfa_state: z.string().optional(),
+  jti: z.string().optional(),
+  iat: z.number().optional(),
+}).passthrough();
 export type JwtPayloadType = z.infer<typeof jwtPayloadSchema>;
 
 export const DOBSchema = z

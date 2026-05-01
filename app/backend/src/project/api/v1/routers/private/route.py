@@ -1,4 +1,6 @@
 from fastapi import APIRouter
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from project.api.v1.routers.auth.schema import MembershipSummary, SchoolSummary
 from project.api.v1.routers.dependencies import (
@@ -20,6 +22,7 @@ from project.core.access_control import (
     resolve_membership_role_names,
     resolve_shell_role_from_names,
 )
+from project.models import User
 
 router = APIRouter(prefix="/me", tags=["Me"])
 
@@ -87,7 +90,15 @@ async def get_admin_basic_info(session: SessionDep, user_in: admin_route) -> dic
     Returns the current logged in user information.
     """
     payload = await get_logged_in_user(session, user_in)
-    payload["admin"] = user_in.user.admin
+    user = (
+        await session.execute(
+            select(User)
+            .where(User.id == user_in.user.id)
+            .options(selectinload(User.admin_profiles))
+        )
+    ).scalar_one()
+
+    payload["admin"] = user.admin
     return payload
 
 
@@ -100,7 +111,14 @@ async def get_teacher_basic_info(session: SessionDep, user_in: teacher_route) ->
     Returns the current logged in user information.
     """
     payload = await get_logged_in_user(session, user_in)
-    payload["teacher"] = user_in.user.teacher
+    user = (
+        await session.execute(
+            select(User)
+            .where(User.id == user_in.user.id)
+            .options(selectinload(User.employee_profiles))
+        )
+    ).scalar_one()
+    payload["teacher"] = user.teacher
     return payload
 
 
@@ -113,5 +131,12 @@ async def get_student_basic_info(session: SessionDep, user_in: student_route) ->
     Returns the current logged in user information.
     """
     payload = await get_logged_in_user(session, user_in)
-    payload["student"] = user_in.user.student
+    user = (
+        await session.execute(
+            select(User)
+            .where(User.id == user_in.user.id)
+            .options(selectinload(User.student_profiles))
+        )
+    ).scalar_one()
+    payload["student"] = user.student
     return payload

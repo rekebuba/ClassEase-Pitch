@@ -6,6 +6,7 @@ Create Date: 2026-04-30 20:45:00.000000
 
 """
 
+import uuid
 from typing import Sequence, Union
 
 from alembic import op
@@ -60,6 +61,11 @@ TRANSFER_EXPR = (
 )
 
 
+LEGACY_NAME = "Legacy School"
+LEGACY_SLUG = "legacy"
+ID = str(uuid.uuid4())
+
+
 def _policy_name(table_name: str) -> str:
     return f"rls_{table_name}_tenant_isolation"
 
@@ -72,8 +78,32 @@ def upgrade() -> None:
         text("SELECT id FROM schools WHERE slug = :slug"),
         {"slug": "legacy"},
     ).scalar_one_or_none()
+
+    # If it doesn't exist (e.g., fresh DB), create it
     if legacy_school_id is None:
-        raise RuntimeError("Legacy school with slug='legacy' must exist before RLS.")
+        bind.execute(
+            text("""
+            INSERT INTO schools (id, name, slug, status, settings)
+            VALUES (
+                :id,
+                :name,
+                :slug,
+                'active',
+                :settings
+            )
+            """),
+            {
+                "id": ID,
+                "name": LEGACY_NAME,
+                "slug": LEGACY_SLUG,
+                "settings": '{"bootstrapMode": "legacy"}',
+            },
+        )
+        # Fetch the ID of the record we just created
+        legacy_school_id = bind.execute(
+            text("SELECT id FROM schools WHERE slug = :slug"),
+            {"slug": "legacy"},
+        ).scalar_one()
 
     for table_name in SCHOOL_ID_TABLES:
         bind.execute(
