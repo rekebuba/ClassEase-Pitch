@@ -2,22 +2,22 @@ import uuid
 from typing import Annotated, List, Optional, Sequence
 
 from fastapi import APIRouter, HTTPException, Query
-from sqlalchemy import select, update
+from sqlalchemy import select
 
 from project.api.v1.routers.dependencies import SessionDep, admin_route
 from project.api.v1.routers.employee.schema import (
     EmployeeBasicInfo,
     UpdateEmployeeStatusSchema,
 )
-from project.core.security import get_password_hash
+from project.core.access_control import provision_user_membership
 from project.models.employee import Employee
 from project.models.employee_year_link import EmployeeYearLink
-from project.models.user import User
 from project.models.year import Year
 from project.schema.schema import SuccessResponseSchema
 from project.utils.enum import (
     EmployeeApplicationStatusEnum,
     EmployeePositionEnum,
+    MfaStateEnum,
     RoleEnum,
 )
 from project.utils.utils import generate_id
@@ -105,27 +105,33 @@ async def update_employee_status(
             link = EmployeeYearLink(employee_id=employee.id, year_id=year.id)
             session.add(link)
 
-        stmt = (
-            update(Employee)
-            .where(Employee.id == employee_id)
-            .values(status=employees.status)
-        )
+        employee.status = employees.status
         if (
             employees.status == EmployeeApplicationStatusEnum.ACTIVE
             and employee.position == EmployeePositionEnum.TEACHING_STAFF
             and employee.user_id is None
         ):
-            username = generate_id(session=session, role=RoleEnum.TEACHER, year=year)
-            new_user = User(
+            username = await generate_id(
+                session=session,
                 role=RoleEnum.TEACHER,
-                username=generate_id(session=session, role=RoleEnum.TEACHER, year=year),
-                password=get_password_hash(username),
+                year=year,
             )
-            session.add(new_user)
-            await session.commit()
+            new_user, membership = await provision_user_membership(
+                session,
+                school=user_in.membership.school,
+                shell_role=RoleEnum.TEACHER,
+                membership_role_name="teacher",
+                login_identifier=username,
+                password=username,
+                email=None,
+                phone=None,
+                is_active=True,
+                is_verified=False,
+                mfa_state=MfaStateEnum.VERIFIED,
+            )
+            employee.user_id = new_user.id
+            employee.school_membership_id = membership.id
+            employee.school_id = membership.school_id
 
-            stmt.values(user_id=new_user.id)
-
-    await session.execute(stmt)
     await session.commit()
     return SuccessResponseSchema(message="Employees status updated successfully.")

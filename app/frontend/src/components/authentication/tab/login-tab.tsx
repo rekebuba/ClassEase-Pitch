@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod/dist/zod";
 import { useMutation } from "@tanstack/react-query";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { Loader2Icon } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
@@ -26,53 +26,45 @@ import {
   FieldLabel,
   FieldSeparator,
 } from "@/components/ui/field";
-import { loginFailure, loginSuccess } from "@/store/slice/auth-slice";
-import { decodeToken } from "@/utils/utils";
+import { loginFailure } from "@/store/slice/auth-slice";
 
-import type { BodyLoginCredential, LoginError } from "@/client/types.gen";
+import type {
+  BodyLoginCredential,
+  LoginError,
+  LoginResponse,
+} from "@/client/types.gen";
 import type { AxiosError } from "axios";
 import type { SubmitHandler } from "react-hook-form";
 
-export default function LoginTab(
-  { setActiveTab }: { setActiveTab: (tab: string) => void },
-) {
+type LoginTabProps = {
+  onAuthResponse: (response: LoginResponse) => void;
+};
+
+export default function LoginTab({ onAuthResponse }: LoginTabProps) {
   const form = useForm<BodyLoginCredential>({
     resolver: zodResolver(zBodyLoginCredential),
     defaultValues: {
       username: "",
       password: "",
+      schoolSlug: "",
+      grant_type: "password",
+      scope: "",
     },
   });
 
   const {
     setError,
+    watch,
     formState: { errors },
     handleSubmit,
   } = form;
 
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
   const mutation = useMutation({
     ...loginMutation(),
     onSuccess: (response) => {
-      const decodedToken = decodeToken(response.accessToken);
-
-      if (decodedToken === null) {
-        dispatch(loginFailure("Invalid token received"));
-        toast.error("Invalid token received", {
-          style: { color: "red" },
-        });
-        return;
-      }
-
-      dispatch(
-        loginSuccess({ token: response.accessToken, userInfo: decodedToken }),
-      );
-
-      const userRole = decodedToken.role;
-
-      navigate({ to: `/${userRole}` });
+      onAuthResponse(response);
     },
     onError: (error: AxiosError<LoginError>) => {
       const detail = error.response?.data?.detail;
@@ -91,7 +83,10 @@ export default function LoginTab(
 
   const submitLogin: SubmitHandler<BodyLoginCredential> = (data) => {
     mutation.mutate({
-      body: data,
+      body: {
+        ...data,
+        grant_type: data.grant_type || "password",
+      },
     });
   };
 
@@ -119,8 +114,16 @@ export default function LoginTab(
                 />
               </Field>
               <Field>
+                <InputWithLabel<BodyLoginCredential>
+                  id="schoolSlug"
+                  fieldTitle="School Slug (Optional)"
+                  nameInSchema="schoolSlug"
+                  placeholder="Enter school slug if you belong to multiple schools"
+                />
+              </Field>
+              <Field>
                 <div className="flex items-center">
-                  <FieldLabel htmlFor="passwords">Password</FieldLabel>
+                  <FieldLabel htmlFor="password">Password</FieldLabel>
                   <Link to="/forgot-password" className="ml-auto text-sm underline-offset-4 hover:underline">
                     Forgot your password?
                   </Link>
@@ -151,16 +154,12 @@ export default function LoginTab(
                 </Button>
               </Field>
               <FieldSeparator>Or continue with</FieldSeparator>
-              <GoogleAuth />
+              <GoogleAuth
+                schoolSlug={watch("schoolSlug") || undefined}
+                onAuthResponse={onAuthResponse}
+              />
               <FieldDescription className="text-center">
-                Don&apos;t have an account?
-                {" "}
-                <a
-                  className="underline underline-offset-4 hover:cursor-pointer"
-                  onClick={() => setActiveTab("signup")}
-                >
-                  Sign up
-                </a>
+                Use your school account credentials or Google to continue.
               </FieldDescription>
             </FieldGroup>
           </form>

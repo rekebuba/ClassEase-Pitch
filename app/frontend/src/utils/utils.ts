@@ -162,12 +162,28 @@ export const ENV = {
   API_BASE_URL: getEnv("VITE_API_BASE_URL"),
 } as const;
 
+function decodeBase64Url(input: string): string {
+  const normalized = input
+    .replace(/-/g, "+")
+    .replace(/_/g, "/");
+
+  const padded = normalized.padEnd(
+    normalized.length + (4 - (normalized.length % 4 || 4)),
+    "=",
+  );
+
+  return atob(padded);
+}
+
 // Helper function to decode the JWT token
 export function decodeToken(token: string): JwtPayloadType | null {
   try {
     // JWT tokens are in the format: header.payload.signature
     const payload = token.split(".")[1]; // Get the payload part
-    const decodedPayload = atob(payload); // Decode base64
+    if (!payload) {
+      throw new Error("Malformed token payload");
+    }
+    const decodedPayload = decodeBase64Url(payload); // Decode base64url
     const parsed = JSON.parse(decodedPayload); // Parse the JSON payload
 
     const result = jwtPayloadSchema.safeParse(parsed);

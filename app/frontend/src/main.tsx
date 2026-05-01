@@ -14,7 +14,6 @@ import "./lib/api-client";
 import { queryClient } from "./lib/query-client";
 import { routeTree } from "./routeTree.gen";
 import { persister, store } from "./store/main-store";
-import { ENV } from "./utils/utils";
 
 // Create a new router instance
 const router = createRouter({ routeTree });

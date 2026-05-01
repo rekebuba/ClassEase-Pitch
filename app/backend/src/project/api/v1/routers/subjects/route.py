@@ -108,11 +108,15 @@ async def post_subject(
         raise HTTPException(status_code=400, detail=errors)
 
     try:
+        year = await session.get(Year, new_subject.year_id)
+        if not year:
+            raise HTTPException(status_code=404, detail="Academic year not found.")
         subject = Subject(
             name=new_subject.name,
             code=new_subject.code,
             year_id=new_subject.year_id,
         )
+        subject.school_id = year.school_id
         session.add(subject)
         await session.commit()
         await session.refresh(subject)

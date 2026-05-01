@@ -154,11 +154,13 @@ async def post_year(
             start_date=new_year.start_date,
             end_date=new_year.end_date,
         )
+        year.school_id = user_in.membership.school_id
         session.add(year)
         await session.flush()
 
         create_academic_term(
             year_id=year.id,
+            school_id=user_in.membership.school_id,
             calendar_type=new_year.calendar_type,
             session=session,
         )
@@ -166,6 +168,7 @@ async def post_year(
         await handle_setup_methods(
             old_year_id=new_year.copy_from_year_id,
             year_id=year.id,
+            school_id=user_in.membership.school_id,
             session=session,
             setup_methods=new_year.setup_methods,
         )
@@ -219,6 +222,7 @@ async def delete_year(
 async def get_detail_grades_by_year_id(
     session: SessionDep,
     year_id: uuid.UUID,
+    user_in: shared_route,
 ) -> Sequence[Grade]:
     """
     Returns specific academic year
@@ -259,6 +263,7 @@ async def get_detail_grades_by_year_id(
 async def get_detail_subjects_by_year_id(
     session: SessionDep,
     year_id: uuid.UUID,
+    user_in: shared_route,
 ) -> Sequence[Subject]:
     """
     Returns specific academic year

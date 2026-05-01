@@ -1,4 +1,5 @@
-from typing import Optional
+import uuid
+from typing import List, Optional
 
 from pydantic import (
     BaseModel,
@@ -9,7 +10,40 @@ from pydantic import (
     field_validator,
 )
 
+from project.utils.enum import RoleEnum, SchoolMembershipStatusEnum, SchoolStatusEnum
 from project.utils.utils import to_camel
+
+
+class SchoolSummary(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    id: uuid.UUID
+    name: str
+    slug: str
+    status: SchoolStatusEnum
+
+
+class MembershipSummary(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True,
+        populate_by_name=True,
+        alias_generator=to_camel,
+    )
+
+    id: uuid.UUID
+    school_id: uuid.UUID
+    school_slug: str
+    school_name: str
+    status: SchoolMembershipStatusEnum
+    login_identifier: Optional[str] = None
+    is_primary: bool
+    role_names: List[str] = []
+    shell_role: RoleEnum
+    permissions: List[str] = []
 
 
 class LoginTokenResponse(BaseModel):
@@ -20,7 +54,11 @@ class LoginTokenResponse(BaseModel):
     )
 
     access_token: str
+    refresh_token: Optional[str] = None
     token_type: str
+    active_school: Optional[SchoolSummary] = None
+    active_membership: Optional[MembershipSummary] = None
+    available_memberships: List[MembershipSummary] = []
 
 
 class LoginRequest(BaseModel):
@@ -41,6 +79,7 @@ class VerifyOTPResponse(BaseModel):
 
 class ProviderResponse(BaseModel):
     credential: Optional[str]
+    school_slug: Optional[str] = None
 
 
 class PasswordRecovery(BaseModel):
@@ -50,6 +89,14 @@ class PasswordRecovery(BaseModel):
 class OTPRequest(BaseModel):
     email: EmailStr
     otp: str
+
+
+class RefreshTokenRequest(BaseModel):
+    refresh_token: str
+
+
+class MembershipSelectionRequest(BaseModel):
+    membership_id: uuid.UUID
 
 
 class PasswordResetRequest(BaseModel):

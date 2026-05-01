@@ -21,3 +21,4 @@ dist
 *.egg-info/
 env.b64
 docker-compose.prod-test.yml
+.codex

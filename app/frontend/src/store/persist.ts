@@ -11,7 +11,14 @@ const authPersistConfig = {
   key: "auth",
   storage,
   // Only persist the token, not loading states or errors
-  whitelist: ["token", "userInfo"],
+  whitelist: [
+    "token",
+    "refreshToken",
+    "userInfo",
+    "activeSchool",
+    "activeMembership",
+    "availableMemberships",
+  ],
   // Optionally, you can blacklist instead
   // blacklist: ['isLoading', 'error']
 };

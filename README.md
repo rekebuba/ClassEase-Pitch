@@ -1,345 +1,295 @@
-<p align="center">
-  <img src="class_ease/src/images/ClassEase-header.png" alt="ClassEase Logo" width="300" height="100">
-</p>
-
 # ClassEase
 
-ClassEase is a comprehensive school management system designed to streamline the process of managing students, teachers, and academic data. This system facilitates student record handling, grade tracking, and role-based access, making it easier for schools to maintain organized and secure data while providing a user-friendly interface for teachers, administrators, and students.
+ClassEase is a modern school management platform for running core academic and administrative workflows in one place. It helps schools manage academic years, grades, subjects, student registrations, employee onboarding, authentication, and role-based access through a full-stack web application.
 
-## Table of Contents
+This repository contains the current ClassEase implementation:
 
-- [Project Overview](#project-overview)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Installation](#installation)
-- [Usage](#usage)
-- [API Endpoints](#api-endpoints)
-- [Running Tests](#Running-Tests)
-- [Contributing](#contributing)
-- [Future Improvements](#future-improvements)
-- [Lessons Learned](#lessons-learned)
-- [License](#license)
+- A FastAPI backend with PostgreSQL, Redis, Alembic migrations, and automated tests
+- A React + Vite frontend with TanStack Router, React Query, Redux Persist, and a generated OpenAPI client
+- Docker-based local development and production-style container builds
 
-## Project Overview
+## Why ClassEase
 
-ClassEase aims to address the challenges faced by schools in managing student information, academic performance, and administrative records. By centralizing data and automating tasks, ClassEase provides a secure and efficient platform for schools to operate, reduce administrative workload, and improve the accessibility of academic information for authorized users.
+Schools often have critical data spread across spreadsheets, paper forms, and disconnected tools. ClassEase is designed to centralize that work into a single system that is easier to operate, safer to manage, and more scalable over time.
 
-## Features
+Core goals of the platform:
 
-- **User Authentication**: Secure login with role-based access control for admins, teachers, and students.
-- **Student Database Management**: Store and manage student details, including personal information, classes, and grades.
-- **Grade Tracking and Report Generation**: Allows teachers to input grades, which are automatically processed and calculated into final scores.
-- **Role-Based Access**: Each user role (admin, teacher, student) has specific permissions to access and modify data.
-- **User-Friendly Interface**: Simple navigation and clear data presentation, ensuring a smooth experience for all users.
+- Reduce administrative overhead for academic operations
+- Improve the accuracy and consistency of student and staff records
+- Support secure, role-based access for admins, teachers, and students
+- Provide a foundation for reporting, academic tracking, and future automation
+
+## Current Product Scope
+
+The current implementation is strongest in the admin experience and core school setup workflows. In particular, the project already includes:
+
+- Authentication with password login, Google login, logout, email verification, and password recovery
+- Academic year creation and setup
+- Grade and subject configuration
+- Student and employee registration flows
+- Admin dashboards and management screens
+- Generated frontend API bindings from the backend OpenAPI schema
+
+Some teacher and student-facing areas are still evolving, so contributors should expect the platform to be under active development rather than feature-complete.
+
+## Architecture
+
+At a high level, the system follows this flow:
+
+1. Administrators create and manage academic years
+2. Each year is configured with grades, subjects, streams, and sections
+3. Students and employees are registered into the system
+4. Users authenticate and access the application according to their role
+
+The repository is organized as a monorepo with separate frontend and backend applications:
+
+```text
+ClassEase-Pitch/
+├── app/
+│   ├── backend/   # FastAPI app, models, migrations, tests
+│   └── frontend/  # React/Vite app, routes, UI, generated client
+├── docker-compose.yml
+├── docker-compose.test.yml
+└── .github/workflows/
+```
 
 ## Tech Stack
 
 ### Frontend
 
-- React for the user interface.
-- React Router for navigation and route protection.
+- React 19
+- Vite
+- TypeScript
+- TanStack Router
+- TanStack React Query
+- Redux Toolkit + Redux Persist
+- React Hook Form + Zod
+- Tailwind CSS and component primitives
 
 ### Backend
 
-- Python with SQLAlchemy ORM for database management.
-- MySQL as the primary relational database.
+- Python 3.12
+- FastAPI
+- SQLAlchemy
+- PostgreSQL
+- Redis
+- Alembic
+- JWT authentication
 
-### Other Technologies
+### Tooling
 
-- REST API for frontend-backend communication.
-- SQLAlchemy for ORM and relational database interactions.
+- Docker and Docker Compose
+- Pytest
+- ESLint
+- Ruff
+- OpenAPI code generation with `@hey-api/openapi-ts`
 
-## Project Structure
+## Repository Layout
 
-```markdown
-api
-├── **init**.py
-└── v1
-├── **init**.py
-├── app.py
-└── views
-├── **init**.py
-├── admin.py
-├── public.py
-├── students.py
-├── teachers.py
-└── utils.py
+### Backend
 
-models
-├── **init**.py
-├── admin.py
-├── assessment.py
-├── average_result.py
-├── base_model.py
-├── engine
-│ ├── **init**.py
-│ └── db_storage.py
-├── grade.py
-├── mark_list.py
-├── section.py
-├── stud_yearly_record.py
-├── student.py
-├── subject.py
-├── teacher.py
-├── teacher_record.py
-└── users.py
+`app/backend/src/project/`
 
-class_ease
-├── README.md
-├── package-lock.json
-├── package.json
-├── public
-│ ├── ClassEase-favicon.ico
-│ ├── index.html
-│ ├── logo192.png
-│ ├── logo512.png
-│ ├── manifest.json
-│ └── robots.txt
-└── src
-├── App.js
-├── App.test.js
-├── components
-│ ├── AdminHeader.js
-│ ├── AdminPanel.js
-│ ├── Home.js
-│ ├── HomeHeader.js
-│ ├── StdPanel.js
-│ ├── TeachHeader.js
-│ └── TeachPanel.js
-├── images
-│ ├── ClassEase-footer.png
-│ ├── ClassEase-full-Logo.png
-│ ├── ClassEase-header.png
-│ └── ClassEase-no-slogan.png
-├── index.js
-├── pages
-│ ├── admin
-│ │ ├── AdminAssignTeacher.js
-│ │ ├── AdminCreateMarkList.js
-│ │ ├── AdminDashboard.js
-│ │ ├── AdminEnrollUser.js
-│ │ ├── AdminEventManagement.js
-│ │ ├── AdminExamAssessmentReports.js
-│ │ ├── AdminManageStudents.js
-│ │ ├── AdminManageTeach.js
-│ │ ├── AdminStudList.js
-│ │ ├── AdminStudPerformance.js
-│ │ ├── AdminStudProfile.js
-│ │ ├── AdminTeachList.js
-│ │ ├── AdminTeachProfile.js
-│ │ ├── AdminUpdateProfile.js
-│ │ └── AdminUserAccessControl.js
-│ ├── library
-│ │ ├── lodash.js
-│ │ └── pagination.js
-│ ├── student
-│ │ ├── StudPopupScore.js
-│ │ ├── StudSubjectList.js
-│ │ ├── StudentDashboard.js
-│ │ ├── StudentRegistrationForm.js
-│ │ └── StudentUpdateProfile.js
-│ └── teacher
-│ ├── TeacherDashboard.js
-│ ├── TeacherManageStudents.js
-│ ├── TeacherPopupUpdateStudentScore.js
-│ ├── TeacherRegistrationForm.js
-│ ├── TeacherStudentsList.js
-│ └── TeacherUpdateProfile.js
-├── services
-│ ├── Alert.js
-│ ├── Login.js
-│ ├── Logout.js
-│ ├── NotFound.js
-│ ├── ProtectedRoute.js
-│ └── api.js
-├── setupTests.js
-└── styles
-├── AdminDashboard.css
-├── AdminManageStudents.css
-├── Alert.css
-├── Dashboard.css
-├── HomePage.css
-├── Login.css
-├── StudDashboard.css
-├── StudRegistrationForm.css
-├── Table.css
-├── TeacherDashboard.css
-├── notfound.css
-└── updateProfile.css
+- `main.py`: FastAPI application entry point
+- `api/v1/routers/`: versioned API endpoints
+- `models/`: SQLAlchemy models for the school domain
+- `schema/`: response and domain schemas
+- `core/`: configuration, database, and security utilities
+- `templates/`: email templates and seeded defaults
 
-tests
-├── __init__.py
-├── test_api
-│ ├──__init__.py
-│ ├── helper_functions.py
-│ ├── test_admins.py
-│ ├── test_students.py
-│ └── test_teachers.py
-└── test_models
-├── test_admin_models.py
-└── test_teacher_models.py
-```
+### Frontend
 
-- **api/v1**: Contains the main API views and route handling for the backend.
-- **models**: Includes all database models and the SQLAlchemy engine configuration.
-- **class_ease**: This directory contains the frontend code and project configuration.
-- **tests**: Unit Test for the Backend API
+`app/frontend/src/`
 
-## Installation
+- `main.tsx`: frontend application bootstrap
+- `routes/`: file-based routing for the application
+- `components/`: reusable UI and domain components
+- `store/`: persisted client state
+- `lib/`: shared frontend utilities and API wiring
+- `client/`: generated SDK, React Query hooks, and Zod schemas from OpenAPI
+
+## Getting Started
 
 ### Prerequisites
 
-- Python 3.7+
-- MySQL
-- Node.js and npm (for frontend)
+Recommended:
 
-### Steps
+- Docker
+- Docker Compose
 
-1. **Clone the Repository:**
+For manual local development:
 
-   ```bash
-   git clone https://github.com/your-username/ClassEase.git
-   cd ClassEase
-   ```
+- Python 3.12+
+- Node.js 24+
+- `pnpm` via Corepack
+- PostgreSQL
+- Redis
 
-2. **MySQL Setup:**
+## Quick Start With Docker
 
-   Set up MySQL by running the setup_mysql_dev.sql:
+Docker Compose is the easiest way to run the full stack locally.
 
-   ```bash
-   mysql -u root -p < setup_mysql_dev.sql # enter password when prompted
-   ```
+1. Review the environment files in `app/backend/`:
 
-3. **Backend Setup:**
+   - `.env.development`
+   - `.env.testing`
+   - `.env.production`
 
-   Set up a virtual environment and install dependencies:
-
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   ```
-
-   Configure the MySQL database in the `db_storage.py` file.
-
-4. **Frontend Setup:**
-
-   Navigate to the frontend directory, install dependencies, and start the development server:
+2. Start the application:
 
    ```bash
-   cd class_ease
-   npm install
-   npm start
+   docker compose up --build
    ```
 
-5. **Run the Backend:**
+3. Open the services:
 
-   Start the backend server:
+   - Frontend: `http://localhost:8081`
+   - Backend API: `http://localhost:8080`
+   - API docs: `http://localhost:8080/api/v1/docs`
 
-   ```bash
-   python3 -m api.v1.app
-   ```
+The Compose stack starts:
 
-## Usage
+- PostgreSQL on `localhost:5432`
+- Redis on `localhost:6379`
+- Backend on `localhost:8080`
+- Frontend on `localhost:8081`
 
-### Login
+## Local Development Without Docker
 
-Open the frontend on `localhost:3000`, and login with your role credentials (admin, teacher, or student).
+### Backend
 
-### Navigating the Platform
-
-- **Admin**: Access student and teacher management, class assignments, and system settings.
-- **Teacher**: Manage grade inputs, view class rosters, and generate reports.
-- **Student**: View grades, personal information, and academic records.
-
-### Data Management
-
-Add or modify student details, update grades, and manage academic records with real-time updates.
-
-## API Endpoints
-
-Here is an overview of some core API endpoints:
-
-| Endpoint                         | Method | Description                                                        |
-| -------------------------------- | ------ | ------------------------------------------------------------------ |
-| /api/v1/login                    | POST   | Logs a user into the system                                        |
-| /api/v1/student/registration     | POST   | Registers a new Student                                            |
-| /api/v1/students                 | POST   | Adds a new student to the system                                   |
-| /api/v1/admin/students/mark_list | PUT    | Create a mark list for students based on the provided admin data   |
-| /api/v1/admin/teachers           | GET    | Lists all teachers                                                 |
-| /api/v1/admin/manage/students    | POST   | Retrieve and filter student data based on the provided admin data. |
-
-For a complete list of API endpoints and detailed usage, please refer to the API documentation in the project repository.
-
-## Running Tests
-
-### Prerequisites
-
-Ensure you have the necessary dependencies installed and the environment set up as described in the [Installation](#installation) section.
-
-### Running Backend Tests
-
-To run the backend tests, navigate to the project root directory and use the following command:
+From `app/backend`:
 
 ```bash
-python3 -m unittest discover -s tests/test_api
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e ".[dev]"
+alembic upgrade head
+uvicorn project.main:app --reload --app-dir src --port 8080
 ```
 
-This command will discover and run all the tests in the `tests/test_api` directory.
+Notes:
 
-### Running Specific Tests
+- The backend configuration loads from `.env.development` by default
+- API docs are available at `http://localhost:8080/api/v1/docs`
+- Alembic is used for schema migrations
 
-If you want to run a specific test file, you can specify the path to the test file. For example, to run the `test_students.py` file:
+### Frontend
+
+From `app/frontend`:
 
 ```bash
-python3 -m unittest tests/test_api/test_students.py
+corepack enable
+pnpm install
+VITE_API_BASE_URL=http://localhost:8080 pnpm dev
 ```
 
-### Viewing Test Coverage
+The Vite dev server runs on `http://localhost:5173` by default.
 
-To view the test coverage for the backend, you can use the `coverage` package. First, install it if you haven't already:
+### Regenerate the Frontend API Client
+
+If you change backend endpoints or schemas, regenerate the frontend client while the backend is running:
 
 ```bash
-pip install coverage
+cd app/frontend
+pnpm generate:client
 ```
 
-Then, run the tests with coverage:
+This refreshes:
+
+- generated SDK functions
+- React Query hooks
+- TypeScript types
+- Zod validators
+
+## Testing and Quality Checks
+
+### Backend Tests
+
+From `app/backend`:
 
 ```bash
-coverage run -m unittest discover -s tests/test_api
-coverage report -m
+pytest
 ```
+
+The backend test suite covers important API flows including authentication, registration, and academic-year management.
+
+### Frontend Linting
+
+From `app/frontend`:
+
+```bash
+pnpm lint
+```
+
+### Optional Git Hooks
+
+If you use pre-commit locally:
+
+```bash
+pre-commit install
+```
+
+There are pre-commit configurations in the repository to help catch formatting and lint issues early.
+
+## API and Authentication
+
+The backend exposes a versioned REST API under `/api/v1`.
+
+Key capabilities include:
+
+- credential login
+- provider login via Google
+- email verification
+- password recovery and reset
+- JWT-based authorization
+- role-based access controls for admin, teacher, and student users
+
+In development and testing environments, OpenAPI docs are available at:
+
+- `http://localhost:8080/api/v1/docs`
+- `http://localhost:8080/api/v1/redoc`
 
 ## Contributing
 
-We welcome contributions to make ClassEase better! If you'd like to contribute, please follow these steps:
+Contributions are welcome. If you want to improve ClassEase, please keep changes focused, well-tested, and aligned with the current architecture.
 
-1. Fork the repository.
-2. Create a new branch for your feature or bugfix:
+Recommended workflow:
 
-   ```bash
-   git checkout -b feature-name
-   ```
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run the relevant checks
+5. Open a pull request with a clear summary
 
-3. Make your changes and commit them.
-4. Push the branch to your forked repository and open a pull request.
+Before opening a PR, please:
 
-For major changes, please open an issue first to discuss what you would like to change.
+- run backend tests if you changed backend behavior
+- run frontend linting if you changed frontend code
+- add or update tests for important logic changes
+- regenerate the frontend API client if backend contracts changed
+- include Alembic migrations if your backend model changes require schema updates
 
-## Future Improvements
+### Contribution Guidelines
 
-- **Database Optimization**: Implement data archiving and partitioning for large tables like mark_lists to improve performance.
-- **Real-Time Updates**: Add WebSocket support for live updates, so grades and other information are instantly available.
-- **Advanced Analytics**: Introduce dashboards with advanced analytics to provide insights into student performance trends.
-- **Mobile Compatibility**: Enhance the UI to make ClassEase accessible on mobile devices.
+- Prefer small, reviewable pull requests
+- Keep documentation updated when workflows change
+- Avoid breaking generated client contracts without updating the frontend
+- Follow the existing project structure instead of introducing parallel patterns
 
-## Lessons Learned
+## Deployment Notes
 
-- **Database Design**: Designing a scalable schema is crucial for long-term performance, especially when dealing with large amounts of student data.
-- **Role-Based Access Control**: Implementing a robust role-based access system improved security and data management.
-- **Teamwork and Collaboration**: This project emphasized the importance of regular communication, version control, and well-defined tasks among team members.
+The repository includes:
+
+- production-oriented Dockerfiles for both backend and frontend
+- GitHub Actions workflows under `.github/workflows/`
+
+Those workflows can serve as a starting point for CI/CD, image publishing, and deployment automation.
+
+## Project Status
+
+ClassEase is under active development. The current codebase already supports meaningful admin and school setup workflows, while broader teacher and student experiences continue to mature.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This repository does not currently include a license file. If you plan to reuse or redistribute the project, please confirm the licensing terms with the repository owner first.

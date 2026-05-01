@@ -48,11 +48,14 @@ class Settings(BaseSettings):
     API_V1_STR: str
     SECRET_KEY: SecretStr
     ACCESS_TOKEN_EXPIRE_MINUTES: int
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 30
     FRONTEND_HOST: str
     GOOGLE_CLIENT_ID: str
     GOOGLE_CLIENT_SECRET: str
 
     PROJECT_NAME: str
+    LEGACY_SCHOOL_NAME: str = "ClassEase Legacy School"
+    LEGACY_SCHOOL_SLUG: str = "legacy"
 
     FIRST_SUPERUSER: str
     FIRST_SUPERUSER_PASSWORD: SecretStr
@@ -186,6 +189,8 @@ class ProdSettings(Settings):
 def get_settings() -> Union[DevSettings, TestSettings, ProdSettings]:
     # 1. Peek at the environment or a base .env to see what mode we are in
     env_mode = os.getenv("ENVIRONMENT", "development")
+
+    print(f"Loading settings for environment: {env_mode}")
 
     # 2. Map modes to classes
     config_mapping = {

@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 """Main module for the API"""
 
+import logging
+
 from fastapi import FastAPI, Request
 from fastapi.exceptions import ResponseValidationError
 from fastapi.responses import JSONResponse
@@ -9,6 +11,17 @@ from starlette.middleware.cors import CORSMiddleware
 
 from project.api.v1 import api_router
 from project.core.config import settings
+from project.core.tenant import (
+    TenantContextTokens,
+    reset_tenant_context,
+    resolve_school_slug_from_request,
+    set_current_membership_id,
+    set_current_school_id,
+    set_request_school_slug,
+)
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -36,6 +49,20 @@ if settings.all_cors_origins:
     )
 
 
+@app.middleware("http")
+async def tenant_context_middleware(request: Request, call_next):
+    tokens = TenantContextTokens(
+        school_id=set_current_school_id(None),
+        membership_id=set_current_membership_id(None),
+        school_slug=set_request_school_slug(resolve_school_slug_from_request(request)),
+    )
+    try:
+        response = await call_next(request)
+    finally:
+        reset_tenant_context(tokens)
+    return response
+
+
 def use_route_names_as_operation_ids(app: FastAPI) -> None:
     """
     Simplify operation IDs so that generated API clients have simpler function
@@ -55,6 +82,14 @@ use_route_names_as_operation_ids(app)
 async def validation_exception_handler(
     request: Request, exc: ResponseValidationError
 ) -> JSONResponse:
+    logger.exception(
+        "Response validation failed | path=%s | method=%s | errors=%s | body=%s",
+        request.url.path,
+        request.method,
+        exc.errors(),
+        getattr(exc, "body", None),
+    )
+
     return JSONResponse(
         status_code=500,
         content={

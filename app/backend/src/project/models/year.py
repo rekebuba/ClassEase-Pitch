@@ -8,6 +8,7 @@ from sqlalchemy import Date, Enum, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
+from project.models.base.school_mixin import SchoolScopedMixin
 from project.utils.enum import AcademicTermTypeEnum, AcademicYearStatusEnum
 
 if TYPE_CHECKING:
@@ -15,11 +16,12 @@ if TYPE_CHECKING:
     from project.models.employee import Employee
     from project.models.event import Event
     from project.models.grade import Grade
+    from project.models.school import School
     from project.models.student import Student
     from project.models.subject import Subject
 
 
-class Year(BaseModel):
+class Year(SchoolScopedMixin, BaseModel):
     """docstring for year."""
 
     __tablename__ = "years"
@@ -89,6 +91,13 @@ class Year(BaseModel):
         secondary="employee_year_links",
         back_populates="years",
         default_factory=list,
+        repr=False,
+        passive_deletes=True,
+    )
+    school: Mapped["School"] = relationship(
+        "School",
+        back_populates="years",
+        init=False,
         repr=False,
         passive_deletes=True,
     )

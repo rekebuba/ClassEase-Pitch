@@ -373,3 +373,38 @@ class MarkListTypeEnum(str, Enum):
 class AuthProviderEnum(str, Enum):
     GOOGLE = "google"
     PASSWORD = "password"
+
+
+class SchoolStatusEnum(str, Enum):
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    SUSPENDED = "suspended"
+
+
+class SchoolMembershipStatusEnum(str, Enum):
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    PENDING = "pending"
+    TRANSFERRED = "transferred"
+    WITHDRAWN = "withdrawn"
+    SUSPENDED = "suspended"
+
+
+class MfaStateEnum(str, Enum):
+    NOT_ENROLLED = "not_enrolled"
+    ENROLLED = "enrolled"
+    VERIFIED = "verified"
+    REQUIRED = "required"
+
+
+class AuthSessionAssuranceEnum(str, Enum):
+    PASSWORD_ONLY = "password_only"
+    PASSWORD_MFA = "password_mfa"
+    FEDERATED = "federated"
+
+
+class TransferRequestStatusEnum(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    COMPLETED = "completed"

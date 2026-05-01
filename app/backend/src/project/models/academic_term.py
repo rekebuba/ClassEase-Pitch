@@ -11,6 +11,7 @@ from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
+from project.models.base.school_mixin import SchoolScopedMixin
 from project.models.grade import Grade
 from project.models.subject import Subject
 from project.utils.enum import AcademicTermEnum
@@ -23,7 +24,7 @@ if TYPE_CHECKING:
     from project.models.year import Year
 
 
-class AcademicTerm(BaseModel):
+class AcademicTerm(SchoolScopedMixin, BaseModel):
     """docstring for AcademicTerm."""
 
     __tablename__ = "academic_terms"

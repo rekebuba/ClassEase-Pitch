@@ -1,6 +1,7 @@
 from collections.abc import AsyncGenerator
+from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Annotated, Any, Dict, List, Type
+from typing import Annotated, Any, Dict, List, Set, Type
 
 import jwt
 from fastapi import Depends, HTTPException, Query, status
@@ -11,16 +12,33 @@ from fastapi.security import (
 from jwt.exceptions import InvalidTokenError
 from pydantic import BaseModel, ValidationError
 from redis.asyncio import Redis
-from sqlalchemy import select
+from sqlalchemy import event, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from sqlalchemy.orm import Session, with_loader_criteria
 
 from project.core import security
+from project.core.access_control import (
+    PRIVILEGED_MEMBERSHIP_ROLES,
+    get_membership_with_roles,
+    resolve_membership_permissions,
+    resolve_membership_role_names,
+    resolve_shell_role_from_names,
+)
 from project.core.config import settings
 from project.core.db import engine, init_db
+from project.core.tenant import (
+    bind_db_school_context,
+    get_current_school_id,
+    set_current_membership_id,
+    set_current_school_id,
+)
+from project.models.auth_session import AuthSession
+from project.models.base.school_mixin import SchoolScopedMixin
 from project.models.blacklist_token import BlacklistToken
+from project.models.school_membership import SchoolMembership
 from project.models.user import User
 from project.schema.schema import TokenPayload
-from project.utils.enum import RoleEnum
+from project.utils.enum import MfaStateEnum, RoleEnum, SchoolMembershipStatusEnum
 from project.utils.utils import classify_model_fields, extract_inner_model
 
 # OAuth2 scheme
@@ -32,6 +50,25 @@ AsyncSessionLocal = async_sessionmaker(
     class_=AsyncSession,
     expire_on_commit=False,
 )
+
+
+@event.listens_for(Session, "do_orm_execute")
+def _apply_school_scope(execute_state):
+    school_id = get_current_school_id()
+    if (
+        school_id is None
+        or not execute_state.is_select
+        or execute_state.execution_options.get("skip_school_scope")
+    ):
+        return
+
+    execute_state.statement = execute_state.statement.options(
+        with_loader_criteria(
+            SchoolScopedMixin,
+            lambda cls: cls.school_id == school_id,
+            include_aliases=True,
+        )
+    )
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
@@ -50,10 +87,19 @@ TokenDep = Annotated[str, Depends(oauth2_scheme)]
 RedisDep = Annotated[Redis, Depends(get_redis)]
 
 
-async def get_current_user(
+@dataclass
+class AuthenticatedActor:
+    user: User
+    membership: SchoolMembership
+    auth_session: AuthSession
+    permissions: Set[str]
+    shell_role: RoleEnum
+
+
+async def get_current_actor(
     session: SessionDep,
     token: TokenDep,
-) -> User:
+) -> AuthenticatedActor:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -87,10 +133,69 @@ async def get_current_user(
 
     except (InvalidTokenError, ValidationError):
         raise credentials_exception
-    user = await session.get(User, token_data.sub)
-    if user is None:
+
+    if (
+        token_data.school_id is None
+        or token_data.membership_id is None
+        or token_data.session_id is None
+    ):
         raise credentials_exception
-    return user
+
+    set_current_school_id(token_data.school_id)
+    membership = await get_membership_with_roles(session, token_data.membership_id)
+    if (
+        membership is None
+        or str(membership.user_id) != token_data.sub
+        or membership.school_id != token_data.school_id
+        or membership.status != SchoolMembershipStatusEnum.ACTIVE
+    ):
+        raise credentials_exception
+
+    auth_session = await session.get(AuthSession, token_data.session_id)
+    if (
+        auth_session is None
+        or auth_session.membership_id != membership.id
+        or auth_session.user_id != membership.user_id
+        or auth_session.revoked_at is not None
+        or auth_session.expires_at <= datetime.now(timezone.utc)
+    ):
+        raise credentials_exception
+
+    if token_data.permissions_version != membership.permissions_version:
+        raise credentials_exception
+
+    await bind_db_school_context(session, membership.school_id)
+    set_current_membership_id(membership.id)
+
+    permissions = resolve_membership_permissions(membership)
+    membership_role_names = resolve_membership_role_names(membership)
+    shell_role = resolve_shell_role_from_names(
+        membership_role_names,
+        fallback=membership.user.role,
+    )
+
+    if (
+        membership_role_names & PRIVILEGED_MEMBERSHIP_ROLES
+        and membership.mfa_state != MfaStateEnum.VERIFIED
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="MFA_REQUIRED",
+        )
+
+    return AuthenticatedActor(
+        user=membership.user,
+        membership=membership,
+        auth_session=auth_session,
+        permissions=permissions,
+        shell_role=shell_role,
+    )
+
+
+async def get_current_user(
+    current_actor: Annotated[AuthenticatedActor, Depends(get_current_actor)],
+) -> User:
+    return current_actor.user
 
 
 class ProtectedRoute:
@@ -98,22 +203,25 @@ class ProtectedRoute:
         self.roles = roles
 
     def __call__(
-        self, current_user: Annotated[User, Depends(get_current_user)]
-    ) -> User:
-        if current_user.role not in self.roles:
+        self, current_actor: Annotated[AuthenticatedActor, Depends(get_current_actor)]
+    ) -> AuthenticatedActor:
+        if current_actor.shell_role not in self.roles:
             raise HTTPException(status_code=403, detail="Forbidden")
-        return current_user
+        return current_actor
 
 
 shared_route = Annotated[
-    User, Depends(ProtectedRoute([RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT]))
+    AuthenticatedActor,
+    Depends(ProtectedRoute([RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT])),
 ]
-admin_route = Annotated[User, Depends(ProtectedRoute([RoleEnum.ADMIN]))]
+admin_route = Annotated[AuthenticatedActor, Depends(ProtectedRoute([RoleEnum.ADMIN]))]
 student_route = Annotated[
-    User, Depends(ProtectedRoute([RoleEnum.ADMIN, RoleEnum.STUDENT]))
+    AuthenticatedActor,
+    Depends(ProtectedRoute([RoleEnum.ADMIN, RoleEnum.STUDENT])),
 ]
 teacher_route = Annotated[
-    User, Depends(ProtectedRoute([RoleEnum.ADMIN, RoleEnum.TEACHER]))
+    AuthenticatedActor,
+    Depends(ProtectedRoute([RoleEnum.ADMIN, RoleEnum.TEACHER])),
 ]
 
 
