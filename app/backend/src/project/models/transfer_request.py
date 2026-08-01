@@ -1,7 +1,18 @@
 import uuid
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
-from sqlalchemy import JSON, UUID, Enum, ForeignKey, String, Text
+from sqlalchemy import (
+    UUID,
+    CheckConstraint,
+    DateTime,
+    Enum,
+    ForeignKey,
+    ForeignKeyConstraint,
+    String,
+    Text,
+)
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
@@ -10,7 +21,6 @@ from project.utils.enum import TransferRequestStatusEnum
 if TYPE_CHECKING:
     from project.models.school import School
     from project.models.school_membership import SchoolMembership
-    from project.models.user import User
 
 
 class TransferRequest(BaseModel):
@@ -34,13 +44,11 @@ class TransferRequest(BaseModel):
     record_scope: Mapped[str] = mapped_column(String(120), nullable=False)
     requested_by_membership_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(),
-        ForeignKey("school_memberships.id", ondelete="SET NULL"),
         nullable=True,
         default=None,
     )
     reviewed_by_membership_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(),
-        ForeignKey("school_memberships.id", ondelete="SET NULL"),
         nullable=True,
         default=None,
     )
@@ -56,9 +64,31 @@ class TransferRequest(BaseModel):
     )
     notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default=None)
     payload: Mapped[Dict[str, Any]] = mapped_column(
-        JSON,
+        JSONB,
         nullable=False,
         default_factory=dict,
+    )
+    reviewed_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        default=None,
+    )
+
+    __table_args__ = (
+        CheckConstraint(
+            "source_school_id <> target_school_id",
+            name="ck_source_target_different",
+        ),
+        ForeignKeyConstraint(
+            ["requested_by_membership_id", "source_school_id"],
+            ["school_memberships.id", "school_memberships.school_id"],
+            name="fk_transfer_request_requested_by",
+        ),
+        ForeignKeyConstraint(
+            ["reviewed_by_membership_id", "target_school_id"],
+            ["school_memberships.id", "school_memberships.school_id"],
+            name="fk_transfer_request_reviewed_by",
+        ),
     )
 
     source_school: Mapped["School"] = relationship(
@@ -89,13 +119,6 @@ class TransferRequest(BaseModel):
         "SchoolMembership",
         foreign_keys=[reviewed_by_membership_id],
         back_populates="reviewed_transfers",
-        init=False,
-        repr=False,
-        passive_deletes=True,
-    )
-    subject_user: Mapped["User"] = relationship(
-        "User",
-        back_populates="transfer_requests",
         init=False,
         repr=False,
         passive_deletes=True,

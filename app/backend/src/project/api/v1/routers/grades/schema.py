@@ -1,7 +1,7 @@
 import uuid
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
 
 from project.schema.models.grade_schema import GradeSchema
 from project.schema.models.section_schema import (
@@ -11,68 +11,43 @@ from project.schema.models.stream_schema import StreamSchema
 from project.schema.models.subject_schema import (
     SubjectSchema,
 )
+from project.schema.schema import BaseSchema
 from project.utils.enum import GradeEnum, GradeLevelEnum
-from project.utils.utils import to_camel
 
 
-class UpdateGrade(BaseModel):
+class UpdateGrade(BaseSchema):
     """
     This model represents a grade  that can be updated in the system.
     """
-
-    model_config = ConfigDict(
-        extra="forbid",
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     grade: Optional[GradeEnum] = Field(default=None)
     level: Optional[GradeLevelEnum] = Field(default=None)
     has_stream: Optional[bool] = Field(default=None)
 
 
-class UpdateStream(BaseModel):
+class UpdateStream(BaseSchema):
     """
     This model represents a stream in the system that can be updated.
     """
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     id: uuid.UUID
     name: Optional[str] = Field(default=None)
 
 
-class UpdateSubject(BaseModel):
+class UpdateSubject(BaseSchema):
     """
     This model represents a subject that can be updated in the system.
     """
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     id: uuid.UUID
     name: str
     code: str
 
 
-class UpdateSection(BaseModel):
+class UpdateSection(BaseSchema):
     """
     This model represents a section in the system that can be updated.
     """
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     id: uuid.UUID
     section: str
@@ -100,27 +75,21 @@ class UpdateGradeSetup(UpdateGrade):
     sections: Optional[List[UpdateSection]] = Field(default=None)
 
 
-class UpdateGradeSetupSuccess(BaseModel):
+class UpdateGradeSetupSuccess(BaseSchema):
     message: str = Field(default="Grade Setup updated Successfully")
 
 
-class DeleteGradeSetupSuccess(BaseModel):
+class DeleteGradeSetupSuccess(BaseSchema):
     message: str = Field(default="Grade Setup Deleted Successfully")
 
 
-class NewGrade(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
+class NewGrade(BaseSchema):
     grade: GradeEnum
     level: GradeLevelEnum
     has_stream: bool
     year_id: uuid.UUID
 
 
-class NewGradeSuccess(BaseModel):
+class NewGradeSuccess(BaseSchema):
     id: uuid.UUID
     message: str = Field(default="Grade created Successfully")

@@ -1,9 +1,8 @@
 import uuid
+from datetime import date
 from typing import Optional
 
 from pydantic import (
-    BaseModel,
-    ConfigDict,
     EmailStr,
     Field,
     PastDate,
@@ -12,23 +11,22 @@ from pydantic import (
 )
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
+from project.schema.schema import BaseSchema
 from project.utils.enum import (
     BloodTypeEnum,
-    EmployeeApplicationStatusEnum,
-    EmployeePositionEnum,
-    ExperienceYearEnum,
+    EmploymentStatusEnum,
+    EmploymentTypeEnum,
     GenderEnum,
     HighestEducationEnum,
     StudentApplicationStatusEnum,
 )
-from project.utils.utils import to_camel
 
 
-class RegistrationStep(BaseModel):
+class RegistrationStep(BaseSchema):
     message: str
 
 
-class RegistrationResponse(BaseModel):
+class RegistrationResponse(BaseSchema):
     """
     Schema for successful registration response.
     """
@@ -37,47 +35,33 @@ class RegistrationResponse(BaseModel):
     message: str
 
 
-class AdminRegistration(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
+class UserRegistration(BaseSchema):
     first_name: str
     father_name: str
-    grand_father_name: str
+    grand_father_name: Optional[str]
     date_of_birth: PastDate
     gender: GenderEnum
-    username: str
-    password: SecretStr
-    phone: PhoneNumber
     email: EmailStr
+    phone: Optional[PhoneNumber] = None
+    username: Optional[str] = None
+    password: Optional[SecretStr] = None
 
 
-class ParentRegistrationForm(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
+class AdminRegistration(UserRegistration):
+    pass
 
-    first_name: str = Field(min_length=2, max_length=50)
-    last_name: str = Field(min_length=2, max_length=50)
-    gender: GenderEnum
-    email: EmailStr
-    phone: PhoneNumber
+
+class ParentRegistrationForm(UserRegistration):
     relation: str = Field(min_length=2, max_length=50)
     emergency_contact_phone: Optional[PhoneNumber] = Field(default=None)
 
 
-class StudRegStep1(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
+class ParentRegistrationMe(BaseSchema):
+    relation: str = Field(min_length=2, max_length=50)
+    emergency_contact_phone: Optional[PhoneNumber] = Field(default=None)
 
+
+class StudRegStep1(BaseSchema):
     first_name: str = Field(min_length=2, max_length=50)
     father_name: str = Field(min_length=2, max_length=50)
     grand_father_name: Optional[str] = Field(default=None)
@@ -87,13 +71,7 @@ class StudRegStep1(BaseModel):
     student_photo: Optional[str] = Field(default=None)
 
 
-class StudRegStep2(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
+class StudRegStep2(BaseSchema):
     registered_for_grade_id: uuid.UUID
     transportation: Optional[str] = Field(default=None)
     is_transfer: bool = Field(default=False)
@@ -102,44 +80,24 @@ class StudRegStep2(BaseModel):
     @model_validator(mode="after")
     def validate_transfer_details(self) -> "StudRegStep2":
         if self.is_transfer and not self.previous_school:
-            raise ValueError(
-                "previousSchool Must be provided if student is Transferred"
-            )
+            raise ValueError("previousSchool Must be provided if student is Transferred")
         if not self.is_transfer:
             self.previous_school = None
         return self
 
 
-class StudRegStep3(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
+class StudRegStep3(BaseSchema):
     city: str = Field(min_length=2, max_length=50)
     state: str = Field(min_length=2, max_length=50)
     postal_code: str = Field(min_length=2, max_length=20)
 
 
-class StudRegStep4(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
+class StudRegStep4(BaseSchema):
     emergency_contact_name: Optional[str] = Field(default=None)
     emergency_contact_phone: Optional[PhoneNumber]
 
 
-class StudRegStep5(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
+class StudRegStep5(BaseSchema):
     blood_type: BloodTypeEnum = Field(default=BloodTypeEnum.UNKNOWN)
     has_medical_condition: bool = Field(default=False)
     medical_details: Optional[str] = Field(default=None)
@@ -149,9 +107,7 @@ class StudRegStep5(BaseModel):
     @model_validator(mode="after")
     def validate_medical_details(self) -> "StudRegStep5":
         if self.has_medical_condition and not self.medical_details:
-            raise ValueError(
-                "medicalDetails Must be provided if has Medical Conditions"
-            )
+            raise ValueError("medicalDetails Must be provided if has Medical Conditions")
         if not self.has_medical_condition:
             self.medical_details = None
 
@@ -164,6 +120,7 @@ class StudRegStep5(BaseModel):
 
 
 class StudentRegistrationForm(
+    UserRegistration,
     StudRegStep1,
     StudRegStep2,
     StudRegStep3,
@@ -171,90 +128,51 @@ class StudentRegistrationForm(
     StudRegStep5,
 ):
     parent_id: uuid.UUID
-    status: StudentApplicationStatusEnum = Field(
-        default=StudentApplicationStatusEnum.PENDING
-    )
+    status: StudentApplicationStatusEnum = Field(default=StudentApplicationStatusEnum.PENDING)
 
 
-class EmployeeRegStep1(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
-    first_name: str = Field(min_length=2, max_length=50)
-    father_name: str = Field(min_length=2, max_length=50)
-    grand_father_name: str
-    date_of_birth: PastDate
-    gender: GenderEnum
-    nationality: str
-    social_security_number: str
+class StudentRegistrationMe(
+    StudRegStep2,
+    StudRegStep3,
+    StudRegStep4,
+    StudRegStep5,
+):
+    nationality: Optional[str] = Field(default=None, min_length=2, max_length=100)
+    student_photo: Optional[str] = Field(default=None)
+    parent_id: Optional[uuid.UUID] = None
+    status: StudentApplicationStatusEnum = Field(default=StudentApplicationStatusEnum.PENDING)
 
 
-class EmployeeRegStep2(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
+class EmployeeRegStep1(BaseSchema):
+    employee_number: str
+    hire_date: date
+    employment_type: EmploymentTypeEnum = EmploymentTypeEnum.FULL_TIME
 
-    city: str = Field(min_length=2, max_length=50)
-    state: str = Field(min_length=2, max_length=50)
-    country: str
-    phone: PhoneNumber
-    secondary_phone: Optional[PhoneNumber] = Field(default=None)
+
+class EmployeeRegStep2(BaseSchema):
     email: EmailStr
-    emergency_contact_name: str = Field(min_length=2, max_length=50)
-    emergency_contact_relation: str = Field(min_length=2, max_length=50)
-    emergency_contact_phone: PhoneNumber
+    phone: PhoneNumber
+    department_id: Optional[uuid.UUID] = Field(default=None)
+    primary_position_id: Optional[uuid.UUID] = Field(default=None)
+    manager_employee_id: Optional[uuid.UUID] = Field(default=None)
 
 
-class EmployeeRegStep3(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
-    highest_education: HighestEducationEnum
-    subject_id: Optional[uuid.UUID] = Field(default=None)
-    university: str
-    graduation_year: int
-    gpa: float
-    position: EmployeePositionEnum
-    years_of_experience: ExperienceYearEnum
-
-    @model_validator(mode="after")
-    def validate_education_details(self) -> "EmployeeRegStep3":
-        if self.position == EmployeePositionEnum.TEACHING_STAFF:
-            if not self.subject_id:
-                raise ValueError(
-                    "subjectId must be provided for teachers applying for the position"
-                )
-        elif self.position != EmployeePositionEnum.TEACHING_STAFF and self.subject_id:
-            raise ValueError(
-                "subjectId should be null for non-teaching staff positions"
-            )
-        return self
+class EmployeeRegStep3(BaseSchema):
+    status: EmploymentStatusEnum = EmploymentStatusEnum.ACTIVE
+    termination_date: Optional[date] = Field(default=None)
+    highest_education: Optional[HighestEducationEnum] = Field(default=None)
 
 
-class EmployeeRegStep4(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
-    resume: Optional[str] = Field(default=None)
+class EmployeeRegStep4(BaseSchema):
     agree_to_terms: bool = Field(validate_default=True)
     agree_to_background_check: bool = Field(validate_default=True)
 
 
 class EmployeeRegistrationForm(
+    UserRegistration,
     EmployeeRegStep1,
     EmployeeRegStep2,
     EmployeeRegStep3,
     EmployeeRegStep4,
 ):
-    status: EmployeeApplicationStatusEnum = EmployeeApplicationStatusEnum.PENDING
+    pass

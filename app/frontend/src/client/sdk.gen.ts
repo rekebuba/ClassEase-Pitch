@@ -479,7 +479,7 @@ export const registerEmployeeStep4 = <ThrowOnError extends boolean = false>(opti
 
 /**
  * Register New Employee
- * Registers a new user (Admin, Student, Employee) in the system.
+ * Registers a new user (Employee) in the system.
  */
 export const registerNewEmployee = <ThrowOnError extends boolean = false>(options: Options<RegisterNewEmployeeData, ThrowOnError>) => {
     return (options.client ?? _heyApiClient).post<RegisterNewEmployeeResponses, RegisterNewEmployeeErrors, ThrowOnError>({

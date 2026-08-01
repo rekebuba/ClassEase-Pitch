@@ -4,30 +4,22 @@ import uuid
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Optional
 
-from pydantic import BaseModel, ConfigDict
-
+from project.schema.schema import BaseSchema
 from project.utils.enum import (
     EventEligibilityEnum,
     EventLocationEnum,
     EventOrganizerEnum,
     EventPurposeEnum,
 )
-from project.utils.utils import to_camel
 
 if TYPE_CHECKING:
     from project.schema.models.year_schema import YearSchema
 
 
-class EventSchema(BaseModel):
+class EventSchema(BaseSchema):
     """
     This model represents an event in the system.
     """
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     id: uuid.UUID
     year_id: uuid.UUID
@@ -47,7 +39,7 @@ class EventSchema(BaseModel):
     description: Optional[str] = None
 
 
-class EventRelatedSchema(BaseModel):
+class EventRelatedSchema(BaseSchema):
     """This model represents the relationships of a EventSchema."""
 
     year: Optional[YearSchema] = None

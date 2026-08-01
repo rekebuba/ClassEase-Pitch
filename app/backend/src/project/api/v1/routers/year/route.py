@@ -1,5 +1,5 @@
 import uuid
-from typing import Any, Dict, List, Sequence
+from typing import List, Sequence
 
 from fastapi import APIRouter, HTTPException
 from fastapi.logger import logger
@@ -7,17 +7,17 @@ from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from starlette import status
 
-from project.api.v1.routers.dependencies import SessionDep, admin_route, shared_route
+from project.api.v1.routers.dependencies import (
+    AuthenticatedRoute,
+    SessionDep,
+    SystemSessionDep,
+)
 from project.api.v1.routers.year.schema import (
     DeleteYearSuccess,
     NewYear,
-    NewYearSuccess,
     YearSummary,
 )
-from project.api.v1.routers.year.service import (
-    create_academic_term,
-    handle_setup_methods,
-)
+from project.api.v1.routers.year.service import create_academic_term
 from project.models.grade import Grade
 from project.models.subject import Subject
 from project.models.year import Year
@@ -25,8 +25,94 @@ from project.schema.models import YearWithRelatedSchema
 from project.schema.models.grade_schema import GradeNestedSchema
 from project.schema.models.subject_schema import SubjectNestedSchema
 from project.schema.models.year_schema import YearSchema
+from project.schema.schema import SuccessResponse
+from project.services.school_provisioning import (
+    SchoolProvisioningService,
+)
+from project.utils.enum import PermissionEnum, RoleEnum
 
 router = APIRouter(prefix="/years", tags=["Years"])
+
+
+@router.post("", response_model=SuccessResponse, status_code=status.HTTP_201_CREATED)
+async def post_year(
+    session: SessionDep,
+    system_session: SystemSessionDep,
+    new_year: NewYear,
+    user_in: AuthenticatedRoute,
+) -> SuccessResponse:
+    """
+    Creates a new School Year
+    """
+    if not user_in.has_role(RoleEnum.ADMIN) and not user_in.has_permission(PermissionEnum.YEARS_WRITE):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+
+    errors = {}
+
+    existing_year_name = (
+        await session.execute(
+            select(Year).where(
+                Year.name == new_year.name,
+            )
+        )
+    ).first()
+
+    if existing_year_name:
+        errors["name"] = "Name already exists."
+
+    if errors:
+        raise HTTPException(status_code=400, detail=errors)
+
+    try:
+        year = Year(
+            school_id=user_in.membership.school_id,
+            name=new_year.name,
+            calendar_type=new_year.calendar_type,
+            status=new_year.status,
+            start_date=new_year.start_date,
+            end_date=new_year.end_date,
+        )
+        session.add(year)
+        await session.flush()
+
+        if new_year.setup_methods == "Default Template":
+            # Populate the explicit year with the default blueprint structure.
+            await SchoolProvisioningService.setup_academic_year_from_blueprint(
+                tenant_session=session,
+                system_session=system_session,
+                school_id=user_in.membership.school_id,
+                year_id=year.id,
+            )
+        elif new_year.setup_methods == "Last Year Copy":
+            try:
+                await SchoolProvisioningService.setup_academic_year_from_previous_year(
+                    tenant_session=session,
+                    school_id=user_in.membership.school_id,
+                    year_id=year.id,
+                )
+            except ValueError as e:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail={"setupMethods": str(e)},
+                )
+        elif new_year.setup_methods == "Manual":
+            create_academic_term(
+                year_id=year.id,
+                school_id=user_in.membership.school_id,
+                calendar_type=new_year.calendar_type,
+                session=session,
+            )
+
+        await session.commit()
+
+        return SuccessResponse(message="Year created Successfully", id=year.id)
+    except HTTPException:
+        await session.rollback()
+        raise
+    except Exception as e:
+        logger.error(f"Error creating year: {e}")
+        await session.rollback()
+        raise HTTPException(status_code=500, detail=f"Creation failed: {str(e)}")
 
 
 @router.get(
@@ -35,7 +121,7 @@ router = APIRouter(prefix="/years", tags=["Years"])
 )
 async def get_years(
     session: SessionDep,
-    user_in: shared_route,
+    user_in: AuthenticatedRoute,
 ) -> Sequence[Year]:
     """
     Returns a list of all academic years in the system.
@@ -52,7 +138,7 @@ async def get_years(
 async def get_year_relation(
     session: SessionDep,
     year_id: uuid.UUID,
-    user_in: shared_route,
+    user_in: AuthenticatedRoute,
 ) -> Year:
     """
     Returns a specific academic year with all its relationship.
@@ -64,10 +150,6 @@ async def get_year_relation(
             .options(
                 selectinload(Year.events),
                 selectinload(Year.academic_terms),
-                selectinload(Year.grades),
-                selectinload(Year.subjects),
-                selectinload(Year.students),
-                selectinload(Year.employees),
             )
         )
     ).scalar_one_or_none()
@@ -87,7 +169,7 @@ async def get_year_relation(
 )
 async def get_year_summary(
     session: SessionDep,
-    user_in: shared_route,
+    user_in: AuthenticatedRoute,
     q: str | None = None,
 ) -> Sequence[Year]:
     """
@@ -96,9 +178,7 @@ async def get_year_summary(
     stmt = select(Year)
     if q:
         stmt = stmt.where(Year.name.ilike(f"%{q}%"))
-    years = (
-        (await session.execute(stmt.order_by(Year.created_at.desc()))).scalars().all()
-    )
+    years = (await session.execute(stmt.order_by(Year.created_at.desc()))).scalars().all()
 
     return years
 
@@ -110,7 +190,7 @@ async def get_year_summary(
 async def get_year_by_id(
     session: SessionDep,
     year_id: uuid.UUID,
-    user_in: shared_route,
+    user_in: AuthenticatedRoute,
 ) -> Year:
     """
     Returns specific academic year
@@ -125,67 +205,6 @@ async def get_year_by_id(
     return year
 
 
-@router.post("", response_model=NewYearSuccess, status_code=status.HTTP_201_CREATED)
-async def post_year(
-    session: SessionDep,
-    new_year: NewYear,
-    user_in: admin_route,
-) -> Dict[str, Any]:
-    """
-    Creates a new Year
-    """
-    errors = {}
-
-    existing_year_name = (
-        await session.execute(select(Year).where(Year.name == new_year.name))
-    ).first()
-
-    if existing_year_name:
-        errors["name"] = "Name already exists."
-
-    if errors:
-        raise HTTPException(status_code=400, detail=errors)
-
-    try:
-        year = Year(
-            name=new_year.name,
-            calendar_type=new_year.calendar_type,
-            status=new_year.status,
-            start_date=new_year.start_date,
-            end_date=new_year.end_date,
-        )
-        year.school_id = user_in.membership.school_id
-        session.add(year)
-        await session.flush()
-
-        create_academic_term(
-            year_id=year.id,
-            school_id=user_in.membership.school_id,
-            calendar_type=new_year.calendar_type,
-            session=session,
-        )
-
-        await handle_setup_methods(
-            old_year_id=new_year.copy_from_year_id,
-            year_id=year.id,
-            school_id=user_in.membership.school_id,
-            session=session,
-            setup_methods=new_year.setup_methods,
-        )
-
-        await session.commit()
-        await session.refresh(year)
-
-        return {"message": "Year created Successfully", "id": year.id}
-    except HTTPException:
-        session.rollback()
-        raise
-    except Exception as e:
-        logger.error(f"Error creating year: {e}")
-        session.rollback()
-        raise HTTPException(status_code=500, detail=f"Creation failed: {str(e)}")
-
-
 @router.delete(
     "/{year_id}",
     response_model=DeleteYearSuccess,
@@ -193,7 +212,7 @@ async def post_year(
 async def delete_year(
     session: SessionDep,
     year_id: uuid.UUID,
-    user_in: admin_route,
+    user_in: AuthenticatedRoute,
 ) -> DeleteYearSuccess:
     """
     Deletes an existing academic year in the system.
@@ -211,7 +230,7 @@ async def delete_year(
 
         return DeleteYearSuccess(message="Year deleted successfully")
     except Exception as e:
-        session.rollback()
+        await session.rollback()
         raise HTTPException(status_code=500, detail=f"Deletion failed: {str(e)}")
 
 
@@ -222,7 +241,7 @@ async def delete_year(
 async def get_detail_grades_by_year_id(
     session: SessionDep,
     year_id: uuid.UUID,
-    user_in: shared_route,
+    user_in: AuthenticatedRoute,
 ) -> Sequence[Grade]:
     """
     Returns specific academic year
@@ -238,14 +257,9 @@ async def get_detail_grades_by_year_id(
     grades = (
         (
             await session.execute(
-                select(Grade)
-                .where(Grade.year_id == year_id)
-                .options(
-                    selectinload(Grade.year),
+                select(Grade).options(
                     selectinload(Grade.sections),
                     selectinload(Grade.streams),
-                    selectinload(Grade.students),
-                    selectinload(Grade.student_term_records),
                 )
             )
         )
@@ -263,7 +277,7 @@ async def get_detail_grades_by_year_id(
 async def get_detail_subjects_by_year_id(
     session: SessionDep,
     year_id: uuid.UUID,
-    user_in: shared_route,
+    user_in: AuthenticatedRoute,
 ) -> Sequence[Subject]:
     """
     Returns specific academic year
@@ -279,12 +293,8 @@ async def get_detail_subjects_by_year_id(
     subjects = (
         (
             await session.execute(
-                select(Subject)
-                .where(Subject.year_id == year_id)
-                .options(
-                    selectinload(Subject.teachers),
-                    selectinload(Subject.students),
-                    selectinload(Subject.mark_lists),
+                select(Subject).options(
+                    # selectinload(Subject.teachers),
                 )
             )
         )

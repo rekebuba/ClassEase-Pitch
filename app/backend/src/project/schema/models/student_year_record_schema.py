@@ -3,9 +3,7 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, List, Optional
 
-from pydantic import BaseModel, ConfigDict
-
-from project.utils.utils import to_camel
+from project.schema.schema import BaseSchema
 
 if TYPE_CHECKING:
     from project.schema.models.grade_schema import GradeSchema
@@ -18,16 +16,10 @@ if TYPE_CHECKING:
     from project.schema.models.year_schema import YearSchema
 
 
-class StudentYearRecordSchema(BaseModel):
+class StudentYearRecordSchema(BaseSchema):
     """
     This model represents a student's yearly academic record.
     """
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     id: uuid.UUID | None = None
     student_id: uuid.UUID
@@ -38,7 +30,7 @@ class StudentYearRecordSchema(BaseModel):
     rank: Optional[int] = None
 
 
-class StudentYearRecordRelatedSchema(BaseModel):
+class StudentYearRecordRelatedSchema(BaseSchema):
     """This model represents the relationships of a StudentYearRecordSchema."""
 
     student: Optional[StudentSchema] = None
@@ -49,9 +41,7 @@ class StudentYearRecordRelatedSchema(BaseModel):
     subject_yearly_averages: Optional[List[SubjectYearlyAverageSchema]] = None
 
 
-class StudentYearRecordWithRelatedSchema(
-    StudentYearRecordSchema, StudentYearRecordRelatedSchema
-):
+class StudentYearRecordWithRelatedSchema(StudentYearRecordSchema, StudentYearRecordRelatedSchema):
     """
     This model represents a student's yearly academic record
     with related entities.

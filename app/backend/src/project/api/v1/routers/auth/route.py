@@ -18,6 +18,7 @@ from project.api.v1.routers.auth.schema import (
     ProviderResponse,
     RefreshTokenRequest,
     SchoolSummary,
+    SignUpRequest,
     VerifyOTPResponse,
 )
 from project.api.v1.routers.auth.service import (
@@ -28,17 +29,17 @@ from project.api.v1.routers.auth.service import (
     verify_password_reset_token,
 )
 from project.api.v1.routers.dependencies import (
-    AuthenticatedActor,
+    AuthenticatedRoute,
     RedisDep,
     SessionDep,
     TokenDep,
-    get_current_actor,
 )
 from project.api.v1.routers.schema import HTTPError
 from project.core.access_control import (
     create_auth_session,
     generate_refresh_token,
     get_membership_with_roles,
+    get_user_with_auth_context,
     hash_refresh_token,
     load_user_memberships_by_identifier,
     load_user_memberships_for_user,
@@ -62,15 +63,75 @@ from project.models import (
     SchoolMembership,
     User,
 )
+from project.schema.schema import SuccessResponse
 from project.utils.enum import (
     AuthProviderEnum,
     AuthSessionAssuranceEnum,
     SchoolMembershipStatusEnum,
+    SessionScope,
 )
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+@router.post(
+    "/signup",
+    status_code=status.HTTP_201_CREATED,
+    response_model=SuccessResponse,
+    responses={
+        status.HTTP_400_BAD_REQUEST: {
+            "model": HTTPError,
+            "description": "User already exists",
+        },
+    },
+)
+async def signup(
+    request_data: SignUpRequest,
+    session: SessionDep,
+) -> SuccessResponse:
+    user = (await session.execute(select(User).filter(User.email == str(request_data.email)))).scalar_one_or_none()
+    if user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="User already exists",
+        )
+
+    new_user = User(
+        first_name=request_data.first_name,
+        father_name=request_data.father_name,
+        grand_father_name=request_data.grand_father_name,
+        email=str(request_data.email),
+        username=request_data.username,
+        phone=request_data.phone,
+        date_of_birth=request_data.date_of_birth,
+        gender=request_data.gender,
+        is_active=True,
+        is_verified=False,
+    )
+    session.add(new_user)
+    await session.flush()
+
+    auth_identity = AuthIdentity(
+        user_id=new_user.id,
+        provider=AuthProviderEnum.PASSWORD,
+        password=get_password_hash(request_data.password),
+    )
+    session.add(auth_identity)
+
+    await record_audit_log(
+        session,
+        action="auth.signup",
+        outcome="success",
+        user_id=new_user.id,
+    )
+    await session.commit()
+
+    return SuccessResponse(
+        message="User created successfully. You can now log in.",
+        id=new_user.id,
+    )
 
 
 class SchoolAwareOAuth2PasswordRequestForm:
@@ -122,9 +183,7 @@ def _build_school_summary(membership: SchoolMembership) -> SchoolSummary:
 def _build_membership_summary(membership: SchoolMembership) -> MembershipSummary:
     role_names = sorted(resolve_membership_role_names(membership))
     permissions = sorted(resolve_membership_permissions(membership))
-    shell_role = resolve_shell_role_from_names(
-        role_names, fallback=membership.user.role
-    )
+    shell_role = resolve_shell_role_from_names(role_names)
     return MembershipSummary(
         id=membership.id,
         school_id=membership.school_id,
@@ -182,10 +241,11 @@ async def _issue_school_scoped_tokens(
 
     role_names = resolve_membership_role_names(membership)
     permissions = resolve_membership_permissions(membership)
-    shell_role = resolve_shell_role_from_names(role_names, fallback=user.role)
+    shell_role = resolve_shell_role_from_names(role_names)
 
     access_token = create_access_token(
         subject=str(user.id),
+        session_scope=SessionScope.SCHOOL,
         role=shell_role,
         school_id=str(membership.school_id),
         school_slug=membership.school.slug,
@@ -197,8 +257,7 @@ async def _issue_school_scoped_tokens(
     )
 
     available_memberships = [
-        _build_membership_summary(item)
-        for item in await load_user_memberships_for_user(session, user_id=user.id)
+        _build_membership_summary(item) for item in await load_user_memberships_for_user(session, user_id=user.id)
     ]
 
     await record_audit_log(
@@ -222,7 +281,104 @@ async def _issue_school_scoped_tokens(
         active_school=_build_school_summary(membership),
         active_membership=_build_membership_summary(membership),
         available_memberships=available_memberships,
+        session_scope=SessionScope.SCHOOL,
     )
+
+
+async def _issue_platform_scoped_tokens(
+    session: SessionDep,
+    *,
+    user: User,
+    assurance_level: AuthSessionAssuranceEnum,
+    request: Request,
+) -> LoginTokenResponse:
+    refresh_token = generate_refresh_token()
+    auth_session = await create_auth_session(
+        session,
+        user=user,
+        refresh_token=refresh_token,
+        user_agent=request.headers.get("user-agent"),
+        ip_address=request.client.host if request.client else None,
+        assurance_level=assurance_level,
+    )
+
+    access_token = create_access_token(
+        subject=str(user.id),
+        session_scope=SessionScope.PLATFORM,
+        session_id=str(auth_session.id),
+    )
+
+    await record_audit_log(
+        session,
+        action="auth.login",
+        outcome="success",
+        user_id=user.id,
+        auth_session_id=auth_session.id,
+        ip_address=request.client.host if request.client else None,
+        user_agent=request.headers.get("user-agent"),
+        details={"scope": SessionScope.PLATFORM.value},
+    )
+    await session.commit()
+
+    return LoginTokenResponse(
+        access_token=access_token,
+        refresh_token=refresh_token,
+        token_type="bearer",
+        active_school=None,
+        active_membership=None,
+        available_memberships=[],
+        session_scope=SessionScope.PLATFORM,
+    )
+
+
+async def _resolve_platform_user_for_login(
+    session: SessionDep,
+    *,
+    identifier: str,
+) -> User | None:
+    user = await get_user_with_auth_context(session, identifier=identifier)
+    if user is None or user.memberships:
+        return None
+    return user
+
+
+async def _validate_password_identity(
+    session: SessionDep,
+    *,
+    user: User,
+    password: str,
+    request: Request,
+    school_id: Any = None,
+    membership_id: Any = None,
+) -> None:
+    identity = next(
+        (
+            auth_identity
+            for auth_identity in user.auth_identities
+            if auth_identity.provider == AuthProviderEnum.PASSWORD
+        ),
+        None,
+    )
+
+    if identity is None or identity.password is None or not check_password(password, identity.password):
+        logger.warning("Failed password attempt for user %s", user.id)
+        await record_audit_log(
+            session,
+            action="auth.login",
+            outcome="failure",
+            school_id=school_id,
+            user_id=user.id,
+            membership_id=membership_id,
+            ip_address=request.client.host if request.client else None,
+            user_agent=request.headers.get("user-agent"),
+            details={"reason": "invalid_credentials"},
+        )
+        await session.commit()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
 
 @router.post(
@@ -252,41 +408,39 @@ async def login(
             school_slug=school_slug,
         )
     )
+    if not memberships:
+        platform_user = await get_user_with_auth_context(session, identifier=login_identifier)
+        if platform_user is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User Not Found",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        await _validate_password_identity(
+            session,
+            user=platform_user,
+            password=form_data.password,
+            request=request,
+        )
+        return await _issue_platform_scoped_tokens(
+            session,
+            user=platform_user,
+            assurance_level=AuthSessionAssuranceEnum.PASSWORD_ONLY,
+            request=request,
+        )
+
     membership = _pick_single_membership(memberships, school_slug=school_slug)
     user = membership.user
 
-    identity = next(
-        (
-            auth_identity
-            for auth_identity in user.auth_identities
-            if auth_identity.provider == AuthProviderEnum.PASSWORD
-        ),
-        None,
+    await _validate_password_identity(
+        session,
+        user=user,
+        password=form_data.password,
+        request=request,
+        school_id=membership.school_id,
+        membership_id=membership.id,
     )
-
-    if (
-        identity is None
-        or identity.password is None
-        or not check_password(form_data.password, identity.password)
-    ):
-        logger.warning("Failed password attempt for user %s", user.id)
-        await record_audit_log(
-            session,
-            action="auth.login",
-            outcome="failure",
-            school_id=membership.school_id,
-            user_id=user.id,
-            membership_id=membership.id,
-            ip_address=request.client.host if request.client else None,
-            user_agent=request.headers.get("user-agent"),
-            details={"reason": "invalid_credentials"},
-        )
-        await session.commit()
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
 
     if not user.is_active or membership.status != SchoolMembershipStatusEnum.ACTIVE:
         raise HTTPException(
@@ -339,6 +493,14 @@ async def login_provider(
             school_slug=school_slug,
         )
     )
+    if not memberships:
+        return await _issue_platform_scoped_tokens(
+            session,
+            user=user,
+            assurance_level=AuthSessionAssuranceEnum.FEDERATED,
+            request=request,
+        )
+
     membership = _pick_single_membership(memberships, school_slug=school_slug)
 
     return await _issue_school_scoped_tokens(
@@ -367,24 +529,80 @@ async def refresh_access_token(
     auth_session = (
         await session.execute(
             select(AuthSession).where(
-                AuthSession.refresh_token_hash
-                == hash_refresh_token(request.refresh_token)
+                AuthSession.refresh_token_hash == hash_refresh_token(request.refresh_token),
+                AuthSession.revoked_at.is_(None),
+                AuthSession.expires_at > datetime.now(timezone.utc),
             )
         )
     ).scalar_one_or_none()
 
-    if (
-        auth_session is None
-        or auth_session.revoked_at is not None
-        or auth_session.expires_at <= datetime.now(timezone.utc)
-    ):
+    if auth_session is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid refresh token",
         )
 
-    membership = await get_membership_with_roles(session, auth_session.membership_id)
-    if membership is None or membership.status != SchoolMembershipStatusEnum.ACTIVE:
+    membership: SchoolMembership | None = None
+    if request.membership_id is not None:
+        membership = await get_membership_with_roles(
+            session,
+            request.membership_id,
+            skip_school_scope=True,
+        )
+    else:
+        memberships = list(
+            await load_user_memberships_for_user(
+                session,
+                user_id=auth_session.user_id,
+            )
+        )
+        if len(memberships) == 1:
+            membership = memberships[0]
+
+    if membership is None:
+        stored_user = await session.get(User, auth_session.user_id)
+        if stored_user is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token",
+            )
+
+        user_identifier = stored_user.email or stored_user.username or ""
+        user = await get_user_with_auth_context(session, identifier=user_identifier)
+        if user is None or user.memberships:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token",
+            )
+
+        refresh_token = generate_refresh_token()
+        auth_session.refresh_token_hash = hash_refresh_token(refresh_token)
+        auth_session.last_seen_at = datetime.now(timezone.utc)
+        access_token = create_access_token(
+            subject=str(user.id),
+            session_scope=SessionScope.PLATFORM,
+            session_id=str(auth_session.id),
+        )
+        await record_audit_log(
+            session,
+            action="auth.refresh",
+            outcome="success",
+            user_id=user.id,
+            auth_session_id=auth_session.id,
+            details={"scope": SessionScope.PLATFORM.value},
+        )
+        await session.commit()
+        return LoginTokenResponse(
+            access_token=access_token,
+            refresh_token=refresh_token,
+            token_type="bearer",
+            active_school=None,
+            active_membership=None,
+            available_memberships=[],
+            session_scope=SessionScope.PLATFORM,
+        )
+
+    if membership.status != SchoolMembershipStatusEnum.ACTIVE:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid refresh token",
@@ -397,9 +615,10 @@ async def refresh_access_token(
 
     role_names = resolve_membership_role_names(membership)
     permissions = resolve_membership_permissions(membership)
-    shell_role = resolve_shell_role_from_names(role_names, fallback=user.role)
+    shell_role = resolve_shell_role_from_names(role_names)
     access_token = create_access_token(
         subject=str(user.id),
+        session_scope=SessionScope.SCHOOL,
         role=shell_role,
         school_id=str(membership.school_id),
         school_slug=membership.school.slug,
@@ -428,9 +647,9 @@ async def refresh_access_token(
         active_school=_build_school_summary(membership),
         active_membership=_build_membership_summary(membership),
         available_memberships=[
-            _build_membership_summary(item)
-            for item in await load_user_memberships_for_user(session, user_id=user.id)
+            _build_membership_summary(item) for item in await load_user_memberships_for_user(session, user_id=user.id)
         ],
+        session_scope=SessionScope.SCHOOL,
     )
 
 
@@ -449,10 +668,12 @@ async def select_membership(
     request: Request,
     session: SessionDep,
     token: TokenDep,
-    current_actor: Annotated[AuthenticatedActor, Depends(get_current_actor)],
+    current_actor: AuthenticatedRoute,
 ) -> LoginTokenResponse:
     target_membership = await get_membership_with_roles(
-        session, request_data.membership_id
+        session,
+        request_data.membership_id,
+        skip_school_scope=True,
     )
     if (
         target_membership is None
@@ -504,11 +725,10 @@ async def select_membership(
 
     role_names = resolve_membership_role_names(target_membership)
     permissions = resolve_membership_permissions(target_membership)
-    shell_role = resolve_shell_role_from_names(
-        role_names, fallback=current_actor.user.role
-    )
+    shell_role = resolve_shell_role_from_names(role_names)
     access_token = create_access_token(
         subject=str(current_actor.user.id),
+        session_scope=SessionScope.SCHOOL,
         role=shell_role,
         school_id=str(target_membership.school_id),
         school_slug=target_membership.school.slug,
@@ -534,6 +754,7 @@ async def select_membership(
                 user_id=current_actor.user.id,
             )
         ],
+        session_scope=SessionScope.SCHOOL,
     )
 
 
@@ -556,18 +777,14 @@ async def verify_email(
     token: str,
 ) -> MessageResponse:
     """Endpoint to verify a user's email using a token."""
-    email = verify_email_verification_token(
-        token, settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS
-    )
+    email = verify_email_verification_token(token, settings.EMAIL_RESET_TOKEN_EXPIRE_HOURS)
     if not email:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Invalid or expired token",
         )
 
-    user = (
-        await session.execute(select(User).filter(User.email == email))
-    ).scalar_one_or_none()
+    user = (await session.execute(select(User).filter(User.email == email))).scalar_one_or_none()
 
     if not user:
         raise HTTPException(
@@ -613,14 +830,10 @@ async def logout(
         session_id = payload.get("session_id")
 
         if not jti:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token format"
-            )
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token format")
 
         existing_blacklist = (
-            await session.execute(
-                select(BlacklistToken).filter(BlacklistToken.jti == jti)
-            )
+            await session.execute(select(BlacklistToken).filter(BlacklistToken.jti == jti))
         ).scalar_one_or_none()
         if existing_blacklist:
             return {"message": "Token was already invalidated"}
@@ -638,9 +851,7 @@ async def logout(
 
     except jwt.PyJWTError as e:
         logger.error("Token validation error during logout: %s", str(e))
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
 
 @router.post(
@@ -660,13 +871,9 @@ async def password_recovery(
     redis: RedisDep,
 ) -> MessageResponse:
     """Endpoint to initiate password recovery by sending an OTP to the user's email."""
-    user = (
-        await session.execute(select(User).filter(User.email == data.email))
-    ).scalar_one_or_none()
+    user = (await session.execute(select(User).filter(User.email == data.email))).scalar_one_or_none()
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     await send_reset_password_email(NameEmail(email=data.email, name=data.email), redis)
     return MessageResponse(message="Password recovery email sent")
@@ -695,9 +902,7 @@ async def verify_otp(otp_request: OTPRequest, redis: RedisDep) -> VerifyOTPRespo
             detail="Invalid or expired OTP",
         )
 
-    return VerifyOTPResponse(
-        message="OTP verified successfully", token=is_valid_with_token
-    )
+    return VerifyOTPResponse(message="OTP verified successfully", token=is_valid_with_token)
 
 
 @router.post(
@@ -728,15 +933,9 @@ async def password_reset(
             detail="Invalid or expired token",
         )
 
-    user = (
-        (await session.execute(select(User).filter(User.email == request.email)))
-        .scalars()
-        .first()
-    )
+    user = (await session.execute(select(User).filter(User.email == request.email))).scalars().first()
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
-        )
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
 
     identity = (
         (

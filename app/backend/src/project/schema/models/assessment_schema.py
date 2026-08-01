@@ -3,38 +3,30 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, Optional
 
-from pydantic import BaseModel, ConfigDict
-
-from project.utils.utils import to_camel
+from project.schema.schema import BaseSchema
 
 if TYPE_CHECKING:
     from project.schema.models.student_schema import StudentSchema
     from project.schema.models.student_term_record_schema import StudentTermRecordSchema
-    from project.schema.models.yearly_subject_schema import YearlySubjectSchema
+    from project.schema.models.subject_offering_schema import SubjectOfferingSchema
 
 
-class AssessmentSchema(BaseModel):
+class AssessmentSchema(BaseSchema):
     """
     This model represents an assessment record for a student including details
     """
 
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
     id: uuid.UUID | None = None
     student_id: uuid.UUID
     student_term_record_id: uuid.UUID
-    yearly_subject_id: uuid.UUID
+    subject_offering_id: uuid.UUID
     total: Optional[float] = None
     rank: Optional[int] = None
 
 
-class AssessmentRelatedSchema(BaseModel):
+class AssessmentRelatedSchema(BaseSchema):
     """This model represents the relationships of a AssessmentSchema."""
 
     student: Optional[StudentSchema] = None
     student_term_record: Optional[StudentTermRecordSchema] = None
-    yearly_subject: Optional[YearlySubjectSchema] = None
+    subject_offering: Optional[SubjectOfferingSchema] = None

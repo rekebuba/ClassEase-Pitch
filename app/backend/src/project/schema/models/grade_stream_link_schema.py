@@ -2,21 +2,13 @@ from __future__ import annotations
 
 import uuid
 
-from pydantic import BaseModel, ConfigDict
-
-from project.utils.utils import to_camel
+from project.schema.schema import BaseSchema
 
 
-class GradeStreamLinkSchema(BaseModel):
+class GradeStreamLinkSchema(BaseSchema):
     """
     This model represents the link between a grade and a stream.
     """
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     id: uuid.UUID | None = None
     grade_id: uuid.UUID

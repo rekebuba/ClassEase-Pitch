@@ -5,7 +5,10 @@ from fastapi import APIRouter, HTTPException, Query
 from fastapi.logger import logger
 from sqlalchemy import select
 
-from project.api.v1.routers.dependencies import SessionDep, admin_route, shared_route
+from project.api.v1.routers.dependencies import (
+    AuthenticatedRoute,
+    SessionDep,
+)
 from project.api.v1.routers.schema import FilterParams
 from project.api.v1.routers.subjects.schema import (
     NewSubject,
@@ -31,7 +34,7 @@ router = APIRouter(prefix="/subjects", tags=["Subjects"])
 async def get_subjects(
     session: SessionDep,
     query: Annotated[FilterParams, Query()],
-    user_in: shared_route,
+    user_in: AuthenticatedRoute,
 ) -> Sequence[Subject]:
     """
     Returns All Subjects with in academic year
@@ -43,17 +46,7 @@ async def get_subjects(
             detail=f"Year with ID {query.year_id} not found.",
         )
 
-    subjects = (
-        (
-            await session.execute(
-                select(Subject)
-                .where(Subject.year_id == query.year_id)
-                .order_by(Subject.name)
-            )
-        )
-        .scalars()
-        .all()
-    )
+    subjects = (await session.execute(select(Subject).order_by(Subject.name))).scalars().all()
 
     return subjects
 
@@ -65,7 +58,7 @@ async def get_subjects(
 async def post_subject(
     session: SessionDep,
     new_subject: NewSubject,
-    user_in: admin_route,
+    user_in: AuthenticatedRoute,
 ) -> Dict[str, Any]:
     """
     Creates a new Subject
@@ -77,7 +70,6 @@ async def post_subject(
             await session.execute(
                 select(Subject).where(
                     Subject.name == new_subject.name,
-                    Subject.year_id == new_subject.year_id,
                 )
             )
         )
@@ -93,7 +85,6 @@ async def post_subject(
             await session.execute(
                 select(Subject).where(
                     Subject.code == new_subject.code,
-                    Subject.year_id == new_subject.year_id,
                 )
             )
         )
@@ -112,11 +103,10 @@ async def post_subject(
         if not year:
             raise HTTPException(status_code=404, detail="Academic year not found.")
         subject = Subject(
+            school_id=year.school_id,
             name=new_subject.name,
             code=new_subject.code,
-            year_id=new_subject.year_id,
         )
-        subject.school_id = year.school_id
         session.add(subject)
         await session.commit()
         await session.refresh(subject)
@@ -135,7 +125,7 @@ async def post_subject(
 async def get_subjects_setup(
     session: SessionDep,
     query: Annotated[FilterParams, Query()],
-    user_in: shared_route,
+    user_in: AuthenticatedRoute,
 ) -> Sequence[Subject]:
     """
     Returns All Subjects with in academic year
@@ -147,7 +137,7 @@ async def get_subjects_setup(
             detail=f"Year with ID {query.year_id} not found.",
         )
 
-    stmt = select(Subject).where(Subject.year_id == query.year_id)
+    stmt = select(Subject)
     if query.q:
         stmt = stmt.where(Subject.name.ilike(f"%{query.q}%"))
 
@@ -163,7 +153,7 @@ async def get_subjects_setup(
 async def get_subject_setup_by_id(
     session: SessionDep,
     subject_id: uuid.UUID,
-    user_in: shared_route,
+    user_in: AuthenticatedRoute,
 ) -> Subject:
     """
     Returns specific academic subject
@@ -186,7 +176,7 @@ async def patch_subject_setup(
     session: SessionDep,
     subject_id: uuid.UUID,
     update_data: UpdateSubjectSetup,
-    user_in: admin_route,
+    user_in: AuthenticatedRoute,
 ) -> Dict[str, str]:
     """
     Updates Subject SetUp
@@ -208,7 +198,12 @@ async def patch_subject_setup(
                 setattr(subject, key, getattr(update_data, key))
 
         # Update relationships
-        update_subject_relationships(subject, update_data, session)
+        update_subject_relationships(
+            year_id=uuid.UUID(),  # TODO: Pass actual year_id from request context
+            subject=subject,
+            update_data=update_data,
+            session=session,
+        )
 
         await session.commit()
 
@@ -226,7 +221,7 @@ async def patch_subject_setup(
 async def get_subject_by_id(
     session: SessionDep,
     subject_id: uuid.UUID,
-    user_in: shared_route,
+    user_in: AuthenticatedRoute,
 ) -> Subject:
     """
     Returns specific academic subject

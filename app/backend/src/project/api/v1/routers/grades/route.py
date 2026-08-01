@@ -8,7 +8,10 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 
-from project.api.v1.routers.dependencies import SessionDep, admin_route, shared_route
+from project.api.v1.routers.dependencies import (
+    AuthenticatedRoute,
+    SessionDep,
+)
 from project.api.v1.routers.grades.schema import (
     GradeSetupSchema,
     NewGrade,
@@ -18,11 +21,12 @@ from project.api.v1.routers.grades.schema import (
 )
 from project.api.v1.routers.grades.service import update_grade_relationships
 from project.api.v1.routers.schema import FilterParams
-from project.models import GradeStreamSubject
+from project.models import SubjectOffering
 from project.models.grade import Grade
 from project.models.year import Year
 from project.schema.models import GradeWithRelatedSchema
 from project.schema.models.grade_schema import GradeSchema
+from project.utils.enum import PermissionEnum
 from project.utils.utils import sort_grade_key
 
 router = APIRouter(prefix="/grades", tags=["Grades"])
@@ -34,24 +38,18 @@ router = APIRouter(prefix="/grades", tags=["Grades"])
 )
 async def get_grades(
     session: SessionDep,
-    query: Annotated[FilterParams, Query()],
-    user_in: shared_route,
+    user_in: AuthenticatedRoute,
 ) -> Sequence[Grade]:
     """
     Returns specific academic year
     """
-    year = await session.get(Year, query.year_id)
-    if not year:
+    if not user_in.has_permission(PermissionEnum.GRADES_READ):
         raise HTTPException(
-            status_code=404,
-            detail=f"Year with ID {query.year_id} not found.",
+            status_code=403,
+            detail="You do not have permission to read grades.",
         )
 
-    grades = (
-        (await session.execute(select(Grade).where(Grade.year_id == query.year_id)))
-        .scalars()
-        .all()
-    )
+    grades = (await session.execute(select(Grade))).scalars().all()
 
     sorted_grades = sorted(grades, key=sort_grade_key)
 
@@ -65,7 +63,7 @@ async def get_grades(
 async def post_grade(
     session: SessionDep,
     new_grade: NewGrade,
-    user_in: admin_route,
+    user_in: AuthenticatedRoute,
 ) -> Dict[str, Any]:
     """
     Creates a new Grade
@@ -76,7 +74,6 @@ async def post_grade(
         await session.execute(
             select(Grade).where(
                 Grade.grade == new_grade.grade,
-                Grade.year_id == new_grade.year_id,
             )
         )
     ).first()
@@ -92,12 +89,11 @@ async def post_grade(
         if not year:
             raise HTTPException(status_code=404, detail="Academic year not found.")
         grade = Grade(
+            school_id=year.school_id,
             grade=new_grade.grade,
             level=new_grade.level,
             has_stream=new_grade.has_stream,
-            year_id=new_grade.year_id,
         )
-        grade.school_id = year.school_id
         session.add(grade)
         await session.commit()
         await session.refresh(grade)
@@ -116,7 +112,7 @@ async def post_grade(
 async def get_grades_setup(
     query: Annotated[FilterParams, Query()],
     session: SessionDep,
-    user_in: shared_route,
+    user_in: AuthenticatedRoute,
 ) -> Sequence[Grade]:
     """
     Returns specific academic year
@@ -128,7 +124,7 @@ async def get_grades_setup(
             detail=f"Year with ID {query.year_id} not found.",
         )
 
-    stmt = select(Grade).where(Grade.year_id == query.year_id)
+    stmt = select(Grade)
     if query.q:
         filter = re.sub(r"^gr?a?d?e? ?", "", query.q.strip(), flags=re.IGNORECASE)
         stmt = stmt.where(Grade.grade.ilike(f"%{filter}%"))
@@ -147,7 +143,7 @@ async def get_grades_setup(
 async def get_grades_setup_by_id(
     grade_id: uuid.UUID,
     session: SessionDep,
-    user_in: shared_route,
+    user_in: AuthenticatedRoute,
 ) -> Grade:
     """
     Returns specific Grade SetUp
@@ -171,7 +167,7 @@ async def patch_grade_setup(
     session: SessionDep,
     grade_id: uuid.UUID,
     update_data: UpdateGradeSetup,
-    user_in: admin_route,
+    user_in: AuthenticatedRoute,
 ) -> Dict[str, str]:
     """
     Updates specific Grade SetUp
@@ -193,7 +189,12 @@ async def patch_grade_setup(
                 setattr(grade, key, getattr(update_data, key))
 
         # Update relationships
-        update_grade_relationships(grade, update_data, session)
+        await update_grade_relationships(
+            year_id=uuid.UUID(),  # TODO: Pass actual year
+            grade=grade,
+            update_data=update_data,
+            session=session,
+        )
 
         await session.commit()
 
@@ -219,11 +220,17 @@ async def patch_grade_setup(
 async def get_grade_by_id(
     session: SessionDep,
     grade_id: uuid.UUID,
-    user_in: shared_route,
+    user_in: AuthenticatedRoute,
 ) -> Grade:
     """
     Returns specific academic grade
     """
+    if not user_in.has_permission(PermissionEnum.GRADES_READ):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to read grades.",
+        )
+
     grade = await session.get(Grade, grade_id)
     if not grade:
         raise HTTPException(
@@ -241,7 +248,7 @@ async def get_grade_by_id(
 async def get_grade_relation(
     session: SessionDep,
     grade_id: uuid.UUID,
-    user_in: shared_route,
+    user_in: AuthenticatedRoute,
 ) -> Grade:
     """
     Returns specific academic grade
@@ -251,14 +258,9 @@ async def get_grade_relation(
             select(Grade)
             .where(Grade.id == grade_id)
             .options(
-                selectinload(Grade.year),
-                selectinload(Grade.student_term_records),
                 selectinload(Grade.streams),
-                selectinload(Grade.students),
                 selectinload(Grade.sections),
-                selectinload(Grade.grade_stream_subjects).selectinload(
-                    GradeStreamSubject.subject
-                ),
+                selectinload(Grade.subject_offerings).selectinload(SubjectOffering.subject),
             )
         )
     ).scalar_one_or_none()

@@ -27,9 +27,6 @@ from project.schema.models.grade_schema import (
     GradeWithSubjectSchema,
 )
 from project.schema.models.grade_stream_link_schema import GradeStreamLinkSchema
-from project.schema.models.grade_stream_subject_schema import (
-    GradeStreamSubjectSchema,
-)
 from project.schema.models.mark_list_schema import MarkListSchema
 from project.schema.models.registration_schema import RegistrationSchema
 from project.schema.models.saved_query_view_schema import (
@@ -62,6 +59,10 @@ from project.schema.models.student_year_record_schema import (
     StudentYearRecordSchema,
     StudentYearRecordWithRelatedSchema,
 )
+from project.schema.models.subject_offering_schema import (
+    SubjectOfferingRelatedSchema,
+    SubjectOfferingSchema,
+)
 from project.schema.models.subject_schema import (
     BasicSubjectSchema,
     SubjectNestedSchema,
@@ -74,10 +75,6 @@ from project.schema.models.subject_yearly_average_schema import (
     SubjectYearlyAverageSchema,
 )
 from project.schema.models.table_schema import TableSchema
-from project.schema.models.teacher_record_schema import (
-    TeacherRecordRelatedSchema,
-    TeacherRecordSchema,
-)
 from project.schema.models.teacher_schema import (
     TeacherRelatedSchema,
     TeacherSchema,
@@ -93,10 +90,6 @@ from project.schema.models.year_schema import (
     YearRelatedSchema,
     YearSchema,
     YearWithRelatedSchema,
-)
-from project.schema.models.yearly_subject_schema import (
-    YearlySubjectRelatedSchema,
-    YearlySubjectSchema,
 )
 
 __all__ = [
@@ -116,7 +109,7 @@ __all__ = [
     "GradeRelatedSchema",
     "GradeSchema",
     "GradeStreamLinkSchema",
-    "GradeStreamSubjectSchema",
+    "SubjectOfferingSchema",
     "GradeWithRelatedSchema",
     "MarkListSchema",
     "RegistrationSchema",
@@ -144,8 +137,6 @@ __all__ = [
     "SubjectYearlyAverageRelatedSchema",
     "SubjectYearlyAverageSchema",
     "TableSchema",
-    "TeacherRecordRelatedSchema",
-    "TeacherRecordSchema",
     "TeacherRelatedSchema",
     "TeacherSchema",
     "TeacherWithRelatedSchema",
@@ -156,8 +147,8 @@ __all__ = [
     "YearRelatedSchema",
     "YearSchema",
     "YearWithRelatedSchema",
-    "YearlySubjectRelatedSchema",
-    "YearlySubjectSchema",
+    "SubjectOfferingRelatedSchema",
+    "SubjectOfferingSchema",
     "StreamNestedSchema",
     "GradeWithSubjectSchema",
     "EmployeeSchema",
@@ -213,8 +204,6 @@ SubjectWithRelatedSchema.model_rebuild()
 
 SubjectYearlyAverageSchema.model_rebuild()
 SubjectYearlyAverageRelatedSchema.model_rebuild()
-TeacherRecordSchema.model_rebuild()
-TeacherRecordRelatedSchema.model_rebuild()
 TeacherSchema.model_rebuild()
 TeacherRelatedSchema.model_rebuild()
 TeacherWithRelatedSchema.model_rebuild()
@@ -227,9 +216,9 @@ YearRelatedSchema.model_rebuild()
 YearNestedSchema.model_rebuild()
 YearWithRelatedSchema.model_rebuild()
 
-YearlySubjectSchema.model_rebuild()
-YearlySubjectRelatedSchema.model_rebuild()
+SubjectOfferingSchema.model_rebuild()
+SubjectOfferingRelatedSchema.model_rebuild()
 
 # Linking Schemas
-GradeStreamSubjectSchema.model_rebuild()
+SubjectOfferingSchema.model_rebuild()
 EmployeeSchema.model_rebuild()

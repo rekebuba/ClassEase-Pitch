@@ -4,19 +4,15 @@
 import uuid
 from typing import TYPE_CHECKING, List
 
-from sqlalchemy import UUID, ForeignKey, String
-from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
+from sqlalchemy import UUID, ForeignKeyConstraint, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
 from project.models.base.school_mixin import SchoolScopedMixin
 
 if TYPE_CHECKING:
+    from project.models.class_section import ClassSection
     from project.models.grade import Grade
-    from project.models.student import Student
-    from project.models.student_term_record import StudentTermRecord
-    from project.models.subject import Subject
-    from project.models.teacher_record import TeacherRecord
 
 
 class Section(SchoolScopedMixin, BaseModel):
@@ -27,13 +23,24 @@ class Section(SchoolScopedMixin, BaseModel):
     __tablename__ = "sections"
     grade_id: Mapped[uuid.UUID] = mapped_column(
         UUID(),
-        ForeignKey("grades.id", ondelete="CASCADE"),
         nullable=False,
+        index=True,
     )
     section: Mapped[str] = mapped_column(
         String(1),
         nullable=True,
     )  # e.g., A, B, C, D, E, F, G
+
+    __table_args__ = (
+        UniqueConstraint("id", "school_id", name="uq_section_id_school_id"),
+        UniqueConstraint("grade_id", "section", name="uq_section_grade_section"),
+        ForeignKeyConstraint(
+            ["grade_id", "school_id"],
+            ["grades.id", "grades.school_id"],
+            name="fk_section_grade_school",
+            ondelete="CASCADE",
+        ),
+    )
 
     # Relationships
     grade: Mapped["Grade"] = relationship(
@@ -44,48 +51,11 @@ class Section(SchoolScopedMixin, BaseModel):
         init=False,
     )
 
-    # Many-To-One Relationships
-    student_term_records: Mapped[List["StudentTermRecord"]] = relationship(
-        "StudentTermRecord",
+    class_sections: Mapped[List["ClassSection"]] = relationship(
+        "ClassSection",
         back_populates="section",
         default_factory=list,
         repr=False,
         passive_deletes=True,
+        overlaps="academic_year,grade,homeroom_teacher,school",
     )
-
-    # Many-to-many relationships
-    teacher_records: Mapped[List["TeacherRecord"]] = relationship(
-        "TeacherRecord",
-        secondary="teacher_record_links",
-        back_populates="sections",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
-
-    students: Mapped[List["Student"]] = relationship(
-        "Student",
-        secondary="student_section_links",
-        back_populates="sections",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
-
-    _teacher_subjects: AssociationProxy[List["Subject"]] = association_proxy(
-        "teacher_records",
-        "subject",
-        default_factory=list,
-    )
-
-    @property
-    def teacher_subjects(self) -> List["Subject"]:
-        """Return unique, non-null teacher_subjects."""
-        seen = set()
-        result = []
-        for s in self._teacher_subjects:
-            if s is not None and s.id not in seen:
-                seen.add(s.id)
-                result.append(s)
-
-        return sorted(result, key=lambda x: x.name)

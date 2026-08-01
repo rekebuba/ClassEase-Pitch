@@ -4,7 +4,7 @@
 from datetime import date
 from typing import TYPE_CHECKING, List
 
-from sqlalchemy import Date, Enum, String
+from sqlalchemy import CheckConstraint, Date, Enum, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
@@ -13,12 +13,12 @@ from project.utils.enum import AcademicTermTypeEnum, AcademicYearStatusEnum
 
 if TYPE_CHECKING:
     from project.models.academic_term import AcademicTerm
-    from project.models.employee import Employee
+    from project.models.class_section import ClassSection
     from project.models.event import Event
-    from project.models.grade import Grade
     from project.models.school import School
-    from project.models.student import Student
-    from project.models.subject import Subject
+    from project.models.student_enrollments import StudentEnrollment
+    from project.models.subject_offering import SubjectOffering
+    from project.models.teacher_subject import TeacherSubject
 
 
 class Year(SchoolScopedMixin, BaseModel):
@@ -31,6 +31,7 @@ class Year(SchoolScopedMixin, BaseModel):
             AcademicTermTypeEnum,
             name="term_type_enum",
             values_callable=lambda x: [e.value for e in x],
+            native_enum=False,
         ),
         nullable=False,
     )
@@ -45,6 +46,11 @@ class Year(SchoolScopedMixin, BaseModel):
             values_callable=lambda x: [e.value for e in x],
         ),
         nullable=False,
+    )
+    __table_args__ = (
+        UniqueConstraint("id", "school_id", name="uq_year_id_school_id"),
+        UniqueConstraint("school_id", "name", name="uq_year_school_name"),
+        CheckConstraint("start_date <= end_date", name="check_year_dates"),
     )
 
     # Relationships
@@ -62,37 +68,29 @@ class Year(SchoolScopedMixin, BaseModel):
         repr=False,
         passive_deletes=True,
     )
-    grades: Mapped[List["Grade"]] = relationship(
-        "Grade",
+    subject_offerings: Mapped[List["SubjectOffering"]] = relationship(
+        "SubjectOffering",
         back_populates="year",
         repr=False,
         passive_deletes=True,
         default_factory=list,
+        overlaps="subject_offerings",
     )
-    subjects: Mapped[List["Subject"]] = relationship(
-        "Subject",
-        back_populates="year",
-        repr=False,
-        passive_deletes=True,
-        default_factory=list,
-    )
-
-    students: Mapped[List["Student"]] = relationship(
-        "Student",
-        secondary="student_year_links",
-        back_populates="years",
+    class_sections: Mapped[List["ClassSection"]] = relationship(
+        "ClassSection",
+        back_populates="academic_year",
         default_factory=list,
         repr=False,
         passive_deletes=True,
+        overlaps="class_sections,grade,homeroom_teacher,school,section",
     )
-
-    employees: Mapped[List["Employee"]] = relationship(
-        "Employee",
-        secondary="employee_year_links",
-        back_populates="years",
+    teacher_subjects: Mapped[List["TeacherSubject"]] = relationship(
+        "TeacherSubject",
+        back_populates="academic_year",
         default_factory=list,
         repr=False,
         passive_deletes=True,
+        overlaps="teacher_subjects",
     )
     school: Mapped["School"] = relationship(
         "School",
@@ -100,4 +98,12 @@ class Year(SchoolScopedMixin, BaseModel):
         init=False,
         repr=False,
         passive_deletes=True,
+    )
+    student_enrollments: Mapped[List["StudentEnrollment"]] = relationship(
+        "StudentEnrollment",
+        back_populates="academic_year",
+        default_factory=list,
+        repr=False,
+        passive_deletes=True,
+        overlaps="student,school,student_enrollments",
     )

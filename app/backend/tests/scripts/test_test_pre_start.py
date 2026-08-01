@@ -21,14 +21,10 @@ def test_init_successful_connection() -> None:
         except Exception:
             connection_successful = False
 
-        assert connection_successful, (
-            "The database connection should be successful and not raise an exception."
-        )
+        assert connection_successful, "The database connection should be successful and not raise an exception."
 
         # 3. Verify the call happened exactly once
-        assert connection_mock.execute.call_count == 1, (
-            "The connection should execute a statement once."
-        )
+        assert connection_mock.execute.call_count == 1, "The connection should execute a statement once."
 
         # We grab the arguments from the call and check the string value.
         args, _ = connection_mock.execute.call_args

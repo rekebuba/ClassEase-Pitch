@@ -3,9 +3,7 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, List, Optional
 
-from pydantic import BaseModel, ConfigDict
-
-from project.utils.utils import to_camel
+from project.schema.schema import BaseSchema
 
 if TYPE_CHECKING:
     from project.schema.models.academic_term_schema import AcademicTermSchema
@@ -16,17 +14,11 @@ if TYPE_CHECKING:
     from project.schema.models.student_schema import StudentSchema
 
 
-class StudentTermRecordSchema(BaseModel):
+class StudentTermRecordSchema(BaseSchema):
     """
     This model represents the average result of a student
     for a particular term and year.
     """
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     id: uuid.UUID | None = None
     student_id: uuid.UUID
@@ -39,14 +31,8 @@ class StudentTermRecordSchema(BaseModel):
     rank: Optional[int] = None
 
 
-class StudentTermRecordRelatedSchema(BaseModel):
+class StudentTermRecordRelatedSchema(BaseSchema):
     """This model represents the relationships of a StudentTermRecordSchema."""
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     student: Optional[StudentSchema] = None
     academic_term: Optional[AcademicTermSchema] = None
@@ -56,9 +42,7 @@ class StudentTermRecordRelatedSchema(BaseModel):
     mark_lists: Optional[List[MarkListSchema]]
 
 
-class StudentTermRecordWithRelatedSchema(
-    StudentTermRecordSchema, StudentTermRecordRelatedSchema
-):
+class StudentTermRecordWithRelatedSchema(StudentTermRecordSchema, StudentTermRecordRelatedSchema):
     """
     This model combines the StudentTermRecordSchema with its relationships.
     It is used to provide a complete view of a student's term record

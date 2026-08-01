@@ -20,3 +20,7 @@ class TypedFactory(factory.Factory, Generic[T]):
     @classmethod
     def create(cls, **kwargs: Any) -> T:
         return super().create(**kwargs)
+
+    @classmethod
+    def create_batch(cls, size: int, **kwargs: Any) -> list[T]:
+        return super().create_batch(size, **kwargs)

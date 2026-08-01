@@ -16,7 +16,9 @@
       ]
     },
     "resolveJsonModule": true,
-    "types": ["vite/client"],
+    "types": [
+      "vite/client"
+    ],
     "allowJs": true,
     "strict": true,
     "noFallthroughCasesInSwitch": true,

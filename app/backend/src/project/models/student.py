@@ -2,40 +2,27 @@
 """Module for Student class"""
 
 import uuid
-from datetime import date
 from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import (
     UUID,
     Boolean,
-    Date,
     Enum,
-    ForeignKey,
+    ForeignKeyConstraint,
     String,
     Text,
+    UniqueConstraint,
 )
-from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
 from project.models.base.school_mixin import SchoolScopedMixin
-from project.utils.enum import BloodTypeEnum, GenderEnum, StudentApplicationStatusEnum
+from project.utils.enum import BloodTypeEnum, StudentApplicationStatusEnum
 
 if TYPE_CHECKING:
-    from project.models.academic_term import AcademicTerm
-    from project.models.assessment import Assessment
-    from project.models.grade import Grade
-    from project.models.mark_list import MarkList
-    from project.models.parent import Parent
     from project.models.school import School
     from project.models.school_membership import SchoolMembership
-    from project.models.section import Section
-    from project.models.stream import Stream
-    from project.models.student_term_record import StudentTermRecord
-    from project.models.subject import Subject
-    from project.models.subject_yearly_average import SubjectYearlyAverage
-    from project.models.user import User
-    from project.models.year import Year
+    from project.models.student_enrollments import StudentEnrollment
 
 
 class Student(SchoolScopedMixin, BaseModel):
@@ -45,35 +32,12 @@ class Student(SchoolScopedMixin, BaseModel):
 
     __tablename__ = "students"
 
-    registered_for_grade_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(),
-        ForeignKey("grades.id"),
-    )
-    # Personal Information
-    first_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    father_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    date_of_birth: Mapped[date] = mapped_column(Date, nullable=False)
-    gender: Mapped[GenderEnum] = mapped_column(
-        Enum(
-            GenderEnum,
-            name="gender_enum",
-            values_callable=lambda x: [e.value for e in x],
-            native_enum=False,
-        ),
-        nullable=False,
-    )
-
     # Contact Information
     city: Mapped[str] = mapped_column(String(50), nullable=False)
     state: Mapped[str] = mapped_column(String(50), nullable=False)
     postal_code: Mapped[str] = mapped_column(String(20), nullable=False)
 
-    grand_father_name: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-    nationality: Mapped[Optional[str]] = mapped_column(
-        String(100), nullable=True, default=None
-    )
+    nationality: Mapped[Optional[str]] = mapped_column(String(100), nullable=True, default=None)
     blood_type: Mapped[BloodTypeEnum] = mapped_column(
         Enum(
             BloodTypeEnum,
@@ -84,21 +48,11 @@ class Student(SchoolScopedMixin, BaseModel):
         nullable=True,
         default=BloodTypeEnum.UNKNOWN,
     )
-    student_photo: Mapped[Optional[str]] = mapped_column(
-        String(255), nullable=True, default=None
-    )
-    previous_school: Mapped[Optional[str]] = mapped_column(
-        String(100), nullable=True, default=None
-    )
-    transportation: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-    disability_details: Mapped[Optional[str]] = mapped_column(
-        Text, nullable=True, default=None
-    )
-    medical_details: Mapped[Optional[str]] = mapped_column(
-        Text, nullable=True, default=None
-    )
+    student_photo: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, default=None)
+    previous_school: Mapped[Optional[str]] = mapped_column(String(100), nullable=True, default=None)
+    transportation: Mapped[Optional[str]] = mapped_column(String(50), nullable=True, default=None)
+    disability_details: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default=None)
+    medical_details: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default=None)
 
     # Defaulted Fields
     has_medical_condition: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -115,60 +69,32 @@ class Student(SchoolScopedMixin, BaseModel):
         default=StudentApplicationStatusEnum.PENDING,
     )
 
-    @hybrid_property
-    def full_name(self):
-        return f"{self.first_name} {self.father_name} {self.grand_father_name}"
-
-    @full_name.expression
-    def full_name(cls):
-        return f"{cls.first_name} {cls.father_name} {cls.grand_father_name}"
-
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(),
-        ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=True,
-        default=None,
-    )
-    school_membership_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        UUID(),
-        ForeignKey("school_memberships.id", ondelete="SET NULL"),
         nullable=True,
         default=None,
     )
 
-    # Many-To-One Relationships
-    grade: Mapped["Grade"] = relationship(
-        "Grade",
-        back_populates="students",
-        repr=False,
-        passive_deletes=True,
-        init=False,
-    )
-
-    # Many-to-many relationships
-    parents: Mapped[List["Parent"]] = relationship(
-        "Parent",
-        secondary="parent_student_links",
-        back_populates="students",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
+    __table_args__ = (
+        UniqueConstraint("id", "school_id", name="uq_student_id_school_id"),
+        ForeignKeyConstraint(
+            ["user_id", "school_id"],
+            [
+                "school_memberships.user_id",
+                "school_memberships.school_id",
+            ],
+            name="fk_students_membership_school",
+        ),
     )
 
     # Relationships
-    user: Mapped["User"] = relationship(
-        "User",
-        back_populates="student_profiles",
-        init=False,
-        repr=False,
-        passive_deletes=True,
-    )
     membership: Mapped[Optional["SchoolMembership"]] = relationship(
         "SchoolMembership",
         back_populates="student_profiles",
         init=False,
         repr=False,
         passive_deletes=True,
+        overlaps="students",
     )
     school: Mapped[Optional["School"]] = relationship(
         "School",
@@ -176,73 +102,13 @@ class Student(SchoolScopedMixin, BaseModel):
         init=False,
         repr=False,
         passive_deletes=True,
+        overlaps="membership,student_profiles",
     )
-    mark_lists: Mapped[List["MarkList"]] = relationship(
-        "MarkList",
+    student_enrollments: Mapped[List["StudentEnrollment"]] = relationship(
+        "StudentEnrollment",
         back_populates="student",
         default_factory=list,
         repr=False,
         passive_deletes=True,
-    )
-    term_records: Mapped[List["StudentTermRecord"]] = relationship(
-        "StudentTermRecord",
-        back_populates="student",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
-    subject_yearly_averages: Mapped[List["SubjectYearlyAverage"]] = relationship(
-        "SubjectYearlyAverage",
-        back_populates="student",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
-    assessments: Mapped[List["Assessment"]] = relationship(
-        "Assessment",
-        back_populates="student",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
-
-    years: Mapped[List["Year"]] = relationship(
-        "Year",
-        secondary="student_year_links",
-        back_populates="students",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
-    academic_terms: Mapped[List["AcademicTerm"]] = relationship(
-        "AcademicTerm",
-        secondary="student_academic_term_links",
-        back_populates="students",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
-    streams: Mapped[List["Stream"]] = relationship(
-        "Stream",
-        secondary="student_stream_links",
-        back_populates="students",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
-    sections: Mapped[List["Section"]] = relationship(
-        "Section",
-        secondary="student_section_links",
-        back_populates="students",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
-    subjects: Mapped[List["Subject"]] = relationship(
-        "Subject",
-        secondary="student_subject_links",
-        back_populates="students",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
+        overlaps="student,school,student_enrollments",
     )

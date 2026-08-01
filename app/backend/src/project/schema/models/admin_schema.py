@@ -3,25 +3,19 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, Optional
 
-from pydantic import BaseModel, ConfigDict, PastDate
+from pydantic import PastDate
 
+from project.schema.schema import BaseSchema
 from project.utils.enum import GenderEnum
-from project.utils.utils import to_camel
 
 if TYPE_CHECKING:
     from project.schema.models.user_schema import UserSchema
 
 
-class AdminSchema(BaseModel):
+class AdminSchema(BaseSchema):
     """
     This model represents an admin in the system. It inherits from BaseModel.
     """
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     id: uuid.UUID | None = None
     user_id: Optional[uuid.UUID] = None
@@ -32,7 +26,7 @@ class AdminSchema(BaseModel):
     gender: GenderEnum
 
 
-class AdminRelatedSchema(BaseModel):
+class AdminRelatedSchema(BaseSchema):
     """This model represents the relationships of an AdminSchema."""
 
     user: Optional[UserSchema] = None

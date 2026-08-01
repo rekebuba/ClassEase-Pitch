@@ -83,12 +83,13 @@ def reset_tenant_context(tokens: TenantContextTokens) -> None:
 
 
 async def bind_db_school_context(
-    session: AsyncSession,
+    *,
+    tenant_session: AsyncSession,
     school_id: uuid.UUID | None,
 ) -> None:
     """Expose the active tenant to PostgreSQL RLS policies when available."""
     value = str(school_id) if school_id is not None else ""
-    await session.execute(
+    await tenant_session.execute(
         text("SELECT set_config('app.current_school_id', :school_id, true)"),
         {"school_id": value},
     )

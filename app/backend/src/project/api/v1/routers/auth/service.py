@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta, timezone
-from typing import List
 
 import pyotp
 from fastapi import HTTPException, status
@@ -7,7 +6,7 @@ from fastapi_mail import FastMail, MessageSchema, MessageType
 from google.auth.transport import requests
 from google.oauth2 import id_token
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
-from pydantic import BaseModel, EmailStr, NameEmail
+from pydantic import EmailStr, NameEmail
 from redis.asyncio import Redis
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,10 +16,6 @@ from project.models import AuthIdentity, User
 from project.utils.enum import AuthProviderEnum
 
 serializer = URLSafeTimedSerializer(settings.SECRET_KEY.get_secret_value())
-
-
-class EmailSchema(BaseModel):
-    email: List[EmailStr]
 
 
 def generate_email_verification_token(email: EmailStr) -> str:
@@ -68,14 +63,10 @@ async def send_verification_email(email_to: NameEmail) -> None:
 def verify_google_token(token: str) -> dict:
     """Verify the Google token and return the user info if valid."""
     try:
-        idinfo = id_token.verify_oauth2_token(
-            token, requests.Request(), settings.GOOGLE_CLIENT_ID
-        )
+        idinfo = id_token.verify_oauth2_token(token, requests.Request(), settings.GOOGLE_CLIENT_ID)
         return idinfo
     except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Google token"
-        )
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid Google token")
 
 
 async def get_google_user(session: AsyncSession, token: str) -> User:
@@ -106,9 +97,7 @@ async def get_google_user(session: AsyncSession, token: str) -> User:
         return linked_identity.user
 
     # Try to find user by email (existing known user)
-    user = (
-        await session.execute(select(User).filter(User.email == email))
-    ).scalar_one_or_none()
+    user = (await session.execute(select(User).filter(User.email == email))).scalar_one_or_none()
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

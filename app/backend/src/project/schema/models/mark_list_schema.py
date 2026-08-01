@@ -3,10 +3,8 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, Optional
 
-from pydantic import BaseModel, ConfigDict
-
+from project.schema.schema import BaseSchema
 from project.utils.enum import MarkListTypeEnum
-from project.utils.utils import to_camel
 
 if TYPE_CHECKING:
     from project.schema.models.student_schema import StudentSchema
@@ -14,16 +12,10 @@ if TYPE_CHECKING:
     from project.schema.models.subject_schema import SubjectSchema
 
 
-class MarkListSchema(BaseModel):
+class MarkListSchema(BaseSchema):
     """
     This model represents an assessment record for a student including details
     """
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     id: uuid.UUID | None = None
     student_id: uuid.UUID
@@ -34,7 +26,7 @@ class MarkListSchema(BaseModel):
     score: Optional[float] = None
 
 
-class MarkListRelatedSchema(BaseModel):
+class MarkListRelatedSchema(BaseSchema):
     """
     This model represents the relationships associated with a MarkList.
     """

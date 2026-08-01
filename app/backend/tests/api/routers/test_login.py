@@ -1,7 +1,5 @@
 from typing import Any
 
-import jwt
-import pytest
 from httpx import AsyncClient
 from redis.asyncio import Redis
 from sqlalchemy import select
@@ -14,49 +12,13 @@ from project.api.v1.routers.auth.service import (
     verify_otp_and_generate_token,
 )
 from project.core.config import settings
-from project.core.security import ALGORITHM
+from project.core.security import _decode_access_token
 from project.models import (
     AuthSession,
     BlacklistToken,
 )
-from tests.utils.utils import _create_multi_school_user, _login
-
-
-def _decode_access_token(access_token: str) -> dict[str, Any]:
-    return jwt.decode(
-        access_token,
-        settings.SECRET_KEY.get_secret_value(),
-        algorithms=[ALGORITHM],
-    )
-
-
-@pytest.mark.parametrize(
-    "username,password",
-    [
-        (
-            settings.FIRST_SUPERUSER,
-            settings.FIRST_SUPERUSER_PASSWORD.get_secret_value(),
-        ),
-    ],
-)
-async def test_login(client: AsyncClient, username: str, password: str) -> None:
-    login_data = {
-        "username": username,
-        "password": password,
-    }
-    r = await client.post(f"{settings.API_V1_STR}/auth/login", data=login_data)
-    tokens = r.json()
-    assert r.status_code == 200
-    assert "accessToken" in tokens
-    assert tokens["accessToken"]
-
-
-async def test_student_login(client: AsyncClient, student_token_headers) -> None:
-    pass
-
-
-async def test_teacher_login(client: AsyncClient, teacher_token_headers) -> None:
-    pass
+from tests.utils.api import API
+from tests.utils.utils import _create_multi_school_user
 
 
 async def test_login_incorrect_password(client: AsyncClient) -> None:
@@ -117,12 +79,12 @@ async def test_login_long_input(client: AsyncClient) -> None:
 async def test_refresh_token_rotates_and_invalidates_previous_token(
     client: AsyncClient,
 ) -> None:
-    login_response = await _login(
+    login_response = await API.login(
         client,
         username=settings.FIRST_SUPERUSER,
         password=settings.FIRST_SUPERUSER_PASSWORD.get_secret_value(),
     )
-    old_refresh_token = login_response.refresh_token
+    old_refresh_token = login_response.response.refresh_token
     assert old_refresh_token is not None
 
     refresh_response = await client.post(
@@ -134,7 +96,7 @@ async def test_refresh_token_rotates_and_invalidates_previous_token(
     refreshed = LoginTokenResponse.model_validate_json(refresh_response.text)
     assert refreshed.refresh_token is not None
     assert refreshed.refresh_token != old_refresh_token
-    assert refreshed.access_token != login_response.access_token
+    assert refreshed.access_token != login_response.response.access_token
 
     stale_refresh_response = await client.post(
         f"{settings.API_V1_STR}/auth/refresh",
@@ -147,26 +109,24 @@ async def test_logout_blacklists_token_and_revokes_session(
     client: AsyncClient,
     db_session: AsyncSession,
 ) -> None:
-    login_response = await _login(
+    login_response = await API.login(
         client,
         username=settings.FIRST_SUPERUSER,
         password=settings.FIRST_SUPERUSER_PASSWORD.get_secret_value(),
     )
 
-    decoded = _decode_access_token(login_response.access_token)
+    decoded = _decode_access_token(login_response.response.access_token)
     token_jti = decoded["jti"]
     token_session_id = decoded["session_id"]
 
     logout_response = await client.post(
         f"{settings.API_V1_STR}/auth/logout",
-        headers={"Authorization": f"Bearer {login_response.access_token}"},
+        headers={"Authorization": f"Bearer {login_response.response.access_token}"},
     )
     assert logout_response.status_code == 200
 
     blacklisted = (
-        await db_session.execute(
-            select(BlacklistToken).where(BlacklistToken.jti == token_jti)
-        )
+        await db_session.execute(select(BlacklistToken).where(BlacklistToken.jti == token_jti))
     ).scalar_one_or_none()
     assert blacklisted is not None
 
@@ -176,14 +136,14 @@ async def test_logout_blacklists_token_and_revokes_session(
     assert auth_session.revoke_reason == "logout"
 
     me_response = await client.get(
-        f"{settings.API_V1_STR}/me",
-        headers={"Authorization": f"Bearer {login_response.access_token}"},
+        f"{settings.API_V1_STR}/user",
+        headers={"Authorization": f"Bearer {login_response.response.access_token}"},
     )
     assert me_response.status_code == 401
 
     refresh_response = await client.post(
         f"{settings.API_V1_STR}/auth/refresh",
-        json={"refresh_token": login_response.refresh_token},
+        json={"refresh_token": login_response.response.refresh_token},
     )
     assert refresh_response.status_code == 401
 
@@ -278,9 +238,7 @@ async def test_forgot_password_empty_email(client: AsyncClient) -> None:
 
 async def test_verify_otp(client: AsyncClient, test_redis: Redis) -> None:
     """Test the OTP verification endpoint with a valid OTP."""
-    otp = await generate_and_store_otp_secret(
-        settings.FIRST_SUPERUSER_EMAIL, test_redis
-    )
+    otp = await generate_and_store_otp_secret(settings.FIRST_SUPERUSER_EMAIL, test_redis)
 
     otp_data = {
         "email": settings.FIRST_SUPERUSER_EMAIL,
@@ -350,15 +308,15 @@ async def test_password_reset(
     assert r.status_code == 200
 
     # login with the new password to confirm it was changed successfully
-    login_response = await _login(
+    login_response = await API.login(
         client,
         username=recovery_user["username"],
         password="NewSecurePassword123!",
         school_slug=recovery_user["primary_school_slug"],
     )
 
-    assert login_response.access_token is not None
-    assert login_response.token_type == "bearer"
+    assert login_response.response.access_token is not None
+    assert login_response.response.token_type == "bearer"
 
 
 async def test_password_reset_invalid_token(client: AsyncClient) -> None:
@@ -407,10 +365,7 @@ async def test_login_requires_school_context_for_multi_membership_user(
     assert scoped_payload.active_school is not None
     assert scoped_payload.active_school.slug == credentials["secondary_school_slug"]
     assert scoped_payload.active_membership is not None
-    assert (
-        str(scoped_payload.active_membership.id)
-        == credentials["secondary_membership_id"]
-    )
+    assert str(scoped_payload.active_membership.id) == credentials["secondary_membership_id"]
 
 
 async def test_login_supports_school_slug_prefixed_identifier(
@@ -445,29 +400,26 @@ async def test_select_membership_rotates_session_and_revokes_previous_credential
         password="SwitchSchool123!",
     )
 
-    initial_login = await _login(
+    initial_login = await API.login(
         client,
         username=credentials["username"],
         password=credentials["password"],
         school_slug=credentials["primary_school_slug"],
     )
 
-    previous_token_payload = _decode_access_token(initial_login.access_token)
+    previous_token_payload = _decode_access_token(initial_login.response.access_token)
     previous_session_id = previous_token_payload["session_id"]
 
     switch_response = await client.post(
         f"{settings.API_V1_STR}/auth/select-membership",
         json={"membership_id": credentials["secondary_membership_id"]},
-        headers={"Authorization": f"Bearer {initial_login.access_token}"},
+        headers={"Authorization": f"Bearer {initial_login.response.access_token}"},
     )
     assert switch_response.status_code == 200
 
     switched_login = LoginTokenResponse.model_validate_json(switch_response.text)
     assert switched_login.active_membership is not None
-    assert (
-        str(switched_login.active_membership.id)
-        == credentials["secondary_membership_id"]
-    )
+    assert str(switched_login.active_membership.id) == credentials["secondary_membership_id"]
 
     old_session = await db_session.get(AuthSession, previous_session_id)
     assert old_session is not None
@@ -475,19 +427,19 @@ async def test_select_membership_rotates_session_and_revokes_previous_credential
     assert old_session.revoke_reason == "school_switch"
 
     old_token_denied = await client.get(
-        f"{settings.API_V1_STR}/me",
-        headers={"Authorization": f"Bearer {initial_login.access_token}"},
+        f"{settings.API_V1_STR}/user",
+        headers={"Authorization": f"Bearer {initial_login.response.access_token}"},
     )
     assert old_token_denied.status_code == 401
 
     old_refresh_denied = await client.post(
         f"{settings.API_V1_STR}/auth/refresh",
-        json={"refresh_token": initial_login.refresh_token},
+        json={"refresh_token": initial_login.response.refresh_token},
     )
     assert old_refresh_denied.status_code == 401
 
     new_token_allowed = await client.get(
-        f"{settings.API_V1_STR}/me",
+        f"{settings.API_V1_STR}/user",
         headers={"Authorization": f"Bearer {switched_login.access_token}"},
     )
     assert new_token_allowed.status_code == 200

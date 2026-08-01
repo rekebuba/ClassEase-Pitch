@@ -2,48 +2,30 @@ import uuid
 from datetime import date
 from typing import Optional
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, EmailStr
+from pydantic import AwareDatetime, EmailStr
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
+from project.schema.schema import BaseSchema
 from project.utils.enum import (
     BloodTypeEnum,
     GenderEnum,
     GradeEnum,
     StudentApplicationStatusEnum,
 )
-from project.utils.utils import to_camel
 
 
-class StudentRegisteredYear(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
+class StudentRegisteredYear(BaseSchema):
     id: uuid.UUID
     name: str
 
 
-class StudentRegisteredGrade(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
+class StudentRegisteredGrade(BaseSchema):
     id: uuid.UUID
     grade: GradeEnum
     year: StudentRegisteredYear
 
 
-class StudentBasicInfo(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
+class StudentBasicInfo(BaseSchema):
     id: uuid.UUID
     full_name: str
     first_name: str
@@ -81,12 +63,12 @@ class StudentBasicInfo(BaseModel):
     grade: StudentRegisteredGrade
 
 
-class UpdateStudentStatus(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
+class UpdateStudentStatus(BaseSchema):
     status: StudentApplicationStatusEnum
     student_ids: list[uuid.UUID]
+
+
+class EnrollStudent(BaseSchema):
+    student_id: uuid.UUID
+    class_section_id: uuid.UUID
+    year_id: uuid.UUID

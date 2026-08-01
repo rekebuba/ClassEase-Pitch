@@ -13,5 +13,4 @@ class SchoolScopedMixin(MappedAsDataclass):
         ForeignKey("schools.id", ondelete="CASCADE"),
         nullable=True,
         index=True,
-        init=False,
     )

@@ -1,65 +1,91 @@
 import uuid
 from datetime import date
+from decimal import Decimal
 from typing import List, Optional
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict
-from pydantic_extra_types.phone_numbers import PhoneNumber
+from pydantic import AwareDatetime
 
-from project.schema.models.subject_schema import BasicSubjectSchema
+from project.schema.schema import BaseSchema
 from project.utils.enum import (
-    EmployeeApplicationStatusEnum,
-    EmployeePositionEnum,
-    ExperienceYearEnum,
-    GenderEnum,
+    ContractStatusEnum,
+    ContractTypeEnum,
+    EmploymentStatusEnum,
+    EmploymentTypeEnum,
     HighestEducationEnum,
+    PayrollPayFrequencyEnum,
+    PayrollPaymentMethodEnum,
 )
-from project.utils.utils import to_camel
 
 
-class EmployeeBasicInfo(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
+class EmployeeBasicInfo(BaseSchema):
     id: uuid.UUID
-    first_name: str
-    father_name: str
-    grand_father_name: str
-    full_name: str
-    date_of_birth: date
-    gender: GenderEnum
-    nationality: str
-    social_security_number: str
-    address: str
-    city: str
-    state: str
-    country: str
-    emergency_contact_name: str
-    emergency_contact_relation: str
-    emergency_contact_phone: PhoneNumber
-    highest_education: HighestEducationEnum
-    university: str
-    graduation_year: int
-    gpa: float
-    position: EmployeePositionEnum
-    years_of_experience: ExperienceYearEnum
-    secondary_phone: Optional[PhoneNumber]
-    resume: Optional[str]
-    status: EmployeeApplicationStatusEnum
-    subject: BasicSubjectSchema | None
-    subjects: List[BasicSubjectSchema]
+    user_id: Optional[uuid.UUID]
+    employee_number: str
+    employment_status: EmploymentStatusEnum
+    employment_type: EmploymentTypeEnum
+    hire_date: date
+    termination_date: Optional[date]
+    department_id: Optional[uuid.UUID]
+    primary_position_id: Optional[uuid.UUID]
+    manager_employee_id: Optional[uuid.UUID]
+    work_email: Optional[str]
+    work_phone: Optional[str]
     created_at: AwareDatetime
 
 
-class UpdateEmployeeStatusSchema(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
-    year_id: uuid.UUID
+class UpdateEmployeeStatusSchema(BaseSchema):
     employee_ids: List[uuid.UUID]
-    status: EmployeeApplicationStatusEnum
+    status: EmploymentStatusEnum
+
+
+# --- Teacher Profile Schemas ---
+
+
+class TeacherProfileCreate(BaseSchema):
+    employee_id: uuid.UUID
+    specialization: Optional[str] = None
+    teacher_license_number: Optional[str] = None
+    certifications: Optional[str] = None
+    highest_education: Optional[HighestEducationEnum] = None
+    years_of_experience: Optional[int] = None
+
+
+class TeacherProfileResponse(TeacherProfileCreate):
+    id: uuid.UUID
+
+
+# --- Lifecycle Schemas ---
+
+
+class EmployeePositionCreate(BaseSchema):
+    employee_id: uuid.UUID
+    position_id: uuid.UUID
+    start_date: date
+    end_date: Optional[date] = None
+    is_primary: bool = False
+
+
+class EmployeePositionUpdate(BaseSchema):
+    end_date: Optional[date] = None
+    is_primary: Optional[bool] = None
+
+
+class EmploymentContractCreate(BaseSchema):
+    employee_id: uuid.UUID
+    contract_type: ContractTypeEnum
+    hours_per_week: int
+    start_date: date
+    end_date: Optional[date] = None
+    salary_grade: Optional[str] = None
+    status: ContractStatusEnum = ContractStatusEnum.DRAFT
+
+
+class PayrollProfileCreate(BaseSchema):
+    employee_id: uuid.UUID
+    bank_name: Optional[str] = None
+    bank_account: Optional[str] = None
+    tin_number: Optional[str] = None
+    payment_method: PayrollPaymentMethodEnum
+    pay_frequency: PayrollPayFrequencyEnum
+    base_salary: Decimal
+    currency: str = "ETB"

@@ -130,22 +130,13 @@ function RouteComponent() {
   });
 
   const [step3InitialValues] = useState<StudRegStep3>({
-    address: initialData.address,
     city: initialData.city,
     state: initialData.state,
     postalCode: initialData.postalCode,
-    fatherPhone: initialData.fatherPhone,
-    motherPhone: initialData.motherPhone,
-    parentEmail: initialData.parentEmail,
   });
   const [step4InitialValues] = useState<StudRegStep4>({
-    guardianName: initialData.guardianName,
-    guardianPhone: initialData.guardianPhone,
-    guardianRelation: initialData.guardianRelation,
     emergencyContactName: initialData.emergencyContactName,
     emergencyContactPhone: initialData.emergencyContactPhone,
-    siblingInSchool: initialData.siblingInSchool,
-    siblingDetails: initialData.siblingDetails,
   });
   const [step5InitialValues] = useState<StudRegStep5>({
     hasMedicalCondition: initialData.hasMedicalCondition,
@@ -574,12 +565,6 @@ function RouteComponent() {
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <InputWithLabel<StudRegStep3>
-                  nameInSchema="address"
-                  fieldTitle="Street Address *"
-                  placeholder="Enter street address"
-                  description="House number, street name, and neighborhood"
-                />
-                <InputWithLabel<StudRegStep3>
                   nameInSchema="city"
                   fieldTitle="City *"
                   placeholder="Enter city"
@@ -593,24 +578,6 @@ function RouteComponent() {
                 />
               </div>
               <Separator />
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <PhoneInputWithLabel<StudRegStep3>
-                  nameInSchema="fatherPhone"
-                  fieldTitle="Father's Phone Number *"
-                  description="Primary contact number for the father (Use Country Code +251)"
-                />
-                <PhoneInputWithLabel<StudRegStep3>
-                  nameInSchema="motherPhone"
-                  fieldTitle="Mother's Phone Number (Optional)"
-                  description="Primary contact number for the mother (Use Country Code +251)"
-                />
-              </div>
-              <InputWithLabel<StudRegStep3>
-                nameInSchema="parentEmail"
-                fieldTitle="Parent/Guardian Email *"
-                placeholder="Enter Parent/Guardian Email"
-                description="Primary email for school communications"
-              />
             </div>
 
             <div className="flex justify-between mt-8 pt-6 border-t">
@@ -649,33 +616,6 @@ function RouteComponent() {
             </div>
 
             <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <InputWithLabel<StudRegStep4>
-                  nameInSchema="guardianName"
-                  fieldTitle="Guardian Name *"
-                  placeholder="Enter guardian name"
-                  description="Full name of the primary guardian"
-                />
-                <SelectWithLabel<StudRegStep4, string>
-                  fieldTitle="Select relationship *"
-                  nameInSchema="guardianRelation"
-                  description="Guardian's relationship to the student"
-                >
-                  <SelectItem value="parent">Parent</SelectItem>
-                  <SelectItem value="grandparent">Grandparent</SelectItem>
-                  <SelectItem value="aunt-uncle">Aunt/Uncle</SelectItem>
-                  <SelectItem value="sibling">Sibling</SelectItem>
-                  <SelectItem value="family-friend">Family Friend</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
-                </SelectWithLabel>
-              </div>
-              <PhoneInputWithLabel<StudRegStep4>
-                nameInSchema="guardianPhone"
-                fieldTitle="Guardian Phone Number *"
-                placeholder="+251 9/7xx-xxx-xxx"
-                description="Primary contact number for the guardian"
-              />
-              <Separator />
               <div className="space-y-4">
                 <h4 className="font-medium text-red-600">
                   Emergency Contact (if different from above)
@@ -697,23 +637,6 @@ function RouteComponent() {
                     description="Phone number for emergency contact"
                   />
                 </div>
-              </div>
-              <Separator />
-              <div className="space-y-4">
-                <CheckboxWithLabel<StudRegStep4, boolean>
-                  nameInSchema="siblingInSchool"
-                  fieldTitle="Does the student have siblings currently enrolled in this school?"
-                />
-                {step4Form.watch().siblingInSchool && (
-                  <div className="ml-6 space-y-2 p-4 bg-gray-50 rounded-lg">
-                    <InputWithLabel<StudRegStep4>
-                      nameInSchema="siblingDetails"
-                      fieldTitle="Sibling Information"
-                      placeholder="Please provide names and grades of siblings currently enrolled"
-                      description="Example: 'Abebe - Grade 5, Tigist - Grade 3'"
-                    />
-                  </div>
-                )}
               </div>
             </div>
             <div className="flex justify-between mt-8 pt-6 border-t">

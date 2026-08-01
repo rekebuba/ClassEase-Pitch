@@ -1,97 +1,48 @@
 import uuid
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field
-
-from project.schema.models.subject_schema import BasicSubjectSchema
-from project.utils.enum import (
-    EmployeeApplicationStatusEnum,
-    GenderEnum,
-)
-from project.utils.utils import to_camel
+from project.schema.schema import BaseSchema
+from project.utils.enum import EmploymentStatusEnum, HighestEducationEnum
 
 
-class TeacherSectionDetail(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
-    id: uuid.UUID
-    section: str
-    teacher_subjects: List[BasicSubjectSchema]
-
-
-class TeacherGradeDetail(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
-    id: uuid.UUID
-    grade: str
-    has_stream: bool
-    subjects: List[BasicSubjectSchema]
+class TeacherBasicInfo(BaseSchema):
+    teacher_profile_id: uuid.UUID
+    employee_id: uuid.UUID
+    user_id: Optional[uuid.UUID]
+    employee_number: str
+    employment_status: EmploymentStatusEnum
+    full_name: Optional[str]
+    work_email: Optional[str]
+    specialization: Optional[str]
+    subject_ids: List[uuid.UUID]
 
 
-class TeacherBasicInfo(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
-    id: uuid.UUID
-    first_name: str
-    father_name: str
-    grand_father_name: str
-    full_name: str
-    personal_email: EmailStr = Field(alias="email")
-    gender: GenderEnum
-    status: EmployeeApplicationStatusEnum
-    subject: Optional[BasicSubjectSchema] = Field(alias="mainSubject")
-    subjects: List[BasicSubjectSchema] = Field(alias="otherSubjects")
-    grades: List[TeacherGradeDetail]
-
-
-class TeachersQuery(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
+class TeachersQuery(BaseSchema):
     q: Optional[str] = None
-    year_id: Optional[uuid.UUID] = None
-    academic_term_id: Optional[uuid.UUID] = None
+    academic_year_id: Optional[uuid.UUID] = None
 
 
-class SectionIDs(BaseModel):
-    id: uuid.UUID
+class CreateTeacherProfile(BaseSchema):
+    employee_id: uuid.UUID
+    specialization: Optional[str] = None
+    teacher_license_number: Optional[str] = None
+    certifications: Optional[str] = None
+    highest_education: Optional[HighestEducationEnum] = None
+    years_of_experience: Optional[int] = None
 
 
-class AssignGrade(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
-    id: uuid.UUID
-    stream_id: Optional[uuid.UUID]
-    sections: List[SectionIDs] = Field(min_length=1)
-
-
-class AssignTeacher(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
-    year_id: uuid.UUID
-    teacher_id: uuid.UUID
+class AssignTeacher(BaseSchema):
+    teacher_profile_id: uuid.UUID
     subject_id: uuid.UUID
-    grade: AssignGrade
+    class_section_id: uuid.UUID
+    academic_year_id: uuid.UUID
+    weekly_periods: int = 0
+    room_id: Optional[uuid.UUID] = None
+
+
+class TeacherProfileUpdate(BaseSchema):
+    specialization: Optional[str] = None
+    teacher_license_number: Optional[str] = None
+    certifications: Optional[str] = None
+    highest_education: Optional[HighestEducationEnum] = None
+    years_of_experience: Optional[int] = None

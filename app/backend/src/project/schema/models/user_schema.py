@@ -3,10 +3,10 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, List, Optional
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict
+from pydantic import AwareDatetime
 
+from project.schema.schema import BaseSchema
 from project.utils.enum import RoleEnum
-from project.utils.utils import to_camel
 
 if TYPE_CHECKING:
     from project.schema.models.admin_schema import AdminSchema
@@ -15,13 +15,7 @@ if TYPE_CHECKING:
     from project.schema.models.teacher_schema import TeacherSchema
 
 
-class UserSchema(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
+class UserSchema(BaseSchema):
     id: uuid.UUID
     username: str
     role: RoleEnum
@@ -38,7 +32,7 @@ class UserSchema(BaseModel):
         }
 
 
-class UserRelatedSchema(BaseModel):
+class UserRelatedSchema(BaseSchema):
     """This model represents the relationships of a UserSchema.
     It is used to define the relationships between the UserSchema and other schemas.
     """

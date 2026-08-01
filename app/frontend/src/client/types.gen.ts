@@ -92,28 +92,28 @@ export type AdminRegistration = {
     /**
      * Grandfathername
      */
-    grandFatherName: string;
+    grandFatherName: string | null;
     /**
      * Dateofbirth
      */
     dateOfBirth: string;
     gender: GenderEnum;
     /**
-     * Username
-     */
-    username: string;
-    /**
-     * Password
-     */
-    password: string;
-    /**
-     * Phone
-     */
-    phone: string;
-    /**
      * Email
      */
     email: string;
+    /**
+     * Phone
+     */
+    phone?: string | null;
+    /**
+     * Username
+     */
+    username?: string | null;
+    /**
+     * Password
+     */
+    password?: string | null;
 };
 
 /**
@@ -433,23 +433,6 @@ export type EmployeePositionEnum = 'administrative staff' | 'teaching staff' | '
  */
 export type EmployeeRegStep1 = {
     /**
-     * Firstname
-     */
-    firstName: string;
-    /**
-     * Fathername
-     */
-    fatherName: string;
-    /**
-     * Grandfathername
-     */
-    grandFatherName: string;
-    /**
-     * Dateofbirth
-     */
-    dateOfBirth: string;
-    gender: GenderEnum;
-    /**
      * Nationality
      */
     nationality: string;
@@ -594,7 +577,7 @@ export type EmployeeRegistrationForm = {
     /**
      * Phone
      */
-    phone: string;
+    phone?: string | null;
     /**
      * Secondaryphone
      */
@@ -616,6 +599,14 @@ export type EmployeeRegistrationForm = {
      */
     emergencyContactPhone: string;
     /**
+     * Nationality
+     */
+    nationality: string;
+    /**
+     * Socialsecuritynumber
+     */
+    socialSecurityNumber: string;
+    /**
      * Firstname
      */
     firstName: string;
@@ -626,20 +617,20 @@ export type EmployeeRegistrationForm = {
     /**
      * Grandfathername
      */
-    grandFatherName: string;
+    grandFatherName: string | null;
     /**
      * Dateofbirth
      */
     dateOfBirth: string;
     gender: GenderEnum;
     /**
-     * Nationality
+     * Username
      */
-    nationality: string;
+    username?: string | null;
     /**
-     * Socialsecuritynumber
+     * Password
      */
-    socialSecurityNumber: string;
+    password?: string | null;
     status?: EmployeeApplicationStatusEnum;
 };
 
@@ -1214,9 +1205,17 @@ export type ParentRegistrationForm = {
      */
     firstName: string;
     /**
-     * Lastname
+     * Fathername
      */
-    lastName: string;
+    fatherName: string;
+    /**
+     * Grandfathername
+     */
+    grandFatherName: string | null;
+    /**
+     * Dateofbirth
+     */
+    dateOfBirth: string;
     gender: GenderEnum;
     /**
      * Email
@@ -1225,7 +1224,15 @@ export type ParentRegistrationForm = {
     /**
      * Phone
      */
-    phone: string;
+    phone?: string | null;
+    /**
+     * Username
+     */
+    username?: string | null;
+    /**
+     * Password
+     */
+    password?: string | null;
     /**
      * Relation
      */
@@ -1320,7 +1327,7 @@ export type RegistrationStep = {
 /**
  * RoleEnum
  */
-export type RoleEnum = 'admin' | 'teacher' | 'student' | 'parent' | 'other';
+export type RoleEnum = 'admin' | 'teacher' | 'student' | 'parent' | 'employee' | 'other';
 
 /**
  * ScheduleEnum
@@ -1852,7 +1859,7 @@ export type StudentRegistrationForm = {
     /**
      * Grandfathername
      */
-    grandFatherName?: string | null;
+    grandFatherName: string | null;
     /**
      * Dateofbirth
      */
@@ -1866,6 +1873,22 @@ export type StudentRegistrationForm = {
      * Studentphoto
      */
     studentPhoto?: string | null;
+    /**
+     * Email
+     */
+    email: string;
+    /**
+     * Phone
+     */
+    phone?: string | null;
+    /**
+     * Username
+     */
+    username?: string | null;
+    /**
+     * Password
+     */
+    password?: string | null;
     /**
      * Parentid
      */

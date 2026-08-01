@@ -132,3 +132,10 @@ class SendAllStudents(TypedDict):
 
 
 SetupMethodType = Literal["Default Template", "Manual", "Last Year Copy"]
+
+
+class FixtureConfig(TypedDict):
+    """for fixture config data."""
+
+    count: int
+    id_prefix: str

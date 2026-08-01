@@ -20,9 +20,7 @@ class SavedQueryView(BaseModel):
     __tablename__ = "saved_query_views"
 
     # Columns
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(), ForeignKey("users.id", ondelete="CASCADE"), nullable=False
-    )
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
     name: Mapped[str] = mapped_column(String(50), nullable=False)
     table_name: Mapped[TableEnum] = mapped_column(
         Enum(

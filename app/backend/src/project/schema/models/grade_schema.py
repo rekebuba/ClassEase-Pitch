@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, List
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict
+from pydantic import AwareDatetime
 
+from project.schema.schema import BaseSchema
 from project.utils.enum import GradeEnum, GradeLevelEnum
-from project.utils.utils import to_camel
 
 if TYPE_CHECKING:
     from project.schema.models.section_schema import (
@@ -21,32 +21,22 @@ if TYPE_CHECKING:
         StudentSchema,
         StudentWithRelatedSchema,
     )
-    from project.schema.models.student_term_record_schema import (
-        StudentTermRecordSchema,
-    )
     from project.schema.models.subject_schema import (
         SubjectSchema,
     )
     from project.schema.models.teacher_schema import (
         TeacherWithRelatedSchema,
     )
-    from project.schema.models.year_schema import YearSchema, YearWithRelatedSchema
+    from project.schema.models.year_schema import YearWithRelatedSchema
 
 
-class GradeSchema(BaseModel):
+class GradeSchema(BaseSchema):
     """
     This model represents a grade in the system. It inherits from BaseModel.
     """
 
-    model_config = ConfigDict(
-        extra="forbid",
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
     id: uuid.UUID
-    year_id: uuid.UUID
+    school_id: uuid.UUID
     grade: GradeEnum
     level: GradeLevelEnum
     has_stream: bool
@@ -61,19 +51,11 @@ class GradeWithSubjectSchema(GradeSchema):
     subjects: List[SubjectSchema]
 
 
-class GradeRelatedSchema(BaseModel):
+class GradeRelatedSchema(BaseSchema):
     """This model represents the relationships of a GradeSchema.
     It is used to define the relationships between the GradeSchema and other schemas.
     """
 
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
-    year: Optional[YearSchema]
-    student_term_records: List[StudentTermRecordSchema]
     streams: List[StreamSchema]
     students: List[StudentSchema]
     sections: List[SectionSchema]
@@ -84,12 +66,6 @@ class GradeNestedSchema(GradeSchema):
     """This model represents the relationships of a GradeSchema.
     It is used to define the relationships between the GradeSchema and other schemas.
     """
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     year: YearWithRelatedSchema
     teachers: List[TeacherWithRelatedSchema]

@@ -3,9 +3,9 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, List
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict
+from pydantic import AwareDatetime
 
-from project.utils.utils import to_camel
+from project.schema.schema import BaseSchema
 
 if TYPE_CHECKING:
     from project.schema.models.grade_schema import GradeSchema, GradeWithRelatedSchema
@@ -22,32 +22,20 @@ if TYPE_CHECKING:
     from project.schema.models.year_schema import YearSchema
 
 
-class BasicSubjectSchema(BaseModel):
+class BasicSubjectSchema(BaseSchema):
     """
     This model represents a basic subject in the system. It inherits from BaseModel.
     """
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     id: uuid.UUID
     name: str
     code: str
 
 
-class SubjectSchema(BaseModel):
+class SubjectSchema(BaseSchema):
     """
     This model represents a subject in the system. It inherits from BaseModel.
     """
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     id: uuid.UUID
     year_id: uuid.UUID
@@ -57,16 +45,10 @@ class SubjectSchema(BaseModel):
     updated_at: AwareDatetime
 
 
-class SubjectRelatedSchema(BaseModel):
+class SubjectRelatedSchema(BaseSchema):
     """This model represents the relationships of a SubjectSchema.
     It is used to define the relationships between the SubjectSchema and other schemas.
     """
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     year: YearSchema
     teachers: List[TeacherSchema]
@@ -80,12 +62,6 @@ class SubjectNestedSchema(SubjectSchema):
     """This model represents the relationships of a SubjectSchema.
     It is used to define the relationships between the SubjectSchema and other schemas.
     """
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     teachers: List[TeacherWithRelatedSchema]
     streams: List[StreamWithRelatedSchema]

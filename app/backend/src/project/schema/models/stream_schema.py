@@ -3,8 +3,6 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, List, Optional
 
-from pydantic import BaseModel, ConfigDict
-
 from project.schema.models.grade_schema import GradeWithRelatedSchema
 from project.schema.models.student_term_record_schema import (
     StudentTermRecordWithRelatedSchema,
@@ -13,7 +11,7 @@ from project.schema.models.student_year_record_schema import (
     StudentYearRecordWithRelatedSchema,
 )
 from project.schema.models.subject_schema import SubjectWithRelatedSchema
-from project.utils.utils import to_camel
+from project.schema.schema import BaseSchema
 
 if TYPE_CHECKING:
     from project.schema.models.grade_schema import GradeSchema
@@ -22,30 +20,18 @@ if TYPE_CHECKING:
     from project.schema.models.subject_schema import SubjectSchema
 
 
-class StreamSchema(BaseModel):
+class StreamSchema(BaseSchema):
     """
     This model represents a stream in the system.
     """
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     id: uuid.UUID
     grade_id: uuid.UUID
     name: str
 
 
-class StreamRelatedSchema(BaseModel):
+class StreamRelatedSchema(BaseSchema):
     """This model represents the relationships of a StreamSchema."""
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     student_term_records: Optional[List[StudentTermRecordSchema]]
     grade: Optional[GradeSchema]
@@ -55,12 +41,6 @@ class StreamRelatedSchema(BaseModel):
 
 class StreamNestedSchema(StreamSchema):
     """This model represents the relationships of a StreamSchema."""
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     student_term_records: List[StudentTermRecordWithRelatedSchema] = []
     grade: Optional[GradeWithRelatedSchema] = None

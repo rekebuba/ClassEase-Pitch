@@ -9,25 +9,26 @@ from project.models.base.base_model import BaseModel
 class ParentStudentLink(BaseModel):
     """
     Represents a link between a parent and a student in the database.
+    This link is global (User to User).
     """
 
     __tablename__ = "parent_student_links"
 
-    parent_id: Mapped[uuid.UUID] = mapped_column(
+    parent_user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(),
-        ForeignKey("parents.id", ondelete="CASCADE"),
+        ForeignKey("users.id", ondelete="CASCADE"),
         primary_key=True,
     )
-    student_id: Mapped[uuid.UUID] = mapped_column(
+    student_user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(),
-        ForeignKey("students.id", ondelete="CASCADE"),
+        ForeignKey("users.id", ondelete="CASCADE"),
         primary_key=True,
     )
 
     __table_args__ = (
         UniqueConstraint(
-            "parent_id",
-            "student_id",
+            "parent_user_id",
+            "student_user_id",
             name="uq_parent_student_links",
         ),
     )

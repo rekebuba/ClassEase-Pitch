@@ -11,7 +11,7 @@ from sqlalchemy import (
     Date,
     DateTime,
     Enum,
-    ForeignKey,
+    ForeignKeyConstraint,
     Integer,
     String,
     Text,
@@ -35,9 +35,7 @@ class Event(SchoolScopedMixin, BaseModel):
     """docstring for Event."""
 
     __tablename__ = "events"
-    year_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(), ForeignKey("years.id", ondelete="CASCADE"), nullable=False
-    )
+    year_id: Mapped[uuid.UUID] = mapped_column(UUID(), nullable=False, index=True)
 
     title: Mapped[str] = mapped_column(String(100), nullable=False)
     purpose: Mapped[str] = mapped_column(
@@ -85,7 +83,7 @@ class Event(SchoolScopedMixin, BaseModel):
             EventEligibilityEnum,
             name="event_eligibility_enum",
             values_callable=lambda obj: [e.value for e in EventEligibilityEnum],
-            native_enum=-False,
+            native_enum=False,
         ),
         nullable=True,
         default=None,
@@ -99,12 +97,18 @@ class Event(SchoolScopedMixin, BaseModel):
     year: Mapped["Year"] = relationship(
         "Year",
         back_populates="events",
-        default=None,
+        init=False,
         repr=False,
         passive_deletes=True,
     )
 
     __table_args__ = (
+        ForeignKeyConstraint(
+            ["year_id", "school_id"],
+            ["years.id", "years.school_id"],
+            name="fk_event_year_school",
+            ondelete="CASCADE",
+        ),
         CheckConstraint("start_date <= end_date", name="check_event_dates"),
         CheckConstraint("start_time <= end_time", name="check_event_times"),
     )

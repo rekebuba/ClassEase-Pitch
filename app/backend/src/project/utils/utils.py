@@ -1,4 +1,3 @@
-import logging
 import random
 import re
 from dataclasses import dataclass
@@ -29,9 +28,6 @@ from project.models.school_membership import SchoolMembership
 from project.models.year import Year
 from project.utils.enum import RoleEnum
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
 
 @dataclass
 class EmailData:
@@ -61,13 +57,7 @@ def generate_subject_code(subject: str) -> str:
 
     """Generate the base code by taking the first 'prefix_length'
       characters of each word and converting them to uppercase"""
-    code = "".join(
-        [
-            word[:prefix_length].upper()
-            for word in words
-            if word.isalpha() and word != "and"
-        ]
-    )
+    code = "".join([word[:prefix_length].upper() for word in words if word.isalpha() and word != "and"])
     return code
 
 
@@ -147,8 +137,7 @@ def extract_inner_model(annotation: Any) -> Tuple[bool, Type[BaseModel]]:
         return (False, annotation)
 
     raise ValueError(
-        f"Type annotation does not resolve to a Pydantic model. "
-        f"Got {annotation} which is not a BaseModel subclass."
+        f"Type annotation does not resolve to a Pydantic model. Got {annotation} which is not a BaseModel subclass."
     )
 
 
@@ -257,10 +246,7 @@ async def generate_id(
                     select(SchoolMembership.login_identifier).where(
                         SchoolMembership.school_id == year.school_id,
                         SchoolMembership.login_identifier.in_(
-                            [
-                                f"{section}/{rid}/{academic_year % 100}"
-                                for rid in random_ids
-                            ]
+                            [f"{section}/{rid}/{academic_year % 100}" for rid in random_ids]
                         ),
                     )
                 )
@@ -269,11 +255,7 @@ async def generate_id(
             .all()
         )
 
-        existing_rids = {
-            int(id.split("/")[1])
-            for id in existing_ids
-            if id and "/" in id and len(id.split("/")) == 3
-        }
+        existing_rids = {int(id.split("/")[1]) for id in existing_ids if id and "/" in id and len(id.split("/")) == 3}
 
         available_ids = random_ids - existing_rids
         if available_ids:
@@ -283,6 +265,4 @@ async def generate_id(
         sample_size += base_sample_size
         attempts += 1
 
-    raise ValueError(
-        "Failed to generate a unique username number after multiple attempts."
-    )
+    raise ValueError("Failed to generate a unique username number after multiple attempts.")

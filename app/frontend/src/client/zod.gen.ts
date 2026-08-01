@@ -58,6 +58,7 @@ export const zRoleEnum = z.enum([
     'teacher',
     'student',
     'parent',
+    'employee',
     'other'
 ]);
 
@@ -163,13 +164,25 @@ export const zAdminInfo = z.object({
 export const zAdminRegistration = z.object({
     firstName: z.string(),
     fatherName: z.string(),
-    grandFatherName: z.string(),
+    grandFatherName: z.union([
+        z.string(),
+        z.null()
+    ]),
     dateOfBirth: z.iso.date(),
     gender: zGenderEnum,
-    username: z.string(),
-    password: z.string(),
-    phone: z.string(),
-    email: z.email()
+    email: z.email(),
+    phone: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    username: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    password: z.optional(z.union([
+        z.string(),
+        z.null()
+    ]))
 });
 
 /**
@@ -401,11 +414,6 @@ export const zEmployeeBasicInfo = z.object({
  * EmployeeRegStep1
  */
 export const zEmployeeRegStep1 = z.object({
-    firstName: z.string().min(2).max(50),
-    fatherName: z.string().min(2).max(50),
-    grandFatherName: z.string(),
-    dateOfBirth: z.iso.date(),
-    gender: zGenderEnum,
     nationality: z.string(),
     socialSecurityNumber: z.string()
 });
@@ -479,7 +487,10 @@ export const zEmployeeRegistrationForm = z.object({
     city: z.string().min(2).max(50),
     state: z.string().min(2).max(50),
     country: z.string(),
-    phone: z.string(),
+    phone: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
     secondaryPhone: z.optional(z.union([
         z.string(),
         z.null()
@@ -488,13 +499,24 @@ export const zEmployeeRegistrationForm = z.object({
     emergencyContactName: z.string().min(2).max(50),
     emergencyContactRelation: z.string().min(2).max(50),
     emergencyContactPhone: z.string(),
-    firstName: z.string().min(2).max(50),
-    fatherName: z.string().min(2).max(50),
-    grandFatherName: z.string(),
-    dateOfBirth: z.iso.date(),
-    gender: zGenderEnum,
     nationality: z.string(),
     socialSecurityNumber: z.string(),
+    firstName: z.string(),
+    fatherName: z.string(),
+    grandFatherName: z.union([
+        z.string(),
+        z.null()
+    ]),
+    dateOfBirth: z.iso.date(),
+    gender: zGenderEnum,
+    username: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    password: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
     status: z.optional(zEmployeeApplicationStatusEnum)
 });
 
@@ -1363,11 +1385,27 @@ export const zOtpRequest = z.object({
  * ParentRegistrationForm
  */
 export const zParentRegistrationForm = z.object({
-    firstName: z.string().min(2).max(50),
-    lastName: z.string().min(2).max(50),
+    firstName: z.string(),
+    fatherName: z.string(),
+    grandFatherName: z.union([
+        z.string(),
+        z.null()
+    ]),
+    dateOfBirth: z.iso.date(),
     gender: zGenderEnum,
     email: z.email(),
-    phone: z.string(),
+    phone: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    username: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    password: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
     relation: z.string().min(2).max(50),
     emergencyContactPhone: z.optional(z.union([
         z.string(),
@@ -1658,12 +1696,12 @@ export const zStudentRegistrationForm = z.object({
         z.string().max(100),
         z.null()
     ])),
-    firstName: z.string().min(2).max(50),
-    fatherName: z.string().min(2).max(50),
-    grandFatherName: z.optional(z.union([
+    firstName: z.string(),
+    fatherName: z.string(),
+    grandFatherName: z.union([
         z.string(),
         z.null()
-    ])),
+    ]),
     dateOfBirth: z.iso.date(),
     gender: zGenderEnum,
     nationality: z.optional(z.union([
@@ -1671,6 +1709,19 @@ export const zStudentRegistrationForm = z.object({
         z.null()
     ])),
     studentPhoto: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    email: z.email(),
+    phone: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    username: z.optional(z.union([
+        z.string(),
+        z.null()
+    ])),
+    password: z.optional(z.union([
         z.string(),
         z.null()
     ])),

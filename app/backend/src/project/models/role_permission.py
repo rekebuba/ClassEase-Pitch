@@ -40,6 +40,4 @@ class RolePermission(BaseModel):
         passive_deletes=True,
     )
 
-    __table_args__ = (
-        UniqueConstraint("role_id", "permission_id", name="uq_role_permission"),
-    )
+    __table_args__ = (UniqueConstraint("role_id", "permission_id", name="uq_role_permission"),)

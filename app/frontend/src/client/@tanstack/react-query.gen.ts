@@ -860,7 +860,7 @@ export const registerNewEmployeeQueryKey = (options: Options<RegisterNewEmployee
 
 /**
  * Register New Employee
- * Registers a new user (Admin, Student, Employee) in the system.
+ * Registers a new user (Employee) in the system.
  */
 export const registerNewEmployeeOptions = (options: Options<RegisterNewEmployeeData>) => {
     return queryOptions({
@@ -879,7 +879,7 @@ export const registerNewEmployeeOptions = (options: Options<RegisterNewEmployeeD
 
 /**
  * Register New Employee
- * Registers a new user (Admin, Student, Employee) in the system.
+ * Registers a new user (Employee) in the system.
  */
 export const registerNewEmployeeMutation = (options?: Partial<Options<RegisterNewEmployeeData>>): UseMutationOptions<RegisterNewEmployeeResponse, AxiosError<RegisterNewEmployeeError>, Options<RegisterNewEmployeeData>> => {
     const mutationOptions: UseMutationOptions<RegisterNewEmployeeResponse, AxiosError<RegisterNewEmployeeError>, Options<RegisterNewEmployeeData>> = {

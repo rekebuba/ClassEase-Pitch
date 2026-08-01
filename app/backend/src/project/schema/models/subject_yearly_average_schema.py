@@ -3,38 +3,30 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING, Optional
 
-from pydantic import BaseModel, ConfigDict
-
-from project.utils.utils import to_camel
+from project.schema.schema import BaseSchema
 
 if TYPE_CHECKING:
     from project.schema.models.student_schema import StudentSchema
     from project.schema.models.student_year_record_schema import StudentYearRecordSchema
-    from project.schema.models.yearly_subject_schema import YearlySubjectSchema
+    from project.schema.models.subject_offering_schema import SubjectOfferingSchema
 
 
-class SubjectYearlyAverageSchema(BaseModel):
+class SubjectYearlyAverageSchema(BaseSchema):
     """
     This model represents the yearly average of a subject for a student.
     """
 
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
     id: uuid.UUID | None = None
     student_id: uuid.UUID
-    yearly_subject_id: uuid.UUID
+    subject_offering_id: uuid.UUID
     student_year_record_id: Optional[uuid.UUID] = None
     average: Optional[float] = None
     rank: Optional[int] = None
 
 
-class SubjectYearlyAverageRelatedSchema(BaseModel):
+class SubjectYearlyAverageRelatedSchema(BaseSchema):
     """This model represents the relationships of a SubjectYearlyAverageSchema."""
 
     student: Optional[StudentSchema] = None
-    yearly_subject: Optional[YearlySubjectSchema] = None
+    subject_offering: Optional[SubjectOfferingSchema] = None
     student_year_record: Optional[StudentYearRecordSchema] = None

@@ -6,12 +6,11 @@ from project.core.access_control import (
     ensure_membership_role,
     get_or_create_legacy_school,
     provision_user_membership,
-    seed_school_roles,
+    seed_system_roles,
 )
 from project.core.config import settings
 from project.core.security import get_password_hash
 from project.models import AuthIdentity, SchoolMembership
-from project.models.admin import Admin
 from project.models.user import User
 from project.utils.enum import (
     AuthProviderEnum,
@@ -21,34 +20,36 @@ from project.utils.enum import (
 )
 
 # Create the engine
-engine = create_async_engine(
-    str(settings.SQLALCHEMY_POSTGRES_DATABASE_URI), future=True
+tenant_engine = create_async_engine(str(settings.SQLALCHEMY_POSTGRES_DATABASE_URI), future=True)
+system_engine = create_async_engine(
+    str(settings.SQLALCHEMY_POSTGRES_DATABASE_SYSTEM_URI),
+    future=True,
 )
 
 
-async def init_db(session: AsyncSession) -> None:
+async def init_db(*, system_session: AsyncSession) -> None:
     """Initialize the database with the first super user and legacy school."""
-    school = await get_or_create_legacy_school(session)
-    school_roles = await seed_school_roles(session, school)
+    school = await get_or_create_legacy_school(system_session=system_session)
+    system_roles = await seed_system_roles(system_session)
 
     user = (
-        await session.execute(
-            select(User)
-            .where(User.username == settings.FIRST_SUPERUSER)
-            .options(
-                selectinload(User.admin_profiles),
-            )
+        await system_session.execute(
+            select(User).where(User.username == settings.FIRST_SUPERUSER).options(selectinload(User.primary_membership))
         )
     ).scalar_one_or_none()
 
     if user is None:
         user, membership = await provision_user_membership(
-            session,
-            school=school,
-            shell_role=RoleEnum.ADMIN,
-            membership_role_name="school_owner",
+            system_session,
+            first_name=settings.FIRST_SUPERUSER_NAME,
+            father_name=settings.FIRST_SUPERUSER_FATHER_NAME,
+            grand_father_name=settings.FIRST_SUPERUSER_GRAND_FATHER_NAME,
+            date_of_birth=settings.FIRST_SUPERUSER_DATE_OF_BIRTH,
+            gender=settings.FIRST_SUPERUSER_GENDER,
+            school_id=school.id,
+            membership_role_name=RoleEnum.OWNER,
             login_identifier=settings.FIRST_SUPERUSER,
-            password=settings.FIRST_SUPERUSER_PASSWORD.get_secret_value(),
+            password=settings.FIRST_SUPERUSER_PASSWORD,
             email=str(settings.FIRST_SUPERUSER_EMAIL),
             phone=str(settings.FIRST_SUPERUSER_PHONE),
             is_active=True,
@@ -56,22 +57,10 @@ async def init_db(session: AsyncSession) -> None:
             mfa_state=MfaStateEnum.VERIFIED,
         )
 
-        admin = Admin(
-            user_id=user.id,
-            school_membership_id=membership.id,
-            first_name=settings.FIRST_SUPERUSER_NAME,
-            father_name=settings.FIRST_SUPERUSER_FATHER_NAME,
-            grand_father_name=settings.FIRST_SUPERUSER_GRAND_FATHER_NAME,
-            date_of_birth=settings.FIRST_SUPERUSER_DATE_OF_BIRTH,
-            gender=settings.FIRST_SUPERUSER_GENDER,
-        )
-        admin.school_id = school.id
-        session.add(admin)
-        await session.commit()
-        return
+    await system_session.flush()
 
     membership = (
-        await session.execute(
+        await system_session.execute(
             select(SchoolMembership).where(
                 SchoolMembership.user_id == user.id,
                 SchoolMembership.school_id == school.id,
@@ -90,13 +79,13 @@ async def init_db(session: AsyncSession) -> None:
             is_primary=True,
             permissions_version=1,
         )
-        session.add(membership)
-        await session.flush()
+        system_session.add(membership)
+        await system_session.flush()
 
-    await ensure_membership_role(session, membership, school_roles["school_owner"])
+    await ensure_membership_role(system_session, membership, system_roles[RoleEnum.OWNER], school.id)
 
     identity = (
-        await session.execute(
+        await system_session.execute(
             select(AuthIdentity).filter_by(
                 user_id=user.id,
                 provider=AuthProviderEnum.PASSWORD,
@@ -104,7 +93,7 @@ async def init_db(session: AsyncSession) -> None:
         )
     ).scalar_one_or_none()
     if identity is None:
-        session.add(
+        system_session.add(
             AuthIdentity(
                 user_id=user.id,
                 provider=AuthProviderEnum.PASSWORD,
@@ -112,20 +101,4 @@ async def init_db(session: AsyncSession) -> None:
             )
         )
 
-    admin = user.admin_profiles[0] if user.admin_profiles else None
-    if admin is None:
-        admin = Admin(
-            user_id=user.id,
-            school_membership_id=membership.id,
-            first_name=settings.FIRST_SUPERUSER_NAME,
-            father_name=settings.FIRST_SUPERUSER_FATHER_NAME,
-            grand_father_name=settings.FIRST_SUPERUSER_GRAND_FATHER_NAME,
-            date_of_birth=settings.FIRST_SUPERUSER_DATE_OF_BIRTH,
-            gender=settings.FIRST_SUPERUSER_GENDER,
-        )
-        session.add(admin)
-
-    admin.school_id = school.id
-    admin.school_membership_id = membership.id
-
-    await session.commit()
+    await system_session.commit()
