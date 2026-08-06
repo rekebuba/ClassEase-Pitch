@@ -92,19 +92,6 @@ class StudentProfileFactory(TypedFactory[StudentProfile]):
         model = StudentProfile
 
     user_id = LazyAttribute(lambda _: uuid.uuid4())
-    city = LazyAttribute(lambda _: fake.city())
-    state = LazyAttribute(lambda _: fake.state())
-    postal_code = LazyAttribute(lambda _: fake.postcode())
-    nationality = LazyAttribute(lambda _: fake.country())
-    blood_type = LazyAttribute(lambda _: random.choice(list(BloodTypeEnum)))
-    student_photo = LazyAttribute(lambda _: fake.file_name(extension="jpg"))
-    previous_school = LazyAttribute(lambda _: fake.company() if random.choice([True, False]) else None)
-    transportation = LazyAttribute(lambda _: random.choice(["Bus", "Walk", "Parent"]))
-    has_medical_condition = LazyAttribute(lambda _: random.choice([True, False]))
-    disability_details = None
-    medical_details = None
-    has_medical_condition = False
-    has_disability = False
     is_transfer = False
 
 

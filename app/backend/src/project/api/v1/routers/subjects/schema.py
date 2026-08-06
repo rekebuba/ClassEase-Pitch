@@ -3,19 +3,20 @@ from typing import List, Optional
 
 from pydantic import Field
 
-from project.schema.models.grade_schema import (
-    GradeSchema,
-)
-from project.schema.models.stream_schema import StreamSchema
+from project.schema.models import GradeSchema, StreamSchema
 from project.schema.models.subject_schema import (
     SubjectSchema,
 )
 from project.schema.schema import BaseSchema
 
 
+class GradeStreamSchema(BaseSchema):
+    stream: StreamSchema | None
+    grade: GradeSchema
+
+
 class SubjectSetupSchema(SubjectSchema):
-    grades: List[GradeSchema]
-    streams: List[StreamSchema]
+    grade_streams: list[GradeStreamSchema]
 
 
 class UpdateSubjectFields(BaseSchema):
@@ -44,7 +45,6 @@ class UpdateSubjectSetupSuccess(BaseSchema):
 class NewSubject(BaseSchema):
     name: str = Field(min_length=3, max_length=50)
     code: str = Field(min_length=3, max_length=10)
-    year_id: uuid.UUID
 
 
 class NewSubjectSuccess(BaseSchema):

@@ -8,18 +8,11 @@ export const Route = createFileRoute("/authentication/")({
   component: AuthPage,
   beforeLoad: async () => {
     const state = store.getState();
-    const { token, userInfo } = state.auth;
+    const { token, activeMembership } = state.auth;
 
-    const routeByRole = (role: string) => {
-      if (role === "admin" || role === "student") {
-        return `/${role}`;
-      }
-      return "/";
-    };
-
-    if (token && userInfo) {
+    if (token && (activeMembership)) {
       throw redirect({
-        to: routeByRole(userInfo.role),
+        to: "/dashboard",
       });
     }
   },

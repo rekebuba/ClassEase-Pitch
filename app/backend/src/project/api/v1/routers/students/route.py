@@ -96,17 +96,6 @@ async def student(
     new_student = Student(
         school_id=user_in.membership.school_id,
         user_id=user.id,
-        city=student_data.city,
-        state=student_data.state,
-        postal_code=student_data.postal_code,
-        nationality=student_data.nationality,
-        blood_type=student_data.blood_type,
-        previous_school=student_data.previous_school,
-        transportation=student_data.transportation,
-        has_medical_condition=student_data.has_medical_condition,
-        medical_details=student_data.medical_details,
-        has_disability=student_data.has_disability,
-        disability_details=student_data.disability_details,
         is_transfer=student_data.is_transfer,
     )
 

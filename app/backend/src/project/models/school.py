@@ -116,7 +116,7 @@ class School(BaseModel):
         default_factory=list,
         repr=False,
         passive_deletes=True,
-        overlaps="academic_year,class_sections,grade,homeroom_teacher,school,section",
+        overlaps="academic_year,class_sections,grade_stream,homeroom_teacher,school,section",
     )
     subject_offerings: Mapped[List["SubjectOffering"]] = relationship(
         "SubjectOffering",

@@ -162,7 +162,7 @@ class SchoolYear:
 class SchoolScenario:
     school: MockSchool
     users: list[UserScenario]
-    years: list[SchoolYear]
+    years: list[YearScenario]
     grades: list[SchoolGrade]
 
     def find_user(self, predicate: Callable[[UserScenario], bool]) -> UserScenario:

@@ -5,7 +5,7 @@ from typing import TypeVar
 import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from tests.utils.utils import _count_rows
+from tests.utils.utils import _assert_provisioned_models_counts, _count_rows
 
 from project.models import (
     AcademicTerm,
@@ -13,6 +13,7 @@ from project.models import (
     AssessmentSchemeComponent,
     ClassSection,
     Grade,
+    GradeStream,
     School,
     Section,
     Stream,
@@ -38,19 +39,6 @@ from project.utils.enum import (
 
 pytestmark = pytest.mark.asyncio
 
-
-PROVISIONED_MODELS = (
-    Year,
-    AcademicTerm,
-    Subject,
-    Grade,
-    Section,
-    Stream,
-    AssessmentScheme,
-    AssessmentSchemeComponent,
-    SubjectOffering,
-    ClassSection,
-)
 
 T = TypeVar("T", bound=SchoolScopedMixin)
 
@@ -110,36 +98,17 @@ async def test_ensure_default_blueprint_creates_complete_global_blueprint(
     assert blueprint_year.calendar_type == AcademicTermTypeEnum.SEMESTER
     assert blueprint_year.status == AcademicYearStatusEnum.UPCOMING
 
-    counts = {
-        model.__tablename__: await _count_rows(
-            tenant_session=db_session,
-            model=model,
-            school_id=None,
-        )
-        for model in PROVISIONED_MODELS
-    }
-
-    assert counts["years"] == 1
-    assert counts["academic_terms"] == 2
-    assert counts["subjects"] >= 20
-    assert counts["grades"] == 12
-    assert counts["sections"] >= 36
-    assert counts["streams"] >= 2
-    assert counts["assessment_schemes"] == 1
-    assert counts["assessment_scheme_components"] == 4
-    assert counts["subject_offerings"] == 130
-    assert counts["class_sections"] > 0
+    counts = await _assert_provisioned_models_counts(
+        tenant_session=db_session,
+        school_id=None,
+    )
 
     # The seed operation is idempotent and does not add duplicate blueprint rows.
     await SchoolProvisioningService.ensure_default_blueprint(system_session=system_db_session)
-    assert counts == {
-        model.__tablename__: await _count_rows(
-            tenant_session=db_session,
-            model=model,
-            school_id=None,
-        )
-        for model in PROVISIONED_MODELS
-    }
+    assert counts == await _assert_provisioned_models_counts(
+        tenant_session=db_session,
+        school_id=None,
+    )
 
 
 async def test_setup_school_copies_blueprint_rows_and_returns_complete_id_maps(
@@ -162,6 +131,7 @@ async def test_setup_school_copies_blueprint_rows_and_returns_complete_id_maps(
         (Grade, maps.grades),
         (Section, maps.sections),
         (Stream, maps.streams),
+        (GradeStream, maps.grade_streams),
         (AssessmentScheme, maps.assessment_schemes),
         (AssessmentSchemeComponent, maps.assessment_scheme_components),
         (SubjectOffering, maps.subject_offerings),
@@ -175,6 +145,11 @@ async def test_setup_school_copies_blueprint_rows_and_returns_complete_id_maps(
         )
         assert len(tenant_rows) == len(blueprint_rows)
         _assert_map_is_complete(blueprint_rows, mapping)
+
+        await _assert_provisioned_models_counts(
+            tenant_session=db_session,
+            school_id=school.id,
+        )
 
 
 async def test_setup_school_remaps_all_copied_foreign_keys_to_tenant_rows(
@@ -203,12 +178,13 @@ async def test_setup_school_remaps_all_copied_foreign_keys_to_tenant_rows(
     )
     assert {section.grade_id for section in tenant_sections}.issubset(set(maps.grades.values()))
 
-    tenant_streams = await _rows(
+    tenant_grade_streams = await _rows(
         system_session=db_session,
-        model=Stream,
+        model=GradeStream,
         school_id=school.id,
     )
-    assert {stream.grade_id for stream in tenant_streams}.issubset(set(maps.grades.values()))
+    assert {gs.grade_id for gs in tenant_grade_streams}.issubset(set(maps.grades.values()))
+    assert {gs.stream_id for gs in tenant_grade_streams if gs.stream_id}.issubset(set(maps.streams.values()))
 
     tenant_components = await _rows(
         system_session=db_session,
@@ -222,17 +198,24 @@ async def test_setup_school_remaps_all_copied_foreign_keys_to_tenant_rows(
 
     tenant_offerings = await _rows(
         system_session=db_session,
+        model=GradeStream,
+        school_id=school.id,
+    )
+    assert {offering.grade_id for offering in tenant_offerings}.issubset(set(maps.grades.values()))
+    assert {offering.stream_id for offering in tenant_offerings if offering.stream_id}.issubset(
+        set(maps.streams.values())
+    )
+
+    tenant_offerings = await _rows(
+        system_session=db_session,
         model=SubjectOffering,
         school_id=school.id,
     )
     assert {offering.year_id for offering in tenant_offerings}.issubset(set(maps.years.values()))
     assert {offering.subject_id for offering in tenant_offerings}.issubset(set(maps.subjects.values()))
-    assert {offering.grade_id for offering in tenant_offerings}.issubset(set(maps.grades.values()))
+    assert {offering.grade_stream_id for offering in tenant_offerings}.issubset(set(maps.grade_streams.values()))
     assert {offering.assessment_scheme_id for offering in tenant_offerings}.issubset(
         set(maps.assessment_schemes.values())
-    )
-    assert {offering.stream_id for offering in tenant_offerings if offering.stream_id}.issubset(
-        set(maps.streams.values())
     )
 
     tenant_class_sections = await _rows(
@@ -244,9 +227,9 @@ async def test_setup_school_remaps_all_copied_foreign_keys_to_tenant_rows(
     assert {class_section.academic_year_id for class_section in tenant_class_sections}.issubset(
         set(maps.years.values())
     )
-    assert {class_section.stream_id for class_section in tenant_class_sections if class_section.stream_id}.issubset(
-        set(maps.streams.values())
-    )
+    assert {
+        class_section.grade_stream_id for class_section in tenant_class_sections if class_section.grade_stream_id
+    }.issubset(set(maps.grade_streams.values()))
 
 
 async def test_setup_school_creates_independent_tenant_copies(

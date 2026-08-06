@@ -57,13 +57,14 @@ export default function DateRangeLabeled<T extends FieldValues>({
   disableTo = new Date("2035-12-31"),
 }: DateRangeLabeledProps<T>) {
   const parentForm = useFormContext<T>();
+  const { getValues, setValue } = parentForm;
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: zodResolver(schema),
     defaultValues: {
       dateRange: {
-        from: parentForm.getValues(fromInSchema) as unknown as Date | undefined,
-        to: parentForm.getValues(toInSchema) as unknown as Date | undefined,
+        from: getValues(fromInSchema) as unknown as Date | undefined,
+        to: getValues(toInSchema) as unknown as Date | undefined,
       },
     },
   });
@@ -71,10 +72,9 @@ export default function DateRangeLabeled<T extends FieldValues>({
   const to = form.watch("dateRange").to;
 
   useEffect(() => {
-    parentForm.setValue(fromInSchema, from as PathValue<T, Path<T>>);
-    parentForm.setValue(toInSchema, to as PathValue<T, Path<T>>);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, to]);
+    setValue(fromInSchema, from as PathValue<T, Path<T>>);
+    setValue(toInSchema, to as PathValue<T, Path<T>>);
+  }, [from, to, fromInSchema, toInSchema, setValue]);
 
   function onSubmit(values: z.infer<typeof schema>) {
     return values;

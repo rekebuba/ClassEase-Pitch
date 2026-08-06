@@ -26,8 +26,19 @@ from project.core.access_control import (
 )
 from project.core.config import settings
 from project.models import (
+    AcademicTerm,
+    AssessmentScheme,
+    AssessmentSchemeComponent,
+    ClassSection,
+    Grade,
+    GradeStream,
     School,
     SchoolMembership,
+    Section,
+    Stream,
+    Subject,
+    SubjectOffering,
+    Year,
 )
 from project.models.base.school_mixin import SchoolScopedMixin
 from project.schema.schema import SuccessResponse
@@ -41,6 +52,51 @@ from tests.factories.api_data import LoginFactory
 from tests.utils.type_test import MockLogin, MockSignUp, SchoolAdmin
 
 f = Faker()
+
+PROVISIONED_MODELS = (
+    Year,
+    AcademicTerm,
+    Subject,
+    Grade,
+    Section,
+    Stream,
+    GradeStream,
+    AssessmentScheme,
+    AssessmentSchemeComponent,
+    SubjectOffering,
+    ClassSection,
+)
+
+
+async def _assert_provisioned_models_counts(
+    *,
+    tenant_session: AsyncSession,
+    school_id: uuid.UUID | None,
+) -> dict[str, int]:
+    counts: dict[str, int] = {
+        model.__tablename__: await _count_rows(
+            tenant_session=tenant_session,
+            model=model,
+            school_id=school_id,
+        )
+        for model in PROVISIONED_MODELS
+    }
+
+    assert counts["years"] == 1, f"Expected 1 year, got {counts['years']}"
+    assert counts["academic_terms"] == 2, f"Expected 2 academic terms, got {counts['academic_terms']}"
+    assert counts["subjects"] == 21, f"Expected 21 subjects, got {counts['subjects']}"
+    assert counts["grades"] == 12, f"Expected 12 grades, got {counts['grades']}"
+    assert counts["sections"] == 36, f"Expected 36 sections, got {counts['sections']}"
+    assert counts["streams"] == 2, f"Expected 2 streams, got {counts['streams']}"
+    assert counts["grade_streams"] == 14, f"Expected 14 grade streams, got {counts['grade_streams']}"
+    assert counts["assessment_schemes"] == 1, f"Expected 1 assessment scheme, got {counts['assessment_schemes']}"
+    assert counts["assessment_scheme_components"] == 4, (
+        f"Expected 4 assessment scheme components, got {counts['assessment_scheme_components']}"
+    )
+    assert counts["subject_offerings"] == 130, f"Expected 130 subject offerings, got {counts['subject_offerings']}"
+    assert counts["class_sections"] == 36, f"Expected 36 class sections, got {counts['class_sections']}"
+
+    return counts
 
 
 async def _signup_user(client: AsyncClient, user: SignUpRequest) -> MockSignUp:

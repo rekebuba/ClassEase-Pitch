@@ -12,9 +12,8 @@ from project.models.base.school_mixin import SchoolScopedMixin
 
 if TYPE_CHECKING:
     from project.models.assessment_scheme import AssessmentScheme
-    from project.models.grade import Grade
+    from project.models.grade_stream import GradeStream
     from project.models.school import School
-    from project.models.stream import Stream
     from project.models.subject import Subject
     from project.models.subject_term_result import SubjectTermResult
     from project.models.subject_yearly_average import SubjectYearlyAverage
@@ -25,18 +24,10 @@ if TYPE_CHECKING:
 class SubjectOffering(SchoolScopedMixin, BaseModel):
     __tablename__ = "subject_offerings"
 
-    assessment_scheme_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(),
-        nullable=False,
-    )
+    assessment_scheme_id: Mapped[uuid.UUID] = mapped_column(UUID(), nullable=False)
     year_id: Mapped[uuid.UUID] = mapped_column(UUID(), nullable=False)
     subject_id: Mapped[uuid.UUID] = mapped_column(UUID(), nullable=False)
-    grade_id: Mapped[uuid.UUID] = mapped_column(UUID(), nullable=False)
-    stream_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        UUID(),
-        nullable=True,
-        default=None,
-    )
+    grade_stream_id: Mapped[uuid.UUID] = mapped_column(UUID(), nullable=False)
 
     # Relationships
     year: Mapped["Year"] = relationship(
@@ -54,19 +45,9 @@ class SubjectOffering(SchoolScopedMixin, BaseModel):
         repr=False,
         overlaps="year,subject_offerings",
     )
-
-    # Association Object
-    grade: Mapped["Grade"] = relationship(
-        "Grade",
+    grade_stream: Mapped["GradeStream"] = relationship(
+        "GradeStream",
         back_populates="subject_offerings",
-        init=False,
-        repr=False,
-        overlaps="subject,year,subject_offerings",
-    )
-    stream: Mapped[Optional["Stream"]] = relationship(
-        "Stream",
-        back_populates="subject_offerings",
-        foreign_keys="[SubjectOffering.stream_id, SubjectOffering.school_id]",
         init=False,
         repr=False,
         overlaps="grade,subject,year,subject_offerings",
@@ -93,7 +74,7 @@ class SubjectOffering(SchoolScopedMixin, BaseModel):
         back_populates="subject_offerings",
         init=False,
         repr=False,
-        overlaps="school,grade,stream,subject,subject_offerings,year",
+        overlaps="grade_stream,school,subject,subject_offerings,year",
     )
     subject_term_results: Mapped[List["SubjectTermResult"]] = relationship(
         "SubjectTermResult",
@@ -108,7 +89,7 @@ class SubjectOffering(SchoolScopedMixin, BaseModel):
         back_populates="subject_offerings",
         init=False,
         repr=False,
-        overlaps="school,grade,stream,subject,subject_offerings,year",
+        overlaps="assessment_scheme,grade_stream,subject,subject_offerings,year",
     )
 
     __table_args__ = (
@@ -116,10 +97,9 @@ class SubjectOffering(SchoolScopedMixin, BaseModel):
         UniqueConstraint(
             "school_id",
             "year_id",
-            "grade_id",
-            "stream_id",
+            "grade_stream_id",
             "subject_id",
-            name="uq_subject_offering_offering_scope",
+            name="uq_subject_offering_scope",
         ),
         ForeignKeyConstraint(
             ["year_id", "school_id"],
@@ -134,15 +114,9 @@ class SubjectOffering(SchoolScopedMixin, BaseModel):
             ondelete="CASCADE",
         ),
         ForeignKeyConstraint(
-            ["grade_id", "school_id"],
-            ["grades.id", "grades.school_id"],
-            name="fk_subject_offerings_grade_school",
-            ondelete="CASCADE",
-        ),
-        ForeignKeyConstraint(
-            ["stream_id", "school_id"],
-            ["streams.id", "streams.school_id"],
-            name="fk_subject_offerings_stream_school",
+            ["grade_stream_id", "school_id"],
+            ["grade_streams.id", "grade_streams.school_id"],
+            name="fk_subject_offerings_grade_stream_school",
             ondelete="CASCADE",
         ),
         ForeignKeyConstraint(

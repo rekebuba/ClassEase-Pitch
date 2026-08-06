@@ -34,6 +34,7 @@ class AssessmentScheme(SchoolScopedMixin, BaseModel):
         default_factory=list,
         repr=False,
         passive_deletes=True,
+        overlaps="grade_stream,subject_offerings",
     )
 
     __table_args__ = (

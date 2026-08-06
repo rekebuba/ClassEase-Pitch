@@ -4,6 +4,7 @@ from typing import Annotated, Any, Dict, List, Sequence
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.logger import logger
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload
 
 from project.api.v1.routers.dependencies import (
     AuthenticatedRoute,
@@ -18,32 +19,32 @@ from project.api.v1.routers.subjects.schema import (
     UpdateSubjectSetupSuccess,
 )
 from project.api.v1.routers.subjects.service import update_subject_relationships
+from project.models import GradeStream, SubjectOffering
 from project.models.subject import Subject
 from project.models.year import Year
 from project.schema.models.subject_schema import (
     SubjectSchema,
 )
+from project.utils.enum import PermissionEnum
 
-router = APIRouter(prefix="/subjects", tags=["Subjects"])
+router = APIRouter(tags=["Subjects"])
 
 
 @router.get(
-    "",
+    "/subjects",
     response_model=List[SubjectSchema],
 )
 async def get_subjects(
     session: SessionDep,
-    query: Annotated[FilterParams, Query()],
     user_in: AuthenticatedRoute,
 ) -> Sequence[Subject]:
     """
     Returns All Subjects with in academic year
     """
-    year = await session.get(Year, query.year_id)
-    if not year:
+    if not user_in.has_permission(PermissionEnum.SUBJECTS_READ):
         raise HTTPException(
-            status_code=404,
-            detail=f"Year with ID {query.year_id} not found.",
+            status_code=403,
+            detail="You do not have permission to read subjects.",
         )
 
     subjects = (await session.execute(select(Subject).order_by(Subject.name))).scalars().all()
@@ -52,7 +53,7 @@ async def get_subjects(
 
 
 @router.post(
-    "",
+    "/subjects",
     response_model=NewSubjectSuccess,
 )
 async def post_subject(
@@ -63,7 +64,11 @@ async def post_subject(
     """
     Creates a new Subject
     """
-    errors = {}
+    if not user_in.has_permission(PermissionEnum.SUBJECTS_WRITE):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to write subjects.",
+        )
 
     existing_subject_name = (
         (
@@ -78,7 +83,7 @@ async def post_subject(
     )
 
     if existing_subject_name:
-        errors["name"] = "Subject name for the year already exists."
+        raise HTTPException(status_code=400, detail="Subject name for the school already exists.")
 
     existing_subject_code = (
         (
@@ -93,17 +98,11 @@ async def post_subject(
     )
 
     if existing_subject_code:
-        errors["code"] = "Subject code for the year already exists."
-
-    if errors:
-        raise HTTPException(status_code=400, detail=errors)
+        raise HTTPException(status_code=400, detail="Subject code for the school already exists.")
 
     try:
-        year = await session.get(Year, new_subject.year_id)
-        if not year:
-            raise HTTPException(status_code=404, detail="Academic year not found.")
         subject = Subject(
-            school_id=year.school_id,
+            school_id=user_in.membership.school_id,
             name=new_subject.name,
             code=new_subject.code,
         )
@@ -119,38 +118,59 @@ async def post_subject(
 
 
 @router.get(
-    "/setup",
+    "/subjects/offerings",
     response_model=List[SubjectSetupSchema],
 )
-async def get_subjects_setup(
+async def get_subject_offerings(
     session: SessionDep,
-    query: Annotated[FilterParams, Query()],
     user_in: AuthenticatedRoute,
+    query: Annotated[FilterParams, Query()],
 ) -> Sequence[Subject]:
     """
     Returns All Subjects with in academic year
     """
-    year = await session.get(Year, query.year_id)
-    if not year:
+    if not user_in.has_permission(PermissionEnum.SUBJECTS_READ):
         raise HTTPException(
-            status_code=404,
-            detail=f"Year with ID {query.year_id} not found.",
+            status_code=403,
+            detail="You do not have permission to read subjects.",
         )
 
-    stmt = select(Subject)
+    year = await session.get(Year, query.year_id)
+    if not year:
+        raise HTTPException(status_code=404, detail="Academic year not found.")
+
+    subject = select(Subject).join(Subject.subject_offerings).where(SubjectOffering.year_id == year.id)
+
     if query.q:
-        stmt = stmt.where(Subject.name.ilike(f"%{query.q}%"))
+        subject = subject.where(Subject.name.ilike(f"%{query.q}%"))
 
-    subjects = (await session.execute(stmt.order_by(Subject.name))).scalars().all()
+    subject_offering = (
+        (
+            await session.execute(
+                subject.options(
+                    selectinload(Subject.subject_offerings)
+                    .selectinload(SubjectOffering.grade_stream)
+                    .selectinload(GradeStream.grade),
+                    selectinload(Subject.subject_offerings)
+                    .selectinload(SubjectOffering.grade_stream)
+                    .selectinload(GradeStream.stream),
+                )
+                .group_by(Subject.id)
+                .order_by(Subject.name)
+            )
+        )
+        .scalars()
+        .all()
+    )
 
-    return subjects
+    return subject_offering
 
 
 @router.get(
-    "/setup/{subject_id}",
+    "/subjects/offerings/{subject_id}",
     response_model=SubjectSetupSchema,
 )
-async def get_subject_setup_by_id(
+async def get_subject_offerings_by_id(
     session: SessionDep,
     subject_id: uuid.UUID,
     user_in: AuthenticatedRoute,
@@ -158,18 +178,40 @@ async def get_subject_setup_by_id(
     """
     Returns specific academic subject
     """
-    subject = await session.get(Subject, subject_id)
-    if not subject:
+    if not user_in.has_permission(PermissionEnum.SUBJECTS_READ):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to read subjects.",
+        )
+
+    subject_offering = (
+        await session.execute(
+            select(Subject)
+            .where(Subject.id == subject_id)
+            .options(
+                selectinload(Subject.subject_offerings)
+                .selectinload(SubjectOffering.grade_stream)
+                .selectinload(GradeStream.grade),
+                selectinload(Subject.subject_offerings)
+                .selectinload(SubjectOffering.grade_stream)
+                .selectinload(GradeStream.stream),
+            )
+            .group_by(Subject.id)
+            .order_by(Subject.name)
+        )
+    ).scalar_one_or_none()
+
+    if not subject_offering:
         raise HTTPException(
             status_code=404,
             detail=f"Subject with ID {subject_id} not found.",
         )
 
-    return subject
+    return subject_offering
 
 
 @router.patch(
-    "/setup/{subject_id}",
+    "/subjects/setup/{subject_id}",
     response_model=UpdateSubjectSetupSuccess,
 )
 async def patch_subject_setup(
@@ -215,7 +257,7 @@ async def patch_subject_setup(
 
 
 @router.get(
-    "/{subject_id}",
+    "/subjects/{subject_id}",
     response_model=SubjectSchema,
 )
 async def get_subject_by_id(

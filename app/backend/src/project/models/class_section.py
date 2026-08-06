@@ -8,6 +8,7 @@ from project.models.base.base_model import BaseModel
 from project.models.base.school_mixin import SchoolScopedMixin
 
 if TYPE_CHECKING:
+    from project.models.grade_stream import GradeStream
     from project.models.school import School
     from project.models.section import Section
     from project.models.student_enrollments import StudentEnrollment
@@ -20,7 +21,7 @@ class ClassSection(SchoolScopedMixin, BaseModel):
     __tablename__ = "class_sections"
 
     section_id: Mapped[uuid.UUID] = mapped_column(UUID(), nullable=False)
-    stream_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(), nullable=True)
+    grade_stream_id: Mapped[Optional[uuid.UUID]] = mapped_column(UUID(), nullable=False)
     academic_year_id: Mapped[uuid.UUID] = mapped_column(UUID(), nullable=False)
     homeroom_teacher_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         UUID(),
@@ -43,9 +44,9 @@ class ClassSection(SchoolScopedMixin, BaseModel):
             ondelete="SET NULL",
         ),
         ForeignKeyConstraint(
-            ["stream_id", "school_id"],
-            ["streams.id", "streams.school_id"],
-            name="fk_class_section_stream_school",
+            ["grade_stream_id", "school_id"],
+            ["grade_streams.id", "grade_streams.school_id"],
+            name="fk_class_section_grade_stream_school",
             ondelete="SET NULL",
         ),
         ForeignKeyConstraint(
@@ -76,13 +77,21 @@ class ClassSection(SchoolScopedMixin, BaseModel):
         passive_deletes=True,
         overlaps="school",
     )
+    grade_stream: Mapped[Optional["GradeStream"]] = relationship(
+        "GradeStream",
+        back_populates="class_sections",
+        init=False,
+        repr=False,
+        passive_deletes=True,
+        overlaps="school,section,stream,grade_streams",
+    )
     academic_year: Mapped["Year"] = relationship(
         "Year",
         back_populates="class_sections",
         init=False,
         repr=False,
         passive_deletes=True,
-        overlaps="section,school",
+        overlaps="grade_stream,section,school",
     )
     homeroom_teacher: Mapped[Optional["TeacherProfile"]] = relationship(
         "TeacherProfile",
@@ -90,7 +99,7 @@ class ClassSection(SchoolScopedMixin, BaseModel):
         init=False,
         repr=False,
         passive_deletes=True,
-        overlaps="academic_year,section,school",
+        overlaps="academic_year,grade_stream,section,school",
     )
     teaching_assignments: Mapped[List["TeachingAssignment"]] = relationship(
         "TeachingAssignment",

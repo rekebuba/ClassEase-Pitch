@@ -21,7 +21,7 @@ from project.api.v1.routers.grades.schema import (
 )
 from project.api.v1.routers.grades.service import update_grade_relationships
 from project.api.v1.routers.schema import FilterParams
-from project.models import SubjectOffering
+from project.models import GradeStream, SubjectOffering
 from project.models.grade import Grade
 from project.models.year import Year
 from project.schema.models import GradeWithRelatedSchema
@@ -29,11 +29,11 @@ from project.schema.models.grade_schema import GradeSchema
 from project.utils.enum import PermissionEnum
 from project.utils.utils import sort_grade_key
 
-router = APIRouter(prefix="/grades", tags=["Grades"])
+router = APIRouter(prefix="", tags=["Grades"])
 
 
 @router.get(
-    "",
+    "/grades",
     response_model=List[GradeSchema],
 )
 async def get_grades(
@@ -57,7 +57,7 @@ async def get_grades(
 
 
 @router.post(
-    "",
+    "/grades",
     response_model=NewGradeSuccess,
 )
 async def post_grade(
@@ -68,28 +68,30 @@ async def post_grade(
     """
     Creates a new Grade
     """
-    errors = {}
+    if not user_in.has_permission(PermissionEnum.GRADES_WRITE):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to write grades.",
+        )
 
     existing_grade_name = (
         await session.execute(
             select(Grade).where(
                 Grade.grade == new_grade.grade,
+                Grade.school_id == user_in.membership.school_id,
             )
         )
     ).first()
 
     if existing_grade_name:
-        errors["grade"] = "Grade name for the year already exists."
-
-    if errors:
-        raise HTTPException(status_code=400, detail=errors)
+        raise HTTPException(
+            status_code=400,
+            detail="Grade name for the school already exists.",
+        )
 
     try:
-        year = await session.get(Year, new_grade.year_id)
-        if not year:
-            raise HTTPException(status_code=404, detail="Academic year not found.")
         grade = Grade(
-            school_id=year.school_id,
+            school_id=user_in.membership.school_id,
             grade=new_grade.grade,
             level=new_grade.level,
             has_stream=new_grade.has_stream,
@@ -106,41 +108,67 @@ async def post_grade(
 
 
 @router.get(
-    "/setup",
+    "/grades/offerings",
     response_model=List[GradeSetupSchema],
 )
-async def get_grades_setup(
-    query: Annotated[FilterParams, Query()],
+async def get_grade_offerings(
     session: SessionDep,
     user_in: AuthenticatedRoute,
+    query: Annotated[FilterParams, Query()],
 ) -> Sequence[Grade]:
     """
-    Returns specific academic year
+    Returns All Grades with in academic year
     """
-    year = await session.get(Year, query.year_id)
-    if not year:
+    if not user_in.has_permission(PermissionEnum.GRADES_READ):
         raise HTTPException(
-            status_code=404,
-            detail=f"Year with ID {query.year_id} not found.",
+            status_code=403,
+            detail="You do not have permission to read grades.",
         )
 
-    stmt = select(Grade)
+    year = await session.get(Year, query.year_id)
+    if not year:
+        raise HTTPException(status_code=404, detail="Academic year not found.")
+
+    grade = (
+        select(Grade)
+        .join(Grade.grade_streams)
+        .join(GradeStream.subject_offerings)
+        .where(SubjectOffering.year_id == year.id)
+    )
+
     if query.q:
         filter = re.sub(r"^gr?a?d?e? ?", "", query.q.strip(), flags=re.IGNORECASE)
-        stmt = stmt.where(Grade.grade.ilike(f"%{filter}%"))
+        grade = grade.where(Grade.grade.ilike(f"%{filter}%"))
 
-    grades = (await session.execute(stmt)).scalars().all()
+    grade_offering = (
+        (
+            await session.execute(
+                grade.options(
+                    # Grade -> Sections
+                    selectinload(Grade.sections),
+                    # Grade -> Streams
+                    selectinload(Grade.grade_streams).selectinload(GradeStream.stream),
+                    # Grade -> Stream -> Subjects
+                    selectinload(Grade.grade_streams)
+                    .selectinload(GradeStream.subject_offerings)
+                    .selectinload(SubjectOffering.subject),
+                ).group_by(Grade.id)
+            )
+        )
+        .scalars()
+        .all()
+    )
 
-    sorted_grades = sorted(grades, key=sort_grade_key)
+    sorted_grades = sorted(grade_offering, key=sort_grade_key)
 
     return sorted_grades
 
 
 @router.get(
-    "/setup/{grade_id}",
+    "/grades/offerings/{grade_id}",
     response_model=GradeSetupSchema,
 )
-async def get_grades_setup_by_id(
+async def get_grade_offerings_by_id(
     grade_id: uuid.UUID,
     session: SessionDep,
     user_in: AuthenticatedRoute,
@@ -148,19 +176,38 @@ async def get_grades_setup_by_id(
     """
     Returns specific Grade SetUp
     """
+    if not user_in.has_permission(PermissionEnum.GRADES_READ):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to read grades.",
+        )
 
-    grade = await session.get(Grade, grade_id)
-    if not grade:
+    grade_offering = (
+        await session.execute(
+            select(Grade)
+            .where(Grade.id == grade_id)
+            .options(
+                selectinload(Grade.sections),
+                selectinload(Grade.grade_streams).selectinload(GradeStream.stream),
+                selectinload(Grade.grade_streams)
+                .selectinload(GradeStream.subject_offerings)
+                .selectinload(SubjectOffering.subject),
+            )
+            .group_by(Grade.id)
+        )
+    ).scalar_one_or_none()
+
+    if not grade_offering:
         raise HTTPException(
             status_code=404,
             detail=f"Grade with ID {grade_id} not found.",
         )
 
-    return grade
+    return grade_offering
 
 
 @router.patch(
-    "/setup/{grade_id}",
+    "/grades/setup/{grade_id}",
     response_model=UpdateGradeSetupSuccess,
 )
 async def patch_grade_setup(
@@ -214,7 +261,7 @@ async def patch_grade_setup(
 
 
 @router.get(
-    "/{grade_id}",
+    "/grades/{grade_id}",
     response_model=GradeSchema,
 )
 async def get_grade_by_id(
@@ -242,7 +289,7 @@ async def get_grade_by_id(
 
 
 @router.get(
-    "/{grade_id}/relation",
+    "/grades/{grade_id}/relation",
     response_model=GradeWithRelatedSchema,
 )
 async def get_grade_relation(
@@ -258,9 +305,7 @@ async def get_grade_relation(
             select(Grade)
             .where(Grade.id == grade_id)
             .options(
-                selectinload(Grade.streams),
                 selectinload(Grade.sections),
-                selectinload(Grade.subject_offerings).selectinload(SubjectOffering.subject),
             )
         )
     ).scalar_one_or_none()

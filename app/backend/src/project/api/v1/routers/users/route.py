@@ -27,10 +27,12 @@ async def get_logged_in_user(session: SessionDep, user_in: AuthenticatedRoute) -
     Returns the current logged in user information.
     """
     memberships = await load_user_memberships_for_user(session, user_id=user_in.user.id)
+    full_name = f"{user_in.user.first_name} {user_in.user.father_name} {user_in.user.grand_father_name}".strip()
     return {
         "id": user_in.user.id,
         "username": user_in.membership.login_identifier or user_in.user.username,
         "role": user_in.shell_role,
+        "full_name": full_name,
         "image_path": user_in.user.image_path,
         "created_at": user_in.user.created_at,
         "active_school": SchoolSummary(

@@ -38,7 +38,6 @@ class SubjectSchema(BaseSchema):
     """
 
     id: uuid.UUID
-    year_id: uuid.UUID
     name: str
     code: str
     created_at: AwareDatetime

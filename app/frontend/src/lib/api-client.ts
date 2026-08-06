@@ -3,7 +3,7 @@ import { refreshAccessToken } from "@/client/sdk.gen";
 import { queryClient } from "@/lib/query-client";
 import { router } from "@/main";
 import { persister, store } from "@/store/main-store";
-import { loginSuccess, logout } from "@/store/slice/auth-slice";
+import { loginSuccess, logout } from "@/store/slice/auth/auth-slice";
 import { decodeToken, ENV } from "@/utils/utils";
 
 // Create a new client with auth configuration

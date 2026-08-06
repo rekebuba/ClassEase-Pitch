@@ -14,6 +14,7 @@ class CurrentUserInfo(UserSchema):
     id: uuid.UUID
     username: str
     role: RoleEnum
+    full_name: str
     image_path: str | None
     created_at: AwareDatetime
     active_school: SchoolSummary

@@ -120,5 +120,5 @@ class TeacherProfile(SchoolScopedMixin, BaseModel):
         default_factory=list,
         repr=False,
         passive_deletes=True,
-        overlaps="academic_year,class_sections,grade,school,section",
+        overlaps="academic_year,class_sections,grade_stream,school,section",
     )

@@ -3,10 +3,8 @@ from typing import List, Optional
 
 from pydantic import Field
 
+from project.schema.models import SectionSchema
 from project.schema.models.grade_schema import GradeSchema
-from project.schema.models.section_schema import (
-    SectionSchema,
-)
 from project.schema.models.stream_schema import StreamSchema
 from project.schema.models.subject_schema import (
     SubjectSchema,
@@ -57,13 +55,17 @@ class StreamSetupSchema(StreamSchema):
     subjects: List[SubjectSchema]
 
 
+class GradeStreamSetup(BaseSchema):
+    stream: StreamSchema | None
+    subjects: List[SubjectSchema]
+
+
 class UpdateStreamSetup(UpdateStream):
     subjects: List[UpdateSubject]
 
 
 class GradeSetupSchema(GradeSchema):
-    subjects: List[SubjectSchema]
-    streams: List[StreamSetupSchema]
+    grade_streams: List[GradeStreamSetup]
     sections: List[SectionSchema]
 
 
@@ -87,7 +89,6 @@ class NewGrade(BaseSchema):
     grade: GradeEnum
     level: GradeLevelEnum
     has_stream: bool
-    year_id: uuid.UUID
 
 
 class NewGradeSuccess(BaseSchema):

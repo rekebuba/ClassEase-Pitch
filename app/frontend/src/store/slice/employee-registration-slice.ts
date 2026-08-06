@@ -1,55 +1,25 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-import type { EmployeeRegistrationForm } from "@/client/types.gen";
+import type { EmployeeProfile } from "@/client/types.gen";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
 type EmployeeRegistrationFormState = {
-  data: EmployeeRegistrationForm;
+  data: EmployeeProfile;
   step: number;
 };
 
-const initialFormData: EmployeeRegistrationForm = {
-  // Personal Information
-  firstName: "",
-  fatherName: "",
-  grandFatherName: "",
-  dateOfBirth: "",
-  gender: undefined as any,
-  nationality: "",
-  socialSecurityNumber: "",
-
-  // Contact Information
-  city: "",
-  state: "",
-  country: "",
-  phone: "",
-  secondaryPhone: "",
-  email: "",
-
-  // Emergency Contact
-  emergencyContactName: "",
-  emergencyContactRelation: "",
-  emergencyContactPhone: "",
-
-  // Educational Background
-  highestEducation: undefined as any,
-  university: "",
-  graduationYear: 0,
-  gpa: 0,
-
-  // Teaching Experience
-  yearsOfExperience: undefined as any,
-
-  // Employment Information
-  position: undefined as any,
-  subjectId: undefined,
-
-  // Documents
-  resume: undefined,
-
-  // Additional Information
-  agreeToTerms: false,
-  agreeToBackgroundCheck: false,
+const initialFormData: EmployeeProfile = {
+  userId: "",
+  employeeNumber: "",
+  hireDate: "",
+  employmentStatus: undefined as any,
+  employmentType: undefined as any,
+  terminationDate: "",
+  departmentId: "",
+  primaryPositionId: "",
+  managerEmployeeId: "",
+  workEmail: "",
+  workPhone: "",
 };
 
 const initialState: EmployeeRegistrationFormState = {
@@ -61,7 +31,7 @@ export const employeeRegistrationFormSlice = createSlice({
   name: "employeeRegistrationForm",
   initialState,
   reducers: {
-    setFormData: (state, action: PayloadAction<EmployeeRegistrationForm>) => {
+    setFormData: (state, action: PayloadAction<EmployeeProfile>) => {
       state.data = action.payload;
     },
     setFormStep: (state, action: PayloadAction<number>) => {

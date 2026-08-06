@@ -2,6 +2,7 @@ import uuid
 from typing import List
 
 from fastapi import APIRouter, HTTPException, status
+from sqlalchemy import select
 
 from project.api.v1.routers.dependencies import AuthenticatedRoute, SessionDep
 from project.models import (
@@ -10,6 +11,7 @@ from project.models import (
     AssessmentSchemeComponent,
     ClassSection,
     Grade,
+    GradeStream,
     Section,
     Stream,
     Subject,
@@ -145,7 +147,6 @@ async def create_streams(
         for s in streams:
             stream = Stream(
                 school_id=user_in.membership.school_id,
-                grade_id=s.grade_id,
                 name=s.name,
             )
             session.add(stream)
@@ -226,12 +227,23 @@ async def create_subject_offerings(
     check_permission(user_in)
     try:
         for o in offerings:
+            grade_stream = (
+                await session.execute(
+                    select(GradeStream).where(GradeStream.grade_id == o.grade_id, GradeStream.stream_id == o.stream_id)
+                )
+            ).scalar_one_or_none()
+
+            if not grade_stream:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Grade or Stream not found for grade_id {o.grade_id} and stream_id {o.stream_id}",
+                )
+
             offering = SubjectOffering(
                 school_id=user_in.membership.school_id,
                 year_id=o.year_id,
                 subject_id=o.subject_id,
-                grade_id=o.grade_id,
-                stream_id=o.stream_id,
+                grade_stream_id=grade_stream.id,
                 assessment_scheme_id=o.assessment_scheme_id,
             )
             session.add(offering)
@@ -255,11 +267,25 @@ async def create_class_sections(
     check_permission(user_in)
     try:
         for cs in class_sections:
+            grade_stream = (
+                await session.execute(
+                    select(GradeStream).where(
+                        GradeStream.grade_id == cs.grade_id, GradeStream.stream_id == cs.stream_id
+                    )
+                )
+            ).scalar_one_or_none()
+
+            if not grade_stream:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Grade or Stream not found for grade_id {cs.grade_id} and stream_id {cs.stream_id}",
+                )
+
             class_section = ClassSection(
                 school_id=user_in.membership.school_id,
                 academic_year_id=cs.academic_year_id,
                 section_id=cs.section_id,
-                stream_id=cs.stream_id,
+                grade_stream_id=grade_stream.id,
             )
             session.add(class_section)
         await session.commit()

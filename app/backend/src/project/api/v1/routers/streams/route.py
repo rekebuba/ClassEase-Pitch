@@ -16,11 +16,11 @@ from project.schema.models.stream_schema import (
     StreamWithRelatedSchema,
 )
 
-router = APIRouter(prefix="/streams", tags=["Streams"])
+router = APIRouter(tags=["Streams"])
 
 
 @router.get(
-    "",
+    "/streams",
     response_model=List[StreamSchema],
 )
 async def get_streams(
@@ -44,7 +44,7 @@ async def get_streams(
 
 
 @router.get(
-    "/{stream_id}",
+    "/streams/{stream_id}",
     response_model=StreamSchema,
 )
 async def get_stream_by_id(
@@ -66,7 +66,7 @@ async def get_stream_by_id(
 
 
 @router.get(
-    "/{stream_id}/relation",
+    "/streams/{stream_id}/relation",
     response_model=StreamWithRelatedSchema,
 )
 async def get_stream_relation(

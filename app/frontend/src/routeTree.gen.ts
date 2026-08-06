@@ -9,48 +9,53 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as StudentIndexRouteImport } from './routes/student/index'
-import { Route as ForgotPasswordIndexRouteImport } from './routes/forgot-password/index'
+import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
+import { Route as SettingsRouteRouteImport } from './routes/settings/route'
 import { Route as AuthenticationIndexRouteImport } from './routes/authentication/index'
-import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardForbiddenRouteImport } from './routes/dashboard/forbidden'
+import { Route as ForgotPasswordIndexRouteImport } from './routes/forgot-password/index'
+import { Route as SettingsIndexRouteImport } from './routes/settings/index'
+import { Route as DashboardEmployeesIndexRouteImport } from './routes/dashboard/employees/index'
+import { Route as DashboardEmployeesEmployeeIdRouteRouteImport } from './routes/dashboard/employees/$employeeId/route'
+import { Route as DashboardGradesIndexRouteImport } from './routes/dashboard/grades/index'
+import { Route as DashboardManageTeachersIndexRouteImport } from './routes/dashboard/manage-teachers/index'
+import { Route as DashboardRegistrationEmployeesRouteImport } from './routes/dashboard/registration/employees'
+import { Route as DashboardRegistrationNewEmployeeRouteImport } from './routes/dashboard/registration/new-employee'
+import { Route as DashboardRegistrationNewStudentRouteImport } from './routes/dashboard/registration/new-student'
+import { Route as DashboardRegistrationStudentsRouteImport } from './routes/dashboard/registration/students'
+import { Route as DashboardStudentsIndexRouteImport } from './routes/dashboard/students/index'
+import { Route as DashboardSubjectsIndexRouteImport } from './routes/dashboard/subjects/index'
+import { Route as DashboardYearIndexRouteImport } from './routes/dashboard/year/index'
 import { Route as ForgotPasswordTokenIndexRouteImport } from './routes/forgot-password/$token/index'
-import { Route as AdminYearIndexRouteImport } from './routes/admin/year/index'
-import { Route as AdminSubjectsIndexRouteImport } from './routes/admin/subjects/index'
-import { Route as AdminStudentsIndexRouteImport } from './routes/admin/students/index'
-import { Route as AdminManageTeachersIndexRouteImport } from './routes/admin/manage-teachers/index'
-import { Route as AdminGradesIndexRouteImport } from './routes/admin/grades/index'
-import { Route as AdminEmployeesIndexRouteImport } from './routes/admin/employees/index'
-import { Route as AdminRegistrationStudentsRouteImport } from './routes/admin/registration/students'
-import { Route as AdminRegistrationNewStudentRouteImport } from './routes/admin/registration/new-student'
-import { Route as AdminRegistrationNewEmployeeRouteImport } from './routes/admin/registration/new-employee'
-import { Route as AdminRegistrationEmployeesRouteImport } from './routes/admin/registration/employees'
-import { Route as AdminEmployeesEmployeeIdRouteRouteImport } from './routes/admin/employees/$employeeId/route'
-import { Route as AdminYearYearIdIndexRouteImport } from './routes/admin/year/$yearId/index'
-import { Route as AdminSubjectsSubjectIdIndexRouteImport } from './routes/admin/subjects/$subjectId/index'
-import { Route as AdminStudentsStudentIdIndexRouteImport } from './routes/admin/students/$studentId/index'
-import { Route as AdminGradesGradeIdIndexRouteImport } from './routes/admin/grades/$gradeId/index'
-import { Route as AdminEmployeesEmployeeIdProfileIndexRouteImport } from './routes/admin/employees/$employeeId/profile/index'
+import { Route as SettingsAcademicIndexRouteImport } from './routes/settings/academic/index'
+import { Route as SettingsAuditLogsIndexRouteImport } from './routes/settings/audit-logs/index'
+import { Route as SettingsBrandingIndexRouteImport } from './routes/settings/branding/index'
+import { Route as SettingsGeneralIndexRouteImport } from './routes/settings/general/index'
+import { Route as SettingsGradesIndexRouteImport } from './routes/settings/grades/index'
+import { Route as SettingsGradingIndexRouteImport } from './routes/settings/grading/index'
+import { Route as SettingsNotificationsIndexRouteImport } from './routes/settings/notifications/index'
+import { Route as SettingsPermissionsIndexRouteImport } from './routes/settings/permissions/index'
+import { Route as DashboardGradesGradeIdIndexRouteImport } from './routes/dashboard/grades/$gradeId/index'
+import { Route as DashboardStudentsStudentIdIndexRouteImport } from './routes/dashboard/students/$studentId/index'
+import { Route as DashboardSubjectsSubjectIdIndexRouteImport } from './routes/dashboard/subjects/$subjectId/index'
+import { Route as DashboardYearYearIdIndexRouteImport } from './routes/dashboard/year/$yearId/index'
+import { Route as DashboardEmployeesEmployeeIdProfileIndexRouteImport } from './routes/dashboard/employees/$employeeId/profile/index'
 
-const AdminRouteRoute = AdminRouteRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const StudentIndexRoute = StudentIndexRouteImport.update({
-  id: '/student/',
-  path: '/student/',
+const DashboardRouteRoute = DashboardRouteRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ForgotPasswordIndexRoute = ForgotPasswordIndexRouteImport.update({
-  id: '/forgot-password/',
-  path: '/forgot-password/',
+const SettingsRouteRoute = SettingsRouteRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticationIndexRoute = AuthenticationIndexRouteImport.update({
@@ -58,10 +63,86 @@ const AuthenticationIndexRoute = AuthenticationIndexRouteImport.update({
   path: '/authentication/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AdminIndexRoute = AdminIndexRouteImport.update({
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => AdminRouteRoute,
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardForbiddenRoute = DashboardForbiddenRouteImport.update({
+  id: '/forbidden',
+  path: '/forbidden',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const ForgotPasswordIndexRoute = ForgotPasswordIndexRouteImport.update({
+  id: '/forgot-password/',
+  path: '/forgot-password/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsIndexRoute = SettingsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SettingsRouteRoute,
+} as any)
+const DashboardEmployeesIndexRoute = DashboardEmployeesIndexRouteImport.update({
+  id: '/employees/',
+  path: '/employees/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardEmployeesEmployeeIdRouteRoute =
+  DashboardEmployeesEmployeeIdRouteRouteImport.update({
+    id: '/employees/$employeeId',
+    path: '/employees/$employeeId',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardGradesIndexRoute = DashboardGradesIndexRouteImport.update({
+  id: '/grades/',
+  path: '/grades/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardManageTeachersIndexRoute =
+  DashboardManageTeachersIndexRouteImport.update({
+    id: '/manage-teachers/',
+    path: '/manage-teachers/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardRegistrationEmployeesRoute =
+  DashboardRegistrationEmployeesRouteImport.update({
+    id: '/registration/employees',
+    path: '/registration/employees',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardRegistrationNewEmployeeRoute =
+  DashboardRegistrationNewEmployeeRouteImport.update({
+    id: '/registration/new-employee',
+    path: '/registration/new-employee',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardRegistrationNewStudentRoute =
+  DashboardRegistrationNewStudentRouteImport.update({
+    id: '/registration/new-student',
+    path: '/registration/new-student',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardRegistrationStudentsRoute =
+  DashboardRegistrationStudentsRouteImport.update({
+    id: '/registration/students',
+    path: '/registration/students',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardStudentsIndexRoute = DashboardStudentsIndexRouteImport.update({
+  id: '/students/',
+  path: '/students/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardSubjectsIndexRoute = DashboardSubjectsIndexRouteImport.update({
+  id: '/subjects/',
+  path: '/subjects/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardYearIndexRoute = DashboardYearIndexRouteImport.update({
+  id: '/year/',
+  path: '/year/',
+  getParentRoute: () => DashboardRouteRoute,
 } as any)
 const ForgotPasswordTokenIndexRoute =
   ForgotPasswordTokenIndexRouteImport.update({
@@ -69,266 +150,300 @@ const ForgotPasswordTokenIndexRoute =
     path: '/forgot-password/$token/',
     getParentRoute: () => rootRouteImport,
   } as any)
-const AdminYearIndexRoute = AdminYearIndexRouteImport.update({
-  id: '/year/',
-  path: '/year/',
-  getParentRoute: () => AdminRouteRoute,
+const SettingsAcademicIndexRoute = SettingsAcademicIndexRouteImport.update({
+  id: '/academic/',
+  path: '/academic/',
+  getParentRoute: () => SettingsRouteRoute,
 } as any)
-const AdminSubjectsIndexRoute = AdminSubjectsIndexRouteImport.update({
-  id: '/subjects/',
-  path: '/subjects/',
-  getParentRoute: () => AdminRouteRoute,
+const SettingsAuditLogsIndexRoute = SettingsAuditLogsIndexRouteImport.update({
+  id: '/audit-logs/',
+  path: '/audit-logs/',
+  getParentRoute: () => SettingsRouteRoute,
 } as any)
-const AdminStudentsIndexRoute = AdminStudentsIndexRouteImport.update({
-  id: '/students/',
-  path: '/students/',
-  getParentRoute: () => AdminRouteRoute,
+const SettingsBrandingIndexRoute = SettingsBrandingIndexRouteImport.update({
+  id: '/branding/',
+  path: '/branding/',
+  getParentRoute: () => SettingsRouteRoute,
 } as any)
-const AdminManageTeachersIndexRoute =
-  AdminManageTeachersIndexRouteImport.update({
-    id: '/manage-teachers/',
-    path: '/manage-teachers/',
-    getParentRoute: () => AdminRouteRoute,
-  } as any)
-const AdminGradesIndexRoute = AdminGradesIndexRouteImport.update({
+const SettingsGeneralIndexRoute = SettingsGeneralIndexRouteImport.update({
+  id: '/general/',
+  path: '/general/',
+  getParentRoute: () => SettingsRouteRoute,
+} as any)
+const SettingsGradesIndexRoute = SettingsGradesIndexRouteImport.update({
   id: '/grades/',
   path: '/grades/',
-  getParentRoute: () => AdminRouteRoute,
+  getParentRoute: () => SettingsRouteRoute,
 } as any)
-const AdminEmployeesIndexRoute = AdminEmployeesIndexRouteImport.update({
-  id: '/employees/',
-  path: '/employees/',
-  getParentRoute: () => AdminRouteRoute,
+const SettingsGradingIndexRoute = SettingsGradingIndexRouteImport.update({
+  id: '/grading/',
+  path: '/grading/',
+  getParentRoute: () => SettingsRouteRoute,
 } as any)
-const AdminRegistrationStudentsRoute =
-  AdminRegistrationStudentsRouteImport.update({
-    id: '/registration/students',
-    path: '/registration/students',
-    getParentRoute: () => AdminRouteRoute,
+const SettingsNotificationsIndexRoute =
+  SettingsNotificationsIndexRouteImport.update({
+    id: '/notifications/',
+    path: '/notifications/',
+    getParentRoute: () => SettingsRouteRoute,
   } as any)
-const AdminRegistrationNewStudentRoute =
-  AdminRegistrationNewStudentRouteImport.update({
-    id: '/registration/new-student',
-    path: '/registration/new-student',
-    getParentRoute: () => AdminRouteRoute,
+const SettingsPermissionsIndexRoute =
+  SettingsPermissionsIndexRouteImport.update({
+    id: '/permissions/',
+    path: '/permissions/',
+    getParentRoute: () => SettingsRouteRoute,
   } as any)
-const AdminRegistrationNewEmployeeRoute =
-  AdminRegistrationNewEmployeeRouteImport.update({
-    id: '/registration/new-employee',
-    path: '/registration/new-employee',
-    getParentRoute: () => AdminRouteRoute,
+const DashboardGradesGradeIdIndexRoute =
+  DashboardGradesGradeIdIndexRouteImport.update({
+    id: '/grades/$gradeId/',
+    path: '/grades/$gradeId/',
+    getParentRoute: () => DashboardRouteRoute,
   } as any)
-const AdminRegistrationEmployeesRoute =
-  AdminRegistrationEmployeesRouteImport.update({
-    id: '/registration/employees',
-    path: '/registration/employees',
-    getParentRoute: () => AdminRouteRoute,
-  } as any)
-const AdminEmployeesEmployeeIdRouteRoute =
-  AdminEmployeesEmployeeIdRouteRouteImport.update({
-    id: '/employees/$employeeId',
-    path: '/employees/$employeeId',
-    getParentRoute: () => AdminRouteRoute,
-  } as any)
-const AdminYearYearIdIndexRoute = AdminYearYearIdIndexRouteImport.update({
-  id: '/year/$yearId/',
-  path: '/year/$yearId/',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminSubjectsSubjectIdIndexRoute =
-  AdminSubjectsSubjectIdIndexRouteImport.update({
-    id: '/subjects/$subjectId/',
-    path: '/subjects/$subjectId/',
-    getParentRoute: () => AdminRouteRoute,
-  } as any)
-const AdminStudentsStudentIdIndexRoute =
-  AdminStudentsStudentIdIndexRouteImport.update({
+const DashboardStudentsStudentIdIndexRoute =
+  DashboardStudentsStudentIdIndexRouteImport.update({
     id: '/students/$studentId/',
     path: '/students/$studentId/',
-    getParentRoute: () => AdminRouteRoute,
+    getParentRoute: () => DashboardRouteRoute,
   } as any)
-const AdminGradesGradeIdIndexRoute = AdminGradesGradeIdIndexRouteImport.update({
-  id: '/grades/$gradeId/',
-  path: '/grades/$gradeId/',
-  getParentRoute: () => AdminRouteRoute,
-} as any)
-const AdminEmployeesEmployeeIdProfileIndexRoute =
-  AdminEmployeesEmployeeIdProfileIndexRouteImport.update({
+const DashboardSubjectsSubjectIdIndexRoute =
+  DashboardSubjectsSubjectIdIndexRouteImport.update({
+    id: '/subjects/$subjectId/',
+    path: '/subjects/$subjectId/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardYearYearIdIndexRoute =
+  DashboardYearYearIdIndexRouteImport.update({
+    id: '/year/$yearId/',
+    path: '/year/$yearId/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardEmployeesEmployeeIdProfileIndexRoute =
+  DashboardEmployeesEmployeeIdProfileIndexRouteImport.update({
     id: '/profile/',
     path: '/profile/',
-    getParentRoute: () => AdminEmployeesEmployeeIdRouteRoute,
+    getParentRoute: () => DashboardEmployeesEmployeeIdRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteRouteWithChildren
-  '/admin/': typeof AdminIndexRoute
-  '/authentication': typeof AuthenticationIndexRoute
-  '/forgot-password': typeof ForgotPasswordIndexRoute
-  '/student': typeof StudentIndexRoute
-  '/admin/employees/$employeeId': typeof AdminEmployeesEmployeeIdRouteRouteWithChildren
-  '/admin/registration/employees': typeof AdminRegistrationEmployeesRoute
-  '/admin/registration/new-employee': typeof AdminRegistrationNewEmployeeRoute
-  '/admin/registration/new-student': typeof AdminRegistrationNewStudentRoute
-  '/admin/registration/students': typeof AdminRegistrationStudentsRoute
-  '/admin/employees': typeof AdminEmployeesIndexRoute
-  '/admin/grades': typeof AdminGradesIndexRoute
-  '/admin/manage-teachers': typeof AdminManageTeachersIndexRoute
-  '/admin/students': typeof AdminStudentsIndexRoute
-  '/admin/subjects': typeof AdminSubjectsIndexRoute
-  '/admin/year': typeof AdminYearIndexRoute
-  '/forgot-password/$token': typeof ForgotPasswordTokenIndexRoute
-  '/admin/grades/$gradeId': typeof AdminGradesGradeIdIndexRoute
-  '/admin/students/$studentId': typeof AdminStudentsStudentIdIndexRoute
-  '/admin/subjects/$subjectId': typeof AdminSubjectsSubjectIdIndexRoute
-  '/admin/year/$yearId': typeof AdminYearYearIdIndexRoute
-  '/admin/employees/$employeeId/profile': typeof AdminEmployeesEmployeeIdProfileIndexRoute
+  '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/settings': typeof SettingsRouteRouteWithChildren
+  '/dashboard/forbidden': typeof DashboardForbiddenRoute
+  '/authentication/': typeof AuthenticationIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
+  '/forgot-password/': typeof ForgotPasswordIndexRoute
+  '/settings/': typeof SettingsIndexRoute
+  '/dashboard/employees/$employeeId': typeof DashboardEmployeesEmployeeIdRouteRouteWithChildren
+  '/dashboard/registration/employees': typeof DashboardRegistrationEmployeesRoute
+  '/dashboard/registration/new-employee': typeof DashboardRegistrationNewEmployeeRoute
+  '/dashboard/registration/new-student': typeof DashboardRegistrationNewStudentRoute
+  '/dashboard/registration/students': typeof DashboardRegistrationStudentsRoute
+  '/dashboard/employees/': typeof DashboardEmployeesIndexRoute
+  '/dashboard/grades/': typeof DashboardGradesIndexRoute
+  '/dashboard/manage-teachers/': typeof DashboardManageTeachersIndexRoute
+  '/dashboard/students/': typeof DashboardStudentsIndexRoute
+  '/dashboard/subjects/': typeof DashboardSubjectsIndexRoute
+  '/dashboard/year/': typeof DashboardYearIndexRoute
+  '/forgot-password/$token/': typeof ForgotPasswordTokenIndexRoute
+  '/settings/academic/': typeof SettingsAcademicIndexRoute
+  '/settings/audit-logs/': typeof SettingsAuditLogsIndexRoute
+  '/settings/branding/': typeof SettingsBrandingIndexRoute
+  '/settings/general/': typeof SettingsGeneralIndexRoute
+  '/settings/grades/': typeof SettingsGradesIndexRoute
+  '/settings/grading/': typeof SettingsGradingIndexRoute
+  '/settings/notifications/': typeof SettingsNotificationsIndexRoute
+  '/settings/permissions/': typeof SettingsPermissionsIndexRoute
+  '/dashboard/grades/$gradeId/': typeof DashboardGradesGradeIdIndexRoute
+  '/dashboard/students/$studentId/': typeof DashboardStudentsStudentIdIndexRoute
+  '/dashboard/subjects/$subjectId/': typeof DashboardSubjectsSubjectIdIndexRoute
+  '/dashboard/year/$yearId/': typeof DashboardYearYearIdIndexRoute
+  '/dashboard/employees/$employeeId/profile/': typeof DashboardEmployeesEmployeeIdProfileIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminIndexRoute
+  '/dashboard/forbidden': typeof DashboardForbiddenRoute
   '/authentication': typeof AuthenticationIndexRoute
+  '/dashboard': typeof DashboardIndexRoute
   '/forgot-password': typeof ForgotPasswordIndexRoute
-  '/student': typeof StudentIndexRoute
-  '/admin/employees/$employeeId': typeof AdminEmployeesEmployeeIdRouteRouteWithChildren
-  '/admin/registration/employees': typeof AdminRegistrationEmployeesRoute
-  '/admin/registration/new-employee': typeof AdminRegistrationNewEmployeeRoute
-  '/admin/registration/new-student': typeof AdminRegistrationNewStudentRoute
-  '/admin/registration/students': typeof AdminRegistrationStudentsRoute
-  '/admin/employees': typeof AdminEmployeesIndexRoute
-  '/admin/grades': typeof AdminGradesIndexRoute
-  '/admin/manage-teachers': typeof AdminManageTeachersIndexRoute
-  '/admin/students': typeof AdminStudentsIndexRoute
-  '/admin/subjects': typeof AdminSubjectsIndexRoute
-  '/admin/year': typeof AdminYearIndexRoute
+  '/settings': typeof SettingsIndexRoute
+  '/dashboard/employees/$employeeId': typeof DashboardEmployeesEmployeeIdRouteRouteWithChildren
+  '/dashboard/registration/employees': typeof DashboardRegistrationEmployeesRoute
+  '/dashboard/registration/new-employee': typeof DashboardRegistrationNewEmployeeRoute
+  '/dashboard/registration/new-student': typeof DashboardRegistrationNewStudentRoute
+  '/dashboard/registration/students': typeof DashboardRegistrationStudentsRoute
+  '/dashboard/employees': typeof DashboardEmployeesIndexRoute
+  '/dashboard/grades': typeof DashboardGradesIndexRoute
+  '/dashboard/manage-teachers': typeof DashboardManageTeachersIndexRoute
+  '/dashboard/students': typeof DashboardStudentsIndexRoute
+  '/dashboard/subjects': typeof DashboardSubjectsIndexRoute
+  '/dashboard/year': typeof DashboardYearIndexRoute
   '/forgot-password/$token': typeof ForgotPasswordTokenIndexRoute
-  '/admin/grades/$gradeId': typeof AdminGradesGradeIdIndexRoute
-  '/admin/students/$studentId': typeof AdminStudentsStudentIdIndexRoute
-  '/admin/subjects/$subjectId': typeof AdminSubjectsSubjectIdIndexRoute
-  '/admin/year/$yearId': typeof AdminYearYearIdIndexRoute
-  '/admin/employees/$employeeId/profile': typeof AdminEmployeesEmployeeIdProfileIndexRoute
+  '/settings/academic': typeof SettingsAcademicIndexRoute
+  '/settings/audit-logs': typeof SettingsAuditLogsIndexRoute
+  '/settings/branding': typeof SettingsBrandingIndexRoute
+  '/settings/general': typeof SettingsGeneralIndexRoute
+  '/settings/grades': typeof SettingsGradesIndexRoute
+  '/settings/grading': typeof SettingsGradingIndexRoute
+  '/settings/notifications': typeof SettingsNotificationsIndexRoute
+  '/settings/permissions': typeof SettingsPermissionsIndexRoute
+  '/dashboard/grades/$gradeId': typeof DashboardGradesGradeIdIndexRoute
+  '/dashboard/students/$studentId': typeof DashboardStudentsStudentIdIndexRoute
+  '/dashboard/subjects/$subjectId': typeof DashboardSubjectsSubjectIdIndexRoute
+  '/dashboard/year/$yearId': typeof DashboardYearYearIdIndexRoute
+  '/dashboard/employees/$employeeId/profile': typeof DashboardEmployeesEmployeeIdProfileIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRouteRouteWithChildren
-  '/admin/': typeof AdminIndexRoute
+  '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/settings': typeof SettingsRouteRouteWithChildren
+  '/dashboard/forbidden': typeof DashboardForbiddenRoute
   '/authentication/': typeof AuthenticationIndexRoute
+  '/dashboard/': typeof DashboardIndexRoute
   '/forgot-password/': typeof ForgotPasswordIndexRoute
-  '/student/': typeof StudentIndexRoute
-  '/admin/employees/$employeeId': typeof AdminEmployeesEmployeeIdRouteRouteWithChildren
-  '/admin/registration/employees': typeof AdminRegistrationEmployeesRoute
-  '/admin/registration/new-employee': typeof AdminRegistrationNewEmployeeRoute
-  '/admin/registration/new-student': typeof AdminRegistrationNewStudentRoute
-  '/admin/registration/students': typeof AdminRegistrationStudentsRoute
-  '/admin/employees/': typeof AdminEmployeesIndexRoute
-  '/admin/grades/': typeof AdminGradesIndexRoute
-  '/admin/manage-teachers/': typeof AdminManageTeachersIndexRoute
-  '/admin/students/': typeof AdminStudentsIndexRoute
-  '/admin/subjects/': typeof AdminSubjectsIndexRoute
-  '/admin/year/': typeof AdminYearIndexRoute
+  '/settings/': typeof SettingsIndexRoute
+  '/dashboard/employees/$employeeId': typeof DashboardEmployeesEmployeeIdRouteRouteWithChildren
+  '/dashboard/registration/employees': typeof DashboardRegistrationEmployeesRoute
+  '/dashboard/registration/new-employee': typeof DashboardRegistrationNewEmployeeRoute
+  '/dashboard/registration/new-student': typeof DashboardRegistrationNewStudentRoute
+  '/dashboard/registration/students': typeof DashboardRegistrationStudentsRoute
+  '/dashboard/employees/': typeof DashboardEmployeesIndexRoute
+  '/dashboard/grades/': typeof DashboardGradesIndexRoute
+  '/dashboard/manage-teachers/': typeof DashboardManageTeachersIndexRoute
+  '/dashboard/students/': typeof DashboardStudentsIndexRoute
+  '/dashboard/subjects/': typeof DashboardSubjectsIndexRoute
+  '/dashboard/year/': typeof DashboardYearIndexRoute
   '/forgot-password/$token/': typeof ForgotPasswordTokenIndexRoute
-  '/admin/grades/$gradeId/': typeof AdminGradesGradeIdIndexRoute
-  '/admin/students/$studentId/': typeof AdminStudentsStudentIdIndexRoute
-  '/admin/subjects/$subjectId/': typeof AdminSubjectsSubjectIdIndexRoute
-  '/admin/year/$yearId/': typeof AdminYearYearIdIndexRoute
-  '/admin/employees/$employeeId/profile/': typeof AdminEmployeesEmployeeIdProfileIndexRoute
+  '/settings/academic/': typeof SettingsAcademicIndexRoute
+  '/settings/audit-logs/': typeof SettingsAuditLogsIndexRoute
+  '/settings/branding/': typeof SettingsBrandingIndexRoute
+  '/settings/general/': typeof SettingsGeneralIndexRoute
+  '/settings/grades/': typeof SettingsGradesIndexRoute
+  '/settings/grading/': typeof SettingsGradingIndexRoute
+  '/settings/notifications/': typeof SettingsNotificationsIndexRoute
+  '/settings/permissions/': typeof SettingsPermissionsIndexRoute
+  '/dashboard/grades/$gradeId/': typeof DashboardGradesGradeIdIndexRoute
+  '/dashboard/students/$studentId/': typeof DashboardStudentsStudentIdIndexRoute
+  '/dashboard/subjects/$subjectId/': typeof DashboardSubjectsSubjectIdIndexRoute
+  '/dashboard/year/$yearId/': typeof DashboardYearYearIdIndexRoute
+  '/dashboard/employees/$employeeId/profile/': typeof DashboardEmployeesEmployeeIdProfileIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/admin'
-    | '/admin/'
-    | '/authentication'
-    | '/forgot-password'
-    | '/student'
-    | '/admin/employees/$employeeId'
-    | '/admin/registration/employees'
-    | '/admin/registration/new-employee'
-    | '/admin/registration/new-student'
-    | '/admin/registration/students'
-    | '/admin/employees'
-    | '/admin/grades'
-    | '/admin/manage-teachers'
-    | '/admin/students'
-    | '/admin/subjects'
-    | '/admin/year'
-    | '/forgot-password/$token'
-    | '/admin/grades/$gradeId'
-    | '/admin/students/$studentId'
-    | '/admin/subjects/$subjectId'
-    | '/admin/year/$yearId'
-    | '/admin/employees/$employeeId/profile'
+    | '/dashboard'
+    | '/settings'
+    | '/dashboard/forbidden'
+    | '/authentication/'
+    | '/dashboard/'
+    | '/forgot-password/'
+    | '/settings/'
+    | '/dashboard/employees/$employeeId'
+    | '/dashboard/registration/employees'
+    | '/dashboard/registration/new-employee'
+    | '/dashboard/registration/new-student'
+    | '/dashboard/registration/students'
+    | '/dashboard/employees/'
+    | '/dashboard/grades/'
+    | '/dashboard/manage-teachers/'
+    | '/dashboard/students/'
+    | '/dashboard/subjects/'
+    | '/dashboard/year/'
+    | '/forgot-password/$token/'
+    | '/settings/academic/'
+    | '/settings/audit-logs/'
+    | '/settings/branding/'
+    | '/settings/general/'
+    | '/settings/grades/'
+    | '/settings/grading/'
+    | '/settings/notifications/'
+    | '/settings/permissions/'
+    | '/dashboard/grades/$gradeId/'
+    | '/dashboard/students/$studentId/'
+    | '/dashboard/subjects/$subjectId/'
+    | '/dashboard/year/$yearId/'
+    | '/dashboard/employees/$employeeId/profile/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/admin'
+    | '/dashboard/forbidden'
     | '/authentication'
+    | '/dashboard'
     | '/forgot-password'
-    | '/student'
-    | '/admin/employees/$employeeId'
-    | '/admin/registration/employees'
-    | '/admin/registration/new-employee'
-    | '/admin/registration/new-student'
-    | '/admin/registration/students'
-    | '/admin/employees'
-    | '/admin/grades'
-    | '/admin/manage-teachers'
-    | '/admin/students'
-    | '/admin/subjects'
-    | '/admin/year'
+    | '/settings'
+    | '/dashboard/employees/$employeeId'
+    | '/dashboard/registration/employees'
+    | '/dashboard/registration/new-employee'
+    | '/dashboard/registration/new-student'
+    | '/dashboard/registration/students'
+    | '/dashboard/employees'
+    | '/dashboard/grades'
+    | '/dashboard/manage-teachers'
+    | '/dashboard/students'
+    | '/dashboard/subjects'
+    | '/dashboard/year'
     | '/forgot-password/$token'
-    | '/admin/grades/$gradeId'
-    | '/admin/students/$studentId'
-    | '/admin/subjects/$subjectId'
-    | '/admin/year/$yearId'
-    | '/admin/employees/$employeeId/profile'
+    | '/settings/academic'
+    | '/settings/audit-logs'
+    | '/settings/branding'
+    | '/settings/general'
+    | '/settings/grades'
+    | '/settings/grading'
+    | '/settings/notifications'
+    | '/settings/permissions'
+    | '/dashboard/grades/$gradeId'
+    | '/dashboard/students/$studentId'
+    | '/dashboard/subjects/$subjectId'
+    | '/dashboard/year/$yearId'
+    | '/dashboard/employees/$employeeId/profile'
   id:
     | '__root__'
     | '/'
-    | '/admin'
-    | '/admin/'
+    | '/dashboard'
+    | '/settings'
+    | '/dashboard/forbidden'
     | '/authentication/'
+    | '/dashboard/'
     | '/forgot-password/'
-    | '/student/'
-    | '/admin/employees/$employeeId'
-    | '/admin/registration/employees'
-    | '/admin/registration/new-employee'
-    | '/admin/registration/new-student'
-    | '/admin/registration/students'
-    | '/admin/employees/'
-    | '/admin/grades/'
-    | '/admin/manage-teachers/'
-    | '/admin/students/'
-    | '/admin/subjects/'
-    | '/admin/year/'
+    | '/settings/'
+    | '/dashboard/employees/$employeeId'
+    | '/dashboard/registration/employees'
+    | '/dashboard/registration/new-employee'
+    | '/dashboard/registration/new-student'
+    | '/dashboard/registration/students'
+    | '/dashboard/employees/'
+    | '/dashboard/grades/'
+    | '/dashboard/manage-teachers/'
+    | '/dashboard/students/'
+    | '/dashboard/subjects/'
+    | '/dashboard/year/'
     | '/forgot-password/$token/'
-    | '/admin/grades/$gradeId/'
-    | '/admin/students/$studentId/'
-    | '/admin/subjects/$subjectId/'
-    | '/admin/year/$yearId/'
-    | '/admin/employees/$employeeId/profile/'
+    | '/settings/academic/'
+    | '/settings/audit-logs/'
+    | '/settings/branding/'
+    | '/settings/general/'
+    | '/settings/grades/'
+    | '/settings/grading/'
+    | '/settings/notifications/'
+    | '/settings/permissions/'
+    | '/dashboard/grades/$gradeId/'
+    | '/dashboard/students/$studentId/'
+    | '/dashboard/subjects/$subjectId/'
+    | '/dashboard/year/$yearId/'
+    | '/dashboard/employees/$employeeId/profile/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRouteRoute: typeof AdminRouteRouteWithChildren
+  DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
+  SettingsRouteRoute: typeof SettingsRouteRouteWithChildren
   AuthenticationIndexRoute: typeof AuthenticationIndexRoute
   ForgotPasswordIndexRoute: typeof ForgotPasswordIndexRoute
-  StudentIndexRoute: typeof StudentIndexRoute
   ForgotPasswordTokenIndexRoute: typeof ForgotPasswordTokenIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -336,220 +451,327 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/student/': {
-      id: '/student/'
-      path: '/student'
-      fullPath: '/student'
-      preLoaderRoute: typeof StudentIndexRouteImport
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/forgot-password/': {
-      id: '/forgot-password/'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof ForgotPasswordIndexRouteImport
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/authentication/': {
       id: '/authentication/'
       path: '/authentication'
-      fullPath: '/authentication'
+      fullPath: '/authentication/'
       preLoaderRoute: typeof AuthenticationIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/': {
-      id: '/admin/'
+    '/dashboard/': {
+      id: '/dashboard/'
       path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/forbidden': {
+      id: '/dashboard/forbidden'
+      path: '/forbidden'
+      fullPath: '/dashboard/forbidden'
+      preLoaderRoute: typeof DashboardForbiddenRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/forgot-password/': {
+      id: '/forgot-password/'
+      path: '/forgot-password'
+      fullPath: '/forgot-password/'
+      preLoaderRoute: typeof ForgotPasswordIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings/': {
+      id: '/settings/'
+      path: '/'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof SettingsIndexRouteImport
+      parentRoute: typeof SettingsRouteRoute
+    }
+    '/dashboard/employees/': {
+      id: '/dashboard/employees/'
+      path: '/employees'
+      fullPath: '/dashboard/employees/'
+      preLoaderRoute: typeof DashboardEmployeesIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/employees/$employeeId': {
+      id: '/dashboard/employees/$employeeId'
+      path: '/employees/$employeeId'
+      fullPath: '/dashboard/employees/$employeeId'
+      preLoaderRoute: typeof DashboardEmployeesEmployeeIdRouteRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/grades/': {
+      id: '/dashboard/grades/'
+      path: '/grades'
+      fullPath: '/dashboard/grades/'
+      preLoaderRoute: typeof DashboardGradesIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/manage-teachers/': {
+      id: '/dashboard/manage-teachers/'
+      path: '/manage-teachers'
+      fullPath: '/dashboard/manage-teachers/'
+      preLoaderRoute: typeof DashboardManageTeachersIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/registration/employees': {
+      id: '/dashboard/registration/employees'
+      path: '/registration/employees'
+      fullPath: '/dashboard/registration/employees'
+      preLoaderRoute: typeof DashboardRegistrationEmployeesRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/registration/new-employee': {
+      id: '/dashboard/registration/new-employee'
+      path: '/registration/new-employee'
+      fullPath: '/dashboard/registration/new-employee'
+      preLoaderRoute: typeof DashboardRegistrationNewEmployeeRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/registration/new-student': {
+      id: '/dashboard/registration/new-student'
+      path: '/registration/new-student'
+      fullPath: '/dashboard/registration/new-student'
+      preLoaderRoute: typeof DashboardRegistrationNewStudentRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/registration/students': {
+      id: '/dashboard/registration/students'
+      path: '/registration/students'
+      fullPath: '/dashboard/registration/students'
+      preLoaderRoute: typeof DashboardRegistrationStudentsRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/students/': {
+      id: '/dashboard/students/'
+      path: '/students'
+      fullPath: '/dashboard/students/'
+      preLoaderRoute: typeof DashboardStudentsIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/subjects/': {
+      id: '/dashboard/subjects/'
+      path: '/subjects'
+      fullPath: '/dashboard/subjects/'
+      preLoaderRoute: typeof DashboardSubjectsIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/year/': {
+      id: '/dashboard/year/'
+      path: '/year'
+      fullPath: '/dashboard/year/'
+      preLoaderRoute: typeof DashboardYearIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
     }
     '/forgot-password/$token/': {
       id: '/forgot-password/$token/'
       path: '/forgot-password/$token'
-      fullPath: '/forgot-password/$token'
+      fullPath: '/forgot-password/$token/'
       preLoaderRoute: typeof ForgotPasswordTokenIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/year/': {
-      id: '/admin/year/'
-      path: '/year'
-      fullPath: '/admin/year'
-      preLoaderRoute: typeof AdminYearIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
+    '/settings/academic/': {
+      id: '/settings/academic/'
+      path: '/academic'
+      fullPath: '/settings/academic/'
+      preLoaderRoute: typeof SettingsAcademicIndexRouteImport
+      parentRoute: typeof SettingsRouteRoute
     }
-    '/admin/subjects/': {
-      id: '/admin/subjects/'
-      path: '/subjects'
-      fullPath: '/admin/subjects'
-      preLoaderRoute: typeof AdminSubjectsIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
+    '/settings/audit-logs/': {
+      id: '/settings/audit-logs/'
+      path: '/audit-logs'
+      fullPath: '/settings/audit-logs/'
+      preLoaderRoute: typeof SettingsAuditLogsIndexRouteImport
+      parentRoute: typeof SettingsRouteRoute
     }
-    '/admin/students/': {
-      id: '/admin/students/'
-      path: '/students'
-      fullPath: '/admin/students'
-      preLoaderRoute: typeof AdminStudentsIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
+    '/settings/branding/': {
+      id: '/settings/branding/'
+      path: '/branding'
+      fullPath: '/settings/branding/'
+      preLoaderRoute: typeof SettingsBrandingIndexRouteImport
+      parentRoute: typeof SettingsRouteRoute
     }
-    '/admin/manage-teachers/': {
-      id: '/admin/manage-teachers/'
-      path: '/manage-teachers'
-      fullPath: '/admin/manage-teachers'
-      preLoaderRoute: typeof AdminManageTeachersIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
+    '/settings/general/': {
+      id: '/settings/general/'
+      path: '/general'
+      fullPath: '/settings/general/'
+      preLoaderRoute: typeof SettingsGeneralIndexRouteImport
+      parentRoute: typeof SettingsRouteRoute
     }
-    '/admin/grades/': {
-      id: '/admin/grades/'
+    '/settings/grades/': {
+      id: '/settings/grades/'
       path: '/grades'
-      fullPath: '/admin/grades'
-      preLoaderRoute: typeof AdminGradesIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
+      fullPath: '/settings/grades/'
+      preLoaderRoute: typeof SettingsGradesIndexRouteImport
+      parentRoute: typeof SettingsRouteRoute
     }
-    '/admin/employees/': {
-      id: '/admin/employees/'
-      path: '/employees'
-      fullPath: '/admin/employees'
-      preLoaderRoute: typeof AdminEmployeesIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
+    '/settings/grading/': {
+      id: '/settings/grading/'
+      path: '/grading'
+      fullPath: '/settings/grading/'
+      preLoaderRoute: typeof SettingsGradingIndexRouteImport
+      parentRoute: typeof SettingsRouteRoute
     }
-    '/admin/registration/students': {
-      id: '/admin/registration/students'
-      path: '/registration/students'
-      fullPath: '/admin/registration/students'
-      preLoaderRoute: typeof AdminRegistrationStudentsRouteImport
-      parentRoute: typeof AdminRouteRoute
+    '/settings/notifications/': {
+      id: '/settings/notifications/'
+      path: '/notifications'
+      fullPath: '/settings/notifications/'
+      preLoaderRoute: typeof SettingsNotificationsIndexRouteImport
+      parentRoute: typeof SettingsRouteRoute
     }
-    '/admin/registration/new-student': {
-      id: '/admin/registration/new-student'
-      path: '/registration/new-student'
-      fullPath: '/admin/registration/new-student'
-      preLoaderRoute: typeof AdminRegistrationNewStudentRouteImport
-      parentRoute: typeof AdminRouteRoute
+    '/settings/permissions/': {
+      id: '/settings/permissions/'
+      path: '/permissions'
+      fullPath: '/settings/permissions/'
+      preLoaderRoute: typeof SettingsPermissionsIndexRouteImport
+      parentRoute: typeof SettingsRouteRoute
     }
-    '/admin/registration/new-employee': {
-      id: '/admin/registration/new-employee'
-      path: '/registration/new-employee'
-      fullPath: '/admin/registration/new-employee'
-      preLoaderRoute: typeof AdminRegistrationNewEmployeeRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/registration/employees': {
-      id: '/admin/registration/employees'
-      path: '/registration/employees'
-      fullPath: '/admin/registration/employees'
-      preLoaderRoute: typeof AdminRegistrationEmployeesRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/employees/$employeeId': {
-      id: '/admin/employees/$employeeId'
-      path: '/employees/$employeeId'
-      fullPath: '/admin/employees/$employeeId'
-      preLoaderRoute: typeof AdminEmployeesEmployeeIdRouteRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/year/$yearId/': {
-      id: '/admin/year/$yearId/'
-      path: '/year/$yearId'
-      fullPath: '/admin/year/$yearId'
-      preLoaderRoute: typeof AdminYearYearIdIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/subjects/$subjectId/': {
-      id: '/admin/subjects/$subjectId/'
-      path: '/subjects/$subjectId'
-      fullPath: '/admin/subjects/$subjectId'
-      preLoaderRoute: typeof AdminSubjectsSubjectIdIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/students/$studentId/': {
-      id: '/admin/students/$studentId/'
-      path: '/students/$studentId'
-      fullPath: '/admin/students/$studentId'
-      preLoaderRoute: typeof AdminStudentsStudentIdIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
-    }
-    '/admin/grades/$gradeId/': {
-      id: '/admin/grades/$gradeId/'
+    '/dashboard/grades/$gradeId/': {
+      id: '/dashboard/grades/$gradeId/'
       path: '/grades/$gradeId'
-      fullPath: '/admin/grades/$gradeId'
-      preLoaderRoute: typeof AdminGradesGradeIdIndexRouteImport
-      parentRoute: typeof AdminRouteRoute
+      fullPath: '/dashboard/grades/$gradeId/'
+      preLoaderRoute: typeof DashboardGradesGradeIdIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
     }
-    '/admin/employees/$employeeId/profile/': {
-      id: '/admin/employees/$employeeId/profile/'
+    '/dashboard/students/$studentId/': {
+      id: '/dashboard/students/$studentId/'
+      path: '/students/$studentId'
+      fullPath: '/dashboard/students/$studentId/'
+      preLoaderRoute: typeof DashboardStudentsStudentIdIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/subjects/$subjectId/': {
+      id: '/dashboard/subjects/$subjectId/'
+      path: '/subjects/$subjectId'
+      fullPath: '/dashboard/subjects/$subjectId/'
+      preLoaderRoute: typeof DashboardSubjectsSubjectIdIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/year/$yearId/': {
+      id: '/dashboard/year/$yearId/'
+      path: '/year/$yearId'
+      fullPath: '/dashboard/year/$yearId/'
+      preLoaderRoute: typeof DashboardYearYearIdIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/employees/$employeeId/profile/': {
+      id: '/dashboard/employees/$employeeId/profile/'
       path: '/profile'
-      fullPath: '/admin/employees/$employeeId/profile'
-      preLoaderRoute: typeof AdminEmployeesEmployeeIdProfileIndexRouteImport
-      parentRoute: typeof AdminEmployeesEmployeeIdRouteRoute
+      fullPath: '/dashboard/employees/$employeeId/profile/'
+      preLoaderRoute: typeof DashboardEmployeesEmployeeIdProfileIndexRouteImport
+      parentRoute: typeof DashboardEmployeesEmployeeIdRouteRoute
     }
   }
 }
 
-interface AdminEmployeesEmployeeIdRouteRouteChildren {
-  AdminEmployeesEmployeeIdProfileIndexRoute: typeof AdminEmployeesEmployeeIdProfileIndexRoute
+interface DashboardEmployeesEmployeeIdRouteRouteChildren {
+  DashboardEmployeesEmployeeIdProfileIndexRoute: typeof DashboardEmployeesEmployeeIdProfileIndexRoute
 }
 
-const AdminEmployeesEmployeeIdRouteRouteChildren: AdminEmployeesEmployeeIdRouteRouteChildren =
+const DashboardEmployeesEmployeeIdRouteRouteChildren: DashboardEmployeesEmployeeIdRouteRouteChildren =
   {
-    AdminEmployeesEmployeeIdProfileIndexRoute:
-      AdminEmployeesEmployeeIdProfileIndexRoute,
+    DashboardEmployeesEmployeeIdProfileIndexRoute:
+      DashboardEmployeesEmployeeIdProfileIndexRoute,
   }
 
-const AdminEmployeesEmployeeIdRouteRouteWithChildren =
-  AdminEmployeesEmployeeIdRouteRoute._addFileChildren(
-    AdminEmployeesEmployeeIdRouteRouteChildren,
+const DashboardEmployeesEmployeeIdRouteRouteWithChildren =
+  DashboardEmployeesEmployeeIdRouteRoute._addFileChildren(
+    DashboardEmployeesEmployeeIdRouteRouteChildren,
   )
 
-interface AdminRouteRouteChildren {
-  AdminIndexRoute: typeof AdminIndexRoute
-  AdminEmployeesEmployeeIdRouteRoute: typeof AdminEmployeesEmployeeIdRouteRouteWithChildren
-  AdminRegistrationEmployeesRoute: typeof AdminRegistrationEmployeesRoute
-  AdminRegistrationNewEmployeeRoute: typeof AdminRegistrationNewEmployeeRoute
-  AdminRegistrationNewStudentRoute: typeof AdminRegistrationNewStudentRoute
-  AdminRegistrationStudentsRoute: typeof AdminRegistrationStudentsRoute
-  AdminEmployeesIndexRoute: typeof AdminEmployeesIndexRoute
-  AdminGradesIndexRoute: typeof AdminGradesIndexRoute
-  AdminManageTeachersIndexRoute: typeof AdminManageTeachersIndexRoute
-  AdminStudentsIndexRoute: typeof AdminStudentsIndexRoute
-  AdminSubjectsIndexRoute: typeof AdminSubjectsIndexRoute
-  AdminYearIndexRoute: typeof AdminYearIndexRoute
-  AdminGradesGradeIdIndexRoute: typeof AdminGradesGradeIdIndexRoute
-  AdminStudentsStudentIdIndexRoute: typeof AdminStudentsStudentIdIndexRoute
-  AdminSubjectsSubjectIdIndexRoute: typeof AdminSubjectsSubjectIdIndexRoute
-  AdminYearYearIdIndexRoute: typeof AdminYearYearIdIndexRoute
+interface DashboardRouteRouteChildren {
+  DashboardForbiddenRoute: typeof DashboardForbiddenRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardEmployeesEmployeeIdRouteRoute: typeof DashboardEmployeesEmployeeIdRouteRouteWithChildren
+  DashboardRegistrationEmployeesRoute: typeof DashboardRegistrationEmployeesRoute
+  DashboardRegistrationNewEmployeeRoute: typeof DashboardRegistrationNewEmployeeRoute
+  DashboardRegistrationNewStudentRoute: typeof DashboardRegistrationNewStudentRoute
+  DashboardRegistrationStudentsRoute: typeof DashboardRegistrationStudentsRoute
+  DashboardEmployeesIndexRoute: typeof DashboardEmployeesIndexRoute
+  DashboardGradesIndexRoute: typeof DashboardGradesIndexRoute
+  DashboardManageTeachersIndexRoute: typeof DashboardManageTeachersIndexRoute
+  DashboardStudentsIndexRoute: typeof DashboardStudentsIndexRoute
+  DashboardSubjectsIndexRoute: typeof DashboardSubjectsIndexRoute
+  DashboardYearIndexRoute: typeof DashboardYearIndexRoute
+  DashboardGradesGradeIdIndexRoute: typeof DashboardGradesGradeIdIndexRoute
+  DashboardStudentsStudentIdIndexRoute: typeof DashboardStudentsStudentIdIndexRoute
+  DashboardSubjectsSubjectIdIndexRoute: typeof DashboardSubjectsSubjectIdIndexRoute
+  DashboardYearYearIdIndexRoute: typeof DashboardYearYearIdIndexRoute
 }
 
-const AdminRouteRouteChildren: AdminRouteRouteChildren = {
-  AdminIndexRoute: AdminIndexRoute,
-  AdminEmployeesEmployeeIdRouteRoute:
-    AdminEmployeesEmployeeIdRouteRouteWithChildren,
-  AdminRegistrationEmployeesRoute: AdminRegistrationEmployeesRoute,
-  AdminRegistrationNewEmployeeRoute: AdminRegistrationNewEmployeeRoute,
-  AdminRegistrationNewStudentRoute: AdminRegistrationNewStudentRoute,
-  AdminRegistrationStudentsRoute: AdminRegistrationStudentsRoute,
-  AdminEmployeesIndexRoute: AdminEmployeesIndexRoute,
-  AdminGradesIndexRoute: AdminGradesIndexRoute,
-  AdminManageTeachersIndexRoute: AdminManageTeachersIndexRoute,
-  AdminStudentsIndexRoute: AdminStudentsIndexRoute,
-  AdminSubjectsIndexRoute: AdminSubjectsIndexRoute,
-  AdminYearIndexRoute: AdminYearIndexRoute,
-  AdminGradesGradeIdIndexRoute: AdminGradesGradeIdIndexRoute,
-  AdminStudentsStudentIdIndexRoute: AdminStudentsStudentIdIndexRoute,
-  AdminSubjectsSubjectIdIndexRoute: AdminSubjectsSubjectIdIndexRoute,
-  AdminYearYearIdIndexRoute: AdminYearYearIdIndexRoute,
+const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardForbiddenRoute: DashboardForbiddenRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+  DashboardEmployeesEmployeeIdRouteRoute:
+    DashboardEmployeesEmployeeIdRouteRouteWithChildren,
+  DashboardRegistrationEmployeesRoute: DashboardRegistrationEmployeesRoute,
+  DashboardRegistrationNewEmployeeRoute: DashboardRegistrationNewEmployeeRoute,
+  DashboardRegistrationNewStudentRoute: DashboardRegistrationNewStudentRoute,
+  DashboardRegistrationStudentsRoute: DashboardRegistrationStudentsRoute,
+  DashboardEmployeesIndexRoute: DashboardEmployeesIndexRoute,
+  DashboardGradesIndexRoute: DashboardGradesIndexRoute,
+  DashboardManageTeachersIndexRoute: DashboardManageTeachersIndexRoute,
+  DashboardStudentsIndexRoute: DashboardStudentsIndexRoute,
+  DashboardSubjectsIndexRoute: DashboardSubjectsIndexRoute,
+  DashboardYearIndexRoute: DashboardYearIndexRoute,
+  DashboardGradesGradeIdIndexRoute: DashboardGradesGradeIdIndexRoute,
+  DashboardStudentsStudentIdIndexRoute: DashboardStudentsStudentIdIndexRoute,
+  DashboardSubjectsSubjectIdIndexRoute: DashboardSubjectsSubjectIdIndexRoute,
+  DashboardYearYearIdIndexRoute: DashboardYearYearIdIndexRoute,
 }
 
-const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
-  AdminRouteRouteChildren,
+const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
+  DashboardRouteRouteChildren,
+)
+
+interface SettingsRouteRouteChildren {
+  SettingsIndexRoute: typeof SettingsIndexRoute
+  SettingsAcademicIndexRoute: typeof SettingsAcademicIndexRoute
+  SettingsAuditLogsIndexRoute: typeof SettingsAuditLogsIndexRoute
+  SettingsBrandingIndexRoute: typeof SettingsBrandingIndexRoute
+  SettingsGeneralIndexRoute: typeof SettingsGeneralIndexRoute
+  SettingsGradesIndexRoute: typeof SettingsGradesIndexRoute
+  SettingsGradingIndexRoute: typeof SettingsGradingIndexRoute
+  SettingsNotificationsIndexRoute: typeof SettingsNotificationsIndexRoute
+  SettingsPermissionsIndexRoute: typeof SettingsPermissionsIndexRoute
+}
+
+const SettingsRouteRouteChildren: SettingsRouteRouteChildren = {
+  SettingsIndexRoute: SettingsIndexRoute,
+  SettingsAcademicIndexRoute: SettingsAcademicIndexRoute,
+  SettingsAuditLogsIndexRoute: SettingsAuditLogsIndexRoute,
+  SettingsBrandingIndexRoute: SettingsBrandingIndexRoute,
+  SettingsGeneralIndexRoute: SettingsGeneralIndexRoute,
+  SettingsGradesIndexRoute: SettingsGradesIndexRoute,
+  SettingsGradingIndexRoute: SettingsGradingIndexRoute,
+  SettingsNotificationsIndexRoute: SettingsNotificationsIndexRoute,
+  SettingsPermissionsIndexRoute: SettingsPermissionsIndexRoute,
+}
+
+const SettingsRouteRouteWithChildren = SettingsRouteRoute._addFileChildren(
+  SettingsRouteRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRouteRoute: AdminRouteRouteWithChildren,
+  DashboardRouteRoute: DashboardRouteRouteWithChildren,
+  SettingsRouteRoute: SettingsRouteRouteWithChildren,
   AuthenticationIndexRoute: AuthenticationIndexRoute,
   ForgotPasswordIndexRoute: ForgotPasswordIndexRoute,
-  StudentIndexRoute: StudentIndexRoute,
   ForgotPasswordTokenIndexRoute: ForgotPasswordTokenIndexRoute,
 }
 export const routeTree = rootRouteImport

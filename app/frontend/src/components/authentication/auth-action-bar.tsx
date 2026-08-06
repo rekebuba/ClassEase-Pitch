@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { loginFailure, loginSuccess } from "@/store/slice/auth-slice";
+import { loginFailure, loginSuccess } from "@/store/slice/auth/auth-slice";
 import { decodeToken } from "@/utils/utils";
 
 import LoginTab from "./tab/login-tab";
@@ -45,13 +45,6 @@ function AuthActionBar() {
   const navigate = useNavigate();
   const [pendingMembership, setPendingMembership] = useState<PendingMembershipState | null>(null);
   const [selectedMembershipId, setSelectedMembershipId] = useState("");
-
-  const resolveRouteByRole = (role: string) => {
-    if (role === "admin" || role === "student") {
-      return `/${role}`;
-    }
-    return "/";
-  };
 
   const finalizeAuthentication = (response: LoginResponse) => {
     const decodedToken = decodeToken(response.accessToken);
@@ -75,8 +68,7 @@ function AuthActionBar() {
       }),
     );
 
-    const role = response.activeMembership?.shellRole || decodedToken.role;
-    navigate({ to: resolveRouteByRole(role) });
+    navigate({ to: "/dashboard" });
   };
 
   const membershipMutation = useMutation({
@@ -158,7 +150,7 @@ function AuthActionBar() {
           Select Membership
         </CardTitle>
         <CardDescription className="text-center">
-          Your account has access to multiple schools or roles.
+          Your account has access to multiple school memberships.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -176,8 +168,6 @@ function AuthActionBar() {
                 {pendingMembership.memberships.map(membership => (
                   <SelectItem key={membership.id} value={membership.id}>
                     {membership.schoolName}
-                    {" - "}
-                    {membership.shellRole}
                     {membership.loginIdentifier
                       ? ` (${membership.loginIdentifier})`
                       : ""}

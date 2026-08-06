@@ -26,7 +26,6 @@ class StreamSchema(BaseSchema):
     """
 
     id: uuid.UUID
-    grade_id: uuid.UUID
     name: str
 
 

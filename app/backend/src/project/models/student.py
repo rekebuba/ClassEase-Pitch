@@ -33,9 +33,9 @@ class Student(SchoolScopedMixin, BaseModel):
     __tablename__ = "students"
 
     # Contact Information
-    city: Mapped[str] = mapped_column(String(50), nullable=False)
-    state: Mapped[str] = mapped_column(String(50), nullable=False)
-    postal_code: Mapped[str] = mapped_column(String(20), nullable=False)
+    city: Mapped[Optional[str]] = mapped_column(String(50), nullable=True, default=None)
+    state: Mapped[Optional[str]] = mapped_column(String(50), nullable=True, default=None)
+    postal_code: Mapped[Optional[str]] = mapped_column(String(20), nullable=True, default=None)
 
     nationality: Mapped[Optional[str]] = mapped_column(String(100), nullable=True, default=None)
     blood_type: Mapped[BloodTypeEnum] = mapped_column(

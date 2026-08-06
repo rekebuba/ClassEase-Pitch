@@ -20,38 +20,133 @@ branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
 
+# Assuming your settings module is imported in your migration script:
+# from app.core.config import settings
+
+
 def upgrade():
-    # It is best practice to use a connection-based execution for DCL
     conn = op.get_bind()
 
-    # We execute these as raw SQL because Alembic's 'op'
-    # doesn't have dedicated helpers for ROLE management.
-    conn.execute(
-        sa.text(
-            f"CREATE ROLE {settings.POSTGRES_SYSTEM_ROLE} \
-            WITH LOGIN PASSWORD '{settings.POSTGRES_SYSTEM_PASS.get_secret_value()}';"
-        )
-    )
-    conn.execute(sa.text(f"ALTER ROLE {settings.POSTGRES_SYSTEM_ROLE} BYPASSRLS;"))
+    system_role = settings.POSTGRES_SYSTEM_ROLE
+    system_pass = settings.POSTGRES_SYSTEM_PASS.get_secret_value()
+    primary_user = settings.POSTGRES_USER  # Ensure primary user variable is available
 
-    # Grant permissions
-    conn.execute(sa.text(f"GRANT USAGE ON SCHEMA public TO {settings.POSTGRES_SYSTEM_ROLE};"))
+    # 1. Create role safely if it doesn't exist
     conn.execute(
         sa.text(
-            f"GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO {settings.POSTGRES_SYSTEM_ROLE};"
+            f"""
+            DO $$
+            BEGIN
+                IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '{system_role}') THEN
+                    CREATE ROLE {system_role} WITH LOGIN PASSWORD '{system_pass}';
+                END IF;
+            END
+            $$;
+            """
         )
     )
-    conn.execute(sa.text(f"GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO {settings.POSTGRES_SYSTEM_ROLE};"))
+
+    # 2. Grant role options & database access
+    conn.execute(sa.text(f"ALTER ROLE {system_role} BYPASSRLS;"))
+    conn.execute(sa.text(f"GRANT CONNECT ON DATABASE {settings.POSTGRES_DB} TO {system_role};"))
+    conn.execute(sa.text(f"GRANT USAGE, CREATE ON SCHEMA public TO {system_role};"))
+
+    # 3. Existing objects permissions
+    conn.execute(sa.text(f"GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO {system_role};"))
+    conn.execute(sa.text(f"GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO {system_role};"))
+    conn.execute(sa.text(f"GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO {system_role};"))
+
+    # 4. Future objects created by primary user -> granted to system role
+    conn.execute(
+        sa.text(
+            f"ALTER DEFAULT PRIVILEGES FOR USER {primary_user} IN SCHEMA public "
+            f"GRANT ALL PRIVILEGES ON TABLES TO {system_role};"
+        )
+    )
+    conn.execute(
+        sa.text(
+            f"ALTER DEFAULT PRIVILEGES FOR USER {primary_user} IN SCHEMA public "
+            f"GRANT ALL PRIVILEGES ON SEQUENCES TO {system_role};"
+        )
+    )
+    conn.execute(
+        sa.text(
+            f"ALTER DEFAULT PRIVILEGES FOR USER {primary_user} IN SCHEMA public "
+            f"GRANT ALL PRIVILEGES ON FUNCTIONS TO {system_role};"
+        )
+    )
+
+    # 5. Future objects created by system role -> granted to primary user
+    conn.execute(
+        sa.text(
+            f"ALTER DEFAULT PRIVILEGES FOR USER {system_role} IN SCHEMA public "
+            f"GRANT ALL PRIVILEGES ON TABLES TO {primary_user};"
+        )
+    )
+    conn.execute(
+        sa.text(
+            f"ALTER DEFAULT PRIVILEGES FOR USER {system_role} IN SCHEMA public "
+            f"GRANT ALL PRIVILEGES ON SEQUENCES TO {primary_user};"
+        )
+    )
+    conn.execute(
+        sa.text(
+            f"ALTER DEFAULT PRIVILEGES FOR USER {system_role} IN SCHEMA public "
+            f"GRANT ALL PRIVILEGES ON FUNCTIONS TO {primary_user};"
+        )
+    )
 
 
 def downgrade():
-    # Clean up by dropping the role
     conn = op.get_bind()
 
-    # 1. Revoke privileges from the role
-    conn.execute(sa.text("REVOKE ALL ON ALL TABLES IN SCHEMA public FROM system_admin;"))
-    conn.execute(sa.text("REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM system_admin;"))
-    conn.execute(sa.text("REVOKE ALL ON SCHEMA public FROM system_admin;"))
+    system_role = settings.POSTGRES_SYSTEM_ROLE
+    primary_user = settings.POSTGRES_USER
 
-    # 2. Drop the role
-    conn.execute(sa.text("DROP ROLE IF EXISTS system_admin;"))
+    # 1. Revoke default privileges
+    conn.execute(
+        sa.text(
+            f"ALTER DEFAULT PRIVILEGES FOR USER {primary_user} IN SCHEMA public "
+            f"REVOKE ALL ON TABLES FROM {system_role};"
+        )
+    )
+    conn.execute(
+        sa.text(
+            f"ALTER DEFAULT PRIVILEGES FOR USER {primary_user} IN SCHEMA public "
+            f"REVOKE ALL ON SEQUENCES FROM {system_role};"
+        )
+    )
+    conn.execute(
+        sa.text(
+            f"ALTER DEFAULT PRIVILEGES FOR USER {primary_user} IN SCHEMA public "
+            f"REVOKE ALL ON FUNCTIONS FROM {system_role};"
+        )
+    )
+    conn.execute(
+        sa.text(
+            f"ALTER DEFAULT PRIVILEGES FOR USER {system_role} IN SCHEMA public "
+            f"REVOKE ALL ON TABLES FROM {primary_user};"
+        )
+    )
+    conn.execute(
+        sa.text(
+            f"ALTER DEFAULT PRIVILEGES FOR USER {system_role} IN SCHEMA public "
+            f"REVOKE ALL ON SEQUENCES FROM {primary_user};"
+        )
+    )
+    conn.execute(
+        sa.text(
+            f"ALTER DEFAULT PRIVILEGES FOR USER {system_role} IN SCHEMA public "
+            f"REVOKE ALL ON FUNCTIONS FROM {primary_user};"
+        )
+    )
+
+    # 2. Revoke existing object privileges
+    conn.execute(sa.text(f"REVOKE ALL PRIVILEGES ON ALL TABLES IN SCHEMA public FROM {system_role};"))
+    conn.execute(sa.text(f"REVOKE ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public FROM {system_role};"))
+    conn.execute(sa.text(f"REVOKE ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public FROM {system_role};"))
+    conn.execute(sa.text(f"REVOKE ALL ON SCHEMA public FROM {system_role};"))
+    conn.execute(sa.text(f"REVOKE CONNECT ON DATABASE {settings.POSTGRES_DB} FROM {system_role};"))
+
+    # 3. Drop role
+    conn.execute(sa.text(f"DROP ROLE IF EXISTS {system_role};"))

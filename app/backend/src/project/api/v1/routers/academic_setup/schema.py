@@ -68,6 +68,7 @@ class SubjectOfferingCreateSchema(BaseSchema):
 class ClassSectionCreateSchema(BaseSchema):
     academic_year_id: uuid.UUID
     section_id: uuid.UUID
+    grade_id: uuid.UUID
     stream_id: Optional[uuid.UUID] = None
 
 

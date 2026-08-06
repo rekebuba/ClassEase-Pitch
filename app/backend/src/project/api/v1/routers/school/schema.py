@@ -7,7 +7,6 @@ from pydantic_extra_types.phone_numbers import PhoneNumber
 
 from project.schema.schema import BaseSchema
 from project.utils.enum import (
-    BloodTypeEnum,
     EmploymentStatusEnum,
     EmploymentTypeEnum,
     RoleEnum,
@@ -49,23 +48,7 @@ class ParentProfile(BaseSchema):
 
 class StudentProfile(BaseSchema):
     user_id: uuid.UUID = Field(..., description="The ID of the user")
-    city: str = Field(min_length=2, max_length=50)
-    state: str = Field(min_length=2, max_length=50)
-    postal_code: str = Field(min_length=2, max_length=20)
-
-    nationality: Optional[str] = Field(default=None, min_length=2, max_length=100)
-    blood_type: BloodTypeEnum = Field(default=BloodTypeEnum.UNKNOWN)
-    student_photo: Optional[str] = Field(default=None)
-    previous_school: Optional[str] = Field(default=None, max_length=100)
-    transportation: Optional[str] = Field(default=None)
-
-    has_medical_condition: bool = Field(default=False)
-    has_disability: bool = Field(default=False)
-    medical_details: Optional[str] = Field(default=None)
-    disability_details: Optional[str] = Field(default=None)
-
     is_transfer: bool = Field(default=False, description="Indicates if the student is a transfer student")
-
     parents: List[ParentProfile] = Field(
         default_factory=list,
         description="List of parent profiles associated with the student",

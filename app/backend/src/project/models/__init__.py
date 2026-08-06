@@ -16,6 +16,7 @@ from project.models.employee_position import EmployeePosition
 from project.models.employment_contract import EmploymentContract
 from project.models.event import Event
 from project.models.grade import Grade
+from project.models.grade_stream import GradeStream
 from project.models.membership_role import MembershipRole
 from project.models.parent import Parent
 from project.models.parent_student_link import ParentStudentLink
@@ -52,8 +53,8 @@ __all__ = [
     "Assessment",
     "AssessmentScheme",
     "AssessmentSchemeComponent",
-    "AuthIdentity",
     "AuditLog",
+    "AuthIdentity",
     "AuthSession",
     "BlacklistToken",
     "ClassSection",
@@ -64,7 +65,7 @@ __all__ = [
     "EmploymentContract",
     "Event",
     "Grade",
-    "SubjectOffering",
+    "GradeStream",
     "MembershipRole",
     "Parent",
     "ParentStudentLink",
@@ -86,6 +87,8 @@ __all__ = [
     "StudentYearRecord",
     "StudentYearRecord",
     "Subject",
+    "SubjectOffering",
+    "SubjectOffering",
     "SubjectTermResult",
     "SubjectYearlyAverage",
     "Table",
@@ -95,5 +98,4 @@ __all__ = [
     "TransferRequest",
     "User",
     "Year",
-    "SubjectOffering",
 ]

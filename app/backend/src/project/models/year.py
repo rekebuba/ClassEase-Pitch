@@ -82,7 +82,7 @@ class Year(SchoolScopedMixin, BaseModel):
         default_factory=list,
         repr=False,
         passive_deletes=True,
-        overlaps="class_sections,grade,homeroom_teacher,school,section",
+        overlaps="class_sections,grade_stream,homeroom_teacher,school,section",
     )
     teacher_subjects: Mapped[List["TeacherSubject"]] = relationship(
         "TeacherSubject",

@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { queryClient } from "@/lib/query-client";
 import { persister } from "@/store/main-store";
-import { logout } from "@/store/slice/auth-slice";
+import { logout } from "@/store/slice/auth/auth-slice";
 
 import type { LogoutError } from "@/client/types.gen";
 import type { AxiosError } from "axios";

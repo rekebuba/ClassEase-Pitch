@@ -57,5 +57,5 @@ class Section(SchoolScopedMixin, BaseModel):
         default_factory=list,
         repr=False,
         passive_deletes=True,
-        overlaps="academic_year,grade,homeroom_teacher,school",
+        overlaps="academic_year,class_sections,grade,grade_stream,homeroom_teacher,school",
     )

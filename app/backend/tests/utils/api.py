@@ -7,7 +7,10 @@ from project.api.v1.routers.auth.schema import (
     SignUpRequest,
 )
 from project.api.v1.routers.employee.schema import EmployeePositionCreate
+from project.api.v1.routers.grades.schema import GradeSetupSchema
+from project.api.v1.routers.schema import FilterParams
 from project.api.v1.routers.school.schema import EmployeeProfile
+from project.api.v1.routers.subjects.schema import SubjectSetupSchema
 from project.api.v1.routers.teachers.schema import CreateTeacherProfile
 from project.api.v1.routers.users.schema import (
     CurrentUserInfo,
@@ -153,6 +156,65 @@ class API:
         )
         assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
         return [GradeSchema.model_validate(grade) for grade in r.json()]
+
+    @staticmethod
+    async def get_grades_offerings(
+        *,
+        client: AsyncClient,
+        headers: dict[str, str],
+        query: FilterParams,
+    ) -> list[GradeSetupSchema]:
+        r = await client.get(
+            f"{settings.API_V1_STR}/grades/offerings",
+            headers=headers,
+            params=query.model_dump(),
+        )
+        assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
+        # print(json.dumps(r.json(), indent=4, sort_keys=True))
+        return [GradeSetupSchema.model_validate(grade) for grade in r.json()]
+
+    @staticmethod
+    async def get_grade_offerings_by_id(
+        *,
+        client: AsyncClient,
+        headers: dict[str, str],
+        grade_id: uuid.UUID,
+    ) -> GradeSetupSchema:
+        r = await client.get(
+            f"{settings.API_V1_STR}/grades/offerings/{grade_id}",
+            headers=headers,
+        )
+        assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
+        return GradeSetupSchema.model_validate(r.json())
+
+    @staticmethod
+    async def get_subjects_offerings(
+        *,
+        client: AsyncClient,
+        headers: dict[str, str],
+        query: FilterParams,
+    ) -> list[SubjectSetupSchema]:
+        r = await client.get(
+            f"{settings.API_V1_STR}/subjects/offerings",
+            headers=headers,
+            params=query.model_dump(),
+        )
+        assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
+        return [SubjectSetupSchema.model_validate(subject) for subject in r.json()]
+
+    @staticmethod
+    async def get_subject_offerings_by_id(
+        *,
+        client: AsyncClient,
+        headers: dict[str, str],
+        subject_id: uuid.UUID,
+    ) -> SubjectSetupSchema:
+        r = await client.get(
+            f"{settings.API_V1_STR}/subjects/offerings/{subject_id}",
+            headers=headers,
+        )
+        assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
+        return SubjectSetupSchema.model_validate(r.json())
 
     @staticmethod
     async def get_sections(

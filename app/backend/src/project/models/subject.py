@@ -4,14 +4,11 @@
 from typing import TYPE_CHECKING, List
 
 from sqlalchemy import String, UniqueConstraint
-from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
+from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
 from project.models.base.school_mixin import SchoolScopedMixin
-from project.models.grade import Grade
-from project.models.stream import Stream
-from project.utils.utils import sort_grade_key
 
 if TYPE_CHECKING:
     from project.models.subject_offering import SubjectOffering
@@ -55,35 +52,7 @@ class Subject(SchoolScopedMixin, BaseModel):
     )
 
     # Association proxy
-    _grades: AssociationProxy[List["Grade"]] = association_proxy(
+    grade_streams = association_proxy(
         "subject_offerings",
-        "grade",
-        default_factory=list,
+        "grade_stream",
     )
-    _streams: AssociationProxy[List["Stream"]] = association_proxy(
-        "subject_offerings",
-        "stream",
-        default_factory=list,
-    )
-
-    @property
-    def grades(self) -> List["Grade"]:
-        """Return unique grades that have streams assigned to this subject."""
-        seen = set()
-        result = []
-        for g in self._grades:
-            if g is not None and g.id not in seen:
-                seen.add(g.id)
-                result.append(g)
-        return sorted(result, key=sort_grade_key)
-
-    @property
-    def streams(self) -> List["Stream"]:
-        """Return unique, non-null streams."""
-        seen = set()
-        result = []
-        for s in self._streams:
-            if s is not None and s.id not in seen:
-                seen.add(s.id)
-                result.append(s)
-        return result

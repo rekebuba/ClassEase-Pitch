@@ -26,7 +26,7 @@ import {
   FieldLabel,
   FieldSeparator,
 } from "@/components/ui/field";
-import { loginFailure } from "@/store/slice/auth-slice";
+import { loginFailure } from "@/store/slice/auth/auth-slice";
 
 import type {
   BodyLoginCredential,

@@ -5,7 +5,7 @@ export default defineConfig({
   output: {
     path: "./src/client",
     clean: true,
-    lint: "eslint",
+    postProcess: ["eslint"],
   },
   plugins: [
     {

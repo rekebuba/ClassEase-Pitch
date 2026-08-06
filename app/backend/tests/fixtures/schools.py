@@ -9,18 +9,6 @@ from project.api.v1.routers.school.schema import (
     SuccessSchoolResponse,
 )
 from project.core.config import settings
-from project.models import (
-    AcademicTerm,
-    AssessmentScheme,
-    AssessmentSchemeComponent,
-    ClassSection,
-    Grade,
-    Section,
-    Stream,
-    Subject,
-    SubjectOffering,
-    Year,
-)
 from project.utils.enum import AcademicYearStatusEnum
 from tests.factories.api_data import (
     NewSchoolFactory,
@@ -40,20 +28,7 @@ from tests.utils.type_test import (
     SchoolYear,
     YearScenario,
 )
-from tests.utils.utils import _count_rows, find_admin_in_school
-
-PROVISIONED_MODELS = (
-    Year,
-    AcademicTerm,
-    Subject,
-    Grade,
-    Section,
-    Stream,
-    AssessmentScheme,
-    AssessmentSchemeComponent,
-    SubjectOffering,
-    ClassSection,
-)
+from tests.utils.utils import _assert_provisioned_models_counts, find_admin_in_school
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -109,7 +84,7 @@ async def school(
     return SchoolScenario(
         school=schools[idx],
         users=all_users,
-        years=years[idx],
+        years=years[idx].years,
         grades=grades[idx],
     )
 
@@ -151,25 +126,10 @@ async def default_school_setup(
             headers=admin.login.headers,
         )
 
-        counts = {
-            model.__tablename__: await _count_rows(
-                tenant_session=db_session,
-                model=model,
-                school_id=school_id,
-            )
-            for model in PROVISIONED_MODELS
-        }
-
-        assert counts["years"] == 1
-        assert counts["academic_terms"] == 2
-        assert counts["subjects"] >= 20
-        assert counts["grades"] == 12
-        assert counts["sections"] >= 36
-        assert counts["streams"] >= 2
-        assert counts["assessment_schemes"] == 1
-        assert counts["assessment_scheme_components"] == 4
-        assert counts["subject_offerings"] == 130
-        assert counts["class_sections"] > 0
+        await _assert_provisioned_models_counts(
+            tenant_session=db_session,
+            school_id=school_id,
+        )
 
         return YearScenario(
             school=school,

@@ -8,12 +8,9 @@ import {
   CheckCircle,
   ChevronRight,
   Clock,
-  Facebook,
   FileText,
   Globe,
   GraduationCap,
-  Instagram,
-  Linkedin,
   Mail,
   MapPin,
   MessageSquare,
@@ -21,12 +18,14 @@ import {
   Settings,
   Shield,
   Star,
-  Twitter,
   Users,
   Zap,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
+import Facebook from "@/assets/icons/facebook.svg";
+import Instagram from "@/assets/icons/Instagram.svg";
+import XIcon from "@/assets/icons/x-logo.svg";
 import {
   Accordion,
   AccordionContent,
@@ -76,9 +75,9 @@ export default function LandingPage() {
       const statsSection = document.getElementById("stats-section");
       if (statsSection) {
         const rect = statsSection.getBoundingClientRect();
-        const isVisible = rect.top < window.innerHeight && rect.bottom >= 0;
+        const visible = rect.top < window.innerHeight && rect.bottom >= 0;
         // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
-        setIsVisible(isVisible);
+        setIsVisible(visible);
       }
     };
 
@@ -174,7 +173,7 @@ export default function LandingPage() {
         </div>
       </header>
       <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-sky-50 to-white">
+        <section className="w-full py-12 md:py-24 lg:py-32 bg-liner-to-b from-sky-50 to-white">
           <div className="container px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12 xl:grid-cols-2">
               <div className="flex flex-col justify-center space-y-4">
@@ -182,7 +181,7 @@ export default function LandingPage() {
                   <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
                     Simplify School Management with ClassEase
                   </h1>
-                  <p className="max-w-[600px] text-muted-foreground md:text-xl">
+                  <p className="max-w-150 text-muted-foreground md:text-xl">
                     The all-in-one platform for administrators, teachers, and
                     students to streamline education workflows and enhance
                     learning outcomes.
@@ -289,7 +288,7 @@ export default function LandingPage() {
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
                   Everything you need to manage your school
                 </h2>
-                <p className="max-w-[900px] text-muted-foreground md:text-xl">
+                <p className="max-w-225 text-muted-foreground md:text-xl">
                   ClassEase provides powerful tools for administrators,
                   teachers, and students to streamline education workflows and
                   enhance learning outcomes.
@@ -385,7 +384,7 @@ export default function LandingPage() {
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
                   Tailored for every role in education
                 </h2>
-                <p className="max-w-[900px] text-muted-foreground md:text-xl">
+                <p className="max-w-225 text-muted-foreground md:text-xl">
                   ClassEase offers specialized solutions for administrators,
                   teachers, students, and parents.
                 </p>
@@ -419,7 +418,7 @@ export default function LandingPage() {
                         "Campus-wide scheduling and resource allocation",
                       ].map(item => (
                         <li key={item} className="flex items-start">
-                          <CheckCircle className="h-5 w-5 text-sky-500 mr-2 mt-0.5 flex-shrink-0" />
+                          <CheckCircle className="h-5 w-5 text-sky-500 mr-2 mt-0.5 shrink-0" />
                           <span>{item}</span>
                         </li>
                       ))}
@@ -456,7 +455,7 @@ export default function LandingPage() {
                         "Resource sharing and collaboration features",
                       ].map(item => (
                         <li key={item} className="flex items-start">
-                          <CheckCircle className="h-5 w-5 text-sky-500 mr-2 mt-0.5 flex-shrink-0" />
+                          <CheckCircle className="h-5 w-5 text-sky-500 mr-2 mt-0.5 shrink-0" />
                           <span>{item}</span>
                         </li>
                       ))}
@@ -493,7 +492,7 @@ export default function LandingPage() {
                         "Collaboration tools for group projects",
                       ].map(item => (
                         <li key={item} className="flex items-start">
-                          <CheckCircle className="h-5 w-5 text-sky-500 mr-2 mt-0.5 flex-shrink-0" />
+                          <CheckCircle className="h-5 w-5 text-sky-500 mr-2 mt-0.5 shrink-0" />
                           <span>{item}</span>
                         </li>
                       ))}
@@ -530,7 +529,7 @@ export default function LandingPage() {
                         "Fee payment and financial management",
                       ].map(item => (
                         <li key={item} className="flex items-start">
-                          <CheckCircle className="h-5 w-5 text-sky-500 mr-2 mt-0.5 flex-shrink-0" />
+                          <CheckCircle className="h-5 w-5 text-sky-500 mr-2 mt-0.5 shrink-0" />
                           <span>{item}</span>
                         </li>
                       ))}
@@ -592,7 +591,7 @@ export default function LandingPage() {
                     },
                   ].map(item => (
                     <div key={item.title} className="flex gap-4">
-                      <div className="rounded-full bg-sky-100 p-2 h-10 w-10 flex items-center justify-center flex-shrink-0">
+                      <div className="rounded-full bg-sky-100 p-2 h-10 w-10 flex items-center justify-center shrink-0">
                         <item.icon className="h-5 w-5 text-sky-500" />
                       </div>
                       <div>
@@ -615,7 +614,7 @@ export default function LandingPage() {
               </div>
 
               <div className="relative">
-                <div className="absolute -z-10 top-0 left-0 h-full w-full bg-gradient-to-br from-sky-100 to-sky-50 rounded-2xl transform -rotate-3"></div>
+                <div className="absolute -z-10 top-0 left-0 h-full w-full bg-liner-to-br from-sky-100 to-sky-50 rounded-2xl transform -rotate-3"></div>
                 <img
                   src="/placeholder.svg?height=500&width=600"
                   alt="ClassEase in action"
@@ -663,7 +662,7 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                <div className="relative h-[250px]">
+                <div className="relative h-62.5">
                   {[
                     {
                       quote:
@@ -774,7 +773,7 @@ export default function LandingPage() {
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
                   Simple, transparent pricing
                 </h2>
-                <p className="max-w-[900px] text-muted-foreground md:text-xl">
+                <p className="max-w-225 text-muted-foreground md:text-xl">
                   Choose the plan that is right for your school.
                 </p>
               </div>
@@ -992,7 +991,7 @@ export default function LandingPage() {
                 <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
                   Frequently Asked Questions
                 </h2>
-                <p className="max-w-[900px] text-muted-foreground md:text-xl">
+                <p className="max-w-225 text-muted-foreground md:text-xl">
                   Find answers to common questions about ClassEase.
                 </p>
               </div>
@@ -1068,7 +1067,7 @@ export default function LandingPage() {
                   <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight">
                     Ready to transform your school?
                   </h2>
-                  <p className="max-w-[600px] text-muted-foreground md:text-xl">
+                  <p className="max-w-150 text-muted-foreground md:text-xl">
                     Our team is here to answer your questions and help you get
                     started with ClassEase.
                   </p>
@@ -1114,25 +1113,25 @@ export default function LandingPage() {
                       href="#"
                       className="rounded-full bg-sky-100 p-2 hover:bg-sky-200 transition-colors"
                     >
-                      <Facebook className="h-5 w-5 text-sky-700" />
+                      <img src={Facebook} alt="Facebook" className="w-5 h-5" />
                     </a>
                     <a
                       href="#"
                       className="rounded-full bg-sky-100 p-2 hover:bg-sky-200 transition-colors"
                     >
-                      <Twitter className="h-5 w-5 text-sky-700" />
+                      <img src={XIcon} alt="XIcon" className="w-5 h-5" />
                     </a>
                     <a
                       href="#"
                       className="rounded-full bg-sky-100 p-2 hover:bg-sky-200 transition-colors"
                     >
-                      <Instagram className="h-5 w-5 text-sky-700" />
+                      <img src={Instagram} alt="Instagram" className="w-5 h-5" />
                     </a>
                     <a
                       href="#"
                       className="rounded-full bg-sky-100 p-2 hover:bg-sky-200 transition-colors"
                     >
-                      <Linkedin className="h-5 w-5 text-sky-700" />
+                      {/* <Linkedin className="h-5 w-5 text-sky-700" /> */}
                     </a>
                   </div>
                 </div>
@@ -1217,7 +1216,7 @@ export default function LandingPage() {
                         </label>
                         <textarea
                           id="message"
-                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-[100px]"
+                          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm min-h-25"
                           placeholder="Tell us about your school and requirements..."
                         />
                       </div>
@@ -1249,25 +1248,25 @@ export default function LandingPage() {
                   href="#"
                   className="text-muted-foreground hover:text-sky-500"
                 >
-                  <Facebook className="h-5 w-5" />
+                  <img src={Facebook} alt="Facebook" className="w-5 h-5" />
                 </a>
                 <a
                   href="#"
                   className="text-muted-foreground hover:text-sky-500"
                 >
-                  <Twitter className="h-5 w-5" />
+                  <img src={XIcon} alt="XIcon" className="w-5 h-5" />
                 </a>
                 <a
                   href="#"
                   className="text-muted-foreground hover:text-sky-500"
                 >
-                  <Instagram className="h-5 w-5" />
+                  <img src={Instagram} alt="Instagram" className="w-5 h-5" />
                 </a>
                 <a
                   href="#"
                   className="text-muted-foreground hover:text-sky-500"
                 >
-                  <Linkedin className="h-5 w-5" />
+                  {/* <img src={Linkedin} alt="Linkedin" className="w-5 h-5" /> */}
                 </a>
               </div>
             </div>
