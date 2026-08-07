@@ -1,10 +1,9 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, redirect } from "@tanstack/react-router";
 import { GraduationCap } from "lucide-react";
 
-import AuthActionBar from "@/components/authentication/auth-action-bar";
 import { store } from "@/store/main-store";
 
-export const Route = createFileRoute("/authentication/")({
+export const Route = createFileRoute("/auth")({
   component: AuthPage,
   beforeLoad: async () => {
     const state = store.getState();
@@ -28,7 +27,8 @@ export default function AuthPage() {
           </div>
           ClassEase
         </Link>
-        <AuthActionBar />
+        
+        <Outlet />
       </div>
     </div>
   );

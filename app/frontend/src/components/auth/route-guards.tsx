@@ -14,7 +14,7 @@ export function RequireAuthentication({ children }: GuardProps) {
   const { activeMembership } = usePermissions();
 
   if (!activeMembership) {
-    return <Navigate to="/authentication" />;
+    return <Navigate to="/auth" />;
   }
 
   return children;
@@ -37,7 +37,7 @@ export function RouteGuard({
   const { activeMembership, hasPermission } = usePermissions();
 
   if (!activeMembership) {
-    return <Navigate to="/authentication" />;
+    return <Navigate to="/auth" />;
   }
 
   if (permission && !hasPermission(permission)) {

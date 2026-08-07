@@ -45,7 +45,7 @@ function Logout() {
       persister.purge();
 
       // redirect after success
-      navigate({ to: "/authentication" });
+      navigate({ to: "/auth" });
       toast.success(response.message, {
         style: { color: "green" },
       });

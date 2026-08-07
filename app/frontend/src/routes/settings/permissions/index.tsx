@@ -60,7 +60,7 @@ function PermissionsSettingsPage() {
 
       <SettingsSection title="Permission Matrix Preview" description="Compact static matrix for common modules and role access levels.">
         <div className="overflow-x-auto rounded-2xl border">
-          <table className="w-full min-w-[640px] text-sm">
+          <table className="w-full min-w-160 text-sm">
             <thead className="bg-muted/60 text-muted-foreground"><tr>{["Module", "Owner", "Principal", "Teacher", "Guardian"].map(head => <th key={head} className="px-4 py-3 text-left font-medium">{head}</th>)}</tr></thead>
             <tbody>{[["Students", "Full", "Full", "Limited", "Own child"], ["Grades", "Full", "Approve", "Edit assigned", "View"], ["Finance", "Full", "View", "None", "Own invoices"], ["Settings", "Full", "Limited", "None", "None"]].map(row => <tr key={row[0]} className="border-t">{row.map(cell => <td key={cell} className="px-4 py-3">{cell}</td>)}</tr>)}</tbody>
           </table>

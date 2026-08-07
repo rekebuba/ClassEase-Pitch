@@ -60,7 +60,7 @@ function RouteComponent() {
       toast.success(response.message, {
         style: { color: "green" },
       });
-      navigate({ to: "/authentication" });
+      navigate({ to: "/auth" });
     },
     onError: (error: AxiosError<PasswordResetError>) => {
       const detail = error.response?.data?.detail;
@@ -145,7 +145,7 @@ function RouteComponent() {
             </form>
           </FormProvider>
 
-          <Link to="/authentication" className="group mx-auto flex w-fit items-center gap-2">
+          <Link to="/auth" className="group mx-auto flex w-fit items-center gap-2">
             <ChevronLeftIcon className="size-5 transition-transform duration-200 group-hover:-translate-x-0.5" />
             <span>Back to login</span>
           </Link>

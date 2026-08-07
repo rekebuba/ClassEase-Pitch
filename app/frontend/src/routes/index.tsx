@@ -163,7 +163,7 @@ export default function LandingPage() {
             </a>
           </nav>
           <div className="flex items-center gap-4">
-            <a href="/authentication">
+            <a href="/auth">
               <Button variant="outline">Log in</Button>
             </a>
             <a href="/signup">

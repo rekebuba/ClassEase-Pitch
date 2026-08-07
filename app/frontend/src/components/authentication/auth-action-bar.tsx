@@ -97,7 +97,7 @@ function AuthActionBar() {
     membershipId: string,
   ) => {
     membershipMutation.mutate({
-      body: { membership_id: membershipId },
+      body: { membershipId },
       headers: {
         Authorization: `Bearer ${loginResponse.accessToken}`,
       },
@@ -132,7 +132,7 @@ function AuthActionBar() {
     }
 
     membershipMutation.mutate({
-      body: { membership_id: selectedMembershipId },
+      body: { membershipId: selectedMembershipId },
       headers: {
         Authorization: `Bearer ${pendingMembership.accessToken}`,
       },

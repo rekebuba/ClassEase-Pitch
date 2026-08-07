@@ -19,7 +19,7 @@ function resetAuthState() {
   queryClient.clear();
   persister.purge();
   store.dispatch(logout());
-  router.navigate({ to: "/authentication" });
+  router.navigate({ to: "/auth" });
 }
 
 function drainRefreshQueue(token: string | null) {

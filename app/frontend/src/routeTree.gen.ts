@@ -10,13 +10,16 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as SettingsRouteRouteImport } from './routes/settings/route'
-import { Route as AuthenticationIndexRouteImport } from './routes/authentication/index'
+import { Route as AuthIndexRouteImport } from './routes/auth/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardForbiddenRouteImport } from './routes/dashboard/forbidden'
 import { Route as ForgotPasswordIndexRouteImport } from './routes/forgot-password/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
+import { Route as AuthSignInIndexRouteImport } from './routes/auth/sign-in/index'
+import { Route as AuthSignUpIndexRouteImport } from './routes/auth/sign-up/index'
 import { Route as DashboardEmployeesIndexRouteImport } from './routes/dashboard/employees/index'
 import { Route as DashboardEmployeesEmployeeIdRouteRouteImport } from './routes/dashboard/employees/$employeeId/route'
 import { Route as DashboardGradesIndexRouteImport } from './routes/dashboard/grades/index'
@@ -48,6 +51,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRouteRoute = AuthRouteRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -58,10 +66,10 @@ const SettingsRouteRoute = SettingsRouteRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticationIndexRoute = AuthenticationIndexRouteImport.update({
-  id: '/authentication/',
-  path: '/authentication/',
-  getParentRoute: () => rootRouteImport,
+const AuthIndexRoute = AuthIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthRouteRoute,
 } as any)
 const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
@@ -82,6 +90,16 @@ const SettingsIndexRoute = SettingsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => SettingsRouteRoute,
+} as any)
+const AuthSignInIndexRoute = AuthSignInIndexRouteImport.update({
+  id: '/sign-in/',
+  path: '/sign-in/',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthSignUpIndexRoute = AuthSignUpIndexRouteImport.update({
+  id: '/sign-up/',
+  path: '/sign-up/',
+  getParentRoute: () => AuthRouteRoute,
 } as any)
 const DashboardEmployeesIndexRoute = DashboardEmployeesIndexRouteImport.update({
   id: '/employees/',
@@ -225,10 +243,11 @@ const DashboardEmployeesEmployeeIdProfileIndexRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/settings': typeof SettingsRouteRouteWithChildren
   '/dashboard/forbidden': typeof DashboardForbiddenRoute
-  '/authentication/': typeof AuthenticationIndexRoute
+  '/auth/': typeof AuthIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/forgot-password/': typeof ForgotPasswordIndexRoute
   '/settings/': typeof SettingsIndexRoute
@@ -237,6 +256,8 @@ export interface FileRoutesByFullPath {
   '/dashboard/registration/new-employee': typeof DashboardRegistrationNewEmployeeRoute
   '/dashboard/registration/new-student': typeof DashboardRegistrationNewStudentRoute
   '/dashboard/registration/students': typeof DashboardRegistrationStudentsRoute
+  '/auth/sign-in/': typeof AuthSignInIndexRoute
+  '/auth/sign-up/': typeof AuthSignUpIndexRoute
   '/dashboard/employees/': typeof DashboardEmployeesIndexRoute
   '/dashboard/grades/': typeof DashboardGradesIndexRoute
   '/dashboard/manage-teachers/': typeof DashboardManageTeachersIndexRoute
@@ -261,7 +282,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard/forbidden': typeof DashboardForbiddenRoute
-  '/authentication': typeof AuthenticationIndexRoute
+  '/auth': typeof AuthIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/forgot-password': typeof ForgotPasswordIndexRoute
   '/settings': typeof SettingsIndexRoute
@@ -270,6 +291,8 @@ export interface FileRoutesByTo {
   '/dashboard/registration/new-employee': typeof DashboardRegistrationNewEmployeeRoute
   '/dashboard/registration/new-student': typeof DashboardRegistrationNewStudentRoute
   '/dashboard/registration/students': typeof DashboardRegistrationStudentsRoute
+  '/auth/sign-in': typeof AuthSignInIndexRoute
+  '/auth/sign-up': typeof AuthSignUpIndexRoute
   '/dashboard/employees': typeof DashboardEmployeesIndexRoute
   '/dashboard/grades': typeof DashboardGradesIndexRoute
   '/dashboard/manage-teachers': typeof DashboardManageTeachersIndexRoute
@@ -294,10 +317,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteRouteWithChildren
   '/settings': typeof SettingsRouteRouteWithChildren
   '/dashboard/forbidden': typeof DashboardForbiddenRoute
-  '/authentication/': typeof AuthenticationIndexRoute
+  '/auth/': typeof AuthIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/forgot-password/': typeof ForgotPasswordIndexRoute
   '/settings/': typeof SettingsIndexRoute
@@ -306,6 +330,8 @@ export interface FileRoutesById {
   '/dashboard/registration/new-employee': typeof DashboardRegistrationNewEmployeeRoute
   '/dashboard/registration/new-student': typeof DashboardRegistrationNewStudentRoute
   '/dashboard/registration/students': typeof DashboardRegistrationStudentsRoute
+  '/auth/sign-in/': typeof AuthSignInIndexRoute
+  '/auth/sign-up/': typeof AuthSignUpIndexRoute
   '/dashboard/employees/': typeof DashboardEmployeesIndexRoute
   '/dashboard/grades/': typeof DashboardGradesIndexRoute
   '/dashboard/manage-teachers/': typeof DashboardManageTeachersIndexRoute
@@ -331,10 +357,11 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/dashboard'
     | '/settings'
     | '/dashboard/forbidden'
-    | '/authentication/'
+    | '/auth/'
     | '/dashboard/'
     | '/forgot-password/'
     | '/settings/'
@@ -343,6 +370,8 @@ export interface FileRouteTypes {
     | '/dashboard/registration/new-employee'
     | '/dashboard/registration/new-student'
     | '/dashboard/registration/students'
+    | '/auth/sign-in/'
+    | '/auth/sign-up/'
     | '/dashboard/employees/'
     | '/dashboard/grades/'
     | '/dashboard/manage-teachers/'
@@ -367,7 +396,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/dashboard/forbidden'
-    | '/authentication'
+    | '/auth'
     | '/dashboard'
     | '/forgot-password'
     | '/settings'
@@ -376,6 +405,8 @@ export interface FileRouteTypes {
     | '/dashboard/registration/new-employee'
     | '/dashboard/registration/new-student'
     | '/dashboard/registration/students'
+    | '/auth/sign-in'
+    | '/auth/sign-up'
     | '/dashboard/employees'
     | '/dashboard/grades'
     | '/dashboard/manage-teachers'
@@ -399,10 +430,11 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/auth'
     | '/dashboard'
     | '/settings'
     | '/dashboard/forbidden'
-    | '/authentication/'
+    | '/auth/'
     | '/dashboard/'
     | '/forgot-password/'
     | '/settings/'
@@ -411,6 +443,8 @@ export interface FileRouteTypes {
     | '/dashboard/registration/new-employee'
     | '/dashboard/registration/new-student'
     | '/dashboard/registration/students'
+    | '/auth/sign-in/'
+    | '/auth/sign-up/'
     | '/dashboard/employees/'
     | '/dashboard/grades/'
     | '/dashboard/manage-teachers/'
@@ -435,9 +469,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRouteRoute: typeof AuthRouteRouteWithChildren
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   SettingsRouteRoute: typeof SettingsRouteRouteWithChildren
-  AuthenticationIndexRoute: typeof AuthenticationIndexRoute
   ForgotPasswordIndexRoute: typeof ForgotPasswordIndexRoute
   ForgotPasswordTokenIndexRoute: typeof ForgotPasswordTokenIndexRoute
 }
@@ -449,6 +483,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -465,12 +506,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/authentication/': {
-      id: '/authentication/'
-      path: '/authentication'
-      fullPath: '/authentication/'
-      preLoaderRoute: typeof AuthenticationIndexRouteImport
-      parentRoute: typeof rootRouteImport
+    '/auth/': {
+      id: '/auth/'
+      path: '/'
+      fullPath: '/auth/'
+      preLoaderRoute: typeof AuthIndexRouteImport
+      parentRoute: typeof AuthRouteRoute
     }
     '/dashboard/': {
       id: '/dashboard/'
@@ -499,6 +540,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/settings/'
       preLoaderRoute: typeof SettingsIndexRouteImport
       parentRoute: typeof SettingsRouteRoute
+    }
+    '/auth/sign-in/': {
+      id: '/auth/sign-in/'
+      path: '/sign-in'
+      fullPath: '/auth/sign-in/'
+      preLoaderRoute: typeof AuthSignInIndexRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/auth/sign-up/': {
+      id: '/auth/sign-up/'
+      path: '/sign-up'
+      fullPath: '/auth/sign-up/'
+      preLoaderRoute: typeof AuthSignUpIndexRouteImport
+      parentRoute: typeof AuthRouteRoute
     }
     '/dashboard/employees/': {
       id: '/dashboard/employees/'
@@ -678,6 +733,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthRouteRouteChildren {
+  AuthIndexRoute: typeof AuthIndexRoute
+  AuthSignInIndexRoute: typeof AuthSignInIndexRoute
+  AuthSignUpIndexRoute: typeof AuthSignUpIndexRoute
+}
+
+const AuthRouteRouteChildren: AuthRouteRouteChildren = {
+  AuthIndexRoute: AuthIndexRoute,
+  AuthSignInIndexRoute: AuthSignInIndexRoute,
+  AuthSignUpIndexRoute: AuthSignUpIndexRoute,
+}
+
+const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
+  AuthRouteRouteChildren,
+)
+
 interface DashboardEmployeesEmployeeIdRouteRouteChildren {
   DashboardEmployeesEmployeeIdProfileIndexRoute: typeof DashboardEmployeesEmployeeIdProfileIndexRoute
 }
@@ -768,9 +839,9 @@ const SettingsRouteRouteWithChildren = SettingsRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRouteRoute: AuthRouteRouteWithChildren,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   SettingsRouteRoute: SettingsRouteRouteWithChildren,
-  AuthenticationIndexRoute: AuthenticationIndexRoute,
   ForgotPasswordIndexRoute: ForgotPasswordIndexRoute,
   ForgotPasswordTokenIndexRoute: ForgotPasswordTokenIndexRoute,
 }

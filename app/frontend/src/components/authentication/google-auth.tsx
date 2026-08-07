@@ -52,7 +52,7 @@ function GoogleAuth({ schoolSlug, onAuthResponse }: GoogleAuthProps) {
     mutation.mutate({
       body: {
         credential: credentialResponse.credential,
-        school_slug: schoolSlug || undefined,
+        schoolSlug: schoolSlug || undefined,
       },
       path: { provider: "google" },
     });

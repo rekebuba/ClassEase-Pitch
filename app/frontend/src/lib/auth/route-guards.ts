@@ -9,7 +9,7 @@ export function requireAuthentication() {
   const { auth } = store.getState();
 
   if (!auth.token) {
-    throw redirect({ to: "/authentication" });
+    throw redirect({ to: "/auth" });
   }
 
   return auth;
@@ -19,7 +19,7 @@ export function requireMembership() {
   const auth = requireAuthentication();
 
   if (!(auth.activeMembership)) {
-    throw redirect({ to: "/authentication" });
+    throw redirect({ to: "/auth" });
   }
 
   return auth;

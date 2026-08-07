@@ -162,7 +162,7 @@ function RouteComponent() {
                         {recoveryMutation.isPending && <Loader2Icon className="animate-spin" />}
                         {recoveryMutation.isPending ? "Sending..." : "Send Reset Code"}
                       </Button>
-                      <Link to="/authentication" className="group mx-auto flex w-fit items-center gap-2">
+                      <Link to="/auth" className="group mx-auto flex w-fit items-center gap-2">
                         <ChevronLeftIcon className="size-5 transition-transform duration-200 group-hover:-translate-x-0.5" />
                         <span>Back to login</span>
                       </Link>
@@ -230,7 +230,7 @@ function RouteComponent() {
                       <Button type="submit" className="w-full">
                         Verify Code
                       </Button>
-                      <Link to="/authentication" className="group mx-auto flex w-fit items-center gap-2">
+                      <Link to="/auth" className="group mx-auto flex w-fit items-center gap-2">
                         <ChevronLeftIcon className="size-5 transition-transform duration-200 group-hover:-translate-x-0.5" />
                         <span>Back to login</span>
                       </Link>
