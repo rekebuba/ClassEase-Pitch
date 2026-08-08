@@ -17,6 +17,11 @@ from project.models.employment_contract import EmploymentContract
 from project.models.event import Event
 from project.models.grade import Grade
 from project.models.grade_stream import GradeStream
+from project.models.employment_application import EmploymentApplication
+from project.models.employment_position import EmploymentPosition
+from project.models.employment_profile import EmploymentProfile
+from project.models.enrollment_application import EnrollmentApplication
+from project.models.enrollment_opportunity import EnrollmentOpportunity
 from project.models.membership_role import MembershipRole
 from project.models.parent import Parent
 from project.models.parent_student_link import ParentStudentLink
@@ -66,6 +71,11 @@ __all__ = [
     "Event",
     "Grade",
     "GradeStream",
+    "EmploymentApplication",
+    "EmploymentPosition",
+    "EmploymentProfile",
+    "EnrollmentApplication",
+    "EnrollmentOpportunity",
     "MembershipRole",
     "Parent",
     "ParentStudentLink",

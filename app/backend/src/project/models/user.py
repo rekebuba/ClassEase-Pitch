@@ -14,6 +14,9 @@ from project.utils.enum import GenderEnum
 if TYPE_CHECKING:
     from project.models.auth_identity import AuthIdentity
     from project.models.auth_session import AuthSession
+    from project.models.employment_profile import EmploymentProfile
+    from project.models.employment_application import EmploymentApplication
+    from project.models.enrollment_application import EnrollmentApplication
     from project.models.saved_query_view import SavedQueryView
 
 
@@ -95,6 +98,31 @@ class User(BaseModel):
         back_populates="user",
         default_factory=list,
         init=False,
+        passive_deletes=True,
+    )
+    employment_profile: Mapped[Optional["EmploymentProfile"]] = relationship(
+        "EmploymentProfile",
+        back_populates="user",
+        uselist=False,
+        default=None,
+        init=False,
+        repr=False,
+        passive_deletes=True,
+    )
+    employment_applications: Mapped[List["EmploymentApplication"]] = relationship(
+        "EmploymentApplication",
+        back_populates="user",
+        default_factory=list,
+        init=False,
+        repr=False,
+        passive_deletes=True,
+    )
+    enrollment_applications: Mapped[List["EnrollmentApplication"]] = relationship(
+        "EnrollmentApplication",
+        back_populates="user",
+        default_factory=list,
+        init=False,
+        repr=False,
         passive_deletes=True,
     )
 

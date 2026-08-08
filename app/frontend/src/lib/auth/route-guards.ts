@@ -25,6 +25,16 @@ export function requireMembership() {
   return auth;
 }
 
+export function requireGuest() {
+  const auth = requireAuthentication();
+
+  if (auth.activeMembership) {
+    throw redirect({ to: "/dashboard" });
+  }
+
+  return auth;
+}
+
 export function requireRoutePermission(required: PermissionRequirement) {
   const auth = requireMembership();
 

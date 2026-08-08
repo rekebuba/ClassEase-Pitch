@@ -12,11 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
+import { Route as GuestRouteRouteImport } from './routes/guest/route'
 import { Route as SettingsRouteRouteImport } from './routes/settings/route'
 import { Route as AuthIndexRouteImport } from './routes/auth/index'
 import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
 import { Route as DashboardForbiddenRouteImport } from './routes/dashboard/forbidden'
 import { Route as ForgotPasswordIndexRouteImport } from './routes/forgot-password/index'
+import { Route as GuestIndexRouteImport } from './routes/guest/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 import { Route as AuthSignInIndexRouteImport } from './routes/auth/sign-in/index'
 import { Route as AuthSignUpIndexRouteImport } from './routes/auth/sign-up/index'
@@ -32,6 +34,9 @@ import { Route as DashboardStudentsIndexRouteImport } from './routes/dashboard/s
 import { Route as DashboardSubjectsIndexRouteImport } from './routes/dashboard/subjects/index'
 import { Route as DashboardYearIndexRouteImport } from './routes/dashboard/year/index'
 import { Route as ForgotPasswordTokenIndexRouteImport } from './routes/forgot-password/$token/index'
+import { Route as GuestApplicationsIndexRouteImport } from './routes/guest/applications/index'
+import { Route as GuestProfileIndexRouteImport } from './routes/guest/profile/index'
+import { Route as GuestSchoolsIndexRouteImport } from './routes/guest/schools/index'
 import { Route as SettingsAcademicIndexRouteImport } from './routes/settings/academic/index'
 import { Route as SettingsAuditLogsIndexRouteImport } from './routes/settings/audit-logs/index'
 import { Route as SettingsBrandingIndexRouteImport } from './routes/settings/branding/index'
@@ -44,7 +49,10 @@ import { Route as DashboardGradesGradeIdIndexRouteImport } from './routes/dashbo
 import { Route as DashboardStudentsStudentIdIndexRouteImport } from './routes/dashboard/students/$studentId/index'
 import { Route as DashboardSubjectsSubjectIdIndexRouteImport } from './routes/dashboard/subjects/$subjectId/index'
 import { Route as DashboardYearYearIdIndexRouteImport } from './routes/dashboard/year/$yearId/index'
+import { Route as GuestApplicationsApplicationIdIndexRouteImport } from './routes/guest/applications/$applicationId/index'
+import { Route as GuestSchoolsSchoolSlugIndexRouteImport } from './routes/guest/schools/$schoolSlug/index'
 import { Route as DashboardEmployeesEmployeeIdProfileIndexRouteImport } from './routes/dashboard/employees/$employeeId/profile/index'
+import { Route as GuestSchoolsSchoolSlugPositionsPositionIdIndexRouteImport } from './routes/guest/schools/$schoolSlug/positions/$positionId/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -59,6 +67,11 @@ const AuthRouteRoute = AuthRouteRouteImport.update({
 const DashboardRouteRoute = DashboardRouteRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuestRouteRoute = GuestRouteRouteImport.update({
+  id: '/guest',
+  path: '/guest',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SettingsRouteRoute = SettingsRouteRouteImport.update({
@@ -85,6 +98,11 @@ const ForgotPasswordIndexRoute = ForgotPasswordIndexRouteImport.update({
   id: '/forgot-password/',
   path: '/forgot-password/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const GuestIndexRoute = GuestIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => GuestRouteRoute,
 } as any)
 const SettingsIndexRoute = SettingsIndexRouteImport.update({
   id: '/',
@@ -168,6 +186,21 @@ const ForgotPasswordTokenIndexRoute =
     path: '/forgot-password/$token/',
     getParentRoute: () => rootRouteImport,
   } as any)
+const GuestApplicationsIndexRoute = GuestApplicationsIndexRouteImport.update({
+  id: '/applications/',
+  path: '/applications/',
+  getParentRoute: () => GuestRouteRoute,
+} as any)
+const GuestProfileIndexRoute = GuestProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
+  getParentRoute: () => GuestRouteRoute,
+} as any)
+const GuestSchoolsIndexRoute = GuestSchoolsIndexRouteImport.update({
+  id: '/schools/',
+  path: '/schools/',
+  getParentRoute: () => GuestRouteRoute,
+} as any)
 const SettingsAcademicIndexRoute = SettingsAcademicIndexRouteImport.update({
   id: '/academic/',
   path: '/academic/',
@@ -234,22 +267,42 @@ const DashboardYearYearIdIndexRoute =
     path: '/year/$yearId/',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
+const GuestApplicationsApplicationIdIndexRoute =
+  GuestApplicationsApplicationIdIndexRouteImport.update({
+    id: '/applications/$applicationId/',
+    path: '/applications/$applicationId/',
+    getParentRoute: () => GuestRouteRoute,
+  } as any)
+const GuestSchoolsSchoolSlugIndexRoute =
+  GuestSchoolsSchoolSlugIndexRouteImport.update({
+    id: '/schools/$schoolSlug/',
+    path: '/schools/$schoolSlug/',
+    getParentRoute: () => GuestRouteRoute,
+  } as any)
 const DashboardEmployeesEmployeeIdProfileIndexRoute =
   DashboardEmployeesEmployeeIdProfileIndexRouteImport.update({
     id: '/profile/',
     path: '/profile/',
     getParentRoute: () => DashboardEmployeesEmployeeIdRouteRoute,
   } as any)
+const GuestSchoolsSchoolSlugPositionsPositionIdIndexRoute =
+  GuestSchoolsSchoolSlugPositionsPositionIdIndexRouteImport.update({
+    id: '/schools/$schoolSlug/positions/$positionId/',
+    path: '/schools/$schoolSlug/positions/$positionId/',
+    getParentRoute: () => GuestRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/guest': typeof GuestRouteRouteWithChildren
   '/settings': typeof SettingsRouteRouteWithChildren
   '/dashboard/forbidden': typeof DashboardForbiddenRoute
   '/auth/': typeof AuthIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/forgot-password/': typeof ForgotPasswordIndexRoute
+  '/guest/': typeof GuestIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/dashboard/employees/$employeeId': typeof DashboardEmployeesEmployeeIdRouteRouteWithChildren
   '/dashboard/registration/employees': typeof DashboardRegistrationEmployeesRoute
@@ -265,6 +318,9 @@ export interface FileRoutesByFullPath {
   '/dashboard/subjects/': typeof DashboardSubjectsIndexRoute
   '/dashboard/year/': typeof DashboardYearIndexRoute
   '/forgot-password/$token/': typeof ForgotPasswordTokenIndexRoute
+  '/guest/applications/': typeof GuestApplicationsIndexRoute
+  '/guest/profile/': typeof GuestProfileIndexRoute
+  '/guest/schools/': typeof GuestSchoolsIndexRoute
   '/settings/academic/': typeof SettingsAcademicIndexRoute
   '/settings/audit-logs/': typeof SettingsAuditLogsIndexRoute
   '/settings/branding/': typeof SettingsBrandingIndexRoute
@@ -277,7 +333,10 @@ export interface FileRoutesByFullPath {
   '/dashboard/students/$studentId/': typeof DashboardStudentsStudentIdIndexRoute
   '/dashboard/subjects/$subjectId/': typeof DashboardSubjectsSubjectIdIndexRoute
   '/dashboard/year/$yearId/': typeof DashboardYearYearIdIndexRoute
+  '/guest/applications/$applicationId/': typeof GuestApplicationsApplicationIdIndexRoute
+  '/guest/schools/$schoolSlug/': typeof GuestSchoolsSchoolSlugIndexRoute
   '/dashboard/employees/$employeeId/profile/': typeof DashboardEmployeesEmployeeIdProfileIndexRoute
+  '/guest/schools/$schoolSlug/positions/$positionId/': typeof GuestSchoolsSchoolSlugPositionsPositionIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -285,6 +344,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthIndexRoute
   '/dashboard': typeof DashboardIndexRoute
   '/forgot-password': typeof ForgotPasswordIndexRoute
+  '/guest': typeof GuestIndexRoute
   '/settings': typeof SettingsIndexRoute
   '/dashboard/employees/$employeeId': typeof DashboardEmployeesEmployeeIdRouteRouteWithChildren
   '/dashboard/registration/employees': typeof DashboardRegistrationEmployeesRoute
@@ -300,6 +360,9 @@ export interface FileRoutesByTo {
   '/dashboard/subjects': typeof DashboardSubjectsIndexRoute
   '/dashboard/year': typeof DashboardYearIndexRoute
   '/forgot-password/$token': typeof ForgotPasswordTokenIndexRoute
+  '/guest/applications': typeof GuestApplicationsIndexRoute
+  '/guest/profile': typeof GuestProfileIndexRoute
+  '/guest/schools': typeof GuestSchoolsIndexRoute
   '/settings/academic': typeof SettingsAcademicIndexRoute
   '/settings/audit-logs': typeof SettingsAuditLogsIndexRoute
   '/settings/branding': typeof SettingsBrandingIndexRoute
@@ -312,18 +375,23 @@ export interface FileRoutesByTo {
   '/dashboard/students/$studentId': typeof DashboardStudentsStudentIdIndexRoute
   '/dashboard/subjects/$subjectId': typeof DashboardSubjectsSubjectIdIndexRoute
   '/dashboard/year/$yearId': typeof DashboardYearYearIdIndexRoute
+  '/guest/applications/$applicationId': typeof GuestApplicationsApplicationIdIndexRoute
+  '/guest/schools/$schoolSlug': typeof GuestSchoolsSchoolSlugIndexRoute
   '/dashboard/employees/$employeeId/profile': typeof DashboardEmployeesEmployeeIdProfileIndexRoute
+  '/guest/schools/$schoolSlug/positions/$positionId': typeof GuestSchoolsSchoolSlugPositionsPositionIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/auth': typeof AuthRouteRouteWithChildren
   '/dashboard': typeof DashboardRouteRouteWithChildren
+  '/guest': typeof GuestRouteRouteWithChildren
   '/settings': typeof SettingsRouteRouteWithChildren
   '/dashboard/forbidden': typeof DashboardForbiddenRoute
   '/auth/': typeof AuthIndexRoute
   '/dashboard/': typeof DashboardIndexRoute
   '/forgot-password/': typeof ForgotPasswordIndexRoute
+  '/guest/': typeof GuestIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/dashboard/employees/$employeeId': typeof DashboardEmployeesEmployeeIdRouteRouteWithChildren
   '/dashboard/registration/employees': typeof DashboardRegistrationEmployeesRoute
@@ -339,6 +407,9 @@ export interface FileRoutesById {
   '/dashboard/subjects/': typeof DashboardSubjectsIndexRoute
   '/dashboard/year/': typeof DashboardYearIndexRoute
   '/forgot-password/$token/': typeof ForgotPasswordTokenIndexRoute
+  '/guest/applications/': typeof GuestApplicationsIndexRoute
+  '/guest/profile/': typeof GuestProfileIndexRoute
+  '/guest/schools/': typeof GuestSchoolsIndexRoute
   '/settings/academic/': typeof SettingsAcademicIndexRoute
   '/settings/audit-logs/': typeof SettingsAuditLogsIndexRoute
   '/settings/branding/': typeof SettingsBrandingIndexRoute
@@ -351,7 +422,10 @@ export interface FileRoutesById {
   '/dashboard/students/$studentId/': typeof DashboardStudentsStudentIdIndexRoute
   '/dashboard/subjects/$subjectId/': typeof DashboardSubjectsSubjectIdIndexRoute
   '/dashboard/year/$yearId/': typeof DashboardYearYearIdIndexRoute
+  '/guest/applications/$applicationId/': typeof GuestApplicationsApplicationIdIndexRoute
+  '/guest/schools/$schoolSlug/': typeof GuestSchoolsSchoolSlugIndexRoute
   '/dashboard/employees/$employeeId/profile/': typeof DashboardEmployeesEmployeeIdProfileIndexRoute
+  '/guest/schools/$schoolSlug/positions/$positionId/': typeof GuestSchoolsSchoolSlugPositionsPositionIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -359,11 +433,13 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/guest'
     | '/settings'
     | '/dashboard/forbidden'
     | '/auth/'
     | '/dashboard/'
     | '/forgot-password/'
+    | '/guest/'
     | '/settings/'
     | '/dashboard/employees/$employeeId'
     | '/dashboard/registration/employees'
@@ -379,6 +455,9 @@ export interface FileRouteTypes {
     | '/dashboard/subjects/'
     | '/dashboard/year/'
     | '/forgot-password/$token/'
+    | '/guest/applications/'
+    | '/guest/profile/'
+    | '/guest/schools/'
     | '/settings/academic/'
     | '/settings/audit-logs/'
     | '/settings/branding/'
@@ -391,7 +470,10 @@ export interface FileRouteTypes {
     | '/dashboard/students/$studentId/'
     | '/dashboard/subjects/$subjectId/'
     | '/dashboard/year/$yearId/'
+    | '/guest/applications/$applicationId/'
+    | '/guest/schools/$schoolSlug/'
     | '/dashboard/employees/$employeeId/profile/'
+    | '/guest/schools/$schoolSlug/positions/$positionId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -399,6 +481,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/dashboard'
     | '/forgot-password'
+    | '/guest'
     | '/settings'
     | '/dashboard/employees/$employeeId'
     | '/dashboard/registration/employees'
@@ -414,6 +497,9 @@ export interface FileRouteTypes {
     | '/dashboard/subjects'
     | '/dashboard/year'
     | '/forgot-password/$token'
+    | '/guest/applications'
+    | '/guest/profile'
+    | '/guest/schools'
     | '/settings/academic'
     | '/settings/audit-logs'
     | '/settings/branding'
@@ -426,17 +512,22 @@ export interface FileRouteTypes {
     | '/dashboard/students/$studentId'
     | '/dashboard/subjects/$subjectId'
     | '/dashboard/year/$yearId'
+    | '/guest/applications/$applicationId'
+    | '/guest/schools/$schoolSlug'
     | '/dashboard/employees/$employeeId/profile'
+    | '/guest/schools/$schoolSlug/positions/$positionId'
   id:
     | '__root__'
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/guest'
     | '/settings'
     | '/dashboard/forbidden'
     | '/auth/'
     | '/dashboard/'
     | '/forgot-password/'
+    | '/guest/'
     | '/settings/'
     | '/dashboard/employees/$employeeId'
     | '/dashboard/registration/employees'
@@ -452,6 +543,9 @@ export interface FileRouteTypes {
     | '/dashboard/subjects/'
     | '/dashboard/year/'
     | '/forgot-password/$token/'
+    | '/guest/applications/'
+    | '/guest/profile/'
+    | '/guest/schools/'
     | '/settings/academic/'
     | '/settings/audit-logs/'
     | '/settings/branding/'
@@ -464,13 +558,17 @@ export interface FileRouteTypes {
     | '/dashboard/students/$studentId/'
     | '/dashboard/subjects/$subjectId/'
     | '/dashboard/year/$yearId/'
+    | '/guest/applications/$applicationId/'
+    | '/guest/schools/$schoolSlug/'
     | '/dashboard/employees/$employeeId/profile/'
+    | '/guest/schools/$schoolSlug/positions/$positionId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthRouteRoute: typeof AuthRouteRouteWithChildren
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
+  GuestRouteRoute: typeof GuestRouteRouteWithChildren
   SettingsRouteRoute: typeof SettingsRouteRouteWithChildren
   ForgotPasswordIndexRoute: typeof ForgotPasswordIndexRoute
   ForgotPasswordTokenIndexRoute: typeof ForgotPasswordTokenIndexRoute
@@ -497,6 +595,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof DashboardRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guest': {
+      id: '/guest'
+      path: '/guest'
+      fullPath: '/guest'
+      preLoaderRoute: typeof GuestRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/settings': {
@@ -533,6 +638,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/forgot-password/'
       preLoaderRoute: typeof ForgotPasswordIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/guest/': {
+      id: '/guest/'
+      path: '/'
+      fullPath: '/guest/'
+      preLoaderRoute: typeof GuestIndexRouteImport
+      parentRoute: typeof GuestRouteRoute
     }
     '/settings/': {
       id: '/settings/'
@@ -639,6 +751,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForgotPasswordTokenIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/guest/applications/': {
+      id: '/guest/applications/'
+      path: '/applications'
+      fullPath: '/guest/applications/'
+      preLoaderRoute: typeof GuestApplicationsIndexRouteImport
+      parentRoute: typeof GuestRouteRoute
+    }
+    '/guest/profile/': {
+      id: '/guest/profile/'
+      path: '/profile'
+      fullPath: '/guest/profile/'
+      preLoaderRoute: typeof GuestProfileIndexRouteImport
+      parentRoute: typeof GuestRouteRoute
+    }
+    '/guest/schools/': {
+      id: '/guest/schools/'
+      path: '/schools'
+      fullPath: '/guest/schools/'
+      preLoaderRoute: typeof GuestSchoolsIndexRouteImport
+      parentRoute: typeof GuestRouteRoute
+    }
     '/settings/academic/': {
       id: '/settings/academic/'
       path: '/academic'
@@ -723,12 +856,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardYearYearIdIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/guest/applications/$applicationId/': {
+      id: '/guest/applications/$applicationId/'
+      path: '/applications/$applicationId'
+      fullPath: '/guest/applications/$applicationId/'
+      preLoaderRoute: typeof GuestApplicationsApplicationIdIndexRouteImport
+      parentRoute: typeof GuestRouteRoute
+    }
+    '/guest/schools/$schoolSlug/': {
+      id: '/guest/schools/$schoolSlug/'
+      path: '/schools/$schoolSlug'
+      fullPath: '/guest/schools/$schoolSlug/'
+      preLoaderRoute: typeof GuestSchoolsSchoolSlugIndexRouteImport
+      parentRoute: typeof GuestRouteRoute
+    }
     '/dashboard/employees/$employeeId/profile/': {
       id: '/dashboard/employees/$employeeId/profile/'
       path: '/profile'
       fullPath: '/dashboard/employees/$employeeId/profile/'
       preLoaderRoute: typeof DashboardEmployeesEmployeeIdProfileIndexRouteImport
       parentRoute: typeof DashboardEmployeesEmployeeIdRouteRoute
+    }
+    '/guest/schools/$schoolSlug/positions/$positionId/': {
+      id: '/guest/schools/$schoolSlug/positions/$positionId/'
+      path: '/schools/$schoolSlug/positions/$positionId'
+      fullPath: '/guest/schools/$schoolSlug/positions/$positionId/'
+      preLoaderRoute: typeof GuestSchoolsSchoolSlugPositionsPositionIdIndexRouteImport
+      parentRoute: typeof GuestRouteRoute
     }
   }
 }
@@ -809,6 +963,32 @@ const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
   DashboardRouteRouteChildren,
 )
 
+interface GuestRouteRouteChildren {
+  GuestIndexRoute: typeof GuestIndexRoute
+  GuestApplicationsIndexRoute: typeof GuestApplicationsIndexRoute
+  GuestProfileIndexRoute: typeof GuestProfileIndexRoute
+  GuestSchoolsIndexRoute: typeof GuestSchoolsIndexRoute
+  GuestApplicationsApplicationIdIndexRoute: typeof GuestApplicationsApplicationIdIndexRoute
+  GuestSchoolsSchoolSlugIndexRoute: typeof GuestSchoolsSchoolSlugIndexRoute
+  GuestSchoolsSchoolSlugPositionsPositionIdIndexRoute: typeof GuestSchoolsSchoolSlugPositionsPositionIdIndexRoute
+}
+
+const GuestRouteRouteChildren: GuestRouteRouteChildren = {
+  GuestIndexRoute: GuestIndexRoute,
+  GuestApplicationsIndexRoute: GuestApplicationsIndexRoute,
+  GuestProfileIndexRoute: GuestProfileIndexRoute,
+  GuestSchoolsIndexRoute: GuestSchoolsIndexRoute,
+  GuestApplicationsApplicationIdIndexRoute:
+    GuestApplicationsApplicationIdIndexRoute,
+  GuestSchoolsSchoolSlugIndexRoute: GuestSchoolsSchoolSlugIndexRoute,
+  GuestSchoolsSchoolSlugPositionsPositionIdIndexRoute:
+    GuestSchoolsSchoolSlugPositionsPositionIdIndexRoute,
+}
+
+const GuestRouteRouteWithChildren = GuestRouteRoute._addFileChildren(
+  GuestRouteRouteChildren,
+)
+
 interface SettingsRouteRouteChildren {
   SettingsIndexRoute: typeof SettingsIndexRoute
   SettingsAcademicIndexRoute: typeof SettingsAcademicIndexRoute
@@ -841,6 +1021,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRouteRoute: AuthRouteRouteWithChildren,
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
+  GuestRouteRoute: GuestRouteRouteWithChildren,
   SettingsRouteRoute: SettingsRouteRouteWithChildren,
   ForgotPasswordIndexRoute: ForgotPasswordIndexRoute,
   ForgotPasswordTokenIndexRoute: ForgotPasswordTokenIndexRoute,

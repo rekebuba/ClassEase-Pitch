@@ -155,6 +155,53 @@ class PositionCategoryEnum(str, Enum):
     OTHER = "other"
 
 
+class EmploymentProfileStatusEnum(str, Enum):
+    INCOMPLETE = "incomplete"
+    COMPLETE = "complete"
+
+
+class EmploymentPositionStatusEnum(str, Enum):
+    DRAFT = "draft"
+    OPEN = "open"
+    CLOSED = "closed"
+    ARCHIVED = "archived"
+
+
+class EmploymentApplicationStatusEnum(str, Enum):
+    DRAFT = "draft"
+    SUBMITTED = "submitted"
+    UNDER_REVIEW = "under_review"
+    SHORTLISTED = "shortlisted"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    WITHDRAWN = "withdrawn"
+
+
+class EmploymentPositionTypeEnum(str, Enum):
+    FULL_TIME = "full_time"
+    PART_TIME = "part_time"
+    CONTRACT = "contract"
+    TEMPORARY = "temporary"
+    SUBSTITUTE = "substitute"
+    INTERNSHIP = "internship"
+
+
+class EnrollmentOpportunityStatusEnum(str, Enum):
+    DRAFT = "draft"
+    OPEN = "open"
+    CLOSED = "closed"
+    ARCHIVED = "archived"
+
+
+class EnrollmentApplicationStatusEnum(str, Enum):
+    DRAFT = "draft"
+    SUBMITTED = "submitted"
+    UNDER_REVIEW = "under_review"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    WITHDRAWN = "withdrawn"
+
+
 class PayrollPaymentMethodEnum(str, Enum):
     BANK_TRANSFER = "bank_transfer"
     MOBILE_MONEY = "mobile_money"
