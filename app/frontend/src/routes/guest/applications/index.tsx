@@ -29,7 +29,7 @@ function ApplicationsPage() {
 
     return applications.filter((application) => {
       const matchesQuery = !normalized
-        || `${application.positionTitle} ${application.schoolName}`.toLowerCase().includes(normalized);
+        || `${application.opportunityTitle} ${application.schoolName} ${application.kind}`.toLowerCase().includes(normalized);
       const matchesStatus = status === "all" || application.status === status;
 
       return matchesQuery && matchesStatus;
@@ -41,7 +41,7 @@ function ApplicationsPage() {
       <section className="rounded-xl border bg-background p-6 sm:p-8">
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">My Applications</h1>
-          <p className="text-muted-foreground">Track applications submitted with your reusable profile.</p>
+          <p className="text-muted-foreground">Track enrollment and employment applications submitted to schools.</p>
         </div>
       </section>
 

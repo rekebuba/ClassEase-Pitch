@@ -14,7 +14,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { guestSchools } from "@/lib/guest-data";
+import { guestSchools, isEnrollmentAcceptingApplications, isPositionAcceptingApplications } from "@/lib/guest-data";
 
 export const Route = createFileRoute("/guest/schools/")({
   component: SchoolsPage,
@@ -35,12 +35,15 @@ function SchoolsPage() {
 
     return guestSchools.filter((school) => {
       const positionText = school.positions.map(position => `${position.title} ${position.category}`).join(" ");
+      const enrollmentText = school.enrollmentOpportunities.map(opportunity => `${opportunity.grade} ${opportunity.academicYear}`).join(" ");
       const matchesQuery = !normalized
-        || `${school.name} ${school.location} ${school.category} ${positionText}`.toLowerCase().includes(normalized);
+        || `${school.name} ${school.location} ${school.category} ${positionText} ${enrollmentText}`.toLowerCase().includes(normalized);
       const matchesLocation = location === "all" || school.city === location;
       const matchesCategory = category === "all" || school.positions.some(position => position.category === category);
+      const isAcceptingApplications = school.enrollmentOpportunities.some(isEnrollmentAcceptingApplications)
+        || school.positions.some(isPositionAcceptingApplications);
       const matchesAvailability = availability === "all"
-        || (availability === "open" ? school.applicationsOpen : !school.applicationsOpen);
+        || (availability === "open" ? isAcceptingApplications : !isAcceptingApplications);
 
       return matchesQuery && matchesLocation && matchesCategory && matchesAvailability;
     });
@@ -58,9 +61,9 @@ function SchoolsPage() {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl space-y-2">
             <Badge variant="secondary">School discovery</Badge>
-            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Find schools accepting applications</h1>
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Discover Schools</h1>
             <p className="text-muted-foreground">
-              Search by school, location, or position. Your saved profile will be reused when you apply.
+              Search schools and see public enrollment opportunities and open employment positions.
             </p>
           </div>
           <div className="text-sm text-muted-foreground">
@@ -105,8 +108,8 @@ function SchoolsPage() {
             <SelectValue placeholder="Availability" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="open">Applications open</SelectItem>
-            <SelectItem value="closed">Closed</SelectItem>
+            <SelectItem value="open">Accepting applications</SelectItem>
+            <SelectItem value="closed">No public openings</SelectItem>
             <SelectItem value="all">All schools</SelectItem>
           </SelectContent>
         </Select>

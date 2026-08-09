@@ -14,7 +14,7 @@ export function ApplicationCard({ application }: { application: GuestApplication
       <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0 space-y-2">
           <div>
-            <h3 className="font-semibold">{application.positionTitle}</h3>
+            <h3 className="font-semibold">{application.opportunityTitle}</h3>
             <p className="text-sm text-muted-foreground">{application.schoolName}</p>
           </div>
           <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
@@ -25,6 +25,7 @@ export function ApplicationCard({ application }: { application: GuestApplication
               {formatGuestDate(application.submittedAt)}
             </span>
             <ApplicationStatusBadge status={application.status} />
+            <span>{application.kind}</span>
           </div>
         </div>
         <Button variant="outline" size="sm" asChild>

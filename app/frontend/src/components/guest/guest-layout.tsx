@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from "@tanstack/react-router";
-import { BriefcaseBusiness, FileText, GraduationCap, LayoutDashboard, Menu, UserRound } from "lucide-react";
+import { BriefcaseBusiness, FileText, GraduationCap, LayoutDashboard, Menu, School, UserRound } from "lucide-react";
 
 import { Logout } from "@/components";
 import { useGuest } from "@/components/guest/guest-context";
@@ -18,7 +18,8 @@ import { cn } from "@/lib/utils";
 
 const guestNavigation = [
   { label: "Dashboard", to: "/guest", icon: LayoutDashboard },
-  { label: "Schools", to: "/guest/schools", icon: BriefcaseBusiness },
+  { label: "Schools", to: "/guest/schools", icon: School },
+  { label: "Jobs", to: "/guest/jobs", icon: BriefcaseBusiness },
   { label: "My Applications", to: "/guest/applications", icon: FileText },
   { label: "Profile", to: "/guest/profile", icon: UserRound },
 ] as const;

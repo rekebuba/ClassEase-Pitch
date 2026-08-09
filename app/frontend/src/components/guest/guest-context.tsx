@@ -17,7 +17,7 @@ const applicationsStorageKey = "classease.guest.applications";
 type GuestContextValue = {
   profile: GuestProfile;
   applications: GuestApplication[];
-  isProfileComplete: boolean;
+  isEmploymentProfileComplete: boolean;
   missingProfileFields: ReturnType<typeof getProfileMissingFields>;
   saveProfile: (profile: GuestProfile) => void;
   loadDemoProfile: () => void;
@@ -56,16 +56,16 @@ export function GuestProvider({ children }: { children: ReactNode }) {
   }, [applications]);
 
   const missingProfileFields = useMemo(() => getProfileMissingFields(profile), [profile]);
-  const isProfileComplete = missingProfileFields.length === 0;
+  const isEmploymentProfileComplete = missingProfileFields.length === 0;
 
   const value = useMemo<GuestContextValue>(() => ({
     profile,
     applications,
     missingProfileFields,
-    isProfileComplete,
+    isEmploymentProfileComplete,
     saveProfile: (nextProfile) => {
       setProfile(nextProfile);
-      toast.success("Application profile saved");
+      toast.success("Employment profile saved");
     },
     loadDemoProfile: () => {
       setProfile(demoGuestProfile);
@@ -73,7 +73,9 @@ export function GuestProvider({ children }: { children: ReactNode }) {
     },
     submitApplication: (school, position) => {
       const existing = applications.find(application =>
-        application.schoolSlug === school.slug && application.positionId === position.id);
+        application.kind === "Employment"
+        && application.schoolSlug === school.slug
+        && application.opportunityId === position.id);
 
       if (existing) {
         return existing;
@@ -81,10 +83,11 @@ export function GuestProvider({ children }: { children: ReactNode }) {
 
       const application: GuestApplication = {
         id: `app-${Date.now()}`,
+        kind: "Employment",
         schoolSlug: school.slug,
         schoolName: school.name,
-        positionId: position.id,
-        positionTitle: position.title,
+        opportunityId: position.id,
+        opportunityTitle: position.title,
         submittedAt: new Date().toISOString().slice(0, 10),
         status: "Pending",
         applicantName: `${profile.firstName} ${profile.lastName}`.trim(),
@@ -103,7 +106,7 @@ export function GuestProvider({ children }: { children: ReactNode }) {
         current.map(application =>
           application.id === applicationId ? { ...application, status } : application));
     },
-  }), [applications, isProfileComplete, missingProfileFields, profile]);
+  }), [applications, isEmploymentProfileComplete, missingProfileFields, profile]);
 
   return <GuestContext value={value}>{children}</GuestContext>;
 }

@@ -35,6 +35,7 @@ import { Route as DashboardSubjectsIndexRouteImport } from './routes/dashboard/s
 import { Route as DashboardYearIndexRouteImport } from './routes/dashboard/year/index'
 import { Route as ForgotPasswordTokenIndexRouteImport } from './routes/forgot-password/$token/index'
 import { Route as GuestApplicationsIndexRouteImport } from './routes/guest/applications/index'
+import { Route as GuestJobsIndexRouteImport } from './routes/guest/jobs/index'
 import { Route as GuestProfileIndexRouteImport } from './routes/guest/profile/index'
 import { Route as GuestSchoolsIndexRouteImport } from './routes/guest/schools/index'
 import { Route as SettingsAcademicIndexRouteImport } from './routes/settings/academic/index'
@@ -50,6 +51,7 @@ import { Route as DashboardStudentsStudentIdIndexRouteImport } from './routes/da
 import { Route as DashboardSubjectsSubjectIdIndexRouteImport } from './routes/dashboard/subjects/$subjectId/index'
 import { Route as DashboardYearYearIdIndexRouteImport } from './routes/dashboard/year/$yearId/index'
 import { Route as GuestApplicationsApplicationIdIndexRouteImport } from './routes/guest/applications/$applicationId/index'
+import { Route as GuestJobsPositionIdIndexRouteImport } from './routes/guest/jobs/$positionId/index'
 import { Route as GuestSchoolsSchoolSlugIndexRouteImport } from './routes/guest/schools/$schoolSlug/index'
 import { Route as DashboardEmployeesEmployeeIdProfileIndexRouteImport } from './routes/dashboard/employees/$employeeId/profile/index'
 import { Route as GuestSchoolsSchoolSlugPositionsPositionIdIndexRouteImport } from './routes/guest/schools/$schoolSlug/positions/$positionId/index'
@@ -191,6 +193,11 @@ const GuestApplicationsIndexRoute = GuestApplicationsIndexRouteImport.update({
   path: '/applications/',
   getParentRoute: () => GuestRouteRoute,
 } as any)
+const GuestJobsIndexRoute = GuestJobsIndexRouteImport.update({
+  id: '/jobs/',
+  path: '/jobs/',
+  getParentRoute: () => GuestRouteRoute,
+} as any)
 const GuestProfileIndexRoute = GuestProfileIndexRouteImport.update({
   id: '/profile/',
   path: '/profile/',
@@ -273,6 +280,12 @@ const GuestApplicationsApplicationIdIndexRoute =
     path: '/applications/$applicationId/',
     getParentRoute: () => GuestRouteRoute,
   } as any)
+const GuestJobsPositionIdIndexRoute =
+  GuestJobsPositionIdIndexRouteImport.update({
+    id: '/jobs/$positionId/',
+    path: '/jobs/$positionId/',
+    getParentRoute: () => GuestRouteRoute,
+  } as any)
 const GuestSchoolsSchoolSlugIndexRoute =
   GuestSchoolsSchoolSlugIndexRouteImport.update({
     id: '/schools/$schoolSlug/',
@@ -319,6 +332,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/year/': typeof DashboardYearIndexRoute
   '/forgot-password/$token/': typeof ForgotPasswordTokenIndexRoute
   '/guest/applications/': typeof GuestApplicationsIndexRoute
+  '/guest/jobs/': typeof GuestJobsIndexRoute
   '/guest/profile/': typeof GuestProfileIndexRoute
   '/guest/schools/': typeof GuestSchoolsIndexRoute
   '/settings/academic/': typeof SettingsAcademicIndexRoute
@@ -334,6 +348,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/subjects/$subjectId/': typeof DashboardSubjectsSubjectIdIndexRoute
   '/dashboard/year/$yearId/': typeof DashboardYearYearIdIndexRoute
   '/guest/applications/$applicationId/': typeof GuestApplicationsApplicationIdIndexRoute
+  '/guest/jobs/$positionId/': typeof GuestJobsPositionIdIndexRoute
   '/guest/schools/$schoolSlug/': typeof GuestSchoolsSchoolSlugIndexRoute
   '/dashboard/employees/$employeeId/profile/': typeof DashboardEmployeesEmployeeIdProfileIndexRoute
   '/guest/schools/$schoolSlug/positions/$positionId/': typeof GuestSchoolsSchoolSlugPositionsPositionIdIndexRoute
@@ -361,6 +376,7 @@ export interface FileRoutesByTo {
   '/dashboard/year': typeof DashboardYearIndexRoute
   '/forgot-password/$token': typeof ForgotPasswordTokenIndexRoute
   '/guest/applications': typeof GuestApplicationsIndexRoute
+  '/guest/jobs': typeof GuestJobsIndexRoute
   '/guest/profile': typeof GuestProfileIndexRoute
   '/guest/schools': typeof GuestSchoolsIndexRoute
   '/settings/academic': typeof SettingsAcademicIndexRoute
@@ -376,6 +392,7 @@ export interface FileRoutesByTo {
   '/dashboard/subjects/$subjectId': typeof DashboardSubjectsSubjectIdIndexRoute
   '/dashboard/year/$yearId': typeof DashboardYearYearIdIndexRoute
   '/guest/applications/$applicationId': typeof GuestApplicationsApplicationIdIndexRoute
+  '/guest/jobs/$positionId': typeof GuestJobsPositionIdIndexRoute
   '/guest/schools/$schoolSlug': typeof GuestSchoolsSchoolSlugIndexRoute
   '/dashboard/employees/$employeeId/profile': typeof DashboardEmployeesEmployeeIdProfileIndexRoute
   '/guest/schools/$schoolSlug/positions/$positionId': typeof GuestSchoolsSchoolSlugPositionsPositionIdIndexRoute
@@ -408,6 +425,7 @@ export interface FileRoutesById {
   '/dashboard/year/': typeof DashboardYearIndexRoute
   '/forgot-password/$token/': typeof ForgotPasswordTokenIndexRoute
   '/guest/applications/': typeof GuestApplicationsIndexRoute
+  '/guest/jobs/': typeof GuestJobsIndexRoute
   '/guest/profile/': typeof GuestProfileIndexRoute
   '/guest/schools/': typeof GuestSchoolsIndexRoute
   '/settings/academic/': typeof SettingsAcademicIndexRoute
@@ -423,6 +441,7 @@ export interface FileRoutesById {
   '/dashboard/subjects/$subjectId/': typeof DashboardSubjectsSubjectIdIndexRoute
   '/dashboard/year/$yearId/': typeof DashboardYearYearIdIndexRoute
   '/guest/applications/$applicationId/': typeof GuestApplicationsApplicationIdIndexRoute
+  '/guest/jobs/$positionId/': typeof GuestJobsPositionIdIndexRoute
   '/guest/schools/$schoolSlug/': typeof GuestSchoolsSchoolSlugIndexRoute
   '/dashboard/employees/$employeeId/profile/': typeof DashboardEmployeesEmployeeIdProfileIndexRoute
   '/guest/schools/$schoolSlug/positions/$positionId/': typeof GuestSchoolsSchoolSlugPositionsPositionIdIndexRoute
@@ -456,6 +475,7 @@ export interface FileRouteTypes {
     | '/dashboard/year/'
     | '/forgot-password/$token/'
     | '/guest/applications/'
+    | '/guest/jobs/'
     | '/guest/profile/'
     | '/guest/schools/'
     | '/settings/academic/'
@@ -471,6 +491,7 @@ export interface FileRouteTypes {
     | '/dashboard/subjects/$subjectId/'
     | '/dashboard/year/$yearId/'
     | '/guest/applications/$applicationId/'
+    | '/guest/jobs/$positionId/'
     | '/guest/schools/$schoolSlug/'
     | '/dashboard/employees/$employeeId/profile/'
     | '/guest/schools/$schoolSlug/positions/$positionId/'
@@ -498,6 +519,7 @@ export interface FileRouteTypes {
     | '/dashboard/year'
     | '/forgot-password/$token'
     | '/guest/applications'
+    | '/guest/jobs'
     | '/guest/profile'
     | '/guest/schools'
     | '/settings/academic'
@@ -513,6 +535,7 @@ export interface FileRouteTypes {
     | '/dashboard/subjects/$subjectId'
     | '/dashboard/year/$yearId'
     | '/guest/applications/$applicationId'
+    | '/guest/jobs/$positionId'
     | '/guest/schools/$schoolSlug'
     | '/dashboard/employees/$employeeId/profile'
     | '/guest/schools/$schoolSlug/positions/$positionId'
@@ -544,6 +567,7 @@ export interface FileRouteTypes {
     | '/dashboard/year/'
     | '/forgot-password/$token/'
     | '/guest/applications/'
+    | '/guest/jobs/'
     | '/guest/profile/'
     | '/guest/schools/'
     | '/settings/academic/'
@@ -559,6 +583,7 @@ export interface FileRouteTypes {
     | '/dashboard/subjects/$subjectId/'
     | '/dashboard/year/$yearId/'
     | '/guest/applications/$applicationId/'
+    | '/guest/jobs/$positionId/'
     | '/guest/schools/$schoolSlug/'
     | '/dashboard/employees/$employeeId/profile/'
     | '/guest/schools/$schoolSlug/positions/$positionId/'
@@ -758,6 +783,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuestApplicationsIndexRouteImport
       parentRoute: typeof GuestRouteRoute
     }
+    '/guest/jobs/': {
+      id: '/guest/jobs/'
+      path: '/jobs'
+      fullPath: '/guest/jobs/'
+      preLoaderRoute: typeof GuestJobsIndexRouteImport
+      parentRoute: typeof GuestRouteRoute
+    }
     '/guest/profile/': {
       id: '/guest/profile/'
       path: '/profile'
@@ -863,6 +895,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuestApplicationsApplicationIdIndexRouteImport
       parentRoute: typeof GuestRouteRoute
     }
+    '/guest/jobs/$positionId/': {
+      id: '/guest/jobs/$positionId/'
+      path: '/jobs/$positionId'
+      fullPath: '/guest/jobs/$positionId/'
+      preLoaderRoute: typeof GuestJobsPositionIdIndexRouteImport
+      parentRoute: typeof GuestRouteRoute
+    }
     '/guest/schools/$schoolSlug/': {
       id: '/guest/schools/$schoolSlug/'
       path: '/schools/$schoolSlug'
@@ -966,9 +1005,11 @@ const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
 interface GuestRouteRouteChildren {
   GuestIndexRoute: typeof GuestIndexRoute
   GuestApplicationsIndexRoute: typeof GuestApplicationsIndexRoute
+  GuestJobsIndexRoute: typeof GuestJobsIndexRoute
   GuestProfileIndexRoute: typeof GuestProfileIndexRoute
   GuestSchoolsIndexRoute: typeof GuestSchoolsIndexRoute
   GuestApplicationsApplicationIdIndexRoute: typeof GuestApplicationsApplicationIdIndexRoute
+  GuestJobsPositionIdIndexRoute: typeof GuestJobsPositionIdIndexRoute
   GuestSchoolsSchoolSlugIndexRoute: typeof GuestSchoolsSchoolSlugIndexRoute
   GuestSchoolsSchoolSlugPositionsPositionIdIndexRoute: typeof GuestSchoolsSchoolSlugPositionsPositionIdIndexRoute
 }
@@ -976,10 +1017,12 @@ interface GuestRouteRouteChildren {
 const GuestRouteRouteChildren: GuestRouteRouteChildren = {
   GuestIndexRoute: GuestIndexRoute,
   GuestApplicationsIndexRoute: GuestApplicationsIndexRoute,
+  GuestJobsIndexRoute: GuestJobsIndexRoute,
   GuestProfileIndexRoute: GuestProfileIndexRoute,
   GuestSchoolsIndexRoute: GuestSchoolsIndexRoute,
   GuestApplicationsApplicationIdIndexRoute:
     GuestApplicationsApplicationIdIndexRoute,
+  GuestJobsPositionIdIndexRoute: GuestJobsPositionIdIndexRoute,
   GuestSchoolsSchoolSlugIndexRoute: GuestSchoolsSchoolSlugIndexRoute,
   GuestSchoolsSchoolSlugPositionsPositionIdIndexRoute:
     GuestSchoolsSchoolSlugPositionsPositionIdIndexRoute,

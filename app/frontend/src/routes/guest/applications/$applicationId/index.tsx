@@ -34,13 +34,13 @@ function ApplicationDetailsPage() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="space-y-2">
             <ApplicationStatusBadge status={application.status} />
-            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{application.positionTitle}</h1>
+            <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{application.opportunityTitle}</h1>
             <p className="text-muted-foreground">{application.schoolName}</p>
           </div>
           <Button variant="outline" asChild>
             <Link
               to="/guest/schools/$schoolSlug/positions/$positionId"
-              params={{ schoolSlug: application.schoolSlug, positionId: application.positionId }}
+              params={{ schoolSlug: application.schoolSlug, positionId: application.opportunityId }}
             >
               View Position
             </Link>
@@ -55,6 +55,8 @@ function ApplicationDetailsPage() {
           </CardHeader>
           <CardContent className="space-y-4 text-sm">
             <InfoItem icon={<School className="size-4" />} label="School" value={application.schoolName} />
+            <Separator />
+            <InfoItem label="Application type" value={application.kind} />
             <Separator />
             <InfoItem icon={<CalendarDays className="size-4" />} label="Submitted" value={formatGuestDate(application.submittedAt)} />
             <Separator />

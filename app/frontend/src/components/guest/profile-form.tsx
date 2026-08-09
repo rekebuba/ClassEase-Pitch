@@ -39,7 +39,7 @@ const profileSchema = z.object({
   highestEducation: z.string().min(1, "Highest education is required"),
   fieldOfStudy: z.string().min(1, "Field of study is required"),
   institution: z.string().optional(),
-  yearsOfExperience: z.string().optional(),
+  yearsOfExperience: z.string().min(1, "Years of experience is required"),
   skills: z.string().optional(),
   certifications: z.string().optional(),
   summary: z.string().optional(),
@@ -82,9 +82,9 @@ export function ProfileForm({
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <Card className="rounded-lg">
           <CardHeader>
-            <CardTitle>Application profile</CardTitle>
+            <CardTitle>Employment profile</CardTitle>
             <CardDescription>
-              Complete your profile once and make applying to schools easier.
+              Complete this once and reuse it when applying for school positions.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -126,9 +126,9 @@ export function ProfileForm({
 
         <Card className="rounded-lg">
           <CardHeader>
-            <CardTitle>Professional and academic information</CardTitle>
+            <CardTitle>Employment information</CardTitle>
             <CardDescription>
-              Education and field of study are required. Add optional details once and reuse them for every application.
+              Education, field of study, and experience are required for employment applications.
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
@@ -141,7 +141,7 @@ export function ProfileForm({
             />
             <TextField name="fieldOfStudy" label="Field of study" required />
             <TextField name="institution" label="Institution" />
-            <TextField name="yearsOfExperience" label="Years of experience" type="number" min="0" />
+            <TextField name="yearsOfExperience" label="Years of experience" type="number" min="0" required />
             <TextareaField name="skills" label="Skills" placeholder="Mathematics instruction, classroom technology, lesson planning" />
             <TextareaField name="certifications" label="Certifications" placeholder="Teaching license, short courses, awards" />
             <div className="md:col-span-2">

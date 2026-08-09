@@ -28,11 +28,28 @@ export type SchoolPosition = {
   id: string;
   title: string;
   category: string;
-  type: string;
+  employmentType: string;
+  status: "Open" | "Closed";
   deadline: string;
   summary: string;
+  description: string;
   requirements: string[];
   responsibilities: string[];
+  benefits: string[];
+  location: string;
+  openingsCount: number;
+  allowApplications: boolean;
+};
+
+export type EnrollmentOpportunity = {
+  id: string;
+  academicYear: string;
+  grade: string;
+  status: "Open" | "Closed";
+  deadline: string;
+  capacity: number;
+  remainingSeats: number;
+  allowApplications: boolean;
 };
 
 export type GuestSchool = {
@@ -48,15 +65,17 @@ export type GuestSchool = {
   deadline: string;
   students: string;
   curriculum: string;
+  enrollmentOpportunities: EnrollmentOpportunity[];
   positions: SchoolPosition[];
 };
 
 export type GuestApplication = {
   id: string;
+  kind: "Employment" | "Enrollment";
   schoolSlug: string;
   schoolName: string;
-  positionId: string;
-  positionTitle: string;
+  opportunityId: string;
+  opportunityTitle: string;
   submittedAt: string;
   status: GuestApplicationStatus;
   applicantName: string;
@@ -69,15 +88,16 @@ export type GuestApplication = {
 export const requiredProfileFields: Array<{
   key: keyof GuestProfile;
   label: string;
-  group: "Personal" | "Contact" | "Professional";
+  group: "Employment Profile";
 }> = [
-  { key: "firstName", label: "First name", group: "Personal" },
-  { key: "lastName", label: "Last name", group: "Personal" },
-  { key: "email", label: "Email", group: "Contact" },
-  { key: "phone", label: "Phone number", group: "Contact" },
-  { key: "city", label: "City", group: "Contact" },
-  { key: "highestEducation", label: "Highest education", group: "Professional" },
-  { key: "fieldOfStudy", label: "Field of study", group: "Professional" },
+  { key: "firstName", label: "First name", group: "Employment Profile" },
+  { key: "lastName", label: "Last name", group: "Employment Profile" },
+  { key: "email", label: "Email", group: "Employment Profile" },
+  { key: "phone", label: "Phone number", group: "Employment Profile" },
+  { key: "city", label: "City", group: "Employment Profile" },
+  { key: "highestEducation", label: "Highest education", group: "Employment Profile" },
+  { key: "fieldOfStudy", label: "Field of study", group: "Employment Profile" },
+  { key: "yearsOfExperience", label: "Years of experience", group: "Employment Profile" },
 ];
 
 export const emptyGuestProfile: GuestProfile = {
@@ -132,26 +152,60 @@ export const guestSchools: GuestSchool[] = [
     deadline: "2026-08-30",
     students: "1,200 students",
     curriculum: "National curriculum with STEM enrichment",
+    enrollmentOpportunities: [
+      {
+        id: "grade-5-2026",
+        academicYear: "2026/2027",
+        grade: "Grade 5",
+        status: "Open",
+        deadline: "2026-08-30",
+        capacity: 60,
+        remainingSeats: 12,
+        allowApplications: true,
+      },
+      {
+        id: "grade-9-2026",
+        academicYear: "2026/2027",
+        grade: "Grade 9",
+        status: "Open",
+        deadline: "2026-08-30",
+        capacity: 90,
+        remainingSeats: 18,
+        allowApplications: true,
+      },
+    ],
     positions: [
       {
         id: "math-teacher",
         title: "Mathematics Teacher",
         category: "Teaching",
-        type: "Full-time",
+        employmentType: "Full-time",
+        status: "Open",
         deadline: "2026-08-30",
         summary: "Teach grades 9-12 mathematics and support exam preparation with practical, student-centered lessons.",
+        description: "Addis Ababa High School is hiring a mathematics teacher to lead secondary classes, prepare learners for national exams, and contribute to a structured STEM program.",
         requirements: ["Bachelor's degree in Mathematics, Education, Engineering, or a related field", "At least 2 years of classroom or tutoring experience", "Strong lesson planning and assessment skills"],
         responsibilities: ["Prepare daily lessons and weekly assessments", "Track learner progress and communicate concerns early", "Collaborate with the science department on STEM activities"],
+        benefits: ["Structured academic calendar", "Professional development support", "Collaborative STEM department"],
+        location: "Addis Ababa",
+        openingsCount: 2,
+        allowApplications: true,
       },
       {
         id: "english-teacher",
         title: "English Teacher",
         category: "Teaching",
-        type: "Full-time",
+        employmentType: "Full-time",
+        status: "Open",
         deadline: "2026-09-05",
         summary: "Lead English language classes with emphasis on reading, writing, and confident communication.",
+        description: "The English department is looking for a teacher who can build strong reading, writing, speaking, and exam preparation routines.",
         requirements: ["Degree in English, Literature, Linguistics, or Education", "Clear spoken and written English", "Experience preparing students for national exams"],
         responsibilities: ["Design reading and writing assignments", "Facilitate speaking practice", "Maintain clear feedback records"],
+        benefits: ["Mentorship from senior teachers", "Exam preparation resources", "Family engagement support"],
+        location: "Addis Ababa",
+        openingsCount: 1,
+        allowApplications: true,
       },
     ],
   },
@@ -168,26 +222,50 @@ export const guestSchools: GuestSchool[] = [
     deadline: "2026-09-12",
     students: "860 students",
     curriculum: "STEM preparatory program",
+    enrollmentOpportunities: [
+      {
+        id: "grade-7-2026",
+        academicYear: "2026/2027",
+        grade: "Grade 7",
+        status: "Open",
+        deadline: "2026-09-12",
+        capacity: 48,
+        remainingSeats: 9,
+        allowApplications: true,
+      },
+    ],
     positions: [
       {
         id: "science-teacher",
         title: "Science Teacher",
         category: "Teaching",
-        type: "Full-time",
+        employmentType: "Full-time",
+        status: "Open",
         deadline: "2026-09-12",
         summary: "Teach integrated science and coordinate safe, engaging laboratory sessions for middle school learners.",
+        description: "Unity STEM Academy needs a science teacher who can connect classroom theory to labs, student projects, and measurable progress.",
         requirements: ["Degree in Biology, Chemistry, Physics, or Education", "Laboratory safety knowledge", "Comfort with digital classroom tools"],
         responsibilities: ["Run weekly lab activities", "Create practical assessments", "Support the annual science fair"],
+        benefits: ["Lab access", "Project-based learning resources", "STEM event budget"],
+        location: "Adama",
+        openingsCount: 1,
+        allowApplications: true,
       },
       {
         id: "ict-instructor",
         title: "ICT Instructor",
         category: "Technology",
-        type: "Part-time",
+        employmentType: "Part-time",
+        status: "Open",
         deadline: "2026-09-15",
         summary: "Introduce students to productivity software, coding basics, and responsible technology use.",
+        description: "The academy is adding part-time ICT instruction for beginner-friendly productivity, coding, and digital citizenship classes.",
         requirements: ["Diploma or degree in Computer Science, IT, or a related field", "Strong practical computer skills", "Ability to teach beginner-friendly classes"],
         responsibilities: ["Maintain ICT lesson plans", "Guide project work", "Coordinate with academic staff on digital assignments"],
+        benefits: ["Flexible teaching schedule", "Computer lab access", "Curriculum planning support"],
+        location: "Adama",
+        openingsCount: 1,
+        allowApplications: true,
       },
     ],
   },
@@ -204,16 +282,34 @@ export const guestSchools: GuestSchool[] = [
     deadline: "2026-08-24",
     students: "640 students",
     curriculum: "National curriculum",
+    enrollmentOpportunities: [
+      {
+        id: "grade-1-2026",
+        academicYear: "2026/2027",
+        grade: "Grade 1",
+        status: "Open",
+        deadline: "2026-08-24",
+        capacity: 40,
+        remainingSeats: 6,
+        allowApplications: true,
+      },
+    ],
     positions: [
       {
         id: "guidance-counselor",
         title: "Guidance Counselor",
         category: "Student Support",
-        type: "Full-time",
+        employmentType: "Full-time",
+        status: "Open",
         deadline: "2026-08-24",
         summary: "Support students with academic planning, personal development, and family communication.",
+        description: "Blue Nile Community School is hiring a counselor to support academic planning, student wellbeing, and family communication.",
         requirements: ["Degree in Psychology, Counseling, Education, or Social Work", "Strong listening and documentation skills", "Experience working with adolescents"],
         responsibilities: ["Hold student support sessions", "Coordinate referrals when needed", "Maintain confidential support records"],
+        benefits: ["Confidential counseling space", "Supportive leadership team", "Community engagement program"],
+        location: "Bahir Dar",
+        openingsCount: 1,
+        allowApplications: true,
       },
     ],
   },
@@ -230,16 +326,34 @@ export const guestSchools: GuestSchool[] = [
     deadline: "2026-08-18",
     students: "520 students",
     curriculum: "Primary national curriculum",
+    enrollmentOpportunities: [
+      {
+        id: "grade-3-2026",
+        academicYear: "2026/2027",
+        grade: "Grade 3",
+        status: "Closed",
+        deadline: "2026-08-18",
+        capacity: 35,
+        remainingSeats: 0,
+        allowApplications: false,
+      },
+    ],
     positions: [
       {
         id: "primary-teacher",
         title: "Primary Teacher",
         category: "Teaching",
-        type: "Full-time",
+        employmentType: "Full-time",
+        status: "Closed",
         deadline: "2026-08-18",
         summary: "Teach core subjects for upper-primary learners and maintain strong parent communication.",
+        description: "Future Leaders Primary keeps this position visible for reference, but applications are currently closed.",
         requirements: ["Diploma or degree in Primary Education", "Experience with child-centered classroom management", "Strong Amharic and English communication"],
         responsibilities: ["Plan daily literacy and numeracy lessons", "Monitor student behavior and progress", "Prepare simple parent updates"],
+        benefits: ["Primary teaching resources", "Parent communication tools", "Supportive grade-level team"],
+        location: "Hawassa",
+        openingsCount: 1,
+        allowApplications: false,
       },
     ],
   },
@@ -248,10 +362,11 @@ export const guestSchools: GuestSchool[] = [
 export const initialGuestApplications: GuestApplication[] = [
   {
     id: "app-001",
+    kind: "Employment",
     schoolSlug: "blue-nile-community-school",
     schoolName: "Blue Nile Community School",
-    positionId: "guidance-counselor",
-    positionTitle: "Guidance Counselor",
+    opportunityId: "guidance-counselor",
+    opportunityTitle: "Guidance Counselor",
     submittedAt: "2026-08-05",
     status: "Under Review",
     applicantName: "Abubeker Abdullahi",
@@ -285,4 +400,20 @@ export function findSchool(slug: string) {
 
 export function findPosition(schoolSlug: string, positionId: string) {
   return findSchool(schoolSlug)?.positions.find(position => position.id === positionId);
+}
+
+export function getOpenPositions() {
+  return guestSchools.flatMap(school =>
+    school.positions.map(position => ({ school, position })));
+}
+
+export function isPositionAcceptingApplications(position: SchoolPosition) {
+  return position.status === "Open" && position.allowApplications && new Date(`${position.deadline}T23:59:59`) >= new Date();
+}
+
+export function isEnrollmentAcceptingApplications(opportunity: EnrollmentOpportunity) {
+  return opportunity.status === "Open"
+    && opportunity.allowApplications
+    && opportunity.remainingSeats > 0
+    && new Date(`${opportunity.deadline}T23:59:59`) >= new Date();
 }

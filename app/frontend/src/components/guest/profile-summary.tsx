@@ -17,7 +17,7 @@ export function ProfileSummary({ profile }: { profile: GuestProfile }) {
           {missing.length === 0
             ? <CheckCircle2 className="size-5 text-emerald-600" />
             : <CircleAlert className="size-5 text-amber-600" />}
-          Your profile
+          Employment profile
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">

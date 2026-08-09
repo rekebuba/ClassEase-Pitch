@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { CalendarDays, MapPin, UsersRound } from "lucide-react";
+import { BriefcaseBusiness, CalendarDays, GraduationCap, MapPin, UsersRound } from "lucide-react";
 
 import { PositionCard } from "@/components/guest/position-card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { findSchool, formatGuestDate } from "@/lib/guest-data";
+import { findSchool, formatGuestDate, isEnrollmentAcceptingApplications, isPositionAcceptingApplications } from "@/lib/guest-data";
 
 export const Route = createFileRoute("/guest/schools/$schoolSlug/")({
   component: SchoolDetailsPage,
@@ -20,6 +20,10 @@ function SchoolDetailsPage() {
   if (!school) {
     throw notFound();
   }
+
+  const openEnrollment = school.enrollmentOpportunities.filter(isEnrollmentAcceptingApplications);
+  const openPositions = school.positions.filter(isPositionAcceptingApplications);
+  const acceptingApplications = openEnrollment.length > 0 || openPositions.length > 0;
 
   return (
     <div className="space-y-6">
@@ -35,8 +39,8 @@ function SchoolDetailsPage() {
               <div>
                 <div className="mb-2 flex flex-wrap items-center gap-2">
                   <Badge variant="secondary">{school.category}</Badge>
-                  <Badge variant={school.applicationsOpen ? "default" : "secondary"}>
-                    {school.applicationsOpen ? "Applications open" : "Applications closed"}
+                  <Badge variant={acceptingApplications ? "default" : "secondary"}>
+                    {acceptingApplications ? "Accepting applications" : "No public openings"}
                   </Badge>
                 </div>
                 <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">{school.name}</h1>
@@ -48,14 +52,6 @@ function SchoolDetailsPage() {
               <p className="max-w-3xl leading-7 text-muted-foreground">{school.description}</p>
             </div>
           </div>
-          <Button asChild>
-            <Link
-              to="/guest/schools/$schoolSlug/positions/$positionId"
-              params={{ schoolSlug: school.slug, positionId: school.positions[0]?.id ?? "" }}
-            >
-              View First Position
-            </Link>
-          </Button>
         </div>
       </section>
 
@@ -69,6 +65,83 @@ function SchoolDetailsPage() {
               <p className="leading-7 text-muted-foreground">{school.about}</p>
             </CardContent>
           </Card>
+
+          <section className="space-y-4">
+            <div>
+              <h2 className="text-xl font-semibold">What are you looking for?</h2>
+              <p className="text-sm text-muted-foreground">Choose enrollment or employment based on what this school is currently accepting.</p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              <Card className="rounded-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <GraduationCap className="size-5 text-sky-600" />
+                    Enrollment
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">Grades currently accepting applications.</p>
+                  <div className="flex flex-wrap gap-2">
+                    {openEnrollment.length > 0
+                      ? openEnrollment.map(opportunity => <Badge key={opportunity.id} variant="outline">{opportunity.grade}</Badge>)
+                      : <Badge variant="secondary">Applications closed</Badge>}
+                  </div>
+                  <Button variant="outline" disabled={openEnrollment.length === 0}>View Enrollment Opportunities</Button>
+                </CardContent>
+              </Card>
+              <Card className="rounded-lg">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BriefcaseBusiness className="size-5 text-sky-600" />
+                    Employment
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">Positions currently available.</p>
+                  <div className="flex flex-wrap gap-2">
+                    {openPositions.length > 0
+                      ? openPositions.map(position => <Badge key={position.id} variant="outline">{position.title}</Badge>)
+                      : <Badge variant="secondary">Not currently hiring</Badge>}
+                  </div>
+                  <Button variant="outline" asChild disabled={openPositions.length === 0}>
+                    <Link
+                      to="/guest/schools/$schoolSlug/positions/$positionId"
+                      params={{ schoolSlug: school.slug, positionId: openPositions[0]?.id ?? school.positions[0]?.id ?? "" }}
+                    >
+                      View Open Positions
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <div>
+              <h2 className="text-xl font-semibold">Enrollment Opportunities</h2>
+              <p className="text-sm text-muted-foreground">Student application availability by academic year and grade.</p>
+            </div>
+            <div className="grid gap-4 md:grid-cols-2">
+              {school.enrollmentOpportunities.map(opportunity => (
+                <Card key={opportunity.id} className="rounded-lg">
+                  <CardHeader>
+                    <CardTitle>{opportunity.grade}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3 text-sm">
+                    <InfoRow label="Academic year" value={opportunity.academicYear} />
+                    <InfoRow label="Application deadline" value={formatGuestDate(opportunity.deadline)} />
+                    <InfoRow label="Capacity" value={`${opportunity.remainingSeats} of ${opportunity.capacity} seats remaining`} />
+                    <Badge variant={isEnrollmentAcceptingApplications(opportunity) ? "default" : "secondary"}>
+                      {isEnrollmentAcceptingApplications(opportunity) ? "Applications open" : opportunity.remainingSeats === 0 ? "No longer accepting applications" : "Applications closed"}
+                    </Badge>
+                    <Button className="w-full" disabled={!isEnrollmentAcceptingApplications(opportunity)}>
+                      Apply for Enrollment
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </section>
 
           <section className="space-y-4">
             <div>
