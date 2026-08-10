@@ -14,8 +14,8 @@ from project.utils.enum import GenderEnum
 if TYPE_CHECKING:
     from project.models.auth_identity import AuthIdentity
     from project.models.auth_session import AuthSession
-    from project.models.employment_profile import EmploymentProfile
     from project.models.employment_application import EmploymentApplication
+    from project.models.employment_profile import EmploymentProfile
     from project.models.enrollment_application import EnrollmentApplication
     from project.models.saved_query_view import SavedQueryView
 
@@ -133,18 +133,18 @@ class User(BaseModel):
     """
     children: Mapped[List["User"]] = relationship(
         "User",
-        secondary="parent_student_links",
-        primaryjoin="User.id == ParentStudentLink.parent_user_id",
-        secondaryjoin="User.id == ParentStudentLink.student_user_id",
+        secondary="user_guardians",
+        primaryjoin="User.id == UserGuardian.guardian_user_id",
+        secondaryjoin="User.id == UserGuardian.dependent_user_id",
         back_populates="parents",
         viewonly=True,
         default_factory=list,
     )
     parents: Mapped[List["User"]] = relationship(
         "User",
-        secondary="parent_student_links",
-        primaryjoin="User.id == ParentStudentLink.student_user_id",
-        secondaryjoin="User.id == ParentStudentLink.parent_user_id",
+        secondary="user_guardians",
+        primaryjoin="User.id == UserGuardian.dependent_user_id",
+        secondaryjoin="User.id == UserGuardian.guardian_user_id",
         back_populates="children",
         viewonly=True,
         default_factory=list,

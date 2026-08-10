@@ -19,7 +19,6 @@ from project.models import (
     Grade,
     MembershipRole,
     Parent,
-    ParentStudentLink,
     Permission,
     Role,
     RolePermission,
@@ -37,6 +36,7 @@ from project.models import (
     Table,
     TransferRequest,
     User,
+    UserGuardian,
     Year,
 )
 from project.utils.enum import (
@@ -736,9 +736,9 @@ class TableFactory(TypedFactory[Table]):
     name = factory.Sequence(lambda n: f"table_{n}")
 
 
-class ParentStudentLinkFactory(TypedFactory[ParentStudentLink]):
+class ParentStudentLinkFactory(TypedFactory[UserGuardian]):
     class Meta:
-        model = ParentStudentLink
+        model = UserGuardian
         exclude = ("parent_obj", "student_obj")
 
     parent_obj = factory.SubFactory(ParentFactory)

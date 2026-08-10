@@ -9,10 +9,10 @@ from project.core.access_control import ensure_membership_role, seed_system_role
 from project.core.security import get_password_hash
 from project.models import (
     AuthIdentity,
-    ParentStudentLink,
     School,
     SchoolMembership,
     User,
+    UserGuardian,
 )
 from project.utils.enum import (
     AuthProviderEnum,
@@ -141,23 +141,23 @@ async def ensure_school_membership(
 async def link_parent_to_student(
     session: AsyncSession,
     *,
-    parent_user_id: uuid.UUID,
-    student_user_id: uuid.UUID,
+    guardian_user_id: uuid.UUID,
+    dependent_user_id: uuid.UUID,
 ) -> None:
     """
     Creates a global link between a parent user and a student user.
     """
-    stmt = select(ParentStudentLink).where(
-        ParentStudentLink.parent_user_id == parent_user_id,
-        ParentStudentLink.student_user_id == student_user_id,
+    stmt = select(UserGuardian).where(
+        UserGuardian.guardian_user_id == guardian_user_id,
+        UserGuardian.dependent_user_id == dependent_user_id,
     )
     result = await session.execute(stmt)
     existing = result.scalar_one_or_none()
 
     if not existing:
-        link = ParentStudentLink(
-            parent_user_id=parent_user_id,
-            student_user_id=student_user_id,
+        link = UserGuardian(
+            guardian_user_id=guardian_user_id,
+            dependent_user_id=dependent_user_id,
         )
         session.add(link)
         await session.flush()

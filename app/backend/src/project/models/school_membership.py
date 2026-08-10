@@ -23,7 +23,6 @@ if TYPE_CHECKING:
     from project.models.audit_log import AuditLog
     from project.models.employee import Employee
     from project.models.membership_role import MembershipRole
-    from project.models.parent import Parent
     from project.models.role import Role
     from project.models.school import School
     from project.models.student import Student
@@ -151,14 +150,6 @@ class SchoolMembership(BaseModel):
         repr=False,
         passive_deletes=True,
         overlaps="students",
-    )
-    parent_profiles: Mapped[List["Parent"]] = relationship(
-        "Parent",
-        back_populates="membership",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-        overlaps="parents,school",
     )
     initiated_transfers: Mapped[List["TransferRequest"]] = relationship(
         "TransferRequest",

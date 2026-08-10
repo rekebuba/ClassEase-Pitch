@@ -11,7 +11,6 @@ from project.api.v1.routers.employee.schema import EmployeePositionCreate
 from project.api.v1.routers.registrations.schema import (
     AdminRegistration,
     EmployeeRegistrationForm,
-    ParentRegistrationForm,
     StudentRegistrationForm,
 )
 from project.api.v1.routers.school.schema import (
@@ -161,19 +160,6 @@ class AdminRegistrationFactory(TypedFactory[AdminRegistration]):
     phone = LazyAttribute(lambda x: "+251912345678")
     username = LazyAttribute(lambda x: fake.user_name())
     password = LazyAttribute(lambda x: fake.password(length=12))
-
-
-class ParentRegistrationFactory(TypedFactory[ParentRegistrationForm]):
-    class Meta:
-        model = ParentRegistrationForm
-
-    first_name = LazyAttribute(lambda x: fake.first_name())
-    last_name = LazyAttribute(lambda x: fake.last_name())
-    gender = LazyAttribute(lambda x: fake.random_element(elements=list(GenderEnum)))
-    email = LazyAttribute(lambda x: fake.email())
-    phone = LazyAttribute(lambda x: "+251912345678")
-    relation = LazyAttribute(lambda x: fake.random_element(elements=("Father", "Mother", "Guardian")))
-    emergency_contact_phone = LazyAttribute(lambda x: "+251912345678")
 
 
 class StudentRegistrationFactory(TypedFactory[StudentRegistrationForm]):

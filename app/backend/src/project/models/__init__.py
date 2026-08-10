@@ -13,18 +13,16 @@ from project.models.class_section import ClassSection
 from project.models.department import Department
 from project.models.employee import Employee
 from project.models.employee_position import EmployeePosition
-from project.models.employment_contract import EmploymentContract
-from project.models.event import Event
-from project.models.grade import Grade
-from project.models.grade_stream import GradeStream
 from project.models.employment_application import EmploymentApplication
+from project.models.employment_contract import EmploymentContract
 from project.models.employment_position import EmploymentPosition
 from project.models.employment_profile import EmploymentProfile
 from project.models.enrollment_application import EnrollmentApplication
 from project.models.enrollment_opportunity import EnrollmentOpportunity
+from project.models.event import Event
+from project.models.grade import Grade
+from project.models.grade_stream import GradeStream
 from project.models.membership_role import MembershipRole
-from project.models.parent import Parent
-from project.models.parent_student_link import ParentStudentLink
 from project.models.payroll_entry import PayrollEntry
 from project.models.payroll_profile import PayrollProfile
 from project.models.payroll_run import PayrollRun
@@ -51,6 +49,7 @@ from project.models.teacher_subject import TeacherSubject
 from project.models.teaching_assignment import TeachingAssignment
 from project.models.transfer_request import TransferRequest
 from project.models.user import User
+from project.models.user_guardian import UserGuardian
 from project.models.year import Year
 
 __all__ = [
@@ -67,18 +66,16 @@ __all__ = [
     "Employee",
     "EmployeePosition",
     "EmployeeYearLink",
-    "EmploymentContract",
-    "Event",
-    "Grade",
-    "GradeStream",
     "EmploymentApplication",
+    "EmploymentContract",
     "EmploymentPosition",
     "EmploymentProfile",
     "EnrollmentApplication",
     "EnrollmentOpportunity",
+    "Event",
+    "Grade",
+    "GradeStream",
     "MembershipRole",
-    "Parent",
-    "ParentStudentLink",
     "PayrollEntry",
     "PayrollProfile",
     "PayrollRun",
@@ -107,5 +104,6 @@ __all__ = [
     "TeachingAssignment",
     "TransferRequest",
     "User",
+    "UserGuardian",
     "Year",
 ]

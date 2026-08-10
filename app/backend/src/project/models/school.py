@@ -12,12 +12,11 @@ if TYPE_CHECKING:
     from project.models.department import Department
     from project.models.employee import Employee
     from project.models.employee_position import EmployeePosition
-    from project.models.employment_contract import EmploymentContract
     from project.models.employment_application import EmploymentApplication
+    from project.models.employment_contract import EmploymentContract
     from project.models.employment_position import EmploymentPosition
     from project.models.enrollment_application import EnrollmentApplication
     from project.models.enrollment_opportunity import EnrollmentOpportunity
-    from project.models.parent import Parent
     from project.models.payroll_entry import PayrollEntry
     from project.models.payroll_profile import PayrollProfile
     from project.models.payroll_run import PayrollRun
@@ -205,14 +204,6 @@ class School(BaseModel):
         default_factory=list,
         repr=False,
         passive_deletes=True,
-    )
-    parents: Mapped[List["Parent"]] = relationship(
-        "Parent",
-        back_populates="school",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-        overlaps="membership",
     )
     audit_logs: Mapped[List["AuditLog"]] = relationship(
         "AuditLog",

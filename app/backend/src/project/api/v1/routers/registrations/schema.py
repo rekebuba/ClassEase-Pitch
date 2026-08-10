@@ -51,11 +51,6 @@ class AdminRegistration(UserRegistration):
     pass
 
 
-class ParentRegistrationForm(UserRegistration):
-    relation: str = Field(min_length=2, max_length=50)
-    emergency_contact_phone: Optional[PhoneNumber] = Field(default=None)
-
-
 class ParentRegistrationMe(BaseSchema):
     relation: str = Field(min_length=2, max_length=50)
     emergency_contact_phone: Optional[PhoneNumber] = Field(default=None)

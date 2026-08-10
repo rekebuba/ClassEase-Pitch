@@ -25,8 +25,6 @@ from project.core.access_control import (
 )
 from project.models import (
     AcademicTerm,
-    Parent,
-    ParentStudentLink,
     Role,
     SchoolMembership,
     Student,
@@ -34,6 +32,7 @@ from project.models import (
     StudentTermRecord,
     StudentYearRecord,
     User,
+    UserGuardian,
 )
 from project.models.grade import Grade
 from project.models.year import Year
@@ -99,22 +98,13 @@ async def student(
         is_transfer=student_data.is_transfer,
     )
 
-    for parent in student_data.parents:
-        new_parent = Parent(
-            school_id=user_in.membership.school_id,
-            user_id=user.id,
-            relation=parent.relation,
-            emergency_contact_phone=parent.emergency_contact_phone,
+    session.add(
+        UserGuardian(
+            guardian_user_id=new_student.id,
+            dependent_user_id=new_student.id,
+            relation="",
         )
-        session.add(new_parent)
-        await session.flush()
-
-        session.add(
-            ParentStudentLink(
-                parent_user_id=new_parent.id,
-                student_user_id=new_student.id,
-            )
-        )
+    )
 
     await session.commit()
 
