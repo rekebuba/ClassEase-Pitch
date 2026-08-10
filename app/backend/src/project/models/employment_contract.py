@@ -9,7 +9,6 @@ from sqlalchemy import (
     Enum,
     ForeignKeyConstraint,
     Integer,
-    String,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -38,11 +37,6 @@ class EmploymentContract(SchoolScopedMixin, BaseModel):
     hours_per_week: Mapped[int] = mapped_column(Integer, nullable=False)
     start_date: Mapped[date] = mapped_column(Date, nullable=False)
     end_date: Mapped[Optional[date]] = mapped_column(Date, nullable=True, default=None)
-    salary_grade: Mapped[Optional[str]] = mapped_column(
-        String(30),
-        nullable=True,
-        default=None,
-    )
     status: Mapped[ContractStatusEnum] = mapped_column(
         Enum(
             ContractStatusEnum,

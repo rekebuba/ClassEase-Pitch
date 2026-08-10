@@ -25,7 +25,6 @@ class EmployeeBasicInfo(BaseSchema):
     employment_type: EmploymentTypeEnum
     hire_date: date
     termination_date: Optional[date]
-    department_id: Optional[uuid.UUID]
     primary_position_id: Optional[uuid.UUID]
     manager_employee_id: Optional[uuid.UUID]
     work_email: Optional[str]

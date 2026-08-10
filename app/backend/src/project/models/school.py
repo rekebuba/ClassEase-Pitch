@@ -14,7 +14,6 @@ if TYPE_CHECKING:
     from project.models.employee_position import EmployeePosition
     from project.models.employment_application import EmploymentApplication
     from project.models.employment_contract import EmploymentContract
-    from project.models.employment_position import EmploymentPosition
     from project.models.enrollment_application import EnrollmentApplication
     from project.models.enrollment_opportunity import EnrollmentOpportunity
     from project.models.payroll_entry import PayrollEntry
@@ -91,13 +90,6 @@ class School(BaseModel):
         repr=False,
         passive_deletes=True,
         overlaps="school",
-    )
-    employment_positions: Mapped[List["EmploymentPosition"]] = relationship(
-        "EmploymentPosition",
-        back_populates="school",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
     )
     employment_applications: Mapped[List["EmploymentApplication"]] = relationship(
         "EmploymentApplication",

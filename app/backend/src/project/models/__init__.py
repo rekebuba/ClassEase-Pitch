@@ -15,13 +15,12 @@ from project.models.employee import Employee
 from project.models.employee_position import EmployeePosition
 from project.models.employment_application import EmploymentApplication
 from project.models.employment_contract import EmploymentContract
-from project.models.employment_position import EmploymentPosition
-from project.models.employment_profile import EmploymentProfile
 from project.models.enrollment_application import EnrollmentApplication
 from project.models.enrollment_opportunity import EnrollmentOpportunity
 from project.models.event import Event
 from project.models.grade import Grade
 from project.models.grade_stream import GradeStream
+from project.models.job_posting import JobPosting
 from project.models.membership_role import MembershipRole
 from project.models.payroll_entry import PayrollEntry
 from project.models.payroll_profile import PayrollProfile
@@ -68,13 +67,12 @@ __all__ = [
     "EmployeeYearLink",
     "EmploymentApplication",
     "EmploymentContract",
-    "EmploymentPosition",
-    "EmploymentProfile",
     "EnrollmentApplication",
     "EnrollmentOpportunity",
     "Event",
     "Grade",
     "GradeStream",
+    "JobPosting",
     "MembershipRole",
     "PayrollEntry",
     "PayrollProfile",

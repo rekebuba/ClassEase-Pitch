@@ -1,8 +1,8 @@
 import uuid
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import JSON, UUID, DateTime, Enum, ForeignKey, Text, UniqueConstraint
+from sqlalchemy import UUID, DateTime, Enum, ForeignKey, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
@@ -18,7 +18,13 @@ if TYPE_CHECKING:
 class EnrollmentApplication(SchoolScopedMixin, BaseModel):
     __tablename__ = "enrollment_applications"
 
-    user_id: Mapped[uuid.UUID] = mapped_column(
+    applicant_user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(),
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    student_user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(),
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
@@ -40,7 +46,6 @@ class EnrollmentApplication(SchoolScopedMixin, BaseModel):
         nullable=False,
         default=EnrollmentApplicationStatusEnum.SUBMITTED,
     )
-    student_info: Mapped[Dict[str, Any]] = mapped_column(JSON, nullable=False, default_factory=dict)
     applicant_note: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default=None)
     reviewer_note: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default=None)
     submitted_at: Mapped[datetime] = mapped_column(
@@ -49,11 +54,8 @@ class EnrollmentApplication(SchoolScopedMixin, BaseModel):
         default_factory=lambda: datetime.now(timezone.utc),
     )
     reviewed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
-    withdrawn_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
-    __table_args__ = (
-        UniqueConstraint("id", "school_id", name="uq_enrollment_application_id_school_id"),
-    )
+    __table_args__ = (UniqueConstraint("id", "school_id", name="uq_enrollment_application_id_school_id"),)
 
     user: Mapped["User"] = relationship(
         "User",

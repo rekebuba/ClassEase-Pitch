@@ -104,7 +104,6 @@ class EmployeeProfileFactory(TypedFactory[EmployeeProfile]):
     employment_status = LazyAttribute(lambda _: random.choice(list(EmploymentStatusEnum)))
     employment_type = LazyAttribute(lambda _: random.choice(list(EmploymentTypeEnum)))
     termination_date = LazyAttribute(lambda _: fake.future_date() if random.choice([True, False]) else None)
-    department_id = LazyAttribute(lambda _: uuid.uuid4())
     primary_position_id = LazyAttribute(lambda _: uuid.uuid4())
     manager_employee_id = LazyAttribute(lambda _: uuid.uuid4())
     work_email = LazyAttribute(lambda _: fake.company_email())

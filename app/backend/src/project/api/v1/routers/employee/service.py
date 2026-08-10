@@ -55,12 +55,6 @@ class EmployeeService:
                 school_id,
             )
 
-        if employee_data.department_id and (await session.get(Employee, employee_data.department_id)) is None:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Department Not Found",
-            )
-
         if (
             employee_data.manager_employee_id
             and (await session.get(Employee, employee_data.manager_employee_id)) is None
@@ -87,7 +81,6 @@ class EmployeeService:
             employment_status=employee_data.employment_status,
             employment_type=employee_data.employment_type,
             termination_date=employee_data.termination_date,
-            department_id=employee_data.department_id,
             primary_position_id=employee_data.primary_position_id,
             manager_employee_id=employee_data.manager_employee_id,
             work_email=employee_data.work_email,

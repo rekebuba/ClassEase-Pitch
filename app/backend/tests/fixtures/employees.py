@@ -48,7 +48,6 @@ async def hire_employee(
         # 1. Create Membership
         employee_profile = EmployeeProfileFactory.create(
             user_id=user.response.id,
-            department_id=None,
             manager_employee_id=None,
             primary_position_id=None,
         )

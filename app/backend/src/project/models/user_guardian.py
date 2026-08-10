@@ -17,12 +17,10 @@ class UserGuardian(BaseModel):
     guardian_user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(),
         ForeignKey("users.id", ondelete="CASCADE"),
-        primary_key=True,
     )
     dependent_user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(),
         ForeignKey("users.id", ondelete="CASCADE"),
-        primary_key=True,
     )
     relation: Mapped[str] = mapped_column(String(50), nullable=False)
 

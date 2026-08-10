@@ -147,7 +147,6 @@ class EmployeeRegStep1(BaseSchema):
 class EmployeeRegStep2(BaseSchema):
     email: EmailStr
     phone: PhoneNumber
-    department_id: Optional[uuid.UUID] = Field(default=None)
     primary_position_id: Optional[uuid.UUID] = Field(default=None)
     manager_employee_id: Optional[uuid.UUID] = Field(default=None)
 

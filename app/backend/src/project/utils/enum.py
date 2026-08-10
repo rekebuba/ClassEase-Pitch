@@ -118,7 +118,7 @@ class EmployeePositionEnum(str, Enum):
     OTHER = "other"
 
 
-class EmployeeApplicationStatusEnum(str, Enum):
+class JobStatusEnum(str, Enum):
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
@@ -155,18 +155,6 @@ class PositionCategoryEnum(str, Enum):
     OTHER = "other"
 
 
-class EmploymentProfileStatusEnum(str, Enum):
-    INCOMPLETE = "incomplete"
-    COMPLETE = "complete"
-
-
-class EmploymentPositionStatusEnum(str, Enum):
-    DRAFT = "draft"
-    OPEN = "open"
-    CLOSED = "closed"
-    ARCHIVED = "archived"
-
-
 class EmploymentApplicationStatusEnum(str, Enum):
     DRAFT = "draft"
     SUBMITTED = "submitted"
@@ -175,15 +163,6 @@ class EmploymentApplicationStatusEnum(str, Enum):
     ACCEPTED = "accepted"
     REJECTED = "rejected"
     WITHDRAWN = "withdrawn"
-
-
-class EmploymentPositionTypeEnum(str, Enum):
-    FULL_TIME = "full_time"
-    PART_TIME = "part_time"
-    CONTRACT = "contract"
-    TEMPORARY = "temporary"
-    SUBSTITUTE = "substitute"
-    INTERNSHIP = "internship"
 
 
 class EnrollmentOpportunityStatusEnum(str, Enum):

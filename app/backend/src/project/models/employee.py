@@ -27,7 +27,6 @@ if TYPE_CHECKING:
     from project.models.payroll_entry import PayrollEntry
     from project.models.payroll_profile import PayrollProfile
     from project.models.payroll_run import PayrollRun
-    from project.models.position import Position
     from project.models.school import School
     from project.models.school_membership import SchoolMembership
     from project.models.teacher_profile import TeacherProfile
@@ -68,16 +67,6 @@ class Employee(SchoolScopedMixin, BaseModel):
         nullable=True,
         default=None,
     )
-    department_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        UUID(),
-        nullable=True,
-        default=None,
-    )
-    primary_position_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        UUID(),
-        nullable=True,
-        default=None,
-    )
     manager_employee_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         UUID(),
         nullable=True,
@@ -115,18 +104,6 @@ class Employee(SchoolScopedMixin, BaseModel):
             name="fk_employees_membership_school",
         ),
         ForeignKeyConstraint(
-            ["department_id", "school_id"],
-            ["departments.id", "departments.school_id"],
-            name="fk_employee_department_school",
-            ondelete="SET NULL",
-        ),
-        ForeignKeyConstraint(
-            ["primary_position_id", "school_id"],
-            ["positions.id", "positions.school_id"],
-            name="fk_employee_primary_position_school",
-            ondelete="SET NULL",
-        ),
-        ForeignKeyConstraint(
             ["manager_employee_id", "school_id"],
             ["employees.id", "employees.school_id"],
             name="fk_employee_manager_school",
@@ -155,22 +132,6 @@ class Employee(SchoolScopedMixin, BaseModel):
         repr=False,
         passive_deletes=True,
         overlaps="membership",
-    )
-    department: Mapped[Optional["Department"]] = relationship(
-        "Department",
-        foreign_keys=[department_id],
-        back_populates="employees",
-        init=False,
-        repr=False,
-        passive_deletes=True,
-    )
-    primary_position: Mapped[Optional["Position"]] = relationship(
-        "Position",
-        foreign_keys=[primary_position_id],
-        back_populates="primary_for_employees",
-        init=False,
-        repr=False,
-        passive_deletes=True,
     )
     manager: Mapped[Optional["Employee"]] = relationship(
         "Employee",

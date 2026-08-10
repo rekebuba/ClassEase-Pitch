@@ -14,11 +14,9 @@ from project.models import (
     AuthIdentity,
     AuthSession,
     BlacklistToken,
-    Employee,
     Event,
     Grade,
     MembershipRole,
-    Parent,
     Permission,
     Role,
     RolePermission,
@@ -36,7 +34,6 @@ from project.models import (
     Table,
     TransferRequest,
     User,
-    UserGuardian,
     Year,
 )
 from project.utils.enum import (
@@ -46,17 +43,13 @@ from project.utils.enum import (
     AuthProviderEnum,
     AuthSessionAssuranceEnum,
     BloodTypeEnum,
-    EmployeeApplicationStatusEnum,
-    EmployeePositionEnum,
     EventEligibilityEnum,
     EventLocationEnum,
     EventOrganizerEnum,
     EventPurposeEnum,
-    ExperienceYearEnum,
     GenderEnum,
     GradeEnum,
     GradeLevelEnum,
-    HighestEducationEnum,
     MfaStateEnum,
     RoleEnum,
     SchoolMembershipStatusEnum,
@@ -125,13 +118,6 @@ class UserFactory(TypedFactory[User]):
             role=RoleEnum.ADMIN,
             admin_profile=factory.RelatedFactory(
                 "tests.factories.models.model_factories.AdminFactory",
-                factory_related_name="user_obj",
-            ),
-        )
-        as_employee = factory.Trait(
-            role=RoleEnum.TEACHER,
-            employee_profile=factory.RelatedFactory(
-                "tests.factories.models.model_factories.EmployeeFactory",
                 factory_related_name="user_obj",
             ),
         )
@@ -324,73 +310,6 @@ class RolePermissionFactory(TypedFactory[RolePermission]):
     permission_obj = factory.SubFactory(PermissionFactory)
     role_id = factory.LazyAttribute(lambda o: o.role_obj.id)
     permission_id = factory.LazyAttribute(lambda o: o.permission_obj.id)
-
-
-class EmployeeFactory(TypedFactory[Employee]):
-    class Meta:
-        model = Employee
-        exclude = ("user_obj", "membership_obj", "subject_obj")
-
-    user_obj = factory.SubFactory(UserFactory, role=RoleEnum.TEACHER)
-    membership_obj = factory.SubFactory(
-        SchoolMembershipFactory,
-        user_obj=factory.SelfAttribute("..user_obj"),
-    )
-    subject_obj = factory.SubFactory(SubjectFactory)
-
-    user_id = factory.LazyAttribute(lambda o: o.user_obj.id)
-    school_membership_id = factory.LazyAttribute(lambda o: o.membership_obj.id)
-    subject_id = factory.LazyAttribute(lambda o: o.subject_obj.id)
-
-    first_name = factory.Faker("first_name")
-    father_name = factory.Faker("last_name")
-    grand_father_name = factory.Faker("last_name")
-    date_of_birth = factory.Faker("date_of_birth", minimum_age=22, maximum_age=70)
-    gender = factory.LazyFunction(lambda: _pick(GenderEnum))
-    nationality = factory.Faker("country")
-    social_security_number = factory.Sequence(lambda n: f"SSN-{n:08d}")
-    city = factory.Faker("city")
-    state = factory.Faker("state")
-    country = factory.Faker("country")
-    emergency_contact_name = factory.Faker("name")
-    emergency_contact_relation = factory.LazyFunction(lambda: random.choice(["Spouse", "Sibling", "Parent"]))
-    emergency_contact_phone = factory.Sequence(lambda n: f"+251911{n:06d}")
-    highest_education = factory.LazyFunction(lambda: _pick(HighestEducationEnum))
-    university = factory.Faker("company")
-    graduation_year = factory.LazyFunction(lambda: random.randint(1998, 2024))
-    gpa = factory.LazyFunction(lambda: round(random.uniform(2.0, 4.0), 2))
-    position = factory.LazyFunction(lambda: _pick(EmployeePositionEnum))
-    years_of_experience = factory.LazyFunction(lambda: _pick(ExperienceYearEnum))
-    secondary_phone = factory.Sequence(lambda n: f"+251922{n:06d}")
-    certifications = factory.Faker("sentence", nb_words=5)
-    resume = factory.LazyFunction(lambda: fake.file_name(extension="pdf"))
-    status = EmployeeApplicationStatusEnum.PENDING
-
-    class Params:
-        without_subject = factory.Trait(subject_obj=None, subject_id=None)
-
-
-class ParentFactory(TypedFactory[Parent]):
-    class Meta:
-        model = Parent
-        exclude = ("user_obj", "membership_obj")
-
-    user_obj = factory.SubFactory(UserFactory, role=RoleEnum.PARENT)
-    membership_obj = factory.SubFactory(
-        SchoolMembershipFactory,
-        user_obj=factory.SelfAttribute("..user_obj"),
-    )
-
-    user_id = factory.LazyAttribute(lambda o: o.user_obj.id)
-    school_membership_id = factory.LazyAttribute(lambda o: o.membership_obj.id)
-
-    first_name = factory.Faker("first_name")
-    last_name = factory.Faker("last_name")
-    gender = factory.LazyFunction(lambda: _pick(GenderEnum))
-    email = factory.Sequence(lambda n: f"parent{n}@example.com")
-    phone = factory.Sequence(lambda n: f"+251933{n:06d}")
-    relation = factory.LazyFunction(lambda: random.choice(["mother", "father", "guardian"]))
-    emergency_contact_phone = factory.Sequence(lambda n: f"+251944{n:06d}")
 
 
 class StudentFactory(TypedFactory[Student]):
@@ -734,17 +653,6 @@ class TableFactory(TypedFactory[Table]):
         model = Table
 
     name = factory.Sequence(lambda n: f"table_{n}")
-
-
-class ParentStudentLinkFactory(TypedFactory[UserGuardian]):
-    class Meta:
-        model = UserGuardian
-        exclude = ("parent_obj", "student_obj")
-
-    parent_obj = factory.SubFactory(ParentFactory)
-    student_obj = factory.SubFactory(StudentFactory)
-    parent_id = factory.LazyAttribute(lambda o: o.parent_obj.id)
-    student_id = factory.LazyAttribute(lambda o: o.student_obj.id)
 
 
 class StudentYearRecordFactory(TypedFactory[StudentYearRecord]):

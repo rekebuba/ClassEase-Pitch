@@ -1,8 +1,8 @@
 import uuid
 from datetime import datetime, timezone
-from typing import TYPE_CHECKING, Any, Dict, Optional
+from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import JSON, UUID, DateTime, Enum, ForeignKey, Text, UniqueConstraint
+from sqlalchemy import UUID, DateTime, Enum, ForeignKey, ForeignKeyConstraint, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
@@ -10,8 +10,6 @@ from project.models.base.school_mixin import SchoolScopedMixin
 from project.utils.enum import EmploymentApplicationStatusEnum
 
 if TYPE_CHECKING:
-    from project.models.employment_position import EmploymentPosition
-    from project.models.employment_profile import EmploymentProfile
     from project.models.school import School
     from project.models.user import User
 
@@ -19,23 +17,15 @@ if TYPE_CHECKING:
 class EmploymentApplication(SchoolScopedMixin, BaseModel):
     __tablename__ = "employment_applications"
 
-    user_id: Mapped[uuid.UUID] = mapped_column(
+    applicant_user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(),
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
-    profile_id: Mapped[uuid.UUID] = mapped_column(
+    job_posting_id: Mapped[uuid.UUID] = mapped_column(
         UUID(),
-        ForeignKey("employment_profiles.id", ondelete="RESTRICT"),
         nullable=False,
-        index=True,
-    )
-    position_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(),
-        ForeignKey("employment_positions.id", ondelete="CASCADE"),
-        nullable=False,
-        index=True,
     )
     status: Mapped[EmploymentApplicationStatusEnum] = mapped_column(
         Enum(
@@ -47,8 +37,7 @@ class EmploymentApplication(SchoolScopedMixin, BaseModel):
         nullable=False,
         default=EmploymentApplicationStatusEnum.SUBMITTED,
     )
-    profile_snapshot: Mapped[Dict[str, Any]] = mapped_column(JSON, nullable=False, default_factory=dict)
-    applicant_note: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default=None)
+    cover_note: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default=None)
     reviewer_note: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default=None)
     submitted_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
@@ -56,11 +45,19 @@ class EmploymentApplication(SchoolScopedMixin, BaseModel):
         default_factory=lambda: datetime.now(timezone.utc),
     )
     reviewed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
-    withdrawn_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
     __table_args__ = (
         UniqueConstraint("id", "school_id", name="uq_employment_application_id_school_id"),
-        UniqueConstraint("user_id", "position_id", name="uq_employment_application_user_position"),
+        UniqueConstraint(
+            "applicant_user_id",
+            "job_posting_id",
+            name="uq_employment_application_applicant_user_id_job_posting_id",
+        ),
+        ForeignKeyConstraint(
+            ["job_posting_id", "school_id"],
+            ["job_postings.id", "job_postings.school_id"],
+            name="fk_employment_application_job_posting_id_school_id_job_postings",
+        ),
     )
 
     user: Mapped["User"] = relationship(
@@ -73,20 +70,6 @@ class EmploymentApplication(SchoolScopedMixin, BaseModel):
     school: Mapped["School"] = relationship(
         "School",
         back_populates="employment_applications",
-        init=False,
-        repr=False,
-        passive_deletes=True,
-    )
-    profile: Mapped["EmploymentProfile"] = relationship(
-        "EmploymentProfile",
-        back_populates="applications",
-        init=False,
-        repr=False,
-        passive_deletes=True,
-    )
-    position: Mapped["EmploymentPosition"] = relationship(
-        "EmploymentPosition",
-        back_populates="applications",
         init=False,
         repr=False,
         passive_deletes=True,

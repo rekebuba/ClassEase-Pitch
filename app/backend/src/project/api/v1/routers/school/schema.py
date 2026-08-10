@@ -62,7 +62,6 @@ class EmployeeProfile(BaseSchema):
     employment_status: EmploymentStatusEnum = Field(..., description="The employment status")
     employment_type: EmploymentTypeEnum = Field(..., description="The employment type")
     termination_date: Optional[date] = Field(..., description="The termination date of the employee")
-    department_id: Optional[uuid.UUID] = Field(..., description="The ID of the department")
     primary_position_id: Optional[uuid.UUID] = Field(..., description="The ID of the primary position")
     manager_employee_id: Optional[uuid.UUID] = Field(..., description="The ID of the manager employee")
     work_email: Optional[EmailStr] = Field(..., description="The work email of the employee")
