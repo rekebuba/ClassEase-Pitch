@@ -10,6 +10,7 @@ from tests.fixtures import (
 
 FIXTURE_CONFIG: dict[str, FixtureConfig] = {
     "school": {"count": NUM_TEST_SCHOOLS, "id_prefix": "school"},
+    "school_HR": {"count": NUM_TEST_SCHOOLS, "id_prefix": "school_HR"},
     "user": {"count": NUM_TEST_USERS, "id_prefix": "user"},
     "admin": {"count": NUM_TEST_SCHOOLS * ADMIN_PER_SCHOOL, "id_prefix": "admin"},
     "student": {

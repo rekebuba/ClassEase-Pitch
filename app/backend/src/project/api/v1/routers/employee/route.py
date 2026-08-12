@@ -33,7 +33,7 @@ from project.utils.enum import PermissionEnum
 router = APIRouter()
 
 
-@router.post("/employees", status_code=status.HTTP_201_CREATED, tags=["Employees"])
+@router.post("/employees", status_code=status.HTTP_201_CREATED, response_model=SuccessResponse, tags=["Employees"])
 async def employee(
     session: SessionDep,
     user_in: AuthenticatedRoute,
@@ -227,7 +227,6 @@ async def create_employment_contract(
         hours_per_week=contract_data.hours_per_week,
         start_date=contract_data.start_date,
         end_date=contract_data.end_date,
-        salary_grade=contract_data.salary_grade,
         status=contract_data.status,
     )
 

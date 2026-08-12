@@ -6,11 +6,11 @@ from project.api.v1.routers.auth.schema import MembershipSummary, SchoolSummary
 from project.schema.models.admin_schema import AdminSchema
 from project.schema.models.student_schema import StudentSchema
 from project.schema.models.teacher_schema import TeacherSchema
-from project.schema.models.user_schema import UserSchema
+from project.schema.schema import BaseSchema
 from project.utils.enum import RoleEnum
 
 
-class CurrentUserInfo(UserSchema):
+class CurrentUserInfo(BaseSchema):
     id: uuid.UUID
     username: str
     role: RoleEnum

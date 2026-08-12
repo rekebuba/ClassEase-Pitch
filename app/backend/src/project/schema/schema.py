@@ -40,6 +40,11 @@ class SuccessResponse(BaseSchema):
     id: uuid.UUID
 
 
+class BatchSuccessResponse(BaseSchema):
+    message: str
+    id: list[uuid.UUID]
+
+
 class ErrorResponseSchema(BaseSchema):
     """
     This model represents an error response schema.

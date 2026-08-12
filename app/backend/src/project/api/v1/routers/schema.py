@@ -9,6 +9,10 @@ class FilterParams(BaseSchema):
     q: str | None = None
 
 
+class SearchParams(BaseSchema):
+    q: str | None = None
+
+
 # JSON Patch specific schemas
 class JSONPatchOperation(BaseSchema):
     op: Literal["add", "remove", "replace", "move", "copy", "test"]

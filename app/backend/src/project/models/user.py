@@ -101,19 +101,25 @@ class User(BaseModel):
     )
     employment_applications: Mapped[List["EmploymentApplication"]] = relationship(
         "EmploymentApplication",
-        back_populates="user",
+        back_populates="applicant_user",
         default_factory=list,
         init=False,
         repr=False,
         passive_deletes=True,
     )
-    enrollment_applications: Mapped[List["EnrollmentApplication"]] = relationship(
+    applicant_enrollment_applications: Mapped[List["EnrollmentApplication"]] = relationship(
         "EnrollmentApplication",
-        back_populates="user",
+        foreign_keys="EnrollmentApplication.applicant_user_id",
+        back_populates="applicant_user",
         default_factory=list,
         init=False,
-        repr=False,
-        passive_deletes=True,
+    )
+    student_enrollment_applications: Mapped[List["EnrollmentApplication"]] = relationship(
+        "EnrollmentApplication",
+        foreign_keys="EnrollmentApplication.student_user_id",
+        back_populates="student_user",
+        default_factory=list,
+        init=False,
     )
 
     """

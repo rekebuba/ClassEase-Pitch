@@ -75,7 +75,6 @@ class EmploymentContractCreate(BaseSchema):
     hours_per_week: int
     start_date: date
     end_date: Optional[date] = None
-    salary_grade: Optional[str] = None
     status: ContractStatusEnum = ContractStatusEnum.DRAFT
 
 

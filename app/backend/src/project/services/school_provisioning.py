@@ -3,7 +3,8 @@
 import uuid
 from dataclasses import dataclass
 from datetime import date
-from typing import Any, Iterable, TypeVar
+from typing import Any, Iterable, TypedDict, TypeVar
+from uuid import UUID
 
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,6 +17,7 @@ from project.models import (
     Department,
     Grade,
     GradeStream,
+    Position,
     Section,
     Stream,
     Subject,
@@ -34,6 +36,81 @@ from project.utils.enum import (
 DEFAULT_BLUEPRINT_YEAR_NAME = "Default Academic Year Blueprint"
 DEFAULT_BLUEPRINT_SCHEME_NAME = "Default Assessment Scheme"
 DEFAULT_BLUEPRINT_SECTIONS = ("A", "B", "C")
+
+
+class PositionTemplate(TypedDict):
+    title: str
+
+
+class DepartmentPositionTemplate(TypedDict):
+    code: str
+    name: str
+    positions: list[PositionTemplate]
+
+
+TENANT_DEPARTMENT_POSITIONS_TEMPLATE: list[DepartmentPositionTemplate] = [
+    {
+        "code": "ACADEMIC",
+        "name": "Academic Affairs",
+        "positions": [
+            {"title": "School Principal"},
+            {"title": "Vice Principal"},
+            {"title": "Head Teacher / HOD"},
+            {"title": "Teacher"},
+            {"title": "Assistant Teacher"},
+        ],
+    },
+    {
+        "code": "ADMIN",
+        "name": "Administration",
+        "positions": [
+            {"title": "School Administrator"},
+            {"title": "Admissions Officer"},
+            {"title": "Front Desk Receptionist"},
+        ],
+    },
+    {
+        "code": "FINANCE",
+        "name": "Finance & Accounting",
+        "positions": [
+            {"title": "Finance Manager"},
+            {"title": "Accountant"},
+        ],
+    },
+    {
+        "code": "HR",
+        "name": "Human Resources",
+        "positions": [
+            {"title": "HR Manager"},
+            {"title": "HR Officer"},
+        ],
+    },
+    {
+        "code": "IT",
+        "name": "Information Technology",
+        "positions": [
+            {"title": "IT Administrator"},
+            {"title": "IT Support Technician"},
+        ],
+    },
+    {
+        "code": "LIBRARY",
+        "name": "Library Services",
+        "positions": [
+            {"title": "Head Librarian"},
+            {"title": "Library Assistant"},
+        ],
+    },
+    {
+        "code": "FACILITIES",
+        "name": "Facilities & Operations",
+        "positions": [
+            {"title": "Facilities Manager"},
+            {"title": "Maintenance Worker"},
+            {"title": "Security Guard"},
+        ],
+    },
+]
 
 
 class SchoolProvisioningError(RuntimeError):
@@ -60,6 +137,8 @@ class ProvisioningMaps:
     assessment_scheme_components: dict[uuid.UUID, uuid.UUID]
     subject_offerings: dict[uuid.UUID, uuid.UUID]
     class_sections: dict[uuid.UUID, uuid.UUID]
+    departments: dict[uuid.UUID, uuid.UUID]
+    positions: dict[uuid.UUID, uuid.UUID]
 
     @classmethod
     def empty(cls) -> "ProvisioningMaps":
@@ -75,6 +154,8 @@ class ProvisioningMaps:
             assessment_scheme_components={},
             subject_offerings={},
             class_sections={},
+            departments={},
+            positions={},
         )
 
 
@@ -200,6 +281,18 @@ class SchoolProvisioningService:
             maps=maps,
         )
         await cls._copy_class_sections(
+            system_session=system_session,
+            tenant_session=tenant_session,
+            school_id=school_id,
+            maps=maps,
+        )
+        await cls._copy_departments(
+            system_session=system_session,
+            tenant_session=tenant_session,
+            school_id=school_id,
+            maps=maps,
+        )
+        await cls._copy_positions(
             system_session=system_session,
             tenant_session=tenant_session,
             school_id=school_id,
@@ -698,7 +791,6 @@ class SchoolProvisioningService:
     @classmethod
     async def ensure_default_blueprint(cls, *, system_session: AsyncSession) -> None:
         """Create the bundled global blueprint rows if no blueprint exists."""
-
         existing_year_id = await cls._get_blueprint_year_id(
             system_session=system_session,
             required=False,
@@ -707,7 +799,31 @@ class SchoolProvisioningService:
             return
 
         template = BluePrintTemplate(**TEM_DATA)
-        blueprint_year = Year(
+        await cls.seed_departments_and_positions(system_session=system_session)
+
+        blueprint_year = await cls._create_blueprint_year(system_session=system_session)
+
+        terms = await cls._create_terms(system_session=system_session, blueprint_year=blueprint_year)
+        scheme = await cls._create_assessment_scheme(system_session=system_session)
+        await cls._create_assessment_scheme_components(system_session=system_session, terms=terms, scheme=scheme)
+
+        subject_by_name = await cls._create_subjects(system_session=system_session, template=template)
+
+        await cls._create_grades_streams_offerings_and_sections(
+            system_session=system_session,
+            template=template,
+            blueprint_year=blueprint_year,
+            scheme=scheme,
+            subject_by_name=subject_by_name,
+        )
+
+    @classmethod
+    async def _create_blueprint_year(
+        cls,
+        *,
+        system_session: AsyncSession,
+    ) -> Year:
+        year = Year(
             school_id=None,
             calendar_type=AcademicTermTypeEnum.SEMESTER,
             name=DEFAULT_BLUEPRINT_YEAR_NAME,
@@ -715,9 +831,17 @@ class SchoolProvisioningService:
             end_date=date(2027, 6, 30),
             status=AcademicYearStatusEnum.UPCOMING,
         )
-        system_session.add(blueprint_year)
+        system_session.add(year)
         await system_session.flush()
+        return year
 
+    @classmethod
+    async def _create_terms(
+        cls,
+        *,
+        system_session: AsyncSession,
+        blueprint_year: Year,
+    ) -> list[AcademicTerm]:
         terms: list[AcademicTerm] = []
         for index, term_name in enumerate((AcademicTermEnum.FIRST_TERM, AcademicTermEnum.SECOND_TERM), start=1):
             term = AcademicTerm(
@@ -732,7 +856,14 @@ class SchoolProvisioningService:
             terms.append(term)
         system_session.add_all(terms)
         await system_session.flush()
+        return terms
 
+    @classmethod
+    async def _create_assessment_scheme(
+        cls,
+        *,
+        system_session: AsyncSession,
+    ) -> AssessmentScheme:
         scheme = AssessmentScheme(
             school_id=None,
             name=DEFAULT_BLUEPRINT_SCHEME_NAME,
@@ -741,34 +872,49 @@ class SchoolProvisioningService:
         system_session.add(scheme)
         await system_session.flush()
 
-        components: list[AssessmentSchemeComponent] = []
-        for term in terms:
-            components.extend(
-                [
-                    AssessmentSchemeComponent(
-                        school_id=None,
-                        term_id=term.id,
-                        assessment_scheme_id=scheme.id,
-                        name=f"Term {term.name.value} Continuous Assessment",
-                        description="Classwork, quizzes, assignments, and projects.",
-                        weight=40.0,
-                        max_score=40.0,
-                        display_order=1,
-                    ),
-                    AssessmentSchemeComponent(
-                        school_id=None,
-                        term_id=term.id,
-                        assessment_scheme_id=scheme.id,
-                        name=f"Term {term.name.value} Final Exam",
-                        description="End of term examination.",
-                        weight=60.0,
-                        max_score=60.0,
-                        display_order=2,
-                    ),
-                ]
+        return scheme
+
+    @classmethod
+    async def _create_assessment_scheme_components(
+        cls,
+        *,
+        system_session: AsyncSession,
+        terms: list[AcademicTerm],
+        scheme: AssessmentScheme,
+    ) -> None:
+        component_templates = [
+            ("Test 1", 10.0, 10.0, 1),
+            ("Test 2", 10.0, 10.0, 2),
+            ("Continuous Assessment", 10.0, 10.0, 3),
+            ("Quiz", 5.0, 5.0, 4),
+            ("Attendance", 5.0, 5.0, 5),
+            ("Final Exam", 50.0, 50.0, 6),
+        ]
+
+        components = [
+            AssessmentSchemeComponent(
+                school_id=None,
+                term_id=term.id,
+                assessment_scheme_id=scheme.id,
+                name=name,
+                description=f"Term {term.name.value} {name}",
+                weight=weight,
+                max_score=max_score,
+                display_order=display_order,
             )
+            for term in terms
+            for name, weight, max_score, display_order in component_templates
+        ]
+
         system_session.add_all(components)
 
+    @classmethod
+    async def _create_subjects(
+        cls,
+        *,
+        system_session: AsyncSession,
+        template: BluePrintTemplate,
+    ) -> dict[str, Subject]:
         subjects = [
             Subject(
                 school_id=None,
@@ -779,14 +925,19 @@ class SchoolProvisioningService:
         ]
         system_session.add_all(subjects)
         await system_session.flush()
-        subject_by_name = {subject.name: subject for subject in subjects}
+        return {subject.name: subject for subject in subjects}
 
-        # Track global streams across grades to prevent duplicates
+    @classmethod
+    async def _create_grades_streams_offerings_and_sections(
+        cls,
+        *,
+        system_session: AsyncSession,
+        template: BluePrintTemplate,
+        blueprint_year: Year,
+        scheme: AssessmentScheme,
+        subject_by_name: dict[str, Subject],
+    ) -> None:
         global_stream_map: dict[str, Stream] = {}
-
-        grade_by_value: dict[uuid.UUID, Grade] = {}
-        sections_by_grade: dict[uuid.UUID, list[Section]] = {}
-        grade_streams_by_grade: dict[uuid.UUID, list[GradeStream]] = {}
 
         offerings: list[SubjectOffering] = []
         class_sections: list[ClassSection] = []
@@ -800,7 +951,6 @@ class SchoolProvisioningService:
             )
             system_session.add(grade)
             await system_session.flush()
-            grade_by_value[grade.id] = grade
 
             # Collect sections for this grade
             grade_sections = [
@@ -812,7 +962,7 @@ class SchoolProvisioningService:
                 for section_name in DEFAULT_BLUEPRINT_SECTIONS
             ]
             system_session.add_all(grade_sections)
-            sections_by_grade[grade.id] = grade_sections
+            await system_session.flush()
 
             current_grade_streams: list[GradeStream] = []
 
@@ -820,19 +970,12 @@ class SchoolProvisioningService:
                 for stream_data in grade_data.streams:
                     stream = global_stream_map.get(stream_data.name)
                     if not stream:
-                        stream = Stream(
-                            school_id=None,
-                            name=stream_data.name,
-                        )
+                        stream = Stream(school_id=None, name=stream_data.name)
                         system_session.add(stream)
                         await system_session.flush()
                         global_stream_map[stream_data.name] = stream
 
-                    grade_stream = GradeStream(
-                        school_id=None,
-                        grade_id=grade.id,
-                        stream_id=stream.id,
-                    )
+                    grade_stream = GradeStream(school_id=None, grade_id=grade.id, stream_id=stream.id)
                     system_session.add(grade_stream)
                     await system_session.flush()
                     current_grade_streams.append(grade_stream)
@@ -848,11 +991,7 @@ class SchoolProvisioningService:
                             )
                         )
             else:
-                grade_stream = GradeStream(
-                    school_id=None,
-                    grade_id=grade.id,
-                    stream_id=None,
-                )
+                grade_stream = GradeStream(school_id=None, grade_id=grade.id, stream_id=None)
                 system_session.add(grade_stream)
                 await system_session.flush()
                 current_grade_streams.append(grade_stream)
@@ -867,8 +1006,6 @@ class SchoolProvisioningService:
                             assessment_scheme_id=scheme.id,
                         )
                     )
-
-            grade_streams_by_grade[grade.id] = current_grade_streams
 
             # Create ClassSections per grade using local section indices
             for local_idx, section in enumerate(grade_sections):
@@ -885,14 +1022,40 @@ class SchoolProvisioningService:
         system_session.add_all(offerings)
         system_session.add_all(class_sections)
 
-        department = Department(
-            school_id=None,
-            name="Teaching",
-            code="TEACH",
-            head_employee_id=None,
-        )
+    @classmethod
+    async def seed_departments_and_positions(
+        cls,
+        *,
+        system_session: AsyncSession,
+        school_id: UUID | None = None,
+    ) -> None:
+        """
+        Seeds standard departments and their corresponding positions in a single graph.
+        Pass `school_id=None` for global system templates, or a specific UUID for tenant bootstrapping.
+        """
+        position_instances: list[Position] = []
 
-        system_session.add(department)
+        for dept_data in TENANT_DEPARTMENT_POSITIONS_TEMPLATE:
+            department = Department(
+                school_id=school_id,
+                name=dept_data["name"],
+                code=dept_data["code"],
+                head_employee_id=None,
+            )
+            system_session.add(department)
+
+            await system_session.flush()
+
+            for pos_data in dept_data["positions"]:
+                position_instances.append(
+                    Position(
+                        school_id=school_id,
+                        department_id=department.id,
+                        title=pos_data["title"],
+                    )
+                )
+
+        system_session.add_all(position_instances)
         await system_session.flush()
 
     @classmethod
@@ -966,6 +1129,18 @@ class SchoolProvisioningService:
             maps=maps,
         )
         await cls._copy_class_sections(
+            system_session=system_session,
+            tenant_session=tenant_session,
+            school_id=school_id,
+            maps=maps,
+        )
+        await cls._copy_departments(
+            system_session=system_session,
+            tenant_session=tenant_session,
+            school_id=school_id,
+            maps=maps,
+        )
+        await cls._copy_positions(
             system_session=system_session,
             tenant_session=tenant_session,
             school_id=school_id,
@@ -1586,11 +1761,11 @@ class SchoolProvisioningService:
                 blueprint_stream_ids.append(stream.id)
                 existing_stream_names.add(stream.name)
 
-            tenant_session.add_all(new_rows)
-            await tenant_session.flush()
+        tenant_session.add_all(new_rows)
+        await tenant_session.flush()
 
-            for blueprint_id, new_st in zip(blueprint_stream_ids, new_rows):
-                maps.streams[blueprint_id] = new_st.id
+        for blueprint_id, new_st in zip(blueprint_stream_ids, new_rows):
+            maps.streams[blueprint_id] = new_st.id
 
     @classmethod
     async def _ensure_streams(
@@ -1997,3 +2172,114 @@ class SchoolProvisioningService:
             # Map old IDs to generated target IDs after flush
             for blueprint_id, new_cs in zip(blueprint_cs_ids, new_rows):
                 maps.class_sections[blueprint_id] = new_cs.id
+
+    @classmethod
+    async def _copy_departments(
+        cls,
+        *,
+        tenant_session: AsyncSession,
+        system_session: AsyncSession,
+        school_id: uuid.UUID,
+        maps: ProvisioningMaps,
+    ) -> None:
+        departments = await cls._blueprint_rows(
+            system_session=system_session,
+            model=Department,
+        )
+        if not departments:
+            return
+
+        # Fetch existing target departments to prevent duplicates
+        existing_target_departments = (
+            (
+                await tenant_session.execute(
+                    select(Department).where(
+                        Department.school_id == school_id,
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+        existing_department_names = {d.name for d in existing_target_departments}
+
+        new_rows: list[Department] = []
+        blueprint_department_ids: list[uuid.UUID] = []
+
+        for department in departments:
+            if department.name not in existing_department_names:
+                new_department = Department(
+                    school_id=school_id,
+                    name=department.name,
+                    code=department.code,
+                )
+                new_rows.append(new_department)
+                blueprint_department_ids.append(department.id)
+                existing_department_names.add(department.name)
+
+            tenant_session.add_all(new_rows)
+            await tenant_session.flush()
+
+            for blueprint_id, new_dept in zip(blueprint_department_ids, new_rows):
+                maps.departments[blueprint_id] = new_dept.id
+
+    @classmethod
+    async def _copy_positions(
+        cls,
+        *,
+        tenant_session: AsyncSession,
+        system_session: AsyncSession,
+        school_id: uuid.UUID,
+        maps: ProvisioningMaps,
+    ) -> None:
+        blueprint_positions = await cls._blueprint_rows(
+            system_session=system_session,
+            model=Position,
+        )
+        if not blueprint_positions:
+            return
+
+        # Fetch existing target positions to prevent duplicates
+        existing_target_positions = (
+            (
+                await tenant_session.execute(
+                    select(Position).where(
+                        Position.school_id == school_id,
+                    )
+                )
+            )
+            .scalars()
+            .all()
+        )
+        existing_position_keys = {(pos.department_id, pos.title) for pos in existing_target_positions}
+
+        new_positions: list[Position] = []
+        blueprint_pos_ids: list[uuid.UUID] = []
+
+        for blueprint_pos in blueprint_positions:
+            # Map the system department ID to the newly created tenant department ID
+            if blueprint_pos.department_id not in maps.departments:
+                continue
+
+            tenant_dept_id = maps.departments.get(blueprint_pos.department_id)
+
+            # Skip position if its parent department was not mapped or found
+            if not tenant_dept_id:
+                continue
+
+            pos_key = (tenant_dept_id, blueprint_pos.title)
+            if pos_key not in existing_position_keys:
+                new_pos = Position(
+                    school_id=school_id,
+                    department_id=tenant_dept_id,
+                    title=blueprint_pos.title,
+                )
+                new_positions.append(new_pos)
+                blueprint_pos_ids.append(blueprint_pos.id)
+                existing_position_keys.add(pos_key)
+
+            tenant_session.add_all(new_positions)
+            await tenant_session.flush()  # Generates tenant UUIDs for new positions
+
+            for blueprint_id, new_pos in zip(blueprint_pos_ids, new_positions):
+                maps.positions[blueprint_id] = new_pos.id

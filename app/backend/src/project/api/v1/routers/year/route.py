@@ -18,12 +18,8 @@ from project.api.v1.routers.year.schema import (
     YearSummary,
 )
 from project.api.v1.routers.year.service import create_academic_term
-from project.models.grade import Grade
-from project.models.subject import Subject
 from project.models.year import Year
 from project.schema.models import YearWithRelatedSchema
-from project.schema.models.grade_schema import GradeNestedSchema
-from project.schema.models.subject_schema import SubjectNestedSchema
 from project.schema.models.year_schema import YearSchema
 from project.schema.schema import SuccessResponse
 from project.services.school_provisioning import (
@@ -232,74 +228,3 @@ async def delete_year(
     except Exception as e:
         await session.rollback()
         raise HTTPException(status_code=500, detail=f"Deletion failed: {str(e)}")
-
-
-@router.get(
-    "/{year_id}/grades/detail",
-    response_model=List[GradeNestedSchema],
-)
-async def get_detail_grades_by_year_id(
-    session: SessionDep,
-    year_id: uuid.UUID,
-    user_in: AuthenticatedRoute,
-) -> Sequence[Grade]:
-    """
-    Returns specific academic year
-    """
-    # TODO: This should be moved to grades route
-    year = await session.get(Year, year_id)
-    if not year:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Year with ID {year_id} not found.",
-        )
-
-    grades = (
-        (
-            await session.execute(
-                select(Grade).options(
-                    selectinload(Grade.sections),
-                    selectinload(Grade.streams),
-                )
-            )
-        )
-        .scalars()
-        .all()
-    )
-
-    return grades
-
-
-@router.get(
-    "/{year_id}/subjects/detail",
-    response_model=List[SubjectNestedSchema],
-)
-async def get_detail_subjects_by_year_id(
-    session: SessionDep,
-    year_id: uuid.UUID,
-    user_in: AuthenticatedRoute,
-) -> Sequence[Subject]:
-    """
-    Returns specific academic year
-    """
-    # TODO: This should be moved to subjects route
-    year = await session.get(Year, year_id)
-    if not year:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Year with ID {year_id} not found.",
-        )
-
-    subjects = (
-        (
-            await session.execute(
-                select(Subject).options(
-                    # selectinload(Subject.teachers),
-                )
-            )
-        )
-        .scalars()
-        .all()
-    )
-
-    return subjects

@@ -13,7 +13,9 @@ from project.schema.models.assessment_schema import (
     AssessmentSchema,
 )
 from project.schema.models.blacklist_token_schema import BlacklistTokenSchema
+from project.schema.models.department_schema import DepartmentSchema
 from project.schema.models.employee_schema import EmployeeSchema
+from project.schema.models.employment_application_schema import EmploymentApplicationSchema
 from project.schema.models.event_schema import (
     EventRelatedSchema,
     EventSchema,
@@ -27,7 +29,9 @@ from project.schema.models.grade_schema import (
     GradeWithSubjectSchema,
 )
 from project.schema.models.grade_stream_link_schema import GradeStreamLinkSchema
+from project.schema.models.job_schema import JobSchema
 from project.schema.models.mark_list_schema import MarkListSchema
+from project.schema.models.position_schema import PositionSchema
 from project.schema.models.registration_schema import RegistrationSchema
 from project.schema.models.saved_query_view_schema import (
     SavedQueryViewRelatedSchema,
@@ -101,7 +105,11 @@ __all__ = [
     "AdminWithRelatedSchema",
     "AssessmentRelatedSchema",
     "AssessmentSchema",
+    "BasicSubjectSchema",
     "BlacklistTokenSchema",
+    "DepartmentSchema",
+    "EmployeeSchema",
+    "EmploymentApplicationSchema",
     "EventRelatedSchema",
     "EventSchema",
     "EventWithRelatedSchema",
@@ -109,15 +117,18 @@ __all__ = [
     "GradeRelatedSchema",
     "GradeSchema",
     "GradeStreamLinkSchema",
-    "SubjectOfferingSchema",
     "GradeWithRelatedSchema",
+    "GradeWithSubjectSchema",
+    "JobSchema",
     "MarkListSchema",
+    "PositionSchema",
     "RegistrationSchema",
     "SavedQueryViewRelatedSchema",
     "SavedQueryViewSchema",
     "SectionRelatedSchema",
     "SectionSchema",
     "SectionWithRelatedSchema",
+    "StreamNestedSchema",
     "StreamRelatedSchema",
     "StreamSchema",
     "StudentRelatedSchema",
@@ -130,8 +141,10 @@ __all__ = [
     "StudentYearRecordSchema",
     "StudentYearRecordWithRelatedSchema",
     "SubjectNestedSchema",
+    "SubjectOfferingRelatedSchema",
+    "SubjectOfferingSchema",
+    "SubjectOfferingSchema",
     "SubjectRelatedSchema",
-    "BasicSubjectSchema",
     "SubjectSchema",
     "SubjectWithRelatedSchema",
     "SubjectYearlyAverageRelatedSchema",
@@ -147,11 +160,6 @@ __all__ = [
     "YearRelatedSchema",
     "YearSchema",
     "YearWithRelatedSchema",
-    "SubjectOfferingRelatedSchema",
-    "SubjectOfferingSchema",
-    "StreamNestedSchema",
-    "GradeWithSubjectSchema",
-    "EmployeeSchema",
 ]
 
 AcademicTermSchema.model_rebuild()
@@ -222,3 +230,8 @@ SubjectOfferingRelatedSchema.model_rebuild()
 # Linking Schemas
 SubjectOfferingSchema.model_rebuild()
 EmployeeSchema.model_rebuild()
+
+DepartmentSchema.model_rebuild()
+PositionSchema.model_rebuild()
+JobSchema.model_rebuild()
+EmploymentApplicationSchema.model_rebuild()

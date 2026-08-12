@@ -57,9 +57,18 @@ class EnrollmentApplication(SchoolScopedMixin, BaseModel):
 
     __table_args__ = (UniqueConstraint("id", "school_id", name="uq_enrollment_application_id_school_id"),)
 
-    user: Mapped["User"] = relationship(
+    applicant_user: Mapped["User"] = relationship(
         "User",
-        back_populates="enrollment_applications",
+        foreign_keys=[applicant_user_id],
+        back_populates="applicant_enrollment_applications",
+        init=False,
+        repr=False,
+        passive_deletes=True,
+    )
+    student_user: Mapped["User"] = relationship(
+        "User",
+        foreign_keys=[student_user_id],
+        back_populates="student_enrollment_applications",
         init=False,
         repr=False,
         passive_deletes=True,

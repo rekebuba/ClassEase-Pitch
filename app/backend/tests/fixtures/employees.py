@@ -1,23 +1,51 @@
+import uuid
 from typing import Awaitable, Callable
 
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
 
+from project.api.v1.routers.jobs.schema import JobApplicationPost
+from project.schema.models import JobSchema
+from project.schema.schema import SuccessResponse
 from tests.factories.api_data import (
-    EmployeeProfileFactory,
+    HireJobApplicationFactory,
     TeacherProfileFactory,
 )
 from tests.utils.api import API
 from tests.utils.type_test import (
+    MockEmployeeProfile,
     MockSchool,
     MockSignUp,
     SchoolAdmin,
     SchoolEmployee,
+    SchoolHR,
     SchoolUsers,
     UserScenario,
 )
 from tests.utils.utils import find_admin_in_school
+
+
+@pytest_asyncio.fixture(scope="session")
+async def submit_employee_application(
+    client: AsyncClient,
+    school_users: list[SchoolUsers],
+    school_hr_data: list[SchoolHR],
+) -> Callable[[dict[str, str], JobApplicationPost], Awaitable[SuccessResponse]]:
+    async def _submit_employee_application(
+        headers: dict[str, str],
+        employee_application: JobApplicationPost,
+    ) -> SuccessResponse:
+        r = await API.post_job_application(
+            client=client,
+            job_id=employee_application.job_id,
+            application_data=employee_application,
+            headers=headers,
+        )
+        assert r.status_code == 201, f"Expected 201, got {r.status_code}. Response: {r.text}"
+        return SuccessResponse.model_validate(r.json())
+
+    return _submit_employee_application
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -26,7 +54,7 @@ async def hire_employee(
     schools: list[MockSchool],
     school_users: list[SchoolUsers],
     admin_membership: list[SchoolAdmin],
-) -> Callable[[MockSchool, MockSignUp], Awaitable[UserScenario]]:
+) -> Callable[[MockSchool, MockSignUp, JobApplicationPost, uuid.UUID], Awaitable[UserScenario]]:
     """
     A factory fixture that returns a function to build the scenario.
     """
@@ -34,6 +62,8 @@ async def hire_employee(
     async def _build(
         school: MockSchool,
         user: MockSignUp,
+        job: JobSchema,
+        application_id: uuid.UUID,
     ) -> UserScenario:
         school_id = school.response.school_id
 
@@ -45,30 +75,24 @@ async def hire_employee(
         if admin is None:
             raise ValueError(f"No admin membership found for school with ID {school_id}")
 
-        # 1. Create Membership
-        employee_profile = EmployeeProfileFactory.create(
+        employee_to_hire = HireJobApplicationFactory.create(
             user_id=user.response.id,
+            job_id=job.id,
+            application_id=application_id,
             manager_employee_id=None,
-            primary_position_id=None,
+            teacher_profile=TeacherProfileFactory.create(),
         )
 
-        membership = await API.post_employee(
+        response = await API.hire_employee(
             client=client,
-            employee_profile=employee_profile,
+            employee_data=employee_to_hire,
             headers=admin.login.headers,
         )
 
-        teacher_profile = TeacherProfileFactory.create(
-            employee_id=membership.response.id,
-        )
+        assert response.status_code == 201, f"Expected 201, got {response.status_code}. Response: {response.text}"
+        employee_data = SuccessResponse.model_validate(response.json())
+        assert employee_data is not None, "Failed to validate response JSON"
 
-        await API.post_teacher_profile(
-            client=client,
-            teacher_profile=teacher_profile,
-            headers=admin.login.headers,
-        )
-
-        # 2. Perform Login
         login_data = await API.login(
             client,
             username=user.request.username,
@@ -76,7 +100,7 @@ async def hire_employee(
             school_slug=None,
         )
 
-        employee = await API.get_logged_in_user(
+        user_info = await API.get_logged_in_user(
             client,
             headers=login_data.headers,
         )
@@ -84,8 +108,11 @@ async def hire_employee(
         return UserScenario(
             school=school,
             signup=user,
-            user_info=employee,
-            employee=membership,
+            user_info=user_info,
+            employee=MockEmployeeProfile(
+                request=employee_to_hire,
+                response=employee_data,
+            ),
             login=login_data,
         )
 

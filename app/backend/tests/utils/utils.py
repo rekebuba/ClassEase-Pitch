@@ -30,8 +30,10 @@ from project.models import (
     AssessmentScheme,
     AssessmentSchemeComponent,
     ClassSection,
+    Department,
     Grade,
     GradeStream,
+    Position,
     School,
     SchoolMembership,
     Section,
@@ -65,6 +67,8 @@ PROVISIONED_MODELS = (
     AssessmentSchemeComponent,
     SubjectOffering,
     ClassSection,
+    Department,
+    Position,
 )
 
 
@@ -90,11 +94,13 @@ async def _assert_provisioned_models_counts(
     assert counts["streams"] == 2, f"Expected 2 streams, got {counts['streams']}"
     assert counts["grade_streams"] == 14, f"Expected 14 grade streams, got {counts['grade_streams']}"
     assert counts["assessment_schemes"] == 1, f"Expected 1 assessment scheme, got {counts['assessment_schemes']}"
-    assert counts["assessment_scheme_components"] == 4, (
-        f"Expected 4 assessment scheme components, got {counts['assessment_scheme_components']}"
+    assert counts["assessment_scheme_components"] == 12, (
+        f"Expected 12 assessment scheme components, got {counts['assessment_scheme_components']}"
     )
     assert counts["subject_offerings"] == 130, f"Expected 130 subject offerings, got {counts['subject_offerings']}"
     assert counts["class_sections"] == 36, f"Expected 36 class sections, got {counts['class_sections']}"
+    assert counts["departments"] == 7, f"Expected 7 departments, got {counts['departments']}"
+    assert counts["positions"] == 19, f"Expected 19 positions, got {counts['positions']}"
 
     return counts
 

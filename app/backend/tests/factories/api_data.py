@@ -7,7 +7,10 @@ from faker import Faker
 
 from project.api.v1.routers.auth.route import SchoolAwareOAuth2PasswordRequestForm
 from project.api.v1.routers.auth.schema import SignUpRequest
+from project.api.v1.routers.departments.schema import DepartmentBase
 from project.api.v1.routers.employee.schema import EmployeePositionCreate
+from project.api.v1.routers.jobs.schema import HireJobApplication, JobApplicationPost, JobPost
+from project.api.v1.routers.positions.schema import PositionBase
 from project.api.v1.routers.registrations.schema import (
     AdminRegistration,
     EmployeeRegistrationForm,
@@ -25,6 +28,7 @@ from project.utils.enum import (
     AcademicTermTypeEnum,
     AcademicYearStatusEnum,
     BloodTypeEnum,
+    ContractTypeEnum,
     EmployeePositionEnum,
     EmploymentStatusEnum,
     EmploymentTypeEnum,
@@ -86,6 +90,80 @@ class NewSchoolMembershipFactory(TypedFactory[NewSchoolMembership]):
     role = LazyAttribute(lambda _: random.choice(list(RoleEnum)))
 
 
+class DepartmentFactory(TypedFactory[DepartmentBase]):
+    class Meta:
+        model = DepartmentBase
+
+    name = LazyAttribute(lambda _: fake.department())
+    code = LazyAttribute(lambda _: fake.department_code())
+    head_employee_id = LazyAttribute(lambda _: uuid.uuid4())
+
+
+class PositionFactory(TypedFactory[PositionBase]):
+    class Meta:
+        model = PositionBase
+
+    title = LazyAttribute(lambda _: fake.job())
+    department_id = LazyAttribute(lambda _: uuid.uuid4())
+
+
+class JobPostFactory(TypedFactory[JobPost]):
+    class Meta:
+        model = JobPost
+
+    position_id = LazyAttribute(lambda _: uuid.uuid4())
+    description = LazyAttribute(lambda _: fake.text(max_nb_chars=100))
+    employment_type = LazyAttribute(lambda _: random.choice(list(EmploymentTypeEnum)))
+    application_deadline = LazyAttribute(lambda _: fake.future_date())
+    openings_count = LazyAttribute(lambda _: random.randint(1, 2))
+
+
+class JobApplicationFactory(TypedFactory[JobApplicationPost]):
+    class Meta:
+        model = JobApplicationPost
+
+    school_id = LazyAttribute(lambda _: uuid.uuid4())
+    user_id = LazyAttribute(lambda _: uuid.uuid4())
+    job_id = LazyAttribute(lambda _: uuid.uuid4())
+    cover_note = LazyAttribute(lambda _: fake.text(max_nb_chars=100))
+
+
+class TeacherProfileFactory(TypedFactory[CreateTeacherProfile]):
+    class Meta:
+        model = CreateTeacherProfile
+
+    specialization = LazyAttribute(lambda _: fake.job())
+    teacher_license_number = LazyAttribute(lambda _: str(fake.random_number(digits=8)))
+    certifications = LazyAttribute(lambda _: fake.sentence(nb_words=5))
+    highest_education = LazyAttribute(lambda _: random.choice(list(HighestEducationEnum)))
+    years_of_experience = LazyAttribute(lambda _: random.randint(1, 20))
+
+
+class HireJobApplicationFactory(TypedFactory[HireJobApplication]):
+    class Meta:
+        model = HireJobApplication
+
+    user_id = LazyAttribute(lambda _: uuid.uuid4())
+    job_id = LazyAttribute(lambda _: uuid.uuid4())
+    application_id = LazyAttribute(lambda _: uuid.uuid4())
+    employee_number = LazyAttribute(lambda _: str(fake.random_number(digits=5)))
+    hire_date = LazyAttribute(lambda _: fake.past_date())
+    employment_status = LazyAttribute(lambda _: random.choice(list(EmploymentStatusEnum)))
+    employment_type = LazyAttribute(lambda _: random.choice(list(EmploymentTypeEnum)))
+    termination_date = LazyAttribute(lambda _: fake.future_date() if random.choice([True, False]) else None)
+    manager_employee_id = LazyAttribute(lambda _: uuid.uuid4())
+    work_email = LazyAttribute(lambda _: fake.company_email())
+    work_phone = LazyAttribute(lambda _: "+251912345678")
+    start_date = LazyAttribute(lambda _: fake.past_date())
+    end_date = LazyAttribute(lambda _: fake.future_date() if random.choice([True, False]) else None)
+    contract_type = LazyAttribute(lambda _: random.choice(list(ContractTypeEnum)))
+    contract_start_date = LazyAttribute(lambda _: fake.past_date())
+    contract_end_date = LazyAttribute(lambda _: fake.future_date() if random.choice([True, False]) else None)
+    hours_per_week = LazyAttribute(lambda _: random.randint(20, 40))
+
+    teacher_profile = LazyAttribute(lambda _: TeacherProfileFactory.build() if random.choice([True, False]) else None)
+
+
 class StudentProfileFactory(TypedFactory[StudentProfile]):
     class Meta:
         model = StudentProfile
@@ -119,18 +197,6 @@ class EmployeePositionFactory(TypedFactory[EmployeePositionCreate]):
     start_date = LazyAttribute(lambda _: fake.past_date())
     end_date = LazyAttribute(lambda _: fake.future_date() if random.choice([True, False]) else None)
     is_primary = LazyAttribute(lambda _: random.choice([True, False]))
-
-
-class TeacherProfileFactory(TypedFactory[CreateTeacherProfile]):
-    class Meta:
-        model = CreateTeacherProfile
-
-    employee_id = LazyAttribute(lambda _: uuid.uuid4())
-    specialization = LazyAttribute(lambda _: fake.job())
-    teacher_license_number = LazyAttribute(lambda _: str(fake.random_number(digits=8)))
-    certifications = LazyAttribute(lambda _: fake.sentence(nb_words=5))
-    highest_education = LazyAttribute(lambda _: random.choice(list(HighestEducationEnum)))
-    years_of_experience = LazyAttribute(lambda _: random.randint(1, 20))
 
 
 class NewYearFactory(TypedFactory[NewYear]):

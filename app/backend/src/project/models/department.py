@@ -1,5 +1,5 @@
 import uuid
-from typing import TYPE_CHECKING, List, Optional
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import UUID, ForeignKeyConstraint, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -46,14 +46,6 @@ class Department(SchoolScopedMixin, BaseModel):
         foreign_keys=[head_employee_id],
         back_populates="headed_departments",
         init=False,
-        repr=False,
-        passive_deletes=True,
-    )
-    employees: Mapped[List["Employee"]] = relationship(
-        "Employee",
-        foreign_keys="Employee.department_id",
-        back_populates="department",
-        default_factory=list,
         repr=False,
         passive_deletes=True,
     )

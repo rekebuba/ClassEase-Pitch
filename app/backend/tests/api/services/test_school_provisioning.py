@@ -12,8 +12,10 @@ from project.models import (
     AssessmentScheme,
     AssessmentSchemeComponent,
     ClassSection,
+    Department,
     Grade,
     GradeStream,
+    Position,
     School,
     Section,
     Stream,
@@ -136,6 +138,8 @@ async def test_setup_school_copies_blueprint_rows_and_returns_complete_id_maps(
         (AssessmentSchemeComponent, maps.assessment_scheme_components),
         (SubjectOffering, maps.subject_offerings),
         (ClassSection, maps.class_sections),
+        (Department, maps.departments),
+        (Position, maps.positions),
     ):
         blueprint_rows = await _rows(system_session=system_db_session, model=model)
         tenant_rows = await _rows(

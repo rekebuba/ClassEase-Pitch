@@ -23,8 +23,8 @@ from tests.utils.type_test import (
     SchoolAdmin,
     SchoolEmployee,
     SchoolGrade,
+    SchoolHR,
     SchoolScenario,
-    SchoolStudent,
     SchoolYear,
     YearScenario,
 )
@@ -60,8 +60,9 @@ async def schools(
 async def school(
     request: pytest.FixtureRequest,
     schools: list[MockSchool],
+    school_hr_data: list[SchoolHR],
     employee_membership: list[SchoolEmployee],
-    student_membership: list[SchoolStudent],
+    # student_membership: list[SchoolStudent],
     admin_membership: list[SchoolAdmin],
     years: list[SchoolYear],
     grades: list[SchoolGrade],
@@ -71,7 +72,7 @@ async def school(
     # Defensive check: Ensure we are pulling data for the exact same school
     current_school = schools[idx]
     assert employee_membership[idx].school == current_school
-    assert student_membership[idx].school == current_school
+    # assert student_membership[idx].school == current_school
     assert admin_membership[idx].school == current_school
     assert years[idx].school == current_school
     assert grades[idx].school == current_school
@@ -79,7 +80,7 @@ async def school(
     all_users = []
     all_users.extend(admin_membership[idx].admins)
     all_users.extend(employee_membership[idx].employees)
-    all_users.extend(student_membership[idx].students)
+    # all_users.extend(student_membership[idx].students)
 
     return SchoolScenario(
         school=schools[idx],

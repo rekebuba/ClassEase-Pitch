@@ -5,6 +5,7 @@ pytest_plugins = [
     "tests.fixtures.db",
     "tests.fixtures.employees",
     "tests.fixtures.grades",
+    "tests.fixtures.jobs",
     "tests.fixtures.memberships",
     "tests.fixtures.metafunc",
     "tests.fixtures.payroll",

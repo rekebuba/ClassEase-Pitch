@@ -64,15 +64,6 @@ class EmployeeService:
                 detail="Manager Employee Not Found",
             )
 
-        if (
-            employee_data.primary_position_id
-            and (await session.get(Employee, employee_data.primary_position_id)) is None
-        ):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Primary Position Not Found",
-            )
-
         employee = Employee(
             school_id=school_id,
             user_id=user.id,
@@ -81,7 +72,6 @@ class EmployeeService:
             employment_status=employee_data.employment_status,
             employment_type=employee_data.employment_type,
             termination_date=employee_data.termination_date,
-            primary_position_id=employee_data.primary_position_id,
             manager_employee_id=employee_data.manager_employee_id,
             work_email=employee_data.work_email,
             work_phone=employee_data.work_phone,

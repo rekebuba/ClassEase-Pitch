@@ -144,17 +144,6 @@ class EmploymentTypeEnum(str, Enum):
     INTERN = "intern"
 
 
-class PositionCategoryEnum(str, Enum):
-    ACADEMIC = "academic"
-    ADMINISTRATION = "administration"
-    FINANCE = "finance"
-    HR = "hr"
-    IT = "it"
-    OPERATIONS = "operations"
-    SUPPORT = "support"
-    OTHER = "other"
-
-
 class EmploymentApplicationStatusEnum(str, Enum):
     DRAFT = "draft"
     SUBMITTED = "submitted"

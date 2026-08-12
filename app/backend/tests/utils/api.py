@@ -1,14 +1,18 @@
 import uuid
 
+import httpx
 from httpx import AsyncClient
 
 from project.api.v1.routers.auth.schema import (
     LoginTokenResponse,
     SignUpRequest,
 )
+from project.api.v1.routers.departments.schema import DepartmentBase
 from project.api.v1.routers.employee.schema import EmployeePositionCreate
 from project.api.v1.routers.grades.schema import GradeSetupSchema
-from project.api.v1.routers.schema import FilterParams
+from project.api.v1.routers.jobs.schema import HireJobApplication, JobApplicationPost, JobPost
+from project.api.v1.routers.positions.schema import PositionBase
+from project.api.v1.routers.schema import FilterParams, SearchParams
 from project.api.v1.routers.school.schema import EmployeeProfile
 from project.api.v1.routers.subjects.schema import SubjectSetupSchema
 from project.api.v1.routers.teachers.schema import CreateTeacherProfile
@@ -95,6 +99,159 @@ class API:
         )
         assert r.status_code == 201, f"Expected 201, got {r.status_code}. Response: {r.text}"
         return MockYear(request=new_year, response=SuccessResponse.model_validate(r.json()))
+
+    @staticmethod
+    async def post_department(
+        *,
+        client: AsyncClient,
+        department: DepartmentBase,
+        headers: dict[str, str],
+    ) -> httpx.Response:
+        return await client.post(
+            f"{settings.API_V1_STR}/departments",
+            json=department.model_dump(mode="json"),
+            headers=headers,
+        )
+
+    @staticmethod
+    async def get_departments(
+        *,
+        client: AsyncClient,
+        headers: dict[str, str],
+        query: SearchParams | None = None,
+    ) -> httpx.Response:
+        return await client.get(
+            f"{settings.API_V1_STR}/departments",
+            headers=headers,
+            params=query.model_dump() if query else None,
+        )
+
+    @staticmethod
+    async def get_department(
+        *,
+        client: AsyncClient,
+        headers: dict[str, str],
+        department_id: uuid.UUID,
+    ) -> httpx.Response:
+        return await client.get(
+            f"{settings.API_V1_STR}/departments/{department_id}",
+            headers=headers,
+        )
+
+    @staticmethod
+    async def post_position(
+        *,
+        client: AsyncClient,
+        position: PositionBase,
+        headers: dict[str, str],
+    ) -> httpx.Response:
+        return await client.post(
+            f"{settings.API_V1_STR}/positions",
+            json=position.model_dump(mode="json"),
+            headers=headers,
+        )
+
+    @staticmethod
+    async def get_positions(
+        *,
+        client: AsyncClient,
+        headers: dict[str, str],
+        query: SearchParams | None = None,
+    ) -> httpx.Response:
+        return await client.get(
+            f"{settings.API_V1_STR}/positions",
+            headers=headers,
+            params=query.model_dump() if query else None,
+        )
+
+    @staticmethod
+    async def get_position(
+        *,
+        client: AsyncClient,
+        headers: dict[str, str],
+        position_id: uuid.UUID,
+    ) -> httpx.Response:
+        return await client.get(
+            f"{settings.API_V1_STR}/positions/{position_id}",
+            headers=headers,
+        )
+
+    @staticmethod
+    async def post_job(
+        *,
+        client: AsyncClient,
+        job: JobPost,
+        headers: dict[str, str],
+    ) -> httpx.Response:
+        return await client.post(
+            f"{settings.API_V1_STR}/jobs",
+            json=job.model_dump(mode="json"),
+            headers=headers,
+        )
+
+    @staticmethod
+    async def get_all_jobs(
+        *,
+        client: AsyncClient,
+        query: SearchParams | None = None,
+    ) -> httpx.Response:
+        return await client.get(
+            f"{settings.API_V1_STR}/jobs",
+            params=query.model_dump() if query else None,
+        )
+
+    @staticmethod
+    async def get_school_jobs(
+        *,
+        client: AsyncClient,
+        headers: dict[str, str],
+        query: SearchParams | None = None,
+    ) -> httpx.Response:
+        return await client.get(
+            f"{settings.API_V1_STR}/school-jobs",
+            headers=headers,
+            params=query.model_dump() if query else None,
+        )
+
+    @staticmethod
+    async def post_job_application(
+        *,
+        client: AsyncClient,
+        job_id: uuid.UUID,
+        application_data: JobApplicationPost,
+        headers: dict[str, str],
+    ) -> httpx.Response:
+        return await client.post(
+            f"{settings.API_V1_STR}/job-applications",
+            json=application_data.model_dump(mode="json"),
+            headers=headers,
+        )
+
+    @staticmethod
+    async def get_job_applications(
+        *,
+        client: AsyncClient,
+        headers: dict[str, str],
+        query: SearchParams | None = None,
+    ) -> httpx.Response:
+        return await client.get(
+            f"{settings.API_V1_STR}/job-applications",
+            headers=headers,
+            params=query.model_dump() if query else None,
+        )
+
+    @staticmethod
+    async def hire_employee(
+        *,
+        client: AsyncClient,
+        employee_data: HireJobApplication,
+        headers: dict[str, str],
+    ) -> httpx.Response:
+        return await client.post(
+            f"{settings.API_V1_STR}/job-applications/hire",
+            json=employee_data.model_dump(mode="json"),
+            headers=headers,
+        )
 
     @staticmethod
     async def post_employee(

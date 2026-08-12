@@ -3,14 +3,15 @@ from datetime import date
 from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import UUID, Date, Enum, ForeignKeyConstraint, UniqueConstraint
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
 from project.models.base.school_mixin import SchoolScopedMixin
 from project.utils.enum import JobStatusEnum
 
 if TYPE_CHECKING:
-    pass
+    from project.models.employment_application import EmploymentApplication
+    from project.models.position import Position
 
 
 class JobPosting(SchoolScopedMixin, BaseModel):
@@ -49,4 +50,18 @@ class JobPosting(SchoolScopedMixin, BaseModel):
             ["positions.id", "positions.school_id"],
             name="fk_job_postings_position_id_school_id_positions",
         ),
+    )
+
+    position: Mapped["Position"] = relationship(
+        "Position",
+        back_populates="job_postings",
+        init=False,
+        repr=False,
+    )
+    employment_applications: Mapped[list["EmploymentApplication"]] = relationship(
+        "EmploymentApplication",
+        back_populates="job_posting",
+        init=False,
+        default_factory=list,
+        passive_deletes=True,
     )

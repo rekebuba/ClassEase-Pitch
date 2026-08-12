@@ -65,8 +65,9 @@ class AssessmentSchemeComponent(SchoolScopedMixin, BaseModel):
         UniqueConstraint(
             "school_id",
             "assessment_scheme_id",
+            "term_id",
             "name",
-            name="uq_assessment_scheme_component_name",
+            name="uq_assessment_scheme_component_school_scheme_term_name",
         ),
         ForeignKeyConstraint(
             ["assessment_scheme_id", "school_id"],

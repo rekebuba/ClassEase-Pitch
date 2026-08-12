@@ -332,7 +332,7 @@ class RequirePermission:
 
 
 AuthenticatedRoute = Annotated[AuthenticatedActor, Depends(get_current_actor)]
-platform_authenticated_route = Annotated[PlatformAuthenticatedActor, Depends(get_current_platform_actor)]
+PlatformAuthenticatedRoute = Annotated[PlatformAuthenticatedActor, Depends(get_current_platform_actor)]
 
 
 async def parse_nested_params(

@@ -1,7 +1,8 @@
+from typing import Awaitable, Callable
+
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from tests.factories.api_data import (
     SignUpFactory,
@@ -81,14 +82,21 @@ async def user(
 @pytest_asyncio.fixture
 async def user_login(
     client: AsyncClient,
-    db_session: AsyncSession,
-    user: MockSignUp,
-) -> MockLogin:
-    """Fixture to create users for testing"""
+    school_users: list[SchoolUsers],
+) -> Callable[[MockSignUp], Awaitable[MockLogin]]:
+    async def _login(
+        user: MockSignUp,
+    ) -> MockLogin:
+        """
+        Used to login users who are not a member of a school.
+        For example, a user who has signed up but has not yet been added to a school.
+        """
 
-    return await API.login(
-        client,
-        username=user.request.username,
-        password=user.request.password,
-        school_slug=None,
-    )
+        return await API.login(
+            client,
+            username=user.request.username,
+            password=user.request.password,
+            school_slug=None,
+        )
+
+    return _login

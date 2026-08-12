@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Callable
 
 from project.api.v1.routers.auth.route import SchoolAwareOAuth2PasswordRequestForm
@@ -6,8 +6,8 @@ from project.api.v1.routers.auth.schema import (
     LoginTokenResponse,
     SignUpRequest,
 )
+from project.api.v1.routers.jobs.schema import HireJobApplication
 from project.api.v1.routers.school.schema import (
-    EmployeeProfile,
     NewSchool,
     NewSchoolMembership,
     StudentProfile,
@@ -18,7 +18,8 @@ from project.api.v1.routers.users.schema import (
     CurrentUserInfo,
 )
 from project.api.v1.routers.year.schema import NewYear
-from project.schema.models import GradeSchema, SectionSchema
+from project.schema.models import DepartmentSchema, GradeSchema, PositionSchema, SectionSchema
+from project.schema.models.job_schema import JobSchema
 from project.schema.schema import SuccessResponse
 from project.utils.enum import RoleEnum
 
@@ -58,7 +59,7 @@ class MockSchoolMembership:
 
 @dataclass
 class MockEmployeeProfile:
-    request: EmployeeProfile
+    request: HireJobApplication
     response: SuccessResponse
 
 
@@ -144,6 +145,34 @@ class GradeScenario:
 class SchoolGrade:
     school: MockSchool
     grades: list[GradeScenario]
+
+
+@dataclass
+class SchoolDepartment:
+    school: MockSchool
+    departments: list[DepartmentSchema]
+    new_department: SuccessResponse | None = None
+
+
+@dataclass
+class SchoolPosition:
+    school: MockSchool
+    positions: list[PositionSchema]
+    new_position: SuccessResponse | None = None
+
+
+@dataclass
+class SchoolJob:
+    school: MockSchool
+    jobs: list[JobSchema]
+
+
+@dataclass
+class SchoolHR:
+    school: MockSchool
+    departments: list[DepartmentSchema] = field(default_factory=list)
+    positions: list[PositionSchema] = field(default_factory=list)
+    jobs: list[JobSchema] = field(default_factory=list)
 
 
 @dataclass

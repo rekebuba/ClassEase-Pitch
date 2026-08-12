@@ -10,6 +10,7 @@ from project.models.base.school_mixin import SchoolScopedMixin
 from project.utils.enum import EmploymentApplicationStatusEnum
 
 if TYPE_CHECKING:
+    from project.models.job_posting import JobPosting
     from project.models.school import School
     from project.models.user import User
 
@@ -60,7 +61,7 @@ class EmploymentApplication(SchoolScopedMixin, BaseModel):
         ),
     )
 
-    user: Mapped["User"] = relationship(
+    applicant_user: Mapped["User"] = relationship(
         "User",
         back_populates="employment_applications",
         init=False,
@@ -69,6 +70,13 @@ class EmploymentApplication(SchoolScopedMixin, BaseModel):
     )
     school: Mapped["School"] = relationship(
         "School",
+        back_populates="employment_applications",
+        init=False,
+        repr=False,
+        passive_deletes=True,
+    )
+    job_posting: Mapped["JobPosting"] = relationship(
+        "JobPosting",
         back_populates="employment_applications",
         init=False,
         repr=False,

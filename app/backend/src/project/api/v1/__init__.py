@@ -3,9 +3,12 @@ from fastapi import APIRouter
 from project.api.v1.routers.academic_setup import route as academic_setup_router
 from project.api.v1.routers.academic_term import route as academic_term_router
 from project.api.v1.routers.auth import route as auth_router
+from project.api.v1.routers.departments import route as departments_router
 from project.api.v1.routers.employee import route as employee_router
 from project.api.v1.routers.grades import route as grade_router
 from project.api.v1.routers.health import route as health_router
+from project.api.v1.routers.jobs import route as jobs_router
+from project.api.v1.routers.positions import route as positions_router
 from project.api.v1.routers.registrations import route as registration_router
 from project.api.v1.routers.school import route as school_router
 from project.api.v1.routers.sections import route as section_router
@@ -35,3 +38,6 @@ api_router.include_router(employee_router.router)
 api_router.include_router(teachers_router.router)
 api_router.include_router(academic_term_router.router)
 api_router.include_router(academic_setup_router.router)
+api_router.include_router(jobs_router.router)
+api_router.include_router(departments_router.router)
+api_router.include_router(positions_router.router)

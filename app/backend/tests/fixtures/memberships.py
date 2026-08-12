@@ -1,15 +1,19 @@
+import uuid
 from typing import Awaitable, Callable
 
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
 
+from project.api.v1.routers.jobs.schema import JobApplicationPost
 from project.api.v1.routers.school.schema import (
     SuccessNewSchoolMembership,
 )
 from project.core.config import settings
+from project.schema.schema import SuccessResponse
 from project.utils.enum import RoleEnum
 from tests.factories.api_data import (
+    JobApplicationFactory,
     NewSchoolMembershipFactory,
 )
 from tests.utils.api import API
@@ -20,6 +24,7 @@ from tests.utils.type_test import (
     MockSignUp,
     SchoolAdmin,
     SchoolEmployee,
+    SchoolHR,
     SchoolStudent,
     SchoolUsers,
     UserScenario,
@@ -111,21 +116,69 @@ async def admin(
 
 @pytest_asyncio.fixture(scope="session")
 async def employee_membership(
+    client: AsyncClient,
     school_users: list[SchoolUsers],
-    hire_employee: Callable[[MockSchool, MockSignUp], Awaitable[UserScenario]],
+    school_hr_data: list[SchoolHR],
+    submit_employee_application: Callable[
+        [dict[str, str], JobApplicationPost],
+        Awaitable[SuccessResponse],
+    ],
+    hire_employee: Callable[
+        [MockSchool, MockSignUp, JobApplicationPost, uuid.UUID],
+        Awaitable[UserScenario],
+    ],
 ) -> list[SchoolEmployee]:
-    """Fixture to hire an employee in a school"""
-    schools: list[SchoolEmployee] = []
+    """Hire employees in each school."""
 
-    for users in school_users:
-        employees: list[UserScenario] = []
+    school_employees: list[SchoolEmployee] = []
 
-        for employee in users.employees:
-            employees.append(await hire_employee(users.school, employee))
+    for school_users_data, school_hr in zip(
+        school_users,
+        school_hr_data,
+        strict=True,
+    ):
+        hired_employees: list[UserScenario] = []
 
-        schools.append(SchoolEmployee(school=users.school, employees=employees))
+        for i, employee in enumerate(school_users_data.employees):
+            job = school_hr.jobs[i]
 
-    return schools
+            assert len(school_users_data.employees) <= len(school_hr.jobs), "Not enough jobs available for employees."
+
+            login = await API.login(
+                client,
+                username=employee.request.username,
+                password=employee.request.password,
+                school_slug=None,
+            )
+
+            job_application = JobApplicationFactory.create(
+                school_id=job.school_id,
+                user_id=employee.response.id,
+                job_id=job.id,
+            )
+
+            application = await submit_employee_application(
+                login.headers,
+                job_application,
+            )
+
+            hired_employee = await hire_employee(
+                school_users_data.school,
+                employee,
+                job,
+                application.id,
+            )
+
+            hired_employees.append(hired_employee)
+
+        school_employees.append(
+            SchoolEmployee(
+                school=school_users_data.school,
+                employees=hired_employees,
+            )
+        )
+
+    return school_employees
 
 
 @pytest_asyncio.fixture(scope="session")
