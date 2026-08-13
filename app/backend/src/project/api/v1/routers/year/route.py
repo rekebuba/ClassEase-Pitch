@@ -122,7 +122,13 @@ async def get_years(
     """
     Returns a list of all academic years in the system.
     """
-    years = (await session.execute(select(Year))).scalars().all()
+    if not user_in.has_permission(PermissionEnum.YEARS_READ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to read academic years.",
+        )
+
+    years = (await session.execute(select(Year).order_by(Year.created_at.desc()))).scalars().all()
 
     return years
 

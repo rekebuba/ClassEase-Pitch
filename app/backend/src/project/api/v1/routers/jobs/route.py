@@ -1,4 +1,3 @@
-import uuid
 from typing import Annotated, List, Optional, Sequence
 
 from fastapi import APIRouter, HTTPException, Query, status
@@ -22,12 +21,17 @@ from project.models import (
     Role,
     SchoolMembership,
     TeacherProfile,
-    User,
 )
 from project.schema.models import EmploymentApplicationSchema
 from project.schema.models.job_schema import JobSchema
 from project.schema.schema import SuccessResponse
-from project.utils.enum import ContractStatusEnum, EmploymentApplicationStatusEnum, PermissionEnum, RoleEnum
+from project.utils.enum import (
+    ContractStatusEnum,
+    EmploymentApplicationStatusEnum,
+    MfaStateEnum,
+    PermissionEnum,
+    RoleEnum,
+)
 
 router = APIRouter()
 
@@ -75,7 +79,11 @@ async def get_school_jobs(
     q: Annotated[Optional[str], Query()] = None,
 ) -> Sequence[JobPosting]:
     """This endpoint will return job postings based on the provided filters."""
-    stm = select(JobPosting).where(JobPosting.school_id == user_in.membership.school_id)
+    stm = (
+        select(JobPosting)
+        .options(selectinload(JobPosting.position))
+        .where(JobPosting.school_id == user_in.membership.school_id)
+    )
 
     if q:
         stm = stm.where(JobPosting.description.ilike(f"%{q}%"))
@@ -160,12 +168,11 @@ async def get_school_job_by_id(
 async def post_job_application(
     session: SessionDep,
     user_in: PlatformAuthenticatedRoute,
-    job_id: uuid.UUID,
     application_data: JobApplicationPost,
 ) -> SuccessResponse:
     """Registers a new job application in the system."""
 
-    job_posting = await session.get(JobPosting, job_id)
+    job_posting = await session.get(JobPosting, application_data.job_id)
 
     if not job_posting:
         raise HTTPException(
@@ -174,9 +181,9 @@ async def post_job_application(
         )
 
     application = EmploymentApplication(
-        school_id=application_data.school_id,
+        school_id=job_posting.school_id,
         job_posting_id=application_data.job_id,
-        applicant_user_id=application_data.user_id,
+        applicant_user_id=user_in.user.id,
         cover_note=application_data.cover_note,
     )
 
@@ -234,42 +241,30 @@ async def hire_employee(
             status_code=status.HTTP_403_FORBIDDEN,
         )
 
-    user_role = RoleEnum.EMPLOYEE  # Default role for new employees
-    application = (
-        await session.execute(
-            select(EmploymentApplication)
-            .options(
-                selectinload(EmploymentApplication.applicant_user).selectinload(User.memberships),
-            )
-            .where(
-                EmploymentApplication.id == application_form.application_id,
-                EmploymentApplication.school_id == user_in.membership.school_id,
-            )
+    application = await session.scalar(
+        select(EmploymentApplication)
+        .options(selectinload(EmploymentApplication.job_posting).selectinload(JobPosting.position))
+        .where(
+            EmploymentApplication.id == application_form.application_id,
+            EmploymentApplication.school_id == user_in.membership.school_id,
         )
-    ).scalar_one_or_none()
+    )
 
-    if not application:
+    if application is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Job application not found for this school.",
         )
 
-    job = (
-        await session.execute(
-            select(JobPosting)
-            .options(selectinload(JobPosting.position))
-            .where(
-                JobPosting.id == application_form.job_id,
-                JobPosting.school_id == user_in.membership.school_id,
-            )
-        )
-    ).scalar_one_or_none()
-
-    if not job:
+    school_id = application.school_id
+    if school_id != user_in.membership.school_id or school_id is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Job posting not found for this school.",
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="School ID mismatch",
         )
+
+    user_id = application.applicant_user_id
+    job = application.job_posting
 
     if application_form.manager_employee_id:
         manager = await session.get(Employee, application_form.manager_employee_id)
@@ -283,17 +278,26 @@ async def hire_employee(
     # Update application status
     application.status = EmploymentApplicationStatusEnum.ACCEPTED
 
-    if not application.applicant_user.memberships:
+    membership = await session.scalar(
+        select(SchoolMembership).where(
+            SchoolMembership.school_id == school_id,
+            SchoolMembership.user_id == user_id,
+        )
+    )
+
+    if membership is None:
         membership = SchoolMembership(
-            school_id=user_in.membership.school_id,
-            user_id=application.applicant_user_id,
+            school_id=school_id,
+            user_id=user_id,
+            mfa_state=MfaStateEnum.VERIFIED,
         )
         session.add(membership)
-        await session.flush()
+
+    await session.flush()
 
     employee = Employee(
-        school_id=user_in.membership.school_id,
-        user_id=application.applicant_user_id,
+        school_id=school_id,
+        user_id=user_id,
         employee_number=application_form.employee_number,
         hire_date=application_form.hire_date,
         employment_status=application_form.employment_status,
@@ -307,7 +311,7 @@ async def hire_employee(
     await session.flush()
 
     employee_position = EmployeePosition(
-        school_id=user_in.membership.school_id,
+        school_id=school_id,
         employee_id=employee.id,
         position_id=job.position.id,
         start_date=application_form.start_date,
@@ -317,7 +321,7 @@ async def hire_employee(
     session.add(employee_position)
 
     employment_contract = EmploymentContract(
-        school_id=user_in.membership.school_id,
+        school_id=school_id,
         employee_id=employee.id,
         contract_type=application_form.contract_type,
         start_date=application_form.contract_start_date,
@@ -331,11 +335,11 @@ async def hire_employee(
         user_role = RoleEnum.TEACHER
         teacher_profile_data = application_form.teacher_profile
         teacher_profile = TeacherProfile(
-            school_id=user_in.membership.school_id,
+            school_id=school_id,
             employee_id=employee.id,
             specialization=teacher_profile_data.specialization,
             teacher_license_number=teacher_profile_data.teacher_license_number,
-            certifications=teacher_profile_data.certification,
+            certifications=teacher_profile_data.certifications,
             highest_education=teacher_profile_data.highest_education,
             years_of_experience=teacher_profile_data.years_of_experience,
         )
@@ -350,7 +354,7 @@ async def hire_employee(
         session,
         membership,
         role,
-        user_in.membership.school_id,
+        school_id,
     )
 
     await session.commit()

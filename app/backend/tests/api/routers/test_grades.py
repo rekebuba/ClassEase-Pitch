@@ -1,6 +1,7 @@
 import pytest
 from httpx import AsyncClient
 
+from project.api.v1.routers.grades.schema import GradeSetupSchema
 from project.api.v1.routers.schema import FilterParams
 from project.utils.enum import RoleEnum
 from tests.utils.api import API
@@ -19,7 +20,7 @@ from tests.utils.type_test import SchoolScenario
         (RoleEnum.ADMIN, "", 12),
     ],
 )
-async def test_get_grades_offerings(
+async def test_get_grade_offerings(
     client: AsyncClient,
     school: SchoolScenario,
     role: RoleEnum,
@@ -27,17 +28,20 @@ async def test_get_grades_offerings(
     expected_count: int,
 ) -> None:
     """
-    Test the get_grades_offerings function for different user roles.
+    Test the get_grade_offerings function for different user roles.
     """
     headers = school.find_user(lambda u: u.user_info.role == role).login.headers
 
-    result = await API.get_grades_offerings(
+    r = await API.get_grade_offerings(
         client=client,
         headers=headers,
-        query=FilterParams(year_id=school.years[0].year.response.id, q=search),
+        query=FilterParams(year_id=school.years.years[0].id, q=search),
     )
 
-    assert len(result) == expected_count, f"Expected {expected_count}, got {len(result)}"
+    assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
+    grade_offerings = [GradeSetupSchema.model_validate(grade) for grade in r.json()]
+
+    assert len(grade_offerings) == expected_count, f"Expected {expected_count}, got {len(grade_offerings)}"
 
 
 @pytest.mark.parametrize(
@@ -52,14 +56,20 @@ async def test_get_grade_offerings_by_id(client: AsyncClient, school: SchoolScen
     """
     headers = school.find_user(lambda u: u.user_info.role == role).login.headers
 
-    grades = await API.get_grades_offerings(
+    r = await API.get_grade_offerings(
         client=client,
         headers=headers,
-        query=FilterParams(year_id=school.years[0].year.response.id),
+        query=FilterParams(year_id=school.years.years[0].id),
     )
 
-    await API.get_grade_offerings_by_id(
+    assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
+    grade_offerings = [GradeSetupSchema.model_validate(grade) for grade in r.json()]
+
+    r = await API.get_grade_offerings_by_id(
         client=client,
         headers=headers,
-        grade_id=grades[0].id,
+        grade_id=grade_offerings[0].id,
     )
+
+    assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
+    GradeSetupSchema.model_validate(r.json())

@@ -6,6 +6,7 @@ from project.api.v1.routers.auth.schema import (
     LoginTokenResponse,
     SignUpRequest,
 )
+from project.api.v1.routers.grades.schema import GradeSetupSchema
 from project.api.v1.routers.jobs.schema import HireJobApplication
 from project.api.v1.routers.school.schema import (
     NewSchool,
@@ -14,11 +15,13 @@ from project.api.v1.routers.school.schema import (
     SuccessNewSchoolMembership,
     SuccessSchoolResponse,
 )
+from project.api.v1.routers.students.schema import EnrollmentOpportunitySchema
+from project.api.v1.routers.subjects.schema import SubjectSetupSchema
 from project.api.v1.routers.users.schema import (
     CurrentUserInfo,
 )
 from project.api.v1.routers.year.schema import NewYear
-from project.schema.models import DepartmentSchema, GradeSchema, PositionSchema, SectionSchema
+from project.schema.models import DepartmentSchema, GradeSchema, PositionSchema, YearSchema
 from project.schema.models.job_schema import JobSchema
 from project.schema.schema import SuccessResponse
 from project.utils.enum import RoleEnum
@@ -129,22 +132,15 @@ class MockGrade:
 
 
 @dataclass
-class SectionScenario:
-    grade: GradeSchema
-    sections: list[SectionSchema]
-
-
-@dataclass
-class GradeScenario:
-    school: MockSchool
-    grade: GradeSchema
-    sections: SectionScenario
-
-
-@dataclass
 class SchoolGrade:
     school: MockSchool
-    grades: list[GradeScenario]
+    grades: list[GradeSetupSchema]
+
+
+@dataclass
+class SchoolSubject:
+    school: MockSchool
+    subjects: list[SubjectSetupSchema]
 
 
 @dataclass
@@ -173,26 +169,29 @@ class SchoolHR:
     departments: list[DepartmentSchema] = field(default_factory=list)
     positions: list[PositionSchema] = field(default_factory=list)
     jobs: list[JobSchema] = field(default_factory=list)
+    enrollment_opportunities: list[EnrollmentOpportunitySchema] = field(default_factory=list)
 
 
 @dataclass
 class YearScenario:
     school: MockSchool
-    year: MockYear
+    year: list[YearSchema]
 
 
 @dataclass
 class SchoolYear:
     school: MockSchool
-    years: list[YearScenario]
+    years: list[YearSchema]
 
 
 @dataclass
 class SchoolScenario:
     school: MockSchool
     users: list[UserScenario]
-    years: list[YearScenario]
-    grades: list[SchoolGrade]
+    years: SchoolYear
+    grades: SchoolGrade
+    subjects: SchoolSubject
+    hr: SchoolHR
 
     def find_user(self, predicate: Callable[[UserScenario], bool]) -> UserScenario:
         """Finds the first user matching a custom condition."""

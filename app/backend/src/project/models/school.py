@@ -97,6 +97,7 @@ class School(BaseModel):
         default_factory=list,
         repr=False,
         passive_deletes=True,
+        overlaps="employment_applications,job_posting",
     )
     enrollment_opportunities: Mapped[List["EnrollmentOpportunity"]] = relationship(
         "EnrollmentOpportunity",

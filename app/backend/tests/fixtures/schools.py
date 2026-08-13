@@ -1,3 +1,4 @@
+import uuid
 from typing import Awaitable, Callable
 
 import pytest
@@ -9,6 +10,8 @@ from project.api.v1.routers.school.schema import (
     SuccessSchoolResponse,
 )
 from project.core.config import settings
+from project.schema.models import YearSchema
+from project.schema.schema import SuccessResponse
 from project.utils.enum import AcademicYearStatusEnum
 from tests.factories.api_data import (
     NewSchoolFactory,
@@ -25,16 +28,16 @@ from tests.utils.type_test import (
     SchoolGrade,
     SchoolHR,
     SchoolScenario,
+    SchoolSubject,
     SchoolYear,
-    YearScenario,
 )
-from tests.utils.utils import _assert_provisioned_models_counts, find_admin_in_school
+from tests.utils.utils import _assert_provisioned_models_counts
 
 
 @pytest_asyncio.fixture(scope="session")
 async def schools(
     client: AsyncClient,
-    owner_token_headers: MockLogin,
+    super_user: MockLogin,
 ) -> list[MockSchool]:
     created: list[MockSchool] = []
     generated = NewSchoolFactory.create_batch(NUM_TEST_SCHOOLS)
@@ -43,7 +46,7 @@ async def schools(
         r = await client.post(
             f"{settings.API_V1_STR}/schools",
             json=school.model_dump(mode="json"),
-            headers=owner_token_headers.headers,
+            headers=super_user.headers,
         )
         assert r.status_code == 201, f"Expected 201, got {r.status_code}. Response: {r.text}"
         created.append(
@@ -60,33 +63,36 @@ async def schools(
 async def school(
     request: pytest.FixtureRequest,
     schools: list[MockSchool],
-    school_hr_data: list[SchoolHR],
-    employee_membership: list[SchoolEmployee],
-    # student_membership: list[SchoolStudent],
-    admin_membership: list[SchoolAdmin],
-    years: list[SchoolYear],
-    grades: list[SchoolGrade],
+    school_hr_data: dict[uuid.UUID, SchoolHR],
+    school_admins: dict[uuid.UUID, SchoolAdmin],
+    school_employees: dict[uuid.UUID, SchoolEmployee],
+    # school_students: list[SchoolStudent],
+    years: dict[uuid.UUID, SchoolYear],
+    grades: dict[uuid.UUID, SchoolGrade],
+    subjects: dict[uuid.UUID, SchoolSubject],
 ) -> SchoolScenario:
     idx = request.param
 
     # Defensive check: Ensure we are pulling data for the exact same school
     current_school = schools[idx]
-    assert employee_membership[idx].school == current_school
-    # assert student_membership[idx].school == current_school
-    assert admin_membership[idx].school == current_school
-    assert years[idx].school == current_school
-    assert grades[idx].school == current_school
+    school_id = current_school.response.school_id
 
-    all_users = []
-    all_users.extend(admin_membership[idx].admins)
-    all_users.extend(employee_membership[idx].employees)
-    # all_users.extend(student_membership[idx].students)
+    admins = school_admins[school_id]
+    employees = school_employees[school_id]
+    hr_data = school_hr_data[school_id]
+    years_data = years[school_id]
+    grades_data = grades[school_id]
+    subjects_data = subjects[school_id]
+
+    all_users = [*admins.admins, *employees.employees]
 
     return SchoolScenario(
         school=schools[idx],
         users=all_users,
-        years=years[idx].years,
-        grades=grades[idx],
+        years=years_data,
+        grades=grades_data,
+        subjects=subjects_data,
+        hr=hr_data,
     )
 
 
@@ -95,8 +101,8 @@ async def default_school_setup(
     client: AsyncClient,
     db_session: AsyncSession,
     schools: list[MockSchool],
-    admin_membership: list[SchoolAdmin],
-) -> Callable[[MockSchool, MockSignUp], Awaitable[YearScenario]]:
+    school_admins: dict[uuid.UUID, SchoolAdmin],
+) -> Callable[[MockSchool, MockSignUp], Awaitable[SchoolYear]]:
     """
     A factory fixture that returns a function to build the scenario.
     """
@@ -104,37 +110,42 @@ async def default_school_setup(
     async def _build(
         school: MockSchool,
         user: MockSignUp,
-    ) -> YearScenario:
+    ) -> SchoolYear:
         school_id = school.response.school_id
 
-        admin = find_admin_in_school(
-            admin_membership=admin_membership,
-            school_id=school_id,
-        )
-
-        if not admin:
-            raise ValueError(f"No admin membership found for school with ID {school_id}")
-
+        admin = school_admins[school_id].admins[0]
         new_year = NewYearFactory.create(
             setup_methods="Default Template",
             status=AcademicYearStatusEnum.ACTIVE,
         )
         admin.login.headers["x-school-slug"] = school.request.slug
 
-        year = await API.post_year(
+        r = await API.post_year(
             client=client,
             new_year=new_year,
             headers=admin.login.headers,
         )
+
+        assert r.status_code == 201, f"Expected 201, got {r.status_code}. Response: {r.text}"
+        assert SuccessResponse.model_validate(r.json()) is not None, "Failed to create a new academic year."
 
         await _assert_provisioned_models_counts(
             tenant_session=db_session,
             school_id=school_id,
         )
 
-        return YearScenario(
+        r = await API.get_years(
+            client=client,
+            headers=admin.login.headers,
+        )
+
+        assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
+        assert type(r.json()) is list, f"Expected a list of academic years, got {type(r.json())}"
+        years = [YearSchema.model_validate(year) for year in r.json()]
+
+        return SchoolYear(
             school=school,
-            year=year,
+            years=years,
         )
 
     return _build

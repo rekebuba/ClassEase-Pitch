@@ -1,3 +1,4 @@
+import uuid
 from typing import Awaitable, Callable
 
 import pytest
@@ -19,7 +20,6 @@ from tests.utils.type_test import (
     SchoolUsers,
     UserScenario,
 )
-from tests.utils.utils import find_admin_in_school
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -27,7 +27,7 @@ async def enroll_student(
     client: AsyncClient,
     schools: list[MockSchool],
     school_users: list[SchoolUsers],
-    admin_membership: list[SchoolAdmin],
+    school_admins: dict[uuid.UUID, SchoolAdmin],
 ) -> Callable[[MockSchool, MockSignUp], Awaitable[UserScenario]]:
     """
     A factory fixture that returns a function to build the scenario.
@@ -38,13 +38,7 @@ async def enroll_student(
         user: MockSignUp,
     ) -> UserScenario:
         school_id = school.response.school_id
-        admin = find_admin_in_school(
-            admin_membership=admin_membership,
-            school_id=school_id,
-        )
-
-        if not admin:
-            raise ValueError(f"No admin membership found for school with ID {school_id}")
+        admin = school_admins[school_id].admins[0]
 
         # 1. Create Membership
         student_enrollment = StudentProfileFactory.create(
@@ -91,6 +85,6 @@ async def enroll_student(
 @pytest_asyncio.fixture
 async def student(
     request: pytest.FixtureRequest,
-    student_membership: list[SchoolStudent],
+    school_students: list[SchoolStudent],
 ) -> UserScenario:
-    return student_membership[request.param].students[0]
+    return school_students[request.param].students[0]

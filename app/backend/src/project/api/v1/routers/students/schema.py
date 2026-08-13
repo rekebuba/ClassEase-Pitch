@@ -5,6 +5,7 @@ from typing import Optional
 from pydantic import AwareDatetime, EmailStr
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
+from project.schema.models import GradeSchema, YearSchema
 from project.schema.schema import BaseSchema
 from project.utils.enum import (
     BloodTypeEnum,
@@ -69,6 +70,40 @@ class UpdateStudentStatus(BaseSchema):
 
 
 class EnrollStudent(BaseSchema):
+    student_id: uuid.UUID
+    class_section_id: uuid.UUID
+    year_id: uuid.UUID
+
+
+class EnrollmentOpportunityPost(BaseSchema):
+    academic_year_id: uuid.UUID
+    grade_id: uuid.UUID
+    application_deadline: Optional[AwareDatetime]
+    capacity: int
+    allow_applications: bool
+
+
+class EnrollmentOpportunitySchema(BaseSchema):
+    id: uuid.UUID
+    academic_year_id: YearSchema
+    grade_id: GradeSchema
+    application_deadline: Optional[AwareDatetime]
+    capacity: int
+    allow_applications: bool
+    status: StudentApplicationStatusEnum
+    created_at: AwareDatetime
+    updated_at: AwareDatetime
+
+
+class EnrollmentApplicationPost(BaseSchema):
+    opportunity_id: uuid.UUID
+    student_user_id: uuid.UUID
+    applicant_note: Optional[str]
+    relation: Optional[str]
+
+
+class EnrollStudentApplication(BaseSchema):
+    application_id: uuid.UUID
     student_id: uuid.UUID
     class_section_id: uuid.UUID
     year_id: uuid.UUID

@@ -9,7 +9,7 @@ from tests.utils.type_test import (
 
 
 @pytest.fixture(scope="session")
-async def owner_token_headers(client: AsyncClient) -> MockLogin:
+async def super_user(client: AsyncClient) -> MockLogin:
     return await API.login(
         client,
         username=settings.FIRST_SUPERUSER,

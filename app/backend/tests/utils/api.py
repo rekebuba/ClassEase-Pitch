@@ -9,12 +9,11 @@ from project.api.v1.routers.auth.schema import (
 )
 from project.api.v1.routers.departments.schema import DepartmentBase
 from project.api.v1.routers.employee.schema import EmployeePositionCreate
-from project.api.v1.routers.grades.schema import GradeSetupSchema
 from project.api.v1.routers.jobs.schema import HireJobApplication, JobApplicationPost, JobPost
 from project.api.v1.routers.positions.schema import PositionBase
 from project.api.v1.routers.schema import FilterParams, SearchParams
 from project.api.v1.routers.school.schema import EmployeeProfile
-from project.api.v1.routers.subjects.schema import SubjectSetupSchema
+from project.api.v1.routers.students.schema import EnrollmentApplicationPost, EnrollmentOpportunityPost
 from project.api.v1.routers.teachers.schema import CreateTeacherProfile
 from project.api.v1.routers.users.schema import (
     CurrentUserInfo,
@@ -25,10 +24,8 @@ from project.schema.models import GradeSchema, SectionSchema
 from project.schema.schema import SuccessResponse
 from tests.factories.api_data import LoginFactory
 from tests.utils.type_test import (
-    MockEmployeeProfile,
     MockLogin,
     MockSignUp,
-    MockYear,
 )
 
 
@@ -91,14 +88,23 @@ class API:
         client: AsyncClient,
         new_year: NewYear,
         headers: dict[str, str],
-    ) -> MockYear:
-        r = await client.post(
+    ) -> httpx.Response:
+        return await client.post(
             f"{settings.API_V1_STR}/years",
             json=new_year.model_dump(mode="json"),
             headers=headers,
         )
-        assert r.status_code == 201, f"Expected 201, got {r.status_code}. Response: {r.text}"
-        return MockYear(request=new_year, response=SuccessResponse.model_validate(r.json()))
+
+    @staticmethod
+    async def get_years(
+        *,
+        client: AsyncClient,
+        headers: dict[str, str],
+    ) -> httpx.Response:
+        return await client.get(
+            f"{settings.API_V1_STR}/years",
+            headers=headers,
+        )
 
     @staticmethod
     async def post_department(
@@ -217,7 +223,6 @@ class API:
     async def post_job_application(
         *,
         client: AsyncClient,
-        job_id: uuid.UUID,
         application_data: JobApplicationPost,
         headers: dict[str, str],
     ) -> httpx.Response:
@@ -254,21 +259,55 @@ class API:
         )
 
     @staticmethod
+    async def post_enrollment_opportunity(
+        *,
+        client: AsyncClient,
+        enrollment_opportunity: EnrollmentOpportunityPost,
+        headers: dict[str, str],
+    ) -> httpx.Response:
+        return await client.post(
+            f"{settings.API_V1_STR}/enrollment-opportunities",
+            json=enrollment_opportunity.model_dump(mode="json"),
+            headers=headers,
+        )
+
+    @staticmethod
+    async def get_enrollment_opportunities(
+        *,
+        client: AsyncClient,
+        headers: dict[str, str],
+        query: FilterParams,
+    ) -> httpx.Response:
+        return await client.get(
+            f"{settings.API_V1_STR}/enrollment-opportunities",
+            headers=headers,
+            params=query.model_dump(),
+        )
+
+    @staticmethod
+    async def post_enrollment_application(
+        *,
+        client: AsyncClient,
+        application_data: EnrollmentApplicationPost,
+        headers: dict[str, str],
+    ) -> httpx.Response:
+        return await client.post(
+            f"{settings.API_V1_STR}/enrollment-applications",
+            json=application_data.model_dump(mode="json"),
+            headers=headers,
+        )
+
+    @staticmethod
     async def post_employee(
         *,
         client: AsyncClient,
         employee_profile: EmployeeProfile,
         headers: dict[str, str],
-    ) -> MockEmployeeProfile:
-        r = await client.post(
+    ) -> httpx.Response:
+        return await client.post(
             f"{settings.API_V1_STR}/employees",
             json=employee_profile.model_dump(mode="json"),
             headers=headers,
-        )
-        assert r.status_code == 201, f"Expected 201, got {r.status_code}. Response: {r.text}"
-        return MockEmployeeProfile(
-            request=employee_profile,
-            response=SuccessResponse.model_validate(r.json()),
         )
 
     @staticmethod
@@ -315,20 +354,17 @@ class API:
         return [GradeSchema.model_validate(grade) for grade in r.json()]
 
     @staticmethod
-    async def get_grades_offerings(
+    async def get_grade_offerings(
         *,
         client: AsyncClient,
         headers: dict[str, str],
         query: FilterParams,
-    ) -> list[GradeSetupSchema]:
-        r = await client.get(
-            f"{settings.API_V1_STR}/grades/offerings",
+    ) -> httpx.Response:
+        return await client.get(
+            f"{settings.API_V1_STR}/grade-offerings",
             headers=headers,
             params=query.model_dump(),
         )
-        assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
-        # print(json.dumps(r.json(), indent=4, sort_keys=True))
-        return [GradeSetupSchema.model_validate(grade) for grade in r.json()]
 
     @staticmethod
     async def get_grade_offerings_by_id(
@@ -336,28 +372,24 @@ class API:
         client: AsyncClient,
         headers: dict[str, str],
         grade_id: uuid.UUID,
-    ) -> GradeSetupSchema:
-        r = await client.get(
-            f"{settings.API_V1_STR}/grades/offerings/{grade_id}",
+    ) -> httpx.Response:
+        return await client.get(
+            f"{settings.API_V1_STR}/grade-offerings/{grade_id}",
             headers=headers,
         )
-        assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
-        return GradeSetupSchema.model_validate(r.json())
 
     @staticmethod
-    async def get_subjects_offerings(
+    async def get_subject_offerings(
         *,
         client: AsyncClient,
         headers: dict[str, str],
         query: FilterParams,
-    ) -> list[SubjectSetupSchema]:
-        r = await client.get(
-            f"{settings.API_V1_STR}/subjects/offerings",
+    ) -> httpx.Response:
+        return await client.get(
+            f"{settings.API_V1_STR}/subject-offerings",
             headers=headers,
             params=query.model_dump(),
         )
-        assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
-        return [SubjectSetupSchema.model_validate(subject) for subject in r.json()]
 
     @staticmethod
     async def get_subject_offerings_by_id(
@@ -365,13 +397,11 @@ class API:
         client: AsyncClient,
         headers: dict[str, str],
         subject_id: uuid.UUID,
-    ) -> SubjectSetupSchema:
-        r = await client.get(
-            f"{settings.API_V1_STR}/subjects/offerings/{subject_id}",
+    ) -> httpx.Response:
+        return await client.get(
+            f"{settings.API_V1_STR}/subject-offerings/{subject_id}",
             headers=headers,
         )
-        assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
-        return SubjectSetupSchema.model_validate(r.json())
 
     @staticmethod
     async def get_sections(

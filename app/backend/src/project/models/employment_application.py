@@ -81,4 +81,5 @@ class EmploymentApplication(SchoolScopedMixin, BaseModel):
         init=False,
         repr=False,
         passive_deletes=True,
+        overlaps="school",
     )

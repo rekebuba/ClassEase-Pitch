@@ -9,7 +9,7 @@ from project.api.v1.routers.auth.route import SchoolAwareOAuth2PasswordRequestFo
 from project.api.v1.routers.auth.schema import SignUpRequest
 from project.api.v1.routers.departments.schema import DepartmentBase
 from project.api.v1.routers.employee.schema import EmployeePositionCreate
-from project.api.v1.routers.jobs.schema import HireJobApplication, JobApplicationPost, JobPost
+from project.api.v1.routers.jobs.schema import HireJobApplication, JobApplicationPost, JobPost, TeacherProfileJob
 from project.api.v1.routers.positions.schema import PositionBase
 from project.api.v1.routers.registrations.schema import (
     AdminRegistration,
@@ -22,7 +22,7 @@ from project.api.v1.routers.school.schema import (
     NewSchoolMembership,
     StudentProfile,
 )
-from project.api.v1.routers.teachers.schema import CreateTeacherProfile
+from project.api.v1.routers.students.schema import EnrollmentApplicationPost, EnrollmentOpportunityPost
 from project.api.v1.routers.year.schema import NewYear
 from project.utils.enum import (
     AcademicTermTypeEnum,
@@ -122,15 +122,13 @@ class JobApplicationFactory(TypedFactory[JobApplicationPost]):
     class Meta:
         model = JobApplicationPost
 
-    school_id = LazyAttribute(lambda _: uuid.uuid4())
-    user_id = LazyAttribute(lambda _: uuid.uuid4())
     job_id = LazyAttribute(lambda _: uuid.uuid4())
     cover_note = LazyAttribute(lambda _: fake.text(max_nb_chars=100))
 
 
-class TeacherProfileFactory(TypedFactory[CreateTeacherProfile]):
+class TeacherProfileFactory(TypedFactory[TeacherProfileJob]):
     class Meta:
-        model = CreateTeacherProfile
+        model = TeacherProfileJob
 
     specialization = LazyAttribute(lambda _: fake.job())
     teacher_license_number = LazyAttribute(lambda _: str(fake.random_number(digits=8)))
@@ -143,8 +141,6 @@ class HireJobApplicationFactory(TypedFactory[HireJobApplication]):
     class Meta:
         model = HireJobApplication
 
-    user_id = LazyAttribute(lambda _: uuid.uuid4())
-    job_id = LazyAttribute(lambda _: uuid.uuid4())
     application_id = LazyAttribute(lambda _: uuid.uuid4())
     employee_number = LazyAttribute(lambda _: str(fake.random_number(digits=5)))
     hire_date = LazyAttribute(lambda _: fake.past_date())
@@ -162,6 +158,27 @@ class HireJobApplicationFactory(TypedFactory[HireJobApplication]):
     hours_per_week = LazyAttribute(lambda _: random.randint(20, 40))
 
     teacher_profile = LazyAttribute(lambda _: TeacherProfileFactory.build() if random.choice([True, False]) else None)
+
+
+class EnrollmentOpportunityFactory(TypedFactory[EnrollmentOpportunityPost]):
+    class Meta:
+        model = EnrollmentOpportunityPost
+
+    academic_year_id = LazyAttribute(lambda _: uuid.uuid4())
+    grade_id = LazyAttribute(lambda _: uuid.uuid4())
+    application_deadline = LazyAttribute(lambda _: fake.future_date())
+    capacity = LazyAttribute(lambda _: random.randint(20, 100))
+    allow_applications = LazyAttribute(lambda _: random.choice([True, False]))
+
+
+class SubmitEnrollmentApplicationFactory(TypedFactory[EnrollmentApplicationPost]):
+    class Meta:
+        model = EnrollmentApplicationPost
+
+    opportunity_id = LazyAttribute(lambda _: uuid.uuid4())
+    student_user_id = LazyAttribute(lambda _: uuid.uuid4())
+    applicant_note = LazyAttribute(lambda _: fake.text(max_nb_chars=100))
+    relation = LazyAttribute(lambda _: random.choice(["Parent", "Guardian", "Other"]))
 
 
 class StudentProfileFactory(TypedFactory[StudentProfile]):

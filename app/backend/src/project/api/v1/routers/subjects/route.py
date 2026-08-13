@@ -118,7 +118,7 @@ async def post_subject(
 
 
 @router.get(
-    "/subjects/offerings",
+    "/subject-offerings",
     response_model=List[SubjectSetupSchema],
 )
 async def get_subject_offerings(
@@ -167,7 +167,7 @@ async def get_subject_offerings(
 
 
 @router.get(
-    "/subjects/offerings/{subject_id}",
+    "/subject-offerings/{subject_id}",
     response_model=SubjectSetupSchema,
 )
 async def get_subject_offerings_by_id(

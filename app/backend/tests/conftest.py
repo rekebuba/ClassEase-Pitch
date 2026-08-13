@@ -12,6 +12,7 @@ pytest_plugins = [
     "tests.fixtures.schools",
     "tests.fixtures.sections",
     "tests.fixtures.students",
+    "tests.fixtures.subjects",
     "tests.fixtures.teachers",
     "tests.fixtures.users",
     "tests.fixtures.years",

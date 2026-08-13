@@ -1,3 +1,4 @@
+import uuid
 from typing import Awaitable, Callable
 
 import factory
@@ -8,14 +9,14 @@ from httpx import AsyncClient
 from project.api.v1.routers.departments.schema import DepartmentBase
 from project.api.v1.routers.jobs.schema import JobPost
 from project.api.v1.routers.positions.schema import PositionBase
-from project.api.v1.routers.schema import SearchParams
+from project.api.v1.routers.schema import FilterParams, SearchParams
+from project.api.v1.routers.students.schema import EnrollmentOpportunityPost, EnrollmentOpportunitySchema
 from project.schema.models import DepartmentSchema, PositionSchema
 from project.schema.models.job_schema import JobSchema
 from project.schema.schema import SuccessResponse
-from tests.factories.api_data import JobPostFactory, PositionFactory
+from tests.factories.api_data import EnrollmentOpportunityFactory, JobPostFactory, PositionFactory
 from tests.utils.api import API
-from tests.utils.type_test import SchoolAdmin, SchoolHR, SchoolUsers, SchoolYear
-from tests.utils.utils import find_admin_in_school
+from tests.utils.type_test import MockSchool, SchoolAdmin, SchoolGrade, SchoolHR, SchoolUsers, SchoolYear
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -67,28 +68,41 @@ async def create_job(
 
 
 @pytest_asyncio.fixture(scope="session")
+async def create_enrollment_opportunity(
+    client: AsyncClient,
+) -> Callable[[dict[str, str], EnrollmentOpportunityPost], Awaitable[SuccessResponse]]:
+    async def _post_enrollment_opportunity(
+        headers: dict[str, str], enrollment_opportunity: EnrollmentOpportunityPost
+    ) -> SuccessResponse:
+        r = await API.post_enrollment_opportunity(
+            client=client,
+            enrollment_opportunity=enrollment_opportunity,
+            headers=headers,
+        )
+        assert r.status_code == 201, f"Expected 201, got {r.status_code}. Response: {r.text}"
+        return SuccessResponse.model_validate(r.json())
+
+    return _post_enrollment_opportunity
+
+
+@pytest_asyncio.fixture(scope="session")
 async def school_hr_data(
     client: AsyncClient,
     school_users: list[SchoolUsers],
-    admin_membership: list[SchoolAdmin],
-    years: list[SchoolYear],
+    school_admins: dict[uuid.UUID, SchoolAdmin],
+    years: dict[uuid.UUID, SchoolYear],
+    grades: dict[uuid.UUID, SchoolGrade],
     create_department: Callable[[dict[str, str], DepartmentBase], Awaitable[SuccessResponse]],
     create_position: Callable[[dict[str, str], PositionBase], Awaitable[SuccessResponse]],
     create_job: Callable[[dict[str, str], JobPost], Awaitable[SuccessResponse]],
-) -> list[SchoolHR]:
-    school_hr: list[SchoolHR] = []
+    create_enrollment_opportunity: Callable[[dict[str, str], EnrollmentOpportunityPost], Awaitable[SuccessResponse]],
+) -> dict[uuid.UUID, SchoolHR]:
+    school_hr: dict[uuid.UUID, SchoolHR] = {}
 
     for school in school_users:
         school_id = school.school.response.school_id
 
-        admin = find_admin_in_school(
-            admin_membership=admin_membership,
-            school_id=school_id,
-        )
-
-        if admin is None:
-            raise ValueError(f"No admin membership found for school with ID {school_id}")
-
+        admin = school_admins[school_id].admins[0]
         headers = admin.login.headers
 
         # Fetch departments
@@ -134,12 +148,14 @@ async def school_hr_data(
         job_payloads = JobPostFactory.create_batch(
             size=3,
             position_id=factory.Iterator([position.id for position in created_positions]),
+            openings_count=2,
         )
         created_jobs = [await create_job(headers, job) for job in job_payloads]
 
         # Fetch jobs
-        response = await API.get_all_jobs(
+        response = await API.get_school_jobs(
             client=client,
+            headers=headers,
         )
 
         assert response.status_code == 200, f"Expected 200, got {response.status_code}. Response: {response.text}"
@@ -151,13 +167,41 @@ async def school_hr_data(
 
         assert created_job_ids <= fetched_job_ids, "One or more newly created jobs were not found."
 
-        school_hr.append(
-            SchoolHR(
-                school=school.school,
-                departments=fetched_departments,
-                positions=fetched_positions,
-                jobs=fetched_jobs,
-            )
+        enrollment_opportunity_payload = EnrollmentOpportunityFactory.create_batch(
+            size=len(grades[school_id].grades),
+            year_id=years[school_id].years[0].id,
+            grade_id=factory.Iterator(grade.id for grade in grades[school_id].grades),
+        )
+        create_enrollment = [
+            await create_enrollment_opportunity(headers, opportunity) for opportunity in enrollment_opportunity_payload
+        ]
+
+        # Fetch enrollment opportunities
+        response = await API.get_enrollment_opportunities(
+            client=client,
+            headers=headers,
+            query=FilterParams(year_id=years[school_id].years[0].id),
+        )
+
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}. Response: {response.text}"
+
+        fetched_enrollment_opportunities = [
+            EnrollmentOpportunitySchema.model_validate(opportunity) for opportunity in response.json()
+        ]
+
+        created_enrollment_ids = {opportunity.id for opportunity in create_enrollment}
+        fetched_enrollment_ids = {opportunity.id for opportunity in fetched_enrollment_opportunities}
+
+        assert created_enrollment_ids <= fetched_enrollment_ids, (
+            "One or more newly created enrollment opportunities were not found."
+        )
+
+        school_hr[school.school.response.school_id] = SchoolHR(
+            school=school.school,
+            departments=fetched_departments,
+            positions=fetched_positions,
+            jobs=fetched_jobs,
+            enrollment_opportunities=fetched_enrollment_opportunities,
         )
 
     return school_hr
@@ -166,12 +210,13 @@ async def school_hr_data(
 @pytest_asyncio.fixture(scope="function")
 async def school_HR(
     request: pytest.FixtureRequest,
-    school_hr_data: list[SchoolHR],
+    schools: list[MockSchool],
+    school_hr_data: dict[uuid.UUID, SchoolHR],
 ) -> SchoolHR:
     idx = request.param
 
     # Defensive check: Ensure we are pulling data for the exact same school
-    current_school = school_hr_data[idx].school
-    assert school_hr_data[idx].school == current_school
+    current_school = schools[idx]
+    school_id = current_school.response.school_id
 
-    return school_hr_data[idx]
+    return school_hr_data[school_id]

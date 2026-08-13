@@ -6,7 +6,6 @@ from pydantic import EmailStr, Field
 
 from project.schema.schema import BaseSchema
 from project.utils.enum import (
-    ContractStatusEnum,
     ContractTypeEnum,
     EmploymentStatusEnum,
     EmploymentTypeEnum,
@@ -23,8 +22,6 @@ class JobPost(BaseSchema):
 
 
 class JobApplicationPost(BaseSchema):
-    school_id: uuid.UUID = Field(..., description="The ID of the school associated with the job")
-    user_id: uuid.UUID = Field(..., description="The ID of the user applying for the job")
     job_id: uuid.UUID = Field(..., description="The ID of the job posting")
     cover_note: Optional[str] = Field(None, description="The cover note for the application")
 
@@ -32,7 +29,7 @@ class JobApplicationPost(BaseSchema):
 class TeacherProfileJob(BaseSchema):
     specialization: str | None = Field(None, description="The specialization of the teacher")
     teacher_license_number: str | None = Field(None, description="The license number of the teacher")
-    certification: str | None = Field(None, description="The certification of the teacher")
+    certifications: str | None = Field(None, description="The certification of the teacher")
     highest_education: HighestEducationEnum | None = Field(
         None, description="The highest education level of the teacher"
     )
@@ -40,8 +37,6 @@ class TeacherProfileJob(BaseSchema):
 
 
 class HireJobApplication(BaseSchema):
-    user_id: uuid.UUID = Field(..., description="The ID of the user being hired for the job")
-    job_id: uuid.UUID = Field(..., description="The ID of the job posting")
     application_id: uuid.UUID = Field(..., description="The ID of the employment application")
     employee_number: str = Field(..., description="The employee number assigned to the new employee")
     hire_date: date = Field(..., description="The date the employee was hired")

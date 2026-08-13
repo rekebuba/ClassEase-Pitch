@@ -39,7 +39,7 @@ class EnrollmentOpportunity(SchoolScopedMixin, BaseModel):
             native_enum=False,
         ),
         nullable=False,
-        default=EnrollmentOpportunityStatusEnum.DRAFT,
+        default=EnrollmentOpportunityStatusEnum.OPEN,
     )
     application_deadline: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True, default=None

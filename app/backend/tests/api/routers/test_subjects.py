@@ -2,6 +2,7 @@ import pytest
 from httpx import AsyncClient
 
 from project.api.v1.routers.schema import FilterParams
+from project.api.v1.routers.subjects.schema import SubjectSetupSchema
 from project.utils.enum import RoleEnum
 from tests.utils.api import API
 from tests.utils.type_test import SchoolScenario
@@ -28,13 +29,15 @@ async def test_get_subjects_offerings(
     """
     headers = school.find_user(lambda u: u.user_info.role == role).login.headers
 
-    subjects = await API.get_subjects_offerings(
+    r = await API.get_subject_offerings(
         client=client,
         headers=headers,
-        query=FilterParams(year_id=school.years[0].year.response.id, q=search),
+        query=FilterParams(year_id=school.years.years[0].id, q=search),
     )
+    assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
+    subject_offerings = [SubjectSetupSchema.model_validate(subject) for subject in r.json()]
 
-    assert len(subjects) == expected_count
+    assert len(subject_offerings) == expected_count
 
 
 @pytest.mark.parametrize(
@@ -49,16 +52,22 @@ async def test_get_subject_offerings_by_id(client: AsyncClient, school: SchoolSc
     """
     headers = school.find_user(lambda u: u.user_info.role == role).login.headers
 
-    subjects = await API.get_subjects_offerings(
+    r = await API.get_subject_offerings(
         client=client,
         headers=headers,
-        query=FilterParams(year_id=school.years[0].year.response.id),
+        query=FilterParams(year_id=school.years.years[0].id),
     )
 
-    assert len(subjects) == 21
+    assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
+    subject_offerings = [SubjectSetupSchema.model_validate(subject) for subject in r.json()]
 
-    await API.get_subject_offerings_by_id(
+    assert len(subject_offerings) == 21
+
+    r = await API.get_subject_offerings_by_id(
         client=client,
         headers=headers,
-        subject_id=subjects[0].id,
+        subject_id=subject_offerings[0].id,
     )
+
+    assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
+    SubjectSetupSchema.model_validate(r.json())

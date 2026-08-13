@@ -108,7 +108,7 @@ async def post_grade(
 
 
 @router.get(
-    "/grades/offerings",
+    "/grade-offerings",
     response_model=List[GradeSetupSchema],
 )
 async def get_grade_offerings(
@@ -165,7 +165,7 @@ async def get_grade_offerings(
 
 
 @router.get(
-    "/grades/offerings/{grade_id}",
+    "/grade-offerings/{grade_id}",
     response_model=GradeSetupSchema,
 )
 async def get_grade_offerings_by_id(

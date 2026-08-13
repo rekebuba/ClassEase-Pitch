@@ -8,6 +8,7 @@ from starlette import status
 
 from project.api.v1.routers.dependencies import (
     AuthenticatedRoute,
+    PlatformAuthenticatedRoute,
     SessionDep,
 )
 from project.api.v1.routers.schema import FilterParams
@@ -15,7 +16,11 @@ from project.api.v1.routers.school.schema import (
     StudentProfile,
 )
 from project.api.v1.routers.students.schema import (
+    EnrollmentApplicationPost,
+    EnrollmentOpportunityPost,
+    EnrollmentOpportunitySchema,
     EnrollStudent,
+    EnrollStudentApplication,
     StudentBasicInfo,
     UpdateStudentStatus,
 )
@@ -25,6 +30,8 @@ from project.core.access_control import (
 )
 from project.models import (
     AcademicTerm,
+    EnrollmentApplication,
+    EnrollmentOpportunity,
     Role,
     SchoolMembership,
     Student,
@@ -38,6 +45,7 @@ from project.models.grade import Grade
 from project.models.year import Year
 from project.schema.schema import SuccessResponse, SuccessResponseSchema
 from project.utils.enum import (
+    EnrollmentApplicationStatusEnum,
     MfaStateEnum,
     PermissionEnum,
     RoleEnum,
@@ -48,7 +56,174 @@ from project.utils.utils import generate_id
 router = APIRouter()
 
 
-@router.post("/students", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/enrollment-opportunities",
+    status_code=status.HTTP_201_CREATED,
+    tags=["Student-Enrollments"],
+    response_model=SuccessResponse,
+)
+async def post_student_enrollment_opportunity(
+    session: SessionDep,
+    user_in: AuthenticatedRoute,
+    student_enrollment: EnrollmentOpportunityPost,
+) -> SuccessResponse:
+    """Creates a new student enrollment opportunity."""
+    if not user_in.has_permission(PermissionEnum.STUDENTS_WRITE):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+        )
+
+    # EnrollmentOpportunity
+    enrollment_opportunity = EnrollmentOpportunity(
+        school_id=user_in.membership.school_id,
+        academic_year_id=student_enrollment.academic_year_id,
+        grade_id=student_enrollment.grade_id,
+        application_deadline=student_enrollment.application_deadline,
+        capacity=student_enrollment.capacity,
+        allow_applications=student_enrollment.allow_applications,
+    )
+
+    session.add(enrollment_opportunity)
+    await session.commit()
+
+    return SuccessResponse(id=enrollment_opportunity.id, message="Student Enrollment Opportunity Created Successfully")
+
+
+@router.get(
+    "/enrollment-opportunities",
+    response_model=List[EnrollmentOpportunitySchema],
+    tags=["Student-Enrollments"],
+)
+async def get_student_enrollment_opportunities(
+    session: SessionDep,
+    user_in: AuthenticatedRoute,
+    q: Annotated[FilterParams, Query()],
+) -> Sequence[EnrollmentOpportunity]:
+    """Returns all student enrollment opportunities."""
+    if not user_in.has_permission(PermissionEnum.STUDENTS_READ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+        )
+
+    enrollment_opportunities = (
+        (
+            await session.execute(
+                select(EnrollmentOpportunity)
+                .options(
+                    selectinload(EnrollmentOpportunity.academic_year),
+                    selectinload(EnrollmentOpportunity.grade),
+                )
+                .where(
+                    EnrollmentOpportunity.school_id == user_in.membership.school_id,
+                    EnrollmentOpportunity.academic_year_id == q.year_id,
+                )
+            )
+        )
+        .scalars()
+        .all()
+    )
+
+    return enrollment_opportunities
+
+
+@router.post(
+    "/enrollment-applications",
+    status_code=status.HTTP_201_CREATED,
+    tags=["Student-Enrollments"],
+    response_model=SuccessResponse,
+)
+async def post_student_enrollment(
+    session: SessionDep,
+    user_in: PlatformAuthenticatedRoute,
+    enrollment_application: EnrollmentApplicationPost,
+) -> SuccessResponse:
+    """Enrolls a student in the system."""
+
+    enrollment_opportunities = await session.scalar(
+        select(EnrollmentOpportunity)
+        .options(
+            selectinload(EnrollmentOpportunity.school),
+            selectinload(EnrollmentOpportunity.academic_year),
+            selectinload(EnrollmentOpportunity.grade),
+        )
+        .where(
+            EnrollmentOpportunity.id == enrollment_application.opportunity_id,
+        )
+    )
+
+    if not enrollment_opportunities:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Enrollment Opportunity with ID {enrollment_application.opportunity_id} not found.",
+        )
+
+    application = EnrollmentApplication(
+        school_id=enrollment_opportunities.school_id,
+        applicant_user_id=user_in.user.id,
+        student_user_id=enrollment_application.student_user_id,
+        opportunity_id=enrollment_application.opportunity_id,
+        applicant_note=enrollment_application.applicant_note,
+    )
+
+    if application.applicant_user_id != application.student_user_id:
+        session.add(
+            UserGuardian(
+                guardian_user_id=application.applicant_user_id,
+                dependent_user_id=application.student_user_id,
+                relation=enrollment_application.relation or "",
+            )
+        )
+
+    session.add(application)
+    await session.commit()
+
+    return SuccessResponse(id=application.id, message="Student enrolled successfully.")
+
+
+@router.post(
+    "/enrollment-applications/approve",
+    status_code=status.HTTP_200_OK,
+    tags=["Student-Enrollments"],
+    response_model=SuccessResponse,
+)
+async def approve_student_enrollment(
+    session: SessionDep,
+    user_in: AuthenticatedRoute,
+    application_form: EnrollStudentApplication,
+) -> SuccessResponse:
+    """Approves a student enrollment application."""
+    if not user_in.has_permission(PermissionEnum.STUDENTS_WRITE):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+        )
+
+    application = await session.scalar(
+        select(EnrollmentApplication)
+        .options(
+            selectinload(EnrollmentApplication.opportunity),
+        )
+        .where(EnrollmentApplication.id == application_form.application_id)
+    )
+
+    if not application:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Enrollment Application with ID {application_form.application_id} not found.",
+        )
+
+    # Approve the application
+    application.status = EnrollmentApplicationStatusEnum.ACCEPTED
+    await session.commit()
+
+    return SuccessResponse(id=application.id, message="Student enrollment application approved successfully.")
+
+
+@router.post(
+    "/students",
+    status_code=status.HTTP_201_CREATED,
+    tags=["Students"],
+    response_model=SuccessResponse,
+)
 async def student(
     session: SessionDep,
     user_in: AuthenticatedRoute,

@@ -57,6 +57,7 @@ class JobPosting(SchoolScopedMixin, BaseModel):
         back_populates="job_postings",
         init=False,
         repr=False,
+        overlaps="school",
     )
     employment_applications: Mapped[list["EmploymentApplication"]] = relationship(
         "EmploymentApplication",
@@ -64,4 +65,5 @@ class JobPosting(SchoolScopedMixin, BaseModel):
         init=False,
         default_factory=list,
         passive_deletes=True,
+        overlaps="school",
     )

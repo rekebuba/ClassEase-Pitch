@@ -51,7 +51,7 @@ from project.utils.enum import (
     SchoolStatusEnum,
 )
 from tests.factories.api_data import LoginFactory
-from tests.utils.type_test import MockLogin, MockSignUp, SchoolAdmin
+from tests.utils.type_test import MockLogin, MockSignUp
 
 f = Faker()
 
@@ -243,19 +243,6 @@ async def _create_multi_school_user(
         "secondary_school_slug": secondary_school.slug,
         "secondary_membership_id": str(secondary_membership.id),
     }
-
-
-def find_admin_in_school(
-    *,
-    admin_membership: list[SchoolAdmin],
-    school_id: uuid.UUID,
-):
-    for school_admin in admin_membership:
-        if school_admin.school.response.school_id == school_id:
-            for member in school_admin.admins:
-                if member.school.response.school_id == school_id:
-                    return member
-    return None
 
 
 T = TypeVar("T", bound=SchoolScopedMixin)
