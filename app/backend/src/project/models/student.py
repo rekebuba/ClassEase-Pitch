@@ -6,23 +6,23 @@ from typing import TYPE_CHECKING, List, Optional
 
 from sqlalchemy import (
     UUID,
-    Boolean,
     Enum,
     ForeignKeyConstraint,
-    String,
-    Text,
     UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
 from project.models.base.school_mixin import SchoolScopedMixin
-from project.utils.enum import BloodTypeEnum, StudentApplicationStatusEnum
+from project.utils.enum import StudentApplicationStatusEnum
 
 if TYPE_CHECKING:
     from project.models.school import School
     from project.models.school_membership import SchoolMembership
+    from project.models.student_academic_background import StudentAcademicBackground
+    from project.models.student_address import StudentAddress
     from project.models.student_enrollments import StudentEnrollment
+    from project.models.student_health_record import StudentHealthRecord
 
 
 class Student(SchoolScopedMixin, BaseModel):
@@ -32,32 +32,7 @@ class Student(SchoolScopedMixin, BaseModel):
 
     __tablename__ = "students"
 
-    # Contact Information
-    city: Mapped[Optional[str]] = mapped_column(String(50), nullable=True, default=None)
-    state: Mapped[Optional[str]] = mapped_column(String(50), nullable=True, default=None)
-    postal_code: Mapped[Optional[str]] = mapped_column(String(20), nullable=True, default=None)
-
-    nationality: Mapped[Optional[str]] = mapped_column(String(100), nullable=True, default=None)
-    blood_type: Mapped[BloodTypeEnum] = mapped_column(
-        Enum(
-            BloodTypeEnum,
-            name="blood_type_enum",
-            values_callable=lambda x: [e.value for e in x],
-            native_enum=False,
-        ),
-        nullable=True,
-        default=BloodTypeEnum.UNKNOWN,
-    )
-    student_photo: Mapped[Optional[str]] = mapped_column(String(255), nullable=True, default=None)
-    previous_school: Mapped[Optional[str]] = mapped_column(String(100), nullable=True, default=None)
-    transportation: Mapped[Optional[str]] = mapped_column(String(50), nullable=True, default=None)
-    disability_details: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default=None)
-    medical_details: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default=None)
-
-    # Defaulted Fields
-    has_medical_condition: Mapped[bool] = mapped_column(Boolean, default=False)
-    has_disability: Mapped[bool] = mapped_column(Boolean, default=False)
-    is_transfer: Mapped[bool] = mapped_column(Boolean, default=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(UUID(), nullable=False)
     status: Mapped[StudentApplicationStatusEnum] = mapped_column(
         Enum(
             StudentApplicationStatusEnum,
@@ -67,12 +42,6 @@ class Student(SchoolScopedMixin, BaseModel):
         ),
         nullable=False,
         default=StudentApplicationStatusEnum.PENDING,
-    )
-
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(),
-        nullable=True,
-        default=None,
     )
 
     __table_args__ = (
@@ -111,4 +80,23 @@ class Student(SchoolScopedMixin, BaseModel):
         repr=False,
         passive_deletes=True,
         overlaps="student,school,student_enrollments",
+    )
+
+    health_record: Mapped["StudentHealthRecord"] = relationship(
+        "StudentHealthRecord",
+        back_populates="student",
+        init=False,
+        uselist=False,
+    )
+    academic_background: Mapped["StudentAcademicBackground"] = relationship(
+        "StudentAcademicBackground",
+        back_populates="student",
+        init=False,
+        uselist=False,
+    )
+    address: Mapped["StudentAddress"] = relationship(
+        "StudentAddress",
+        back_populates="student",
+        init=False,
+        uselist=False,
     )

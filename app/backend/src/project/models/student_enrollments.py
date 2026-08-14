@@ -37,8 +37,7 @@ class StudentEnrollment(SchoolScopedMixin, BaseModel):
             "school_id",
             "student_id",
             "year_id",
-            "class_section_id",
-            name="uq_student_enrollment_scope",
+            name="uq_student_single_enrollment_per_year",
         ),
         ForeignKeyConstraint(
             ["student_id", "school_id"],

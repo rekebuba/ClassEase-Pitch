@@ -2,6 +2,9 @@
 """This module initializes the storage system for ClassEase"""
 
 from project.models.academic_term import AcademicTerm
+from project.models.application_academic_background import ApplicationAcademicBackground
+from project.models.application_address import ApplicationAddress
+from project.models.application_health_records import ApplicationHealthRecord
 from project.models.assessment import Assessment
 from project.models.assessment_scheme import AssessmentScheme
 from project.models.assessment_scheme_component import AssessmentSchemeComponent
@@ -35,7 +38,10 @@ from project.models.school_membership import SchoolMembership
 from project.models.section import Section
 from project.models.stream import Stream
 from project.models.student import Student
+from project.models.student_academic_background import StudentAcademicBackground
+from project.models.student_address import StudentAddress
 from project.models.student_enrollments import StudentEnrollment
+from project.models.student_health_record import StudentHealthRecord
 from project.models.student_term_record import StudentTermRecord
 from project.models.student_year_record import StudentYearRecord
 from project.models.subject import Subject
@@ -53,6 +59,9 @@ from project.models.year import Year
 
 __all__ = [
     "AcademicTerm",
+    "ApplicationAcademicBackground",
+    "ApplicationAddress",
+    "ApplicationHealthRecord",
     "Assessment",
     "AssessmentScheme",
     "AssessmentSchemeComponent",
@@ -87,7 +96,10 @@ __all__ = [
     "Section",
     "Stream",
     "Student",
+    "StudentAcademicBackground",
+    "StudentAddress",
     "StudentEnrollment",
+    "StudentHealthRecord",
     "StudentTermRecord",
     "StudentYearRecord",
     "StudentYearRecord",

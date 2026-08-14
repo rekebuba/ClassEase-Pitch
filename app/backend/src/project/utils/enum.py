@@ -168,6 +168,7 @@ class EnrollmentApplicationStatusEnum(str, Enum):
     ACCEPTED = "accepted"
     REJECTED = "rejected"
     WITHDRAWN = "withdrawn"
+    PENDING = "pending"
 
 
 class PayrollPaymentMethodEnum(str, Enum):

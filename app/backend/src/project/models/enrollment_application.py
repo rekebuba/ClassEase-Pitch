@@ -10,6 +10,9 @@ from project.models.base.school_mixin import SchoolScopedMixin
 from project.utils.enum import EnrollmentApplicationStatusEnum
 
 if TYPE_CHECKING:
+    from project.models.application_academic_background import ApplicationAcademicBackground
+    from project.models.application_address import ApplicationAddress
+    from project.models.application_health_records import ApplicationHealthRecord
     from project.models.enrollment_opportunity import EnrollmentOpportunity
     from project.models.school import School
     from project.models.user import User
@@ -55,7 +58,15 @@ class EnrollmentApplication(SchoolScopedMixin, BaseModel):
     )
     reviewed_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True, default=None)
 
-    __table_args__ = (UniqueConstraint("id", "school_id", name="uq_enrollment_application_id_school_id"),)
+    __table_args__ = (
+        UniqueConstraint("id", "school_id", name="uq_enrollment_application_id_school_id"),
+        UniqueConstraint(
+            "applicant_user_id",
+            "student_user_id",
+            "opportunity_id",
+            name="uq_enrollment_applications_applicant_student_opp",
+        ),
+    )
 
     applicant_user: Mapped["User"] = relationship(
         "User",
@@ -86,4 +97,23 @@ class EnrollmentApplication(SchoolScopedMixin, BaseModel):
         init=False,
         repr=False,
         passive_deletes=True,
+    )
+
+    health_record: Mapped["ApplicationHealthRecord"] = relationship(
+        "ApplicationHealthRecord",
+        back_populates="application",
+        init=False,
+        uselist=False,
+    )
+    academic_background: Mapped["ApplicationAcademicBackground"] = relationship(
+        "ApplicationAcademicBackground",
+        back_populates="application",
+        init=False,
+        uselist=False,
+    )
+    address: Mapped["ApplicationAddress"] = relationship(
+        "ApplicationAddress",
+        back_populates="application",
+        init=False,
+        uselist=False,
     )

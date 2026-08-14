@@ -2,7 +2,7 @@ import random
 import uuid
 from typing import get_args
 
-from factory import LazyAttribute
+from factory import LazyAttribute, SubFactory
 from faker import Faker
 
 from project.api.v1.routers.auth.route import SchoolAwareOAuth2PasswordRequestForm
@@ -22,7 +22,14 @@ from project.api.v1.routers.school.schema import (
     NewSchoolMembership,
     StudentProfile,
 )
-from project.api.v1.routers.students.schema import EnrollmentApplicationPost, EnrollmentOpportunityPost
+from project.api.v1.routers.students.schema import (
+    AcademicBackground,
+    Address,
+    EnrollmentApplicationPost,
+    EnrollmentOpportunityPost,
+    HealthRecord,
+    StudentBasicInfo,
+)
 from project.api.v1.routers.year.schema import NewYear
 from project.utils.enum import (
     AcademicTermTypeEnum,
@@ -171,6 +178,49 @@ class EnrollmentOpportunityFactory(TypedFactory[EnrollmentOpportunityPost]):
     allow_applications = LazyAttribute(lambda _: random.choice([True, False]))
 
 
+class HealthRecordFactory(TypedFactory[HealthRecord]):
+    class Meta:
+        model = HealthRecord
+
+    blood_type = LazyAttribute(lambda _: random.choice(list(BloodTypeEnum)))
+    has_disability = LazyAttribute(lambda _: random.choice([True, False]))
+    disability_details = LazyAttribute(lambda obj: fake.text(max_nb_chars=60) if obj.has_disability else None)
+    has_medical_condition = LazyAttribute(lambda _: random.choice([True, False]))
+    medical_details = LazyAttribute(lambda obj: fake.text(max_nb_chars=60) if obj.has_medical_condition else None)
+
+
+class AcademicBackgroundFactory(TypedFactory[AcademicBackground]):
+    class Meta:
+        model = AcademicBackground
+
+    previous_school = LazyAttribute(lambda _: fake.company())
+    is_transfer = LazyAttribute(lambda _: random.choice([True, False]))
+
+
+class AddressFactory(TypedFactory[Address]):
+    class Meta:
+        model = Address
+
+    city = LazyAttribute(lambda _: fake.city())
+    state = LazyAttribute(lambda _: fake.state())
+    postal_code = LazyAttribute(lambda _: fake.postcode())
+    nationality = LazyAttribute(lambda _: fake.country())
+    transportation = LazyAttribute(lambda _: random.choice(["Bus", "Walk", "Parent"]))
+
+
+class BasicInfoFactory(TypedFactory[StudentBasicInfo]):
+    class Meta:
+        model = StudentBasicInfo
+
+    first_name = LazyAttribute(lambda _: fake.first_name())
+    father_name = LazyAttribute(lambda _: fake.first_name())
+    grand_father_name = LazyAttribute(lambda _: fake.first_name())
+    date_of_birth = LazyAttribute(lambda _: fake.date_of_birth())
+    gender = LazyAttribute(lambda _: random.choice(["Male", "Female"]))
+    email = None
+    phone = None
+
+
 class SubmitEnrollmentApplicationFactory(TypedFactory[EnrollmentApplicationPost]):
     class Meta:
         model = EnrollmentApplicationPost
@@ -179,6 +229,11 @@ class SubmitEnrollmentApplicationFactory(TypedFactory[EnrollmentApplicationPost]
     student_user_id = LazyAttribute(lambda _: uuid.uuid4())
     applicant_note = LazyAttribute(lambda _: fake.text(max_nb_chars=100))
     relation = LazyAttribute(lambda _: random.choice(["Parent", "Guardian", "Other"]))
+
+    user = LazyAttribute(lambda obj: BasicInfoFactory.build() if obj.student_user_id is None else None)
+    health_record = SubFactory(HealthRecordFactory)
+    academic_background = SubFactory(AcademicBackgroundFactory)
+    address = SubFactory(AddressFactory)
 
 
 class StudentProfileFactory(TypedFactory[StudentProfile]):
