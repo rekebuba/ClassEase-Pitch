@@ -82,7 +82,12 @@ async def init_db(*, system_session: AsyncSession) -> None:
         system_session.add(membership)
         await system_session.flush()
 
-    await ensure_membership_role(system_session, membership, system_roles[RoleEnum.OWNER], school.id)
+    await ensure_membership_role(
+        system_session,
+        membership=membership,
+        role_enum=system_roles[RoleEnum.OWNER].name,
+        school_id=school.id,
+    )
 
     identity = (
         await system_session.execute(

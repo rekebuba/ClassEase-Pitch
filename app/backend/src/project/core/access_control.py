@@ -4,6 +4,7 @@ import uuid
 from datetime import date, datetime, timedelta, timezone
 from typing import Any, Iterable, Optional, Sequence
 
+from fastapi import HTTPException, status
 from pydantic import SecretStr
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -304,10 +305,21 @@ async def seed_system_roles(
 
 async def ensure_membership_role(
     session: AsyncSession,
+    *,
     membership: SchoolMembership,
-    role: Role,
+    role_enum: RoleEnum,
     school_id: uuid.UUID,
 ) -> None:
+    """
+    Ensures a MembershipRole exists for the given membership and role.
+    """
+    role = await session.scalar(select(Role).where(Role.name == role_enum))
+    if not role:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Role '{role_enum.value}' not found.",
+        )
+
     existing = (
         await session.execute(
             select(MembershipRole).where(
@@ -326,6 +338,42 @@ async def ensure_membership_role(
         session.add(membership_role)
         membership.permissions_version += 1
         await session.flush()
+
+
+async def ensure_user_membership_and_role(
+    session: AsyncSession,
+    user_id: uuid.UUID,
+    school_id: uuid.UUID,
+    role_enum: RoleEnum,
+    mfa_state: MfaStateEnum,
+) -> SchoolMembership:
+    """Ensures a SchoolMembership exists for a user and assigns the given role."""
+    membership = await session.scalar(
+        select(SchoolMembership).where(
+            SchoolMembership.user_id == user_id,
+            SchoolMembership.school_id == school_id,
+        )
+    )
+
+    if not membership:
+        membership = SchoolMembership(
+            user_id=user_id,
+            school_id=school_id,
+            status=SchoolMembershipStatusEnum.ACTIVE,
+            mfa_state=mfa_state,
+            is_primary=True,
+            permissions_version=1,
+        )
+        session.add(membership)
+        await session.flush()
+
+    await ensure_membership_role(
+        session,
+        membership=membership,
+        role_enum=role_enum,
+        school_id=school_id,
+    )
+    return membership
 
 
 async def provision_user_membership(
@@ -386,7 +434,12 @@ async def provision_user_membership(
     await session.flush()
 
     system_roles = await seed_system_roles(session)
-    await ensure_membership_role(session, membership, system_roles[membership_role_name], school_id)
+    await ensure_membership_role(
+        session,
+        membership=membership,
+        role_enum=system_roles[membership_role_name].name,
+        school_id=school_id,
+    )
     return user, membership
 
 

@@ -3,16 +3,11 @@ from typing import List, Optional
 
 from pydantic import Field
 
-from project.schema.models import GradeSchema, StreamSchema
+from project.schema.models.grade_stream_schema import GradeStreamSchema
 from project.schema.models.subject_schema import (
     SubjectSchema,
 )
 from project.schema.schema import BaseSchema
-
-
-class GradeStreamSchema(BaseSchema):
-    stream: StreamSchema | None
-    grade: GradeSchema
 
 
 class SubjectSetupSchema(SubjectSchema):

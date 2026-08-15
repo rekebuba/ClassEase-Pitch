@@ -111,7 +111,12 @@ async def assign_school_membership(
     session.add(membership)
     await session.flush()
 
-    await ensure_membership_role(session, membership, role, school.id)
+    await ensure_membership_role(
+        session,
+        membership=membership,
+        role_enum=role.name,
+        school_id=school.id,
+    )
 
     return SuccessNewSchoolMembership(
         message="Membership assigned successfully",

@@ -28,6 +28,7 @@ from tests.utils.type_test import (
     SchoolGrade,
     SchoolHR,
     SchoolScenario,
+    SchoolStudent,
     SchoolSubject,
     SchoolYear,
 )
@@ -66,7 +67,7 @@ async def school(
     school_hr_data: dict[uuid.UUID, SchoolHR],
     school_admins: dict[uuid.UUID, SchoolAdmin],
     school_employees: dict[uuid.UUID, SchoolEmployee],
-    # school_students: list[SchoolStudent],
+    school_students: dict[uuid.UUID, SchoolStudent],
     years: dict[uuid.UUID, SchoolYear],
     grades: dict[uuid.UUID, SchoolGrade],
     subjects: dict[uuid.UUID, SchoolSubject],
@@ -79,12 +80,13 @@ async def school(
 
     admins = school_admins[school_id]
     employees = school_employees[school_id]
+    students = school_students[school_id]
     hr_data = school_hr_data[school_id]
     years_data = years[school_id]
     grades_data = grades[school_id]
     subjects_data = subjects[school_id]
 
-    all_users = [*admins.admins, *employees.employees]
+    all_users = [*admins.admins, *employees.employees, *students.students]
 
     return SchoolScenario(
         school=schools[idx],

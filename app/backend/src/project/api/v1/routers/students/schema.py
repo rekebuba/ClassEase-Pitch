@@ -5,10 +5,12 @@ from typing import Optional
 from pydantic import AwareDatetime, EmailStr, model_validator
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
-from project.schema.models import GradeSchema, YearSchema
+from project.schema.models import YearSchema
+from project.schema.models.grade_stream_schema import GradeStreamSchema
 from project.schema.schema import BaseSchema
 from project.utils.enum import (
     BloodTypeEnum,
+    EnrollmentOpportunityStatusEnum,
     GenderEnum,
     GradeEnum,
     StudentApplicationStatusEnum,
@@ -49,7 +51,7 @@ class EnrollStudent(BaseSchema):
 
 class EnrollmentOpportunityPost(BaseSchema):
     academic_year_id: uuid.UUID
-    grade_id: uuid.UUID
+    grade_stream_id: uuid.UUID
     application_deadline: Optional[AwareDatetime]
     capacity: int
     allow_applications: bool
@@ -57,12 +59,12 @@ class EnrollmentOpportunityPost(BaseSchema):
 
 class EnrollmentOpportunitySchema(BaseSchema):
     id: uuid.UUID
-    academic_year_id: YearSchema
-    grade_id: GradeSchema
+    academic_year: YearSchema
+    grade_stream: GradeStreamSchema
     application_deadline: Optional[AwareDatetime]
     capacity: int
     allow_applications: bool
-    status: StudentApplicationStatusEnum
+    status: EnrollmentOpportunityStatusEnum
     created_at: AwareDatetime
     updated_at: AwareDatetime
 
@@ -130,6 +132,4 @@ class EnrollmentApplicationPost(BaseSchema):
 
 class EnrollStudentApplication(BaseSchema):
     application_id: uuid.UUID
-    student_id: uuid.UUID
-    class_section_id: uuid.UUID
-    year_id: uuid.UUID
+    section_id: uuid.UUID

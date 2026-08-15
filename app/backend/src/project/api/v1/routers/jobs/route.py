@@ -10,7 +10,7 @@ from project.api.v1.routers.dependencies import (
     SessionDep,
 )
 from project.api.v1.routers.jobs.schema import HireJobApplication, JobApplicationPost, JobPost
-from project.core.access_control import ensure_membership_role
+from project.core.access_control import ensure_membership_role, ensure_user_membership_and_role
 from project.models import (
     Employee,
     EmployeePosition,
@@ -18,8 +18,6 @@ from project.models import (
     EmploymentContract,
     JobPosting,
     Position,
-    Role,
-    SchoolMembership,
     TeacherProfile,
 )
 from project.schema.models import EmploymentApplicationSchema
@@ -278,22 +276,13 @@ async def hire_employee(
     # Update application status
     application.status = EmploymentApplicationStatusEnum.ACCEPTED
 
-    membership = await session.scalar(
-        select(SchoolMembership).where(
-            SchoolMembership.school_id == school_id,
-            SchoolMembership.user_id == user_id,
-        )
+    membership = await ensure_user_membership_and_role(
+        session=session,
+        user_id=user_id,
+        school_id=school_id,
+        role_enum=RoleEnum.EMPLOYEE,
+        mfa_state=MfaStateEnum.VERIFIED,
     )
-
-    if membership is None:
-        membership = SchoolMembership(
-            school_id=school_id,
-            user_id=user_id,
-            mfa_state=MfaStateEnum.VERIFIED,
-        )
-        session.add(membership)
-
-    await session.flush()
 
     employee = Employee(
         school_id=school_id,
@@ -332,7 +321,6 @@ async def hire_employee(
     session.add(employment_contract)
 
     if application_form.teacher_profile:
-        user_role = RoleEnum.TEACHER
         teacher_profile_data = application_form.teacher_profile
         teacher_profile = TeacherProfile(
             school_id=school_id,
@@ -343,19 +331,14 @@ async def hire_employee(
             highest_education=teacher_profile_data.highest_education,
             years_of_experience=teacher_profile_data.years_of_experience,
         )
+
+        await ensure_membership_role(
+            session,
+            membership=membership,
+            role_enum=RoleEnum.TEACHER,
+            school_id=school_id,
+        )
         session.add(teacher_profile)
-
-    role = (await session.execute(select(Role).where(Role.name == user_role))).scalar_one_or_none()
-
-    if not role:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Role not found")
-
-    await ensure_membership_role(
-        session,
-        membership,
-        role,
-        school_id,
-    )
 
     await session.commit()
 

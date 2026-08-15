@@ -19,7 +19,7 @@ async def multi_school_user(db_session: AsyncSession) -> dict[str, str]:
     "role",
     [
         RoleEnum.ADMIN,
-        RoleEnum.EMPLOYEE,
+        RoleEnum.TEACHER,
         RoleEnum.STUDENT,
     ],
 )

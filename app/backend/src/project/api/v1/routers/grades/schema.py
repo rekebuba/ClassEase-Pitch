@@ -56,6 +56,7 @@ class StreamSetupSchema(StreamSchema):
 
 
 class GradeStreamSetup(BaseSchema):
+    id: uuid.UUID
     stream: StreamSchema | None
     subjects: List[SubjectSchema]
 

@@ -13,14 +13,19 @@ from project.api.v1.routers.jobs.schema import HireJobApplication, JobApplicatio
 from project.api.v1.routers.positions.schema import PositionBase
 from project.api.v1.routers.schema import FilterParams, SearchParams
 from project.api.v1.routers.school.schema import EmployeeProfile
-from project.api.v1.routers.students.schema import EnrollmentApplicationPost, EnrollmentOpportunityPost
+from project.api.v1.routers.sections.schema import SectionFilterParams
+from project.api.v1.routers.students.schema import (
+    EnrollmentApplicationPost,
+    EnrollmentOpportunityPost,
+    EnrollStudentApplication,
+)
 from project.api.v1.routers.teachers.schema import CreateTeacherProfile
 from project.api.v1.routers.users.schema import (
     CurrentUserInfo,
 )
 from project.api.v1.routers.year.schema import NewYear
 from project.core.config import settings
-from project.schema.models import GradeSchema, SectionSchema
+from project.schema.models import GradeSchema
 from project.schema.schema import SuccessResponse
 from tests.factories.api_data import LoginFactory
 from tests.utils.type_test import (
@@ -298,6 +303,19 @@ class API:
         )
 
     @staticmethod
+    async def post_student_enrollment(
+        *,
+        client: AsyncClient,
+        enrollment_data: EnrollStudentApplication,
+        headers: dict[str, str],
+    ) -> httpx.Response:
+        return await client.post(
+            f"{settings.API_V1_STR}/enrollment-applications/approve",
+            json=enrollment_data.model_dump(mode="json"),
+            headers=headers,
+        )
+
+    @staticmethod
     async def post_employee(
         *,
         client: AsyncClient,
@@ -408,11 +426,10 @@ class API:
         *,
         client: AsyncClient,
         headers: dict[str, str],
-        grade_id: uuid.UUID,
-    ) -> list[SectionSchema]:
-        r = await client.get(
-            f"{settings.API_V1_STR}/sections?grade_id={grade_id}",
+        query: SectionFilterParams,
+    ) -> httpx.Response:
+        return await client.get(
+            f"{settings.API_V1_STR}/sections",
             headers=headers,
+            params=query.model_dump(),
         )
-        assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
-        return [SectionSchema.model_validate(section) for section in r.json()]

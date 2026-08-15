@@ -167,10 +167,15 @@ async def school_hr_data(
 
         assert created_job_ids <= fetched_job_ids, "One or more newly created jobs were not found."
 
+        school_grades = grades[school_id].grades
+        target_year_id = years[school_id].years[0].id
+
+        grade_stream_ids = {stream.id for grade in school_grades for stream in grade.grade_streams}
+
         enrollment_opportunity_payload = EnrollmentOpportunityFactory.create_batch(
-            size=len(grades[school_id].grades),
-            year_id=years[school_id].years[0].id,
-            grade_id=factory.Iterator(grade.id for grade in grades[school_id].grades),
+            size=len(grade_stream_ids),
+            academic_year_id=target_year_id,
+            grade_stream_id=factory.Iterator(grade_stream_ids),
         )
         create_enrollment = [
             await create_enrollment_opportunity(headers, opportunity) for opportunity in enrollment_opportunity_payload
@@ -180,7 +185,7 @@ async def school_hr_data(
         response = await API.get_enrollment_opportunities(
             client=client,
             headers=headers,
-            query=FilterParams(year_id=years[school_id].years[0].id),
+            query=FilterParams(year_id=target_year_id),
         )
 
         assert response.status_code == 200, f"Expected 200, got {response.status_code}. Response: {response.text}"

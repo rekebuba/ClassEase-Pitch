@@ -24,8 +24,14 @@ from project.api.v1.routers.students.schema import (
     StudentBasicInfo,
     UpdateStudentStatus,
 )
+from project.api.v1.routers.students.service import (
+    create_student_profile_and_extensions,
+    fetch_and_validate_application,
+    fetch_class_section,
+    link_parent_to_student,
+)
 from project.core.access_control import (
-    ensure_membership_role,
+    ensure_user_membership_and_role,
     provision_user_membership,
 )
 from project.models import (
@@ -35,13 +41,10 @@ from project.models import (
     ApplicationHealthRecord,
     EnrollmentApplication,
     EnrollmentOpportunity,
-    Role,
+    GradeStream,
     SchoolMembership,
     Student,
-    StudentAcademicBackground,
-    StudentAddress,
     StudentEnrollment,
-    StudentHealthRecord,
     StudentTermRecord,
     StudentYearRecord,
     User,
@@ -55,7 +58,6 @@ from project.utils.enum import (
     MfaStateEnum,
     PermissionEnum,
     RoleEnum,
-    SchoolMembershipStatusEnum,
     StudentApplicationStatusEnum,
 )
 from project.utils.utils import generate_id
@@ -84,7 +86,7 @@ async def post_student_enrollment_opportunity(
     enrollment_opportunity = EnrollmentOpportunity(
         school_id=user_in.membership.school_id,
         academic_year_id=student_enrollment.academic_year_id,
-        grade_id=student_enrollment.grade_id,
+        grade_stream_id=student_enrollment.grade_stream_id,
         application_deadline=student_enrollment.application_deadline,
         capacity=student_enrollment.capacity,
         allow_applications=student_enrollment.allow_applications,
@@ -118,7 +120,8 @@ async def get_student_enrollment_opportunities(
                 select(EnrollmentOpportunity)
                 .options(
                     selectinload(EnrollmentOpportunity.academic_year),
-                    selectinload(EnrollmentOpportunity.grade),
+                    selectinload(EnrollmentOpportunity.grade_stream).selectinload(GradeStream.stream),
+                    selectinload(EnrollmentOpportunity.grade_stream).selectinload(GradeStream.grade),
                 )
                 .where(
                     EnrollmentOpportunity.school_id == user_in.membership.school_id,
@@ -139,7 +142,7 @@ async def get_student_enrollment_opportunities(
     tags=["Student-Enrollments"],
     response_model=SuccessResponse,
 )
-async def post_student_enrollment(
+async def post_student_enrollment_application(
     session: SessionDep,
     user_in: PlatformAuthenticatedRoute,
     enrollment_app: EnrollmentApplicationPost,
@@ -193,12 +196,11 @@ async def post_student_enrollment(
 
     # Establish guardian link if applicant is distinct from student
     if application.applicant_user_id != application.student_user_id:
-        session.add(
-            UserGuardian(
-                guardian_user_id=application.applicant_user_id,
-                dependent_user_id=application.student_user_id,
-                relation=enrollment_app.relation or "",
-            )
+        link_parent_to_student(
+            session,
+            guardian_user_id=application.applicant_user_id,
+            dependent_user_id=application.student_user_id,
+            relation=enrollment_app.relation or "",
         )
 
     session.add(application)
@@ -262,107 +264,51 @@ async def approve_student_enrollment(
             status_code=status.HTTP_403_FORBIDDEN,
         )
 
-    application = await session.scalar(
-        select(EnrollmentApplication)
-        .options(
-            selectinload(EnrollmentApplication.health_record),
-            selectinload(EnrollmentApplication.academic_background),
-            selectinload(EnrollmentApplication.address),
-        )
-        .where(EnrollmentApplication.id == application_form.application_id)
+    acting_school_id = user_in.membership.school_id
+
+    application = await fetch_and_validate_application(
+        session,
+        application_form.application_id,
+        acting_school_id,
+    )
+    class_section = await fetch_class_section(
+        session,
+        application.opportunity,
+        application_form.section_id,
     )
 
-    if not application:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Enrollment Application with ID {application_form.application_id} not found.",
+    # Ensure Parent/Guardian Membership & Role (if applicable)
+    if application.applicant_user_id != application.student_user_id:
+        await ensure_user_membership_and_role(
+            session=session,
+            user_id=application.applicant_user_id,
+            school_id=acting_school_id,
+            role_enum=RoleEnum.PARENT,
+            mfa_state=MfaStateEnum.VERIFIED,
         )
 
-    if application.school_id != user_in.membership.school_id:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="You do not have permission to approve applications for this school.",
-        )
-
-    # Guard: Prevent double-approval
-    if application.status == EnrollmentApplicationStatusEnum.ACCEPTED:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="This application has already been approved.",
-        )
-
-    # Guarantee SchoolMembership exists (Satisfies fk_students_membership_school)
-    membership = await session.scalar(
-        select(SchoolMembership).where(
-            SchoolMembership.user_id == application.student_user_id,
-            SchoolMembership.school_id == application.school_id,
-        )
-    )
-    if not membership:
-        membership = SchoolMembership(
-            user_id=application.student_user_id,
-            school_id=user_in.membership.school_id,
-            status=SchoolMembershipStatusEnum.ACTIVE,
-            mfa_state=MfaStateEnum.ENROLLED,
-            is_primary=True,
-            permissions_version=1,
-        )
-
-        session.add(membership)
-        await session.flush()
-
-    # Activate Student User account if dormant
-    student_user = await session.scalar(select(User).where(User.id == application.student_user_id))
-    if student_user and not student_user.is_active:
-        student_user.is_active = True
-
-    # Create Student profile
-    student = Student(
-        school_id=application.school_id,
+    await ensure_user_membership_and_role(
+        session=session,
         user_id=application.student_user_id,
-        status=StudentApplicationStatusEnum.ACTIVE,
+        school_id=acting_school_id,
+        role_enum=RoleEnum.STUDENT,
+        mfa_state=MfaStateEnum.ENROLLED,
     )
-    session.add(student)
-    await session.flush()
 
-    # Copy 1:1 Staging tables -> Active Extension tables
-    if application.health_record:
-        session.add(
-            StudentHealthRecord(
-                student_id=student.id,
-                school_id=application.school_id,
-                blood_type=application.health_record.blood_type,
-                has_disability=application.health_record.has_disability,
-                disability_details=application.health_record.disability_details,
-                has_medical_condition=application.health_record.has_medical_condition,
-                medical_details=application.health_record.medical_details,
-            )
+    # Create Student Profile & Copy Staging Data
+    student = await create_student_profile_and_extensions(session, application)
+
+    # Create Academic Enrollment Record
+    session.add(
+        StudentEnrollment(
+            school_id=application.school_id,
+            student_id=student.id,
+            year_id=application.opportunity.academic_year_id,
+            class_section_id=class_section.id,
         )
+    )
 
-    if application.academic_background:
-        session.add(
-            StudentAcademicBackground(
-                student_id=student.id,
-                school_id=application.school_id,
-                previous_school=application.academic_background.previous_school,
-                is_transfer=application.academic_background.is_transfer,
-            )
-        )
-
-    if application.address:
-        session.add(
-            StudentAddress(
-                student_id=student.id,
-                school_id=application.school_id,
-                city=application.address.city,
-                state=application.address.state,
-                postal_code=application.address.postal_code,
-                nationality=application.address.nationality,
-                transportation=application.address.transportation,
-            )
-        )
-
-    # Mark application as accepted
+    # Mark Application as Accepted
     application.status = EnrollmentApplicationStatusEnum.ACCEPTED
     await session.commit()
 
@@ -401,24 +347,12 @@ async def student(
         )
 
     if not user.memberships:
-        membership = SchoolMembership(
+        await ensure_user_membership_and_role(
+            session=session,
+            user_id=user.id,
             school_id=user_in.membership.school_id,
-            user_id=student_data.user_id,
-        )
-
-        session.add(membership)
-        await session.flush()
-
-        role = (await session.execute(select(Role).where(Role.name == RoleEnum.STUDENT))).scalar_one_or_none()
-
-        if not role:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Role not found")
-
-        await ensure_membership_role(
-            session,
-            membership,
-            role,
-            user_in.membership.school_id,
+            role_enum=RoleEnum.STUDENT,
+            mfa_state=MfaStateEnum.VERIFIED,
         )
 
     new_student = Student(

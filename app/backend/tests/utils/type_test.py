@@ -11,11 +11,10 @@ from project.api.v1.routers.jobs.schema import HireJobApplication
 from project.api.v1.routers.school.schema import (
     NewSchool,
     NewSchoolMembership,
-    StudentProfile,
     SuccessNewSchoolMembership,
     SuccessSchoolResponse,
 )
-from project.api.v1.routers.students.schema import EnrollmentOpportunitySchema
+from project.api.v1.routers.students.schema import EnrollmentOpportunitySchema, EnrollStudentApplication
 from project.api.v1.routers.subjects.schema import SubjectSetupSchema
 from project.api.v1.routers.users.schema import (
     CurrentUserInfo,
@@ -67,8 +66,8 @@ class MockEmployeeProfile:
 
 
 @dataclass
-class MockStudentEnrollment:
-    request: StudentProfile
+class MockStudentProfile:
+    request: EnrollStudentApplication
     response: SuccessResponse
 
 
@@ -80,7 +79,7 @@ class UserScenario:
     user_info: CurrentUserInfo
     membership: MockSchoolMembership | None = None
     employee: MockEmployeeProfile | None = None
-    student: MockStudentEnrollment | None = None
+    student: MockStudentProfile | None = None
 
     @property
     def is_admin(self) -> bool:

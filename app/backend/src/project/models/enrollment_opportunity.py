@@ -11,7 +11,7 @@ from project.utils.enum import EnrollmentOpportunityStatusEnum
 
 if TYPE_CHECKING:
     from project.models.enrollment_application import EnrollmentApplication
-    from project.models.grade import Grade
+    from project.models.grade_stream import GradeStream
     from project.models.school import School
     from project.models.year import Year
 
@@ -25,9 +25,9 @@ class EnrollmentOpportunity(SchoolScopedMixin, BaseModel):
         nullable=False,
         index=True,
     )
-    grade_id: Mapped[uuid.UUID] = mapped_column(
+    grade_stream_id: Mapped[uuid.UUID] = mapped_column(
         UUID(),
-        ForeignKey("grades.id", ondelete="CASCADE"),
+        ForeignKey("grade_streams.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -50,7 +50,10 @@ class EnrollmentOpportunity(SchoolScopedMixin, BaseModel):
     __table_args__ = (
         UniqueConstraint("id", "school_id", name="uq_enrollment_opportunity_id_school_id"),
         UniqueConstraint(
-            "school_id", "academic_year_id", "grade_id", name="uq_enrollment_opportunity_school_year_grade"
+            "school_id",
+            "academic_year_id",
+            "grade_stream_id",
+            name="uq_enrollment_opportunity_school_year_grade_stream",
         ),
     )
 
@@ -67,8 +70,8 @@ class EnrollmentOpportunity(SchoolScopedMixin, BaseModel):
         repr=False,
         passive_deletes=True,
     )
-    grade: Mapped["Grade"] = relationship(
-        "Grade",
+    grade_stream: Mapped["GradeStream"] = relationship(
+        "GradeStream",
         init=False,
         repr=False,
         passive_deletes=True,

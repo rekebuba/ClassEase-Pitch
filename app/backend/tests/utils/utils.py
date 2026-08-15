@@ -228,8 +228,8 @@ async def _create_multi_school_user(
 
     await ensure_membership_role(
         db_session,
-        secondary_membership,
-        secondary_roles[RoleEnum.TEACHER],
+        membership=secondary_membership,
+        role_enum=secondary_roles[RoleEnum.TEACHER].name,
         school_id=secondary_school.id,
     )
     await db_session.commit()

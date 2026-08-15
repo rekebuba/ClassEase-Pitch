@@ -6,9 +6,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from project.api.v1.routers.school.schema import EmployeeProfile
-from project.core.access_control import ensure_membership_role
-from project.models import Employee, Role, SchoolMembership, User
-from project.utils.enum import RoleEnum
+from project.core.access_control import ensure_user_membership_and_role
+from project.models import Employee, User
+from project.utils.enum import MfaStateEnum, RoleEnum
 
 
 class EmployeeService:
@@ -35,24 +35,12 @@ class EmployeeService:
             )
 
         if not user.memberships:
-            membership = SchoolMembership(
+            await ensure_user_membership_and_role(
+                session=session,
+                user_id=user.id,
                 school_id=school_id,
-                user_id=employee_data.user_id,
-            )
-
-            session.add(membership)
-            await session.flush()
-
-            role = (await session.execute(select(Role).where(Role.name == RoleEnum.EMPLOYEE))).scalar_one_or_none()
-
-            if not role:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Role not found")
-
-            await ensure_membership_role(
-                session,
-                membership,
-                role,
-                school_id,
+                role_enum=RoleEnum.STUDENT,
+                mfa_state=MfaStateEnum.VERIFIED,
             )
 
         if (

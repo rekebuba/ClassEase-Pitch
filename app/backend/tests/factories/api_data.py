@@ -1,5 +1,6 @@
 import random
 import uuid
+from datetime import timezone
 from typing import get_args
 
 from factory import LazyAttribute, SubFactory
@@ -27,6 +28,7 @@ from project.api.v1.routers.students.schema import (
     Address,
     EnrollmentApplicationPost,
     EnrollmentOpportunityPost,
+    EnrollStudentApplication,
     HealthRecord,
     StudentBasicInfo,
 )
@@ -172,8 +174,8 @@ class EnrollmentOpportunityFactory(TypedFactory[EnrollmentOpportunityPost]):
         model = EnrollmentOpportunityPost
 
     academic_year_id = LazyAttribute(lambda _: uuid.uuid4())
-    grade_id = LazyAttribute(lambda _: uuid.uuid4())
-    application_deadline = LazyAttribute(lambda _: fake.future_date())
+    grade_stream_id = LazyAttribute(lambda _: uuid.uuid4())
+    application_deadline = LazyAttribute(lambda _: fake.future_datetime(tzinfo=timezone.utc))
     capacity = LazyAttribute(lambda _: random.randint(20, 100))
     allow_applications = LazyAttribute(lambda _: random.choice([True, False]))
 
@@ -234,6 +236,14 @@ class SubmitEnrollmentApplicationFactory(TypedFactory[EnrollmentApplicationPost]
     health_record = SubFactory(HealthRecordFactory)
     academic_background = SubFactory(AcademicBackgroundFactory)
     address = SubFactory(AddressFactory)
+
+
+class EnrollStudentApplicationFactory(TypedFactory[EnrollStudentApplication]):
+    class Meta:
+        model = EnrollStudentApplication
+
+    application_id = LazyAttribute(lambda _: uuid.uuid4())
+    section_id = LazyAttribute(lambda _: uuid.uuid4())
 
 
 class StudentProfileFactory(TypedFactory[StudentProfile]):
