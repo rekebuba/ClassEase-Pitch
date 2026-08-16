@@ -5,6 +5,20 @@ export type ClientOptions = {
 };
 
 /**
+ * AcademicBackground
+ */
+export type AcademicBackground = {
+    /**
+     * Previousschool
+     */
+    previousSchool: string | null;
+    /**
+     * Istransfer
+     */
+    isTransfer: boolean;
+};
+
+/**
  * AcademicTermEnum
  */
 export type AcademicTermEnum = '1' | '2' | '3' | '4';
@@ -53,6 +67,32 @@ export type AcademicTermTypeEnum = 'Semester' | 'Quarter';
 export type AcademicYearStatusEnum = 'upcoming' | 'active' | 'completed' | 'archived';
 
 /**
+ * Address
+ */
+export type Address = {
+    /**
+     * City
+     */
+    city: string;
+    /**
+     * State
+     */
+    state: string;
+    /**
+     * Postalcode
+     */
+    postalCode: string;
+    /**
+     * Nationality
+     */
+    nationality: string;
+    /**
+     * Transportation
+     */
+    transportation: string;
+};
+
+/**
  * AssessmentComponentCreateSchema
  */
 export type AssessmentComponentCreateSchema = {
@@ -84,38 +124,6 @@ export type AssessmentComponentCreateSchema = {
      * Displayorder
      */
     displayOrder?: number;
-};
-
-/**
- * AssessmentSchema
- *
- * This model represents an assessment record for a student including details
- */
-export type AssessmentSchema = {
-    /**
-     * Id
-     */
-    id?: string | null;
-    /**
-     * Studentid
-     */
-    studentId: string;
-    /**
-     * Studenttermrecordid
-     */
-    studentTermRecordId: string;
-    /**
-     * Subjectofferingid
-     */
-    subjectOfferingId: string;
-    /**
-     * Total
-     */
-    total?: number | null;
-    /**
-     * Rank
-     */
-    rank?: number | null;
 };
 
 /**
@@ -297,6 +305,10 @@ export type CurrentUserInfo = {
     username: string;
     role: RoleEnum;
     /**
+     * Fullname
+     */
+    fullName: string;
+    /**
      * Imagepath
      */
     imagePath: string | null;
@@ -304,10 +316,6 @@ export type CurrentUserInfo = {
      * Createdat
      */
     createdAt: string;
-    /**
-     * Fullname
-     */
-    fullName: string;
     activeSchool: SchoolSummary;
     activeMembership: MembershipSummary;
     /**
@@ -327,9 +335,52 @@ export type DeleteYearSuccess = {
 };
 
 /**
- * EmployeeApplicationStatusEnum
+ * DepartmentBase
  */
-export type EmployeeApplicationStatusEnum = 'pending' | 'approved' | 'rejected' | 'interview-scheduled' | 'active' | 'inactive' | 'withdrawn';
+export type DepartmentBase = {
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Heademployeeid
+     */
+    headEmployeeId?: string | null;
+};
+
+/**
+ * DepartmentSchema
+ */
+export type DepartmentSchema = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Name
+     */
+    name: string;
+    /**
+     * Code
+     */
+    code: string;
+    /**
+     * Heademployeeid
+     */
+    headEmployeeId?: string | null;
+    /**
+     * Createdat
+     */
+    createdAt: string;
+    /**
+     * Updatedat
+     */
+    updatedAt: string;
+};
 
 /**
  * EmployeeBasicInfo
@@ -357,10 +408,6 @@ export type EmployeeBasicInfo = {
      * Terminationdate
      */
     terminationDate: string | null;
-    /**
-     * Departmentid
-     */
-    departmentId: string | null;
     /**
      * Primarypositionid
      */
@@ -460,18 +507,6 @@ export type EmployeeProfile = {
      */
     terminationDate: string | null;
     /**
-     * Departmentid
-     *
-     * The ID of the department
-     */
-    departmentId: string | null;
-    /**
-     * Primarypositionid
-     *
-     * The ID of the primary position
-     */
-    primaryPositionId: string | null;
-    /**
      * Manageremployeeid
      *
      * The ID of the manager employee
@@ -519,10 +554,6 @@ export type EmployeeRegStep2 = {
      */
     phone: string;
     /**
-     * Departmentid
-     */
-    departmentId?: string | null;
-    /**
      * Primarypositionid
      */
     primaryPositionId?: string | null;
@@ -559,6 +590,48 @@ export type EmployeeRegStep4 = {
 };
 
 /**
+ * EmploymentApplicationSchema
+ */
+export type EmploymentApplicationSchema = {
+    /**
+     * Id
+     */
+    id: string;
+    applicantUser: UserSchema;
+    jobPosting: JobSchema;
+    /**
+     * Covernote
+     */
+    coverNote: string | null;
+    /**
+     * Reviewernote
+     */
+    reviewerNote: string | null;
+    status: EmploymentApplicationStatusEnum;
+    /**
+     * Submittedat
+     */
+    submittedAt: string;
+    /**
+     * Reviewedat
+     */
+    reviewedAt: string;
+    /**
+     * Createdat
+     */
+    createdAt: string;
+    /**
+     * Updatedat
+     */
+    updatedAt: string;
+};
+
+/**
+ * EmploymentApplicationStatusEnum
+ */
+export type EmploymentApplicationStatusEnum = 'draft' | 'submitted' | 'under_review' | 'shortlisted' | 'accepted' | 'rejected' | 'withdrawn';
+
+/**
  * EmploymentContractCreate
  */
 export type EmploymentContractCreate = {
@@ -579,10 +652,6 @@ export type EmploymentContractCreate = {
      * Enddate
      */
     endDate?: string | null;
-    /**
-     * Salarygrade
-     */
-    salaryGrade?: string | null;
     status?: ContractStatusEnum;
 };
 
@@ -613,6 +682,110 @@ export type EnrollStudent = {
      */
     yearId: string;
 };
+
+/**
+ * EnrollStudentApplication
+ */
+export type EnrollStudentApplication = {
+    /**
+     * Applicationid
+     */
+    applicationId: string;
+    /**
+     * Sectionid
+     */
+    sectionId: string;
+};
+
+/**
+ * EnrollmentApplicationPost
+ */
+export type EnrollmentApplicationPost = {
+    /**
+     * Opportunityid
+     */
+    opportunityId: string;
+    /**
+     * Studentuserid
+     */
+    studentUserId: string | null;
+    /**
+     * Applicantnote
+     */
+    applicantNote: string | null;
+    /**
+     * Relation
+     */
+    relation: string | null;
+    user: StudentBasicInfo | null;
+    healthRecord: HealthRecord;
+    academicBackground: AcademicBackground;
+    address: Address;
+};
+
+/**
+ * EnrollmentOpportunityPost
+ */
+export type EnrollmentOpportunityPost = {
+    /**
+     * Academicyearid
+     */
+    academicYearId: string;
+    /**
+     * Gradestreamid
+     */
+    gradeStreamId: string;
+    /**
+     * Applicationdeadline
+     */
+    applicationDeadline: string | null;
+    /**
+     * Capacity
+     */
+    capacity: number;
+    /**
+     * Allowapplications
+     */
+    allowApplications: boolean;
+};
+
+/**
+ * EnrollmentOpportunitySchema
+ */
+export type EnrollmentOpportunitySchema = {
+    /**
+     * Id
+     */
+    id: string;
+    academicYear: YearSchema;
+    gradeStream: GradeStreamSchema;
+    /**
+     * Applicationdeadline
+     */
+    applicationDeadline: string | null;
+    /**
+     * Capacity
+     */
+    capacity: number;
+    /**
+     * Allowapplications
+     */
+    allowApplications: boolean;
+    status: EnrollmentOpportunityStatusEnum;
+    /**
+     * Createdat
+     */
+    createdAt: string;
+    /**
+     * Updatedat
+     */
+    updatedAt: string;
+};
+
+/**
+ * EnrollmentOpportunityStatusEnum
+ */
+export type EnrollmentOpportunityStatusEnum = 'draft' | 'open' | 'closed' | 'archived';
 
 /**
  * EventEligibilityEnum
@@ -695,11 +868,6 @@ export type EventSchema = {
 };
 
 /**
- * ExperienceYearEnum
- */
-export type ExperienceYearEnum = '0' | '1-2' | '3-5' | '6-10' | '11-15' | '16-20' | '20+';
-
-/**
  * GenderEnum
  */
 export type GenderEnum = 'male' | 'female';
@@ -725,54 +893,6 @@ export type GradeEnum = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '1
  * GradeLevelEnum
  */
 export type GradeLevelEnum = 'primary' | 'middle school' | 'high school';
-
-/**
- * GradeNestedSchema
- *
- * This model represents the relationships of a GradeSchema.
- * It is used to define the relationships between the GradeSchema and other schemas.
- */
-export type GradeNestedSchema = {
-    /**
-     * Id
-     */
-    id: string;
-    /**
-     * Schoolid
-     */
-    schoolId: string;
-    grade: GradeEnum;
-    level: GradeLevelEnum;
-    /**
-     * Hasstream
-     */
-    hasStream: boolean;
-    /**
-     * Createdat
-     */
-    createdAt: string;
-    /**
-     * Updatedat
-     */
-    updatedAt: string;
-    year: YearWithRelatedSchema;
-    /**
-     * Teachers
-     */
-    teachers: Array<TeacherWithRelatedSchema>;
-    /**
-     * Streams
-     */
-    streams: Array<StreamWithRelatedSchema>;
-    /**
-     * Students
-     */
-    students: Array<StudentWithRelatedSchema>;
-    /**
-     * Sections
-     */
-    sections: Array<SectionWithRelatedSchema>;
-};
 
 /**
  * GradeSchema
@@ -852,6 +972,10 @@ export type GradeStreamSchema = {
  * GradeStreamSetup
  */
 export type GradeStreamSetup = {
+    /**
+     * Id
+     */
+    id: string;
     stream: StreamSchema | null;
     /**
      * Subjects
@@ -946,6 +1070,29 @@ export type HttpValidationError = {
 };
 
 /**
+ * HealthRecord
+ */
+export type HealthRecord = {
+    bloodType: BloodTypeEnum;
+    /**
+     * Hasdisability
+     */
+    hasDisability: boolean;
+    /**
+     * Disabilitydetails
+     */
+    disabilityDetails: string | null;
+    /**
+     * Hasmedicalcondition
+     */
+    hasMedicalCondition: boolean;
+    /**
+     * Medicaldetails
+     */
+    medicalDetails: string | null;
+};
+
+/**
  * HealthStatus
  */
 export type HealthStatus = {
@@ -967,6 +1114,192 @@ export type HealthStatus = {
  * HighestEducationEnum
  */
 export type HighestEducationEnum = 'bachelors' | 'masters' | 'doctorate';
+
+/**
+ * HireJobApplication
+ */
+export type HireJobApplication = {
+    /**
+     * Applicationid
+     *
+     * The ID of the employment application
+     */
+    applicationId: string;
+    /**
+     * Employeenumber
+     *
+     * The employee number assigned to the new employee
+     */
+    employeeNumber: string;
+    /**
+     * Hiredate
+     *
+     * The date the employee was hired
+     */
+    hireDate: string;
+    /**
+     * The employment status of the employee
+     */
+    employmentStatus: EmploymentStatusEnum;
+    /**
+     * The type of employment
+     */
+    employmentType: EmploymentTypeEnum;
+    /**
+     * Terminationdate
+     *
+     * The date the employee was terminated
+     */
+    terminationDate?: string | null;
+    /**
+     * Manageremployeeid
+     *
+     * The ID of the employee's manager
+     */
+    managerEmployeeId?: string | null;
+    /**
+     * Workemail
+     *
+     * The work email of the employee
+     */
+    workEmail: string;
+    /**
+     * Workphone
+     *
+     * The work phone number of the employee
+     */
+    workPhone: string;
+    /**
+     * Startdate
+     *
+     * The start date of the employee's position
+     */
+    startDate: string;
+    /**
+     * Enddate
+     *
+     * The end date of the employee's position
+     */
+    endDate?: string | null;
+    /**
+     * The type of employment contract for the employee
+     */
+    contractType: ContractTypeEnum;
+    /**
+     * Contractstartdate
+     *
+     * The start date of the employment contract
+     */
+    contractStartDate: string;
+    /**
+     * Contractenddate
+     *
+     * The end date of the employment contract
+     */
+    contractEndDate?: string | null;
+    /**
+     * Hoursperweek
+     *
+     * The number of hours per week for the employment contract
+     */
+    hoursPerWeek: number;
+    /**
+     * The teacher profile information for the employee, if applicable
+     */
+    teacherProfile?: TeacherProfileJob | null;
+};
+
+/**
+ * JobApplicationPost
+ */
+export type JobApplicationPost = {
+    /**
+     * Jobid
+     *
+     * The ID of the job posting
+     */
+    jobId: string;
+    /**
+     * Covernote
+     *
+     * The cover note for the application
+     */
+    coverNote?: string | null;
+};
+
+/**
+ * JobPost
+ */
+export type JobPost = {
+    /**
+     * Positionid
+     *
+     * The ID of the position
+     */
+    positionId: string;
+    /**
+     * Description
+     *
+     * The description of the job
+     */
+    description: string;
+    /**
+     * The employment type of the job
+     */
+    employmentType: EmploymentTypeEnum;
+    /**
+     * Applicationdeadline
+     *
+     * The application deadline for the job
+     */
+    applicationDeadline?: string | null;
+    /**
+     * Openingscount
+     *
+     * The number of openings for the job
+     */
+    openingsCount: number;
+};
+
+/**
+ * JobSchema
+ */
+export type JobSchema = {
+    /**
+     * Id
+     */
+    id: string;
+    position: PositionSchema;
+    /**
+     * Schoolid
+     */
+    schoolId: string;
+    /**
+     * Description
+     */
+    description: string;
+    employmentType: EmploymentTypeEnum;
+    /**
+     * Applicationdeadline
+     */
+    applicationDeadline: string | null;
+    /**
+     * Openingscount
+     */
+    openingsCount: number;
+    /**
+     * Allowapplications
+     */
+    allowApplications: boolean;
+    /**
+     * Createdat
+     */
+    createdAt: string;
+    /**
+     * Updatedat
+     */
+    updatedAt: string;
+};
 
 /**
  * LoginTokenResponse
@@ -1003,44 +1336,6 @@ export type ManualSetupBulkSchema = {
     yearId: string;
     blueprint: BluePrintTemplate;
 };
-
-/**
- * MarkListSchema
- *
- * This model represents an assessment record for a student including details
- */
-export type MarkListSchema = {
-    /**
-     * Id
-     */
-    id?: string | null;
-    /**
-     * Studentid
-     */
-    studentId: string;
-    /**
-     * Studenttermrecordid
-     */
-    studentTermRecordId: string;
-    /**
-     * Subjectid
-     */
-    subjectId: string;
-    type: MarkListTypeEnum;
-    /**
-     * Percentage
-     */
-    percentage?: number | null;
-    /**
-     * Score
-     */
-    score?: number | null;
-};
-
-/**
- * MarkListTypeEnum
- */
-export type MarkListTypeEnum = 'Test' | 'Quiz' | 'Assignment' | 'Midterm' | 'Final';
 
 /**
  * MembershipSelectionRequest
@@ -1279,67 +1574,6 @@ export type ParentProfile = {
 };
 
 /**
- * ParentRegistrationForm
- */
-export type ParentRegistrationForm = {
-    /**
-     * Firstname
-     */
-    firstName: string;
-    /**
-     * Fathername
-     */
-    fatherName: string;
-    /**
-     * Grandfathername
-     */
-    grandFatherName: string | null;
-    /**
-     * Dateofbirth
-     */
-    dateOfBirth: string;
-    gender: GenderEnum;
-    /**
-     * Email
-     */
-    email: string;
-    /**
-     * Phone
-     */
-    phone?: string | null;
-    /**
-     * Username
-     */
-    username?: string | null;
-    /**
-     * Password
-     */
-    password?: null;
-    /**
-     * Relation
-     */
-    relation: string;
-    /**
-     * Emergencycontactphone
-     */
-    emergencyContactPhone?: string | null;
-};
-
-/**
- * ParentRegistrationMe
- */
-export type ParentRegistrationMe = {
-    /**
-     * Relation
-     */
-    relation: string;
-    /**
-     * Emergencycontactphone
-     */
-    emergencyContactPhone?: string | null;
-};
-
-/**
  * PasswordRecovery
  */
 export type PasswordRecovery = {
@@ -1411,6 +1645,46 @@ export type PayrollProfileCreate = {
 export type PermissionEnum = 'schools:read' | 'schools:manage' | 'years:read' | 'years:write' | 'grades:read' | 'grades:write' | 'subjects:read' | 'subjects:write' | 'streams:read' | 'streams:write' | 'sections:read' | 'sections:write' | 'students:read' | 'students:write' | 'employees:read' | 'employees:write' | 'registrations:create' | 'teachers:assign' | 'auth:switch_school' | 'records:transfer';
 
 /**
+ * PositionBase
+ */
+export type PositionBase = {
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Departmentid
+     */
+    departmentId: string;
+};
+
+/**
+ * PositionSchema
+ */
+export type PositionSchema = {
+    /**
+     * Id
+     */
+    id: string;
+    /**
+     * Title
+     */
+    title: string;
+    /**
+     * Departmentid
+     */
+    departmentId: string;
+    /**
+     * Createdat
+     */
+    createdAt: string;
+    /**
+     * Updatedat
+     */
+    updatedAt: string;
+};
+
+/**
  * ProviderResponse
  */
 export type ProviderResponse = {
@@ -1439,22 +1713,6 @@ export type RefreshTokenRequest = {
 };
 
 /**
- * RegistrationResponse
- *
- * Schema for successful registration response.
- */
-export type RegistrationResponse = {
-    /**
-     * Id
-     */
-    id: string;
-    /**
-     * Message
-     */
-    message: string;
-};
-
-/**
  * RegistrationStep
  */
 export type RegistrationStep = {
@@ -1468,11 +1726,6 @@ export type RegistrationStep = {
  * RoleEnum
  */
 export type RoleEnum = 'owner' | 'admin' | 'teacher' | 'student' | 'registrar' | 'parent' | 'employee' | 'guest';
-
-/**
- * ScheduleEnum
- */
-export type ScheduleEnum = 'full-time' | 'part-time' | 'flexible-hours' | 'substitute';
 
 /**
  * SchoolMembershipStatusEnum
@@ -1805,14 +2058,6 @@ export type StudentApplicationStatusEnum = 'pending' | 'rejected' | 'active' | '
  */
 export type StudentBasicInfo = {
     /**
-     * Id
-     */
-    id: string;
-    /**
-     * Fullname
-     */
-    fullName: string;
-    /**
      * Firstname
      */
     firstName: string;
@@ -1830,108 +2075,13 @@ export type StudentBasicInfo = {
     dateOfBirth: string;
     gender: GenderEnum;
     /**
-     * Address
+     * Email
      */
-    address: string;
+    email: string | null;
     /**
-     * City
+     * Phone
      */
-    city: string;
-    /**
-     * State
-     */
-    state: string;
-    /**
-     * Postalcode
-     */
-    postalCode: string;
-    /**
-     * Fatherphone
-     */
-    fatherPhone: string;
-    /**
-     * Motherphone
-     */
-    motherPhone: string;
-    /**
-     * Parentemail
-     */
-    parentEmail: string;
-    /**
-     * Nationality
-     */
-    nationality: string | null;
-    bloodType: BloodTypeEnum;
-    /**
-     * Studentphoto
-     */
-    studentPhoto: string | null;
-    /**
-     * Previousschool
-     */
-    previousSchool: string | null;
-    /**
-     * Previousgrades
-     */
-    previousGrades: string | null;
-    /**
-     * Transportation
-     */
-    transportation: string | null;
-    /**
-     * Guardianname
-     */
-    guardianName: string | null;
-    /**
-     * Guardianphone
-     */
-    guardianPhone: string | null;
-    /**
-     * Guardianrelation
-     */
-    guardianRelation: string | null;
-    /**
-     * Emergencycontactname
-     */
-    emergencyContactName: string | null;
-    /**
-     * Emergencycontactphone
-     */
-    emergencyContactPhone: string | null;
-    /**
-     * Disabilitydetails
-     */
-    disabilityDetails: string | null;
-    /**
-     * Siblingdetails
-     */
-    siblingDetails: string | null;
-    /**
-     * Medicaldetails
-     */
-    medicalDetails: string | null;
-    /**
-     * Siblinginschool
-     */
-    siblingInSchool: boolean;
-    /**
-     * Hasmedicalcondition
-     */
-    hasMedicalCondition: boolean;
-    /**
-     * Hasdisability
-     */
-    hasDisability: boolean;
-    /**
-     * Istransfer
-     */
-    isTransfer: boolean;
-    status: StudentApplicationStatusEnum;
-    /**
-     * Createdat
-     */
-    createdAt: string;
-    grade: StudentRegisteredGrade;
+    phone: string | null;
 };
 
 /**
@@ -1956,104 +2106,6 @@ export type StudentProfile = {
      * List of parent profiles associated with the student
      */
     parents?: Array<ParentProfile>;
-};
-
-/**
- * StudentRegisteredGrade
- */
-export type StudentRegisteredGrade = {
-    /**
-     * Id
-     */
-    id: string;
-    grade: GradeEnum;
-    year: StudentRegisteredYear;
-};
-
-/**
- * StudentRegisteredYear
- */
-export type StudentRegisteredYear = {
-    /**
-     * Id
-     */
-    id: string;
-    /**
-     * Name
-     */
-    name: string;
-};
-
-/**
- * StudentRegistrationMe
- */
-export type StudentRegistrationMe = {
-    bloodType?: BloodTypeEnum;
-    /**
-     * Hasmedicalcondition
-     */
-    hasMedicalCondition?: boolean;
-    /**
-     * Medicaldetails
-     */
-    medicalDetails?: string | null;
-    /**
-     * Hasdisability
-     */
-    hasDisability?: boolean;
-    /**
-     * Disabilitydetails
-     */
-    disabilityDetails?: string | null;
-    /**
-     * Emergencycontactname
-     */
-    emergencyContactName?: string | null;
-    /**
-     * Emergencycontactphone
-     */
-    emergencyContactPhone: string | null;
-    /**
-     * City
-     */
-    city: string;
-    /**
-     * State
-     */
-    state: string;
-    /**
-     * Postalcode
-     */
-    postalCode: string;
-    /**
-     * Registeredforgradeid
-     */
-    registeredForGradeId: string;
-    /**
-     * Transportation
-     */
-    transportation?: string | null;
-    /**
-     * Istransfer
-     */
-    isTransfer?: boolean;
-    /**
-     * Previousschool
-     */
-    previousSchool?: string | null;
-    /**
-     * Nationality
-     */
-    nationality?: string | null;
-    /**
-     * Studentphoto
-     */
-    studentPhoto?: string | null;
-    /**
-     * Parentid
-     */
-    parentId?: string | null;
-    status?: StudentApplicationStatusEnum;
 };
 
 /**
@@ -2181,141 +2233,6 @@ export type StudentTermRecordSchema = {
 };
 
 /**
- * StudentWithRelatedSchema
- */
-export type StudentWithRelatedSchema = {
-    startingGrade: GradeSchema | null;
-    user: UserSchema | null;
-    /**
-     * Termrecords
-     */
-    termRecords: Array<StudentTermRecordSchema>;
-    /**
-     * Studentyearrecords
-     */
-    studentYearRecords: Array<StudentYearRecordSchema>;
-    /**
-     * Subjectyearlyaverages
-     */
-    subjectYearlyAverages: Array<SubjectYearlyAverageSchema>;
-    /**
-     * Assessments
-     */
-    assessments: Array<AssessmentSchema>;
-    /**
-     * Years
-     *
-     * List of years the student is associated with.
-     */
-    years: Array<YearSchema>;
-    /**
-     * Academicterms
-     *
-     * List of academic terms the student is associated with.
-     */
-    academicTerms: Array<AcademicTermSchema>;
-    /**
-     * Grades
-     *
-     * List of grades the student is associated with.
-     */
-    grades: Array<GradeSchema>;
-    /**
-     * Subjects
-     *
-     * List of subjects the student is associated with.
-     */
-    subjects: Array<SubjectSchema>;
-    /**
-     * Sections
-     *
-     * List of sections the student is associated with.
-     */
-    sections: Array<SectionSchema>;
-    /**
-     * Marklists
-     *
-     * List of mark lists associated with the student.
-     */
-    markLists: Array<MarkListSchema>;
-    /**
-     * Id
-     */
-    id: string;
-    /**
-     * Userid
-     */
-    userId: string | null;
-    /**
-     * Firstname
-     */
-    firstName: string;
-    /**
-     * Fathername
-     */
-    fatherName: string;
-    /**
-     * Dateofbirth
-     */
-    dateOfBirth: string;
-    gender: GenderEnum;
-    /**
-     * City
-     */
-    city: string;
-    /**
-     * State
-     */
-    state: string;
-    /**
-     * Postalcode
-     */
-    postalCode: string;
-    /**
-     * Grandfathername
-     */
-    grandFatherName: string | null;
-    /**
-     * Nationality
-     */
-    nationality: string | null;
-    bloodType?: BloodTypeEnum;
-    /**
-     * Studentphoto
-     */
-    studentPhoto: string | null;
-    /**
-     * Previousschool
-     */
-    previousSchool: string | null;
-    /**
-     * Transportation
-     */
-    transportation: string | null;
-    /**
-     * Disabilitydetails
-     */
-    disabilityDetails: string | null;
-    /**
-     * Medicaldetails
-     */
-    medicalDetails: string | null;
-    /**
-     * Hasmedicalcondition
-     */
-    hasMedicalCondition: boolean;
-    /**
-     * Hasdisability
-     */
-    hasDisability: boolean;
-    /**
-     * Istransfer
-     */
-    isTransfer: boolean;
-    status?: StudentApplicationStatusEnum;
-};
-
-/**
  * StudentYearRecordSchema
  *
  * This model represents a student's yearly academic record.
@@ -2363,47 +2280,6 @@ export type SubjectCreateSchema = {
      * Code
      */
     code: string;
-};
-
-/**
- * SubjectNestedSchema
- *
- * This model represents the relationships of a SubjectSchema.
- * It is used to define the relationships between the SubjectSchema and other schemas.
- */
-export type SubjectNestedSchema = {
-    /**
-     * Id
-     */
-    id: string;
-    /**
-     * Name
-     */
-    name: string;
-    /**
-     * Code
-     */
-    code: string;
-    /**
-     * Createdat
-     */
-    createdAt: string;
-    /**
-     * Updatedat
-     */
-    updatedAt: string;
-    /**
-     * Teachers
-     */
-    teachers: Array<TeacherWithRelatedSchema>;
-    /**
-     * Streams
-     */
-    streams: Array<StreamWithRelatedSchema>;
-    /**
-     * Grades
-     */
-    grades: Array<GradeWithRelatedSchema>;
 };
 
 /**
@@ -2502,38 +2378,6 @@ export type SubjectTemplate = {
      * Code
      */
     code: string;
-};
-
-/**
- * SubjectYearlyAverageSchema
- *
- * This model represents the yearly average of a subject for a student.
- */
-export type SubjectYearlyAverageSchema = {
-    /**
-     * Id
-     */
-    id?: string | null;
-    /**
-     * Studentid
-     */
-    studentId: string;
-    /**
-     * Subjectofferingid
-     */
-    subjectOfferingId: string;
-    /**
-     * Studentyearrecordid
-     */
-    studentYearRecordId?: string | null;
-    /**
-     * Average
-     */
-    average?: number | null;
-    /**
-     * Rank
-     */
-    rank?: number | null;
 };
 
 /**
@@ -2665,6 +2509,40 @@ export type TeacherBasicInfo = {
 };
 
 /**
+ * TeacherProfileJob
+ */
+export type TeacherProfileJob = {
+    /**
+     * Specialization
+     *
+     * The specialization of the teacher
+     */
+    specialization?: string | null;
+    /**
+     * Teacherlicensenumber
+     *
+     * The license number of the teacher
+     */
+    teacherLicenseNumber?: string | null;
+    /**
+     * Certifications
+     *
+     * The certification of the teacher
+     */
+    certifications?: string | null;
+    /**
+     * The highest education level of the teacher
+     */
+    highestEducation?: HighestEducationEnum | null;
+    /**
+     * Yearsofexperience
+     *
+     * The years of experience of the teacher
+     */
+    yearsOfExperience?: number | null;
+};
+
+/**
  * TeacherProfileUpdate
  */
 export type TeacherProfileUpdate = {
@@ -2685,212 +2563,6 @@ export type TeacherProfileUpdate = {
      * Yearsofexperience
      */
     yearsOfExperience?: number | null;
-};
-
-/**
- * TeacherWithRelatedSchema
- *
- * This model extends TeacherSchema to include relationships.
- */
-export type TeacherWithRelatedSchema = {
-    user?: UserSchema | null;
-    /**
-     * Sections
-     */
-    sections?: Array<SectionSchema> | null;
-    /**
-     * Years
-     *
-     * List of years the teacher is associated with.
-     */
-    years?: Array<YearSchema> | null;
-    /**
-     * Academicterms
-     *
-     * List of academic terms the teacher is associated with.
-     */
-    academicTerms?: Array<AcademicTermSchema> | null;
-    /**
-     * Grades
-     *
-     * List of grades the teacher is associated with.
-     */
-    grades?: Array<GradeSchema> | null;
-    /**
-     * Subjects
-     *
-     * List of subjects the teacher is associated with.
-     */
-    subjects?: Array<SubjectSchema> | null;
-    /**
-     * Id
-     */
-    id?: string | null;
-    /**
-     * Firstname
-     */
-    firstName: string;
-    /**
-     * Fathername
-     */
-    fatherName: string;
-    /**
-     * Grandfathername
-     */
-    grandFatherName: string;
-    /**
-     * Dateofbirth
-     */
-    dateOfBirth: string;
-    gender: GenderEnum;
-    /**
-     * Nationality
-     */
-    nationality: string;
-    /**
-     * Socialsecuritynumber
-     */
-    socialSecurityNumber: string;
-    /**
-     * Address
-     */
-    address: string;
-    /**
-     * City
-     */
-    city: string;
-    /**
-     * State
-     */
-    state: string;
-    /**
-     * Postalcode
-     */
-    postalCode: string;
-    /**
-     * Country
-     */
-    country: string;
-    highestDegree: HighestEducationEnum;
-    /**
-     * University
-     */
-    university: string;
-    /**
-     * Graduationyear
-     */
-    graduationYear: number;
-    /**
-     * Gpa
-     */
-    gpa: number;
-    /**
-     * Positionapplyingfor
-     */
-    positionApplyingFor: string;
-    yearsOfExperience: ExperienceYearEnum;
-    preferredSchedule: ScheduleEnum;
-    /**
-     * Secondaryphone
-     */
-    secondaryPhone?: string | null;
-    /**
-     * Additionaldegrees
-     */
-    additionalDegrees?: string | null;
-    /**
-     * Teachinglicense
-     */
-    teachingLicense?: boolean | null;
-    /**
-     * Licensenumber
-     */
-    licenseNumber?: string | null;
-    /**
-     * Licensestate
-     */
-    licenseState?: string | null;
-    /**
-     * Licenseexpirationdate
-     */
-    licenseExpirationDate?: string | null;
-    /**
-     * Certifications
-     */
-    certifications?: string | null;
-    /**
-     * Specializations
-     */
-    specializations?: string | null;
-    /**
-     * Previousschools
-     */
-    previousSchools?: string | null;
-    /**
-     * Specialskills
-     */
-    specialSkills?: string | null;
-    /**
-     * Professionaldevelopment
-     */
-    professionalDevelopment?: string | null;
-    /**
-     * Hasconvictions
-     */
-    hasConvictions?: boolean;
-    /**
-     * Convictiondetails
-     */
-    convictionDetails?: string | null;
-    /**
-     * Hasdisciplinaryactions
-     */
-    hasDisciplinaryActions?: boolean;
-    /**
-     * Resume
-     */
-    resume?: string | null;
-    /**
-     * Coverletter
-     */
-    coverLetter?: string | null;
-    /**
-     * Transcripts
-     */
-    transcripts?: string | null;
-    /**
-     * Teachingcertificate
-     */
-    teachingCertificate?: string | null;
-    /**
-     * Backgroundcheck
-     */
-    backgroundCheck?: string | null;
-    /**
-     * Teachingphilosophy
-     */
-    teachingPhilosophy?: string | null;
-    /**
-     * Whyteaching
-     */
-    whyTeaching?: string | null;
-    /**
-     * Additionalcomments
-     */
-    additionalComments?: string | null;
-    /**
-     * Agreetoterms
-     */
-    agreeToTerms?: boolean;
-    /**
-     * Agreetobackgroundcheck
-     */
-    agreeToBackgroundCheck?: boolean;
-    /**
-     * Userid
-     */
-    userId?: string | null;
-    status?: EmployeeApplicationStatusEnum;
 };
 
 /**
@@ -3096,15 +2768,51 @@ export type UserSchema = {
      * Username
      */
     username: string;
-    role: RoleEnum;
+    /**
+     * Firstname
+     */
+    firstName: string;
+    /**
+     * Fathername
+     */
+    fatherName: string;
+    /**
+     * Grandfathername
+     */
+    grandFatherName: string | null;
+    /**
+     * Dateofbirth
+     */
+    dateOfBirth: string;
+    gender: GenderEnum;
+    /**
+     * Email
+     */
+    email: string | null;
+    /**
+     * Phone
+     */
+    phone: string | null;
     /**
      * Imagepath
      */
     imagePath?: string | null;
     /**
+     * Isactive
+     */
+    isActive: boolean;
+    /**
+     * Isverified
+     */
+    isVerified: boolean;
+    /**
      * Createdat
      */
     createdAt: string;
+    /**
+     * Updatedat
+     */
+    updatedAt: string;
 };
 
 /**
@@ -3255,53 +2963,6 @@ export type YearWithRelatedSchema = {
      * Updatedat
      */
     updatedAt: string;
-};
-
-/**
- * ParentRegistrationForm
- */
-export type ParentRegistrationFormWritable = {
-    /**
-     * Firstname
-     */
-    firstName: string;
-    /**
-     * Fathername
-     */
-    fatherName: string;
-    /**
-     * Grandfathername
-     */
-    grandFatherName: string | null;
-    /**
-     * Dateofbirth
-     */
-    dateOfBirth: string;
-    gender: GenderEnum;
-    /**
-     * Email
-     */
-    email: string;
-    /**
-     * Phone
-     */
-    phone?: string | null;
-    /**
-     * Username
-     */
-    username?: string | null;
-    /**
-     * Password
-     */
-    password?: string | null;
-    /**
-     * Relation
-     */
-    relation: string;
-    /**
-     * Emergencycontactphone
-     */
-    emergencyContactPhone?: string | null;
 };
 
 /**
@@ -3827,31 +3488,6 @@ export type RegisterStudentStep5Responses = {
 
 export type RegisterStudentStep5Response = RegisterStudentStep5Responses[keyof RegisterStudentStep5Responses];
 
-export type RegisterNewParentData = {
-    body: ParentRegistrationFormWritable;
-    path?: never;
-    query?: never;
-    url: '/api/v1/register/parents';
-};
-
-export type RegisterNewParentErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type RegisterNewParentError = RegisterNewParentErrors[keyof RegisterNewParentErrors];
-
-export type RegisterNewParentResponses = {
-    /**
-     * Successful Response
-     */
-    201: RegistrationResponse;
-};
-
-export type RegisterNewParentResponse = RegisterNewParentResponses[keyof RegisterNewParentResponses];
-
 export type RegisterEmployeeStep1Data = {
     body: EmployeeRegStep1;
     path?: never;
@@ -3951,66 +3587,6 @@ export type RegisterEmployeeStep4Responses = {
 };
 
 export type RegisterEmployeeStep4Response = RegisterEmployeeStep4Responses[keyof RegisterEmployeeStep4Responses];
-
-export type RegisterMeAsParentData = {
-    body: ParentRegistrationMe;
-    path: {
-        /**
-         * School Id
-         */
-        school_id: string;
-    };
-    query?: never;
-    url: '/api/v1/register/schools/{school_id}/me/parent';
-};
-
-export type RegisterMeAsParentErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type RegisterMeAsParentError = RegisterMeAsParentErrors[keyof RegisterMeAsParentErrors];
-
-export type RegisterMeAsParentResponses = {
-    /**
-     * Successful Response
-     */
-    201: RegistrationResponse;
-};
-
-export type RegisterMeAsParentResponse = RegisterMeAsParentResponses[keyof RegisterMeAsParentResponses];
-
-export type RegisterMeAsStudentData = {
-    body: StudentRegistrationMe;
-    path: {
-        /**
-         * School Id
-         */
-        school_id: string;
-    };
-    query?: never;
-    url: '/api/v1/register/schools/{school_id}/me/student';
-};
-
-export type RegisterMeAsStudentErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type RegisterMeAsStudentError = RegisterMeAsStudentErrors[keyof RegisterMeAsStudentErrors];
-
-export type RegisterMeAsStudentResponses = {
-    /**
-     * Successful Response
-     */
-    201: RegistrationResponse;
-};
-
-export type RegisterMeAsStudentResponse = RegisterMeAsStudentResponses[keyof RegisterMeAsStudentResponses];
 
 export type GetYearsData = {
     body?: never;
@@ -4177,70 +3753,6 @@ export type GetYearByIdResponses = {
 
 export type GetYearByIdResponse = GetYearByIdResponses[keyof GetYearByIdResponses];
 
-export type GetDetailGradesByYearIdData = {
-    body?: never;
-    path: {
-        /**
-         * Year Id
-         */
-        year_id: string;
-    };
-    query?: never;
-    url: '/api/v1/years/{year_id}/grades/detail';
-};
-
-export type GetDetailGradesByYearIdErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type GetDetailGradesByYearIdError = GetDetailGradesByYearIdErrors[keyof GetDetailGradesByYearIdErrors];
-
-export type GetDetailGradesByYearIdResponses = {
-    /**
-     * Response Get Detail Grades By Year Id Api V1 Years  Year Id  Grades Detail Get
-     *
-     * Successful Response
-     */
-    200: Array<GradeNestedSchema>;
-};
-
-export type GetDetailGradesByYearIdResponse = GetDetailGradesByYearIdResponses[keyof GetDetailGradesByYearIdResponses];
-
-export type GetDetailSubjectsByYearIdData = {
-    body?: never;
-    path: {
-        /**
-         * Year Id
-         */
-        year_id: string;
-    };
-    query?: never;
-    url: '/api/v1/years/{year_id}/subjects/detail';
-};
-
-export type GetDetailSubjectsByYearIdErrors = {
-    /**
-     * Validation Error
-     */
-    422: HttpValidationError;
-};
-
-export type GetDetailSubjectsByYearIdError = GetDetailSubjectsByYearIdErrors[keyof GetDetailSubjectsByYearIdErrors];
-
-export type GetDetailSubjectsByYearIdResponses = {
-    /**
-     * Response Get Detail Subjects By Year Id Api V1 Years  Year Id  Subjects Detail Get
-     *
-     * Successful Response
-     */
-    200: Array<SubjectNestedSchema>;
-};
-
-export type GetDetailSubjectsByYearIdResponse = GetDetailSubjectsByYearIdResponses[keyof GetDetailSubjectsByYearIdResponses];
-
 export type GetGradesData = {
     body?: never;
     path?: never;
@@ -4297,7 +3809,7 @@ export type GetGradeOfferingsData = {
          */
         q?: string | null;
     };
-    url: '/api/v1/grades/offerings';
+    url: '/api/v1/grade-offerings';
 };
 
 export type GetGradeOfferingsErrors = {
@@ -4311,7 +3823,7 @@ export type GetGradeOfferingsError = GetGradeOfferingsErrors[keyof GetGradeOffer
 
 export type GetGradeOfferingsResponses = {
     /**
-     * Response Get Grade Offerings Api V1 Grades Offerings Get
+     * Response Get Grade Offerings Api V1 Grade Offerings Get
      *
      * Successful Response
      */
@@ -4329,7 +3841,7 @@ export type GetGradeOfferingsByIdData = {
         grade_id: string;
     };
     query?: never;
-    url: '/api/v1/grades/offerings/{grade_id}';
+    url: '/api/v1/grade-offerings/{grade_id}';
 };
 
 export type GetGradeOfferingsByIdErrors = {
@@ -4496,7 +4008,7 @@ export type GetSubjectOfferingsData = {
          */
         q?: string | null;
     };
-    url: '/api/v1/subjects/offerings';
+    url: '/api/v1/subject-offerings';
 };
 
 export type GetSubjectOfferingsErrors = {
@@ -4510,7 +4022,7 @@ export type GetSubjectOfferingsError = GetSubjectOfferingsErrors[keyof GetSubjec
 
 export type GetSubjectOfferingsResponses = {
     /**
-     * Response Get Subject Offerings Api V1 Subjects Offerings Get
+     * Response Get Subject Offerings Api V1 Subject Offerings Get
      *
      * Successful Response
      */
@@ -4528,7 +4040,7 @@ export type GetSubjectOfferingsByIdData = {
         subject_id: string;
     };
     query?: never;
-    url: '/api/v1/subjects/offerings/{subject_id}';
+    url: '/api/v1/subject-offerings/{subject_id}';
 };
 
 export type GetSubjectOfferingsByIdErrors = {
@@ -4816,6 +4328,117 @@ export type GetLoggedInUserResponses = {
 };
 
 export type GetLoggedInUserResponse = GetLoggedInUserResponses[keyof GetLoggedInUserResponses];
+
+export type GetStudentEnrollmentOpportunitiesData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Yearid
+         */
+        yearId: string;
+        /**
+         * Q
+         */
+        q?: string | null;
+    };
+    url: '/api/v1/enrollment-opportunities';
+};
+
+export type GetStudentEnrollmentOpportunitiesErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetStudentEnrollmentOpportunitiesError = GetStudentEnrollmentOpportunitiesErrors[keyof GetStudentEnrollmentOpportunitiesErrors];
+
+export type GetStudentEnrollmentOpportunitiesResponses = {
+    /**
+     * Response Get Student Enrollment Opportunities Api V1 Enrollment Opportunities Get
+     *
+     * Successful Response
+     */
+    200: Array<EnrollmentOpportunitySchema>;
+};
+
+export type GetStudentEnrollmentOpportunitiesResponse = GetStudentEnrollmentOpportunitiesResponses[keyof GetStudentEnrollmentOpportunitiesResponses];
+
+export type PostStudentEnrollmentOpportunityData = {
+    body: EnrollmentOpportunityPost;
+    path?: never;
+    query?: never;
+    url: '/api/v1/enrollment-opportunities';
+};
+
+export type PostStudentEnrollmentOpportunityErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostStudentEnrollmentOpportunityError = PostStudentEnrollmentOpportunityErrors[keyof PostStudentEnrollmentOpportunityErrors];
+
+export type PostStudentEnrollmentOpportunityResponses = {
+    /**
+     * Successful Response
+     */
+    201: SuccessResponse;
+};
+
+export type PostStudentEnrollmentOpportunityResponse = PostStudentEnrollmentOpportunityResponses[keyof PostStudentEnrollmentOpportunityResponses];
+
+export type PostStudentEnrollmentApplicationData = {
+    body: EnrollmentApplicationPost;
+    path?: never;
+    query?: never;
+    url: '/api/v1/enrollment-applications';
+};
+
+export type PostStudentEnrollmentApplicationErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostStudentEnrollmentApplicationError = PostStudentEnrollmentApplicationErrors[keyof PostStudentEnrollmentApplicationErrors];
+
+export type PostStudentEnrollmentApplicationResponses = {
+    /**
+     * Successful Response
+     */
+    201: SuccessResponse;
+};
+
+export type PostStudentEnrollmentApplicationResponse = PostStudentEnrollmentApplicationResponses[keyof PostStudentEnrollmentApplicationResponses];
+
+export type ApproveStudentEnrollmentData = {
+    body: EnrollStudentApplication;
+    path?: never;
+    query?: never;
+    url: '/api/v1/enrollment-applications/approve';
+};
+
+export type ApproveStudentEnrollmentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type ApproveStudentEnrollmentError = ApproveStudentEnrollmentErrors[keyof ApproveStudentEnrollmentErrors];
+
+export type ApproveStudentEnrollmentResponses = {
+    /**
+     * Successful Response
+     */
+    200: SuccessResponse;
+};
+
+export type ApproveStudentEnrollmentResponse = ApproveStudentEnrollmentResponses[keyof ApproveStudentEnrollmentResponses];
 
 export type DeleteStudentsData = {
     body?: never;
@@ -5728,3 +5351,364 @@ export type SetupManualBulkResponses = {
 };
 
 export type SetupManualBulkResponse = SetupManualBulkResponses[keyof SetupManualBulkResponses];
+
+export type GetAllJobsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Q
+         */
+        q?: string | null;
+    };
+    url: '/api/v1/jobs';
+};
+
+export type GetAllJobsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetAllJobsError = GetAllJobsErrors[keyof GetAllJobsErrors];
+
+export type GetAllJobsResponses = {
+    /**
+     * Response Get All Jobs Api V1 Jobs Get
+     *
+     * Successful Response
+     */
+    200: Array<JobSchema>;
+};
+
+export type GetAllJobsResponse = GetAllJobsResponses[keyof GetAllJobsResponses];
+
+export type PostJobData = {
+    body: JobPost;
+    path?: never;
+    query?: never;
+    url: '/api/v1/jobs';
+};
+
+export type PostJobErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostJobError = PostJobErrors[keyof PostJobErrors];
+
+export type PostJobResponses = {
+    /**
+     * Successful Response
+     */
+    201: SuccessResponse;
+};
+
+export type PostJobResponse = PostJobResponses[keyof PostJobResponses];
+
+export type GetSchoolJobsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Q
+         */
+        q?: string | null;
+    };
+    url: '/api/v1/school-jobs';
+};
+
+export type GetSchoolJobsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetSchoolJobsError = GetSchoolJobsErrors[keyof GetSchoolJobsErrors];
+
+export type GetSchoolJobsResponses = {
+    /**
+     * Response Get School Jobs Api V1 School Jobs Get
+     *
+     * Successful Response
+     */
+    200: Array<JobSchema>;
+};
+
+export type GetSchoolJobsResponse = GetSchoolJobsResponses[keyof GetSchoolJobsResponses];
+
+export type GetJobByIdData = {
+    body?: never;
+    path: {
+        /**
+         * Job Id
+         */
+        job_id: string;
+    };
+    query?: never;
+    url: '/api/v1/jobs/{job_id}';
+};
+
+export type GetJobByIdErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetJobByIdError = GetJobByIdErrors[keyof GetJobByIdErrors];
+
+export type GetJobByIdResponses = {
+    /**
+     * Successful Response
+     */
+    200: JobSchema;
+};
+
+export type GetJobByIdResponse = GetJobByIdResponses[keyof GetJobByIdResponses];
+
+export type GetSchoolJobByIdData = {
+    body?: never;
+    path: {
+        /**
+         * Job Id
+         */
+        job_id: string;
+    };
+    query?: never;
+    url: '/api/v1/school-jobs/{job_id}';
+};
+
+export type GetSchoolJobByIdErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetSchoolJobByIdError = GetSchoolJobByIdErrors[keyof GetSchoolJobByIdErrors];
+
+export type GetSchoolJobByIdResponses = {
+    /**
+     * Successful Response
+     */
+    200: JobSchema;
+};
+
+export type GetSchoolJobByIdResponse = GetSchoolJobByIdResponses[keyof GetSchoolJobByIdResponses];
+
+export type GetJobApplicationsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Q
+         */
+        q?: string | null;
+    };
+    url: '/api/v1/job-applications';
+};
+
+export type GetJobApplicationsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetJobApplicationsError = GetJobApplicationsErrors[keyof GetJobApplicationsErrors];
+
+export type GetJobApplicationsResponses = {
+    /**
+     * Response Get Job Applications Api V1 Job Applications Get
+     *
+     * Successful Response
+     */
+    200: Array<EmploymentApplicationSchema>;
+};
+
+export type GetJobApplicationsResponse = GetJobApplicationsResponses[keyof GetJobApplicationsResponses];
+
+export type PostJobApplicationData = {
+    body: JobApplicationPost;
+    path?: never;
+    query?: never;
+    url: '/api/v1/job-applications';
+};
+
+export type PostJobApplicationErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostJobApplicationError = PostJobApplicationErrors[keyof PostJobApplicationErrors];
+
+export type PostJobApplicationResponses = {
+    /**
+     * Successful Response
+     */
+    201: SuccessResponse;
+};
+
+export type PostJobApplicationResponse = PostJobApplicationResponses[keyof PostJobApplicationResponses];
+
+export type HireEmployeeData = {
+    body: HireJobApplication;
+    path?: never;
+    query?: never;
+    url: '/api/v1/job-applications/hire';
+};
+
+export type HireEmployeeErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type HireEmployeeError = HireEmployeeErrors[keyof HireEmployeeErrors];
+
+export type HireEmployeeResponses = {
+    /**
+     * Successful Response
+     */
+    201: SuccessResponse;
+};
+
+export type HireEmployeeResponse = HireEmployeeResponses[keyof HireEmployeeResponses];
+
+export type GetDepartmentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Q
+         */
+        q?: string | null;
+    };
+    url: '/api/v1/departments';
+};
+
+export type GetDepartmentsErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetDepartmentsError = GetDepartmentsErrors[keyof GetDepartmentsErrors];
+
+export type GetDepartmentsResponses = {
+    /**
+     * Response Get Departments Api V1 Departments Get
+     *
+     * Successful Response
+     */
+    200: Array<DepartmentSchema>;
+};
+
+export type GetDepartmentsResponse = GetDepartmentsResponses[keyof GetDepartmentsResponses];
+
+export type PostDepartmentData = {
+    body: DepartmentBase;
+    path?: never;
+    query?: never;
+    url: '/api/v1/departments';
+};
+
+export type PostDepartmentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostDepartmentError = PostDepartmentErrors[keyof PostDepartmentErrors];
+
+export type PostDepartmentResponses = {
+    /**
+     * Successful Response
+     */
+    201: SuccessResponse;
+};
+
+export type PostDepartmentResponse = PostDepartmentResponses[keyof PostDepartmentResponses];
+
+export type GetDepartmentData = {
+    body?: never;
+    path: {
+        /**
+         * Department Id
+         */
+        department_id: string;
+    };
+    query?: never;
+    url: '/api/v1/departments/{department_id}';
+};
+
+export type GetDepartmentErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type GetDepartmentError = GetDepartmentErrors[keyof GetDepartmentErrors];
+
+export type GetDepartmentResponses = {
+    /**
+     * Successful Response
+     */
+    200: DepartmentSchema;
+};
+
+export type GetDepartmentResponse = GetDepartmentResponses[keyof GetDepartmentResponses];
+
+export type GetPositionsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/api/v1/positions';
+};
+
+export type GetPositionsResponses = {
+    /**
+     * Response Get Positions Api V1 Positions Get
+     *
+     * Successful Response
+     */
+    200: Array<PositionSchema>;
+};
+
+export type GetPositionsResponse = GetPositionsResponses[keyof GetPositionsResponses];
+
+export type PostPositionData = {
+    body: PositionBase;
+    path?: never;
+    query?: never;
+    url: '/api/v1/positions';
+};
+
+export type PostPositionErrors = {
+    /**
+     * Validation Error
+     */
+    422: HttpValidationError;
+};
+
+export type PostPositionError = PostPositionErrors[keyof PostPositionErrors];
+
+export type PostPositionResponses = {
+    /**
+     * Successful Response
+     */
+    201: SuccessResponse;
+};
+
+export type PostPositionResponse = PostPositionResponses[keyof PostPositionResponses];

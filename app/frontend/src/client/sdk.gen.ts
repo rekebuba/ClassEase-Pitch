@@ -2,8 +2,8 @@
 
 import { type Client, type ClientMeta, type Options as Options2, type RequestResult, type TDataShape, urlSearchParamsBodySerializer } from './client';
 import { client } from './client.gen';
-import type { AssignSchoolMembershipData, AssignSchoolMembershipErrors, AssignSchoolMembershipResponses, AssignTeacherData, AssignTeacherErrors, AssignTeacherResponses, CreateAssessmentComponentsData, CreateAssessmentComponentsErrors, CreateAssessmentComponentsResponses, CreateAssessmentSchemesData, CreateAssessmentSchemesErrors, CreateAssessmentSchemesResponses, CreateClassSectionsData, CreateClassSectionsErrors, CreateClassSectionsResponses, CreateEmployeePositionData, CreateEmployeePositionErrors, CreateEmployeePositionResponses, CreateEmploymentContractData, CreateEmploymentContractErrors, CreateEmploymentContractResponses, CreateGradesData, CreateGradesErrors, CreateGradesResponses, CreatePayrollProfileData, CreatePayrollProfileErrors, CreatePayrollProfileResponses, CreateSchoolData, CreateSchoolErrors, CreateSchoolResponses, CreateSectionsData, CreateSectionsErrors, CreateSectionsResponses, CreateStreamsData, CreateStreamsErrors, CreateStreamsResponses, CreateSubjectOfferingsData, CreateSubjectOfferingsErrors, CreateSubjectOfferingsResponses, CreateSubjectsData, CreateSubjectsErrors, CreateSubjectsResponses, CreateTeacherProfileData, CreateTeacherProfileErrors, CreateTeacherProfileResponses, CreateTermsData, CreateTermsErrors, CreateTermsResponses, DeleteEmployeesData, DeleteEmployeesErrors, DeleteEmployeesResponses, DeleteStudentsData, DeleteStudentsErrors, DeleteStudentsResponses, DeleteTeacherData, DeleteTeacherErrors, DeleteTeacherResponses, DeleteYearData, DeleteYearErrors, DeleteYearResponses, EmployeeData, EmployeeErrors, EmployeeResponses, EnrollStudentData, EnrollStudentErrors, EnrollStudentResponses, GetAcademicTermsData, GetAcademicTermsErrors, GetAcademicTermsResponses, GetDetailGradesByYearIdData, GetDetailGradesByYearIdErrors, GetDetailGradesByYearIdResponses, GetDetailSubjectsByYearIdData, GetDetailSubjectsByYearIdErrors, GetDetailSubjectsByYearIdResponses, GetEmployeeData, GetEmployeeErrors, GetEmployeeResponses, GetEmployeesData, GetEmployeesErrors, GetEmployeesResponses, GetGradeByIdData, GetGradeByIdErrors, GetGradeByIdResponses, GetGradeOfferingsByIdData, GetGradeOfferingsByIdErrors, GetGradeOfferingsByIdResponses, GetGradeOfferingsData, GetGradeOfferingsErrors, GetGradeOfferingsResponses, GetGradeRelationData, GetGradeRelationErrors, GetGradeRelationResponses, GetGradesData, GetGradesResponses, GetHealthData, GetHealthResponses, GetLoggedInUserData, GetLoggedInUserResponses, GetSectionByIdData, GetSectionByIdErrors, GetSectionByIdResponses, GetSectionRelatedData, GetSectionRelatedErrors, GetSectionRelatedResponses, GetSectionsData, GetSectionsErrors, GetSectionsResponses, GetStreamByIdData, GetStreamByIdErrors, GetStreamByIdResponses, GetStreamRelationData, GetStreamRelationErrors, GetStreamRelationResponses, GetStreamsData, GetStreamsErrors, GetStreamsResponses, GetStudentData, GetStudentErrors, GetStudentResponses, GetStudentsData, GetStudentsErrors, GetStudentsResponses, GetSubjectByIdData, GetSubjectByIdErrors, GetSubjectByIdResponses, GetSubjectOfferingsByIdData, GetSubjectOfferingsByIdErrors, GetSubjectOfferingsByIdResponses, GetSubjectOfferingsData, GetSubjectOfferingsErrors, GetSubjectOfferingsResponses, GetSubjectsData, GetSubjectsResponses, GetTeacherData, GetTeacherErrors, GetTeacherResponses, GetTeachersData, GetTeachersErrors, GetTeachersResponses, GetYearByIdData, GetYearByIdErrors, GetYearByIdResponses, GetYearRelationData, GetYearRelationErrors, GetYearRelationResponses, GetYearsData, GetYearsResponses, GetYearSummaryData, GetYearSummaryErrors, GetYearSummaryResponses, LoginData, LoginErrors, LoginProviderData, LoginProviderErrors, LoginProviderResponses, LoginResponses, LogoutData, LogoutErrors, LogoutResponses, PasswordRecoveryData, PasswordRecoveryErrors, PasswordRecoveryResponses, PasswordResetData, PasswordResetErrors, PasswordResetResponses, PatchGradeSetupData, PatchGradeSetupErrors, PatchGradeSetupResponses, PatchSubjectSetupData, PatchSubjectSetupErrors, PatchSubjectSetupResponses, PostGradeData, PostGradeErrors, PostGradeResponses, PostSubjectData, PostSubjectErrors, PostSubjectResponses, PostYearData, PostYearErrors, PostYearResponses, RefreshAccessTokenData, RefreshAccessTokenErrors, RefreshAccessTokenResponses, RegisterEmployeeStep1Data, RegisterEmployeeStep1Errors, RegisterEmployeeStep1Responses, RegisterEmployeeStep2Data, RegisterEmployeeStep2Errors, RegisterEmployeeStep2Responses, RegisterEmployeeStep3Data, RegisterEmployeeStep3Errors, RegisterEmployeeStep3Responses, RegisterEmployeeStep4Data, RegisterEmployeeStep4Errors, RegisterEmployeeStep4Responses, RegisterMeAsParentData, RegisterMeAsParentErrors, RegisterMeAsParentResponses, RegisterMeAsStudentData, RegisterMeAsStudentErrors, RegisterMeAsStudentResponses, RegisterNewParentData, RegisterNewParentErrors, RegisterNewParentResponses, RegisterStudentStep1Data, RegisterStudentStep1Errors, RegisterStudentStep1Responses, RegisterStudentStep2Data, RegisterStudentStep2Errors, RegisterStudentStep2Responses, RegisterStudentStep3Data, RegisterStudentStep3Errors, RegisterStudentStep3Responses, RegisterStudentStep4Data, RegisterStudentStep4Errors, RegisterStudentStep4Responses, RegisterStudentStep5Data, RegisterStudentStep5Errors, RegisterStudentStep5Responses, SelectMembershipData, SelectMembershipErrors, SelectMembershipResponses, SetupManualBulkData, SetupManualBulkErrors, SetupManualBulkResponses, SignupData, SignupErrors, SignupResponses, StudentData, StudentErrors, StudentResponses, UpdateEmployeePositionData, UpdateEmployeePositionErrors, UpdateEmployeePositionResponses, UpdateEmployeeStatusData, UpdateEmployeeStatusErrors, UpdateEmployeeStatusResponses, UpdateStudentStatusData, UpdateStudentStatusErrors, UpdateStudentStatusResponses, UpdateTeacherData, UpdateTeacherErrors, UpdateTeacherResponses, VerifyEmailData, VerifyEmailErrors, VerifyEmailResponses, VerifyOtpData, VerifyOtpErrors, VerifyOtpResponses } from './types.gen';
-import { zAssignSchoolMembershipResponse, zAssignTeacherResponse, zCreateAssessmentComponentsResponse, zCreateAssessmentSchemesResponse, zCreateClassSectionsResponse, zCreateEmployeePositionResponse, zCreateEmploymentContractResponse, zCreateGradesResponse, zCreatePayrollProfileResponse, zCreateSchoolResponse, zCreateSectionsResponse, zCreateStreamsResponse, zCreateSubjectOfferingsResponse, zCreateSubjectsResponse, zCreateTeacherProfileResponse, zCreateTermsResponse, zDeleteEmployeesResponse, zDeleteStudentsResponse, zDeleteTeacherResponse, zDeleteYearResponse, zEmployeeResponse, zEnrollStudentResponse, zGetAcademicTermsResponse, zGetDetailGradesByYearIdResponse, zGetDetailSubjectsByYearIdResponse, zGetEmployeeResponse, zGetEmployeesResponse, zGetGradeByIdResponse, zGetGradeOfferingsByIdResponse, zGetGradeOfferingsResponse, zGetGradeRelationResponse, zGetGradesResponse, zGetHealthResponse, zGetLoggedInUserResponse, zGetSectionByIdResponse, zGetSectionRelatedResponse, zGetSectionsResponse, zGetStreamByIdResponse, zGetStreamRelationResponse, zGetStreamsResponse, zGetStudentResponse, zGetStudentsResponse, zGetSubjectByIdResponse, zGetSubjectOfferingsByIdResponse, zGetSubjectOfferingsResponse, zGetSubjectsResponse, zGetTeacherResponse, zGetTeachersResponse, zGetYearByIdResponse, zGetYearRelationResponse, zGetYearsResponse, zGetYearSummaryResponse, zLoginProviderResponse, zLoginResponse, zLogoutResponse, zPasswordRecoveryResponse, zPasswordResetResponse, zPatchGradeSetupResponse, zPatchSubjectSetupResponse, zPostGradeResponse, zPostSubjectResponse, zPostYearResponse, zRefreshAccessTokenResponse, zRegisterEmployeeStep1Response, zRegisterEmployeeStep2Response, zRegisterEmployeeStep3Response, zRegisterEmployeeStep4Response, zRegisterMeAsParentResponse, zRegisterMeAsStudentResponse, zRegisterNewParentResponse, zRegisterStudentStep1Response, zRegisterStudentStep2Response, zRegisterStudentStep3Response, zRegisterStudentStep4Response, zRegisterStudentStep5Response, zSelectMembershipResponse, zSetupManualBulkResponse, zSignupResponse, zStudentResponse, zUpdateEmployeePositionResponse, zUpdateEmployeeStatusResponse, zUpdateStudentStatusResponse, zUpdateTeacherResponse, zVerifyEmailResponse, zVerifyOtpResponse2 } from './zod.gen';
+import type { ApproveStudentEnrollmentData, ApproveStudentEnrollmentErrors, ApproveStudentEnrollmentResponses, AssignSchoolMembershipData, AssignSchoolMembershipErrors, AssignSchoolMembershipResponses, AssignTeacherData, AssignTeacherErrors, AssignTeacherResponses, CreateAssessmentComponentsData, CreateAssessmentComponentsErrors, CreateAssessmentComponentsResponses, CreateAssessmentSchemesData, CreateAssessmentSchemesErrors, CreateAssessmentSchemesResponses, CreateClassSectionsData, CreateClassSectionsErrors, CreateClassSectionsResponses, CreateEmployeePositionData, CreateEmployeePositionErrors, CreateEmployeePositionResponses, CreateEmploymentContractData, CreateEmploymentContractErrors, CreateEmploymentContractResponses, CreateGradesData, CreateGradesErrors, CreateGradesResponses, CreatePayrollProfileData, CreatePayrollProfileErrors, CreatePayrollProfileResponses, CreateSchoolData, CreateSchoolErrors, CreateSchoolResponses, CreateSectionsData, CreateSectionsErrors, CreateSectionsResponses, CreateStreamsData, CreateStreamsErrors, CreateStreamsResponses, CreateSubjectOfferingsData, CreateSubjectOfferingsErrors, CreateSubjectOfferingsResponses, CreateSubjectsData, CreateSubjectsErrors, CreateSubjectsResponses, CreateTeacherProfileData, CreateTeacherProfileErrors, CreateTeacherProfileResponses, CreateTermsData, CreateTermsErrors, CreateTermsResponses, DeleteEmployeesData, DeleteEmployeesErrors, DeleteEmployeesResponses, DeleteStudentsData, DeleteStudentsErrors, DeleteStudentsResponses, DeleteTeacherData, DeleteTeacherErrors, DeleteTeacherResponses, DeleteYearData, DeleteYearErrors, DeleteYearResponses, EmployeeData, EmployeeErrors, EmployeeResponses, EnrollStudentData, EnrollStudentErrors, EnrollStudentResponses, GetAcademicTermsData, GetAcademicTermsErrors, GetAcademicTermsResponses, GetAllJobsData, GetAllJobsErrors, GetAllJobsResponses, GetDepartmentData, GetDepartmentErrors, GetDepartmentResponses, GetDepartmentsData, GetDepartmentsErrors, GetDepartmentsResponses, GetEmployeeData, GetEmployeeErrors, GetEmployeeResponses, GetEmployeesData, GetEmployeesErrors, GetEmployeesResponses, GetGradeByIdData, GetGradeByIdErrors, GetGradeByIdResponses, GetGradeOfferingsByIdData, GetGradeOfferingsByIdErrors, GetGradeOfferingsByIdResponses, GetGradeOfferingsData, GetGradeOfferingsErrors, GetGradeOfferingsResponses, GetGradeRelationData, GetGradeRelationErrors, GetGradeRelationResponses, GetGradesData, GetGradesResponses, GetHealthData, GetHealthResponses, GetJobApplicationsData, GetJobApplicationsErrors, GetJobApplicationsResponses, GetJobByIdData, GetJobByIdErrors, GetJobByIdResponses, GetLoggedInUserData, GetLoggedInUserResponses, GetPositionsData, GetPositionsResponses, GetSchoolJobByIdData, GetSchoolJobByIdErrors, GetSchoolJobByIdResponses, GetSchoolJobsData, GetSchoolJobsErrors, GetSchoolJobsResponses, GetSectionByIdData, GetSectionByIdErrors, GetSectionByIdResponses, GetSectionRelatedData, GetSectionRelatedErrors, GetSectionRelatedResponses, GetSectionsData, GetSectionsErrors, GetSectionsResponses, GetStreamByIdData, GetStreamByIdErrors, GetStreamByIdResponses, GetStreamRelationData, GetStreamRelationErrors, GetStreamRelationResponses, GetStreamsData, GetStreamsErrors, GetStreamsResponses, GetStudentData, GetStudentEnrollmentOpportunitiesData, GetStudentEnrollmentOpportunitiesErrors, GetStudentEnrollmentOpportunitiesResponses, GetStudentErrors, GetStudentResponses, GetStudentsData, GetStudentsErrors, GetStudentsResponses, GetSubjectByIdData, GetSubjectByIdErrors, GetSubjectByIdResponses, GetSubjectOfferingsByIdData, GetSubjectOfferingsByIdErrors, GetSubjectOfferingsByIdResponses, GetSubjectOfferingsData, GetSubjectOfferingsErrors, GetSubjectOfferingsResponses, GetSubjectsData, GetSubjectsResponses, GetTeacherData, GetTeacherErrors, GetTeacherResponses, GetTeachersData, GetTeachersErrors, GetTeachersResponses, GetYearByIdData, GetYearByIdErrors, GetYearByIdResponses, GetYearRelationData, GetYearRelationErrors, GetYearRelationResponses, GetYearsData, GetYearsResponses, GetYearSummaryData, GetYearSummaryErrors, GetYearSummaryResponses, HireEmployeeData, HireEmployeeErrors, HireEmployeeResponses, LoginData, LoginErrors, LoginProviderData, LoginProviderErrors, LoginProviderResponses, LoginResponses, LogoutData, LogoutErrors, LogoutResponses, PasswordRecoveryData, PasswordRecoveryErrors, PasswordRecoveryResponses, PasswordResetData, PasswordResetErrors, PasswordResetResponses, PatchGradeSetupData, PatchGradeSetupErrors, PatchGradeSetupResponses, PatchSubjectSetupData, PatchSubjectSetupErrors, PatchSubjectSetupResponses, PostDepartmentData, PostDepartmentErrors, PostDepartmentResponses, PostGradeData, PostGradeErrors, PostGradeResponses, PostJobApplicationData, PostJobApplicationErrors, PostJobApplicationResponses, PostJobData, PostJobErrors, PostJobResponses, PostPositionData, PostPositionErrors, PostPositionResponses, PostStudentEnrollmentApplicationData, PostStudentEnrollmentApplicationErrors, PostStudentEnrollmentApplicationResponses, PostStudentEnrollmentOpportunityData, PostStudentEnrollmentOpportunityErrors, PostStudentEnrollmentOpportunityResponses, PostSubjectData, PostSubjectErrors, PostSubjectResponses, PostYearData, PostYearErrors, PostYearResponses, RefreshAccessTokenData, RefreshAccessTokenErrors, RefreshAccessTokenResponses, RegisterEmployeeStep1Data, RegisterEmployeeStep1Errors, RegisterEmployeeStep1Responses, RegisterEmployeeStep2Data, RegisterEmployeeStep2Errors, RegisterEmployeeStep2Responses, RegisterEmployeeStep3Data, RegisterEmployeeStep3Errors, RegisterEmployeeStep3Responses, RegisterEmployeeStep4Data, RegisterEmployeeStep4Errors, RegisterEmployeeStep4Responses, RegisterStudentStep1Data, RegisterStudentStep1Errors, RegisterStudentStep1Responses, RegisterStudentStep2Data, RegisterStudentStep2Errors, RegisterStudentStep2Responses, RegisterStudentStep3Data, RegisterStudentStep3Errors, RegisterStudentStep3Responses, RegisterStudentStep4Data, RegisterStudentStep4Errors, RegisterStudentStep4Responses, RegisterStudentStep5Data, RegisterStudentStep5Errors, RegisterStudentStep5Responses, SelectMembershipData, SelectMembershipErrors, SelectMembershipResponses, SetupManualBulkData, SetupManualBulkErrors, SetupManualBulkResponses, SignupData, SignupErrors, SignupResponses, StudentData, StudentErrors, StudentResponses, UpdateEmployeePositionData, UpdateEmployeePositionErrors, UpdateEmployeePositionResponses, UpdateEmployeeStatusData, UpdateEmployeeStatusErrors, UpdateEmployeeStatusResponses, UpdateStudentStatusData, UpdateStudentStatusErrors, UpdateStudentStatusResponses, UpdateTeacherData, UpdateTeacherErrors, UpdateTeacherResponses, VerifyEmailData, VerifyEmailErrors, VerifyEmailResponses, VerifyOtpData, VerifyOtpErrors, VerifyOtpResponses } from './types.gen';
+import { zApproveStudentEnrollmentResponse, zAssignSchoolMembershipResponse, zAssignTeacherResponse, zCreateAssessmentComponentsResponse, zCreateAssessmentSchemesResponse, zCreateClassSectionsResponse, zCreateEmployeePositionResponse, zCreateEmploymentContractResponse, zCreateGradesResponse, zCreatePayrollProfileResponse, zCreateSchoolResponse, zCreateSectionsResponse, zCreateStreamsResponse, zCreateSubjectOfferingsResponse, zCreateSubjectsResponse, zCreateTeacherProfileResponse, zCreateTermsResponse, zDeleteEmployeesResponse, zDeleteStudentsResponse, zDeleteTeacherResponse, zDeleteYearResponse, zEmployeeResponse, zEnrollStudentResponse, zGetAcademicTermsResponse, zGetAllJobsResponse, zGetDepartmentResponse, zGetDepartmentsResponse, zGetEmployeeResponse, zGetEmployeesResponse, zGetGradeByIdResponse, zGetGradeOfferingsByIdResponse, zGetGradeOfferingsResponse, zGetGradeRelationResponse, zGetGradesResponse, zGetHealthResponse, zGetJobApplicationsResponse, zGetJobByIdResponse, zGetLoggedInUserResponse, zGetPositionsResponse, zGetSchoolJobByIdResponse, zGetSchoolJobsResponse, zGetSectionByIdResponse, zGetSectionRelatedResponse, zGetSectionsResponse, zGetStreamByIdResponse, zGetStreamRelationResponse, zGetStreamsResponse, zGetStudentEnrollmentOpportunitiesResponse, zGetStudentResponse, zGetStudentsResponse, zGetSubjectByIdResponse, zGetSubjectOfferingsByIdResponse, zGetSubjectOfferingsResponse, zGetSubjectsResponse, zGetTeacherResponse, zGetTeachersResponse, zGetYearByIdResponse, zGetYearRelationResponse, zGetYearsResponse, zGetYearSummaryResponse, zHireEmployeeResponse, zLoginProviderResponse, zLoginResponse, zLogoutResponse, zPasswordRecoveryResponse, zPasswordResetResponse, zPatchGradeSetupResponse, zPatchSubjectSetupResponse, zPostDepartmentResponse, zPostGradeResponse, zPostJobApplicationResponse, zPostJobResponse, zPostPositionResponse, zPostStudentEnrollmentApplicationResponse, zPostStudentEnrollmentOpportunityResponse, zPostSubjectResponse, zPostYearResponse, zRefreshAccessTokenResponse, zRegisterEmployeeStep1Response, zRegisterEmployeeStep2Response, zRegisterEmployeeStep3Response, zRegisterEmployeeStep4Response, zRegisterStudentStep1Response, zRegisterStudentStep2Response, zRegisterStudentStep3Response, zRegisterStudentStep4Response, zRegisterStudentStep5Response, zSelectMembershipResponse, zSetupManualBulkResponse, zSignupResponse, zStudentResponse, zUpdateEmployeePositionResponse, zUpdateEmployeeStatusResponse, zUpdateStudentStatusResponse, zUpdateTeacherResponse, zVerifyEmailResponse, zVerifyOtpResponse2 } from './zod.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean, TResponse = unknown> = Options2<TData, ThrowOnError, TResponse> & {
     /**
@@ -292,23 +292,6 @@ export const registerStudentStep5 = <ThrowOnError extends boolean = false>(optio
 });
 
 /**
- * Register New Parent
- *
- * Registers a new parent in the system.
- */
-export const registerNewParent = <ThrowOnError extends boolean = false>(options: Options<RegisterNewParentData, ThrowOnError>): RequestResult<RegisterNewParentResponses, RegisterNewParentErrors, ThrowOnError> => (options.client ?? client).post<RegisterNewParentResponses, RegisterNewParentErrors, ThrowOnError>({
-    responseType: 'json',
-    responseValidator: async (data) => await zRegisterNewParentResponse.parseAsync(data),
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/register/parents',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
  * Register Employee Step1
  *
  * Validate employee data for each step
@@ -369,36 +352,6 @@ export const registerEmployeeStep4 = <ThrowOnError extends boolean = false>(opti
     responseValidator: async (data) => await zRegisterEmployeeStep4Response.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/register/employees/step4',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * Register Me As Parent
- */
-export const registerMeAsParent = <ThrowOnError extends boolean = false>(options: Options<RegisterMeAsParentData, ThrowOnError>): RequestResult<RegisterMeAsParentResponses, RegisterMeAsParentErrors, ThrowOnError> => (options.client ?? client).post<RegisterMeAsParentResponses, RegisterMeAsParentErrors, ThrowOnError>({
-    responseType: 'json',
-    responseValidator: async (data) => await zRegisterMeAsParentResponse.parseAsync(data),
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/register/schools/{school_id}/me/parent',
-    ...options,
-    headers: {
-        'Content-Type': 'application/json',
-        ...options.headers
-    }
-});
-
-/**
- * Register Me As Student
- */
-export const registerMeAsStudent = <ThrowOnError extends boolean = false>(options: Options<RegisterMeAsStudentData, ThrowOnError>): RequestResult<RegisterMeAsStudentResponses, RegisterMeAsStudentErrors, ThrowOnError> => (options.client ?? client).post<RegisterMeAsStudentResponses, RegisterMeAsStudentErrors, ThrowOnError>({
-    responseType: 'json',
-    responseValidator: async (data) => await zRegisterMeAsStudentResponse.parseAsync(data),
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/register/schools/{school_id}/me/student',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -489,32 +442,6 @@ export const getYearById = <ThrowOnError extends boolean = false>(options: Optio
 });
 
 /**
- * Get Detail Grades By Year Id
- *
- * Returns specific academic year
- */
-export const getDetailGradesByYearId = <ThrowOnError extends boolean = false>(options: Options<GetDetailGradesByYearIdData, ThrowOnError>): RequestResult<GetDetailGradesByYearIdResponses, GetDetailGradesByYearIdErrors, ThrowOnError> => (options.client ?? client).get<GetDetailGradesByYearIdResponses, GetDetailGradesByYearIdErrors, ThrowOnError>({
-    responseType: 'json',
-    responseValidator: async (data) => await zGetDetailGradesByYearIdResponse.parseAsync(data),
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/years/{year_id}/grades/detail',
-    ...options
-});
-
-/**
- * Get Detail Subjects By Year Id
- *
- * Returns specific academic year
- */
-export const getDetailSubjectsByYearId = <ThrowOnError extends boolean = false>(options: Options<GetDetailSubjectsByYearIdData, ThrowOnError>): RequestResult<GetDetailSubjectsByYearIdResponses, GetDetailSubjectsByYearIdErrors, ThrowOnError> => (options.client ?? client).get<GetDetailSubjectsByYearIdResponses, GetDetailSubjectsByYearIdErrors, ThrowOnError>({
-    responseType: 'json',
-    responseValidator: async (data) => await zGetDetailSubjectsByYearIdResponse.parseAsync(data),
-    security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/years/{year_id}/subjects/detail',
-    ...options
-});
-
-/**
  * Get Grades
  *
  * Returns specific academic year
@@ -553,7 +480,7 @@ export const getGradeOfferings = <ThrowOnError extends boolean = false>(options:
     responseType: 'json',
     responseValidator: async (data) => await zGetGradeOfferingsResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/grades/offerings',
+    url: '/api/v1/grade-offerings',
     ...options
 });
 
@@ -566,7 +493,7 @@ export const getGradeOfferingsById = <ThrowOnError extends boolean = false>(opti
     responseType: 'json',
     responseValidator: async (data) => await zGetGradeOfferingsByIdResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/grades/offerings/{grade_id}',
+    url: '/api/v1/grade-offerings/{grade_id}',
     ...options
 });
 
@@ -652,7 +579,7 @@ export const getSubjectOfferings = <ThrowOnError extends boolean = false>(option
     responseType: 'json',
     responseValidator: async (data) => await zGetSubjectOfferingsResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/subjects/offerings',
+    url: '/api/v1/subject-offerings',
     ...options
 });
 
@@ -665,7 +592,7 @@ export const getSubjectOfferingsById = <ThrowOnError extends boolean = false>(op
     responseType: 'json',
     responseValidator: async (data) => await zGetSubjectOfferingsByIdResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
-    url: '/api/v1/subjects/offerings/{subject_id}',
+    url: '/api/v1/subject-offerings/{subject_id}',
     ...options
 });
 
@@ -788,6 +715,70 @@ export const getLoggedInUser = <ThrowOnError extends boolean = false>(options?: 
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/user',
     ...options
+});
+
+/**
+ * Get Student Enrollment Opportunities
+ *
+ * Returns all student enrollment opportunities.
+ */
+export const getStudentEnrollmentOpportunities = <ThrowOnError extends boolean = false>(options: Options<GetStudentEnrollmentOpportunitiesData, ThrowOnError>): RequestResult<GetStudentEnrollmentOpportunitiesResponses, GetStudentEnrollmentOpportunitiesErrors, ThrowOnError> => (options.client ?? client).get<GetStudentEnrollmentOpportunitiesResponses, GetStudentEnrollmentOpportunitiesErrors, ThrowOnError>({
+    responseType: 'json',
+    responseValidator: async (data) => await zGetStudentEnrollmentOpportunitiesResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/enrollment-opportunities',
+    ...options
+});
+
+/**
+ * Post Student Enrollment Opportunity
+ *
+ * Creates a new student enrollment opportunity.
+ */
+export const postStudentEnrollmentOpportunity = <ThrowOnError extends boolean = false>(options: Options<PostStudentEnrollmentOpportunityData, ThrowOnError>): RequestResult<PostStudentEnrollmentOpportunityResponses, PostStudentEnrollmentOpportunityErrors, ThrowOnError> => (options.client ?? client).post<PostStudentEnrollmentOpportunityResponses, PostStudentEnrollmentOpportunityErrors, ThrowOnError>({
+    responseType: 'json',
+    responseValidator: async (data) => await zPostStudentEnrollmentOpportunityResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/enrollment-opportunities',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Post Student Enrollment Application
+ *
+ * Enrolls a student in the system.
+ */
+export const postStudentEnrollmentApplication = <ThrowOnError extends boolean = false>(options: Options<PostStudentEnrollmentApplicationData, ThrowOnError>): RequestResult<PostStudentEnrollmentApplicationResponses, PostStudentEnrollmentApplicationErrors, ThrowOnError> => (options.client ?? client).post<PostStudentEnrollmentApplicationResponses, PostStudentEnrollmentApplicationErrors, ThrowOnError>({
+    responseType: 'json',
+    responseValidator: async (data) => await zPostStudentEnrollmentApplicationResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/enrollment-applications',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Approve Student Enrollment
+ *
+ * Approves a student enrollment application.
+ */
+export const approveStudentEnrollment = <ThrowOnError extends boolean = false>(options: Options<ApproveStudentEnrollmentData, ThrowOnError>): RequestResult<ApproveStudentEnrollmentResponses, ApproveStudentEnrollmentErrors, ThrowOnError> => (options.client ?? client).post<ApproveStudentEnrollmentResponses, ApproveStudentEnrollmentErrors, ThrowOnError>({
+    responseType: 'json',
+    responseValidator: async (data) => await zApproveStudentEnrollmentResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/enrollment-applications/approve',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
 });
 
 /**
@@ -1255,6 +1246,193 @@ export const setupManualBulk = <ThrowOnError extends boolean = false>(options: O
     responseValidator: async (data) => await zSetupManualBulkResponse.parseAsync(data),
     security: [{ scheme: 'bearer', type: 'http' }],
     url: '/api/v1/academic-setup/bulk',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get All Jobs
+ *
+ * This endpoint will return job postings based on the provided filters.
+ */
+export const getAllJobs = <ThrowOnError extends boolean = false>(options?: Options<GetAllJobsData, ThrowOnError>): RequestResult<GetAllJobsResponses, GetAllJobsErrors, ThrowOnError> => (options?.client ?? client).get<GetAllJobsResponses, GetAllJobsErrors, ThrowOnError>({
+    responseType: 'json',
+    responseValidator: async (data) => await zGetAllJobsResponse.parseAsync(data),
+    url: '/api/v1/jobs',
+    ...options
+});
+
+/**
+ * Post Job
+ *
+ * Registers a new job post in the system.
+ */
+export const postJob = <ThrowOnError extends boolean = false>(options: Options<PostJobData, ThrowOnError>): RequestResult<PostJobResponses, PostJobErrors, ThrowOnError> => (options.client ?? client).post<PostJobResponses, PostJobErrors, ThrowOnError>({
+    responseType: 'json',
+    responseValidator: async (data) => await zPostJobResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/jobs',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get School Jobs
+ *
+ * This endpoint will return job postings based on the provided filters.
+ */
+export const getSchoolJobs = <ThrowOnError extends boolean = false>(options?: Options<GetSchoolJobsData, ThrowOnError>): RequestResult<GetSchoolJobsResponses, GetSchoolJobsErrors, ThrowOnError> => (options?.client ?? client).get<GetSchoolJobsResponses, GetSchoolJobsErrors, ThrowOnError>({
+    responseType: 'json',
+    responseValidator: async (data) => await zGetSchoolJobsResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/school-jobs',
+    ...options
+});
+
+/**
+ * Get Job By Id
+ *
+ * Retrieves a specific job posting by its ID.
+ */
+export const getJobById = <ThrowOnError extends boolean = false>(options: Options<GetJobByIdData, ThrowOnError>): RequestResult<GetJobByIdResponses, GetJobByIdErrors, ThrowOnError> => (options.client ?? client).get<GetJobByIdResponses, GetJobByIdErrors, ThrowOnError>({
+    responseType: 'json',
+    responseValidator: async (data) => await zGetJobByIdResponse.parseAsync(data),
+    url: '/api/v1/jobs/{job_id}',
+    ...options
+});
+
+/**
+ * Get School Job By Id
+ *
+ * Retrieves a specific job posting by its ID for the authenticated user's school.
+ */
+export const getSchoolJobById = <ThrowOnError extends boolean = false>(options: Options<GetSchoolJobByIdData, ThrowOnError>): RequestResult<GetSchoolJobByIdResponses, GetSchoolJobByIdErrors, ThrowOnError> => (options.client ?? client).get<GetSchoolJobByIdResponses, GetSchoolJobByIdErrors, ThrowOnError>({
+    responseType: 'json',
+    responseValidator: async (data) => await zGetSchoolJobByIdResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/school-jobs/{job_id}',
+    ...options
+});
+
+/**
+ * Get Job Applications
+ *
+ * This endpoint will return job applications based on the provided filters.
+ */
+export const getJobApplications = <ThrowOnError extends boolean = false>(options?: Options<GetJobApplicationsData, ThrowOnError>): RequestResult<GetJobApplicationsResponses, GetJobApplicationsErrors, ThrowOnError> => (options?.client ?? client).get<GetJobApplicationsResponses, GetJobApplicationsErrors, ThrowOnError>({
+    responseType: 'json',
+    responseValidator: async (data) => await zGetJobApplicationsResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/job-applications',
+    ...options
+});
+
+/**
+ * Post Job Application
+ *
+ * Registers a new job application in the system.
+ */
+export const postJobApplication = <ThrowOnError extends boolean = false>(options: Options<PostJobApplicationData, ThrowOnError>): RequestResult<PostJobApplicationResponses, PostJobApplicationErrors, ThrowOnError> => (options.client ?? client).post<PostJobApplicationResponses, PostJobApplicationErrors, ThrowOnError>({
+    responseType: 'json',
+    responseValidator: async (data) => await zPostJobApplicationResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/job-applications',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Hire Employee
+ *
+ * Hire an employee based on a job application.
+ */
+export const hireEmployee = <ThrowOnError extends boolean = false>(options: Options<HireEmployeeData, ThrowOnError>): RequestResult<HireEmployeeResponses, HireEmployeeErrors, ThrowOnError> => (options.client ?? client).post<HireEmployeeResponses, HireEmployeeErrors, ThrowOnError>({
+    responseType: 'json',
+    responseValidator: async (data) => await zHireEmployeeResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/job-applications/hire',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get Departments
+ *
+ * Retrieves all departments in the system.
+ */
+export const getDepartments = <ThrowOnError extends boolean = false>(options?: Options<GetDepartmentsData, ThrowOnError>): RequestResult<GetDepartmentsResponses, GetDepartmentsErrors, ThrowOnError> => (options?.client ?? client).get<GetDepartmentsResponses, GetDepartmentsErrors, ThrowOnError>({
+    responseType: 'json',
+    responseValidator: async (data) => await zGetDepartmentsResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/departments',
+    ...options
+});
+
+/**
+ * Post Department
+ *
+ * Registers a new department in the system.
+ */
+export const postDepartment = <ThrowOnError extends boolean = false>(options: Options<PostDepartmentData, ThrowOnError>): RequestResult<PostDepartmentResponses, PostDepartmentErrors, ThrowOnError> => (options.client ?? client).post<PostDepartmentResponses, PostDepartmentErrors, ThrowOnError>({
+    responseType: 'json',
+    responseValidator: async (data) => await zPostDepartmentResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/departments',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
+ * Get Department
+ *
+ * Retrieves a specific department by its ID.
+ */
+export const getDepartment = <ThrowOnError extends boolean = false>(options: Options<GetDepartmentData, ThrowOnError>): RequestResult<GetDepartmentResponses, GetDepartmentErrors, ThrowOnError> => (options.client ?? client).get<GetDepartmentResponses, GetDepartmentErrors, ThrowOnError>({
+    responseType: 'json',
+    responseValidator: async (data) => await zGetDepartmentResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/departments/{department_id}',
+    ...options
+});
+
+/**
+ * Get Positions
+ *
+ * Retrieves all positions in the system.
+ */
+export const getPositions = <ThrowOnError extends boolean = false>(options?: Options<GetPositionsData, ThrowOnError>): RequestResult<GetPositionsResponses, unknown, ThrowOnError> => (options?.client ?? client).get<GetPositionsResponses, unknown, ThrowOnError>({
+    responseType: 'json',
+    responseValidator: async (data) => await zGetPositionsResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/positions',
+    ...options
+});
+
+/**
+ * Post Position
+ *
+ * Registers a new position in the system.
+ */
+export const postPosition = <ThrowOnError extends boolean = false>(options: Options<PostPositionData, ThrowOnError>): RequestResult<PostPositionResponses, PostPositionErrors, ThrowOnError> => (options.client ?? client).post<PostPositionResponses, PostPositionErrors, ThrowOnError>({
+    responseType: 'json',
+    responseValidator: async (data) => await zPostPositionResponse.parseAsync(data),
+    security: [{ scheme: 'bearer', type: 'http' }],
+    url: '/api/v1/positions',
     ...options,
     headers: {
         'Content-Type': 'application/json',

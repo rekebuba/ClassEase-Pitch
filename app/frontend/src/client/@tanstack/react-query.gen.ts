@@ -4,8 +4,8 @@ import { type DefaultError, queryOptions, type UseMutationOptions } from '@tanst
 import type { AxiosError } from 'axios';
 
 import { client } from '../client.gen';
-import { assignSchoolMembership, assignTeacher, createAssessmentComponents, createAssessmentSchemes, createClassSections, createEmployeePosition, createEmploymentContract, createGrades, createPayrollProfile, createSchool, createSections, createStreams, createSubjectOfferings, createSubjects, createTeacherProfile, createTerms, deleteEmployees, deleteStudents, deleteTeacher, deleteYear, employee, enrollStudent, getAcademicTerms, getDetailGradesByYearId, getDetailSubjectsByYearId, getEmployee, getEmployees, getGradeById, getGradeOfferings, getGradeOfferingsById, getGradeRelation, getGrades, getHealth, getLoggedInUser, getSectionById, getSectionRelated, getSections, getStreamById, getStreamRelation, getStreams, getStudent, getStudents, getSubjectById, getSubjectOfferings, getSubjectOfferingsById, getSubjects, getTeacher, getTeachers, getYearById, getYearRelation, getYears, getYearSummary, login, loginProvider, logout, type Options, passwordRecovery, passwordReset, patchGradeSetup, patchSubjectSetup, postGrade, postSubject, postYear, refreshAccessToken, registerEmployeeStep1, registerEmployeeStep2, registerEmployeeStep3, registerEmployeeStep4, registerMeAsParent, registerMeAsStudent, registerNewParent, registerStudentStep1, registerStudentStep2, registerStudentStep3, registerStudentStep4, registerStudentStep5, selectMembership, setupManualBulk, signup, student, updateEmployeePosition, updateEmployeeStatus, updateStudentStatus, updateTeacher, verifyEmail, verifyOtp } from '../sdk.gen';
-import type { AssignSchoolMembershipData, AssignSchoolMembershipError, AssignSchoolMembershipResponse, AssignTeacherData, AssignTeacherError, AssignTeacherResponse, CreateAssessmentComponentsData, CreateAssessmentComponentsError, CreateAssessmentComponentsResponse, CreateAssessmentSchemesData, CreateAssessmentSchemesError, CreateAssessmentSchemesResponse, CreateClassSectionsData, CreateClassSectionsError, CreateClassSectionsResponse, CreateEmployeePositionData, CreateEmployeePositionError, CreateEmployeePositionResponse, CreateEmploymentContractData, CreateEmploymentContractError, CreateEmploymentContractResponse, CreateGradesData, CreateGradesError, CreateGradesResponse, CreatePayrollProfileData, CreatePayrollProfileError, CreatePayrollProfileResponse, CreateSchoolData, CreateSchoolError, CreateSchoolResponse, CreateSectionsData, CreateSectionsError, CreateSectionsResponse, CreateStreamsData, CreateStreamsError, CreateStreamsResponse, CreateSubjectOfferingsData, CreateSubjectOfferingsError, CreateSubjectOfferingsResponse, CreateSubjectsData, CreateSubjectsError, CreateSubjectsResponse, CreateTeacherProfileData, CreateTeacherProfileError, CreateTeacherProfileResponse, CreateTermsData, CreateTermsError, CreateTermsResponse, DeleteEmployeesData, DeleteEmployeesError, DeleteEmployeesResponse, DeleteStudentsData, DeleteStudentsError, DeleteStudentsResponse, DeleteTeacherData, DeleteTeacherError, DeleteTeacherResponse, DeleteYearData, DeleteYearError, DeleteYearResponse, EmployeeData, EmployeeError, EmployeeResponse, EnrollStudentData, EnrollStudentError, EnrollStudentResponse, GetAcademicTermsData, GetAcademicTermsError, GetAcademicTermsResponse, GetDetailGradesByYearIdData, GetDetailGradesByYearIdError, GetDetailGradesByYearIdResponse, GetDetailSubjectsByYearIdData, GetDetailSubjectsByYearIdError, GetDetailSubjectsByYearIdResponse, GetEmployeeData, GetEmployeeError, GetEmployeeResponse, GetEmployeesData, GetEmployeesError, GetEmployeesResponse, GetGradeByIdData, GetGradeByIdError, GetGradeByIdResponse, GetGradeOfferingsByIdData, GetGradeOfferingsByIdError, GetGradeOfferingsByIdResponse, GetGradeOfferingsData, GetGradeOfferingsError, GetGradeOfferingsResponse, GetGradeRelationData, GetGradeRelationError, GetGradeRelationResponse, GetGradesData, GetGradesResponse, GetHealthData, GetHealthResponse, GetLoggedInUserData, GetLoggedInUserResponse, GetSectionByIdData, GetSectionByIdError, GetSectionByIdResponse, GetSectionRelatedData, GetSectionRelatedError, GetSectionRelatedResponse, GetSectionsData, GetSectionsError, GetSectionsResponse, GetStreamByIdData, GetStreamByIdError, GetStreamByIdResponse, GetStreamRelationData, GetStreamRelationError, GetStreamRelationResponse, GetStreamsData, GetStreamsError, GetStreamsResponse, GetStudentData, GetStudentError, GetStudentResponse, GetStudentsData, GetStudentsError, GetStudentsResponse, GetSubjectByIdData, GetSubjectByIdError, GetSubjectByIdResponse, GetSubjectOfferingsByIdData, GetSubjectOfferingsByIdError, GetSubjectOfferingsByIdResponse, GetSubjectOfferingsData, GetSubjectOfferingsError, GetSubjectOfferingsResponse, GetSubjectsData, GetSubjectsResponse, GetTeacherData, GetTeacherError, GetTeacherResponse, GetTeachersData, GetTeachersError, GetTeachersResponse, GetYearByIdData, GetYearByIdError, GetYearByIdResponse, GetYearRelationData, GetYearRelationError, GetYearRelationResponse, GetYearsData, GetYearsResponse, GetYearSummaryData, GetYearSummaryError, GetYearSummaryResponse, LoginData, LoginError, LoginProviderData, LoginProviderError, LoginProviderResponse, LoginResponse, LogoutData, LogoutError, LogoutResponse, PasswordRecoveryData, PasswordRecoveryError, PasswordRecoveryResponse, PasswordResetData, PasswordResetError, PasswordResetResponse, PatchGradeSetupData, PatchGradeSetupError, PatchGradeSetupResponse, PatchSubjectSetupData, PatchSubjectSetupError, PatchSubjectSetupResponse, PostGradeData, PostGradeError, PostGradeResponse, PostSubjectData, PostSubjectError, PostSubjectResponse, PostYearData, PostYearError, PostYearResponse, RefreshAccessTokenData, RefreshAccessTokenError, RefreshAccessTokenResponse, RegisterEmployeeStep1Data, RegisterEmployeeStep1Error, RegisterEmployeeStep1Response, RegisterEmployeeStep2Data, RegisterEmployeeStep2Error, RegisterEmployeeStep2Response, RegisterEmployeeStep3Data, RegisterEmployeeStep3Error, RegisterEmployeeStep3Response, RegisterEmployeeStep4Data, RegisterEmployeeStep4Error, RegisterEmployeeStep4Response, RegisterMeAsParentData, RegisterMeAsParentError, RegisterMeAsParentResponse, RegisterMeAsStudentData, RegisterMeAsStudentError, RegisterMeAsStudentResponse, RegisterNewParentData, RegisterNewParentError, RegisterNewParentResponse, RegisterStudentStep1Data, RegisterStudentStep1Error, RegisterStudentStep1Response, RegisterStudentStep2Data, RegisterStudentStep2Error, RegisterStudentStep2Response, RegisterStudentStep3Data, RegisterStudentStep3Error, RegisterStudentStep3Response, RegisterStudentStep4Data, RegisterStudentStep4Error, RegisterStudentStep4Response, RegisterStudentStep5Data, RegisterStudentStep5Error, RegisterStudentStep5Response, SelectMembershipData, SelectMembershipError, SelectMembershipResponse, SetupManualBulkData, SetupManualBulkError, SetupManualBulkResponse, SignupData, SignupError, SignupResponse, StudentData, StudentError, StudentResponse, UpdateEmployeePositionData, UpdateEmployeePositionError, UpdateEmployeePositionResponse, UpdateEmployeeStatusData, UpdateEmployeeStatusError, UpdateEmployeeStatusResponse, UpdateStudentStatusData, UpdateStudentStatusError, UpdateStudentStatusResponse, UpdateTeacherData, UpdateTeacherError, UpdateTeacherResponse, VerifyEmailData, VerifyEmailError, VerifyEmailResponse, VerifyOtpData, VerifyOtpError, VerifyOtpResponse2 } from '../types.gen';
+import { approveStudentEnrollment, assignSchoolMembership, assignTeacher, createAssessmentComponents, createAssessmentSchemes, createClassSections, createEmployeePosition, createEmploymentContract, createGrades, createPayrollProfile, createSchool, createSections, createStreams, createSubjectOfferings, createSubjects, createTeacherProfile, createTerms, deleteEmployees, deleteStudents, deleteTeacher, deleteYear, employee, enrollStudent, getAcademicTerms, getAllJobs, getDepartment, getDepartments, getEmployee, getEmployees, getGradeById, getGradeOfferings, getGradeOfferingsById, getGradeRelation, getGrades, getHealth, getJobApplications, getJobById, getLoggedInUser, getPositions, getSchoolJobById, getSchoolJobs, getSectionById, getSectionRelated, getSections, getStreamById, getStreamRelation, getStreams, getStudent, getStudentEnrollmentOpportunities, getStudents, getSubjectById, getSubjectOfferings, getSubjectOfferingsById, getSubjects, getTeacher, getTeachers, getYearById, getYearRelation, getYears, getYearSummary, hireEmployee, login, loginProvider, logout, type Options, passwordRecovery, passwordReset, patchGradeSetup, patchSubjectSetup, postDepartment, postGrade, postJob, postJobApplication, postPosition, postStudentEnrollmentApplication, postStudentEnrollmentOpportunity, postSubject, postYear, refreshAccessToken, registerEmployeeStep1, registerEmployeeStep2, registerEmployeeStep3, registerEmployeeStep4, registerStudentStep1, registerStudentStep2, registerStudentStep3, registerStudentStep4, registerStudentStep5, selectMembership, setupManualBulk, signup, student, updateEmployeePosition, updateEmployeeStatus, updateStudentStatus, updateTeacher, verifyEmail, verifyOtp } from '../sdk.gen';
+import type { ApproveStudentEnrollmentData, ApproveStudentEnrollmentError, ApproveStudentEnrollmentResponse, AssignSchoolMembershipData, AssignSchoolMembershipError, AssignSchoolMembershipResponse, AssignTeacherData, AssignTeacherError, AssignTeacherResponse, CreateAssessmentComponentsData, CreateAssessmentComponentsError, CreateAssessmentComponentsResponse, CreateAssessmentSchemesData, CreateAssessmentSchemesError, CreateAssessmentSchemesResponse, CreateClassSectionsData, CreateClassSectionsError, CreateClassSectionsResponse, CreateEmployeePositionData, CreateEmployeePositionError, CreateEmployeePositionResponse, CreateEmploymentContractData, CreateEmploymentContractError, CreateEmploymentContractResponse, CreateGradesData, CreateGradesError, CreateGradesResponse, CreatePayrollProfileData, CreatePayrollProfileError, CreatePayrollProfileResponse, CreateSchoolData, CreateSchoolError, CreateSchoolResponse, CreateSectionsData, CreateSectionsError, CreateSectionsResponse, CreateStreamsData, CreateStreamsError, CreateStreamsResponse, CreateSubjectOfferingsData, CreateSubjectOfferingsError, CreateSubjectOfferingsResponse, CreateSubjectsData, CreateSubjectsError, CreateSubjectsResponse, CreateTeacherProfileData, CreateTeacherProfileError, CreateTeacherProfileResponse, CreateTermsData, CreateTermsError, CreateTermsResponse, DeleteEmployeesData, DeleteEmployeesError, DeleteEmployeesResponse, DeleteStudentsData, DeleteStudentsError, DeleteStudentsResponse, DeleteTeacherData, DeleteTeacherError, DeleteTeacherResponse, DeleteYearData, DeleteYearError, DeleteYearResponse, EmployeeData, EmployeeError, EmployeeResponse, EnrollStudentData, EnrollStudentError, EnrollStudentResponse, GetAcademicTermsData, GetAcademicTermsError, GetAcademicTermsResponse, GetAllJobsData, GetAllJobsError, GetAllJobsResponse, GetDepartmentData, GetDepartmentError, GetDepartmentResponse, GetDepartmentsData, GetDepartmentsError, GetDepartmentsResponse, GetEmployeeData, GetEmployeeError, GetEmployeeResponse, GetEmployeesData, GetEmployeesError, GetEmployeesResponse, GetGradeByIdData, GetGradeByIdError, GetGradeByIdResponse, GetGradeOfferingsByIdData, GetGradeOfferingsByIdError, GetGradeOfferingsByIdResponse, GetGradeOfferingsData, GetGradeOfferingsError, GetGradeOfferingsResponse, GetGradeRelationData, GetGradeRelationError, GetGradeRelationResponse, GetGradesData, GetGradesResponse, GetHealthData, GetHealthResponse, GetJobApplicationsData, GetJobApplicationsError, GetJobApplicationsResponse, GetJobByIdData, GetJobByIdError, GetJobByIdResponse, GetLoggedInUserData, GetLoggedInUserResponse, GetPositionsData, GetPositionsResponse, GetSchoolJobByIdData, GetSchoolJobByIdError, GetSchoolJobByIdResponse, GetSchoolJobsData, GetSchoolJobsError, GetSchoolJobsResponse, GetSectionByIdData, GetSectionByIdError, GetSectionByIdResponse, GetSectionRelatedData, GetSectionRelatedError, GetSectionRelatedResponse, GetSectionsData, GetSectionsError, GetSectionsResponse, GetStreamByIdData, GetStreamByIdError, GetStreamByIdResponse, GetStreamRelationData, GetStreamRelationError, GetStreamRelationResponse, GetStreamsData, GetStreamsError, GetStreamsResponse, GetStudentData, GetStudentEnrollmentOpportunitiesData, GetStudentEnrollmentOpportunitiesError, GetStudentEnrollmentOpportunitiesResponse, GetStudentError, GetStudentResponse, GetStudentsData, GetStudentsError, GetStudentsResponse, GetSubjectByIdData, GetSubjectByIdError, GetSubjectByIdResponse, GetSubjectOfferingsByIdData, GetSubjectOfferingsByIdError, GetSubjectOfferingsByIdResponse, GetSubjectOfferingsData, GetSubjectOfferingsError, GetSubjectOfferingsResponse, GetSubjectsData, GetSubjectsResponse, GetTeacherData, GetTeacherError, GetTeacherResponse, GetTeachersData, GetTeachersError, GetTeachersResponse, GetYearByIdData, GetYearByIdError, GetYearByIdResponse, GetYearRelationData, GetYearRelationError, GetYearRelationResponse, GetYearsData, GetYearsResponse, GetYearSummaryData, GetYearSummaryError, GetYearSummaryResponse, HireEmployeeData, HireEmployeeError, HireEmployeeResponse, LoginData, LoginError, LoginProviderData, LoginProviderError, LoginProviderResponse, LoginResponse, LogoutData, LogoutError, LogoutResponse, PasswordRecoveryData, PasswordRecoveryError, PasswordRecoveryResponse, PasswordResetData, PasswordResetError, PasswordResetResponse, PatchGradeSetupData, PatchGradeSetupError, PatchGradeSetupResponse, PatchSubjectSetupData, PatchSubjectSetupError, PatchSubjectSetupResponse, PostDepartmentData, PostDepartmentError, PostDepartmentResponse, PostGradeData, PostGradeError, PostGradeResponse, PostJobApplicationData, PostJobApplicationError, PostJobApplicationResponse, PostJobData, PostJobError, PostJobResponse, PostPositionData, PostPositionError, PostPositionResponse, PostStudentEnrollmentApplicationData, PostStudentEnrollmentApplicationError, PostStudentEnrollmentApplicationResponse, PostStudentEnrollmentOpportunityData, PostStudentEnrollmentOpportunityError, PostStudentEnrollmentOpportunityResponse, PostSubjectData, PostSubjectError, PostSubjectResponse, PostYearData, PostYearError, PostYearResponse, RefreshAccessTokenData, RefreshAccessTokenError, RefreshAccessTokenResponse, RegisterEmployeeStep1Data, RegisterEmployeeStep1Error, RegisterEmployeeStep1Response, RegisterEmployeeStep2Data, RegisterEmployeeStep2Error, RegisterEmployeeStep2Response, RegisterEmployeeStep3Data, RegisterEmployeeStep3Error, RegisterEmployeeStep3Response, RegisterEmployeeStep4Data, RegisterEmployeeStep4Error, RegisterEmployeeStep4Response, RegisterStudentStep1Data, RegisterStudentStep1Error, RegisterStudentStep1Response, RegisterStudentStep2Data, RegisterStudentStep2Error, RegisterStudentStep2Response, RegisterStudentStep3Data, RegisterStudentStep3Error, RegisterStudentStep3Response, RegisterStudentStep4Data, RegisterStudentStep4Error, RegisterStudentStep4Response, RegisterStudentStep5Data, RegisterStudentStep5Error, RegisterStudentStep5Response, SelectMembershipData, SelectMembershipError, SelectMembershipResponse, SetupManualBulkData, SetupManualBulkError, SetupManualBulkResponse, SignupData, SignupError, SignupResponse, StudentData, StudentError, StudentResponse, UpdateEmployeePositionData, UpdateEmployeePositionError, UpdateEmployeePositionResponse, UpdateEmployeeStatusData, UpdateEmployeeStatusError, UpdateEmployeeStatusResponse, UpdateStudentStatusData, UpdateStudentStatusError, UpdateStudentStatusResponse, UpdateTeacherData, UpdateTeacherError, UpdateTeacherResponse, VerifyEmailData, VerifyEmailError, VerifyEmailResponse, VerifyOtpData, VerifyOtpError, VerifyOtpResponse2 } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseURL' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -376,25 +376,6 @@ export const registerStudentStep5Mutation = (options?: Partial<Options<RegisterS
 };
 
 /**
- * Register New Parent
- *
- * Registers a new parent in the system.
- */
-export const registerNewParentMutation = (options?: Partial<Options<RegisterNewParentData>>): UseMutationOptions<RegisterNewParentResponse, AxiosError<RegisterNewParentError>, Options<RegisterNewParentData>> => {
-    const mutationOptions: UseMutationOptions<RegisterNewParentResponse, AxiosError<RegisterNewParentError>, Options<RegisterNewParentData>> = {
-        mutationFn: async (fnOptions) => {
-            const { data } = await registerNewParent({
-                ...options,
-                ...fnOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-/**
  * Register Employee Step1
  *
  * Validate employee data for each step
@@ -460,40 +441,6 @@ export const registerEmployeeStep4Mutation = (options?: Partial<Options<Register
     const mutationOptions: UseMutationOptions<RegisterEmployeeStep4Response, AxiosError<RegisterEmployeeStep4Error>, Options<RegisterEmployeeStep4Data>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await registerEmployeeStep4({
-                ...options,
-                ...fnOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-/**
- * Register Me As Parent
- */
-export const registerMeAsParentMutation = (options?: Partial<Options<RegisterMeAsParentData>>): UseMutationOptions<RegisterMeAsParentResponse, AxiosError<RegisterMeAsParentError>, Options<RegisterMeAsParentData>> => {
-    const mutationOptions: UseMutationOptions<RegisterMeAsParentResponse, AxiosError<RegisterMeAsParentError>, Options<RegisterMeAsParentData>> = {
-        mutationFn: async (fnOptions) => {
-            const { data } = await registerMeAsParent({
-                ...options,
-                ...fnOptions,
-                throwOnError: true
-            });
-            return data;
-        }
-    };
-    return mutationOptions;
-};
-
-/**
- * Register Me As Student
- */
-export const registerMeAsStudentMutation = (options?: Partial<Options<RegisterMeAsStudentData>>): UseMutationOptions<RegisterMeAsStudentResponse, AxiosError<RegisterMeAsStudentError>, Options<RegisterMeAsStudentData>> => {
-    const mutationOptions: UseMutationOptions<RegisterMeAsStudentResponse, AxiosError<RegisterMeAsStudentError>, Options<RegisterMeAsStudentData>> = {
-        mutationFn: async (fnOptions) => {
-            const { data } = await registerMeAsStudent({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -620,46 +567,6 @@ export const getYearByIdOptions = (options: Options<GetYearByIdData>) => queryOp
         return data;
     },
     queryKey: getYearByIdQueryKey(options)
-});
-
-export const getDetailGradesByYearIdQueryKey = (options: Options<GetDetailGradesByYearIdData>) => createQueryKey('getDetailGradesByYearId', options);
-
-/**
- * Get Detail Grades By Year Id
- *
- * Returns specific academic year
- */
-export const getDetailGradesByYearIdOptions = (options: Options<GetDetailGradesByYearIdData>) => queryOptions<GetDetailGradesByYearIdResponse, AxiosError<GetDetailGradesByYearIdError>, GetDetailGradesByYearIdResponse, ReturnType<typeof getDetailGradesByYearIdQueryKey>>({
-    queryFn: async ({ queryKey, signal }) => {
-        const { data } = await getDetailGradesByYearId({
-            ...options,
-            ...queryKey[0],
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getDetailGradesByYearIdQueryKey(options)
-});
-
-export const getDetailSubjectsByYearIdQueryKey = (options: Options<GetDetailSubjectsByYearIdData>) => createQueryKey('getDetailSubjectsByYearId', options);
-
-/**
- * Get Detail Subjects By Year Id
- *
- * Returns specific academic year
- */
-export const getDetailSubjectsByYearIdOptions = (options: Options<GetDetailSubjectsByYearIdData>) => queryOptions<GetDetailSubjectsByYearIdResponse, AxiosError<GetDetailSubjectsByYearIdError>, GetDetailSubjectsByYearIdResponse, ReturnType<typeof getDetailSubjectsByYearIdQueryKey>>({
-    queryFn: async ({ queryKey, signal }) => {
-        const { data } = await getDetailSubjectsByYearId({
-            ...options,
-            ...queryKey[0],
-            signal,
-            throwOnError: true
-        });
-        return data;
-    },
-    queryKey: getDetailSubjectsByYearIdQueryKey(options)
 });
 
 export const getGradesQueryKey = (options?: Options<GetGradesData>) => createQueryKey('getGrades', options);
@@ -1057,6 +964,83 @@ export const getLoggedInUserOptions = (options?: Options<GetLoggedInUserData>) =
     },
     queryKey: getLoggedInUserQueryKey(options)
 });
+
+export const getStudentEnrollmentOpportunitiesQueryKey = (options: Options<GetStudentEnrollmentOpportunitiesData>) => createQueryKey('getStudentEnrollmentOpportunities', options);
+
+/**
+ * Get Student Enrollment Opportunities
+ *
+ * Returns all student enrollment opportunities.
+ */
+export const getStudentEnrollmentOpportunitiesOptions = (options: Options<GetStudentEnrollmentOpportunitiesData>) => queryOptions<GetStudentEnrollmentOpportunitiesResponse, AxiosError<GetStudentEnrollmentOpportunitiesError>, GetStudentEnrollmentOpportunitiesResponse, ReturnType<typeof getStudentEnrollmentOpportunitiesQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getStudentEnrollmentOpportunities({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getStudentEnrollmentOpportunitiesQueryKey(options)
+});
+
+/**
+ * Post Student Enrollment Opportunity
+ *
+ * Creates a new student enrollment opportunity.
+ */
+export const postStudentEnrollmentOpportunityMutation = (options?: Partial<Options<PostStudentEnrollmentOpportunityData>>): UseMutationOptions<PostStudentEnrollmentOpportunityResponse, AxiosError<PostStudentEnrollmentOpportunityError>, Options<PostStudentEnrollmentOpportunityData>> => {
+    const mutationOptions: UseMutationOptions<PostStudentEnrollmentOpportunityResponse, AxiosError<PostStudentEnrollmentOpportunityError>, Options<PostStudentEnrollmentOpportunityData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await postStudentEnrollmentOpportunity({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Post Student Enrollment Application
+ *
+ * Enrolls a student in the system.
+ */
+export const postStudentEnrollmentApplicationMutation = (options?: Partial<Options<PostStudentEnrollmentApplicationData>>): UseMutationOptions<PostStudentEnrollmentApplicationResponse, AxiosError<PostStudentEnrollmentApplicationError>, Options<PostStudentEnrollmentApplicationData>> => {
+    const mutationOptions: UseMutationOptions<PostStudentEnrollmentApplicationResponse, AxiosError<PostStudentEnrollmentApplicationError>, Options<PostStudentEnrollmentApplicationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await postStudentEnrollmentApplication({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Approve Student Enrollment
+ *
+ * Approves a student enrollment application.
+ */
+export const approveStudentEnrollmentMutation = (options?: Partial<Options<ApproveStudentEnrollmentData>>): UseMutationOptions<ApproveStudentEnrollmentResponse, AxiosError<ApproveStudentEnrollmentError>, Options<ApproveStudentEnrollmentData>> => {
+    const mutationOptions: UseMutationOptions<ApproveStudentEnrollmentResponse, AxiosError<ApproveStudentEnrollmentError>, Options<ApproveStudentEnrollmentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await approveStudentEnrollment({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
 
 /**
  * Delete Students
@@ -1631,6 +1615,261 @@ export const setupManualBulkMutation = (options?: Partial<Options<SetupManualBul
     const mutationOptions: UseMutationOptions<SetupManualBulkResponse, AxiosError<SetupManualBulkError>, Options<SetupManualBulkData>> = {
         mutationFn: async (fnOptions) => {
             const { data } = await setupManualBulk({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getAllJobsQueryKey = (options?: Options<GetAllJobsData>) => createQueryKey('getAllJobs', options);
+
+/**
+ * Get All Jobs
+ *
+ * This endpoint will return job postings based on the provided filters.
+ */
+export const getAllJobsOptions = (options?: Options<GetAllJobsData>) => queryOptions<GetAllJobsResponse, AxiosError<GetAllJobsError>, GetAllJobsResponse, ReturnType<typeof getAllJobsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getAllJobs({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getAllJobsQueryKey(options)
+});
+
+/**
+ * Post Job
+ *
+ * Registers a new job post in the system.
+ */
+export const postJobMutation = (options?: Partial<Options<PostJobData>>): UseMutationOptions<PostJobResponse, AxiosError<PostJobError>, Options<PostJobData>> => {
+    const mutationOptions: UseMutationOptions<PostJobResponse, AxiosError<PostJobError>, Options<PostJobData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await postJob({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getSchoolJobsQueryKey = (options?: Options<GetSchoolJobsData>) => createQueryKey('getSchoolJobs', options);
+
+/**
+ * Get School Jobs
+ *
+ * This endpoint will return job postings based on the provided filters.
+ */
+export const getSchoolJobsOptions = (options?: Options<GetSchoolJobsData>) => queryOptions<GetSchoolJobsResponse, AxiosError<GetSchoolJobsError>, GetSchoolJobsResponse, ReturnType<typeof getSchoolJobsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getSchoolJobs({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getSchoolJobsQueryKey(options)
+});
+
+export const getJobByIdQueryKey = (options: Options<GetJobByIdData>) => createQueryKey('getJobById', options);
+
+/**
+ * Get Job By Id
+ *
+ * Retrieves a specific job posting by its ID.
+ */
+export const getJobByIdOptions = (options: Options<GetJobByIdData>) => queryOptions<GetJobByIdResponse, AxiosError<GetJobByIdError>, GetJobByIdResponse, ReturnType<typeof getJobByIdQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getJobById({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getJobByIdQueryKey(options)
+});
+
+export const getSchoolJobByIdQueryKey = (options: Options<GetSchoolJobByIdData>) => createQueryKey('getSchoolJobById', options);
+
+/**
+ * Get School Job By Id
+ *
+ * Retrieves a specific job posting by its ID for the authenticated user's school.
+ */
+export const getSchoolJobByIdOptions = (options: Options<GetSchoolJobByIdData>) => queryOptions<GetSchoolJobByIdResponse, AxiosError<GetSchoolJobByIdError>, GetSchoolJobByIdResponse, ReturnType<typeof getSchoolJobByIdQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getSchoolJobById({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getSchoolJobByIdQueryKey(options)
+});
+
+export const getJobApplicationsQueryKey = (options?: Options<GetJobApplicationsData>) => createQueryKey('getJobApplications', options);
+
+/**
+ * Get Job Applications
+ *
+ * This endpoint will return job applications based on the provided filters.
+ */
+export const getJobApplicationsOptions = (options?: Options<GetJobApplicationsData>) => queryOptions<GetJobApplicationsResponse, AxiosError<GetJobApplicationsError>, GetJobApplicationsResponse, ReturnType<typeof getJobApplicationsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getJobApplications({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getJobApplicationsQueryKey(options)
+});
+
+/**
+ * Post Job Application
+ *
+ * Registers a new job application in the system.
+ */
+export const postJobApplicationMutation = (options?: Partial<Options<PostJobApplicationData>>): UseMutationOptions<PostJobApplicationResponse, AxiosError<PostJobApplicationError>, Options<PostJobApplicationData>> => {
+    const mutationOptions: UseMutationOptions<PostJobApplicationResponse, AxiosError<PostJobApplicationError>, Options<PostJobApplicationData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await postJobApplication({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+/**
+ * Hire Employee
+ *
+ * Hire an employee based on a job application.
+ */
+export const hireEmployeeMutation = (options?: Partial<Options<HireEmployeeData>>): UseMutationOptions<HireEmployeeResponse, AxiosError<HireEmployeeError>, Options<HireEmployeeData>> => {
+    const mutationOptions: UseMutationOptions<HireEmployeeResponse, AxiosError<HireEmployeeError>, Options<HireEmployeeData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await hireEmployee({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getDepartmentsQueryKey = (options?: Options<GetDepartmentsData>) => createQueryKey('getDepartments', options);
+
+/**
+ * Get Departments
+ *
+ * Retrieves all departments in the system.
+ */
+export const getDepartmentsOptions = (options?: Options<GetDepartmentsData>) => queryOptions<GetDepartmentsResponse, AxiosError<GetDepartmentsError>, GetDepartmentsResponse, ReturnType<typeof getDepartmentsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getDepartments({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getDepartmentsQueryKey(options)
+});
+
+/**
+ * Post Department
+ *
+ * Registers a new department in the system.
+ */
+export const postDepartmentMutation = (options?: Partial<Options<PostDepartmentData>>): UseMutationOptions<PostDepartmentResponse, AxiosError<PostDepartmentError>, Options<PostDepartmentData>> => {
+    const mutationOptions: UseMutationOptions<PostDepartmentResponse, AxiosError<PostDepartmentError>, Options<PostDepartmentData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await postDepartment({
+                ...options,
+                ...fnOptions,
+                throwOnError: true
+            });
+            return data;
+        }
+    };
+    return mutationOptions;
+};
+
+export const getDepartmentQueryKey = (options: Options<GetDepartmentData>) => createQueryKey('getDepartment', options);
+
+/**
+ * Get Department
+ *
+ * Retrieves a specific department by its ID.
+ */
+export const getDepartmentOptions = (options: Options<GetDepartmentData>) => queryOptions<GetDepartmentResponse, AxiosError<GetDepartmentError>, GetDepartmentResponse, ReturnType<typeof getDepartmentQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getDepartment({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getDepartmentQueryKey(options)
+});
+
+export const getPositionsQueryKey = (options?: Options<GetPositionsData>) => createQueryKey('getPositions', options);
+
+/**
+ * Get Positions
+ *
+ * Retrieves all positions in the system.
+ */
+export const getPositionsOptions = (options?: Options<GetPositionsData>) => queryOptions<GetPositionsResponse, AxiosError<DefaultError>, GetPositionsResponse, ReturnType<typeof getPositionsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getPositions({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getPositionsQueryKey(options)
+});
+
+/**
+ * Post Position
+ *
+ * Registers a new position in the system.
+ */
+export const postPositionMutation = (options?: Partial<Options<PostPositionData>>): UseMutationOptions<PostPositionResponse, AxiosError<PostPositionError>, Options<PostPositionData>> => {
+    const mutationOptions: UseMutationOptions<PostPositionResponse, AxiosError<PostPositionError>, Options<PostPositionData>> = {
+        mutationFn: async (fnOptions) => {
+            const { data } = await postPosition({
                 ...options,
                 ...fnOptions,
                 throwOnError: true

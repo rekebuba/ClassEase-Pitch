@@ -3,6 +3,14 @@
 import * as z from 'zod';
 
 /**
+ * AcademicBackground
+ */
+export const zAcademicBackground = z.object({
+    previousSchool: z.string().nullable(),
+    isTransfer: z.boolean()
+});
+
+/**
  * AcademicTermEnum
  */
 export const zAcademicTermEnum = z.enum([
@@ -43,6 +51,17 @@ export const zAcademicYearStatusEnum = z.enum([
 ]);
 
 /**
+ * Address
+ */
+export const zAddress = z.object({
+    city: z.string(),
+    state: z.string(),
+    postalCode: z.string(),
+    nationality: z.string(),
+    transportation: z.string()
+});
+
+/**
  * AssessmentComponentCreateSchema
  */
 export const zAssessmentComponentCreateSchema = z.object({
@@ -53,20 +72,6 @@ export const zAssessmentComponentCreateSchema = z.object({
     weight: z.number(),
     maxScore: z.number(),
     displayOrder: z.int().optional().default(0)
-});
-
-/**
- * AssessmentSchema
- *
- * This model represents an assessment record for a student including details
- */
-export const zAssessmentSchema = z.object({
-    id: z.uuid().nullish(),
-    studentId: z.uuid(),
-    studentTermRecordId: z.uuid(),
-    subjectOfferingId: z.uuid(),
-    total: z.number().nullish(),
-    rank: z.int().nullish()
 });
 
 /**
@@ -161,17 +166,25 @@ export const zDeleteYearSuccess = z.object({
 });
 
 /**
- * EmployeeApplicationStatusEnum
+ * DepartmentBase
  */
-export const zEmployeeApplicationStatusEnum = z.enum([
-    'pending',
-    'approved',
-    'rejected',
-    'interview-scheduled',
-    'active',
-    'inactive',
-    'withdrawn'
-]);
+export const zDepartmentBase = z.object({
+    name: z.string(),
+    code: z.string(),
+    headEmployeeId: z.uuid().nullish()
+});
+
+/**
+ * DepartmentSchema
+ */
+export const zDepartmentSchema = z.object({
+    id: z.uuid(),
+    name: z.string(),
+    code: z.string(),
+    headEmployeeId: z.uuid().nullish(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime()
+});
 
 /**
  * EmployeePositionCreate
@@ -198,7 +211,6 @@ export const zEmployeePositionUpdate = z.object({
 export const zEmployeeRegStep2 = z.object({
     email: z.email(),
     phone: z.string(),
-    departmentId: z.uuid().nullish(),
     primaryPositionId: z.uuid().nullish(),
     managerEmployeeId: z.uuid().nullish()
 });
@@ -212,6 +224,19 @@ export const zEmployeeRegStep4 = z.object({
 });
 
 /**
+ * EmploymentApplicationStatusEnum
+ */
+export const zEmploymentApplicationStatusEnum = z.enum([
+    'draft',
+    'submitted',
+    'under_review',
+    'shortlisted',
+    'accepted',
+    'rejected',
+    'withdrawn'
+]);
+
+/**
  * EmploymentContractCreate
  */
 export const zEmploymentContractCreate = z.object({
@@ -220,7 +245,6 @@ export const zEmploymentContractCreate = z.object({
     hoursPerWeek: z.int(),
     startDate: z.iso.date(),
     endDate: z.iso.date().nullish(),
-    salaryGrade: z.string().nullish(),
     status: zContractStatusEnum.optional().default('draft')
 });
 
@@ -257,7 +281,6 @@ export const zEmployeeBasicInfo = z.object({
     employmentType: zEmploymentTypeEnum,
     hireDate: z.iso.date(),
     terminationDate: z.iso.date().nullable(),
-    departmentId: z.uuid().nullable(),
     primaryPositionId: z.uuid().nullable(),
     managerEmployeeId: z.uuid().nullable(),
     workEmail: z.string().nullable(),
@@ -275,8 +298,6 @@ export const zEmployeeProfile = z.object({
     employmentStatus: zEmploymentStatusEnum,
     employmentType: zEmploymentTypeEnum,
     terminationDate: z.iso.date().nullable(),
-    departmentId: z.uuid().nullable(),
-    primaryPositionId: z.uuid().nullable(),
     managerEmployeeId: z.uuid().nullable(),
     workEmail: z.email().nullable(),
     workPhone: z.string().nullable()
@@ -299,6 +320,35 @@ export const zEnrollStudent = z.object({
     classSectionId: z.uuid(),
     yearId: z.uuid()
 });
+
+/**
+ * EnrollStudentApplication
+ */
+export const zEnrollStudentApplication = z.object({
+    applicationId: z.uuid(),
+    sectionId: z.uuid()
+});
+
+/**
+ * EnrollmentOpportunityPost
+ */
+export const zEnrollmentOpportunityPost = z.object({
+    academicYearId: z.uuid(),
+    gradeStreamId: z.uuid(),
+    applicationDeadline: z.iso.datetime().nullable(),
+    capacity: z.int(),
+    allowApplications: z.boolean()
+});
+
+/**
+ * EnrollmentOpportunityStatusEnum
+ */
+export const zEnrollmentOpportunityStatusEnum = z.enum([
+    'draft',
+    'open',
+    'closed',
+    'archived'
+]);
 
 /**
  * EventEligibilityEnum
@@ -369,19 +419,6 @@ export const zEventSchema = z.object({
 });
 
 /**
- * ExperienceYearEnum
- */
-export const zExperienceYearEnum = z.enum([
-    '0',
-    '1-2',
-    '3-5',
-    '6-10',
-    '11-15',
-    '16-20',
-    '20+'
-]);
-
-/**
  * GenderEnum
  */
 export const zGenderEnum = z.enum(['male', 'female']);
@@ -447,6 +484,17 @@ export const zHttpError = z.object({
 });
 
 /**
+ * HealthRecord
+ */
+export const zHealthRecord = z.object({
+    bloodType: zBloodTypeEnum,
+    hasDisability: z.boolean(),
+    disabilityDetails: z.string().nullable(),
+    hasMedicalCondition: z.boolean(),
+    medicalDetails: z.string().nullable()
+});
+
+/**
  * HealthStatus
  */
 export const zHealthStatus = z.object({
@@ -486,29 +534,22 @@ export const zEmployeeRegStep3 = z.object({
 });
 
 /**
- * MarkListTypeEnum
+ * JobApplicationPost
  */
-export const zMarkListTypeEnum = z.enum([
-    'Test',
-    'Quiz',
-    'Assignment',
-    'Midterm',
-    'Final'
-]);
+export const zJobApplicationPost = z.object({
+    jobId: z.uuid(),
+    coverNote: z.string().nullish()
+});
 
 /**
- * MarkListSchema
- *
- * This model represents an assessment record for a student including details
+ * JobPost
  */
-export const zMarkListSchema = z.object({
-    id: z.uuid().nullish(),
-    studentId: z.uuid(),
-    studentTermRecordId: z.uuid(),
-    subjectId: z.uuid(),
-    type: zMarkListTypeEnum,
-    percentage: z.number().nullish(),
-    score: z.number().nullish()
+export const zJobPost = z.object({
+    positionId: z.uuid(),
+    description: z.string(),
+    employmentType: zEmploymentTypeEnum,
+    applicationDeadline: z.iso.date().nullish(),
+    openingsCount: z.int()
 });
 
 /**
@@ -594,31 +635,6 @@ export const zParentProfile = z.object({
 });
 
 /**
- * ParentRegistrationForm
- */
-export const zParentRegistrationForm = z.object({
-    firstName: z.string(),
-    fatherName: z.string(),
-    grandFatherName: z.string().nullable(),
-    dateOfBirth: z.iso.date(),
-    gender: zGenderEnum,
-    email: z.email(),
-    phone: z.string().nullish(),
-    username: z.string().nullish(),
-    password: z.null().optional(),
-    relation: z.string().min(2).max(50),
-    emergencyContactPhone: z.string().nullish()
-});
-
-/**
- * ParentRegistrationMe
- */
-export const zParentRegistrationMe = z.object({
-    relation: z.string().min(2).max(50),
-    emergencyContactPhone: z.string().nullish()
-});
-
-/**
  * PasswordRecovery
  */
 export const zPasswordRecovery = z.object({
@@ -698,6 +714,41 @@ export const zPermissionEnum = z.enum([
 ]);
 
 /**
+ * PositionBase
+ */
+export const zPositionBase = z.object({
+    title: z.string(),
+    departmentId: z.uuid()
+});
+
+/**
+ * PositionSchema
+ */
+export const zPositionSchema = z.object({
+    id: z.uuid(),
+    title: z.string(),
+    departmentId: z.uuid(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime()
+});
+
+/**
+ * JobSchema
+ */
+export const zJobSchema = z.object({
+    id: z.uuid(),
+    position: zPositionSchema,
+    schoolId: z.uuid(),
+    description: z.string(),
+    employmentType: zEmploymentTypeEnum,
+    applicationDeadline: z.iso.date().nullable(),
+    openingsCount: z.int(),
+    allowApplications: z.boolean(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime()
+});
+
+/**
  * ProviderResponse
  */
 export const zProviderResponse = z.object({
@@ -711,16 +762,6 @@ export const zProviderResponse = z.object({
 export const zRefreshTokenRequest = z.object({
     refreshToken: z.string(),
     membershipId: z.uuid().nullish()
-});
-
-/**
- * RegistrationResponse
- *
- * Schema for successful registration response.
- */
-export const zRegistrationResponse = z.object({
-    id: z.uuid(),
-    message: z.string()
 });
 
 /**
@@ -751,16 +792,6 @@ export const zNewSchoolMembership = z.object({
     userId: z.uuid(),
     role: zRoleEnum
 });
-
-/**
- * ScheduleEnum
- */
-export const zScheduleEnum = z.enum([
-    'full-time',
-    'part-time',
-    'flexible-hours',
-    'substitute'
-]);
 
 /**
  * SchoolMembershipStatusEnum
@@ -829,9 +860,9 @@ export const zCurrentUserInfo = z.object({
     id: z.uuid(),
     username: z.string(),
     role: zRoleEnum,
+    fullName: z.string(),
     imagePath: z.string().nullable(),
     createdAt: z.iso.datetime(),
-    fullName: z.string(),
     activeSchool: zSchoolSummary,
     activeMembership: zMembershipSummary,
     availableMemberships: z.array(zMembershipSummary)
@@ -987,94 +1018,39 @@ export const zStudentApplicationStatusEnum = z.enum([
 ]);
 
 /**
+ * StudentBasicInfo
+ */
+export const zStudentBasicInfo = z.object({
+    firstName: z.string(),
+    fatherName: z.string(),
+    grandFatherName: z.string(),
+    dateOfBirth: z.iso.date(),
+    gender: zGenderEnum,
+    email: z.email().nullable(),
+    phone: z.string().nullable()
+});
+
+/**
+ * EnrollmentApplicationPost
+ */
+export const zEnrollmentApplicationPost = z.object({
+    opportunityId: z.uuid(),
+    studentUserId: z.uuid().nullable(),
+    applicantNote: z.string().nullable(),
+    relation: z.string().nullable(),
+    user: zStudentBasicInfo.nullable(),
+    healthRecord: zHealthRecord,
+    academicBackground: zAcademicBackground,
+    address: zAddress
+});
+
+/**
  * StudentProfile
  */
 export const zStudentProfile = z.object({
     userId: z.uuid(),
     isTransfer: z.boolean().optional().default(false),
     parents: z.array(zParentProfile).optional()
-});
-
-/**
- * StudentRegisteredYear
- */
-export const zStudentRegisteredYear = z.object({
-    id: z.uuid(),
-    name: z.string()
-});
-
-/**
- * StudentRegisteredGrade
- */
-export const zStudentRegisteredGrade = z.object({
-    id: z.uuid(),
-    grade: zGradeEnum,
-    year: zStudentRegisteredYear
-});
-
-/**
- * StudentBasicInfo
- */
-export const zStudentBasicInfo = z.object({
-    id: z.uuid(),
-    fullName: z.string(),
-    firstName: z.string(),
-    fatherName: z.string(),
-    grandFatherName: z.string(),
-    dateOfBirth: z.iso.date(),
-    gender: zGenderEnum,
-    address: z.string(),
-    city: z.string(),
-    state: z.string(),
-    postalCode: z.string(),
-    fatherPhone: z.string(),
-    motherPhone: z.string(),
-    parentEmail: z.email(),
-    nationality: z.string().nullable(),
-    bloodType: zBloodTypeEnum,
-    studentPhoto: z.string().nullable(),
-    previousSchool: z.string().nullable(),
-    previousGrades: z.string().nullable(),
-    transportation: z.string().nullable(),
-    guardianName: z.string().nullable(),
-    guardianPhone: z.string().nullable(),
-    guardianRelation: z.string().nullable(),
-    emergencyContactName: z.string().nullable(),
-    emergencyContactPhone: z.string().nullable(),
-    disabilityDetails: z.string().nullable(),
-    siblingDetails: z.string().nullable(),
-    medicalDetails: z.string().nullable(),
-    siblingInSchool: z.boolean(),
-    hasMedicalCondition: z.boolean(),
-    hasDisability: z.boolean(),
-    isTransfer: z.boolean(),
-    status: zStudentApplicationStatusEnum,
-    createdAt: z.iso.datetime(),
-    grade: zStudentRegisteredGrade
-});
-
-/**
- * StudentRegistrationMe
- */
-export const zStudentRegistrationMe = z.object({
-    bloodType: zBloodTypeEnum.optional().default('unknown'),
-    hasMedicalCondition: z.boolean().optional().default(false),
-    medicalDetails: z.string().nullish(),
-    hasDisability: z.boolean().optional().default(false),
-    disabilityDetails: z.string().nullish(),
-    emergencyContactName: z.string().nullish(),
-    emergencyContactPhone: z.string().nullable(),
-    city: z.string().min(2).max(50),
-    state: z.string().min(2).max(50),
-    postalCode: z.string().min(2).max(20),
-    registeredForGradeId: z.uuid(),
-    transportation: z.string().nullish(),
-    isTransfer: z.boolean().optional().default(false),
-    previousSchool: z.string().max(100).nullish(),
-    nationality: z.string().min(2).max(100).nullish(),
-    studentPhoto: z.string().nullish(),
-    parentId: z.uuid().nullish(),
-    status: zStudentApplicationStatusEnum.optional().default('pending')
 });
 
 /**
@@ -1187,6 +1163,7 @@ export const zSubjectSchema = z.object({
  * GradeStreamSetup
  */
 export const zGradeStreamSetup = z.object({
+    id: z.uuid(),
     stream: zStreamSchema.nullable(),
     subjects: z.array(zSubjectSchema)
 });
@@ -1292,20 +1269,6 @@ export const zManualSetupBulkSchema = z.object({
 });
 
 /**
- * SubjectYearlyAverageSchema
- *
- * This model represents the yearly average of a subject for a student.
- */
-export const zSubjectYearlyAverageSchema = z.object({
-    id: z.uuid().nullish(),
-    studentId: z.uuid(),
-    subjectOfferingId: z.uuid(),
-    studentYearRecordId: z.uuid().nullish(),
-    average: z.number().nullish(),
-    rank: z.int().nullish()
-});
-
-/**
  * SuccessMessage
  */
 export const zSuccessMessage = z.object({
@@ -1362,6 +1325,39 @@ export const zTeacherBasicInfo = z.object({
     workEmail: z.string().nullable(),
     specialization: z.string().nullable(),
     subjectIds: z.array(z.uuid())
+});
+
+/**
+ * TeacherProfileJob
+ */
+export const zTeacherProfileJob = z.object({
+    specialization: z.string().nullish(),
+    teacherLicenseNumber: z.string().nullish(),
+    certifications: z.string().nullish(),
+    highestEducation: zHighestEducationEnum.nullish(),
+    yearsOfExperience: z.int().nullish()
+});
+
+/**
+ * HireJobApplication
+ */
+export const zHireJobApplication = z.object({
+    applicationId: z.uuid(),
+    employeeNumber: z.string(),
+    hireDate: z.iso.date(),
+    employmentStatus: zEmploymentStatusEnum,
+    employmentType: zEmploymentTypeEnum,
+    terminationDate: z.iso.date().nullish(),
+    managerEmployeeId: z.uuid().nullish(),
+    workEmail: z.email(),
+    workPhone: z.string(),
+    startDate: z.iso.date(),
+    endDate: z.iso.date().nullish(),
+    contractType: zContractTypeEnum,
+    contractStartDate: z.iso.date(),
+    contractEndDate: z.iso.date().nullish(),
+    hoursPerWeek: z.int(),
+    teacherProfile: zTeacherProfileJob.nullish()
 });
 
 /**
@@ -1491,9 +1487,34 @@ export const zUpdateSubjectSetup = z.object({
 export const zUserSchema = z.object({
     id: z.uuid(),
     username: z.string(),
-    role: zRoleEnum,
+    firstName: z.string(),
+    fatherName: z.string(),
+    grandFatherName: z.string().nullable(),
+    dateOfBirth: z.iso.date(),
+    gender: zGenderEnum,
+    email: z.email().nullable(),
+    phone: z.string().nullable(),
     imagePath: z.string().nullish(),
-    createdAt: z.iso.datetime()
+    isActive: z.boolean(),
+    isVerified: z.boolean(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime()
+});
+
+/**
+ * EmploymentApplicationSchema
+ */
+export const zEmploymentApplicationSchema = z.object({
+    id: z.uuid(),
+    applicantUser: zUserSchema,
+    jobPosting: zJobSchema,
+    coverNote: z.string().nullable(),
+    reviewerNote: z.string().nullable(),
+    status: zEmploymentApplicationStatusEnum,
+    submittedAt: z.iso.datetime(),
+    reviewedAt: z.iso.datetime(),
+    createdAt: z.iso.datetime(),
+    updatedAt: z.iso.datetime()
 });
 
 /**
@@ -1539,119 +1560,18 @@ export const zYearSchema = z.object({
 });
 
 /**
- * StudentWithRelatedSchema
+ * EnrollmentOpportunitySchema
  */
-export const zStudentWithRelatedSchema = z.object({
-    startingGrade: zGradeSchema.nullable(),
-    user: zUserSchema.nullable(),
-    termRecords: z.array(zStudentTermRecordSchema),
-    studentYearRecords: z.array(zStudentYearRecordSchema),
-    subjectYearlyAverages: z.array(zSubjectYearlyAverageSchema),
-    assessments: z.array(zAssessmentSchema),
-    years: z.array(zYearSchema),
-    academicTerms: z.array(zAcademicTermSchema),
-    grades: z.array(zGradeSchema),
-    subjects: z.array(zSubjectSchema),
-    sections: z.array(zSectionSchema),
-    markLists: z.array(zMarkListSchema),
+export const zEnrollmentOpportunitySchema = z.object({
     id: z.uuid(),
-    userId: z.uuid().nullable(),
-    firstName: z.string(),
-    fatherName: z.string(),
-    dateOfBirth: z.iso.date(),
-    gender: zGenderEnum,
-    city: z.string(),
-    state: z.string(),
-    postalCode: z.string(),
-    grandFatherName: z.string().nullable(),
-    nationality: z.string().nullable(),
-    bloodType: zBloodTypeEnum.optional().default('unknown'),
-    studentPhoto: z.string().nullable(),
-    previousSchool: z.string().nullable(),
-    transportation: z.string().nullable(),
-    disabilityDetails: z.string().nullable(),
-    medicalDetails: z.string().nullable(),
-    hasMedicalCondition: z.boolean(),
-    hasDisability: z.boolean(),
-    isTransfer: z.boolean(),
-    status: zStudentApplicationStatusEnum.optional().default('pending')
-});
-
-/**
- * TeacherWithRelatedSchema
- *
- * This model extends TeacherSchema to include relationships.
- */
-export const zTeacherWithRelatedSchema = z.object({
-    user: zUserSchema.nullish(),
-    sections: z.array(zSectionSchema).nullish().default([]),
-    years: z.array(zYearSchema).nullish(),
-    academicTerms: z.array(zAcademicTermSchema).nullish(),
-    grades: z.array(zGradeSchema).nullish(),
-    subjects: z.array(zSubjectSchema).nullish(),
-    id: z.uuid().nullish(),
-    firstName: z.string(),
-    fatherName: z.string(),
-    grandFatherName: z.string(),
-    dateOfBirth: z.iso.date(),
-    gender: zGenderEnum,
-    nationality: z.string(),
-    socialSecurityNumber: z.string(),
-    address: z.string(),
-    city: z.string(),
-    state: z.string(),
-    postalCode: z.string(),
-    country: z.string(),
-    highestDegree: zHighestEducationEnum,
-    university: z.string(),
-    graduationYear: z.int(),
-    gpa: z.number(),
-    positionApplyingFor: z.string(),
-    yearsOfExperience: zExperienceYearEnum,
-    preferredSchedule: zScheduleEnum,
-    secondaryPhone: z.string().nullish(),
-    additionalDegrees: z.string().nullish(),
-    teachingLicense: z.boolean().nullish().default(false),
-    licenseNumber: z.string().nullish(),
-    licenseState: z.string().nullish(),
-    licenseExpirationDate: z.iso.date().nullish(),
-    certifications: z.string().nullish(),
-    specializations: z.string().nullish(),
-    previousSchools: z.string().nullish(),
-    specialSkills: z.string().nullish(),
-    professionalDevelopment: z.string().nullish(),
-    hasConvictions: z.boolean().optional().default(false),
-    convictionDetails: z.string().nullish(),
-    hasDisciplinaryActions: z.boolean().optional().default(false),
-    resume: z.string().nullish(),
-    coverLetter: z.string().nullish(),
-    transcripts: z.string().nullish(),
-    teachingCertificate: z.string().nullish(),
-    backgroundCheck: z.string().nullish(),
-    teachingPhilosophy: z.string().nullish(),
-    whyTeaching: z.string().nullish(),
-    additionalComments: z.string().nullish(),
-    agreeToTerms: z.boolean().optional().default(false),
-    agreeToBackgroundCheck: z.boolean().optional().default(false),
-    userId: z.uuid().nullish(),
-    status: zEmployeeApplicationStatusEnum.optional().default('pending')
-});
-
-/**
- * SubjectNestedSchema
- *
- * This model represents the relationships of a SubjectSchema.
- * It is used to define the relationships between the SubjectSchema and other schemas.
- */
-export const zSubjectNestedSchema = z.object({
-    id: z.uuid(),
-    name: z.string(),
-    code: z.string(),
+    academicYear: zYearSchema,
+    gradeStream: zGradeStreamSchema,
+    applicationDeadline: z.iso.datetime().nullable(),
+    capacity: z.int(),
+    allowApplications: z.boolean(),
+    status: zEnrollmentOpportunityStatusEnum,
     createdAt: z.iso.datetime(),
-    updatedAt: z.iso.datetime(),
-    teachers: z.array(zTeacherWithRelatedSchema),
-    streams: z.array(zStreamWithRelatedSchema),
-    grades: z.array(zGradeWithRelatedSchema)
+    updatedAt: z.iso.datetime()
 });
 
 /**
@@ -1684,44 +1604,6 @@ export const zYearWithRelatedSchema = z.object({
     status: zAcademicYearStatusEnum,
     createdAt: z.iso.datetime(),
     updatedAt: z.iso.datetime()
-});
-
-/**
- * GradeNestedSchema
- *
- * This model represents the relationships of a GradeSchema.
- * It is used to define the relationships between the GradeSchema and other schemas.
- */
-export const zGradeNestedSchema = z.object({
-    id: z.uuid(),
-    schoolId: z.uuid(),
-    grade: zGradeEnum,
-    level: zGradeLevelEnum,
-    hasStream: z.boolean(),
-    createdAt: z.iso.datetime(),
-    updatedAt: z.iso.datetime(),
-    year: zYearWithRelatedSchema,
-    teachers: z.array(zTeacherWithRelatedSchema),
-    streams: z.array(zStreamWithRelatedSchema),
-    students: z.array(zStudentWithRelatedSchema),
-    sections: z.array(zSectionWithRelatedSchema)
-});
-
-/**
- * ParentRegistrationForm
- */
-export const zParentRegistrationFormWritable = z.object({
-    firstName: z.string(),
-    fatherName: z.string(),
-    grandFatherName: z.string().nullable(),
-    dateOfBirth: z.iso.date(),
-    gender: zGenderEnum,
-    email: z.email(),
-    phone: z.string().nullish(),
-    username: z.string().nullish(),
-    password: z.string().nullish(),
-    relation: z.string().min(2).max(50),
-    emergencyContactPhone: z.string().nullish()
 });
 
 /**
@@ -1866,13 +1748,6 @@ export const zRegisterStudentStep5Body = zStudRegStep5;
  */
 export const zRegisterStudentStep5Response = zRegistrationStep;
 
-export const zRegisterNewParentBody = zParentRegistrationFormWritable;
-
-/**
- * Successful Response
- */
-export const zRegisterNewParentResponse = zRegistrationResponse;
-
 export const zRegisterEmployeeStep1Body = zEmployeeRegStep1;
 
 /**
@@ -1900,28 +1775,6 @@ export const zRegisterEmployeeStep4Body = zEmployeeRegStep4;
  * Successful Response
  */
 export const zRegisterEmployeeStep4Response = zRegistrationStep;
-
-export const zRegisterMeAsParentBody = zParentRegistrationMe;
-
-export const zRegisterMeAsParentPath = z.object({
-    school_id: z.uuid()
-});
-
-/**
- * Successful Response
- */
-export const zRegisterMeAsParentResponse = zRegistrationResponse;
-
-export const zRegisterMeAsStudentBody = zStudentRegistrationMe;
-
-export const zRegisterMeAsStudentPath = z.object({
-    school_id: z.uuid()
-});
-
-/**
- * Successful Response
- */
-export const zRegisterMeAsStudentResponse = zRegistrationResponse;
 
 /**
  * Response Get Years Api V1 Years Get
@@ -1975,28 +1828,6 @@ export const zGetYearByIdPath = z.object({
  */
 export const zGetYearByIdResponse = zYearSchema;
 
-export const zGetDetailGradesByYearIdPath = z.object({
-    year_id: z.uuid()
-});
-
-/**
- * Response Get Detail Grades By Year Id Api V1 Years  Year Id  Grades Detail Get
- *
- * Successful Response
- */
-export const zGetDetailGradesByYearIdResponse = z.array(zGradeNestedSchema);
-
-export const zGetDetailSubjectsByYearIdPath = z.object({
-    year_id: z.uuid()
-});
-
-/**
- * Response Get Detail Subjects By Year Id Api V1 Years  Year Id  Subjects Detail Get
- *
- * Successful Response
- */
-export const zGetDetailSubjectsByYearIdResponse = z.array(zSubjectNestedSchema);
-
 /**
  * Response Get Grades Api V1 Grades Get
  *
@@ -2017,7 +1848,7 @@ export const zGetGradeOfferingsQuery = z.object({
 });
 
 /**
- * Response Get Grade Offerings Api V1 Grades Offerings Get
+ * Response Get Grade Offerings Api V1 Grade Offerings Get
  *
  * Successful Response
  */
@@ -2081,7 +1912,7 @@ export const zGetSubjectOfferingsQuery = z.object({
 });
 
 /**
- * Response Get Subject Offerings Api V1 Subjects Offerings Get
+ * Response Get Subject Offerings Api V1 Subject Offerings Get
  *
  * Successful Response
  */
@@ -2180,6 +2011,39 @@ export const zGetSectionRelatedResponse = zSectionWithRelatedSchema;
  * Successful Response
  */
 export const zGetLoggedInUserResponse = zCurrentUserInfo;
+
+export const zGetStudentEnrollmentOpportunitiesQuery = z.object({
+    yearId: z.uuid(),
+    q: z.string().nullish()
+});
+
+/**
+ * Response Get Student Enrollment Opportunities Api V1 Enrollment Opportunities Get
+ *
+ * Successful Response
+ */
+export const zGetStudentEnrollmentOpportunitiesResponse = z.array(zEnrollmentOpportunitySchema);
+
+export const zPostStudentEnrollmentOpportunityBody = zEnrollmentOpportunityPost;
+
+/**
+ * Successful Response
+ */
+export const zPostStudentEnrollmentOpportunityResponse = zSuccessResponse;
+
+export const zPostStudentEnrollmentApplicationBody = zEnrollmentApplicationPost;
+
+/**
+ * Successful Response
+ */
+export const zPostStudentEnrollmentApplicationResponse = zSuccessResponse;
+
+export const zApproveStudentEnrollmentBody = zEnrollStudentApplication;
+
+/**
+ * Successful Response
+ */
+export const zApproveStudentEnrollmentResponse = zSuccessResponse;
 
 export const zDeleteStudentsQuery = z.object({
     student_ids: z.array(z.uuid())
@@ -2474,3 +2338,116 @@ export const zSetupManualBulkBody = zManualSetupBulkSchema;
  * Successful Response
  */
 export const zSetupManualBulkResponse = zSuccessMessage;
+
+export const zGetAllJobsQuery = z.object({
+    q: z.string().nullish()
+});
+
+/**
+ * Response Get All Jobs Api V1 Jobs Get
+ *
+ * Successful Response
+ */
+export const zGetAllJobsResponse = z.array(zJobSchema);
+
+export const zPostJobBody = zJobPost;
+
+/**
+ * Successful Response
+ */
+export const zPostJobResponse = zSuccessResponse;
+
+export const zGetSchoolJobsQuery = z.object({
+    q: z.string().nullish()
+});
+
+/**
+ * Response Get School Jobs Api V1 School Jobs Get
+ *
+ * Successful Response
+ */
+export const zGetSchoolJobsResponse = z.array(zJobSchema);
+
+export const zGetJobByIdPath = z.object({
+    job_id: z.string()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetJobByIdResponse = zJobSchema;
+
+export const zGetSchoolJobByIdPath = z.object({
+    job_id: z.string()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetSchoolJobByIdResponse = zJobSchema;
+
+export const zGetJobApplicationsQuery = z.object({
+    q: z.string().nullish()
+});
+
+/**
+ * Response Get Job Applications Api V1 Job Applications Get
+ *
+ * Successful Response
+ */
+export const zGetJobApplicationsResponse = z.array(zEmploymentApplicationSchema);
+
+export const zPostJobApplicationBody = zJobApplicationPost;
+
+/**
+ * Successful Response
+ */
+export const zPostJobApplicationResponse = zSuccessResponse;
+
+export const zHireEmployeeBody = zHireJobApplication;
+
+/**
+ * Successful Response
+ */
+export const zHireEmployeeResponse = zSuccessResponse;
+
+export const zGetDepartmentsQuery = z.object({
+    q: z.string().nullish()
+});
+
+/**
+ * Response Get Departments Api V1 Departments Get
+ *
+ * Successful Response
+ */
+export const zGetDepartmentsResponse = z.array(zDepartmentSchema);
+
+export const zPostDepartmentBody = zDepartmentBase;
+
+/**
+ * Successful Response
+ */
+export const zPostDepartmentResponse = zSuccessResponse;
+
+export const zGetDepartmentPath = z.object({
+    department_id: z.string()
+});
+
+/**
+ * Successful Response
+ */
+export const zGetDepartmentResponse = zDepartmentSchema;
+
+/**
+ * Response Get Positions Api V1 Positions Get
+ *
+ * Successful Response
+ */
+export const zGetPositionsResponse = z.array(zPositionSchema);
+
+export const zPostPositionBody = zPositionBase;
+
+/**
+ * Successful Response
+ */
+export const zPostPositionResponse = zSuccessResponse;
