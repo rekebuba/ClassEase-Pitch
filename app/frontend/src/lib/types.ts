@@ -66,15 +66,18 @@ export type NavBarItem = {
   search?: LinkOptions["search"];
   icon?: React.ComponentType;
   permission?: PermissionEnum;
+  items?: NavBarItem[];
 };
 
 export type NavMainItem = {
   title: string;
-  icon: React.ComponentType;
+  icon?: React.ComponentType;
   isActive?: boolean;
-  items: NavBarItem[];
+  to?: LinkOptions["to"];
+  items?: NavBarItem[];
   params?: LinkOptions["params"];
   search?: LinkOptions["search"];
+  permission?: PermissionEnum;
 };
 
 export type MainNavItem = {

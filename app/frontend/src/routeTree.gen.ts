@@ -25,6 +25,7 @@ import { Route as AuthSignUpIndexRouteImport } from './routes/auth/sign-up/index
 import { Route as DashboardEmployeesIndexRouteImport } from './routes/dashboard/employees/index'
 import { Route as DashboardEmployeesEmployeeIdRouteRouteImport } from './routes/dashboard/employees/$employeeId/route'
 import { Route as DashboardGradesIndexRouteImport } from './routes/dashboard/grades/index'
+import { Route as DashboardHrIndexRouteImport } from './routes/dashboard/hr/index'
 import { Route as DashboardManageTeachersIndexRouteImport } from './routes/dashboard/manage-teachers/index'
 import { Route as DashboardRegistrationEmployeesRouteImport } from './routes/dashboard/registration/employees'
 import { Route as DashboardRegistrationNewEmployeeRouteImport } from './routes/dashboard/registration/new-employee'
@@ -47,6 +48,15 @@ import { Route as SettingsGradingIndexRouteImport } from './routes/settings/grad
 import { Route as SettingsNotificationsIndexRouteImport } from './routes/settings/notifications/index'
 import { Route as SettingsPermissionsIndexRouteImport } from './routes/settings/permissions/index'
 import { Route as DashboardGradesGradeIdIndexRouteImport } from './routes/dashboard/grades/$gradeId/index'
+import { Route as DashboardHrAttendanceIndexRouteImport } from './routes/dashboard/hr/attendance/index'
+import { Route as DashboardHrDepartmentsIndexRouteImport } from './routes/dashboard/hr/departments/index'
+import { Route as DashboardHrDocumentsIndexRouteImport } from './routes/dashboard/hr/documents/index'
+import { Route as DashboardHrEmployeesIndexRouteImport } from './routes/dashboard/hr/employees/index'
+import { Route as DashboardHrLeaveIndexRouteImport } from './routes/dashboard/hr/leave/index'
+import { Route as DashboardHrPerformanceIndexRouteImport } from './routes/dashboard/hr/performance/index'
+import { Route as DashboardHrPositionsIndexRouteImport } from './routes/dashboard/hr/positions/index'
+import { Route as DashboardHrRecruitmentIndexRouteImport } from './routes/dashboard/hr/recruitment/index'
+import { Route as DashboardHrReportsIndexRouteImport } from './routes/dashboard/hr/reports/index'
 import { Route as DashboardStudentsStudentIdIndexRouteImport } from './routes/dashboard/students/$studentId/index'
 import { Route as DashboardSubjectsSubjectIdIndexRouteImport } from './routes/dashboard/subjects/$subjectId/index'
 import { Route as DashboardYearYearIdIndexRouteImport } from './routes/dashboard/year/$yearId/index'
@@ -54,6 +64,13 @@ import { Route as GuestApplicationsApplicationIdIndexRouteImport } from './route
 import { Route as GuestJobsPositionIdIndexRouteImport } from './routes/guest/jobs/$positionId/index'
 import { Route as GuestSchoolsSchoolSlugIndexRouteImport } from './routes/guest/schools/$schoolSlug/index'
 import { Route as DashboardEmployeesEmployeeIdProfileIndexRouteImport } from './routes/dashboard/employees/$employeeId/profile/index'
+import { Route as DashboardHrDepartmentsDepartmentIdIndexRouteImport } from './routes/dashboard/hr/departments/$departmentId/index'
+import { Route as DashboardHrEmployeesEmployeeIdIndexRouteImport } from './routes/dashboard/hr/employees/$employeeId/index'
+import { Route as DashboardHrPositionsPositionIdIndexRouteImport } from './routes/dashboard/hr/positions/$positionId/index'
+import { Route as DashboardHrRecruitmentApplicationsIndexRouteImport } from './routes/dashboard/hr/recruitment/applications/index'
+import { Route as DashboardHrRecruitmentJobsIndexRouteImport } from './routes/dashboard/hr/recruitment/jobs/index'
+import { Route as DashboardHrRecruitmentApplicationsApplicationIdIndexRouteImport } from './routes/dashboard/hr/recruitment/applications/$applicationId/index'
+import { Route as DashboardHrRecruitmentJobsJobIdIndexRouteImport } from './routes/dashboard/hr/recruitment/jobs/$jobId/index'
 import { Route as GuestSchoolsSchoolSlugPositionsPositionIdIndexRouteImport } from './routes/guest/schools/$schoolSlug/positions/$positionId/index'
 
 const IndexRoute = IndexRouteImport.update({
@@ -135,6 +152,11 @@ const DashboardEmployeesEmployeeIdRouteRoute =
 const DashboardGradesIndexRoute = DashboardGradesIndexRouteImport.update({
   id: '/grades/',
   path: '/grades/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardHrIndexRoute = DashboardHrIndexRouteImport.update({
+  id: '/hr/',
+  path: '/hr/',
   getParentRoute: () => DashboardRouteRoute,
 } as any)
 const DashboardManageTeachersIndexRoute =
@@ -256,6 +278,58 @@ const DashboardGradesGradeIdIndexRoute =
     path: '/grades/$gradeId/',
     getParentRoute: () => DashboardRouteRoute,
   } as any)
+const DashboardHrAttendanceIndexRoute =
+  DashboardHrAttendanceIndexRouteImport.update({
+    id: '/hr/attendance/',
+    path: '/hr/attendance/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardHrDepartmentsIndexRoute =
+  DashboardHrDepartmentsIndexRouteImport.update({
+    id: '/hr/departments/',
+    path: '/hr/departments/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardHrDocumentsIndexRoute =
+  DashboardHrDocumentsIndexRouteImport.update({
+    id: '/hr/documents/',
+    path: '/hr/documents/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardHrEmployeesIndexRoute =
+  DashboardHrEmployeesIndexRouteImport.update({
+    id: '/hr/employees/',
+    path: '/hr/employees/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardHrLeaveIndexRoute = DashboardHrLeaveIndexRouteImport.update({
+  id: '/hr/leave/',
+  path: '/hr/leave/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardHrPerformanceIndexRoute =
+  DashboardHrPerformanceIndexRouteImport.update({
+    id: '/hr/performance/',
+    path: '/hr/performance/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardHrPositionsIndexRoute =
+  DashboardHrPositionsIndexRouteImport.update({
+    id: '/hr/positions/',
+    path: '/hr/positions/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardHrRecruitmentIndexRoute =
+  DashboardHrRecruitmentIndexRouteImport.update({
+    id: '/hr/recruitment/',
+    path: '/hr/recruitment/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardHrReportsIndexRoute = DashboardHrReportsIndexRouteImport.update({
+  id: '/hr/reports/',
+  path: '/hr/reports/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 const DashboardStudentsStudentIdIndexRoute =
   DashboardStudentsStudentIdIndexRouteImport.update({
     id: '/students/$studentId/',
@@ -298,6 +372,48 @@ const DashboardEmployeesEmployeeIdProfileIndexRoute =
     path: '/profile/',
     getParentRoute: () => DashboardEmployeesEmployeeIdRouteRoute,
   } as any)
+const DashboardHrDepartmentsDepartmentIdIndexRoute =
+  DashboardHrDepartmentsDepartmentIdIndexRouteImport.update({
+    id: '/hr/departments/$departmentId/',
+    path: '/hr/departments/$departmentId/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardHrEmployeesEmployeeIdIndexRoute =
+  DashboardHrEmployeesEmployeeIdIndexRouteImport.update({
+    id: '/hr/employees/$employeeId/',
+    path: '/hr/employees/$employeeId/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardHrPositionsPositionIdIndexRoute =
+  DashboardHrPositionsPositionIdIndexRouteImport.update({
+    id: '/hr/positions/$positionId/',
+    path: '/hr/positions/$positionId/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardHrRecruitmentApplicationsIndexRoute =
+  DashboardHrRecruitmentApplicationsIndexRouteImport.update({
+    id: '/hr/recruitment/applications/',
+    path: '/hr/recruitment/applications/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardHrRecruitmentJobsIndexRoute =
+  DashboardHrRecruitmentJobsIndexRouteImport.update({
+    id: '/hr/recruitment/jobs/',
+    path: '/hr/recruitment/jobs/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardHrRecruitmentApplicationsApplicationIdIndexRoute =
+  DashboardHrRecruitmentApplicationsApplicationIdIndexRouteImport.update({
+    id: '/hr/recruitment/applications/$applicationId/',
+    path: '/hr/recruitment/applications/$applicationId/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
+const DashboardHrRecruitmentJobsJobIdIndexRoute =
+  DashboardHrRecruitmentJobsJobIdIndexRouteImport.update({
+    id: '/hr/recruitment/jobs/$jobId/',
+    path: '/hr/recruitment/jobs/$jobId/',
+    getParentRoute: () => DashboardRouteRoute,
+  } as any)
 const GuestSchoolsSchoolSlugPositionsPositionIdIndexRoute =
   GuestSchoolsSchoolSlugPositionsPositionIdIndexRouteImport.update({
     id: '/schools/$schoolSlug/positions/$positionId/',
@@ -326,6 +442,7 @@ export interface FileRoutesByFullPath {
   '/auth/sign-up/': typeof AuthSignUpIndexRoute
   '/dashboard/employees/': typeof DashboardEmployeesIndexRoute
   '/dashboard/grades/': typeof DashboardGradesIndexRoute
+  '/dashboard/hr/': typeof DashboardHrIndexRoute
   '/dashboard/manage-teachers/': typeof DashboardManageTeachersIndexRoute
   '/dashboard/students/': typeof DashboardStudentsIndexRoute
   '/dashboard/subjects/': typeof DashboardSubjectsIndexRoute
@@ -344,6 +461,15 @@ export interface FileRoutesByFullPath {
   '/settings/notifications/': typeof SettingsNotificationsIndexRoute
   '/settings/permissions/': typeof SettingsPermissionsIndexRoute
   '/dashboard/grades/$gradeId/': typeof DashboardGradesGradeIdIndexRoute
+  '/dashboard/hr/attendance/': typeof DashboardHrAttendanceIndexRoute
+  '/dashboard/hr/departments/': typeof DashboardHrDepartmentsIndexRoute
+  '/dashboard/hr/documents/': typeof DashboardHrDocumentsIndexRoute
+  '/dashboard/hr/employees/': typeof DashboardHrEmployeesIndexRoute
+  '/dashboard/hr/leave/': typeof DashboardHrLeaveIndexRoute
+  '/dashboard/hr/performance/': typeof DashboardHrPerformanceIndexRoute
+  '/dashboard/hr/positions/': typeof DashboardHrPositionsIndexRoute
+  '/dashboard/hr/recruitment/': typeof DashboardHrRecruitmentIndexRoute
+  '/dashboard/hr/reports/': typeof DashboardHrReportsIndexRoute
   '/dashboard/students/$studentId/': typeof DashboardStudentsStudentIdIndexRoute
   '/dashboard/subjects/$subjectId/': typeof DashboardSubjectsSubjectIdIndexRoute
   '/dashboard/year/$yearId/': typeof DashboardYearYearIdIndexRoute
@@ -351,6 +477,13 @@ export interface FileRoutesByFullPath {
   '/guest/jobs/$positionId/': typeof GuestJobsPositionIdIndexRoute
   '/guest/schools/$schoolSlug/': typeof GuestSchoolsSchoolSlugIndexRoute
   '/dashboard/employees/$employeeId/profile/': typeof DashboardEmployeesEmployeeIdProfileIndexRoute
+  '/dashboard/hr/departments/$departmentId/': typeof DashboardHrDepartmentsDepartmentIdIndexRoute
+  '/dashboard/hr/employees/$employeeId/': typeof DashboardHrEmployeesEmployeeIdIndexRoute
+  '/dashboard/hr/positions/$positionId/': typeof DashboardHrPositionsPositionIdIndexRoute
+  '/dashboard/hr/recruitment/applications/': typeof DashboardHrRecruitmentApplicationsIndexRoute
+  '/dashboard/hr/recruitment/jobs/': typeof DashboardHrRecruitmentJobsIndexRoute
+  '/dashboard/hr/recruitment/applications/$applicationId/': typeof DashboardHrRecruitmentApplicationsApplicationIdIndexRoute
+  '/dashboard/hr/recruitment/jobs/$jobId/': typeof DashboardHrRecruitmentJobsJobIdIndexRoute
   '/guest/schools/$schoolSlug/positions/$positionId/': typeof GuestSchoolsSchoolSlugPositionsPositionIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -370,6 +503,7 @@ export interface FileRoutesByTo {
   '/auth/sign-up': typeof AuthSignUpIndexRoute
   '/dashboard/employees': typeof DashboardEmployeesIndexRoute
   '/dashboard/grades': typeof DashboardGradesIndexRoute
+  '/dashboard/hr': typeof DashboardHrIndexRoute
   '/dashboard/manage-teachers': typeof DashboardManageTeachersIndexRoute
   '/dashboard/students': typeof DashboardStudentsIndexRoute
   '/dashboard/subjects': typeof DashboardSubjectsIndexRoute
@@ -388,6 +522,15 @@ export interface FileRoutesByTo {
   '/settings/notifications': typeof SettingsNotificationsIndexRoute
   '/settings/permissions': typeof SettingsPermissionsIndexRoute
   '/dashboard/grades/$gradeId': typeof DashboardGradesGradeIdIndexRoute
+  '/dashboard/hr/attendance': typeof DashboardHrAttendanceIndexRoute
+  '/dashboard/hr/departments': typeof DashboardHrDepartmentsIndexRoute
+  '/dashboard/hr/documents': typeof DashboardHrDocumentsIndexRoute
+  '/dashboard/hr/employees': typeof DashboardHrEmployeesIndexRoute
+  '/dashboard/hr/leave': typeof DashboardHrLeaveIndexRoute
+  '/dashboard/hr/performance': typeof DashboardHrPerformanceIndexRoute
+  '/dashboard/hr/positions': typeof DashboardHrPositionsIndexRoute
+  '/dashboard/hr/recruitment': typeof DashboardHrRecruitmentIndexRoute
+  '/dashboard/hr/reports': typeof DashboardHrReportsIndexRoute
   '/dashboard/students/$studentId': typeof DashboardStudentsStudentIdIndexRoute
   '/dashboard/subjects/$subjectId': typeof DashboardSubjectsSubjectIdIndexRoute
   '/dashboard/year/$yearId': typeof DashboardYearYearIdIndexRoute
@@ -395,6 +538,13 @@ export interface FileRoutesByTo {
   '/guest/jobs/$positionId': typeof GuestJobsPositionIdIndexRoute
   '/guest/schools/$schoolSlug': typeof GuestSchoolsSchoolSlugIndexRoute
   '/dashboard/employees/$employeeId/profile': typeof DashboardEmployeesEmployeeIdProfileIndexRoute
+  '/dashboard/hr/departments/$departmentId': typeof DashboardHrDepartmentsDepartmentIdIndexRoute
+  '/dashboard/hr/employees/$employeeId': typeof DashboardHrEmployeesEmployeeIdIndexRoute
+  '/dashboard/hr/positions/$positionId': typeof DashboardHrPositionsPositionIdIndexRoute
+  '/dashboard/hr/recruitment/applications': typeof DashboardHrRecruitmentApplicationsIndexRoute
+  '/dashboard/hr/recruitment/jobs': typeof DashboardHrRecruitmentJobsIndexRoute
+  '/dashboard/hr/recruitment/applications/$applicationId': typeof DashboardHrRecruitmentApplicationsApplicationIdIndexRoute
+  '/dashboard/hr/recruitment/jobs/$jobId': typeof DashboardHrRecruitmentJobsJobIdIndexRoute
   '/guest/schools/$schoolSlug/positions/$positionId': typeof GuestSchoolsSchoolSlugPositionsPositionIdIndexRoute
 }
 export interface FileRoutesById {
@@ -419,6 +569,7 @@ export interface FileRoutesById {
   '/auth/sign-up/': typeof AuthSignUpIndexRoute
   '/dashboard/employees/': typeof DashboardEmployeesIndexRoute
   '/dashboard/grades/': typeof DashboardGradesIndexRoute
+  '/dashboard/hr/': typeof DashboardHrIndexRoute
   '/dashboard/manage-teachers/': typeof DashboardManageTeachersIndexRoute
   '/dashboard/students/': typeof DashboardStudentsIndexRoute
   '/dashboard/subjects/': typeof DashboardSubjectsIndexRoute
@@ -437,6 +588,15 @@ export interface FileRoutesById {
   '/settings/notifications/': typeof SettingsNotificationsIndexRoute
   '/settings/permissions/': typeof SettingsPermissionsIndexRoute
   '/dashboard/grades/$gradeId/': typeof DashboardGradesGradeIdIndexRoute
+  '/dashboard/hr/attendance/': typeof DashboardHrAttendanceIndexRoute
+  '/dashboard/hr/departments/': typeof DashboardHrDepartmentsIndexRoute
+  '/dashboard/hr/documents/': typeof DashboardHrDocumentsIndexRoute
+  '/dashboard/hr/employees/': typeof DashboardHrEmployeesIndexRoute
+  '/dashboard/hr/leave/': typeof DashboardHrLeaveIndexRoute
+  '/dashboard/hr/performance/': typeof DashboardHrPerformanceIndexRoute
+  '/dashboard/hr/positions/': typeof DashboardHrPositionsIndexRoute
+  '/dashboard/hr/recruitment/': typeof DashboardHrRecruitmentIndexRoute
+  '/dashboard/hr/reports/': typeof DashboardHrReportsIndexRoute
   '/dashboard/students/$studentId/': typeof DashboardStudentsStudentIdIndexRoute
   '/dashboard/subjects/$subjectId/': typeof DashboardSubjectsSubjectIdIndexRoute
   '/dashboard/year/$yearId/': typeof DashboardYearYearIdIndexRoute
@@ -444,6 +604,13 @@ export interface FileRoutesById {
   '/guest/jobs/$positionId/': typeof GuestJobsPositionIdIndexRoute
   '/guest/schools/$schoolSlug/': typeof GuestSchoolsSchoolSlugIndexRoute
   '/dashboard/employees/$employeeId/profile/': typeof DashboardEmployeesEmployeeIdProfileIndexRoute
+  '/dashboard/hr/departments/$departmentId/': typeof DashboardHrDepartmentsDepartmentIdIndexRoute
+  '/dashboard/hr/employees/$employeeId/': typeof DashboardHrEmployeesEmployeeIdIndexRoute
+  '/dashboard/hr/positions/$positionId/': typeof DashboardHrPositionsPositionIdIndexRoute
+  '/dashboard/hr/recruitment/applications/': typeof DashboardHrRecruitmentApplicationsIndexRoute
+  '/dashboard/hr/recruitment/jobs/': typeof DashboardHrRecruitmentJobsIndexRoute
+  '/dashboard/hr/recruitment/applications/$applicationId/': typeof DashboardHrRecruitmentApplicationsApplicationIdIndexRoute
+  '/dashboard/hr/recruitment/jobs/$jobId/': typeof DashboardHrRecruitmentJobsJobIdIndexRoute
   '/guest/schools/$schoolSlug/positions/$positionId/': typeof GuestSchoolsSchoolSlugPositionsPositionIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -469,6 +636,7 @@ export interface FileRouteTypes {
     | '/auth/sign-up/'
     | '/dashboard/employees/'
     | '/dashboard/grades/'
+    | '/dashboard/hr/'
     | '/dashboard/manage-teachers/'
     | '/dashboard/students/'
     | '/dashboard/subjects/'
@@ -487,6 +655,15 @@ export interface FileRouteTypes {
     | '/settings/notifications/'
     | '/settings/permissions/'
     | '/dashboard/grades/$gradeId/'
+    | '/dashboard/hr/attendance/'
+    | '/dashboard/hr/departments/'
+    | '/dashboard/hr/documents/'
+    | '/dashboard/hr/employees/'
+    | '/dashboard/hr/leave/'
+    | '/dashboard/hr/performance/'
+    | '/dashboard/hr/positions/'
+    | '/dashboard/hr/recruitment/'
+    | '/dashboard/hr/reports/'
     | '/dashboard/students/$studentId/'
     | '/dashboard/subjects/$subjectId/'
     | '/dashboard/year/$yearId/'
@@ -494,6 +671,13 @@ export interface FileRouteTypes {
     | '/guest/jobs/$positionId/'
     | '/guest/schools/$schoolSlug/'
     | '/dashboard/employees/$employeeId/profile/'
+    | '/dashboard/hr/departments/$departmentId/'
+    | '/dashboard/hr/employees/$employeeId/'
+    | '/dashboard/hr/positions/$positionId/'
+    | '/dashboard/hr/recruitment/applications/'
+    | '/dashboard/hr/recruitment/jobs/'
+    | '/dashboard/hr/recruitment/applications/$applicationId/'
+    | '/dashboard/hr/recruitment/jobs/$jobId/'
     | '/guest/schools/$schoolSlug/positions/$positionId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -513,6 +697,7 @@ export interface FileRouteTypes {
     | '/auth/sign-up'
     | '/dashboard/employees'
     | '/dashboard/grades'
+    | '/dashboard/hr'
     | '/dashboard/manage-teachers'
     | '/dashboard/students'
     | '/dashboard/subjects'
@@ -531,6 +716,15 @@ export interface FileRouteTypes {
     | '/settings/notifications'
     | '/settings/permissions'
     | '/dashboard/grades/$gradeId'
+    | '/dashboard/hr/attendance'
+    | '/dashboard/hr/departments'
+    | '/dashboard/hr/documents'
+    | '/dashboard/hr/employees'
+    | '/dashboard/hr/leave'
+    | '/dashboard/hr/performance'
+    | '/dashboard/hr/positions'
+    | '/dashboard/hr/recruitment'
+    | '/dashboard/hr/reports'
     | '/dashboard/students/$studentId'
     | '/dashboard/subjects/$subjectId'
     | '/dashboard/year/$yearId'
@@ -538,6 +732,13 @@ export interface FileRouteTypes {
     | '/guest/jobs/$positionId'
     | '/guest/schools/$schoolSlug'
     | '/dashboard/employees/$employeeId/profile'
+    | '/dashboard/hr/departments/$departmentId'
+    | '/dashboard/hr/employees/$employeeId'
+    | '/dashboard/hr/positions/$positionId'
+    | '/dashboard/hr/recruitment/applications'
+    | '/dashboard/hr/recruitment/jobs'
+    | '/dashboard/hr/recruitment/applications/$applicationId'
+    | '/dashboard/hr/recruitment/jobs/$jobId'
     | '/guest/schools/$schoolSlug/positions/$positionId'
   id:
     | '__root__'
@@ -561,6 +762,7 @@ export interface FileRouteTypes {
     | '/auth/sign-up/'
     | '/dashboard/employees/'
     | '/dashboard/grades/'
+    | '/dashboard/hr/'
     | '/dashboard/manage-teachers/'
     | '/dashboard/students/'
     | '/dashboard/subjects/'
@@ -579,6 +781,15 @@ export interface FileRouteTypes {
     | '/settings/notifications/'
     | '/settings/permissions/'
     | '/dashboard/grades/$gradeId/'
+    | '/dashboard/hr/attendance/'
+    | '/dashboard/hr/departments/'
+    | '/dashboard/hr/documents/'
+    | '/dashboard/hr/employees/'
+    | '/dashboard/hr/leave/'
+    | '/dashboard/hr/performance/'
+    | '/dashboard/hr/positions/'
+    | '/dashboard/hr/recruitment/'
+    | '/dashboard/hr/reports/'
     | '/dashboard/students/$studentId/'
     | '/dashboard/subjects/$subjectId/'
     | '/dashboard/year/$yearId/'
@@ -586,6 +797,13 @@ export interface FileRouteTypes {
     | '/guest/jobs/$positionId/'
     | '/guest/schools/$schoolSlug/'
     | '/dashboard/employees/$employeeId/profile/'
+    | '/dashboard/hr/departments/$departmentId/'
+    | '/dashboard/hr/employees/$employeeId/'
+    | '/dashboard/hr/positions/$positionId/'
+    | '/dashboard/hr/recruitment/applications/'
+    | '/dashboard/hr/recruitment/jobs/'
+    | '/dashboard/hr/recruitment/applications/$applicationId/'
+    | '/dashboard/hr/recruitment/jobs/$jobId/'
     | '/guest/schools/$schoolSlug/positions/$positionId/'
   fileRoutesById: FileRoutesById
 }
@@ -711,6 +929,13 @@ declare module '@tanstack/react-router' {
       path: '/grades'
       fullPath: '/dashboard/grades/'
       preLoaderRoute: typeof DashboardGradesIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/hr/': {
+      id: '/dashboard/hr/'
+      path: '/hr'
+      fullPath: '/dashboard/hr/'
+      preLoaderRoute: typeof DashboardHrIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
     '/dashboard/manage-teachers/': {
@@ -867,6 +1092,69 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardGradesGradeIdIndexRouteImport
       parentRoute: typeof DashboardRouteRoute
     }
+    '/dashboard/hr/attendance/': {
+      id: '/dashboard/hr/attendance/'
+      path: '/hr/attendance'
+      fullPath: '/dashboard/hr/attendance/'
+      preLoaderRoute: typeof DashboardHrAttendanceIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/hr/departments/': {
+      id: '/dashboard/hr/departments/'
+      path: '/hr/departments'
+      fullPath: '/dashboard/hr/departments/'
+      preLoaderRoute: typeof DashboardHrDepartmentsIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/hr/documents/': {
+      id: '/dashboard/hr/documents/'
+      path: '/hr/documents'
+      fullPath: '/dashboard/hr/documents/'
+      preLoaderRoute: typeof DashboardHrDocumentsIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/hr/employees/': {
+      id: '/dashboard/hr/employees/'
+      path: '/hr/employees'
+      fullPath: '/dashboard/hr/employees/'
+      preLoaderRoute: typeof DashboardHrEmployeesIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/hr/leave/': {
+      id: '/dashboard/hr/leave/'
+      path: '/hr/leave'
+      fullPath: '/dashboard/hr/leave/'
+      preLoaderRoute: typeof DashboardHrLeaveIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/hr/performance/': {
+      id: '/dashboard/hr/performance/'
+      path: '/hr/performance'
+      fullPath: '/dashboard/hr/performance/'
+      preLoaderRoute: typeof DashboardHrPerformanceIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/hr/positions/': {
+      id: '/dashboard/hr/positions/'
+      path: '/hr/positions'
+      fullPath: '/dashboard/hr/positions/'
+      preLoaderRoute: typeof DashboardHrPositionsIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/hr/recruitment/': {
+      id: '/dashboard/hr/recruitment/'
+      path: '/hr/recruitment'
+      fullPath: '/dashboard/hr/recruitment/'
+      preLoaderRoute: typeof DashboardHrRecruitmentIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/hr/reports/': {
+      id: '/dashboard/hr/reports/'
+      path: '/hr/reports'
+      fullPath: '/dashboard/hr/reports/'
+      preLoaderRoute: typeof DashboardHrReportsIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
     '/dashboard/students/$studentId/': {
       id: '/dashboard/students/$studentId/'
       path: '/students/$studentId'
@@ -915,6 +1203,55 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/employees/$employeeId/profile/'
       preLoaderRoute: typeof DashboardEmployeesEmployeeIdProfileIndexRouteImport
       parentRoute: typeof DashboardEmployeesEmployeeIdRouteRoute
+    }
+    '/dashboard/hr/departments/$departmentId/': {
+      id: '/dashboard/hr/departments/$departmentId/'
+      path: '/hr/departments/$departmentId'
+      fullPath: '/dashboard/hr/departments/$departmentId/'
+      preLoaderRoute: typeof DashboardHrDepartmentsDepartmentIdIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/hr/employees/$employeeId/': {
+      id: '/dashboard/hr/employees/$employeeId/'
+      path: '/hr/employees/$employeeId'
+      fullPath: '/dashboard/hr/employees/$employeeId/'
+      preLoaderRoute: typeof DashboardHrEmployeesEmployeeIdIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/hr/positions/$positionId/': {
+      id: '/dashboard/hr/positions/$positionId/'
+      path: '/hr/positions/$positionId'
+      fullPath: '/dashboard/hr/positions/$positionId/'
+      preLoaderRoute: typeof DashboardHrPositionsPositionIdIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/hr/recruitment/applications/': {
+      id: '/dashboard/hr/recruitment/applications/'
+      path: '/hr/recruitment/applications'
+      fullPath: '/dashboard/hr/recruitment/applications/'
+      preLoaderRoute: typeof DashboardHrRecruitmentApplicationsIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/hr/recruitment/jobs/': {
+      id: '/dashboard/hr/recruitment/jobs/'
+      path: '/hr/recruitment/jobs'
+      fullPath: '/dashboard/hr/recruitment/jobs/'
+      preLoaderRoute: typeof DashboardHrRecruitmentJobsIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/hr/recruitment/applications/$applicationId/': {
+      id: '/dashboard/hr/recruitment/applications/$applicationId/'
+      path: '/hr/recruitment/applications/$applicationId'
+      fullPath: '/dashboard/hr/recruitment/applications/$applicationId/'
+      preLoaderRoute: typeof DashboardHrRecruitmentApplicationsApplicationIdIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/hr/recruitment/jobs/$jobId/': {
+      id: '/dashboard/hr/recruitment/jobs/$jobId/'
+      path: '/hr/recruitment/jobs/$jobId'
+      fullPath: '/dashboard/hr/recruitment/jobs/$jobId/'
+      preLoaderRoute: typeof DashboardHrRecruitmentJobsJobIdIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
     }
     '/guest/schools/$schoolSlug/positions/$positionId/': {
       id: '/guest/schools/$schoolSlug/positions/$positionId/'
@@ -967,14 +1304,31 @@ interface DashboardRouteRouteChildren {
   DashboardRegistrationStudentsRoute: typeof DashboardRegistrationStudentsRoute
   DashboardEmployeesIndexRoute: typeof DashboardEmployeesIndexRoute
   DashboardGradesIndexRoute: typeof DashboardGradesIndexRoute
+  DashboardHrIndexRoute: typeof DashboardHrIndexRoute
   DashboardManageTeachersIndexRoute: typeof DashboardManageTeachersIndexRoute
   DashboardStudentsIndexRoute: typeof DashboardStudentsIndexRoute
   DashboardSubjectsIndexRoute: typeof DashboardSubjectsIndexRoute
   DashboardYearIndexRoute: typeof DashboardYearIndexRoute
   DashboardGradesGradeIdIndexRoute: typeof DashboardGradesGradeIdIndexRoute
+  DashboardHrAttendanceIndexRoute: typeof DashboardHrAttendanceIndexRoute
+  DashboardHrDepartmentsIndexRoute: typeof DashboardHrDepartmentsIndexRoute
+  DashboardHrDocumentsIndexRoute: typeof DashboardHrDocumentsIndexRoute
+  DashboardHrEmployeesIndexRoute: typeof DashboardHrEmployeesIndexRoute
+  DashboardHrLeaveIndexRoute: typeof DashboardHrLeaveIndexRoute
+  DashboardHrPerformanceIndexRoute: typeof DashboardHrPerformanceIndexRoute
+  DashboardHrPositionsIndexRoute: typeof DashboardHrPositionsIndexRoute
+  DashboardHrRecruitmentIndexRoute: typeof DashboardHrRecruitmentIndexRoute
+  DashboardHrReportsIndexRoute: typeof DashboardHrReportsIndexRoute
   DashboardStudentsStudentIdIndexRoute: typeof DashboardStudentsStudentIdIndexRoute
   DashboardSubjectsSubjectIdIndexRoute: typeof DashboardSubjectsSubjectIdIndexRoute
   DashboardYearYearIdIndexRoute: typeof DashboardYearYearIdIndexRoute
+  DashboardHrDepartmentsDepartmentIdIndexRoute: typeof DashboardHrDepartmentsDepartmentIdIndexRoute
+  DashboardHrEmployeesEmployeeIdIndexRoute: typeof DashboardHrEmployeesEmployeeIdIndexRoute
+  DashboardHrPositionsPositionIdIndexRoute: typeof DashboardHrPositionsPositionIdIndexRoute
+  DashboardHrRecruitmentApplicationsIndexRoute: typeof DashboardHrRecruitmentApplicationsIndexRoute
+  DashboardHrRecruitmentJobsIndexRoute: typeof DashboardHrRecruitmentJobsIndexRoute
+  DashboardHrRecruitmentApplicationsApplicationIdIndexRoute: typeof DashboardHrRecruitmentApplicationsApplicationIdIndexRoute
+  DashboardHrRecruitmentJobsJobIdIndexRoute: typeof DashboardHrRecruitmentJobsJobIdIndexRoute
 }
 
 const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
@@ -988,14 +1342,37 @@ const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
   DashboardRegistrationStudentsRoute: DashboardRegistrationStudentsRoute,
   DashboardEmployeesIndexRoute: DashboardEmployeesIndexRoute,
   DashboardGradesIndexRoute: DashboardGradesIndexRoute,
+  DashboardHrIndexRoute: DashboardHrIndexRoute,
   DashboardManageTeachersIndexRoute: DashboardManageTeachersIndexRoute,
   DashboardStudentsIndexRoute: DashboardStudentsIndexRoute,
   DashboardSubjectsIndexRoute: DashboardSubjectsIndexRoute,
   DashboardYearIndexRoute: DashboardYearIndexRoute,
   DashboardGradesGradeIdIndexRoute: DashboardGradesGradeIdIndexRoute,
+  DashboardHrAttendanceIndexRoute: DashboardHrAttendanceIndexRoute,
+  DashboardHrDepartmentsIndexRoute: DashboardHrDepartmentsIndexRoute,
+  DashboardHrDocumentsIndexRoute: DashboardHrDocumentsIndexRoute,
+  DashboardHrEmployeesIndexRoute: DashboardHrEmployeesIndexRoute,
+  DashboardHrLeaveIndexRoute: DashboardHrLeaveIndexRoute,
+  DashboardHrPerformanceIndexRoute: DashboardHrPerformanceIndexRoute,
+  DashboardHrPositionsIndexRoute: DashboardHrPositionsIndexRoute,
+  DashboardHrRecruitmentIndexRoute: DashboardHrRecruitmentIndexRoute,
+  DashboardHrReportsIndexRoute: DashboardHrReportsIndexRoute,
   DashboardStudentsStudentIdIndexRoute: DashboardStudentsStudentIdIndexRoute,
   DashboardSubjectsSubjectIdIndexRoute: DashboardSubjectsSubjectIdIndexRoute,
   DashboardYearYearIdIndexRoute: DashboardYearYearIdIndexRoute,
+  DashboardHrDepartmentsDepartmentIdIndexRoute:
+    DashboardHrDepartmentsDepartmentIdIndexRoute,
+  DashboardHrEmployeesEmployeeIdIndexRoute:
+    DashboardHrEmployeesEmployeeIdIndexRoute,
+  DashboardHrPositionsPositionIdIndexRoute:
+    DashboardHrPositionsPositionIdIndexRoute,
+  DashboardHrRecruitmentApplicationsIndexRoute:
+    DashboardHrRecruitmentApplicationsIndexRoute,
+  DashboardHrRecruitmentJobsIndexRoute: DashboardHrRecruitmentJobsIndexRoute,
+  DashboardHrRecruitmentApplicationsApplicationIdIndexRoute:
+    DashboardHrRecruitmentApplicationsApplicationIdIndexRoute,
+  DashboardHrRecruitmentJobsJobIdIndexRoute:
+    DashboardHrRecruitmentJobsJobIdIndexRoute,
 }
 
 const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(

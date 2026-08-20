@@ -2,27 +2,18 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import {
   BadgeCheck,
-  BarChart3,
   Bell,
-  BookOpen,
-  Calendar,
   ChevronsUpDown,
-  Clock,
-  Cog,
   CreditCard,
-  DollarSign,
-  FileText,
   GraduationCap,
-  Layers,
-  MessageSquare,
   Sparkles,
-  Users,
 } from "lucide-react";
 
 import { getLoggedInUserOptions } from "@/client/@tanstack/react-query.gen";
 import { Logout } from "@/components";
 import { usePermissions } from "@/components/auth/permission-provider";
 import FadeIn from "@/components/fade-in";
+import { filterNavigation, navigation } from "@/components/layout/sidebar/navigation";
 import { NavMain } from "@/components/nav-main";
 import { NavSidebar } from "@/components/nav-sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -47,76 +38,10 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Permission } from "@/lib/permissions";
 
 import type { CurrentUserInfo, PermissionEnum } from "@/client/types.gen";
-import type { MainNavItem } from "@/lib/types";
-
-const navigation: MainNavItem = {
-  navBar: [
-    { title: "Academics", icon: BookOpen, to: "/dashboard/year", permission: Permission["years:read"] },
-    { title: "Attendance", icon: Clock, to: "/dashboard" },
-    { title: "Analytics", icon: BarChart3, to: "/dashboard" },
-    { title: "Communication", icon: MessageSquare, to: "/dashboard" },
-    { title: "Finance", icon: DollarSign, to: "/dashboard" },
-    { title: "Resources", icon: Layers, to: "/dashboard" },
-    { title: "Settings", icon: Cog, to: "/settings" },
-  ],
-  navMain: [
-    {
-      title: "People",
-      icon: Users,
-      isActive: true,
-      items: [
-        { title: "Students", to: "/dashboard/students", permission: Permission["students:read"] },
-        { title: "Teachers", to: "/dashboard/manage-teachers", permission: Permission["teachers:assign"] },
-        { title: "Users", to: "/dashboard" },
-      ],
-    },
-    {
-      title: "Registration",
-      icon: GraduationCap,
-      items: [
-        { title: "Student Registration", to: "/dashboard/registration/students", permission: Permission["students:write"] },
-        { title: "Employee Registration", to: "/dashboard/registration/employees", permission: Permission["employees:write"] },
-      ],
-    },
-    {
-      title: "Calendar",
-      icon: Calendar,
-      items: [{ title: "Events", to: "/dashboard" }],
-    },
-    {
-      title: "Assessments",
-      icon: FileText,
-      items: [{ title: "Mark List", to: "/dashboard" }],
-    },
-    {
-      title: "Setup",
-      icon: Cog,
-      items: [
-        { title: "Academic Year", to: "/dashboard/year", permission: Permission["years:read"] },
-        { title: "Subjects", to: "/dashboard/subjects", permission: Permission["subjects:read"] },
-        { title: "Grades", to: "/dashboard/grades", permission: Permission["grades:read"] },
-      ],
-    },
-  ],
-};
 
 type AppSidebarProps = React.ComponentProps<typeof Sidebar>;
-
-function filterNavigation(items: MainNavItem, canAccess: (permission?: PermissionEnum) => boolean): MainNavItem {
-  return {
-    navBar: items.navBar.filter(item => canAccess(item.permission)),
-    navMain: items.navMain
-      .map(group => ({
-        ...group,
-        items: group.items.filter(item => canAccess(item.permission)),
-      }))
-      .filter(group => group.items.length > 0),
-  };
-}
-
 export default function AppSidebar({ ...props }: AppSidebarProps) {
   const { hasPermission } = usePermissions();
   const { data: currentUserInfo, isLoading } = useQuery(getLoggedInUserOptions());
