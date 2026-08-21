@@ -1,4 +1,5 @@
 import os
+import uuid
 import warnings
 from datetime import date
 from functools import lru_cache
@@ -54,8 +55,6 @@ class Settings(BaseSettings):
     GOOGLE_CLIENT_SECRET: str
 
     PROJECT_NAME: str
-    LEGACY_SCHOOL_NAME: str = "ClassEase Legacy School"
-    LEGACY_SCHOOL_SLUG: str = "legacy"
 
     FIRST_SUPERUSER: str
     FIRST_SUPERUSER_PASSWORD: SecretStr
@@ -74,10 +73,17 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: SecretStr
     POSTGRES_DB: str
 
+    POSTGRES_SYSTEM_ROLE: str
+    POSTGRES_SYSTEM_PASS: SecretStr
+
     REDIS_SERVER: str
     REDIS_PORT: int
     REDIS_USER: str
     REDIS_PASSWORD: SecretStr | None = None
+
+    SYSTEM_SCHOOL_NAME: str
+    SYSTEM_SCHOOL_SLUG: str
+    SYSTEM_SCHOOL_ID: uuid.UUID
 
     @computed_field
     @property
@@ -93,26 +99,32 @@ class Settings(BaseSettings):
 
     @computed_field
     @property
+    def SQLALCHEMY_POSTGRES_DATABASE_SYSTEM_URI(self) -> PostgresDsn:
+        return PostgresDsn.build(
+            scheme="postgresql+asyncpg",
+            username=self.POSTGRES_SYSTEM_ROLE,
+            password=self.POSTGRES_SYSTEM_PASS.get_secret_value(),
+            host=self.POSTGRES_SERVER,
+            port=self.POSTGRES_PORT,
+            path=self.POSTGRES_DB,
+        )
+
+    @computed_field
+    @property
     def REDIS_URL(self) -> RedisDsn:
         return RedisDsn.build(
             scheme="redis",
-            password=(
-                self.REDIS_PASSWORD.get_secret_value() if self.REDIS_PASSWORD else None
-            ),
+            password=(self.REDIS_PASSWORD.get_secret_value() if self.REDIS_PASSWORD else None),
             host=self.REDIS_SERVER,
             port=self.REDIS_PORT,
         )
 
-    BACKEND_CORS_ORIGINS: Annotated[
-        list[AnyUrl] | str, BeforeValidator(parse_cors)
-    ] = []
+    BACKEND_CORS_ORIGINS: Annotated[list[AnyUrl] | str, BeforeValidator(parse_cors)] = []
 
     @computed_field
     @property
     def all_cors_origins(self) -> list[str]:
-        return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS] + [
-            self.FRONTEND_HOST
-        ]
+        return [str(origin).rstrip("/") for origin in self.BACKEND_CORS_ORIGINS] + [self.FRONTEND_HOST]
 
     SMTP_TLS: bool = True
     SMTP_SSL: bool = False
@@ -138,8 +150,7 @@ class Settings(BaseSettings):
     def _check_default_secret(self, var_name: str, value: SecretStr | None) -> None:
         if value == "changethis":
             message = (
-                f'The value of {var_name} is "changethis", '
-                "for security, please change it, at least for deployments."
+                f'The value of {var_name} is "changethis", for security, please change it, at least for deployments.'
             )
             if self.ENVIRONMENT == "development":
                 warnings.warn(message, stacklevel=1)
@@ -149,9 +160,7 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def _enforce_non_default_secrets(self) -> Self:
         self._check_default_secret("SECRET_KEY", self.SECRET_KEY)
-        self._check_default_secret(
-            "FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD
-        )
+        self._check_default_secret("FIRST_SUPERUSER_PASSWORD", self.FIRST_SUPERUSER_PASSWORD)
 
         return self
 
@@ -183,6 +192,21 @@ class ProdSettings(Settings):
             )
         else:
             return f"postgresql+asyncpg://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD.get_secret_value()}@/{self.POSTGRES_DB}?host=/cloudsql/{self.POSTGRES_SERVER}"
+
+    @computed_field
+    @property
+    def SQLALCHEMY_POSTGRES_DATABASE_SYSTEM_URI(self) -> str | PostgresDsn:
+        if self.PROD_TEST:
+            return PostgresDsn.build(
+                scheme="postgresql+asyncpg",
+                username=self.POSTGRES_SYSTEM_ROLE,
+                password=self.POSTGRES_SYSTEM_PASS.get_secret_value(),
+                host=self.POSTGRES_SERVER,
+                port=self.POSTGRES_PORT,
+                path=self.POSTGRES_DB,
+            )
+        else:
+            return f"postgresql+asyncpg://{self.POSTGRES_SYSTEM_ROLE}:{self.POSTGRES_SYSTEM_PASS.get_secret_value()}@/{self.POSTGRES_DB}?host=/cloudsql/{self.POSTGRES_SERVER}"
 
 
 @lru_cache

@@ -1,8 +1,10 @@
 import logging
 
-from sqlalchemy import Engine, text
-from src.project.core.db import engine
+from sqlalchemy import text
+from sqlalchemy.engine import Engine
 from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixed
+
+from project.core.db import system_engine as engine
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -19,12 +21,11 @@ wait_seconds = 1
 )
 def init(db_engine: Engine) -> None:
     try:
-        # Try to create session to check if DB is awake
         with db_engine.connect() as conn:
             conn.execute(text("SELECT 1"))
     except Exception as e:
         logger.error(e)
-        raise e
+        raise
 
 
 def main() -> None:

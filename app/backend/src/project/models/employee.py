@@ -7,159 +7,117 @@ from sqlalchemy import (
     CheckConstraint,
     Date,
     Enum,
-    Float,
-    ForeignKey,
-    Integer,
+    ForeignKeyConstraint,
+    Index,
     String,
-    Text,
+    UniqueConstraint,
+    text,
 )
-from sqlalchemy.ext.associationproxy import AssociationProxy, association_proxy
-from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
 from project.models.base.school_mixin import SchoolScopedMixin
-from project.models.grade import Grade
-from project.models.teacher_record import TeacherRecord
-from project.utils.enum import (
-    EmployeeApplicationStatusEnum,
-    EmployeePositionEnum,
-    ExperienceYearEnum,
-    GenderEnum,
-    HighestEducationEnum,
-)
-from project.utils.utils import sort_grade_key
+from project.utils.enum import EmploymentStatusEnum, EmploymentTypeEnum
 
 if TYPE_CHECKING:
+    from project.models.class_section import ClassSection
+    from project.models.department import Department
+    from project.models.employee_position import EmployeePosition
+    from project.models.employment_contract import EmploymentContract
+    from project.models.payroll_entry import PayrollEntry
+    from project.models.payroll_profile import PayrollProfile
+    from project.models.payroll_run import PayrollRun
     from project.models.school import School
     from project.models.school_membership import SchoolMembership
-    from project.models.subject import Subject
-    from project.models.user import User
-    from project.models.year import Year
+    from project.models.teacher_profile import TeacherProfile
 
 
 class Employee(SchoolScopedMixin, BaseModel):
-    """
-    This model represents an employee in the ClassEase system.
-    It inherits from BaseModel and Base.
-    """
-
     __tablename__ = "employees"
 
-    first_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    father_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    grand_father_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    date_of_birth: Mapped[date] = mapped_column(Date, nullable=False)
-    gender: Mapped[GenderEnum] = mapped_column(
+    employee_number: Mapped[str] = mapped_column(String(50), nullable=False)
+    hire_date: Mapped[date] = mapped_column(Date, nullable=False)
+    user_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(),
+        nullable=True,
+        default=None,
+    )
+    employment_status: Mapped[EmploymentStatusEnum] = mapped_column(
         Enum(
-            GenderEnum,
-            name="gender_enum",
+            EmploymentStatusEnum,
+            name="employment_status_enum",
             values_callable=lambda x: [e.value for e in x],
             native_enum=False,
         ),
         nullable=False,
+        default=EmploymentStatusEnum.ACTIVE,
     )
-    nationality: Mapped[str] = mapped_column(String(50), nullable=False)
-    social_security_number: Mapped[str] = mapped_column(String(50), nullable=False)
-
-    # Contact Information
-    city: Mapped[str] = mapped_column(String(50), nullable=False)
-    state: Mapped[str] = mapped_column(String(50), nullable=False)
-    country: Mapped[str] = mapped_column(String(50), nullable=False)
-
-    # Emergency Contact
-    emergency_contact_name: Mapped[str] = mapped_column(String(50), nullable=False)
-    emergency_contact_relation: Mapped[str] = mapped_column(String(50), nullable=False)
-    emergency_contact_phone: Mapped[str] = mapped_column(String(50), nullable=False)
-
-    # Educational Background
-    highest_education: Mapped[HighestEducationEnum] = mapped_column(
+    employment_type: Mapped[EmploymentTypeEnum] = mapped_column(
         Enum(
-            HighestEducationEnum,
-            name="highest_education_enum",
-            values_callable=lambda x: [e.value for e in x],
-            native_enum=False,
-        ),
-    )
-    university: Mapped[str] = mapped_column(String(50), nullable=False)
-    graduation_year: Mapped[int] = mapped_column(Integer, nullable=False)
-    gpa: Mapped[float] = mapped_column(Float, nullable=False)
-
-    position: Mapped[EmployeePositionEnum] = mapped_column(
-        Enum(
-            EmployeePositionEnum,
-            name="employee_position_enum",
-            values_callable=lambda x: [e.value for e in x],
-            native_enum=False,
-        ),
-    )
-    years_of_experience: Mapped[ExperienceYearEnum] = mapped_column(
-        Enum(
-            ExperienceYearEnum,
-            name="experience_year_enum",
+            EmploymentTypeEnum,
+            name="employment_type_enum",
             values_callable=lambda x: [e.value for e in x],
             native_enum=False,
         ),
         nullable=False,
+        default=EmploymentTypeEnum.FULL_TIME,
     )
-
-    secondary_phone: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-
-    certifications: Mapped[Optional[str]] = mapped_column(
-        Text, nullable=True, default=None
-    )
-
-    resume: Mapped[Optional[str]] = mapped_column(
-        String(50), nullable=True, default=None
-    )
-
-    user_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(),
-        ForeignKey("users.id", ondelete="CASCADE"),
+    termination_date: Mapped[Optional[date]] = mapped_column(
+        Date,
         nullable=True,
         default=None,
     )
-    school_membership_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+    manager_employee_id: Mapped[Optional[uuid.UUID]] = mapped_column(
         UUID(),
-        ForeignKey("school_memberships.id", ondelete="SET NULL"),
         nullable=True,
         default=None,
     )
-    subject_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        UUID(),
-        ForeignKey("subjects.id", ondelete="SET NULL"),
+    work_email: Mapped[Optional[str]] = mapped_column(
+        String(120),
         nullable=True,
         default=None,
-    )  # For Teaching positions
-    status: Mapped[EmployeeApplicationStatusEnum] = mapped_column(
-        Enum(
-            EmployeeApplicationStatusEnum,
-            name="status_enum",
-            values_callable=lambda x: [e.value for e in x],
-            native_enum=False,
+    )
+    work_phone: Mapped[Optional[str]] = mapped_column(
+        String(50),
+        nullable=True,
+        default=None,
+    )
+
+    __table_args__ = (
+        UniqueConstraint("id", "school_id", name="uq_employee_id_school_id"),
+        UniqueConstraint(
+            "school_id",
+            "employee_number",
+            name="uq_employee_school_employee_number",
         ),
-        nullable=False,
-        default=EmployeeApplicationStatusEnum.PENDING,
+        CheckConstraint(
+            "termination_date IS NULL OR termination_date >= hire_date",
+            name="check_employee_dates",
+        ),
+        CheckConstraint(
+            "manager_employee_id IS NULL OR manager_employee_id <> id",
+            name="check_employee_not_self_manager",
+        ),
+        ForeignKeyConstraint(
+            ["user_id", "school_id"],
+            ["school_memberships.user_id", "school_memberships.school_id"],
+            name="fk_employees_membership_school",
+        ),
+        ForeignKeyConstraint(
+            ["manager_employee_id", "school_id"],
+            ["employees.id", "employees.school_id"],
+            name="fk_employee_manager_school",
+            ondelete="SET NULL",
+        ),
+        Index(
+            "uq_employee_school_user_when_present",
+            "school_id",
+            "user_id",
+            unique=True,
+            postgresql_where=text("user_id IS NOT NULL"),
+        ),
     )
 
-    @hybrid_property
-    def full_name(self):
-        return self.first_name + " " + self.father_name + " " + self.grand_father_name
-
-    @full_name.expression
-    def full_name(cls):
-        return cls.first_name + " " + cls.father_name + " " + cls.grand_father_name
-
-    # Relationship with Default
-    user: Mapped[Optional["User"]] = relationship(
-        "User",
-        back_populates="employee_profiles",
-        init=False,
-        repr=False,
-        passive_deletes=True,
-    )
     membership: Mapped[Optional["SchoolMembership"]] = relationship(
         "SchoolMembership",
         back_populates="employee_profiles",
@@ -173,69 +131,82 @@ class Employee(SchoolScopedMixin, BaseModel):
         init=False,
         repr=False,
         passive_deletes=True,
+        overlaps="membership",
     )
-
-    years: Mapped[List["Year"]] = relationship(
-        "Year",
-        secondary="employee_year_links",
-        back_populates="employees",
+    manager: Mapped[Optional["Employee"]] = relationship(
+        "Employee",
+        foreign_keys=[manager_employee_id],
+        remote_side="Employee.id",
+        back_populates="direct_reports",
+        init=False,
+        repr=False,
+        passive_deletes=True,
+    )
+    direct_reports: Mapped[List["Employee"]] = relationship(
+        "Employee",
+        foreign_keys=[manager_employee_id],
+        back_populates="manager",
         default_factory=list,
         repr=False,
         passive_deletes=True,
     )
-
-    # One-To-Many Relationships
-    teacher_records: Mapped[List["TeacherRecord"]] = relationship(
-        "TeacherRecord",
+    employee_positions: Mapped[List["EmployeePosition"]] = relationship(
+        "EmployeePosition",
         back_populates="employee",
         default_factory=list,
         repr=False,
         passive_deletes=True,
     )
-
-    subject: Mapped[Optional["Subject"]] = relationship(
-        "Subject",
-        back_populates="teachers",
+    teacher_profile: Mapped[Optional["TeacherProfile"]] = relationship(
+        "TeacherProfile",
+        back_populates="employee",
         init=False,
         repr=False,
         passive_deletes=True,
     )
-
-    _subjects: AssociationProxy[List["Subject"]] = association_proxy(
-        "teacher_records",
-        "subject",
-        default_factory=list,
+    payroll_profile: Mapped[Optional["PayrollProfile"]] = relationship(
+        "PayrollProfile",
+        back_populates="employee",
+        init=False,
+        repr=False,
+        passive_deletes=True,
     )
-
-    @property
-    def subjects(self) -> List["Subject"]:
-        """Return unique, non-null subjects."""
-        seen = set()
-        result = []
-        for s in self._subjects:
-            if s is not None and s.id not in seen and s.id != self.subject_id:
-                seen.add(s.id)
-                result.append(s)
-
-        return sorted(result, key=lambda x: x.name)
-
-    _grades: AssociationProxy[List["Grade"]] = association_proxy(
-        "teacher_records",
-        "grade",
+    payroll_entries: Mapped[List["PayrollEntry"]] = relationship(
+        "PayrollEntry",
+        back_populates="employee",
         default_factory=list,
+        repr=False,
+        passive_deletes=True,
     )
-
-    @property
-    def grades(self) -> List["Grade"]:
-        """Return unique grades that have streams assigned to this subject."""
-        seen = set()
-        result = []
-        for g in self._grades:
-            if g is not None and g.id not in seen:
-                seen.add(g.id)
-                result.append(g)
-        return sorted(result, key=sort_grade_key)
-
-    __table_args__ = (
-        CheckConstraint("gpa >= 0.0 AND gpa <= 4.0", name="check_employee_gpa_range"),
+    processed_payroll_runs: Mapped[List["PayrollRun"]] = relationship(
+        "PayrollRun",
+        foreign_keys="PayrollRun.processed_by",
+        back_populates="processor",
+        default_factory=list,
+        repr=False,
+        passive_deletes=True,
+    )
+    employment_contracts: Mapped[List["EmploymentContract"]] = relationship(
+        "EmploymentContract",
+        back_populates="employee",
+        default_factory=list,
+        repr=False,
+        passive_deletes=True,
+    )
+    headed_departments: Mapped[List["Department"]] = relationship(
+        "Department",
+        foreign_keys="Department.head_employee_id",
+        back_populates="head_employee",
+        default_factory=list,
+        repr=False,
+        passive_deletes=True,
+    )
+    homeroom_for_sections: Mapped[List["ClassSection"]] = relationship(
+        "ClassSection",
+        secondary="teacher_profiles",
+        primaryjoin="Employee.id == TeacherProfile.employee_id",
+        secondaryjoin="TeacherProfile.id == ClassSection.homeroom_teacher_id",
+        viewonly=True,
+        default_factory=list,
+        repr=False,
     )

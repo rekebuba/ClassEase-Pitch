@@ -27,12 +27,8 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     redirect_slashes=False,
-    docs_url=None
-    if settings.ENVIRONMENT == "production"
-    else f"{settings.API_V1_STR}/docs",
-    redoc_url=None
-    if settings.ENVIRONMENT == "production"
-    else f"{settings.API_V1_STR}/redoc",
+    docs_url=None if settings.ENVIRONMENT == "production" else f"{settings.API_V1_STR}/docs",
+    redoc_url=None if settings.ENVIRONMENT == "production" else f"{settings.API_V1_STR}/redoc",
 )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
@@ -79,9 +75,7 @@ use_route_names_as_operation_ids(app)
 
 
 @app.exception_handler(ResponseValidationError)
-async def validation_exception_handler(
-    request: Request, exc: ResponseValidationError
-) -> JSONResponse:
+async def validation_exception_handler(request: Request, exc: ResponseValidationError) -> JSONResponse:
     logger.exception(
         "Response validation failed | path=%s | method=%s | errors=%s | body=%s",
         request.url.path,
@@ -92,7 +86,5 @@ async def validation_exception_handler(
 
     return JSONResponse(
         status_code=500,
-        content={
-            "message": "Internal server error due to response validation failure."
-        },
+        content={"message": "Internal server error due to response validation failure."},
     )

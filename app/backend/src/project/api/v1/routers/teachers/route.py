@@ -1,235 +1,269 @@
+import uuid
 from typing import Annotated, List, Sequence
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, status
 from sqlalchemy import select
-from sqlalchemy.orm import (
-    joinedload,
-    with_loader_criteria,
-)
+from sqlalchemy.orm import selectinload
 
-from project.api.v1.routers.dependencies import SessionDep, admin_route
+from project.api.v1.routers.dependencies import (
+    AuthenticatedRoute,
+    SessionDep,
+)
 from project.api.v1.routers.teachers.schema import (
     AssignTeacher,
+    CreateTeacherProfile,
     TeacherBasicInfo,
+    TeacherProfileUpdate,
     TeachersQuery,
 )
-from project.models.academic_term import AcademicTerm
+from project.models import SchoolMembership
+from project.models.class_section import ClassSection
 from project.models.employee import Employee
-from project.models.grade import Grade
-from project.models.grade_stream_subject import GradeStreamSubject
-from project.models.section import Section
-from project.models.stream import Stream
-from project.models.teacher_record import TeacherRecord
-from project.models.teacher_record_link import TeacherRecordLink
+from project.models.subject import Subject
+from project.models.teacher_profile import TeacherProfile
+from project.models.teacher_subject import TeacherSubject
+from project.models.teaching_assignment import TeachingAssignment
 from project.models.year import Year
-from project.schema.schema import SuccessResponseSchema
-from project.utils.enum import EmployeePositionEnum
+from project.schema.schema import SuccessResponse, SuccessResponseSchema
+from project.utils.enum import PermissionEnum
 
-router = APIRouter(prefix="/teachers", tags=["Teachers"])
+router = APIRouter()
 
 
-@router.get("", response_model=List[TeacherBasicInfo])
+@router.get("/teachers", response_model=List[TeacherBasicInfo])
 async def get_teachers(
     session: SessionDep,
-    user_in: admin_route,
+    user_in: AuthenticatedRoute,
     q: Annotated[TeachersQuery, Query()],
-) -> Sequence[Employee]:
-    """This endpoint will return employees based on the provided filters."""
-    if (
-        await session.execute(select(Year).where(Year.id == q.year_id))
-    ).scalar_one_or_none() is None:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Year with ID {q.year_id} not found.",
+) -> Sequence[TeacherBasicInfo]:
+    school_id = user_in.membership.school_id
+    stmt = (
+        select(TeacherProfile)
+        .where(TeacherProfile.school_id == school_id)
+        .options(
+            selectinload(TeacherProfile.employee).selectinload(Employee.membership).selectinload(SchoolMembership.user),
+            selectinload(TeacherProfile.teacher_subjects),
+        )
+    )
+
+    if q.q:
+        stmt = stmt.join(Employee, TeacherProfile.employee_id == Employee.id).where(
+            Employee.employee_number.ilike(f"%{q.q}%")
         )
 
-    if (
+    if q.academic_year_id:
+        stmt = stmt.where(TeacherProfile.teacher_subjects.any(TeacherSubject.academic_year_id == q.academic_year_id))
+
+    profiles = (await session.execute(stmt)).scalars().unique().all()
+    response: List[TeacherBasicInfo] = []
+    for profile in profiles:
+        employee = profile.employee
+        user = employee.membership.user if employee and employee.membership else None
+        full_name = None
+        if user:
+            full_name = " ".join([p for p in [user.first_name, user.father_name, user.grand_father_name] if p])
+        response.append(
+            TeacherBasicInfo(
+                teacher_profile_id=profile.id,
+                employee_id=employee.id,
+                user_id=employee.membership.user_id if employee and employee.membership else None,
+                employee_number=employee.employee_number,
+                employment_status=employee.employment_status,
+                full_name=full_name,
+                work_email=employee.work_email,
+                specialization=profile.specialization,
+                subject_ids=[ts.subject_id for ts in profile.teacher_subjects],
+            )
+        )
+    return response
+
+
+@router.get("/teachers/{teacher_id}", response_model=TeacherBasicInfo)
+async def get_teacher(
+    teacher_id: uuid.UUID,
+    session: SessionDep,
+    user_in: AuthenticatedRoute,
+) -> TeacherProfile:
+    """Retrieve a single teacher by ID."""
+    teacher = await session.get(TeacherProfile, teacher_id)
+
+    if not teacher or teacher.school_id != user_in.membership.school_id:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Teacher with ID {teacher_id} not found.",
+        )
+    return teacher
+
+
+@router.post(
+    "/teacher-profiles",
+    status_code=status.HTTP_201_CREATED,
+    response_model=SuccessResponse,
+)
+async def create_teacher_profile(
+    session: SessionDep,
+    payload: CreateTeacherProfile,
+    user_in: AuthenticatedRoute,
+) -> SuccessResponse:
+    """Creates a TeacherProfile for an existing employee."""
+    if not user_in.has_permission(PermissionEnum.EMPLOYEES_WRITE):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+        )
+
+    school_id = user_in.membership.school_id
+    employee = await session.get(Employee, payload.employee_id)
+    if not employee or employee.school_id != school_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Employee not found.",
+        )
+
+    existing = (
         await session.execute(
-            select(AcademicTerm).where(AcademicTerm.id == q.academic_term_id)
+            select(TeacherProfile).where(
+                TeacherProfile.school_id == school_id,
+                TeacherProfile.employee_id == payload.employee_id,
+            )
         )
-    ).scalar_one_or_none() is None:
+    ).scalar_one_or_none()
+    if existing:
         raise HTTPException(
-            status_code=400,
-            detail=f"Academic Term with ID {q.academic_term_id} not found.",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Teacher profile already exists.",
         )
 
-    filtered_gss_subquery = (
-        select(GradeStreamSubject.id)
-        .join(
-            TeacherRecord,
-            TeacherRecord.grade_stream_subject_id == GradeStreamSubject.id,
-        )
-        .join(
-            TeacherRecordLink, TeacherRecordLink.teacher_record_id == TeacherRecord.id
-        )
-        .where(TeacherRecordLink.section_id == Section.id)
-        .correlate(Grade)
-        .scalar_subquery()
+    teacher_profile = TeacherProfile(
+        school_id=school_id,
+        employee_id=payload.employee_id,
+        specialization=payload.specialization,
+        teacher_license_number=payload.teacher_license_number,
+        certifications=payload.certifications,
+        highest_education=payload.highest_education,
+        years_of_experience=payload.years_of_experience,
     )
 
-    teachers = select(Employee).options(
-        with_loader_criteria(Section, Section.id == TeacherRecordLink.section_id),
-        with_loader_criteria(
-            GradeStreamSubject, GradeStreamSubject.id.in_(filtered_gss_subquery)
-        ),
-        with_loader_criteria(Year, Year.id == q.year_id),
-        with_loader_criteria(AcademicTerm, AcademicTerm.id == q.academic_term_id),
-        joinedload(Employee.teacher_records).joinedload(TeacherRecord.academic_term),
-        joinedload(Employee.teacher_records)
-        .joinedload(TeacherRecord.grade_stream_subject)
-        .joinedload(GradeStreamSubject.subject),
-        joinedload(Employee.teacher_records)
-        .joinedload(TeacherRecord.grade_stream_subject)
-        .joinedload(GradeStreamSubject.stream),
-    )
+    session.add(teacher_profile)
+    await session.commit()
 
-    result = (await session.execute(teachers)).scalars().unique().all()
-
-    return result
+    return SuccessResponse(id=teacher_profile.id, message="Teacher profile created successfully.")
 
 
-@router.post("", response_model=SuccessResponseSchema)
+@router.post("/teachers", response_model=SuccessResponseSchema)
 async def assign_teacher(
     session: SessionDep,
     assign_data: AssignTeacher,
-    user_in: admin_route,
+    user_in: AuthenticatedRoute,
 ) -> SuccessResponseSchema:
-    """
-    This endpoint will assign a teacher to
-        - academic term
-        - grade stream subject
-        - section
-    """
-    teacher = await session.get(Employee, assign_data.teacher_id)
+    school_id = user_in.membership.school_id
 
-    if not teacher:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Teacher with ID {assign_data.teacher_id} not found.",
-        )
+    teacher_profile = await session.get(TeacherProfile, assign_data.teacher_profile_id)
+    if not teacher_profile or teacher_profile.school_id != school_id:
+        raise HTTPException(status_code=404, detail="Teacher profile not found.")
 
-    if teacher.position != EmployeePositionEnum.TEACHING_STAFF:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Employee with ID {assign_data.teacher_id} is not a teacher.",
-        )
+    subject = await session.get(Subject, assign_data.subject_id)
+    if not subject or subject.school_id != school_id:
+        raise HTTPException(status_code=404, detail="Subject not found.")
 
-    grade = await session.get(Grade, assign_data.grade.id)
-    if not grade:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Grade with ID {assign_data.grade.id} not found.",
-        )
+    class_section = await session.get(ClassSection, assign_data.class_section_id)
+    if not class_section or class_section.school_id != school_id:
+        raise HTTPException(status_code=404, detail="Class section not found.")
 
-    if grade and grade.has_stream:
-        if not assign_data.grade.stream_id:
-            raise HTTPException(
-                status_code=400,
-                detail="Stream ID is required for the selected grade.",
-            )
+    academic_year = await session.get(Year, assign_data.academic_year_id)
+    if not academic_year or academic_year.school_id != school_id:
+        raise HTTPException(status_code=404, detail="Academic year not found.")
 
-        stream = (
-            await session.execute(
-                select(Stream)
-                .where(Stream.id == assign_data.grade.stream_id)
-                .where(Stream.grade_id == assign_data.grade.id)
-            )
-        ).scalar_one_or_none()
-        if not stream:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Stream with ID {assign_data.grade.stream_id} not found.",
-            )
-
-    gss = (
+    teacher_subject = (
         await session.execute(
-            select(GradeStreamSubject)
-            .where(GradeStreamSubject.stream_id == assign_data.grade.stream_id)
-            .where(GradeStreamSubject.subject_id == assign_data.subject_id)
-            .where(GradeStreamSubject.grade_id == assign_data.grade.id)
+            select(TeacherSubject).where(
+                TeacherSubject.school_id == school_id,
+                TeacherSubject.teacher_profile_id == assign_data.teacher_profile_id,
+                TeacherSubject.subject_id == assign_data.subject_id,
+                TeacherSubject.academic_year_id == assign_data.academic_year_id,
+            )
         )
     ).scalar_one_or_none()
-
-    if not gss:
-        raise HTTPException(
-            status_code=404,
-            detail="Grade Stream Subject not found \
-                for the given stream, subject, and grade.",
+    if teacher_subject is None:
+        teacher_subject = TeacherSubject(
+            school_id=school_id,
+            teacher_profile_id=assign_data.teacher_profile_id,
+            subject_id=assign_data.subject_id,
+            academic_year_id=assign_data.academic_year_id,
         )
-    term_ids = (
-        (
-            await session.execute(
-                select(AcademicTerm.id).where(
-                    AcademicTerm.year_id == assign_data.year_id
-                )
+        session.add(teacher_subject)
+
+    existing_assignment = (
+        await session.execute(
+            select(TeachingAssignment).where(
+                TeachingAssignment.school_id == school_id,
+                TeachingAssignment.teacher_profile_id == assign_data.teacher_profile_id,
+                TeachingAssignment.subject_offering_id == assign_data.subject_id,
+                TeachingAssignment.class_section_id == assign_data.class_section_id,
+                TeachingAssignment.academic_year_id == assign_data.academic_year_id,
             )
         )
-        .scalars()
-        .all()
+    ).scalar_one_or_none()
+    if existing_assignment:
+        raise HTTPException(status_code=400, detail="Assignment already exists.")
+
+    assignment = TeachingAssignment(
+        school_id=school_id,
+        teacher_profile_id=assign_data.teacher_profile_id,
+        subject_offering_id=assign_data.subject_id,
+        class_section_id=assign_data.class_section_id,
+        academic_year_id=assign_data.academic_year_id,
     )
-    if not term_ids:
+    session.add(assignment)
+    await session.commit()
+    return SuccessResponseSchema(message="Teacher assigned successfully.")
+
+
+@router.patch("/teachers/{teacher_id}", response_model=SuccessResponseSchema)
+async def update_teacher(
+    teacher_id: uuid.UUID,
+    teacher_data: TeacherProfileUpdate,
+    session: SessionDep,
+    user_in: AuthenticatedRoute,
+) -> SuccessResponseSchema:
+    """Update a teacher profile."""
+    if not user_in.has_permission(PermissionEnum.EMPLOYEES_WRITE):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+
+    teacher = await session.get(TeacherProfile, teacher_id)
+
+    if not teacher or teacher.school_id != user_in.membership.school_id:
         raise HTTPException(
             status_code=404,
-            detail=f"Academic Term with Year ID {assign_data.year_id} not found.",
+            detail=f"Teacher with ID {teacher_id} not found.",
         )
 
-    for term_id in term_ids:
-        existing_record = (
-            await session.execute(
-                select(TeacherRecord).where(
-                    TeacherRecord.employee_id == assign_data.teacher_id,
-                    TeacherRecord.academic_term_id == term_id,
-                    TeacherRecord.grade_stream_subject_id == gss.id,
-                )
-            )
-        ).scalar_one_or_none()
+    update_data = teacher_data.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(teacher, key, value)
 
-        if existing_record:
-            raise HTTPException(
-                status_code=400,
-                detail="Another Teacher is already assigned with the same details.",
-            )
+    await session.commit()
+    return SuccessResponseSchema(message="Teacher updated successfully.")
 
-        new_record = TeacherRecord(
-            employee_id=assign_data.teacher_id,
-            academic_term_id=term_id,
-            grade_stream_subject_id=gss.id,
+
+@router.delete("/teachers/{teacher_id}", response_model=SuccessResponseSchema)
+async def delete_teacher(
+    teacher_id: uuid.UUID,
+    session: SessionDep,
+    user_in: AuthenticatedRoute,
+) -> SuccessResponseSchema:
+    """Delete a teacher profile."""
+    if not user_in.has_permission(PermissionEnum.EMPLOYEES_WRITE):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+
+    teacher = await session.get(TeacherProfile, teacher_id)
+
+    if not teacher or teacher.school_id != user_in.membership.school_id:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Teacher with ID {teacher_id} not found.",
         )
 
-        session.add(new_record)
-        await session.flush()
-
-        for section in assign_data.grade.sections:
-            session_exists = await session.get(Section, section.id)
-            if not session_exists:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Section with ID {section.id} not found.",
-                )
-
-            teacher_record_link_exists = (
-                await session.execute(
-                    select(TeacherRecordLink).where(
-                        TeacherRecordLink.teacher_record_id == new_record.id,
-                        TeacherRecordLink.section_id == section.id,
-                    )
-                )
-            ).scalar_one_or_none()
-
-            if teacher_record_link_exists:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Teacher is already assigned to section with ID \
-                         {section.id}.",
-                )
-
-            session.add(
-                TeacherRecordLink(
-                    teacher_record_id=new_record.id, section_id=section.id
-                )
-            )
-
-    session.add(new_record)
+    session.delete(teacher)
     await session.commit()
 
-    return SuccessResponseSchema(message="Teacher assigned successfully.")
+    return SuccessResponseSchema(message="Teacher deleted successfully.")

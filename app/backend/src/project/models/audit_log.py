@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING, Any, Dict, Optional
 
-from sqlalchemy import JSON, UUID, ForeignKey, String, Text
+from sqlalchemy import JSON, UUID, ForeignKey, ForeignKeyConstraint, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
@@ -10,7 +10,6 @@ if TYPE_CHECKING:
     from project.models.auth_session import AuthSession
     from project.models.school import School
     from project.models.school_membership import SchoolMembership
-    from project.models.user import User
 
 
 class AuditLog(BaseModel):
@@ -24,19 +23,12 @@ class AuditLog(BaseModel):
     )
     user_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(),
-        ForeignKey("users.id", ondelete="SET NULL"),
-        nullable=True,
-        index=True,
-    )
-    membership_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(),
-        ForeignKey("school_memberships.id", ondelete="SET NULL"),
         nullable=True,
         index=True,
     )
     auth_session_id: Mapped[uuid.UUID | None] = mapped_column(
         UUID(),
-        ForeignKey("auth_sessions.id", ondelete="SET NULL"),
+        ForeignKey("auth_sessions.id"),
         nullable=True,
         index=True,
     )
@@ -52,9 +44,7 @@ class AuditLog(BaseModel):
         default=None,
     )
     outcome: Mapped[str] = mapped_column(String(40), nullable=False, default="success")
-    ip_address: Mapped[Optional[str]] = mapped_column(
-        String(64), nullable=True, default=None
-    )
+    ip_address: Mapped[Optional[str]] = mapped_column(String(64), nullable=True, default=None)
     user_agent: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default=None)
     details: Mapped[Dict[str, Any]] = mapped_column(
         JSON,
@@ -62,15 +52,19 @@ class AuditLog(BaseModel):
         default_factory=dict,
     )
 
+    __table_args__ = (
+        ForeignKeyConstraint(
+            ["user_id", "school_id"],
+            [
+                "school_memberships.user_id",
+                "school_memberships.school_id",
+            ],
+            name="fk_audit_membership_school",
+        ),
+    )
+
     school: Mapped[Optional["School"]] = relationship(
         "School",
-        back_populates="audit_logs",
-        init=False,
-        repr=False,
-        passive_deletes=True,
-    )
-    user: Mapped[Optional["User"]] = relationship(
-        "User",
         back_populates="audit_logs",
         init=False,
         repr=False,
@@ -82,6 +76,7 @@ class AuditLog(BaseModel):
         init=False,
         repr=False,
         passive_deletes=True,
+        overlaps="school",
     )
     auth_session: Mapped[Optional["AuthSession"]] = relationship(
         "AuthSession",
@@ -89,4 +84,5 @@ class AuditLog(BaseModel):
         init=False,
         repr=False,
         passive_deletes=True,
+        overlaps="membership,school",
     )

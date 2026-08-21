@@ -24,9 +24,7 @@ async def get_health(session: SessionDep, redis: RedisDep) -> HealthStatus:
         redis_ok = await redis.ping()  # ty:ignore[invalid-await]
 
         if not redis_ok:
-            raise Exception(
-                "Redis health check failed: Unable to connect or ping Redis server."
-            )
+            raise Exception("Redis health check failed: Unable to connect or ping Redis server.")
 
         return HealthStatus(
             api_status="healthy",

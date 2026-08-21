@@ -7,8 +7,8 @@ export default antfu({
   typescript: true,
   formatters: true,
   ignores: [
-    "src/client/**", // ignore open-api client codegen output
     "src/components/ui/**", // ignore auto-generated UI components from shadcn/ui
+    "pnpm-lock.yaml",
     "**/*.gen.*",
     "dist",
     "build",
@@ -59,5 +59,7 @@ export default antfu({
       case: "kebabCase",
       ignore: ["README.md", "Dockerfile"],
     }],
+    "e18e/prefer-timer-args": "off",
+    "react-refresh/only-export-components": "off",
   },
 });

@@ -1,26 +1,22 @@
 #!/usr/bin/python3
 """Module for User class"""
 
-from typing import TYPE_CHECKING, Iterable, List, Optional
+from datetime import date
+from typing import TYPE_CHECKING, List, Optional
 
-from sqlalchemy import Boolean, Enum, String
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy import Boolean, Date, Enum, String, and_, true
+from sqlalchemy.orm import Mapped, foreign, mapped_column, relationship
 
-from project.core.tenant import get_current_school_id
 from project.models.base.base_model import BaseModel
-from project.utils.enum import RoleEnum
+from project.models.school_membership import SchoolMembership
+from project.utils.enum import GenderEnum
 
 if TYPE_CHECKING:
-    from project.models.admin import Admin
-    from project.models.audit_log import AuditLog
     from project.models.auth_identity import AuthIdentity
     from project.models.auth_session import AuthSession
-    from project.models.employee import Employee
-    from project.models.parent import Parent
+    from project.models.employment_application import EmploymentApplication
+    from project.models.enrollment_application import EnrollmentApplication
     from project.models.saved_query_view import SavedQueryView
-    from project.models.school_membership import SchoolMembership
-    from project.models.student import Student
-    from project.models.transfer_request import TransferRequest
 
 
 class User(BaseModel):
@@ -32,14 +28,19 @@ class User(BaseModel):
     """
 
     __tablename__ = "users"
-    role: Mapped[RoleEnum] = mapped_column(
+    # Common Profile Information
+    first_name: Mapped[str] = mapped_column(String(50), nullable=False)
+    father_name: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    grand_father_name: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
+    date_of_birth: Mapped[Optional[date]] = mapped_column(Date, nullable=True)
+    gender: Mapped[Optional[GenderEnum]] = mapped_column(
         Enum(
-            RoleEnum,
-            name="role_enum",
+            GenderEnum,
+            name="gender_enum",
             values_callable=lambda x: [e.value for e in x],
             native_enum=False,
         ),
-        nullable=False,
+        nullable=True,
     )
     email: Mapped[Optional[str]] = mapped_column(String(120), nullable=True)
     phone: Mapped[Optional[str]] = mapped_column(String(50), nullable=True)
@@ -56,38 +57,6 @@ class User(BaseModel):
     is_active: Mapped[bool] = mapped_column(Boolean, default=False)
     is_verified: Mapped[bool] = mapped_column(Boolean, default=False)
 
-    admin_profiles: Mapped[List["Admin"]] = relationship(
-        "Admin",
-        back_populates="user",
-        default_factory=list,
-        init=False,
-        repr=False,
-        passive_deletes=True,
-    )
-    employee_profiles: Mapped[List["Employee"]] = relationship(
-        "Employee",
-        back_populates="user",
-        default_factory=list,
-        init=False,
-        repr=False,
-        passive_deletes=True,
-    )
-    parent_profiles: Mapped[List["Parent"]] = relationship(
-        "Parent",
-        back_populates="user",
-        default_factory=list,
-        init=False,
-        repr=False,
-        passive_deletes=True,
-    )
-    student_profiles: Mapped[List["Student"]] = relationship(
-        "Student",
-        back_populates="user",
-        default_factory=list,
-        init=False,
-        repr=False,
-        passive_deletes=True,
-    )
     saved_query_views: Mapped["SavedQueryView"] = relationship(
         "SavedQueryView",
         back_populates="user",
@@ -105,6 +74,17 @@ class User(BaseModel):
         repr=False,
         passive_deletes=True,
     )
+    primary_membership: Mapped[Optional["SchoolMembership"]] = relationship(
+        "SchoolMembership",
+        primaryjoin=lambda: and_(
+            User.id == foreign(SchoolMembership.user_id),
+            SchoolMembership.is_primary == true(),
+        ),
+        uselist=False,
+        viewonly=True,
+        default=None,
+        init=False,
+    )
     memberships: Mapped[List["SchoolMembership"]] = relationship(
         "SchoolMembership",
         back_populates="user",
@@ -116,49 +96,52 @@ class User(BaseModel):
         "AuthSession",
         back_populates="user",
         default_factory=list,
-        repr=False,
+        init=False,
         passive_deletes=True,
     )
-    audit_logs: Mapped[List["AuditLog"]] = relationship(
-        "AuditLog",
-        back_populates="user",
+    employment_applications: Mapped[List["EmploymentApplication"]] = relationship(
+        "EmploymentApplication",
+        back_populates="applicant_user",
         default_factory=list,
+        init=False,
         repr=False,
         passive_deletes=True,
     )
-    transfer_requests: Mapped[List["TransferRequest"]] = relationship(
-        "TransferRequest",
-        back_populates="subject_user",
+    applicant_enrollment_applications: Mapped[List["EnrollmentApplication"]] = relationship(
+        "EnrollmentApplication",
+        foreign_keys="EnrollmentApplication.applicant_user_id",
+        back_populates="applicant_user",
         default_factory=list,
-        repr=False,
-        passive_deletes=True,
+        init=False,
+    )
+    student_enrollment_applications: Mapped[List["EnrollmentApplication"]] = relationship(
+        "EnrollmentApplication",
+        foreign_keys="EnrollmentApplication.student_user_id",
+        back_populates="student_user",
+        default_factory=list,
+        init=False,
     )
 
-    def _resolve_scoped_profile(self, profiles: Iterable[object]) -> object | None:
-        school_id = get_current_school_id()
-        profile_list = list(profiles)
-        if school_id is not None:
-            for profile in profile_list:
-                if getattr(profile, "school_id", None) == school_id:
-                    return profile
-        return profile_list[0] if profile_list else None
-
-    @property
-    def admin(self) -> Optional["Admin"]:
-        return self._resolve_scoped_profile(self.admin_profiles)  # type: ignore[return-value]
-
-    @property
-    def employee(self) -> Optional["Employee"]:
-        return self._resolve_scoped_profile(self.employee_profiles)  # type: ignore[return-value]
-
-    @property
-    def teacher(self) -> Optional["Employee"]:
-        return self.employee
-
-    @property
-    def parent(self) -> Optional["Parent"]:
-        return self._resolve_scoped_profile(self.parent_profiles)  # type: ignore[return-value]
-
-    @property
-    def student(self) -> Optional["Student"]:
-        return self._resolve_scoped_profile(self.student_profiles)  # type: ignore[return-value]
+    """
+    Note: If you use viewonly=True, you won't be able to do
+    `user.children.append(another_user)`. you would have to use
+    `parent.students.append(student)` instead.
+    """
+    children: Mapped[List["User"]] = relationship(
+        "User",
+        secondary="user_guardians",
+        primaryjoin="User.id == UserGuardian.guardian_user_id",
+        secondaryjoin="User.id == UserGuardian.dependent_user_id",
+        back_populates="parents",
+        viewonly=True,
+        default_factory=list,
+    )
+    parents: Mapped[List["User"]] = relationship(
+        "User",
+        secondary="user_guardians",
+        primaryjoin="User.id == UserGuardian.dependent_user_id",
+        secondaryjoin="User.id == UserGuardian.guardian_user_id",
+        back_populates="children",
+        viewonly=True,
+        default_factory=list,
+    )

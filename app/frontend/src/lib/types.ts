@@ -1,3 +1,4 @@
+import type { PermissionEnum } from "@/client/types.gen";
 import type {
   AverageRangeSchema,
   GradeCountsSchema,
@@ -12,11 +13,10 @@ import type {
   tableIdValue,
   userSchema,
   ViewSchema,
-} from "./validations";
+} from "@/lib/validations";
 import type { LinkOptions } from "@tanstack/react-router";
 import type { z } from "zod";
 
-export type RoleProps = "admin" | "teacher" | "student";
 export type UserDataProps = z.infer<typeof userSchema>;
 
 // Defines a standard error response type
@@ -65,38 +65,24 @@ export type NavBarItem = {
   params?: LinkOptions["params"];
   search?: LinkOptions["search"];
   icon?: React.ComponentType;
+  permission?: PermissionEnum;
+  items?: NavBarItem[];
 };
 
 export type NavMainItem = {
   title: string;
-  icon: React.ComponentType;
+  icon?: React.ComponentType;
   isActive?: boolean;
-  items: NavBarItem[];
+  to?: LinkOptions["to"];
+  items?: NavBarItem[];
   params?: LinkOptions["params"];
   search?: LinkOptions["search"];
+  permission?: PermissionEnum;
 };
 
 export type MainNavItem = {
   navBar: NavBarItem[];
   navMain: NavMainItem[];
-};
-
-export type DataProps = {
-  [key in RoleProps]: {
-    user: {
-      firstName: string;
-      fatherName: string;
-      grandFatherName: string;
-      email: string;
-      role: string;
-    };
-    system: {
-      title: string;
-      icon: React.ComponentType;
-      href: string;
-    }[];
-    navMain: NavMainItem[];
-  };
 };
 
 export type Student = z.infer<typeof StudentSchema>;

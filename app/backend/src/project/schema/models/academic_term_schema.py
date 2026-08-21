@@ -4,27 +4,18 @@ import uuid
 from datetime import date
 from typing import TYPE_CHECKING, List, Optional
 
-from pydantic import BaseModel, ConfigDict
-
+from project.schema.schema import BaseSchema
 from project.utils.enum import AcademicTermEnum
-from project.utils.utils import to_camel
 
 if TYPE_CHECKING:
     from project.schema.models.student_term_record_schema import StudentTermRecordSchema
-    from project.schema.models.teacher_record_schema import TeacherRecordSchema
     from project.schema.models.year_schema import YearSchema
 
 
-class AcademicTermSchema(BaseModel):
+class AcademicTermSchema(BaseSchema):
     """
     This model represents an academic term in the system.
     """
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     id: uuid.UUID
     year_id: uuid.UUID
@@ -44,18 +35,11 @@ class AcademicTermSchema(BaseModel):
         return {"id", "name", "start_date", "end_date"}
 
 
-class AcademicTermRelatedSchema(BaseModel):
+class AcademicTermRelatedSchema(BaseSchema):
     """This model represents the relationships of a AcademicTermSchema."""
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     year: Optional[YearSchema] = None
     student_term_records: Optional[List[StudentTermRecordSchema]] = []
-    teacher_records: Optional[List[TeacherRecordSchema]] = []
 
 
 class AcademicTermWithRelatedSchema(AcademicTermSchema, AcademicTermRelatedSchema):

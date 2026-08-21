@@ -92,6 +92,19 @@ services:
       timeout: 10s
       retries: 5
 
+  schemaspy:
+    image: schemaspy/schemaspy:latest
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    env_file:
+      - ./app/backend/.env.development
+    volumes:
+      - ./app/backend/docs/schema:/output
+      - ./app/backend/schemaspy.properties:/schemaspy.properties:ro
+    networks:
+      - app-network
+    # command: -configFile /schemaspy.properties
 
 networks:
   app-network:

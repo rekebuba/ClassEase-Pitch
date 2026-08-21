@@ -5,12 +5,13 @@ from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 
-from project.api.v1.routers.dependencies import SessionDep, shared_route
+from project.api.v1.routers.dependencies import AuthenticatedRoute, SessionDep
 from project.api.v1.routers.sections.schema import SectionFilterParams
 from project.models.grade import Grade
 from project.models.section import Section
 from project.schema.models import SectionWithRelatedSchema
 from project.schema.models.section_schema import SectionSchema
+from project.utils.enum import PermissionEnum
 
 router = APIRouter(prefix="/sections", tags=["Sections"])
 
@@ -22,11 +23,17 @@ router = APIRouter(prefix="/sections", tags=["Sections"])
 async def get_sections(
     session: SessionDep,
     query: Annotated[SectionFilterParams, Query()],
-    user_in: shared_route,
+    user_in: AuthenticatedRoute,
 ) -> Sequence[Section]:
     """
     Returns specific academic grade
     """
+    if not user_in.has_permission(PermissionEnum.SECTIONS_READ):
+        raise HTTPException(
+            status_code=403,
+            detail="You do not have permission to read sections.",
+        )
+
     grade = await session.get(Grade, query.grade_id)
     if not grade:
         raise HTTPException(
@@ -34,15 +41,7 @@ async def get_sections(
             detail=f"Grade with ID {query.grade_id} not found.",
         )
 
-    sections = (
-        (
-            await session.execute(
-                select(Section).where(Section.grade_id == query.grade_id)
-            )
-        )
-        .scalars()
-        .all()
-    )
+    sections = (await session.execute(select(Section).where(Section.grade_id == query.grade_id))).scalars().all()
 
     return sections
 
@@ -54,7 +53,7 @@ async def get_sections(
 async def get_section_by_id(
     session: SessionDep,
     section_id: uuid.UUID,
-    user_in: shared_route,
+    user_in: AuthenticatedRoute,
 ) -> Section:
     """
     Returns specific academic section
@@ -76,7 +75,7 @@ async def get_section_by_id(
 async def get_section_related(
     session: SessionDep,
     section_id: uuid.UUID,
-    user_in: shared_route,
+    user_in: AuthenticatedRoute,
 ) -> Section:
     """
     Returns specific academic section
@@ -87,7 +86,6 @@ async def get_section_related(
             .where(Section.id == section_id)
             .options(
                 selectinload(Section.grade),
-                selectinload(Section.students),
             )
         )
     ).scalar_one_or_none()

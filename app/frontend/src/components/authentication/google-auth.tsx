@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { toast } from "sonner";
 
 import { loginProviderMutation } from "@/client/@tanstack/react-query.gen";
-import { loginFailure } from "@/store/slice/auth-slice";
+import { loginFailure } from "@/store/slice/auth/auth-slice";
 
 import type {
   LoginProviderError,
@@ -52,7 +52,7 @@ function GoogleAuth({ schoolSlug, onAuthResponse }: GoogleAuthProps) {
     mutation.mutate({
       body: {
         credential: credentialResponse.credential,
-        school_slug: schoolSlug || undefined,
+        schoolSlug: schoolSlug || undefined,
       },
       path: { provider: "google" },
     });

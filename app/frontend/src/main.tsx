@@ -8,8 +8,9 @@ import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { Toaster } from "sonner";
 
-import "../src/globals.css";
+import "../src/index.css";
 
+import { PermissionProvider } from "./components/auth/permission-provider";
 import "./lib/api-client";
 import { queryClient } from "./lib/query-client";
 import { routeTree } from "./routeTree.gen";
@@ -39,7 +40,9 @@ if (!rootElement.innerHTML) {
               <Suspense fallback={<div />}>
                 {/* <PageLoader /> */}
                 <GoogleOAuthProvider clientId="553158623204-f65bpgp3pjg22o2ohainiafte64sil0r.apps.googleusercontent.com">
-                  <RouterProvider router={router} />
+                  <PermissionProvider>
+                    <RouterProvider router={router} />
+                  </PermissionProvider>
                 </GoogleOAuthProvider>
               </Suspense>
             </NuqsAdapter>

@@ -4,17 +4,16 @@ import uuid
 from datetime import date
 from typing import TYPE_CHECKING, List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
 
 from project.schema.models.academic_term_schema import AcademicTermSchema
+from project.schema.schema import BaseSchema
 from project.utils.enum import (
-    EmployeeApplicationStatusEnum,
     ExperienceYearEnum,
     GenderEnum,
     HighestEducationEnum,
     ScheduleEnum,
 )
-from project.utils.utils import to_camel
 
 if TYPE_CHECKING:
     from project.schema.models.grade_schema import GradeSchema
@@ -24,13 +23,7 @@ if TYPE_CHECKING:
     from project.schema.models.year_schema import YearSchema
 
 
-class TeacherSchema(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
+class TeacherSchema(BaseSchema):
     id: uuid.UUID | None = None
     first_name: str
     father_name: str
@@ -76,7 +69,6 @@ class TeacherSchema(BaseModel):
     agree_to_terms: bool = False
     agree_to_background_check: bool = False
     user_id: Optional[uuid.UUID] = None
-    status: EmployeeApplicationStatusEnum = EmployeeApplicationStatusEnum.PENDING
 
     @classmethod
     def default_fields(cls) -> set[str]:
@@ -88,16 +80,10 @@ class TeacherSchema(BaseModel):
         return {"id", "first_name", "father_name", "date_of_birth"}
 
 
-class TeacherRelatedSchema(BaseModel):
+class TeacherRelatedSchema(BaseSchema):
     """This model represents the relationships of a TeacherSchema.
     It is used to define the relationships between the TeacherSchema and other schemas.
     """
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     user: Optional[UserSchema] = None
     sections: Optional[List[SectionSchema]] = []

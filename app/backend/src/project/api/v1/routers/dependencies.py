@@ -1,9 +1,9 @@
+import uuid
 from collections.abc import AsyncGenerator
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Annotated, Any, Dict, List, Set, Type
+from typing import Annotated, Any, Dict, Iterable, List, Set, Type
 
-import jwt
 from fastapi import Depends, HTTPException, Query, status
 from fastapi.security import (
     HTTPBearer,
@@ -16,7 +16,6 @@ from sqlalchemy import event, select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import Session, with_loader_criteria
 
-from project.core import security
 from project.core.access_control import (
     PRIVILEGED_MEMBERSHIP_ROLES,
     get_membership_with_roles,
@@ -25,10 +24,12 @@ from project.core.access_control import (
     resolve_shell_role_from_names,
 )
 from project.core.config import settings
-from project.core.db import engine, init_db
+from project.core.db import init_db, system_engine, tenant_engine
+from project.core.security import _decode_access_token
 from project.core.tenant import (
     bind_db_school_context,
     get_current_school_id,
+    get_request_school_slug,
     set_current_membership_id,
     set_current_school_id,
 )
@@ -38,15 +39,26 @@ from project.models.blacklist_token import BlacklistToken
 from project.models.school_membership import SchoolMembership
 from project.models.user import User
 from project.schema.schema import TokenPayload
-from project.utils.enum import MfaStateEnum, RoleEnum, SchoolMembershipStatusEnum
+from project.utils.enum import (
+    MfaStateEnum,
+    PermissionEnum,
+    RoleEnum,
+    SchoolMembershipStatusEnum,
+    SessionScope,
+)
 from project.utils.utils import classify_model_fields, extract_inner_model
 
 # OAuth2 scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 security_bearer = HTTPBearer(auto_error=True)
 
-AsyncSessionLocal = async_sessionmaker(
-    engine,
+TenantSessionLocal = async_sessionmaker(
+    tenant_engine,
+    class_=AsyncSession,
+    expire_on_commit=False,
+)
+SystemSessionLocal = async_sessionmaker(
+    system_engine,
     class_=AsyncSession,
     expire_on_commit=False,
 )
@@ -55,11 +67,7 @@ AsyncSessionLocal = async_sessionmaker(
 @event.listens_for(Session, "do_orm_execute")
 def _apply_school_scope(execute_state):
     school_id = get_current_school_id()
-    if (
-        school_id is None
-        or not execute_state.is_select
-        or execute_state.execution_options.get("skip_school_scope")
-    ):
+    if school_id is None or not execute_state.is_select or execute_state.execution_options.get("skip_school_scope"):
         return
 
     execute_state.statement = execute_state.statement.options(
@@ -72,8 +80,13 @@ def _apply_school_scope(execute_state):
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
-    async with AsyncSessionLocal() as session:
-        await init_db(session)
+    async with TenantSessionLocal() as session:
+        yield session
+
+
+async def get_system_db() -> AsyncGenerator[AsyncSession, None]:
+    async with SystemSessionLocal() as session:
+        await init_db(system_session=session)
         yield session
 
 
@@ -83,17 +96,37 @@ async def get_redis() -> AsyncGenerator[Redis, None]:
 
 
 SessionDep = Annotated[AsyncSession, Depends(get_db)]
+SystemSessionDep = Annotated[AsyncSession, Depends(get_system_db)]
 TokenDep = Annotated[str, Depends(oauth2_scheme)]
 RedisDep = Annotated[Redis, Depends(get_redis)]
 
 
-@dataclass
+@dataclass(frozen=True)
 class AuthenticatedActor:
     user: User
     membership: SchoolMembership
     auth_session: AuthSession
-    permissions: Set[str]
-    shell_role: RoleEnum
+    permissions: Set[PermissionEnum]
+    roles: Set[RoleEnum] = field(default_factory=set)
+    shell_role: RoleEnum | None = None
+
+    def has_permission(self, permission: PermissionEnum) -> bool:
+        return permission in self.permissions
+
+    def has_any_permission(self, permissions: Iterable[PermissionEnum]) -> bool:
+        return any(permission in self.permissions for permission in permissions)
+
+    def has_role(self, role: RoleEnum) -> bool:
+        return role in self.roles
+
+    def has_any_role(self, roles: Iterable[RoleEnum]) -> bool:
+        return any(role in self.roles for role in roles)
+
+
+@dataclass(frozen=True)
+class PlatformAuthenticatedActor:
+    user: User
+    auth_session: AuthSession
 
 
 async def get_current_actor(
@@ -107,11 +140,7 @@ async def get_current_actor(
     )
 
     try:
-        payload = jwt.decode(
-            token,
-            settings.SECRET_KEY.get_secret_value(),
-            algorithms=[security.ALGORITHM],
-        )
+        payload = _decode_access_token(token)
         token_data = TokenPayload(**payload)
 
         if token_data.exp < datetime.now(timezone.utc):
@@ -119,9 +148,7 @@ async def get_current_actor(
 
         # Check if the token is blacklisted
         blacklisted = (
-            await session.execute(
-                select(BlacklistToken).where(BlacklistToken.jti == str(token_data.jti))
-            )
+            await session.execute(select(BlacklistToken).where(BlacklistToken.jti == str(token_data.jti)))
         ).scalar_one_or_none()
 
         if blacklisted:
@@ -135,7 +162,8 @@ async def get_current_actor(
         raise credentials_exception
 
     if (
-        token_data.school_id is None
+        token_data.scope != SessionScope.SCHOOL
+        or token_data.school_id is None
         or token_data.membership_id is None
         or token_data.session_id is None
     ):
@@ -151,33 +179,37 @@ async def get_current_actor(
     ):
         raise credentials_exception
 
-    auth_session = await session.get(AuthSession, token_data.session_id)
-    if (
-        auth_session is None
-        or auth_session.membership_id != membership.id
-        or auth_session.user_id != membership.user_id
-        or auth_session.revoked_at is not None
-        or auth_session.expires_at <= datetime.now(timezone.utc)
-    ):
+    request_slug = get_request_school_slug()
+
+    if request_slug is not None:
+        if membership.school.slug != request_slug:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid tenant.")
+
+    auth_session = (
+        await session.execute(
+            select(AuthSession).where(
+                AuthSession.id == token_data.session_id,
+                AuthSession.user_id == membership.user_id,
+                AuthSession.revoked_at.is_(None),
+                AuthSession.expires_at > datetime.now(timezone.utc),
+            )
+        )
+    ).scalar_one_or_none()
+
+    if auth_session is None:
         raise credentials_exception
 
     if token_data.permissions_version != membership.permissions_version:
         raise credentials_exception
 
-    await bind_db_school_context(session, membership.school_id)
+    await bind_db_school_context(tenant_session=session, school_id=membership.school_id)
     set_current_membership_id(membership.id)
 
     permissions = resolve_membership_permissions(membership)
     membership_role_names = resolve_membership_role_names(membership)
-    shell_role = resolve_shell_role_from_names(
-        membership_role_names,
-        fallback=membership.user.role,
-    )
+    shell_role = resolve_shell_role_from_names(membership_role_names)
 
-    if (
-        membership_role_names & PRIVILEGED_MEMBERSHIP_ROLES
-        and membership.mfa_state != MfaStateEnum.VERIFIED
-    ):
+    if membership_role_names & PRIVILEGED_MEMBERSHIP_ROLES and membership.mfa_state != MfaStateEnum.VERIFIED:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="MFA_REQUIRED",
@@ -188,8 +220,74 @@ async def get_current_actor(
         membership=membership,
         auth_session=auth_session,
         permissions=permissions,
+        roles=membership_role_names,
         shell_role=shell_role,
     )
+
+
+async def get_current_platform_actor(
+    session: SessionDep,
+    token: TokenDep,
+) -> PlatformAuthenticatedActor:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    try:
+        payload = _decode_access_token(token)
+        token_data = TokenPayload(**payload)
+
+        if token_data.exp < datetime.now(timezone.utc):
+            raise credentials_exception
+
+        blacklisted = (
+            await session.execute(select(BlacklistToken).where(BlacklistToken.jti == str(token_data.jti)))
+        ).scalar_one_or_none()
+
+        if blacklisted:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="User is Black Listed try to Sign in to Continue",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+        user_id = uuid.UUID(token_data.sub)
+    except (InvalidTokenError, ValidationError, ValueError):
+        raise credentials_exception
+
+    if (
+        token_data.scope != SessionScope.PLATFORM
+        or token_data.school_id is not None
+        or token_data.school_slug is not None
+        or token_data.membership_id is not None
+        or token_data.role is not None
+        or token_data.permissions_version is not None
+        or token_data.permissions
+        or token_data.session_id is None
+    ):
+        raise credentials_exception
+
+    user = await session.get(User, user_id)
+    if user is None or not user.is_active:
+        raise credentials_exception
+
+    auth_session = (
+        await session.execute(
+            select(AuthSession).where(
+                AuthSession.id == token_data.session_id,
+                AuthSession.user_id == user.id,
+                AuthSession.revoked_at.is_(None),
+                AuthSession.expires_at > datetime.now(timezone.utc),
+            )
+        )
+    ).scalar_one_or_none()
+
+    if auth_session is None:
+        raise credentials_exception
+
+    return PlatformAuthenticatedActor(user=user, auth_session=auth_session)
 
 
 async def get_current_user(
@@ -198,31 +296,43 @@ async def get_current_user(
     return current_actor.user
 
 
-class ProtectedRoute:
-    def __init__(self, roles: List[RoleEnum] = []):
-        self.roles = roles
+class RequirePermission:
+    """FastAPI dependency that authorizes by membership permissions.
 
-    def __call__(
-        self, current_actor: Annotated[AuthenticatedActor, Depends(get_current_actor)]
-    ) -> AuthenticatedActor:
-        if current_actor.shell_role not in self.roles:
+    ``fallback_permissions`` lets routes move to future granular permissions while
+    accepting the coarse permissions currently seeded in existing databases.
+    ``scope_policy`` is intentionally reserved for later resource-level checks.
+    """
+
+    def __init__(
+        self,
+        permission: PermissionEnum,
+        *,
+        fallback_permissions: Iterable[PermissionEnum] | None = None,
+        scope_policy: Any | None = None,
+    ) -> None:
+        self.permission = permission
+        self.fallback_permissions = set(fallback_permissions or ())
+        self.scope_policy = scope_policy
+
+    @property
+    def accepted_permissions(self) -> set[PermissionEnum]:
+        return {self.permission, *self.fallback_permissions}
+
+    def __call__(self, current_actor: Annotated[AuthenticatedActor, Depends(get_current_actor)]) -> AuthenticatedActor:
+        if not current_actor.has_any_permission(self.accepted_permissions):
             raise HTTPException(status_code=403, detail="Forbidden")
+
+        if self.scope_policy is not None:
+            # Placeholder for future resource ownership/scope policies.
+            # Policies should receive the actor and route context once introduced.
+            pass
+
         return current_actor
 
 
-shared_route = Annotated[
-    AuthenticatedActor,
-    Depends(ProtectedRoute([RoleEnum.ADMIN, RoleEnum.TEACHER, RoleEnum.STUDENT])),
-]
-admin_route = Annotated[AuthenticatedActor, Depends(ProtectedRoute([RoleEnum.ADMIN]))]
-student_route = Annotated[
-    AuthenticatedActor,
-    Depends(ProtectedRoute([RoleEnum.ADMIN, RoleEnum.STUDENT])),
-]
-teacher_route = Annotated[
-    AuthenticatedActor,
-    Depends(ProtectedRoute([RoleEnum.ADMIN, RoleEnum.TEACHER])),
-]
+AuthenticatedRoute = Annotated[AuthenticatedActor, Depends(get_current_actor)]
+PlatformAuthenticatedRoute = Annotated[PlatformAuthenticatedActor, Depends(get_current_platform_actor)]
 
 
 async def parse_nested_params(
@@ -274,15 +384,13 @@ async def parse_nested_params(
     allowed_fields = set(classified.get("model_class", []))
 
     valid_fields: List[str] = []
-    for field in field_names:
+    for f in field_names:
         # Validate that the field is a model class
-        if field == "all":
+        if f == "all":
             valid_fields.extend(allowed_fields)
             break
 
-        if ("." not in field and field not in allowed_fields) or (
-            "." in field and not expansions
-        ):
+        if ("." not in f and f not in allowed_fields) or ("." in f and not expansions):
             # Nested field without expansion -> invalid
             allowed_fields.add("all")
             raise HTTPException(
@@ -290,13 +398,13 @@ async def parse_nested_params(
                 detail={
                     "message": "Invalid field requested",
                     "meta": {
-                        "invalid_field": field,
+                        "invalid_field": f,
                         "allowed_fields": list(allowed_fields),
                     },
                 },
             )
-        elif "." not in field:
-            valid_fields.append(field)
+        elif "." not in f:
+            valid_fields.append(f)
 
     # If no fields explicitly given for this model, use defaults
     if not valid_fields:
@@ -331,9 +439,7 @@ async def parse_nested_params(
                 },
             )
 
-        is_list, related_model = extract_inner_model(
-            base_model.model_fields[expand_field].annotation
-        )
+        is_list, related_model = extract_inner_model(base_model.model_fields[expand_field].annotation)
         # Build nested prefix for child expansion
         child_prefix = f"{prefix}.{expand_field}" if prefix else expand_field
 
@@ -345,9 +451,7 @@ async def parse_nested_params(
             fields=fields,
         )
 
-        include_dict[expand_field] = (
-            {"__all__": nested_params} if is_list else nested_params
-        )
+        include_dict[expand_field] = {"__all__": nested_params} if is_list else nested_params
 
     return include_dict
 
@@ -362,8 +466,6 @@ class NestedParamsDependency:
         fields: str = Query("", alias="fields"),
     ) -> Dict[str, Any]:
         try:
-            return await parse_nested_params(
-                base_model=self.base_model, expand=expand, fields=fields
-            )
+            return await parse_nested_params(base_model=self.base_model, expand=expand, fields=fields)
         except HTTPException as e:
             raise e

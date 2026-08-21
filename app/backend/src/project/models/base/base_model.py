@@ -40,34 +40,35 @@ class Base(DeclarativeBase):
 
 
 @dataclass
-class AssociationBase(Base):
+class TimestampMixin(MappedAsDataclass, Base):
+    """Mixin for models that need created_at and updated_at."""
+
     __abstract__ = True
 
-
-@dataclass
-class BaseModel(MappedAsDataclass, Base):
-    """Defines all common attributes/methods for other classes"""
-
-    __abstract__ = True  # Prevents SQLAlchemy from creating a table for this class
-
-    # Dataclass fields (not mapped to SQLAlchemy)
-    id: Mapped[uuid.UUID] = mapped_column(
-        UUID(),
-        default_factory=uuid.uuid4,
-        primary_key=True,
-        init=False,
-    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
         nullable=False,
         init=False,
     )
-
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
         onupdate=func.now(),
+        init=False,
+    )
+
+
+@dataclass
+class BaseModel(TimestampMixin):
+    """Base class for entities with a standard UUID surrogate primary key."""
+
+    __abstract__ = True
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        UUID(),
+        default_factory=uuid.uuid4,
+        primary_key=True,
         init=False,
     )
 

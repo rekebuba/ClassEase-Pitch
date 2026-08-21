@@ -1,34 +1,30 @@
 import uuid
 from typing import Any, Literal, Optional
 
-from pydantic import BaseModel, ConfigDict
-
-from project.utils.utils import to_camel
+from project.schema.schema import BaseSchema
 
 
-class FilterParams(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
+class FilterParams(BaseSchema):
     year_id: uuid.UUID
     q: str | None = None
 
 
+class SearchParams(BaseSchema):
+    q: str | None = None
+
+
 # JSON Patch specific schemas
-class JSONPatchOperation(BaseModel):
+class JSONPatchOperation(BaseSchema):
     op: Literal["add", "remove", "replace", "move", "copy", "test"]
     path: str
     value: Optional[Any] = None
 
 
-class JSONPatchRequest(BaseModel):
+class JSONPatchRequest(BaseSchema):
     patch: list[JSONPatchOperation]
 
 
-class HTTPError(BaseModel):
+class HTTPError(BaseSchema):
     """
     HTTP error schema to be used when an HTTPException is thrown.
     """

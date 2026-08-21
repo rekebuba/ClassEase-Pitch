@@ -241,9 +241,7 @@ def upgrade() -> None:
             ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk_auth_sessions")),
-        sa.UniqueConstraint(
-            "refresh_token_hash", name=op.f("uq_auth_sessions_refresh_token_hash")
-        ),
+        sa.UniqueConstraint("refresh_token_hash", name=op.f("uq_auth_sessions_refresh_token_hash")),
     )
     op.create_index(
         op.f("ix_auth_sessions_membership_id"),
@@ -251,12 +249,8 @@ def upgrade() -> None:
         ["membership_id"],
         unique=False,
     )
-    op.create_index(
-        op.f("ix_auth_sessions_school_id"), "auth_sessions", ["school_id"], unique=False
-    )
-    op.create_index(
-        op.f("ix_auth_sessions_user_id"), "auth_sessions", ["user_id"], unique=False
-    )
+    op.create_index(op.f("ix_auth_sessions_school_id"), "auth_sessions", ["school_id"], unique=False)
+    op.create_index(op.f("ix_auth_sessions_user_id"), "auth_sessions", ["user_id"], unique=False)
     op.create_table(
         "membership_roles",
         sa.Column("membership_id", sa.UUID(), nullable=False),
@@ -273,12 +267,6 @@ def upgrade() -> None:
             sa.DateTime(timezone=True),
             server_default=sa.text("now()"),
             nullable=False,
-        ),
-        sa.ForeignKeyConstraint(
-            ["membership_id"],
-            ["school_memberships.id"],
-            name=op.f("fk_membership_roles_membership_id_school_memberships"),
-            ondelete="CASCADE",
         ),
         sa.ForeignKeyConstraint(
             ["role_id"],
@@ -359,17 +347,13 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(
             ["requested_by_membership_id"],
             ["school_memberships.id"],
-            name=op.f(
-                "fk_transfer_requests_requested_by_membership_id_school_memberships"
-            ),
+            name=op.f("fk_transfer_requests_requested_by_membership_id_school_memberships"),
             ondelete="SET NULL",
         ),
         sa.ForeignKeyConstraint(
             ["reviewed_by_membership_id"],
             ["school_memberships.id"],
-            name=op.f(
-                "fk_transfer_requests_reviewed_by_membership_id_school_memberships"
-            ),
+            name=op.f("fk_transfer_requests_reviewed_by_membership_id_school_memberships"),
             ondelete="SET NULL",
         ),
         sa.ForeignKeyConstraint(
@@ -456,12 +440,8 @@ def upgrade() -> None:
         ["membership_id"],
         unique=False,
     )
-    op.create_index(
-        op.f("ix_audit_logs_school_id"), "audit_logs", ["school_id"], unique=False
-    )
-    op.create_index(
-        op.f("ix_audit_logs_user_id"), "audit_logs", ["user_id"], unique=False
-    )
+    op.create_index(op.f("ix_audit_logs_school_id"), "audit_logs", ["school_id"], unique=False)
+    op.create_index(op.f("ix_audit_logs_user_id"), "audit_logs", ["user_id"], unique=False)
     op.add_column("academic_terms", sa.Column("school_id", sa.UUID(), nullable=True))
     op.create_index(
         op.f("ix_academic_terms_school_id"),
@@ -496,17 +476,11 @@ def upgrade() -> None:
         ["id"],
         ondelete="SET NULL",
     )
-    op.create_unique_constraint(
-        "uq_employee_year_links", "employee_year_links", ["employee_id", "year_id"]
-    )
-    op.add_column(
-        "employees", sa.Column("school_membership_id", sa.UUID(), nullable=True)
-    )
+    op.create_unique_constraint("uq_employee_year_links", "employee_year_links", ["employee_id", "year_id"])
+    op.add_column("employees", sa.Column("school_membership_id", sa.UUID(), nullable=True))
     op.add_column("employees", sa.Column("school_id", sa.UUID(), nullable=True))
     op.drop_constraint(op.f("uq_employees_user_id"), "employees", type_="unique")
-    op.create_index(
-        op.f("ix_employees_school_id"), "employees", ["school_id"], unique=False
-    )
+    op.create_index(op.f("ix_employees_school_id"), "employees", ["school_id"], unique=False)
     op.create_foreign_key(
         op.f("fk_employees_school_id_schools"),
         "employees",
@@ -543,13 +517,9 @@ def upgrade() -> None:
         ["id"],
         ondelete="CASCADE",
     )
-    op.add_column(
-        "parents", sa.Column("school_membership_id", sa.UUID(), nullable=True)
-    )
+    op.add_column("parents", sa.Column("school_membership_id", sa.UUID(), nullable=True))
     op.add_column("parents", sa.Column("school_id", sa.UUID(), nullable=True))
-    op.create_index(
-        op.f("ix_parents_school_id"), "parents", ["school_id"], unique=False
-    )
+    op.create_index(op.f("ix_parents_school_id"), "parents", ["school_id"], unique=False)
     op.create_foreign_key(
         op.f("fk_parents_school_id_schools"),
         "parents",
@@ -567,9 +537,7 @@ def upgrade() -> None:
         ondelete="SET NULL",
     )
     op.add_column("sections", sa.Column("school_id", sa.UUID(), nullable=True))
-    op.create_index(
-        op.f("ix_sections_school_id"), "sections", ["school_id"], unique=False
-    )
+    op.create_index(op.f("ix_sections_school_id"), "sections", ["school_id"], unique=False)
     op.create_foreign_key(
         op.f("fk_sections_school_id_schools"),
         "sections",
@@ -579,9 +547,7 @@ def upgrade() -> None:
         ondelete="CASCADE",
     )
     op.add_column("streams", sa.Column("school_id", sa.UUID(), nullable=True))
-    op.create_index(
-        op.f("ix_streams_school_id"), "streams", ["school_id"], unique=False
-    )
+    op.create_index(op.f("ix_streams_school_id"), "streams", ["school_id"], unique=False)
     op.create_foreign_key(
         op.f("fk_streams_school_id_schools"),
         "streams",
@@ -590,14 +556,10 @@ def upgrade() -> None:
         ["id"],
         ondelete="CASCADE",
     )
-    op.add_column(
-        "students", sa.Column("school_membership_id", sa.UUID(), nullable=True)
-    )
+    op.add_column("students", sa.Column("school_membership_id", sa.UUID(), nullable=True))
     op.add_column("students", sa.Column("school_id", sa.UUID(), nullable=True))
     op.drop_constraint(op.f("uq_students_user_id"), "students", type_="unique")
-    op.create_index(
-        op.f("ix_students_school_id"), "students", ["school_id"], unique=False
-    )
+    op.create_index(op.f("ix_students_school_id"), "students", ["school_id"], unique=False)
     op.create_foreign_key(
         op.f("fk_students_school_id_schools"),
         "students",
@@ -615,9 +577,7 @@ def upgrade() -> None:
         ondelete="SET NULL",
     )
     op.add_column("subjects", sa.Column("school_id", sa.UUID(), nullable=True))
-    op.create_index(
-        op.f("ix_subjects_school_id"), "subjects", ["school_id"], unique=False
-    )
+    op.create_index(op.f("ix_subjects_school_id"), "subjects", ["school_id"], unique=False)
     op.create_foreign_key(
         op.f("fk_subjects_school_id_schools"),
         "subjects",
@@ -646,15 +606,7 @@ def downgrade() -> None:
     op.drop_constraint(op.f("fk_years_school_id_schools"), "years", type_="foreignkey")
     op.drop_index(op.f("ix_years_school_id"), table_name="years")
     op.drop_column("years", "school_id")
-    op.create_unique_constraint(
-        op.f("uq_users_username"),
-        "users",
-        ["username"],
-        postgresql_nulls_not_distinct=False,
-    )
-    op.drop_constraint(
-        op.f("fk_subjects_school_id_schools"), "subjects", type_="foreignkey"
-    )
+    op.drop_constraint(op.f("fk_subjects_school_id_schools"), "subjects", type_="foreignkey")
     op.drop_index(op.f("ix_subjects_school_id"), table_name="subjects")
     op.drop_column("subjects", "school_id")
     op.drop_constraint(
@@ -662,26 +614,14 @@ def downgrade() -> None:
         "students",
         type_="foreignkey",
     )
-    op.drop_constraint(
-        op.f("fk_students_school_id_schools"), "students", type_="foreignkey"
-    )
+    op.drop_constraint(op.f("fk_students_school_id_schools"), "students", type_="foreignkey")
     op.drop_index(op.f("ix_students_school_id"), table_name="students")
-    op.create_unique_constraint(
-        op.f("uq_students_user_id"),
-        "students",
-        ["user_id"],
-        postgresql_nulls_not_distinct=False,
-    )
     op.drop_column("students", "school_id")
     op.drop_column("students", "school_membership_id")
-    op.drop_constraint(
-        op.f("fk_streams_school_id_schools"), "streams", type_="foreignkey"
-    )
+    op.drop_constraint(op.f("fk_streams_school_id_schools"), "streams", type_="foreignkey")
     op.drop_index(op.f("ix_streams_school_id"), table_name="streams")
     op.drop_column("streams", "school_id")
-    op.drop_constraint(
-        op.f("fk_sections_school_id_schools"), "sections", type_="foreignkey"
-    )
+    op.drop_constraint(op.f("fk_sections_school_id_schools"), "sections", type_="foreignkey")
     op.drop_index(op.f("ix_sections_school_id"), table_name="sections")
     op.drop_column("sections", "school_id")
     op.drop_constraint(
@@ -689,20 +629,14 @@ def downgrade() -> None:
         "parents",
         type_="foreignkey",
     )
-    op.drop_constraint(
-        op.f("fk_parents_school_id_schools"), "parents", type_="foreignkey"
-    )
+    op.drop_constraint(op.f("fk_parents_school_id_schools"), "parents", type_="foreignkey")
     op.drop_index(op.f("ix_parents_school_id"), table_name="parents")
     op.drop_column("parents", "school_id")
     op.drop_column("parents", "school_membership_id")
-    op.drop_constraint(
-        op.f("fk_grades_school_id_schools"), "grades", type_="foreignkey"
-    )
+    op.drop_constraint(op.f("fk_grades_school_id_schools"), "grades", type_="foreignkey")
     op.drop_index(op.f("ix_grades_school_id"), table_name="grades")
     op.drop_column("grades", "school_id")
-    op.drop_constraint(
-        op.f("fk_events_school_id_schools"), "events", type_="foreignkey"
-    )
+    op.drop_constraint(op.f("fk_events_school_id_schools"), "events", type_="foreignkey")
     op.drop_index(op.f("ix_events_school_id"), table_name="events")
     op.drop_column("events", "school_id")
     op.drop_constraint(
@@ -710,16 +644,8 @@ def downgrade() -> None:
         "employees",
         type_="foreignkey",
     )
-    op.drop_constraint(
-        op.f("fk_employees_school_id_schools"), "employees", type_="foreignkey"
-    )
+    op.drop_constraint(op.f("fk_employees_school_id_schools"), "employees", type_="foreignkey")
     op.drop_index(op.f("ix_employees_school_id"), table_name="employees")
-    op.create_unique_constraint(
-        op.f("uq_employees_user_id"),
-        "employees",
-        ["user_id"],
-        postgresql_nulls_not_distinct=False,
-    )
     op.drop_column("employees", "school_id")
     op.drop_column("employees", "school_membership_id")
     op.drop_constraint("uq_employee_year_links", "employee_year_links", type_="unique")
@@ -728,9 +654,7 @@ def downgrade() -> None:
         "admins",
         type_="foreignkey",
     )
-    op.drop_constraint(
-        op.f("fk_admins_school_id_schools"), "admins", type_="foreignkey"
-    )
+    op.drop_constraint(op.f("fk_admins_school_id_schools"), "admins", type_="foreignkey")
     op.drop_index(op.f("ix_admins_school_id"), table_name="admins")
     op.drop_column("admins", "school_id")
     op.drop_column("admins", "school_membership_id")
@@ -753,12 +677,8 @@ def downgrade() -> None:
     op.drop_index(op.f("ix_auth_sessions_school_id"), table_name="auth_sessions")
     op.drop_index(op.f("ix_auth_sessions_membership_id"), table_name="auth_sessions")
     op.drop_table("auth_sessions")
-    op.drop_index(
-        op.f("ix_school_memberships_user_id"), table_name="school_memberships"
-    )
-    op.drop_index(
-        op.f("ix_school_memberships_school_id"), table_name="school_memberships"
-    )
+    op.drop_index(op.f("ix_school_memberships_user_id"), table_name="school_memberships")
+    op.drop_index(op.f("ix_school_memberships_school_id"), table_name="school_memberships")
     op.drop_table("school_memberships")
     op.drop_index(op.f("ix_roles_school_id"), table_name="roles")
     op.drop_table("roles")

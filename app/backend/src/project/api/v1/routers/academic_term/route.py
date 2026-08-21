@@ -3,7 +3,7 @@ from typing import Annotated, List, Sequence
 from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import select
 
-from project.api.v1.routers.dependencies import SessionDep, admin_route
+from project.api.v1.routers.dependencies import AuthenticatedRoute, SessionDep
 from project.api.v1.routers.schema import FilterParams
 from project.models.academic_term import AcademicTerm
 from project.models.year import Year
@@ -16,7 +16,7 @@ router = APIRouter(prefix="/terms", tags=["Academic Terms"])
 async def get_academic_terms(
     session: SessionDep,
     query: Annotated[FilterParams, Query()],
-    user_in: admin_route,
+    user_in: AuthenticatedRoute,
 ) -> Sequence[AcademicTerm]:
     """This endpoint will return a list of academic terms for a given year."""
     year = await session.get(Year, query.year_id)
@@ -29,9 +29,7 @@ async def get_academic_terms(
     terms = (
         (
             await session.execute(
-                select(AcademicTerm)
-                .filter(AcademicTerm.year_id == year.id)
-                .order_by(AcademicTerm.name)
+                select(AcademicTerm).filter(AcademicTerm.year_id == year.id).order_by(AcademicTerm.name)
             )
         )
         .scalars()

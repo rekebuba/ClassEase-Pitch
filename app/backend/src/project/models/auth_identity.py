@@ -1,7 +1,7 @@
 import uuid
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import UUID, Enum, ForeignKey, String
+from sqlalchemy import UUID, Enum, ForeignKey, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
@@ -19,7 +19,7 @@ class AuthIdentity(BaseModel):
         ForeignKey("users.id", ondelete="CASCADE"),
         nullable=False,
     )
-    provider: Mapped[str] = mapped_column(
+    provider: Mapped[AuthProviderEnum] = mapped_column(
         Enum(
             AuthProviderEnum,
             name="auth_provider_enum",
@@ -30,7 +30,6 @@ class AuthIdentity(BaseModel):
     )
     provider_user_id: Mapped[Optional[str]] = mapped_column(
         String(255),
-        unique=True,
         nullable=True,
         default=None,
     )  # google_sub, github_id, etc
@@ -39,6 +38,14 @@ class AuthIdentity(BaseModel):
         nullable=True,
         default=None,
     )  # Only for provider="password"
+
+    __table_args__ = (
+        UniqueConstraint(
+            "provider",
+            "provider_user_id",
+            name="uq_auth_identities_provider_user_id",
+        ),
+    )
 
     # Relationships
     user: Mapped["User"] = relationship(

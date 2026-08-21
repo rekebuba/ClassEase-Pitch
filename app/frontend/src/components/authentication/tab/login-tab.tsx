@@ -1,4 +1,4 @@
-import { zodResolver } from "@hookform/resolvers/zod/dist/zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { Link } from "@tanstack/react-router";
 import { Loader2Icon } from "lucide-react";
@@ -26,7 +26,7 @@ import {
   FieldLabel,
   FieldSeparator,
 } from "@/components/ui/field";
-import { loginFailure } from "@/store/slice/auth-slice";
+import { loginFailure } from "@/store/slice/auth/auth-slice";
 
 import type {
   BodyLoginCredential,
@@ -159,7 +159,9 @@ export default function LoginTab({ onAuthResponse }: LoginTabProps) {
                 onAuthResponse={onAuthResponse}
               />
               <FieldDescription className="text-center">
-                Use your school account credentials or Google to continue.
+                Don't have an account?
+                {" "}
+                <Link to="/auth/sign-up" className="underline underline-offset-4 hover:text-primary">Sign up</Link>
               </FieldDescription>
             </FieldGroup>
           </form>

@@ -1,16 +1,7 @@
-from pydantic import BaseModel, ConfigDict
-
-from project.utils.utils import to_camel
+from project.schema.schema import BaseSchema
 
 
-class HealthStatus(BaseModel):
-    model_config = ConfigDict(
-        extra="forbid",
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
+class HealthStatus(BaseSchema):
     api_status: str
     db_status: str
     redis_status: str

@@ -4,10 +4,10 @@ import uuid
 from datetime import date
 from typing import TYPE_CHECKING, List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
 
+from project.schema.schema import BaseSchema
 from project.utils.enum import BloodTypeEnum, GenderEnum, StudentApplicationStatusEnum
-from project.utils.utils import to_camel
 
 if TYPE_CHECKING:
     from project.schema.models.academic_term_schema import AcademicTermSchema
@@ -25,16 +25,10 @@ if TYPE_CHECKING:
     from project.schema.models.year_schema import YearSchema
 
 
-class StudentSchema(BaseModel):
+class StudentSchema(BaseSchema):
     """
     This model represents a student in the system. It inherits from BaseModel.
     """
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     id: uuid.UUID
     user_id: Optional[uuid.UUID]
@@ -59,7 +53,7 @@ class StudentSchema(BaseModel):
     status: StudentApplicationStatusEnum = StudentApplicationStatusEnum.PENDING
 
 
-class StudentRelatedSchema(BaseModel):
+class StudentRelatedSchema(BaseSchema):
     """This model represents the relationships of a StudentSchema."""
 
     starting_grade: Optional[GradeSchema]

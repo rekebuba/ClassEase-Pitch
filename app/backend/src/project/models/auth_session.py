@@ -2,7 +2,14 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import UUID, DateTime, Enum, ForeignKey, String, Text
+from sqlalchemy import (
+    UUID,
+    DateTime,
+    Enum,
+    ForeignKey,
+    String,
+    Text,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from project.models.base.base_model import BaseModel
@@ -10,8 +17,6 @@ from project.utils.enum import AuthSessionAssuranceEnum
 
 if TYPE_CHECKING:
     from project.models.audit_log import AuditLog
-    from project.models.school import School
-    from project.models.school_membership import SchoolMembership
     from project.models.user import User
 
 
@@ -20,19 +25,7 @@ class AuthSession(BaseModel):
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(),
-        ForeignKey("users.id", ondelete="CASCADE"),
-        nullable=False,
-        index=True,
-    )
-    school_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(),
-        ForeignKey("schools.id", ondelete="CASCADE"),
-        nullable=False,
-        index=True,
-    )
-    membership_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(),
-        ForeignKey("school_memberships.id", ondelete="CASCADE"),
+        ForeignKey("users.id"),
         nullable=False,
         index=True,
     )
@@ -41,16 +34,10 @@ class AuthSession(BaseModel):
         nullable=False,
         unique=True,
     )
-    expires_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False
-    )
-    last_seen_at: Mapped[datetime] = mapped_column(
-        DateTime(timezone=True), nullable=False
-    )
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     user_agent: Mapped[Optional[str]] = mapped_column(Text, nullable=True, default=None)
-    ip_address: Mapped[Optional[str]] = mapped_column(
-        String(64), nullable=True, default=None
-    )
+    ip_address: Mapped[Optional[str]] = mapped_column(String(64), nullable=True, default=None)
     assurance_level: Mapped[AuthSessionAssuranceEnum] = mapped_column(
         Enum(
             AuthSessionAssuranceEnum,
@@ -72,26 +59,12 @@ class AuthSession(BaseModel):
         default=None,
     )
 
+    __table_args__ = ()
+
     user: Mapped["User"] = relationship(
         "User",
         back_populates="auth_sessions",
         init=False,
-        repr=False,
-        passive_deletes=True,
-    )
-    school: Mapped["School"] = relationship(
-        "School",
-        back_populates="auth_sessions",
-        init=False,
-        repr=False,
-        passive_deletes=True,
-    )
-    membership: Mapped["SchoolMembership"] = relationship(
-        "SchoolMembership",
-        back_populates="auth_sessions",
-        init=False,
-        repr=False,
-        passive_deletes=True,
     )
     audit_logs: Mapped[list["AuditLog"]] = relationship(
         "AuditLog",
@@ -99,4 +72,5 @@ class AuthSession(BaseModel):
         default_factory=list,
         repr=False,
         passive_deletes=True,
+        overlaps="school",
     )

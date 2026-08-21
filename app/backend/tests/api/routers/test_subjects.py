@@ -1,69 +1,73 @@
-import random
-from typing import Dict
-
+import pytest
 from httpx import AsyncClient
 
-from project.core.config import settings
-from project.schema.models import YearSchema, YearWithRelatedSchema
+from project.api.v1.routers.schema import FilterParams
+from project.api.v1.routers.subjects.schema import SubjectSetupSchema
+from project.utils.enum import RoleEnum
+from tests.utils.api import API
+from tests.utils.type_test import SchoolScenario
 
 
-class TestSubjectsApi:
-    async def test_get_subjects(
-        self,
-        client: AsyncClient,
-        admin_token_headers: Dict[str, str],
-        year: YearSchema,
-    ) -> None:
-        """Test retrieving all subjects."""
-        r = await client.get(
-            f"{settings.API_V1_STR}/subjects",
-            params={"yearId": str(year.id)},
-            headers=admin_token_headers,
-        )
+@pytest.mark.parametrize(
+    "role, search, expected_count",
+    [
+        (RoleEnum.ADMIN, None, 21),
+        (RoleEnum.ADMIN, "None", 0),
+        (RoleEnum.ADMIN, "Economics", 1),
+        (RoleEnum.ADMIN, "", 21),
+    ],
+)
+async def test_get_subjects_offerings(
+    client: AsyncClient,
+    school: SchoolScenario,
+    role: RoleEnum,
+    search: str | None,
+    expected_count: int,
+) -> None:
+    """
+    Test the get_subjects_offerings function for different user roles.
+    """
+    headers = school.find_user(lambda u: u.user_info.role == role).login.headers
 
-        assert r.status_code == 200
+    r = await API.get_subject_offerings(
+        client=client,
+        headers=headers,
+        query=FilterParams(year_id=school.years.years[0].id, q=search),
+    )
+    assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
+    subject_offerings = [SubjectSetupSchema.model_validate(subject) for subject in r.json()]
 
-    async def test_get_subject_by_id(
-        self,
-        client: AsyncClient,
-        admin_token_headers: Dict[str, str],
-        year: YearSchema,
-        year_relation: YearWithRelatedSchema,
-    ) -> None:
-        """Test the API endpoint for retrieving a single subject by ID"""
-        subject = random.choice(year_relation.subjects)
-        r = await client.get(
-            f"{settings.API_V1_STR}/subjects/{subject.id}",
-            params={"yearId": str(year.id)},
-            headers=admin_token_headers,
-        )
+    assert len(subject_offerings) == expected_count
 
-        assert r.status_code == 200
 
-    async def test_get_subject_by_id_unauthorized(
-        self,
-        client: AsyncClient,
-        year: YearSchema,
-        year_relation: YearWithRelatedSchema,
-    ) -> None:
-        """Test that a 401 error is returned when no auth header is provided."""
-        subject = random.choice(year_relation.subjects)
-        r = await client.get(
-            f"{settings.API_V1_STR}/subjects/{subject.id}",
-            params={"yearId": str(year.id)},
-        )
+@pytest.mark.parametrize(
+    "role",
+    [
+        RoleEnum.ADMIN,
+    ],
+)
+async def test_get_subject_offerings_by_id(client: AsyncClient, school: SchoolScenario, role: RoleEnum) -> None:
+    """
+    Test the get_subject_offerings_by_id function for different user roles.
+    """
+    headers = school.find_user(lambda u: u.user_info.role == role).login.headers
 
-        assert r.status_code == 401
+    r = await API.get_subject_offerings(
+        client=client,
+        headers=headers,
+        query=FilterParams(year_id=school.years.years[0].id),
+    )
 
-    async def test_subject_unauthorized(
-        self,
-        client: AsyncClient,
-        year: YearSchema,
-    ) -> None:
-        """Test retrieving all subjects."""
-        r = await client.get(
-            f"{settings.API_V1_STR}/subjects",
-            params={"yearId": str(year.id)},
-        )
+    assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
+    subject_offerings = [SubjectSetupSchema.model_validate(subject) for subject in r.json()]
 
-        assert r.status_code == 401
+    assert len(subject_offerings) == 21
+
+    r = await API.get_subject_offerings_by_id(
+        client=client,
+        headers=headers,
+        subject_id=subject_offerings[0].id,
+    )
+
+    assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
+    SubjectSetupSchema.model_validate(r.json())

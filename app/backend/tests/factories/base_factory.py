@@ -21,13 +21,9 @@ class BaseFactory(SQLAlchemyModelFactory, Generic[T]):
     @classmethod
     def get_or_create(cls: Type["BaseFactory[T]"], **kwargs: Any) -> T:
         model = getattr(cls._meta, "model", None)
-        session: Optional[scoped_session[Session]] = getattr(
-            cls._meta, "sqlalchemy_session", None
-        )
+        session: Optional[scoped_session[Session]] = getattr(cls._meta, "sqlalchemy_session", None)
         if model is None or session is None:
-            raise ValueError(
-                "Model and session must be defined in the factory's Meta class."
-            )
+            raise ValueError("Model and session must be defined in the factory's Meta class.")
 
         lookup_kwargs = {k: v for k, v in kwargs.items()}
 
@@ -38,15 +34,11 @@ class BaseFactory(SQLAlchemyModelFactory, Generic[T]):
         return cls.create(**kwargs)
 
     @classmethod
-    def get(
-        cls: Type["BaseFactory[T]"], **kwargs: Any
-    ) -> Optional[scoped_session[Session]]:
+    def get(cls: Type["BaseFactory[T]"], **kwargs: Any) -> Optional[scoped_session[Session]]:
         model = getattr(cls._meta, "model", None)
         session: Optional[Session] = getattr(cls._meta, "sqlalchemy_session", None)
         if model is None or session is None:
-            raise ValueError(
-                "Model and session must be defined in the factory's Meta class."
-            )
+            raise ValueError("Model and session must be defined in the factory's Meta class.")
 
         lookup_kwargs = {k: v for k, v in kwargs.items()}
 
@@ -57,9 +49,7 @@ class BaseFactory(SQLAlchemyModelFactory, Generic[T]):
         return None
 
     @classmethod
-    def _create(
-        cls: Type["BaseFactory[T]"], model_class: Type[T], *arg: Any, **kwargs: Any
-    ) -> T:
+    def _create(cls: Type["BaseFactory[T]"], model_class: Type[T], *arg: Any, **kwargs: Any) -> T:
         """
         Override creation to add specific fields marked in _add_for_session
         """

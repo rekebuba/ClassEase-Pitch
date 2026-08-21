@@ -5,11 +5,19 @@ EnumT = TypeVar("EnumT", bound=Enum)
 
 
 class RoleEnum(str, Enum):
+    OWNER = "owner"
     ADMIN = "admin"
     TEACHER = "teacher"
     STUDENT = "student"
+    REGISTRAR = "registrar"
     PARENT = "parent"
-    OTHER = "other"
+    EMPLOYEE = "employee"
+    GUEST = "guest"
+
+
+class SessionScope(str, Enum):
+    PLATFORM = "platform"
+    SCHOOL = "school"
 
 
 class TableEnum(str, Enum):
@@ -110,7 +118,7 @@ class EmployeePositionEnum(str, Enum):
     OTHER = "other"
 
 
-class EmployeeApplicationStatusEnum(str, Enum):
+class JobStatusEnum(str, Enum):
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
@@ -118,6 +126,86 @@ class EmployeeApplicationStatusEnum(str, Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
     WITHDRAWN = "withdrawn"
+
+
+class EmploymentStatusEnum(str, Enum):
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    ON_LEAVE = "on_leave"
+    SUSPENDED = "suspended"
+    TERMINATED = "terminated"
+
+
+class EmploymentTypeEnum(str, Enum):
+    FULL_TIME = "full_time"
+    PART_TIME = "part_time"
+    CONTRACT = "contract"
+    TEMPORARY = "temporary"
+    INTERN = "intern"
+
+
+class EmploymentApplicationStatusEnum(str, Enum):
+    DRAFT = "draft"
+    SUBMITTED = "submitted"
+    UNDER_REVIEW = "under_review"
+    SHORTLISTED = "shortlisted"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    WITHDRAWN = "withdrawn"
+
+
+class EnrollmentOpportunityStatusEnum(str, Enum):
+    DRAFT = "draft"
+    OPEN = "open"
+    CLOSED = "closed"
+    ARCHIVED = "archived"
+
+
+class EnrollmentApplicationStatusEnum(str, Enum):
+    DRAFT = "draft"
+    SUBMITTED = "submitted"
+    UNDER_REVIEW = "under_review"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+    WITHDRAWN = "withdrawn"
+    PENDING = "pending"
+
+
+class PayrollPaymentMethodEnum(str, Enum):
+    BANK_TRANSFER = "bank_transfer"
+    MOBILE_MONEY = "mobile_money"
+    CASH = "cash"
+    CHEQUE = "cheque"
+    OTHER = "other"
+
+
+class PayrollPayFrequencyEnum(str, Enum):
+    WEEKLY = "weekly"
+    BIWEEKLY = "biweekly"
+    MONTHLY = "monthly"
+    QUARTERLY = "quarterly"
+
+
+class PayrollRunStatusEnum(str, Enum):
+    DRAFT = "draft"
+    PROCESSING = "processing"
+    FINALIZED = "finalized"
+    CANCELLED = "cancelled"
+
+
+class ContractTypeEnum(str, Enum):
+    PERMANENT = "permanent"
+    FIXED_TERM = "fixed_term"
+    CASUAL = "casual"
+    PROBATION = "probation"
+    CONSULTANCY = "consultancy"
+
+
+class ContractStatusEnum(str, Enum):
+    ACTIVE = "active"
+    EXPIRED = "expired"
+    TERMINATED = "terminated"
+    DRAFT = "draft"
 
 
 class HighestEducationEnum(str, Enum):
@@ -408,3 +496,36 @@ class TransferRequestStatusEnum(str, Enum):
     APPROVED = "approved"
     REJECTED = "rejected"
     COMPLETED = "completed"
+
+
+class PermissionEnum(str, Enum):
+    SCHOOLS_READ = "schools:read"
+    SCHOOLS_MANAGE = "schools:manage"
+    YEARS_READ = "years:read"
+    YEARS_WRITE = "years:write"
+    GRADES_READ = "grades:read"
+    GRADES_WRITE = "grades:write"
+    SUBJECTS_READ = "subjects:read"
+    SUBJECTS_WRITE = "subjects:write"
+    STREAMS_READ = "streams:read"
+    STREAMS_WRITE = "streams:write"
+    SECTIONS_READ = "sections:read"
+    SECTIONS_WRITE = "sections:write"
+    STUDENTS_READ = "students:read"
+    STUDENTS_WRITE = "students:write"
+    EMPLOYEES_READ = "employees:read"
+    EMPLOYEES_WRITE = "employees:write"
+    REGISTRATIONS_CREATE = "registrations:create"
+    TEACHERS_ASSIGN = "teachers:assign"
+    AUTH_SWITCH_SCHOOL = "auth:switch_school"
+    RECORDS_TRANSFER = "records:transfer"
+
+
+class AssessmentSchemeEnum(str, Enum):
+    TEST = "test"
+    QUIZ = "quiz"
+    ASSIGNMENT = "assignment"
+    MIDTERM = "midterm"
+    FINAL = "final"
+    MODEL = "model"
+    EXIT = "exit"

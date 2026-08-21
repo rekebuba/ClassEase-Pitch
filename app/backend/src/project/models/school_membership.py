@@ -8,9 +8,11 @@ from sqlalchemy import (
     DateTime,
     Enum,
     ForeignKey,
+    Index,
     Integer,
     String,
     UniqueConstraint,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -18,12 +20,9 @@ from project.models.base.base_model import BaseModel
 from project.utils.enum import MfaStateEnum, SchoolMembershipStatusEnum
 
 if TYPE_CHECKING:
-    from project.models.admin import Admin
     from project.models.audit_log import AuditLog
-    from project.models.auth_session import AuthSession
     from project.models.employee import Employee
     from project.models.membership_role import MembershipRole
-    from project.models.parent import Parent
     from project.models.role import Role
     from project.models.school import School
     from project.models.student import Student
@@ -88,6 +87,25 @@ class SchoolMembership(BaseModel):
         default=1,
     )
 
+    __table_args__ = (
+        UniqueConstraint(
+            "id",
+            "school_id",
+            name="uq_tenant_membership_id_school",
+        ),
+        UniqueConstraint(
+            "user_id",
+            "school_id",
+            name="uq_school_membership_id_school",
+        ),
+        Index(
+            "uq_primary_membership_per_user",
+            "user_id",
+            unique=True,
+            postgresql_where=text("is_primary = true"),
+        ),
+    )
+
     user: Mapped["User"] = relationship(
         "User",
         back_populates="memberships",
@@ -109,26 +127,13 @@ class SchoolMembership(BaseModel):
         repr=False,
         passive_deletes=True,
     )
-    auth_sessions: Mapped[List["AuthSession"]] = relationship(
-        "AuthSession",
-        back_populates="membership",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
-    )
     audit_logs: Mapped[List["AuditLog"]] = relationship(
         "AuditLog",
         back_populates="membership",
         default_factory=list,
         repr=False,
         passive_deletes=True,
-    )
-    admin_profiles: Mapped[List["Admin"]] = relationship(
-        "Admin",
-        back_populates="membership",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
+        overlaps="audit_logs,auth_session,school",
     )
     employee_profiles: Mapped[List["Employee"]] = relationship(
         "Employee",
@@ -136,6 +141,7 @@ class SchoolMembership(BaseModel):
         default_factory=list,
         repr=False,
         passive_deletes=True,
+        overlaps="employees,school",
     )
     student_profiles: Mapped[List["Student"]] = relationship(
         "Student",
@@ -143,13 +149,7 @@ class SchoolMembership(BaseModel):
         default_factory=list,
         repr=False,
         passive_deletes=True,
-    )
-    parent_profiles: Mapped[List["Parent"]] = relationship(
-        "Parent",
-        back_populates="membership",
-        default_factory=list,
-        repr=False,
-        passive_deletes=True,
+        overlaps="students",
     )
     initiated_transfers: Mapped[List["TransferRequest"]] = relationship(
         "TransferRequest",
@@ -168,10 +168,6 @@ class SchoolMembership(BaseModel):
         passive_deletes=True,
     )
 
-    @property
-    def roles(self) -> List["Role"]:
-        return [membership_role.role for membership_role in self.membership_roles]
-
     __table_args__ = (
         UniqueConstraint("user_id", "school_id", name="uq_membership_user_school"),
         UniqueConstraint(
@@ -180,3 +176,7 @@ class SchoolMembership(BaseModel):
             name="uq_membership_school_login_identifier",
         ),
     )
+
+    @property
+    def roles(self) -> List["Role"]:
+        return [membership_role.role for membership_role in self.membership_roles]

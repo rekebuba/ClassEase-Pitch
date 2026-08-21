@@ -1,36 +1,17 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-import type { StudentRegistrationForm } from "@/client/types.gen";
+import type { StudentProfile } from "@/client/types.gen";
 import type { PayloadAction } from "@reduxjs/toolkit";
 
 type StudentRegistrationFormState = {
-  data: StudentRegistrationForm;
+  data: StudentProfile;
   step: number;
 };
 
-const initialFormData: StudentRegistrationForm = {
-  parentId: "",
-  registeredForGradeId: "",
-  firstName: "",
-  fatherName: "",
-  grandFatherName: "",
-  dateOfBirth: "",
-  gender: undefined as any,
-  nationality: "",
-  bloodType: undefined,
-  studentPhoto: undefined,
+const initialFormData: StudentProfile = {
+  userId: "",
   isTransfer: false,
-  previousSchool: "",
-  city: "",
-  state: "",
-  postalCode: "1000",
-  emergencyContactName: null,
-  emergencyContactPhone: null,
-  hasMedicalCondition: false,
-  medicalDetails: "",
-  hasDisability: false,
-  disabilityDetails: "",
-  transportation: null,
+  parents: [],
 };
 
 const initialState: StudentRegistrationFormState = {
@@ -42,7 +23,7 @@ export const studentRegistrationFormSlice = createSlice({
   name: "studentRegistrationForm",
   initialState,
   reducers: {
-    setFormData: (state, action: PayloadAction<StudentRegistrationForm>) => {
+    setFormData: (state, action: PayloadAction<StudentProfile>) => {
       state.data = action.payload;
     },
     setFormStep: (state, action: PayloadAction<number>) => {

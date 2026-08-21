@@ -1,45 +1,29 @@
 import uuid
 from typing import List, Optional
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import Field
 
-from project.schema.models.grade_schema import (
-    GradeSchema,
-)
-from project.schema.models.stream_schema import StreamSchema
+from project.schema.models.grade_stream_schema import GradeStreamSchema
 from project.schema.models.subject_schema import (
     SubjectSchema,
 )
-from project.utils.utils import to_camel
+from project.schema.schema import BaseSchema
 
 
 class SubjectSetupSchema(SubjectSchema):
-    grades: List[GradeSchema]
-    streams: List[StreamSchema]
+    grade_streams: list[GradeStreamSchema]
 
 
-class UpdateSubjectFields(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
+class UpdateSubjectFields(BaseSchema):
     name: Optional[str] = Field(default=None, min_length=3, max_length=50)
     code: Optional[str] = Field(default=None, min_length=3, max_length=10)
 
 
-class UpdateSubjectGrade(BaseModel):
+class UpdateSubjectGrade(BaseSchema):
     id: uuid.UUID
 
 
-class UpdateSubjectStream(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
+class UpdateSubjectStream(BaseSchema):
     id: uuid.UUID
     grade_id: uuid.UUID
 
@@ -49,22 +33,15 @@ class UpdateSubjectSetup(UpdateSubjectFields):
     streams: Optional[List[UpdateSubjectStream]] = Field(default=None)
 
 
-class UpdateSubjectSetupSuccess(BaseModel):
+class UpdateSubjectSetupSuccess(BaseSchema):
     message: str = Field(default="Subject Setup updated Successfully")
 
 
-class NewSubject(BaseModel):
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
+class NewSubject(BaseSchema):
     name: str = Field(min_length=3, max_length=50)
     code: str = Field(min_length=3, max_length=10)
-    year_id: uuid.UUID
 
 
-class NewSubjectSuccess(BaseModel):
+class NewSubjectSuccess(BaseSchema):
     id: uuid.UUID
     message: str = Field(default="Subject created Successfully")

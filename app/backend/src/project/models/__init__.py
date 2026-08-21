@@ -2,25 +2,34 @@
 """This module initializes the storage system for ClassEase"""
 
 from project.models.academic_term import AcademicTerm
-from project.models.admin import Admin
+from project.models.application_academic_background import ApplicationAcademicBackground
+from project.models.application_address import ApplicationAddress
+from project.models.application_health_records import ApplicationHealthRecord
 from project.models.assessment import Assessment
+from project.models.assessment_scheme import AssessmentScheme
+from project.models.assessment_scheme_component import AssessmentSchemeComponent
 from project.models.audit_log import AuditLog
 from project.models.auth_identity import AuthIdentity
 from project.models.auth_session import AuthSession
 from project.models.blacklist_token import BlacklistToken
+from project.models.class_section import ClassSection
+from project.models.department import Department
 from project.models.employee import Employee
-from project.models.employee_year_link import EmployeeYearLink
+from project.models.employee_position import EmployeePosition
+from project.models.employment_application import EmploymentApplication
+from project.models.employment_contract import EmploymentContract
+from project.models.enrollment_application import EnrollmentApplication
+from project.models.enrollment_opportunity import EnrollmentOpportunity
 from project.models.event import Event
 from project.models.grade import Grade
-from project.models.grade_section_link import GradeSectionLink
-from project.models.grade_stream_link import GradeStreamLink
-from project.models.grade_stream_subject import GradeStreamSubject
-from project.models.mark_list import MarkList
+from project.models.grade_stream import GradeStream
+from project.models.job_posting import JobPosting
 from project.models.membership_role import MembershipRole
-from project.models.parent import Parent
-from project.models.parent_student_link import ParentStudentLink
+from project.models.payroll_entry import PayrollEntry
+from project.models.payroll_profile import PayrollProfile
+from project.models.payroll_run import PayrollRun
 from project.models.permission import Permission
-from project.models.registration import Registration
+from project.models.position import Position
 from project.models.role import Role
 from project.models.role_permission import RolePermission
 from project.models.saved_query_view import SavedQueryView
@@ -29,45 +38,56 @@ from project.models.school_membership import SchoolMembership
 from project.models.section import Section
 from project.models.stream import Stream
 from project.models.student import Student
-from project.models.student_academic_term_link import StudentAcademicTermLink
-from project.models.student_grade_link import StudentGradeLink
-from project.models.student_section_link import StudentSectionLink
-from project.models.student_stream_link import StudentStreamLink
-from project.models.student_subject_link import StudentSubjectLink
+from project.models.student_academic_background import StudentAcademicBackground
+from project.models.student_address import StudentAddress
+from project.models.student_enrollments import StudentEnrollment
+from project.models.student_health_record import StudentHealthRecord
 from project.models.student_term_record import StudentTermRecord
-from project.models.student_year_link import StudentYearLink
 from project.models.student_year_record import StudentYearRecord
 from project.models.subject import Subject
+from project.models.subject_offering import SubjectOffering
+from project.models.subject_term_result import SubjectTermResult
 from project.models.subject_yearly_average import SubjectYearlyAverage
 from project.models.table import Table
-from project.models.teacher_record import TeacherRecord
-from project.models.teacher_record_link import TeacherRecordLink
+from project.models.teacher_profile import TeacherProfile
+from project.models.teacher_subject import TeacherSubject
+from project.models.teaching_assignment import TeachingAssignment
 from project.models.transfer_request import TransferRequest
 from project.models.user import User
+from project.models.user_guardian import UserGuardian
 from project.models.year import Year
-from project.models.yearly_subject import YearlySubject
 
 __all__ = [
     "AcademicTerm",
-    "Admin",
+    "ApplicationAcademicBackground",
+    "ApplicationAddress",
+    "ApplicationHealthRecord",
     "Assessment",
-    "AuthIdentity",
+    "AssessmentScheme",
+    "AssessmentSchemeComponent",
     "AuditLog",
+    "AuthIdentity",
     "AuthSession",
     "BlacklistToken",
+    "ClassSection",
+    "Department",
     "Employee",
+    "EmployeePosition",
     "EmployeeYearLink",
+    "EmploymentApplication",
+    "EmploymentContract",
+    "EnrollmentApplication",
+    "EnrollmentOpportunity",
     "Event",
     "Grade",
-    "GradeSectionLink",
-    "GradeStreamLink",
-    "GradeStreamSubject",
-    "MarkList",
+    "GradeStream",
+    "JobPosting",
     "MembershipRole",
-    "Parent",
-    "ParentStudentLink",
+    "PayrollEntry",
+    "PayrollProfile",
+    "PayrollRun",
     "Permission",
-    "Registration",
+    "Position",
     "Role",
     "RolePermission",
     "SavedQueryView",
@@ -76,21 +96,24 @@ __all__ = [
     "Section",
     "Stream",
     "Student",
-    "StudentAcademicTermLink",
-    "StudentGradeLink",
-    "StudentSectionLink",
-    "StudentStreamLink",
-    "StudentSubjectLink",
+    "StudentAcademicBackground",
+    "StudentAddress",
+    "StudentEnrollment",
+    "StudentHealthRecord",
     "StudentTermRecord",
-    "StudentYearLink",
+    "StudentYearRecord",
     "StudentYearRecord",
     "Subject",
+    "SubjectOffering",
+    "SubjectOffering",
+    "SubjectTermResult",
     "SubjectYearlyAverage",
     "Table",
-    "TeacherRecord",
-    "TeacherRecordLink",
+    "TeacherProfile",
+    "TeacherSubject",
+    "TeachingAssignment",
     "TransferRequest",
     "User",
+    "UserGuardian",
     "Year",
-    "YearlySubject",
 ]

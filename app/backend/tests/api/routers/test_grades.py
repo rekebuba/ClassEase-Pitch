@@ -1,83 +1,75 @@
-import random
-from typing import Dict
-
+import pytest
 from httpx import AsyncClient
 
-from project.core.config import settings
-from project.schema.models import YearSchema, YearWithRelatedSchema
+from project.api.v1.routers.grades.schema import GradeSetupSchema
+from project.api.v1.routers.schema import FilterParams
+from project.utils.enum import RoleEnum
+from tests.utils.api import API
+from tests.utils.type_test import SchoolScenario
 
 
-class TestGradesApi:
-    async def test_get_grades(
-        self,
-        client: AsyncClient,
-        admin_token_headers: Dict[str, str],
-        year: YearSchema,
-    ) -> None:
-        """Test retrieving all grades."""
-        r = await client.get(
-            f"{settings.API_V1_STR}/grades",
-            params={"yearId": str(year.id)},
-            headers=admin_token_headers,
-        )
+@pytest.mark.parametrize(
+    "role, search, expected_count",
+    [
+        (RoleEnum.ADMIN, None, 12),
+        (RoleEnum.ADMIN, "hjgkjknmm", 0),
+        (RoleEnum.ADMIN, "grade", 12),
+        (RoleEnum.ADMIN, "grade 5", 1),
+        (RoleEnum.ADMIN, "grade 0", 1),  # Grade 10
+        (RoleEnum.ADMIN, "grade 1", 4),
+        (RoleEnum.ADMIN, "", 12),
+    ],
+)
+async def test_get_grade_offerings(
+    client: AsyncClient,
+    school: SchoolScenario,
+    role: RoleEnum,
+    search: str | None,
+    expected_count: int,
+) -> None:
+    """
+    Test the get_grade_offerings function for different user roles.
+    """
+    headers = school.find_user(lambda u: u.user_info.role == role).login.headers
 
-        assert r.status_code == 200
+    r = await API.get_grade_offerings(
+        client=client,
+        headers=headers,
+        query=FilterParams(year_id=school.years.years[0].id, q=search),
+    )
 
-    async def test_get_grade_by_id(
-        self,
-        client: AsyncClient,
-        admin_token_headers: Dict[str, str],
-        year_relation: YearWithRelatedSchema,
-    ) -> None:
-        """Test the API endpoint for retrieving a single grade by ID"""
-        grade = random.choice(year_relation.grades)
-        r = await client.get(
-            f"{settings.API_V1_STR}/grades/{grade.id}",
-            params={"yearId": str(year_relation.id)},
-            headers=admin_token_headers,
-        )
+    assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
+    grade_offerings = [GradeSetupSchema.model_validate(grade) for grade in r.json()]
 
-        assert r.status_code == 200
+    assert len(grade_offerings) == expected_count, f"Expected {expected_count}, got {len(grade_offerings)}"
 
-    async def test_get_grade_by_id_unauthorized(
-        self,
-        client: AsyncClient,
-        year_relation: YearWithRelatedSchema,
-    ) -> None:
-        """Test that a 401 error is returned when no auth header is provided."""
-        grade = random.choice(year_relation.grades)
-        r = await client.get(
-            f"{settings.API_V1_STR}/grades/{grade.id}",
-            params={"yearId": str(year_relation.id)},
-        )
 
-        assert r.status_code == 401
+@pytest.mark.parametrize(
+    "role",
+    [
+        RoleEnum.ADMIN,
+    ],
+)
+async def test_get_grade_offerings_by_id(client: AsyncClient, school: SchoolScenario, role: RoleEnum) -> None:
+    """
+    Test the get_grade_offerings_by_id function for different user roles.
+    """
+    headers = school.find_user(lambda u: u.user_info.role == role).login.headers
 
-    async def test_grade_unauthorized(
-        self,
-        client: AsyncClient,
-        year: YearSchema,
-    ) -> None:
-        """Test retrieving all grades."""
-        r = await client.get(
-            f"{settings.API_V1_STR}/grades",
-            params={"yearId": str(year.id)},
-        )
+    r = await API.get_grade_offerings(
+        client=client,
+        headers=headers,
+        query=FilterParams(year_id=school.years.years[0].id),
+    )
 
-        assert r.status_code == 401
+    assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
+    grade_offerings = [GradeSetupSchema.model_validate(grade) for grade in r.json()]
 
-    async def test_grade_relation(
-        self,
-        client: AsyncClient,
-        admin_token_headers: Dict[str, str],
-        year_relation: YearWithRelatedSchema,
-    ) -> None:
-        """Test retrieving a grade with all its relationships."""
-        grade = random.choice(year_relation.grades)
+    r = await API.get_grade_offerings_by_id(
+        client=client,
+        headers=headers,
+        grade_id=grade_offerings[0].id,
+    )
 
-        r = await client.get(
-            f"{settings.API_V1_STR}/grades/{grade.id}/relation",
-            headers=admin_token_headers,
-        )
-
-        assert r.status_code == 200
+    assert r.status_code == 200, f"Expected 200, got {r.status_code}. Response: {r.text}"
+    GradeSetupSchema.model_validate(r.json())

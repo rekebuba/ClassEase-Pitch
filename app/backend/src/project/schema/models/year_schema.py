@@ -4,11 +4,10 @@ import uuid
 from datetime import date
 from typing import TYPE_CHECKING, List
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict
+from pydantic import AwareDatetime
 
-from project.schema.models import EmployeeSchema
+from project.schema.schema import BaseSchema
 from project.utils.enum import AcademicTermTypeEnum, AcademicYearStatusEnum
-from project.utils.utils import to_camel
 
 if TYPE_CHECKING:
     from project.schema.models.academic_term_schema import (
@@ -16,30 +15,19 @@ if TYPE_CHECKING:
         AcademicTermWithRelatedSchema,
     )
     from project.schema.models.event_schema import EventSchema, EventWithRelatedSchema
-    from project.schema.models.grade_schema import GradeSchema, GradeWithRelatedSchema
+    from project.schema.models.grade_schema import GradeWithRelatedSchema
     from project.schema.models.student_schema import (
-        StudentSchema,
         StudentWithRelatedSchema,
     )
     from project.schema.models.subject_schema import (
-        SubjectSchema,
         SubjectWithRelatedSchema,
     )
-    from project.schema.models.teacher_schema import (
-        TeacherWithRelatedSchema,
-    )
 
 
-class YearSchema(BaseModel):
+class YearSchema(BaseSchema):
     """
     This model represents a year in the system.
     """
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     id: uuid.UUID
     calendar_type: AcademicTermTypeEnum
@@ -51,37 +39,20 @@ class YearSchema(BaseModel):
     updated_at: AwareDatetime
 
 
-class YearRelatedSchema(BaseModel):
+class YearRelatedSchema(BaseSchema):
     """This model represents the relationships of a YearSchema."""
-
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
 
     events: List[EventSchema]
     academic_terms: List[AcademicTermSchema]
-    grades: List[GradeSchema]
-    students: List[StudentSchema]
-    subjects: List[SubjectSchema]
-    employees: List[EmployeeSchema]
 
 
 class YearNestedSchema(YearSchema):
     """This model represents the relationships of a YearSchema."""
 
-    model_config = ConfigDict(
-        from_attributes=True,
-        populate_by_name=True,
-        alias_generator=to_camel,
-    )
-
     events: List[EventWithRelatedSchema]
     academic_terms: List[AcademicTermWithRelatedSchema]
     grades: List[GradeWithRelatedSchema]
     students: List[StudentWithRelatedSchema]
-    teachers: List[TeacherWithRelatedSchema]
     subjects: List[SubjectWithRelatedSchema]
 
 

@@ -1,0 +1,10 @@
+allowBuilds:
+  esbuild: true
+  puppeteer: false
+  unrs-resolver: true
+minimumReleaseAgeExclude:
+  - "@hookform/resolvers@5.7.1"
+  - react-dropzone@20.0.0
+shellEmulator: true
+
+trustPolicy: off
