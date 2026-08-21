@@ -5,6 +5,7 @@ from typing import List, Optional
 
 from pydantic import AwareDatetime
 
+from project.schema.models import UserSchema
 from project.schema.schema import BaseSchema
 from project.utils.enum import (
     ContractStatusEnum,
@@ -19,17 +20,17 @@ from project.utils.enum import (
 
 class EmployeeBasicInfo(BaseSchema):
     id: uuid.UUID
-    user_id: Optional[uuid.UUID]
+    user: UserSchema
     employee_number: str
     employment_status: EmploymentStatusEnum
     employment_type: EmploymentTypeEnum
     hire_date: date
     termination_date: Optional[date]
-    primary_position_id: Optional[uuid.UUID]
     manager_employee_id: Optional[uuid.UUID]
     work_email: Optional[str]
     work_phone: Optional[str]
     created_at: AwareDatetime
+    updated_at: AwareDatetime
 
 
 class UpdateEmployeeStatusSchema(BaseSchema):

@@ -9,7 +9,6 @@ from project.api.v1.routers.dependencies import (
     SessionDep,
 )
 from project.api.v1.routers.employee.schema import (
-    EmployeeBasicInfo,
     EmployeePositionCreate,
     EmployeePositionUpdate,
     EmploymentContractCreate,
@@ -27,13 +26,19 @@ from project.models import (
     PayrollProfile,
     Position,
 )
+from project.schema.models import EmployeeSchema
 from project.schema.schema import SuccessResponse, SuccessResponseSchema
 from project.utils.enum import PermissionEnum
 
 router = APIRouter()
 
 
-@router.post("/employees", status_code=status.HTTP_201_CREATED, response_model=SuccessResponse, tags=["Employees"])
+@router.post(
+    "/employees",
+    status_code=status.HTTP_201_CREATED,
+    response_model=SuccessResponse,
+    tags=["Employees"],
+)
 async def employee(
     session: SessionDep,
     user_in: AuthenticatedRoute,
@@ -64,7 +69,7 @@ async def employee(
     return SuccessResponse(id=employee.id, message="employee Registered Successfully")
 
 
-@router.get("/employees", response_model=List[EmployeeBasicInfo])
+@router.get("/employees", response_model=List[EmployeeSchema])
 async def get_employees(
     session: SessionDep,
     user_in: AuthenticatedRoute,
@@ -81,7 +86,7 @@ async def get_employees(
     return employees
 
 
-@router.get("/employees/{employee_id}", response_model=EmployeeBasicInfo)
+@router.get("/employees/{employee_id}", response_model=EmployeeSchema)
 async def get_employee(
     employee_id: uuid.UUID,
     session: SessionDep,
@@ -112,7 +117,7 @@ async def delete_employees(
                 status_code=404,
                 detail=f"Employee with ID {employee_id} not found.",
             )
-        session.delete(employee)
+        await session.delete(employee)
     await session.commit()
 
     return SuccessResponseSchema(message="Employees deleted successfully.")
